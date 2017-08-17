@@ -3,12 +3,12 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -24,7 +24,7 @@ public class SimpleContactPointPlaneBody implements ContactablePlaneBody
    private final RigidBody rigidBody;
    private final PoseReferenceFrame contactFrame;
 
-   private final List<FramePoint2d> contactPoints = new ArrayList<>();
+   private final List<FramePoint2D> contactPoints = new ArrayList<>();
 
    public SimpleContactPointPlaneBody(String name, RigidBody rigidBody, RigidBodyTransform contactFramePoseInJointFrame)
    {
@@ -34,7 +34,7 @@ public class SimpleContactPointPlaneBody implements ContactablePlaneBody
       ReferenceFrame frameAfterJoint = rigidBody.getParentJoint().getFrameAfterJoint();
       contactFrame = new PoseReferenceFrame(name + "Frame", frameAfterJoint);
       contactFrame.setPoseAndUpdate(contactFramePoseInJointFrame);
-      contactPoints.add(new FramePoint2d(contactFrame));
+      contactPoints.add(new FramePoint2D(contactFrame));
    }
 
    @Override
@@ -62,10 +62,10 @@ public class SimpleContactPointPlaneBody implements ContactablePlaneBody
    }
 
    @Override
-   public List<FramePoint> getContactPointsCopy()
+   public List<FramePoint3D> getContactPointsCopy()
    {
-      List<FramePoint> contactPoints = new ArrayList<>();
-      contactPoints.add(new FramePoint(contactFrame));
+      List<FramePoint3D> contactPoints = new ArrayList<>();
+      contactPoints.add(new FramePoint3D(contactFrame));
       return contactPoints;
    }
 
@@ -76,7 +76,7 @@ public class SimpleContactPointPlaneBody implements ContactablePlaneBody
    }
 
    @Override
-   public List<FramePoint2d> getContactPoints2d()
+   public List<FramePoint2D> getContactPoints2d()
    {
       return contactPoints;
    }

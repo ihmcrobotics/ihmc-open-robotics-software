@@ -1,15 +1,15 @@
 package us.ihmc.commonWalkingControlModules.visualizer;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.Momentum;
 import us.ihmc.robotics.screwTheory.MomentumCalculator;
@@ -25,7 +25,7 @@ public class MomentumVisualizer implements Updatable
    private final YoFrameVector linearMomentum;
 
    private final Momentum momentum = new Momentum(ReferenceFrame.getWorldFrame());
-   private final FrameVector frameVector = new FrameVector();
+   private final FrameVector3D frameVector = new FrameVector3D();
 
    public MomentumVisualizer(String name, OneDoFJoint rootJoint, YoVariableRegistry registry,
          YoGraphicsListRegistry graphicsRegistry)

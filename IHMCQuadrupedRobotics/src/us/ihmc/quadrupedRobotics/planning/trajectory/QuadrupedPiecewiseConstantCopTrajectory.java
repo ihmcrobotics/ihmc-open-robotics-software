@@ -4,12 +4,13 @@ import java.util.ArrayList;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
+
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -19,10 +20,10 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    private final QuadrantDependentList<MutableBoolean> isInitialContactState;
    private boolean initialized;
 
-   private final FramePoint copPositionAtCurrentTime;
+   private final FramePoint3D copPositionAtCurrentTime;
    private int numberOfIntervals;
    private final ArrayList<MutableDouble> timeAtStartOfInterval;
-   private final ArrayList<FramePoint> copPositionAtStartOfInterval;
+   private final ArrayList<FramePoint3D> copPositionAtStartOfInterval;
    private final ArrayList<QuadrantDependentList<MutableDouble>> normalizedPressureAtStartOfInterval;
    private final ArrayList<MutableDouble> normalizedPressureContributedByInitialContacts;
    private final ArrayList<MutableDouble> normalizedPressureContributedByQueuedSteps;
@@ -38,7 +39,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       }
       initialized = false;
 
-      copPositionAtCurrentTime = new FramePoint();
+      copPositionAtCurrentTime = new FramePoint3D();
       numberOfIntervals = 0;
       timeAtStartOfInterval = new ArrayList<>(maxIntervals);
       copPositionAtStartOfInterval = new ArrayList<>(maxIntervals);
@@ -48,7 +49,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       for (int i = 0; i < maxIntervals; i++)
       {
          timeAtStartOfInterval.add(i, new MutableDouble(0.0));
-         copPositionAtStartOfInterval.add(i, new FramePoint());
+         copPositionAtStartOfInterval.add(i, new FramePoint3D());
          normalizedPressureContributedByInitialContacts.add(i, new MutableDouble(0.0));
          normalizedPressureContributedByQueuedSteps.add(i, new MutableDouble(0.0));
          normalizedPressureAtStartOfInterval.add(i, new QuadrantDependentList<MutableDouble>());
@@ -79,7 +80,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       numberOfIntervals = timedContactSequence.size();
       for (int interval = 0; interval < numberOfIntervals; interval++)
       {
-         QuadrantDependentList<FramePoint> solePosition = timedContactSequence.get(interval).getSolePosition();
+         QuadrantDependentList<FramePoint3D> solePosition = timedContactSequence.get(interval).getSolePosition();
          QuadrantDependentList<ContactState> contactState = timedContactSequence.get(interval).getContactState();
 
          QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedPressureAtStartOfInterval.get(interval), contactState);
@@ -128,7 +129,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       copPositionAtCurrentTime.setIncludingFrame(copPositionAtStartOfInterval.get(0));
    }
 
-   public void getPosition(FramePoint copPositionAtCurrentTime)
+   public void getPosition(FramePoint3D copPositionAtCurrentTime)
    {
       copPositionAtCurrentTime.setIncludingFrame(this.copPositionAtCurrentTime);
    }
@@ -143,7 +144,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       return timeAtStartOfInterval.get(interval).doubleValue();
    }
 
-   public FramePoint getCopPositionAtStartOfInterval(int interval)
+   public FramePoint3D getCopPositionAtStartOfInterval(int interval)
    {
       return copPositionAtStartOfInterval.get(interval);
    }
@@ -168,7 +169,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       return timeAtStartOfInterval;
    }
 
-   public ArrayList<FramePoint> getCopPositionAtStartOfInterval()
+   public ArrayList<FramePoint3D> getCopPositionAtStartOfInterval()
    {
       return copPositionAtStartOfInterval;
    }

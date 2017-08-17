@@ -8,6 +8,9 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
@@ -18,9 +21,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.kinematics.InverseJacobianSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities;
@@ -33,7 +34,6 @@ import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -108,7 +108,7 @@ public class TaskspaceToJointspaceCalculator
    private final YoDouble kpTaskspaceAngularError;
    private final YoDouble kpTaskspaceLinearError;
 
-   private final FramePoint baseParentJointFramePosition = new FramePoint();
+   private final FramePoint3D baseParentJointFramePosition = new FramePoint3D();
    private final FrameOrientation baseParentJointFrameOrientation = new FrameOrientation();
 
    private final AxisAngle errorAxisAngle = new AxisAngle();
@@ -402,7 +402,7 @@ public class TaskspaceToJointspaceCalculator
       kpTaskspaceLinearError.set(kPLinearError);
    }
 
-   public void compute(FramePoint desiredPosition, FrameOrientation desiredOrientation, FrameVector desiredLinearVelocity, FrameVector desiredAngularVelocity)
+   public void compute(FramePoint3D desiredPosition, FrameOrientation desiredOrientation, FrameVector3D desiredLinearVelocity, FrameVector3D desiredAngularVelocity)
    {
       desiredControlFramePose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
       desiredControlFrameTwist.set(originalEndEffectorFrame, originalBaseFrame, originalControlFrame, desiredLinearVelocity, desiredAngularVelocity);
@@ -573,8 +573,8 @@ public class TaskspaceToJointspaceCalculator
       CommonOps.add(spatialVelocityFromError, spatialDesiredVelocityToPack, spatialDesiredVelocityToPack);
    }
 
-   private final FrameVector angularPart = new FrameVector();
-   private final FrameVector linearPart = new FrameVector();
+   private final FrameVector3D angularPart = new FrameVector3D();
+   private final FrameVector3D linearPart = new FrameVector3D();
    private final DenseMatrix64F subspaceSpatialVector = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F tempSpatialVector = new DenseMatrix64F(1, 1);
 
@@ -626,7 +626,7 @@ public class TaskspaceToJointspaceCalculator
       linearPartToPack.setAndMatchFrame(linearPart);
    }
 
-   private void getAngularAndLinearPartsFromSpatialVector(FrameVector angularPartToPack, FrameVector linearPartToPack, DenseMatrix64F spatialVector)
+   private void getAngularAndLinearPartsFromSpatialVector(FrameVector3D angularPartToPack, FrameVector3D linearPartToPack, DenseMatrix64F spatialVector)
    {
       MatrixTools.extractFrameTupleFromEJMLVector(angularPartToPack, spatialVector, localControlFrame, 0);
       MatrixTools.extractFrameTupleFromEJMLVector(linearPartToPack, spatialVector, localControlFrame, 3);
@@ -640,7 +640,7 @@ public class TaskspaceToJointspaceCalculator
       MatrixTools.insertFrameTupleIntoEJMLVector(linearPart, spatialVectorToPack, 3);
    }
 
-   private void setSpatialVectorFromAngularAndLinearParts(DenseMatrix64F spatialVectorToPack, FrameVector angularPart, FrameVector linearPart)
+   private void setSpatialVectorFromAngularAndLinearParts(DenseMatrix64F spatialVectorToPack, FrameVector3D angularPart, FrameVector3D linearPart)
    {
       MatrixTools.insertFrameTupleIntoEJMLVector(angularPart, spatialVectorToPack, 0);
       MatrixTools.insertFrameTupleIntoEJMLVector(linearPart, spatialVectorToPack, 3);
@@ -703,12 +703,12 @@ public class TaskspaceToJointspaceCalculator
       return NormOps.normP2(subspaceSpatialError);
    }
 
-   private final FramePoint tempPoint = new FramePoint();
-   private final FrameVector tempPositionError = new FrameVector();
+   private final FramePoint3D tempPoint = new FramePoint3D();
+   private final FrameVector3D tempPositionError = new FrameVector3D();
    private final DenseMatrix64F tempSpatialError = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
    private final DenseMatrix64F tempSubspaceError = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
 
-   public double getNormPositionError(FramePoint desiredPosition)
+   public double getNormPositionError(FramePoint3D desiredPosition)
    {
       tempPoint.setIncludingFrame(desiredPosition);
       tempPoint.changeFrame(localControlFrame);
@@ -803,13 +803,13 @@ public class TaskspaceToJointspaceCalculator
       desiredPose.changeFrame(desiredFrame);
    }
 
-   public FrameVector getInitialHandPoseVelocity(ReferenceFrame referenceFrame)
+   public FrameVector3D getInitialHandPoseVelocity(ReferenceFrame referenceFrame)
    {
-      return new FrameVector(referenceFrame);
+      return new FrameVector3D(referenceFrame);
    }
 
-   public FrameVector getInitialHandPoseAngularVelocity(ReferenceFrame referenceFrame)
+   public FrameVector3D getInitialHandPoseAngularVelocity(ReferenceFrame referenceFrame)
    {
-      return new FrameVector(referenceFrame);
+      return new FrameVector3D(referenceFrame);
    }
 }

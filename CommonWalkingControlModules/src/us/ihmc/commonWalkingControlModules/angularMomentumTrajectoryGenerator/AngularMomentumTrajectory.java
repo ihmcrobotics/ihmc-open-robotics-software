@@ -2,10 +2,10 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.WalkingTrajectoryType;
 import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -37,21 +37,21 @@ public class AngularMomentumTrajectory extends YoSegmentedFrameTrajectory3D impl
    }
 
    @Override
-   public void update(double timeInState, FrameVector desiredAngularMomentumToPack)
+   public void update(double timeInState, FrameVector3D desiredAngularMomentumToPack)
    {
       update(timeInState);
       desiredAngularMomentumToPack.setIncludingFrame(currentSegment.getFramePosition());
    }
 
    @Override
-   public void update(double timeInState, FrameVector desiredAngularMomentumToPack, FrameVector desiredTorqueToPack)
+   public void update(double timeInState, FrameVector3D desiredAngularMomentumToPack, FrameVector3D desiredTorqueToPack)
    {
       update(timeInState, desiredAngularMomentumToPack);
       desiredTorqueToPack.setIncludingFrame(currentSegment.getFrameVelocity());
    }
 
    @Override
-   public void update(double timeInState, FrameVector desiredAngularMomentumToPack, FrameVector desiredTorqueToPack, FrameVector desiredRotatumToPack)
+   public void update(double timeInState, FrameVector3D desiredAngularMomentumToPack, FrameVector3D desiredTorqueToPack, FrameVector3D desiredRotatumToPack)
    {
       update(timeInState, desiredAngularMomentumToPack, desiredTorqueToPack);
       desiredRotatumToPack.setIncludingFrame(currentSegment.getFrameAcceleration());
@@ -64,15 +64,9 @@ public class AngularMomentumTrajectory extends YoSegmentedFrameTrajectory3D impl
       numberOfSegments.increment();
    }
 
-   public void set(double t0, double tFinal, FramePoint z0, FramePoint zf)
+   public void set(double t0, double tFinal, FramePoint3D z0, FramePoint3D zf)
    {
       segments.get(getNumberOfSegments()).setLinear(t0, tFinal, z0, zf);
       numberOfSegments.increment();
-   }
-
-   public YoFrameTrajectory3D getTorqueTrajectory(int segmentIndex)
-   {
-      segments.get(segmentIndex).getDerivative(torqueTrajectory);
-      return torqueTrajectory;
    }
 }

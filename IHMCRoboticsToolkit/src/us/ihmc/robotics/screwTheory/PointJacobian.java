@@ -2,9 +2,9 @@ package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Jacobian that maps joint velocities to the velocity of a point fixed
@@ -17,7 +17,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class PointJacobian
 {
    private GeometricJacobian geometricJacobian;
-   private final FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final DenseMatrix64F jacobianMatrix = new DenseMatrix64F(1, 1);
 
    // temp stuff
@@ -25,7 +25,7 @@ public class PointJacobian
    private final Vector3D translation = new Vector3D();
    private final Vector3D tempVector = new Vector3D();
 
-   public void set(GeometricJacobian geometricJacobian, FramePoint point)
+   public void set(GeometricJacobian geometricJacobian, FramePoint3D point)
    {
       if (geometricJacobian.getBaseFrame() != geometricJacobian.getJacobianFrame())
          throw new RuntimeException("Jacobian must be expressed in base frame");
@@ -76,7 +76,7 @@ public class PointJacobian
       return geometricJacobian;
    }
 
-   public FramePoint getPoint()
+   public FramePoint3D getPoint()
    {
       return point;
    }

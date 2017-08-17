@@ -1,13 +1,13 @@
 package us.ihmc.robotics.sensors;
 
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 
 public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
 {
-   private final FrameVector centerOfMassVelocity = new FrameVector();
+   private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
    
-   public void setCenterOfMassVelocity(FrameVector centerOfMassVelocity)
+   public void setCenterOfMassVelocity(FrameVector3D centerOfMassVelocity)
    {
       this.centerOfMassVelocity.setIncludingFrame(centerOfMassVelocity); 
    }
@@ -18,7 +18,7 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
    }
 
    @Override
-   public void getCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack)
+   public void getCenterOfMassVelocity(FrameVector3D centerOfMassVelocityToPack)
    {
       centerOfMassVelocityToPack.setIncludingFrame(centerOfMassVelocity);
    }

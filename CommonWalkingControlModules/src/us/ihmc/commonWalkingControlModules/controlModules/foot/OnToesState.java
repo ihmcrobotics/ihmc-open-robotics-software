@@ -11,18 +11,18 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -33,7 +33,7 @@ public class OnToesState extends AbstractFootControlState
    private final SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
    private final SpatialAccelerationCommand zeroAccelerationCommand = new SpatialAccelerationCommand();
 
-   private final FramePoint desiredContactPointPosition = new FramePoint();
+   private final FramePoint3D desiredContactPointPosition = new FramePoint3D();
    private final YoVariableDoubleProvider maximumToeOffAngleProvider;
 
    private final ToeOffCalculator toeOffCalculator;
@@ -43,7 +43,7 @@ public class OnToesState extends AbstractFootControlState
    private final FrameOrientation startOrientation = new FrameOrientation();
    private final double[] tempYawPitchRoll = new double[3];
 
-   private final FramePoint contactPointPosition = new FramePoint();
+   private final FramePoint3D contactPointPosition = new FramePoint3D();
 
    private final YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
    private final List<YoContactPoint> contactPoints = contactState.getContactPoints();
@@ -53,14 +53,14 @@ public class OnToesState extends AbstractFootControlState
    private final YoDouble toeOffDesiredPitchAngle, toeOffDesiredPitchVelocity, toeOffDesiredPitchAcceleration;
    private final YoDouble toeOffCurrentPitchAngle, toeOffCurrentPitchVelocity;
 
-   private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
+   private final FramePoint2D toeOffContactPoint2d = new FramePoint2D();
    private final FrameLineSegment2d toeOffContactLine2d = new FrameLineSegment2d();
 
    private final TranslationReferenceFrame toeOffFrame;
 
    private final ReferenceFrame soleZUpFrame;
 
-   public OnToesState(FootControlHelper footControlHelper, ToeOffCalculator toeOffCalculator, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
+   public OnToesState(FootControlHelper footControlHelper, ToeOffCalculator toeOffCalculator, YoPIDSE3Gains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.TOES, footControlHelper);
 
@@ -201,7 +201,7 @@ public class OnToesState extends AbstractFootControlState
          toeSlippingDetector.update();
    }
 
-   public void getDesireds(FrameOrientation desiredOrientationToPack, FrameVector desiredAngularVelocityToPack)
+   public void getDesireds(FrameOrientation desiredOrientationToPack, FrameVector3D desiredAngularVelocityToPack)
    {
       desiredOrientationToPack.setIncludingFrame(desiredOrientation);
       desiredAngularVelocityToPack.setIncludingFrame(desiredAngularVelocity);
@@ -217,8 +217,8 @@ public class OnToesState extends AbstractFootControlState
       }
    }
 
-   private final FrameVector direction = new FrameVector();
-   private final FramePoint2d tmpPoint2d = new FramePoint2d();
+   private final FrameVector3D direction = new FrameVector3D();
+   private final FramePoint2D tmpPoint2d = new FramePoint2D();
    private void setupContactLine()
    {
       direction.setToZero(contactableFoot.getSoleFrame());
@@ -243,12 +243,12 @@ public class OnToesState extends AbstractFootControlState
    {
       toeOffCalculator.getToeOffContactPoint(toeOffContactPoint2d, robotSide);
 
-      contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
+      contactPointPosition.setIncludingFrame(toeOffContactPoint2d, 0.0);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       feedbackControlCommand.setControlFrameFixedInEndEffector(contactPointPosition);
       toeOffFrame.updateTranslation(contactPointPosition);
 
-      desiredContactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
+      desiredContactPointPosition.setIncludingFrame(toeOffContactPoint2d, 0.0);
       desiredContactPointPosition.changeFrame(worldFrame);
    }
 
@@ -257,12 +257,12 @@ public class OnToesState extends AbstractFootControlState
       toeOffCalculator.getToeOffContactLine(toeOffContactLine2d, robotSide);
       toeOffContactLine2d.midpoint(toeOffContactPoint2d);
 
-      contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
+      contactPointPosition.setIncludingFrame(toeOffContactPoint2d, 0.0);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       toeOffFrame.updateTranslation(contactPointPosition);
       feedbackControlCommand.setControlFrameFixedInEndEffector(contactPointPosition);
 
-      desiredContactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
+      desiredContactPointPosition.setIncludingFrame(toeOffContactPoint2d, 0.0);
       desiredContactPointPosition.changeFrame(worldFrame);
    }
 

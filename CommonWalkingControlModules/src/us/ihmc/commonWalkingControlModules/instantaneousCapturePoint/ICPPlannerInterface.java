@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -83,7 +83,7 @@ public interface ICPPlannerInterface
     * @param icpPositionToHold the position at which the ICP will be held during the next double
     *           support phase. Not modified.
     */
-   void holdCurrentICP(FramePoint icpPositionToHold);
+   void holdCurrentICP(FramePoint3D icpPositionToHold);
 
    /**
     * Initializes the planner to smoothly re-center the ICP in the support polygon preparing the
@@ -175,7 +175,7 @@ public interface ICPPlannerInterface
     * @return the estimated time remaining before the capture point reaches its desired position at
     *         the end of this state.
     */
-   double estimateTimeRemainingForStateUnderDisturbance(FramePoint2d actualCapturePointPosition);
+   double estimateTimeRemainingForStateUnderDisturbance(FramePoint2D actualCapturePointPosition);
 
    /**
     * Updates the current state of the ICP plan.
@@ -199,7 +199,7 @@ public interface ICPPlannerInterface
     * 
     * @param desiredCapturePointPositionToPack the current ICP position. Modified.
     */
-   void getDesiredCapturePointPosition(FramePoint desiredCapturePointPositionToPack);
+   void getDesiredCapturePointPosition(FramePoint3D desiredCapturePointPositionToPack);
 
    /**
     * Gets the current ICP position.
@@ -210,7 +210,7 @@ public interface ICPPlannerInterface
     * 
     * @param desiredCapturePointPositionToPack the current ICP position. Modified.
     */
-   void getDesiredCapturePointPosition(FramePoint2d desiredCapturePointPositionToPack);
+   void getDesiredCapturePointPosition(FramePoint2D desiredCapturePointPositionToPack);
 
    /**
     * Gets the current ICP position.
@@ -232,7 +232,7 @@ public interface ICPPlannerInterface
     *
     * @param desiredCenterOfMassPositionToPack the current CoM position. Modified.
     */
-   void getDesiredCenterOfMassPosition(FramePoint desiredCenterOfMassPositionToPack);
+   void getDesiredCenterOfMassPosition(FramePoint3D desiredCenterOfMassPositionToPack);
 
    /**
     * Gets the current CoM position.
@@ -254,7 +254,7 @@ public interface ICPPlannerInterface
     * 
     * @param desiredCapturePointVelocityToPack the current ICP velocity. Modified.
     */
-   void getDesiredCapturePointVelocity(FrameVector desiredCapturePointVelocityToPack);
+   void getDesiredCapturePointVelocity(FrameVector3D desiredCapturePointVelocityToPack);
 
    /**
     * Gets the current ICP velocity.
@@ -265,7 +265,7 @@ public interface ICPPlannerInterface
     * 
     * @param desiredCapturePointVelocityToPack the current ICP velocity. Modified.
     */
-   void getDesiredCapturePointVelocity(FrameVector2d desiredCapturePointVelocityToPack);
+   void getDesiredCapturePointVelocity(FrameVector2D desiredCapturePointVelocityToPack);
 
    /**
     * Gets the current ICP velocity.
@@ -287,7 +287,7 @@ public interface ICPPlannerInterface
     *
     * @param desiredCapturePointAccelerationToPack the current ICP velocity. Modified.
     */
-   void getDesiredCapturePointAcceleration(FrameVector desiredCapturePointAccelerationToPack);
+   void getDesiredCapturePointAcceleration(FrameVector3D desiredCapturePointAccelerationToPack);
 
    /**
     * Gets the current CMP position.
@@ -298,7 +298,7 @@ public interface ICPPlannerInterface
     * 
     * @param desiredCentroidalMomentumPivotPositionToPack the current CMP position. Modified.
     */
-   void getDesiredCentroidalMomentumPivotPosition(FramePoint desiredCentroidalMomentumPivotPositionToPack);
+   void getDesiredCentroidalMomentumPivotPosition(FramePoint3D desiredCentroidalMomentumPivotPositionToPack);
 
    /**
     * Gets the current CMP position.
@@ -309,7 +309,7 @@ public interface ICPPlannerInterface
     * 
     * @param desiredCentroidalMomentumPivotPositionToPack the current CMP position. Modified.
     */
-   void getDesiredCentroidalMomentumPivotPosition(FramePoint2d desiredCentroidalMomentumPivotPositionToPack);
+   void getDesiredCentroidalMomentumPivotPosition(FramePoint2D desiredCentroidalMomentumPivotPositionToPack);
 
    /**
     * Gets the current CMP velocity.
@@ -320,7 +320,7 @@ public interface ICPPlannerInterface
     * 
     * @param desiredCentroidalMomentumPivotVelocityToPack the current CMP velocity. Modified.
     */
-   void getDesiredCentroidalMomentumPivotVelocity(FrameVector desiredCentroidalMomentumPivotVelocityToPack);
+   void getDesiredCentroidalMomentumPivotVelocity(FrameVector3D desiredCentroidalMomentumPivotVelocityToPack);
 
    /**
     * Gets the current CMP velocity.
@@ -331,7 +331,7 @@ public interface ICPPlannerInterface
     * 
     * @param desiredCentroidalMomentumPivotVelocityToPack the current CMP velocity. Modified.
     */
-   void getDesiredCentroidalMomentumPivotVelocity(FrameVector2d desiredCentroidalMomentumPivotVelocityToPack);
+   void getDesiredCentroidalMomentumPivotVelocity(FrameVector2D desiredCentroidalMomentumPivotVelocityToPack);
 
    /**
     * Gets the time relative to the beginning of the current state.
@@ -440,7 +440,7 @@ public interface ICPPlannerInterface
     * 
     * @param finalDesiredCapturePointPositionToPack the final desired ICP position. Modified.
     */
-   void getFinalDesiredCapturePointPosition(FramePoint finalDesiredCapturePointPositionToPack);
+   void getFinalDesiredCapturePointPosition(FramePoint3D finalDesiredCapturePointPositionToPack);
 
    /**
     * Retrieves the desired ICP position at the end of the current state.
@@ -454,7 +454,7 @@ public interface ICPPlannerInterface
     *
     * @param finalDesiredCenterOfMassPositionToPack the final desired ICP position. Modified.
     */
-   void getFinalDesiredCenterOfMassPosition(FramePoint finalDesiredCenterOfMassPositionToPack);
+   void getFinalDesiredCenterOfMassPosition(FramePoint3D finalDesiredCenterOfMassPositionToPack);
 
    /**
     * Retrieves the position of the next exit CMP.
@@ -465,7 +465,7 @@ public interface ICPPlannerInterface
     * 
     * @param exitCMPToPack the next exit CMP position. Modified.
     */
-   void getNextExitCMP(FramePoint exitCMPToPack);
+   void getNextExitCMP(FramePoint3D exitCMPToPack);
 
    /**
     * Tests if the ICP planner is done with the current state.

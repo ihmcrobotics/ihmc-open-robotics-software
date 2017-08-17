@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -17,15 +20,12 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGeneratorInMultipleFrames
 {
@@ -65,7 +65,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    // For viz
    private final boolean visualize;
    private final BagOfBalls bagOfBalls;
-   private final FramePoint ballPosition = new FramePoint();
+   private final FramePoint3D ballPosition = new FramePoint3D();
    private final int numberOfBalls = 50;
 
    private final YoFramePose distortedPlanePose;
@@ -185,7 +185,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    private final Vector3D tempVector = new Vector3D();
    private final AxisAngle tempAxisAngle = new AxisAngle();
 
-   public void setInitialLeadOut(FramePoint initialPosition, FrameVector initialDirection, double leaveDistance)
+   public void setInitialLeadOut(FramePoint3D initialPosition, FrameVector3D initialDirection, double leaveDistance)
    {
       this.initialPosition.set(initialPosition);
       this.initialDirection.set(initialDirection);
@@ -200,7 +200,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       this.leaveDistance.set(leaveDistance);
    }
 
-   public void setFinalLeadIn(FramePoint finalPosition, FrameVector finalDirection, double approachDistance)
+   public void setFinalLeadIn(FramePoint3D finalPosition, FrameVector3D finalDirection, double approachDistance)
    {
       this.finalPosition.set(finalPosition);
       this.finalDirection.set(finalDirection);
@@ -298,8 +298,10 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       double alphaDDot = shouldBeZero ? 0.0 : xyPolynomial.getAcceleration();
 
       currentPosition.interpolate(initialPosition, finalPosition, xyPolynomial.getPosition());
-      currentVelocity.subAndScale(alphaDot, finalPosition, initialPosition);
-      currentAcceleration.subAndScale(alphaDDot, finalPosition, initialPosition);
+      currentVelocity.sub(finalPosition, initialPosition);
+      currentVelocity.scale(alphaDot);
+      currentAcceleration.sub(finalPosition, initialPosition);
+      currentAcceleration.scale(alphaDDot);
 
       zPolynomial.compute(MathTools.clamp(time, 0.0, tf));
 
@@ -341,25 +343,25 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    }
 
    @Override
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       currentPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
    @Override
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
    @Override
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
    @Override
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

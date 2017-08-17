@@ -1,6 +1,9 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -9,9 +12,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -67,8 +67,8 @@ public class Step6WalkingController implements RobotController
    private double comPosX, comPosZ, comVelX, icpPosX;
    private YoGraphicPosition icpGraphics;
    private YoDouble icpYoPosX, icpYoPosY, icpYoPosZ;
-   private FramePoint2d capturePoint, centerOfMassInWorld; 
-   private FrameVector2d centerOfMassVelocityInWorld;
+   private FramePoint2D capturePoint, centerOfMassInWorld; 
+   private FrameVector2D centerOfMassVelocityInWorld;
    
    
    /**
@@ -511,9 +511,9 @@ public class Step6WalkingController implements RobotController
     comPosZ = rob.getBodyPositionZ();
     double omega0 = Math.sqrt(9.81 / comPosZ);
     
-    capturePoint = new FramePoint2d();
-    centerOfMassInWorld = new FramePoint2d(ReferenceFrame.getWorldFrame(), comPosX, 0.0);
-    centerOfMassVelocityInWorld = new FrameVector2d(ReferenceFrame.getWorldFrame(), comVelX, 0.0);
+    capturePoint = new FramePoint2D();
+    centerOfMassInWorld = new FramePoint2D(ReferenceFrame.getWorldFrame(), comPosX, 0.0);
+    centerOfMassVelocityInWorld = new FrameVector2D(ReferenceFrame.getWorldFrame(), comVelX, 0.0);
     CapturePointCalculator.computeCapturePoint(capturePoint, centerOfMassInWorld, centerOfMassVelocityInWorld, omega0);
     icpPosX = capturePoint.getX();
     //    System.out.println("comPos" + centerOfMassInWorld + "\ncomVel" + centerOfMassVelocityInWorld + "\nicp" + capturePoint + "\nicpPosX" + icpPosX ); 

@@ -50,6 +50,10 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
@@ -57,13 +61,9 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -535,13 +535,13 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       }
    }
 
-   private final FrameVector2d desiredICPVelocityAsFrameVector = new FrameVector2d();
+   private final FrameVector2D desiredICPVelocityAsFrameVector = new FrameVector2D();
 
-   private final SideDependentList<FramePoint2d> footDesiredCoPs = new SideDependentList<FramePoint2d>(new FramePoint2d(), new FramePoint2d());
+   private final SideDependentList<FramePoint2D> footDesiredCoPs = new SideDependentList<FramePoint2D>(new FramePoint2D(), new FramePoint2D());
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(4, PlaneContactStateCommand.class);
-   private final FramePoint2d capturePoint2d = new FramePoint2d();
-   private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
-   private final FrameVector achievedLinearMomentumRate = new FrameVector();
+   private final FramePoint2D capturePoint2d = new FramePoint2D();
+   private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
+   private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
 
    @Override
    public void doAction()
@@ -624,7 +624,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          }
          else if (!balanceManager.isPushRecoveryEnabled() || balanceManager.isRecoveryImpossible())
          {
-            FrameVector2d fallingDirection = failureDetectionControlModule.getFallingDirection();
+            FrameVector2D fallingDirection = failureDetectionControlModule.getFallingDirection();
             walkingMessageHandler.reportControllerFailure(fallingDirection);
             controllerToolbox.reportControllerFailureToListeners(fallingDirection);
          }

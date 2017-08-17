@@ -8,6 +8,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -17,23 +20,19 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 {
@@ -41,7 +40,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private static final long NO_CONTACT_ID = 0L;
    private static final long IN_CONTACT_ID = 1L;
    private static final int dofs = Twist.SIZE;
-   private static final FrameVector zeroInWorld = new FrameVector(worldFrame, 0.0, 0.0, 0.0);
+   private static final FrameVector3D zeroInWorld = new FrameVector3D(worldFrame, 0.0, 0.0, 0.0);
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
@@ -72,9 +71,9 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final RigidBodyTransform bodyToJointTransform = new RigidBodyTransform();
    private final RigidBodyTransform contactToJointTransform = new RigidBodyTransform();
 
-   private final FramePoint desiredContactPosition = new FramePoint(worldFrame);
+   private final FramePoint3D desiredContactPosition = new FramePoint3D(worldFrame);
    private final FrameOrientation desiredContactOrientation = new FrameOrientation(worldFrame);
-   private final FramePoint currentContactPosition = new FramePoint(worldFrame);
+   private final FramePoint3D currentContactPosition = new FramePoint3D(worldFrame);
    private final FrameOrientation currentContactOrientation = new FrameOrientation(worldFrame);
 
    private final YoBoolean hybridModeActive;
@@ -135,10 +134,10 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       spatialFeedbackControlCommand.setWeightsForSolver(taskspaceAngularWeight, taskspaceLinearWeight);
    }
 
-   public void setGains(YoOrientationPIDGainsInterface taskspaceOrientationGains, YoPositionPIDGainsInterface taskspacePositionGains)
+   public void setGains(YoPID3DGains taskspaceOrientationGains, YoPID3DGains taskspacePositionGains)
    {
-      spatialFeedbackControlCommand.setGains(taskspaceOrientationGains);
-      spatialFeedbackControlCommand.setGains(taskspacePositionGains);
+      spatialFeedbackControlCommand.setOrientationGains(taskspaceOrientationGains);
+      spatialFeedbackControlCommand.setPositionGains(taskspacePositionGains);
    }
 
    public void setCoefficientOfFriction(double coefficientOfFriction)

@@ -9,18 +9,17 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.Epsilons;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import us.ihmc.robotics.math.trajectories.YoTrajectory3D;
-import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
-import us.ihmc.commons.Epsilons;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
@@ -28,7 +27,7 @@ public class TrajectoryMathToolsTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static YoVariableRegistry registry = new YoVariableRegistry("TrajectoryMathTestRegistry");
-
+   private static TrajectoryMathTools trajMath = new TrajectoryMathTools("TestToolsClass", 16, registry);
    private static final double epsilon = 1e-6;
 
    @Before
@@ -53,7 +52,7 @@ public class TrajectoryMathToolsTest
       traj2.setCubic(1, 10, 12.5, 3.5);
       Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
       Assert.assertTrue(traj2.getNumberOfCoefficients() == 4);
-      TrajectoryMathTools.add(traj1, traj1, traj2);
+      trajMath.add(traj1, traj1, traj2);
       Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
       Assert.assertEquals(traj1.getCoefficient(0), 13.482853223593963, epsilon);
       Assert.assertEquals(traj1.getCoefficient(1), 1.069958847736625, epsilon);
@@ -76,7 +75,7 @@ public class TrajectoryMathToolsTest
       traj2.setCubic(3, 5, 12.5, 3.5);
       Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
       Assert.assertTrue(traj2.getNumberOfCoefficients() == 4);
-      int numberOfSegments = TrajectoryMathTools.add(resultTrajectoryList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      int numberOfSegments = trajMath.add(resultTrajectoryList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 3);
       YoTrajectory traj3 = resultTrajectoryList.get(0);
       YoTrajectory traj4 = resultTrajectoryList.get(1);
@@ -115,7 +114,7 @@ public class TrajectoryMathToolsTest
       YoTrajectory traj2 = new YoTrajectory("Trajectory2", 10, registry);
       traj1.setConstant(5, 10, 1);
       traj2.setConstant(1, 4, 1);
-      int numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      int numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 3);
       Assert.assertTrue(timeList.get(0) == 1);
       Assert.assertTrue(timeList.get(1) == 4);
@@ -124,7 +123,7 @@ public class TrajectoryMathToolsTest
 
       traj1.setConstant(5, 10, 1);
       traj2.setConstant(1, 6, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 3);
       Assert.assertTrue(timeList.get(0) == 1);
       Assert.assertTrue(timeList.get(1) == 5);
@@ -133,7 +132,7 @@ public class TrajectoryMathToolsTest
 
       traj1.setConstant(5, 10, 1);
       traj2.setConstant(1, 11, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 3);
       Assert.assertTrue(timeList.get(0) == 1);
       Assert.assertTrue(timeList.get(1) == 5);
@@ -142,7 +141,7 @@ public class TrajectoryMathToolsTest
 
       traj1.setConstant(5, 10, 1);
       traj2.setConstant(6, 9, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 3);
       Assert.assertTrue(timeList.get(0) == 5);
       Assert.assertTrue(timeList.get(1) == 6);
@@ -151,7 +150,7 @@ public class TrajectoryMathToolsTest
 
       traj1.setConstant(5, 10, 1);
       traj2.setConstant(6, 11, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 3);
       Assert.assertTrue(timeList.get(0) == 5);
       Assert.assertTrue(timeList.get(1) == 6);
@@ -160,7 +159,7 @@ public class TrajectoryMathToolsTest
 
       traj1.setConstant(5, 10, 1);
       traj2.setConstant(11, 12, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 3);
       Assert.assertTrue(timeList.get(0) == 5);
       Assert.assertTrue(timeList.get(1) == 10);
@@ -170,7 +169,7 @@ public class TrajectoryMathToolsTest
       // 
       traj2.setConstant(5, 10, 1);
       traj1.setConstant(1, 4, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 3);
       Assert.assertTrue(timeList.get(0) == 1);
       Assert.assertTrue(timeList.get(1) == 4);
@@ -179,7 +178,7 @@ public class TrajectoryMathToolsTest
 
       traj2.setConstant(5, 10, 1);
       traj1.setConstant(1, 6, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 3);
       Assert.assertTrue(timeList.get(0) == 1);
       Assert.assertTrue(timeList.get(1) == 5);
@@ -188,7 +187,7 @@ public class TrajectoryMathToolsTest
 
       traj2.setConstant(5, 10, 1);
       traj1.setConstant(1, 11, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 3);
       Assert.assertTrue(timeList.get(0) == 1);
       Assert.assertTrue(timeList.get(1) == 5);
@@ -197,7 +196,7 @@ public class TrajectoryMathToolsTest
 
       traj2.setConstant(5, 10, 1);
       traj1.setConstant(6, 9, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 3);
       Assert.assertTrue(timeList.get(0) == 5);
       Assert.assertTrue(timeList.get(1) == 6);
@@ -206,7 +205,7 @@ public class TrajectoryMathToolsTest
 
       traj2.setConstant(5, 10, 1);
       traj1.setConstant(6, 11, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 3);
       Assert.assertTrue(timeList.get(0) == 5);
       Assert.assertTrue(timeList.get(1) == 6);
@@ -215,7 +214,7 @@ public class TrajectoryMathToolsTest
 
       traj2.setConstant(5, 10, 1);
       traj1.setConstant(11, 12, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 3);
       Assert.assertTrue(timeList.get(0) == 5);
       Assert.assertTrue(timeList.get(1) == 10);
@@ -225,7 +224,7 @@ public class TrajectoryMathToolsTest
       //
       traj1.setConstant(5, 10, 1);
       traj2.setConstant(5, 9, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 2);
       Assert.assertTrue(timeList.get(0) == 5);
       Assert.assertTrue(timeList.get(1) == 9);
@@ -233,7 +232,7 @@ public class TrajectoryMathToolsTest
 
       traj1.setConstant(5, 10, 1);
       traj2.setConstant(5, 11, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 2);
       Assert.assertTrue(timeList.get(0) == 5);
       Assert.assertTrue(timeList.get(1) == 10);
@@ -241,7 +240,7 @@ public class TrajectoryMathToolsTest
 
       traj1.setConstant(5, 10, 1);
       traj2.setConstant(4, 10, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 2);
       Assert.assertTrue(timeList.get(0) == 4);
       Assert.assertTrue(timeList.get(1) == 5);
@@ -249,7 +248,7 @@ public class TrajectoryMathToolsTest
 
       traj1.setConstant(5, 10, 1);
       traj2.setConstant(6, 10, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 2);
       Assert.assertTrue(timeList.get(0) == 5);
       Assert.assertTrue(timeList.get(1) == 6);
@@ -258,7 +257,7 @@ public class TrajectoryMathToolsTest
       //
       traj2.setConstant(5, 10, 1);
       traj1.setConstant(5, 9, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 2);
       Assert.assertTrue(timeList.get(0) == 5);
       Assert.assertTrue(timeList.get(1) == 9);
@@ -266,7 +265,7 @@ public class TrajectoryMathToolsTest
 
       traj2.setConstant(5, 10, 1);
       traj1.setConstant(5, 11, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 2);
       Assert.assertTrue(timeList.get(0) == 5);
       Assert.assertTrue(timeList.get(1) == 10);
@@ -274,7 +273,7 @@ public class TrajectoryMathToolsTest
 
       traj2.setConstant(5, 10, 1);
       traj1.setConstant(4, 10, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 2);
       Assert.assertTrue(timeList.get(0) == 4);
       Assert.assertTrue(timeList.get(1) == 5);
@@ -282,7 +281,7 @@ public class TrajectoryMathToolsTest
 
       traj2.setConstant(5, 10, 1);
       traj1.setConstant(6, 10, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 2);
       Assert.assertTrue(timeList.get(0) == 5);
       Assert.assertTrue(timeList.get(1) == 6);
@@ -290,7 +289,7 @@ public class TrajectoryMathToolsTest
 
       traj1.setConstant(5, 10, 1);
       traj2.setConstant(5, 10, 1);
-      numberOfSegments = TrajectoryMathTools.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 1);
       Assert.assertTrue(timeList.get(0) == 5);
       Assert.assertTrue(timeList.get(1) == 10);
@@ -306,7 +305,7 @@ public class TrajectoryMathToolsTest
       traj2.setCubic(0, 2, -0.5, -0.6);
       Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
       Assert.assertTrue(traj2.getNumberOfCoefficients() == 4);
-      TrajectoryMathTools.subtract(traj1, traj1, traj2);
+      trajMath.subtract(traj1, traj1, traj2);
       Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
       Assert.assertEquals(traj1.getCoefficient(0), 3.5 + 0.500, epsilon);
       Assert.assertEquals(traj1.getCoefficient(1), 0.0 - 0.000, epsilon);
@@ -329,7 +328,7 @@ public class TrajectoryMathToolsTest
       traj2.setCubic(1, 10, -10.6, 6.5);
       Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
       Assert.assertTrue(traj2.getNumberOfCoefficients() == 4);
-      int numberOfSegments = TrajectoryMathTools.subtract(resultTrajectoryList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      int numberOfSegments = trajMath.subtract(resultTrajectoryList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 3);
       YoTrajectory traj3 = resultTrajectoryList.get(0);
       YoTrajectory traj4 = resultTrajectoryList.get(1);
@@ -367,7 +366,7 @@ public class TrajectoryMathToolsTest
       YoTrajectory traj2 = new YoTrajectory("Trajectory2", 8, registry);
       traj1.setLinear(0, 10, 1, 2);
       traj2.setLinear(0, 10, 2, 3);
-      TrajectoryMathTools.multiply(traj1, traj1, traj2);
+      trajMath.multiply(traj1, traj1, traj2);
       Assert.assertEquals(traj1.getCoefficient(0), 2, epsilon);
       Assert.assertEquals(traj1.getCoefficient(1), 0.3, epsilon);
       Assert.assertEquals(traj1.getCoefficient(2), 0.01, epsilon);
@@ -384,7 +383,7 @@ public class TrajectoryMathToolsTest
       traj2.setCubic(12, 15, 0.5, 0.1);
       Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
       Assert.assertTrue(traj2.getNumberOfCoefficients() == 4);
-      TrajectoryMathTools.multiply(traj1, traj1, traj2);
+      trajMath.multiply(traj1, traj1, traj2);
       Assert.assertTrue(traj1.getNumberOfCoefficients() == 7);
       Assert.assertEquals(traj1.getCoefficient(0), -2.228097449999825e+06, epsilon);
       Assert.assertEquals(traj1.getCoefficient(1), 1.016083999999920e+06, epsilon);
@@ -408,7 +407,7 @@ public class TrajectoryMathToolsTest
       traj2.setCubic(1, 10, -1.6, 0.5);
       Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
       Assert.assertTrue(traj2.getNumberOfCoefficients() == 4);
-      int numberOfSegments = TrajectoryMathTools.multiply(resultTrajectoryList, traj1, traj2, Epsilons.ONE_MILLIONTH);
+      int numberOfSegments = trajMath.multiply(resultTrajectoryList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 2);
       YoTrajectory traj3 = resultTrajectoryList.get(0);
       YoTrajectory traj4 = resultTrajectoryList.get(1);
@@ -440,7 +439,7 @@ public class TrajectoryMathToolsTest
       YoTrajectory3D traj2 = new YoTrajectory3D("Trajectory2", 3, registry);
       traj1.setLinear(0, 1, new Point3D(0.5, 0.1, 10), new Point3D(1, 10, 5));
       traj2.setLinear(0, 1, new Point3D(), new Point3D(5, 7.7, 1));
-      TrajectoryMathTools.add(traj1, traj1, traj2);
+      trajMath.add(traj1, traj1, traj2);
 
       YoTrajectory traj = traj1.getYoTrajectoryX();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
@@ -472,7 +471,7 @@ public class TrajectoryMathToolsTest
       YoTrajectory3D traj2 = new YoTrajectory3D("Trajectory2", 3, registry);
       traj1.setLinear(0, 1, new Point3D(0.1, 3.414, 1.87), new Point3D(2.09, 1.35, 5.35));
       traj2.setLinear(0, 1, new Point3D(3.14, 1.59, 12.9), new Point3D(4.51, 5.32, 1.12));
-      TrajectoryMathTools.subtract(traj1, traj1, traj2);
+      trajMath.subtract(traj1, traj1, traj2);
 
       YoTrajectory traj = traj1.getYoTrajectoryX();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
@@ -504,7 +503,7 @@ public class TrajectoryMathToolsTest
       YoTrajectory3D traj2 = new YoTrajectory3D("Trajectory2", 3, registry);
       traj1.setLinear(0, 1, new Point3D(1, 3, 5), new Point3D(6, 4, 2));
       traj2.setLinear(0, 1, new Point3D(2, 4, 6), new Point3D(5, 3, 1));
-      TrajectoryMathTools.dotProduct(traj1, traj1, traj2);
+      trajMath.dotProduct(traj1, traj1, traj2);
 
       YoTrajectory traj = traj1.getYoTrajectoryX();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
@@ -539,7 +538,7 @@ public class TrajectoryMathToolsTest
       YoTrajectory3D traj2 = new YoTrajectory3D("Trajectory2", 3, registry);
       traj1.setLinear(0, 1, new Point3D(1, 3, 5), new Point3D(6, 4, 2));
       traj2.setLinear(0, 1, new Point3D(2, 4, 6), new Point3D(5, 3, 1));
-      TrajectoryMathTools.crossProduct(traj1, traj1, traj2);
+      trajMath.crossProduct(traj1, traj1, traj2);
 
       YoTrajectory traj = traj1.getYoTrajectoryX();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
@@ -573,7 +572,7 @@ public class TrajectoryMathToolsTest
       YoTrajectory traj1 = new YoTrajectory("Trajectory1", 2, registry);
       YoTrajectory traj2 = new YoTrajectory("Trajectory2", 3, registry);
       traj1.setLinear(1, 11, 4, 5);
-      TrajectoryMathTools.getIntergal(traj2, traj1);
+      trajMath.getIntergal(traj2, traj1);
       Assert.assertEquals(traj2.getCoefficient(0), -4.00, epsilon);
       Assert.assertEquals(traj2.getCoefficient(1), 3.90, epsilon);
       Assert.assertEquals(traj2.getCoefficient(2), 0.05, epsilon);
@@ -586,7 +585,7 @@ public class TrajectoryMathToolsTest
       YoTrajectory traj1 = new YoTrajectory("Trajectory1", 3, registry);
       YoTrajectory traj2 = new YoTrajectory("Trajectory2", 2, registry);
       traj1.setQuadratic(1, 11, 4, 0, 5);
-      TrajectoryMathTools.getDerivative(traj2, traj1);
+      trajMath.getDerivative(traj2, traj1);
       Assert.assertEquals(traj2.getCoefficient(0), traj1.getCoefficient(1), epsilon);
       Assert.assertEquals(traj2.getCoefficient(1), 2 * traj1.getCoefficient(2), epsilon);
    }
@@ -600,11 +599,11 @@ public class TrajectoryMathToolsTest
       traj1.setDirectlyFast(1, 2);
       traj1.setDirectlyFast(2, 3);
       traj1.setTime(2, 4);
-      TrajectoryMathTools.addTimeOffset(traj1, 2);
+      trajMath.addTimeOffset(traj1, 2);
       Assert.assertEquals(traj1.getCoefficient(0), 9, epsilon);
       Assert.assertEquals(traj1.getCoefficient(1), -10, epsilon);
       Assert.assertEquals(traj1.getCoefficient(2), 3, epsilon);
-      TrajectoryMathTools.addTimeOffset(traj1, -4);
+      trajMath.addTimeOffset(traj1, -4);
       Assert.assertEquals(traj1.getCoefficient(0), 17, epsilon);
       Assert.assertEquals(traj1.getCoefficient(1), 14, epsilon);
       Assert.assertEquals(traj1.getCoefficient(2), 3, epsilon);
@@ -618,7 +617,7 @@ public class TrajectoryMathToolsTest
          super(name, maxNumberOfSegments, maxNumberOfCoefficients, registry);
       }
 
-      public void setSegment(double t0, double tFinal, FramePoint z0, FramePoint zf)
+      public void setSegment(double t0, double tFinal, FramePoint3D z0, FramePoint3D zf)
       {
          segments.get(numberOfSegments.getIntegerValue()).setLinear(t0, tFinal, z0, zf);
          numberOfSegments.increment();
@@ -632,11 +631,11 @@ public class TrajectoryMathToolsTest
       DummySegmentedTrajectory traj1 = new DummySegmentedTrajectory("TestTraj1", 4, 2, registry);
       DummySegmentedTrajectory traj2 = new DummySegmentedTrajectory("TestTraj2", 4, 2, registry);
       DummySegmentedTrajectory traj3 = new DummySegmentedTrajectory("TestTraj3", 10, 2, registry);
-      traj1.setSegment(0, 1, new FramePoint(worldFrame, 10, 11, 12), new FramePoint(worldFrame, 13, 14, 15));
-      traj1.setSegment(1, 2, new FramePoint(worldFrame, 15, 20, 25), new FramePoint(worldFrame, 20, 25, 30));
-      traj1.setSegment(2, 3, new FramePoint(worldFrame, 25, 28, 31), new FramePoint(worldFrame, 35, 38, 41));
-      traj2.setSegment(0.5, 0.6, new FramePoint(worldFrame, 1, 2, 3), new FramePoint(worldFrame, 3, 2, 1));
-      traj2.setSegment(1.2, 2.2, new FramePoint(worldFrame, 3, 2, 1), new FramePoint(worldFrame, 4, 5, 6));
-      TrajectoryMathTools.addSegmentedTrajectories(traj3, traj1, traj2, Epsilons.ONE_BILLIONTH);
+      traj1.setSegment(0, 1, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
+      traj1.setSegment(1, 2, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
+      traj1.setSegment(2, 3, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));
+      traj2.setSegment(0.5, 0.6, new FramePoint3D(worldFrame, 1, 2, 3), new FramePoint3D(worldFrame, 3, 2, 1));
+      traj2.setSegment(1.2, 2.2, new FramePoint3D(worldFrame, 3, 2, 1), new FramePoint3D(worldFrame, 4, 5, 6));
+      trajMath.addSegmentedTrajectories(traj3, traj1, traj2, Epsilons.ONE_BILLIONTH);
    }
 }

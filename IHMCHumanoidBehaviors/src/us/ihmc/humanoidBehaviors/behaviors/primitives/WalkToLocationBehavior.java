@@ -5,6 +5,10 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -17,17 +21,13 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -153,7 +153,7 @@ public class WalkToLocationBehavior extends AbstractBehavior
       this.walkPathVector.sub(this.targetLocation, robotYoPose.getPosition());
       fullRobotModel.updateFrames();
 
-      FrameVector2d frameHeadingVector = new FrameVector2d(referenceFrame, 1.0, 0.0);
+      FrameVector2D frameHeadingVector = new FrameVector2D(referenceFrame, 1.0, 0.0);
       frameHeadingVector.changeFrame(worldFrame);
       double ret = -Math.abs(frameHeadingVector.angle(walkPathVector.getFrameVector2dCopy()));
 
@@ -216,11 +216,11 @@ public class WalkToLocationBehavior extends AbstractBehavior
 
    private void generateFootsteps()
    {
-      FramePoint midFeetPosition = getCurrentMidFeetPosition();
+      FramePoint3D midFeetPosition = getCurrentMidFeetPosition();
 
       footsteps.clear();
       FramePose2d endPose = new FramePose2d(worldFrame);
-      endPose.setPosition(new FramePoint2d(worldFrame, targetLocation.getX(), targetLocation.getY()));
+      endPose.setPosition(new FramePoint2D(worldFrame, targetLocation.getX(), targetLocation.getY()));
       endPose.setOrientation(new FrameOrientation2d(worldFrame, targetOrientation.getYaw().getDoubleValue()));
 
       boolean computeFootstepsWithFlippedInitialTurnDirection = pathType.getAngle() != 0.0;
@@ -276,9 +276,9 @@ public class WalkToLocationBehavior extends AbstractBehavior
       footstepListBehavior.doControl();
    }
 
-   private FramePoint getCurrentMidFeetPosition()
+   private FramePoint3D getCurrentMidFeetPosition()
    {
-      FramePoint ret = new FramePoint();
+      FramePoint3D ret = new FramePoint3D();
       ret.setToZero(referenceFrames.getMidFeetZUpFrame());
       ret.changeFrame(worldFrame);
 

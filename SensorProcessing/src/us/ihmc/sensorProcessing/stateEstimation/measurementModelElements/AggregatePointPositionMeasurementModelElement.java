@@ -10,10 +10,10 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 
@@ -26,7 +26,7 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final List<PointPositionMeasurementModelElement> elementPool = new ArrayList<PointPositionMeasurementModelElement>();
    private final ControlFlowInputPort<List<PointPositionDataObject>> inputPort;
-   private final ControlFlowOutputPort<FramePoint> centerOfMassPositionPort;
+   private final ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort;
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
    private final ReferenceFrame estimationFrame;
    private final AfterJointReferenceFrameNameMap referenceFrameMap;
@@ -42,7 +42,7 @@ public class AggregatePointPositionMeasurementModelElement implements Measuremen
 
 
    public AggregatePointPositionMeasurementModelElement(ControlFlowInputPort<List<PointPositionDataObject>> inputPort,
-         ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameOrientation> orientationPort, ReferenceFrame estimationFrame,
+         ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort, ControlFlowOutputPort<FrameOrientation> orientationPort, ReferenceFrame estimationFrame,
          AfterJointReferenceFrameNameMap referenceFrameMap, boolean assumePerfectIMU)
    {
       this.inputPort = inputPort;

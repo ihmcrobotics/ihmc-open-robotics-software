@@ -3,18 +3,18 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 import java.util.List;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -88,7 +88,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
 
       parentRegistry.addChild(registry);
 
-      angularVelocityRootJointFrameRelativeToWorld = new FrameVector(rootJointFrame);
+      angularVelocityRootJointFrameRelativeToWorld = new FrameVector3D(rootJointFrame);
    }
 
    public IMUSensorReadOnly getIMUUsedForEstimation()
@@ -236,13 +236,13 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final Vector3D angularVelocityMeasurementBias = new Vector3D();
 
    /** Angular velocity of the measurement link, with respect to world. */
-   private final FrameVector angularVelocityMeasurementLinkRelativeToWorld = new FrameVector();
+   private final FrameVector3D angularVelocityMeasurementLinkRelativeToWorld = new FrameVector3D();
 
    /** Angular velocity of the estimation link, with respect to the measurement link. */
-   private final FrameVector angularVelocityRootJointFrameRelativeToMeasurementLink = new FrameVector();
+   private final FrameVector3D angularVelocityRootJointFrameRelativeToMeasurementLink = new FrameVector3D();
 
    /** Angular velocity of the root body, with respect to world. */
-   private final FrameVector angularVelocityRootJointFrameRelativeToWorld;
+   private final FrameVector3D angularVelocityRootJointFrameRelativeToWorld;
 
    /** Twist of the estimation link, with respect to the measurement link. */
    private final Twist twistRootJointFrameRelativeToMeasurementLink = new Twist();
@@ -303,7 +303,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    }
 
    @Override
-   public void getEstimatedAngularVelocity(FrameVector estimatedAngularVelocityToPack)
+   public void getEstimatedAngularVelocity(FrameVector3D estimatedAngularVelocityToPack)
    {
       estimatedAngularVelocityToPack.setIncludingFrame(angularVelocityRootJointFrameRelativeToWorld);
    }

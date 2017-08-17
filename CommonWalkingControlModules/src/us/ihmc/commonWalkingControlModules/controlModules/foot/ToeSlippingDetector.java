@@ -3,12 +3,12 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -87,9 +87,9 @@ public class ToeSlippingDetector
       alpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency, dt));
    }
 
-   private final FramePoint toeContactPointPosition = new FramePoint();
+   private final FramePoint3D toeContactPointPosition = new FramePoint3D();
 
-   public void initialize(FramePoint toeContactPointPosition)
+   public void initialize(FramePoint3D toeContactPointPosition)
    {
       this.toeContactPointPosition.setIncludingFrame(toeContactPointPosition);
       this.toeContactPointPosition.changeFrame(foot.getBodyFixedFrame());
@@ -109,8 +109,8 @@ public class ToeSlippingDetector
 
    private final Wrench footWrench = new Wrench();
    private final Twist footTwist = new Twist();
-   private final FrameVector toeLinearVelocity = new FrameVector();
-   private final FramePoint currentToePosition = new FramePoint();
+   private final FrameVector3D toeLinearVelocity = new FrameVector3D();
+   private final FramePoint3D currentToePosition = new FramePoint3D();
 
    public void update()
    {

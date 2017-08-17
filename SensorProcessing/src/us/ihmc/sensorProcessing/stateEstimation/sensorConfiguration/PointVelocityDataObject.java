@@ -1,9 +1,9 @@
 package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -15,7 +15,7 @@ public class PointVelocityDataObject
    protected final Point3D measurementPointInBodyFrame = new Point3D();
    protected final Vector3D velocityOfMeasurementPointInWorldFrame = new Vector3D();
 
-   public void set(RigidBody rigidBody, FramePoint measurementPointInBodyFrame, FrameVector velocityOfMeasurementPointInWorldFrame, boolean isPointVelocityValid)
+   public void set(RigidBody rigidBody, FramePoint3D measurementPointInBodyFrame, FrameVector3D velocityOfMeasurementPointInWorldFrame, boolean isPointVelocityValid)
    {
       this.rigidBodyName = rigidBody.getName();
       this.bodyFixedReferenceFrameName = measurementPointInBodyFrame.getReferenceFrame().getName();

@@ -7,8 +7,8 @@ import us.ihmc.controlFlow.AbstractControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
@@ -18,13 +18,13 @@ public class StateEstimationDataFromController extends AbstractControlFlowElemen
    private final ReferenceFrame angularAccelerationEstimationFrame;
    private final ReferenceFrame centerOfMassAccelerationFrame = ReferenceFrame.getWorldFrame();
 
-   private final FrameVector desiredCenterOfMassAcceleration;
-   private final FrameVector desiredAngularAcceleration;
+   private final FrameVector3D desiredCenterOfMassAcceleration;
+   private final FrameVector3D desiredAngularAcceleration;
    private final List<PointPositionDataObject> pointPositionDataObjects;
    private final List<PointVelocityDataObject> pointVelocityDataObjects;
 
-   private final ControlFlowOutputPort<FrameVector> desiredCenterOfMassAccelerationOutputPort;
-   private final ControlFlowOutputPort<FrameVector> desiredAngularAccelerationOutputPort;
+   private final ControlFlowOutputPort<FrameVector3D> desiredCenterOfMassAccelerationOutputPort;
+   private final ControlFlowOutputPort<FrameVector3D> desiredAngularAccelerationOutputPort;
    private final ControlFlowOutputPort<List<PointPositionDataObject>> pointPositionOutputPort;
    private final ControlFlowOutputPort<List<PointVelocityDataObject>> pointVelocityOutputPort;
 
@@ -35,10 +35,10 @@ public class StateEstimationDataFromController extends AbstractControlFlowElemen
    {
       this.angularAccelerationEstimationFrame = estimationFrame;
 
-      this.desiredCenterOfMassAccelerationOutputPort = new ControlFlowOutputPort<FrameVector>("desiredCoMAcceleration", this);
+      this.desiredCenterOfMassAccelerationOutputPort = new ControlFlowOutputPort<FrameVector3D>("desiredCoMAcceleration", this);
       registerOutputPort(desiredCenterOfMassAccelerationOutputPort);
 
-      this.desiredAngularAccelerationOutputPort = new ControlFlowOutputPort<FrameVector>("desiredAngularAcceleration", this);
+      this.desiredAngularAccelerationOutputPort = new ControlFlowOutputPort<FrameVector3D>("desiredAngularAcceleration", this);
       registerOutputPort(desiredAngularAccelerationOutputPort);
 
       this.pointPositionOutputPort = new ControlFlowOutputPort<List<PointPositionDataObject>>("pointPosition", this);
@@ -47,8 +47,8 @@ public class StateEstimationDataFromController extends AbstractControlFlowElemen
       this.pointVelocityOutputPort = new ControlFlowOutputPort<List<PointVelocityDataObject>>("pointVelocity", this);
       registerOutputPort(pointVelocityOutputPort);
 
-      desiredCenterOfMassAcceleration = new FrameVector(centerOfMassAccelerationFrame);
-      desiredAngularAcceleration = new FrameVector(angularAccelerationEstimationFrame);
+      desiredCenterOfMassAcceleration = new FrameVector3D(centerOfMassAccelerationFrame);
+      desiredAngularAcceleration = new FrameVector3D(angularAccelerationEstimationFrame);
       pointPositionDataObjects = new ArrayList<PointPositionDataObject>();
       pointVelocityDataObjects = new ArrayList<PointVelocityDataObject>();
 
@@ -58,14 +58,14 @@ public class StateEstimationDataFromController extends AbstractControlFlowElemen
       pointVelocityOutputPort.setData(pointVelocityDataObjects);
    }
    
-   public void setDesiredCenterOfMassAcceleration(FrameVector desiredCenterOfMassAcceleration)
+   public void setDesiredCenterOfMassAcceleration(FrameVector3D desiredCenterOfMassAcceleration)
    {
       checkReferenceFrameMatchByName(centerOfMassAccelerationFrame, desiredCenterOfMassAcceleration.getReferenceFrame());
       this.desiredCenterOfMassAcceleration.setIncludingFrame(centerOfMassAccelerationFrame, desiredCenterOfMassAcceleration.getVector());
       desiredCenterOfMassAccelerationOutputPort.setData(this.desiredCenterOfMassAcceleration);
    }
 
-   public void setDesiredAngularAcceleration(FrameVector desiredAngularAcceleration)
+   public void setDesiredAngularAcceleration(FrameVector3D desiredAngularAcceleration)
    {
       checkReferenceFrameMatchByName(angularAccelerationEstimationFrame, desiredAngularAcceleration.getReferenceFrame());
       this.desiredAngularAcceleration.setIncludingFrame(angularAccelerationEstimationFrame, desiredAngularAcceleration.getVector());
@@ -122,13 +122,13 @@ public class StateEstimationDataFromController extends AbstractControlFlowElemen
       }
    }
 
-   private FrameVector getDesiredAngularAcceleration()
+   private FrameVector3D getDesiredAngularAcceleration()
    {
       return desiredAngularAcceleration;
    }
 
    // TODO make that private again (Sylvain)
-   public FrameVector getDesiredCenterOfMassAcceleration()
+   public FrameVector3D getDesiredCenterOfMassAcceleration()
    {
       return desiredCenterOfMassAcceleration;
    }
@@ -164,8 +164,8 @@ public class StateEstimationDataFromController extends AbstractControlFlowElemen
    
    public void connectDesiredAccelerationPorts(ControlFlowGraph controlFlowGraph, StateEstimatorWithPorts orientationEstimatorWithPorts)
    {      
-      ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort = orientationEstimatorWithPorts.getDesiredAngularAccelerationInputPort();
-      ControlFlowInputPort<FrameVector> desiredCenterOfMassAccelerationInputPort = orientationEstimatorWithPorts.getDesiredCenterOfMassAccelerationInputPort();
+      ControlFlowInputPort<FrameVector3D> desiredAngularAccelerationInputPort = orientationEstimatorWithPorts.getDesiredAngularAccelerationInputPort();
+      ControlFlowInputPort<FrameVector3D> desiredCenterOfMassAccelerationInputPort = orientationEstimatorWithPorts.getDesiredCenterOfMassAccelerationInputPort();
       ControlFlowInputPort<List<PointPositionDataObject>> pointPositionInputPort = orientationEstimatorWithPorts.getPointPositionInputPort();
       ControlFlowInputPort<List<PointVelocityDataObject>> pointVelocityInputPort = orientationEstimatorWithPorts.getPointVelocityInputPort();
       

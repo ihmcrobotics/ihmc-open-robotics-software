@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * @author twan
@@ -59,8 +59,8 @@ public class ContactPointVisualizer implements Updatable
       parentRegistry.addChild(registry);
    }
 
-   private final FramePoint tempFramePoint = new FramePoint(worldFrame);
-   private final FrameVector tempFrameVector = new FrameVector(worldFrame);
+   private final FramePoint3D tempFramePoint = new FramePoint3D(worldFrame);
+   private final FrameVector3D tempFrameVector = new FrameVector3D(worldFrame);
 
    @Override
    public void update(double time)

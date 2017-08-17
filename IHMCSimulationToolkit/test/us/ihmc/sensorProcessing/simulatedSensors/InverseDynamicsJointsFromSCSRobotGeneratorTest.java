@@ -11,6 +11,8 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -21,9 +23,7 @@ import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
@@ -403,10 +403,10 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
                   pinJoint.getLink().getComOffset(comOffset);
                   pinJoint.physics.getLinearVelocityInBody(pinJointCoMLinearVelocityInBody, comOffset);
 
-                  FramePoint comOffsetCheck = new FramePoint();
+                  FramePoint3D comOffsetCheck = new FramePoint3D();
                   revoluteJoint.getSuccessor().getCoMOffset(comOffsetCheck);
                   comOffsetCheck.changeFrame(revoluteJoint.getFrameAfterJoint());
-                  EuclidCoreTestTools.assertTuple3DEquals(comOffset, comOffsetCheck.getVectorCopy(), 1e-7);
+                  EuclidCoreTestTools.assertTuple3DEquals(comOffset, comOffsetCheck, 1e-7);
 
                   Twist revoluteJointTwist = new Twist();
                   revoluteJoint.getSuccessor().getBodyFixedFrame().getTwistOfFrame(revoluteJointTwist);

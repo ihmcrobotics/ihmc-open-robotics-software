@@ -6,14 +6,14 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 
@@ -23,11 +23,11 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    private final RigidBody rigidBody;
    private final ArrayList<ContactPointWrapper> contactPoints = new ArrayList<>();
    private final GroundContactPoint contactPoint;
-   private FrameVector contactNormal = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
+   private FrameVector3D contactNormal = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
    private final double coefficientOfFriction = 0.8;
    private final int numberOfPointsInContact = 1;
    private final double contactForceThreshold = 0.3;
-   private final FramePoint touchdownPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D touchdownPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final ReferenceFrame soleFrame;
 
    public SimulatedPlaneContactStateUpdater(GroundContactPoint contactPoint, RigidBody footRigiBody, ReferenceFrame soleFrame)
@@ -118,32 +118,32 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    }
 
    @Override
-   public FrameVector getContactNormalFrameVectorCopy()
+   public FrameVector3D getContactNormalFrameVectorCopy()
    {
       return null;
    }
 
    @Override
-   public void getContactNormalFrameVector(FrameVector frameVectorToPack)
+   public void getContactNormalFrameVector(FrameVector3D frameVectorToPack)
    {
       YoFrameVector yoSurfaceNormal = contactPoint.getYoSurfaceNormal();
       yoSurfaceNormal.getFrameTuple(frameVectorToPack);
    }
 
    @Override
-   public List<FramePoint> getContactFramePointsInContactCopy()
+   public List<FramePoint3D> getContactFramePointsInContactCopy()
    {
       return null;
    }
 
    @Override
-   public void getContactFramePointsInContact(List<FramePoint> contactPointListToPack)
+   public void getContactFramePointsInContact(List<FramePoint3D> contactPointListToPack)
    {
 
    }
 
    @Override
-   public List<FramePoint2d> getContactFramePoints2dInContactCopy()
+   public List<FramePoint2D> getContactFramePoints2dInContactCopy()
    {
       return null;
    }
@@ -205,19 +205,19 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       }
 
       @Override
-      public FramePoint getPosition()
+      public FramePoint3D getPosition()
       {
          return groundContactPoint.getYoPosition().getFrameTuple();
       }
 
       @Override
-      public void getPosition(FramePoint framePointToPack)
+      public void getPosition(FramePoint3D framePointToPack)
       {
          framePointToPack.set(groundContactPoint.getPositionPoint());
       }
 
       @Override
-      public void getPosition2d(FramePoint2d framePoint2dToPack)
+      public void getPosition2d(FramePoint2D framePoint2dToPack)
       {
 
       }
@@ -229,13 +229,13 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       }
 
       @Override
-      public void setPosition(FramePoint position)
+      public void setPosition(FramePoint3D position)
       {
 
       }
 
       @Override
-      public void setPosition2d(FramePoint2d position2d)
+      public void setPosition2d(FramePoint2D position2d)
       {
 
       }

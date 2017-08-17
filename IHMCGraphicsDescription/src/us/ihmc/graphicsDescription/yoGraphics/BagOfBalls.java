@@ -3,15 +3,15 @@ package us.ihmc.graphicsDescription.yoGraphics;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * <p>
@@ -239,7 +239,7 @@ public class BagOfBalls
       }
    }
 
-   public void setBall(FramePoint location, int ballIndex)
+   public void setBall(FramePoint3D location, int ballIndex)
    {
       setBall(location, null, ballIndex);
    }
@@ -249,12 +249,12 @@ public class BagOfBalls
     *
     * @param location FramePoint to set the next ball to.
     */
-   public void setBall(FramePoint location)
+   public void setBall(FramePoint3D location)
    {
       setBall(location, null);
    }
 
-   public void setBall(FramePoint location, AppearanceDefinition appearance)
+   public void setBall(FramePoint3D location, AppearanceDefinition appearance)
    {
       setBall(location, appearance, index);
       index++;
@@ -262,12 +262,12 @@ public class BagOfBalls
 
    public void setBall(Point3D pointToTestAboveRamp)
    {
-      setBall(new FramePoint(worldFrame, pointToTestAboveRamp));
+      setBall(new FramePoint3D(worldFrame, pointToTestAboveRamp));
    }
 
    public void setBall(Point3D pointToTestAboveRamp, AppearanceDefinition appearance)
    {
-      setBall(new FramePoint(worldFrame, pointToTestAboveRamp), appearance);
+      setBall(new FramePoint3D(worldFrame, pointToTestAboveRamp), appearance);
    }
 
    /**
@@ -277,7 +277,7 @@ public class BagOfBalls
     * @param location FramePoint to set the next ball to.
     * @param appearance Appearance to give the next ball.
     */
-   public void setBall(FramePoint location, AppearanceDefinition appearance, int ballIndex)
+   public void setBall(FramePoint3D location, AppearanceDefinition appearance, int ballIndex)
    {
       //TODO: PDN, note that with current implementation of JME, you can only "set" the appearance once. After that, it will ignore all appearance sets
       if (!location.getReferenceFrame().isWorldFrame())
@@ -322,7 +322,7 @@ public class BagOfBalls
     *
     * @param location FramePoint to set the next ball to.
     */
-   public void setBallLoop(FramePoint location)
+   public void setBallLoop(FramePoint3D location)
    {
       setBallLoop(location, null);
    }
@@ -334,7 +334,7 @@ public class BagOfBalls
     * @param location FramePoint to set the next ball to.
     * @param appearance Appearance to give the next ball.
     */
-   public void setBallLoop(FramePoint location, AppearanceDefinition appearance)
+   public void setBallLoop(FramePoint3D location, AppearanceDefinition appearance)
    {
       location.changeFrame(worldFrame);
 

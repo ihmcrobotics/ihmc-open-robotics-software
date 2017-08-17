@@ -3,16 +3,17 @@ package us.ihmc.simulationconstructionset;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 
 
@@ -69,8 +70,8 @@ public class LinkHollowCylinder extends Link
       boneGeometry = createBoneGeometry(length, radius, color, cylinderZAxisInWorld, parentJointOffsetFromCoM);
       jointAxisGeometry = createJointAxisGeometry(length, 0.1 * radius, color, cylinderZAxisInWorld, parentJointOffsetFromCoM);
 
-      FrameVector cylinderZAxisExpressedInWorld = new FrameVector(world, cylinderZAxisInWorld);
-      this.cylinderReferenceFrame = ReferenceFrame.constructReferenceFrameFromPointAndZAxis(name, new FramePoint(world), cylinderZAxisExpressedInWorld);
+      FrameVector3D cylinderZAxisExpressedInWorld = new FrameVector3D(world, cylinderZAxisInWorld);
+      this.cylinderReferenceFrame = GeometryTools.constructReferenceFrameFromPointAndZAxis(name, new FramePoint3D(world), cylinderZAxisExpressedInWorld);
 
       comOffset.set(parentJointOffsetFromCoM);
 
@@ -80,9 +81,9 @@ public class LinkHollowCylinder extends Link
 
       if (computeMoiInWorldInternally)
       {
-         FrameVector linkXAxis = new FrameVector(cylinderReferenceFrame, 1.0, 0.0, 0.0);
-         FrameVector linkYAxis = new FrameVector(cylinderReferenceFrame, 0.0, 1.0, 0.0);
-         FrameVector linkZAxis = new FrameVector(cylinderReferenceFrame, 0.0, 0.0, 1.0);
+         FrameVector3D linkXAxis = new FrameVector3D(cylinderReferenceFrame, 1.0, 0.0, 0.0);
+         FrameVector3D linkYAxis = new FrameVector3D(cylinderReferenceFrame, 0.0, 1.0, 0.0);
+         FrameVector3D linkZAxis = new FrameVector3D(cylinderReferenceFrame, 0.0, 0.0, 1.0);
 
          linkXAxis.changeFrame(world);
          linkYAxis.changeFrame(world);

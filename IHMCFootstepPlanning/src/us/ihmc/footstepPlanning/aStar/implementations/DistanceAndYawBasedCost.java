@@ -1,13 +1,13 @@
 package us.ihmc.footstepPlanning.aStar.implementations;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.aStar.FootstepCost;
 import us.ihmc.footstepPlanning.aStar.FootstepNode;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -43,7 +43,7 @@ public class DistanceAndYawBasedCost implements FootstepCost
       stanceFootPose.setY(node.getY());
       ReferenceFrame stanceFrame = new PoseReferenceFrame("stanceFrame", stanceFootPose);
 
-      FramePoint2d midFootPoint = new FramePoint2d(stanceFrame);
+      FramePoint2D midFootPoint = new FramePoint2D(stanceFrame);
       double ySign = node.getRobotSide().negateIfLeftSide(1.0);
       midFootPoint.setY(ySign * defaultStepWidth / 2.0);
       midFootPoint.changeFrame(ReferenceFrame.getWorldFrame());

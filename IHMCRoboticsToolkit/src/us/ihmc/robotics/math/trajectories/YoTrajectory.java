@@ -423,81 +423,6 @@ public class YoTrajectory
       return name + ":\n" + polynomial.toString() + " TInitial: " + tInitial.getDoubleValue() + " TFinal: " + tFinal.getDoubleValue();
    }
 
-   public void scale(double scalar)
-   {
-      scale(this, scalar);
-   }
-
-   public void scale(YoTrajectory traj, double scalar)
-   {
-      TrajectoryMathTools.scale(this, traj, scalar);
-   }
-
-   public void add(YoTrajectory traj1, YoTrajectory traj2)
-   {
-      TrajectoryMathTools.add(this, traj1, traj2);
-   }
-
-   public void add(YoTrajectory addTraj)
-   {
-      add(this, addTraj);
-   }
-
-   public void addByTrimming(YoTrajectory traj1, YoTrajectory traj2)
-   {
-      TrajectoryMathTools.addByTrimming(this, traj1, traj2);
-   }
-
-   public void addByTrimming(YoTrajectory addTraj)
-   {
-      addByTrimming(this, addTraj);
-   }
-
-   public void subtract(YoTrajectory traj1, YoTrajectory traj2)
-   {
-      TrajectoryMathTools.subtract(this, traj1, traj2);
-   }
-
-   public void subtract(YoTrajectory subTraj)
-   {
-      subtract(this, subTraj);
-   }
-
-   public void subtractByTrimming(YoTrajectory traj1, YoTrajectory traj2)
-   {
-      TrajectoryMathTools.subtractByTrimming(this, traj1, traj2);
-   }
-
-   public void subtractByTrimming(YoTrajectory subTraj)
-   {
-      subtractByTrimming(this, subTraj);
-   }
-
-   public void multiply(YoTrajectory traj1, YoTrajectory traj2)
-   {
-      TrajectoryMathTools.multiply(this, traj1, traj2);
-   }
-
-   public void multiply(YoTrajectory mulTraj)
-   {
-      multiply(this, mulTraj);
-   }
-
-   public void multiplyByTrimming(YoTrajectory traj1, YoTrajectory traj2)
-   {
-      TrajectoryMathTools.multiplyByTrimming(this, traj1, traj2);
-   }
-
-   public void multiplyByTrimming(YoTrajectory mulTraj)
-   {
-      multiplyByTrimming(this, mulTraj);
-   }
-
-   public void getDerivative(YoTrajectory dervTraj)
-   {
-      TrajectoryMathTools.getDerivative(dervTraj, this);
-   }
-
    public void getDerivative(YoTrajectory dervTraj, int order)
    {
       if (dervTraj.getMaximumNumberOfCoefficients() < this.getNumberOfCoefficients() - order)
@@ -511,22 +436,6 @@ public class YoTrajectory
       dervTraj.setFinalTime(this.getFinalTime());
    }
    
-   public void addTimeOffset(double deltaT)
-   {
-      TrajectoryMathTools.addTimeOffset(this, deltaT);
-   }
-   
-   public void addTimeOffset(YoTrajectory trajToCopy, double deltaT)
-   {
-      set(trajToCopy);
-      addTimeOffset(deltaT);
-   }   
-   
-   public void getIntegral(YoTrajectory trajToPack)
-   {
-      TrajectoryMathTools.getIntergal(trajToPack, this);
-   }
-
    public YoPolynomial getPolynomial()
    {
       return polynomial;

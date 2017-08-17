@@ -3,6 +3,10 @@ package us.ihmc.simulationconstructionset.util.ground;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -14,10 +18,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
 import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -26,7 +27,6 @@ import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -81,11 +81,11 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
 
       YoFrameConvexPolygon2d yoFrameConvexPolygon2d = new YoFrameConvexPolygon2d("floorGraphicPolygon", "", planeFrame, 4, registry);
       
-      FramePoint p0 = new FramePoint(WORLD_FRAME, 1.0, 1.0, 0.0);
-      FramePoint p1 = new FramePoint(WORLD_FRAME, -1.0, 1.0, 0.0);
-      FramePoint p2 = new FramePoint(WORLD_FRAME, -1.0, -1.0, 0.0);
-      FramePoint p3 = new FramePoint(WORLD_FRAME, 1.0, -1.0, 0.0);
-      FramePoint[] framePoints = new FramePoint[]{p0, p1, p2, p3};
+      FramePoint3D p0 = new FramePoint3D(WORLD_FRAME, 1.0, 1.0, 0.0);
+      FramePoint3D p1 = new FramePoint3D(WORLD_FRAME, -1.0, 1.0, 0.0);
+      FramePoint3D p2 = new FramePoint3D(WORLD_FRAME, -1.0, -1.0, 0.0);
+      FramePoint3D p3 = new FramePoint3D(WORLD_FRAME, 1.0, -1.0, 0.0);
+      FramePoint3D[] framePoints = new FramePoint3D[]{p0, p1, p2, p3};
       
       yoFrameConvexPolygon2d.setConvexPolygon2d(framePoints);
       
@@ -102,7 +102,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       return null;
    }
 
-   FramePoint testPoint = new FramePoint(WORLD_FRAME);
+   FramePoint3D testPoint = new FramePoint3D(WORLD_FRAME);
    @Override
    public boolean isClose(double x, double y, double z)
    {
@@ -111,8 +111,8 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       return plane.isOnOrBelow(testPoint);
    }
 
-   FrameVector normalVector = new FrameVector(WORLD_FRAME);
-   FramePoint2d xyPoint = new FramePoint2d(WORLD_FRAME);
+   FrameVector3D normalVector = new FrameVector3D(WORLD_FRAME);
+   FramePoint2D xyPoint = new FramePoint2D(WORLD_FRAME);
    /**
     * Returns true if inside the ground object. If inside, must pack the intersection and normal. If not inside, packing those is optional.
     */
@@ -128,10 +128,10 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
          normalVector.setToNaN(plane.getReferenceFrame());
          plane.getNormal(normalVector);
          normalVector.changeFrame(WORLD_FRAME);
-         normalVector.getVector(normalToPack);
+         normalVector.get(normalToPack);
          
          xyPoint.setToNaN(planeFrame);
-         testPoint.getFramePoint2d(xyPoint);
+         xyPoint.setIncludingFrame(testPoint);
          double zHeight = plane.getZOnPlane(xyPoint);
          
          testPoint.changeFrame(WORLD_FRAME);
@@ -148,11 +148,11 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       return null;
    }
 
-   FrameVector v1 = new FrameVector(planeFrame);
-   FrameVector v2 = new FrameVector(WORLD_FRAME);
+   FrameVector3D v1 = new FrameVector3D(planeFrame);
+   FrameVector3D v2 = new FrameVector3D(WORLD_FRAME);
    Vector3D v3 = new Vector3D();
-   FramePoint p1 = new FramePoint(WORLD_FRAME);
-   FramePoint p2 = new FramePoint(WORLD_FRAME);
+   FramePoint3D p1 = new FramePoint3D(WORLD_FRAME);
+   FramePoint3D p2 = new FramePoint3D(WORLD_FRAME);
    
    public void velocityAt(double x, double y, double z, Vector3D normal)
    {
@@ -162,7 +162,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       p1.setIncludingFrame(WORLD_FRAME, x, y, z);
       p1.changeFrame(planeFrame);
       xyPoint.setToNaN(planeFrame);
-      p1.getFramePoint2d(xyPoint);
+      xyPoint.setIncludingFrame(p1);
       double currentZ = plane.getZOnPlane(xyPoint);
       
       v1.changeFrame(planeFrame);
@@ -186,7 +186,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       p1.setIncludingFrame(WORLD_FRAME, position);
       p1.changeFrame(planeFrame);
       xyPoint.setToNaN(planeFrame);
-      p1.getFramePoint2d(xyPoint);
+      xyPoint.setIncludingFrame(p1);
       double currentZ = plane.getZOnPlane(xyPoint);
       
       return currentZ - prevZ != 0;
@@ -216,7 +216,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       return null;
    }
 
-   private final FramePoint pointOnPlane = new FramePoint(WORLD_FRAME);
+   private final FramePoint3D pointOnPlane = new FramePoint3D(WORLD_FRAME);
    private final Vector3D gcForce = new Vector3D();
    private final Vector3D gcVelocity = new Vector3D();
    @Override

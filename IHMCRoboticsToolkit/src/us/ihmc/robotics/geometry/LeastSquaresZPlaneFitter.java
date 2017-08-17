@@ -6,7 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 
 /**
@@ -57,7 +57,7 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
       return true;
    }
 
-   public double fitPlaneToPoints(Point2D center, List<Point3D> pointList, Plane3D planeToPack)
+   public double fitPlaneToPoints(Point2DBasics center, List<Point3D> pointList, Plane3D planeToPack)
    {
       double squareError = fitPlaneToPoints(pointList, planeToPack);
 

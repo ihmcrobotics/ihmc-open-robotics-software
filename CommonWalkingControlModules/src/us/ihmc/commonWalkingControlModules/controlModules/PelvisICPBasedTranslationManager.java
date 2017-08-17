@@ -6,20 +6,20 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -76,12 +76,12 @@ public class PelvisICPBasedTranslationManager
    private final BipedSupportPolygons bipedSupportPolygons;
    private FrameConvexPolygon2d supportPolygon;
 
-   private final FramePoint tempPosition = new FramePoint();
-   private final FrameVector tempVelocity = new FrameVector();
-   private final FramePoint2d tempPosition2d = new FramePoint2d();
-   private final FrameVector2d tempError2d = new FrameVector2d();
-   private final FrameVector2d tempICPOffset = new FrameVector2d();
-   private final FrameVector2d icpOffsetForFreezing = new FrameVector2d();
+   private final FramePoint3D tempPosition = new FramePoint3D();
+   private final FrameVector3D tempVelocity = new FrameVector3D();
+   private final FramePoint2D tempPosition2d = new FramePoint2D();
+   private final FrameVector2D tempError2d = new FrameVector2D();
+   private final FrameVector2D tempICPOffset = new FrameVector2D();
+   private final FrameVector2D icpOffsetForFreezing = new FrameVector2D();
 
    private final YoLong lastCommandId;
 
@@ -131,7 +131,7 @@ public class PelvisICPBasedTranslationManager
       parentRegistry.addChild(registry);
    }
 
-   public void compute(RobotSide supportLeg, FramePoint2d actualICP)
+   public void compute(RobotSide supportLeg, FramePoint2D actualICP)
    {
       if (isFrozen.getBooleanValue())
       {
@@ -382,9 +382,9 @@ public class PelvisICPBasedTranslationManager
    private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
    private final FrameConvexPolygon2d safeSupportPolygonToConstrainICPOffset = new FrameConvexPolygon2d();
 
-   private final FramePoint2d originalICPToModify = new FramePoint2d();
+   private final FramePoint2D originalICPToModify = new FramePoint2D();
 
-   public void addICPOffset(FramePoint2d desiredICPToModify, FrameVector2d desiredICPVelocityToModify)
+   public void addICPOffset(FramePoint2D desiredICPToModify, FrameVector2D desiredICPVelocityToModify)
    {
       desiredICPToModify.changeFrame(supportPolygon.getReferenceFrame());
       desiredICPVelocityToModify.changeFrame(supportPolygon.getReferenceFrame());

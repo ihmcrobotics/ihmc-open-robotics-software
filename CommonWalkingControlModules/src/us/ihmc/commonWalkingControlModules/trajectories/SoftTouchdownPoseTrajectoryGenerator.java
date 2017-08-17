@@ -1,15 +1,15 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoSpline3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
@@ -17,19 +17,19 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
    private final YoVariableRegistry registry;
    
    private final YoSpline3D positionTouchdownTrajectory;
-   private final FramePoint desiredPosition = new FramePoint();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
    
    private final YoDouble timeInitial;
    private final YoDouble timeFinal;
    private final YoDouble timeIntoTouchdown;
    
-   private final FramePoint initialPosition = new FramePoint();
-   private final FrameVector initialVelocity = new FrameVector();
-   private final FrameVector initialAcceleration = new FrameVector();
+   private final FramePoint3D initialPosition = new FramePoint3D();
+   private final FrameVector3D initialVelocity = new FrameVector3D();
+   private final FrameVector3D initialAcceleration = new FrameVector3D();
    
    private final FrameOrientation constantOrientation = new FrameOrientation();
-   private final FrameVector constantAngularVelocity = new FrameVector();
-   private final FrameVector constantAngularAcceleration = new FrameVector();
+   private final FrameVector3D constantAngularVelocity = new FrameVector3D();
+   private final FrameVector3D constantAngularAcceleration = new FrameVector3D();
    
    public SoftTouchdownPoseTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry)
    {
@@ -51,7 +51,7 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
       constantAngularAcceleration.setToZero(worldFrame);
    }
 
-   public void setLinearTrajectory(double initialTime, FramePoint initialPosition, FrameVector initialVelocity, FrameVector initialAcceleration)
+   public void setLinearTrajectory(double initialTime, FramePoint3D initialPosition, FrameVector3D initialVelocity, FrameVector3D initialAcceleration)
    {
       this.timeInitial.set(initialTime);
       
@@ -87,19 +87,19 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
    }
 
    @Override
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       positionTouchdownTrajectory.getPosition(positionToPack);
    }
 
    @Override
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       positionTouchdownTrajectory.getVelocity(velocityToPack);
    }
 
    @Override
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       positionTouchdownTrajectory.getAcceleration(accelerationToPack);
    }
@@ -111,13 +111,13 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
    }
 
    @Override
-   public void getAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       angularVelocityToPack.setIncludingFrame(constantAngularVelocity);
    }
 
    @Override
-   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
    {
       angularAccelerationToPack.setIncludingFrame(constantAngularAcceleration);
    }

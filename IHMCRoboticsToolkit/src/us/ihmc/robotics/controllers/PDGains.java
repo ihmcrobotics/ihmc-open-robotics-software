@@ -1,5 +1,7 @@
 package us.ihmc.robotics.controllers;
 
+import us.ihmc.robotics.controllers.pidGains.GainCalculator;
+
 public class PDGains
 {
    private final String name;

@@ -9,6 +9,10 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.LineSegment1D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -18,23 +22,18 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class DynamicReachabilityCalculator
 {
@@ -97,22 +96,22 @@ public class DynamicReachabilityCalculator
 
    private final ExecutionTimer reachabilityTimer = new ExecutionTimer("reachabilityTimer", registry);
 
-   private final FrameVector2d currentInitialTransferGradient = new FrameVector2d(worldFrame);
-   private final FrameVector2d currentEndTransferGradient = new FrameVector2d(worldFrame);
+   private final FrameVector2D currentInitialTransferGradient = new FrameVector2D(worldFrame);
+   private final FrameVector2D currentEndTransferGradient = new FrameVector2D(worldFrame);
 
-   private final FrameVector2d currentInitialSwingGradient = new FrameVector2d(worldFrame);
-   private final FrameVector2d currentEndSwingGradient = new FrameVector2d(worldFrame);
+   private final FrameVector2D currentInitialSwingGradient = new FrameVector2D(worldFrame);
+   private final FrameVector2D currentEndSwingGradient = new FrameVector2D(worldFrame);
 
-   private final FrameVector2d nextInitialTransferGradient = new FrameVector2d(worldFrame);
-   private final FrameVector2d nextEndTransferGradient = new FrameVector2d(worldFrame);
+   private final FrameVector2D nextInitialTransferGradient = new FrameVector2D(worldFrame);
+   private final FrameVector2D nextEndTransferGradient = new FrameVector2D(worldFrame);
 
-   private final ArrayList<FrameVector2d> higherSwingGradients = new ArrayList<>();
-   private final ArrayList<FrameVector2d> higherTransferGradients = new ArrayList<>();
+   private final ArrayList<FrameVector2D> higherSwingGradients = new ArrayList<>();
+   private final ArrayList<FrameVector2D> higherTransferGradients = new ArrayList<>();
 
-   private final SideDependentList<FramePoint> ankleLocations = new SideDependentList<>();
+   private final SideDependentList<FramePoint3D> ankleLocations = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
-   private final SideDependentList<FramePoint> adjustedAnkleLocations = new SideDependentList<>();
-   private final SideDependentList<FrameVector> hipOffsets = new SideDependentList<>();
+   private final SideDependentList<FramePoint3D> adjustedAnkleLocations = new SideDependentList<>();
+   private final SideDependentList<FrameVector3D> hipOffsets = new SideDependentList<>();
 
    private final SideDependentList<YoFramePoint> yoAnkleLocations = new SideDependentList<>();
    private final SideDependentList<YoFramePoint> yoHipLocations = new SideDependentList<>();
@@ -128,19 +127,19 @@ public class DynamicReachabilityCalculator
    private final SideDependentList<ReferenceFrame> predictedHipFrames = new SideDependentList<>();
    private final SideDependentList<Vector2dZUpFrame> stepDirectionFrames = new SideDependentList<>();
 
-   private final FramePoint adjustedCoMPosition = new FramePoint();
-   private final FramePoint predictedCoMPosition = new FramePoint();
+   private final FramePoint3D adjustedCoMPosition = new FramePoint3D();
+   private final FramePoint3D predictedCoMPosition = new FramePoint3D();
 
    private final FrameOrientation predictedPelvisOrientation = new FrameOrientation();
    private final FrameOrientation stanceFootOrientation = new FrameOrientation();
    private final FrameOrientation footstepAnkleOrientation = new FrameOrientation();
 
-   private final FrameVector tempGradient = new FrameVector();
-   private final FrameVector tempVector = new FrameVector();
+   private final FrameVector3D tempGradient = new FrameVector3D();
+   private final FrameVector3D tempVector = new FrameVector3D();
 
-   private final FramePoint tempPoint = new FramePoint();
-   private final FramePoint tempPoint3d = new FramePoint();
-   private final FramePoint tempFinalCoM = new FramePoint();
+   private final FramePoint3D tempPoint = new FramePoint3D();
+   private final FramePoint3D tempPoint3d = new FramePoint3D();
+   private final FramePoint3D tempFinalCoM = new FramePoint3D();
 
    private final DynamicReachabilityParameters dynamicReachabilityParameters;
    private final double thighLength;
@@ -183,9 +182,9 @@ public class DynamicReachabilityCalculator
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         ankleLocations.put(robotSide, new FramePoint());
-         adjustedAnkleLocations.put(robotSide, new FramePoint());
-         hipOffsets.put(robotSide, new FrameVector());
+         ankleLocations.put(robotSide, new FramePoint3D());
+         adjustedAnkleLocations.put(robotSide, new FramePoint3D());
+         hipOffsets.put(robotSide, new FrameVector3D());
 
          String prefix = robotSide.getShortLowerCaseName();
          if (VISUALIZE_REACHABILITY)
@@ -209,8 +208,8 @@ public class DynamicReachabilityCalculator
       int numberOfFootstepsToConsider = icpPlanner.getNumberOfFootstepsToConsider();
       for (int i = 0; i < numberOfFootstepsToConsider - 3; i++)
       {
-         FrameVector2d higherSwingGradient = new FrameVector2d(worldFrame);
-         FrameVector2d higherTransferGradient = new FrameVector2d(worldFrame);
+         FrameVector2D higherSwingGradient = new FrameVector2D(worldFrame);
+         FrameVector2D higherTransferGradient = new FrameVector2D(worldFrame);
          higherSwingGradients.add(higherSwingGradient);
          higherTransferGradients.add(higherTransferGradient);
 
@@ -229,25 +228,25 @@ public class DynamicReachabilityCalculator
 
       // compute leg segment lengths
       ReferenceFrame hipPitchFrame = fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH).getFrameAfterJoint();
-      FramePoint hipPoint = new FramePoint(hipPitchFrame);
-      FramePoint kneePoint = new FramePoint(fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH).getFrameBeforeJoint());
+      FramePoint3D hipPoint = new FramePoint3D(hipPitchFrame);
+      FramePoint3D kneePoint = new FramePoint3D(fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH).getFrameBeforeJoint());
       kneePoint.changeFrame(hipPitchFrame);
 
       thighLength = hipPoint.distance(kneePoint);
 
       ReferenceFrame kneePitchFrame = fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH).getFrameAfterJoint();
       kneePoint.setToZero(kneePitchFrame);
-      FramePoint anklePoint = new FramePoint(fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH).getFrameBeforeJoint());
+      FramePoint3D anklePoint = new FramePoint3D(fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH).getFrameBeforeJoint());
       anklePoint.changeFrame(kneePitchFrame);
 
       shinLength = kneePoint.distance(anklePoint);
 
       // setup reference frames
       ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
-      FramePoint pelvis = new FramePoint(pelvisFrame);
-      FramePoint com = new FramePoint(centerOfMassFrame);
+      FramePoint3D pelvis = new FramePoint3D(pelvisFrame);
+      FramePoint3D com = new FramePoint3D(centerOfMassFrame);
       pelvis.changeFrame(centerOfMassFrame);
-      FrameVector translationToCoM = new FrameVector(centerOfMassFrame);
+      FrameVector3D translationToCoM = new FrameVector3D(centerOfMassFrame);
       translationToCoM.set(com);
       translationToCoM.sub(pelvis);
       translationToCoM.changeFrame(pelvisFrame);
@@ -269,9 +268,9 @@ public class DynamicReachabilityCalculator
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FrameVector translationToPelvis = new FrameVector(pelvisFrame);
-         FramePoint pelvisCenter = new FramePoint(pelvisFrame);
-         FramePoint hipJoint = new FramePoint(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH).getFrameAfterJoint());
+         FrameVector3D translationToPelvis = new FrameVector3D(pelvisFrame);
+         FramePoint3D pelvisCenter = new FramePoint3D(pelvisFrame);
+         FramePoint3D hipJoint = new FramePoint3D(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH).getFrameAfterJoint());
          hipJoint.changeFrame(pelvisFrame);
          translationToPelvis.set(hipJoint);
          translationToPelvis.sub(pelvisCenter);
@@ -360,8 +359,8 @@ public class DynamicReachabilityCalculator
       predictedPelvisOrientation.setToZero(pelvisFrame);
       predictedPelvisOrientation.interpolate(stanceFootOrientation, footstepAnkleOrientation, 0.5);
 
-      FramePoint stanceAnkleLocation = ankleLocations.get(stanceSide);
-      FramePoint upcomingStepLocation = ankleLocations.get(swingSide);
+      FramePoint3D stanceAnkleLocation = ankleLocations.get(stanceSide);
+      FramePoint3D upcomingStepLocation = ankleLocations.get(swingSide);
       stanceAnkleLocation.setToZero(fullRobotModel.getLegJoint(stanceSide, LegJointName.ANKLE_PITCH).getFrameAfterJoint());
       nextFootstep.getAnklePosition(upcomingStepLocation, transformsFromAnkleToSole.get(nextFootstep.getRobotSide()));
       upcomingStepLocation.changeFrame(worldFrame);
@@ -402,7 +401,7 @@ public class DynamicReachabilityCalculator
 
    private void computeHeightLineFromStance(RobotSide supportSide, double minimumStanceLegLength, double maximumStanceLegLength)
    {
-      FramePoint ankleLocation = ankleLocations.get(supportSide);
+      FramePoint3D ankleLocation = ankleLocations.get(supportSide);
       ankleLocation.changeFrame(worldFrame);
       tempPoint3d.set(ankleLocation);
 
@@ -449,7 +448,7 @@ public class DynamicReachabilityCalculator
    {
       RobotSide swingSide = nextFootstep.getRobotSide();
 
-      FramePoint ankleLocation = ankleLocations.get(swingSide);
+      FramePoint3D ankleLocation = ankleLocations.get(swingSide);
       ankleLocation.changeFrame(worldFrame);
       tempPoint3d.set(ankleLocation);
 
@@ -728,8 +727,8 @@ public class DynamicReachabilityCalculator
    {
       RobotSide stanceSide = footstep.getRobotSide().getOppositeSide();
 
-      FramePoint stanceAnkleLocation = ankleLocations.get(stanceSide);
-      FramePoint stepAnkleLocation = ankleLocations.get(stanceSide.getOppositeSide());
+      FramePoint3D stanceAnkleLocation = ankleLocations.get(stanceSide);
+      FramePoint3D stepAnkleLocation = ankleLocations.get(stanceSide.getOppositeSide());
       stanceAnkleLocation.changeFrame(worldFrame);
       stepAnkleLocation.changeFrame(worldFrame);
 
@@ -747,13 +746,13 @@ public class DynamicReachabilityCalculator
       Vector2dZUpFrame stepDirectionFrame = stepDirectionFrames.get(stanceSide);
 
       // compute base point of upcoming sphere account for hip offsets
-      FramePoint upcomingAnklePoint = ankleLocations.get(stepSide);
-      FramePoint stanceAnklePoint = ankleLocations.get(stanceSide);
-      FramePoint adjustedUpcomingAnklePoint = adjustedAnkleLocations.get(stepSide);
-      FramePoint adjustedStanceAnklePoint = adjustedAnkleLocations.get(stanceSide);
+      FramePoint3D upcomingAnklePoint = ankleLocations.get(stepSide);
+      FramePoint3D stanceAnklePoint = ankleLocations.get(stanceSide);
+      FramePoint3D adjustedUpcomingAnklePoint = adjustedAnkleLocations.get(stepSide);
+      FramePoint3D adjustedStanceAnklePoint = adjustedAnkleLocations.get(stanceSide);
 
-      FrameVector stepHipVector = hipOffsets.get(stepSide);
-      FrameVector stanceHipVector = hipOffsets.get(stanceSide);
+      FrameVector3D stepHipVector = hipOffsets.get(stepSide);
+      FrameVector3D stanceHipVector = hipOffsets.get(stanceSide);
 
       tempPoint.setToZero(stepHipFrame);
       tempPoint.changeFrame(predictedCoMFrame);
@@ -1034,7 +1033,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      currentInitialTransferGradient.setByProjectionOntoXYPlane(tempGradient);
+      currentInitialTransferGradient.set(tempGradient);
 
       // compute end transfer duration gradient
       variation = -transferTwiddleSizeDuration * currentEndTransferDuration;
@@ -1044,7 +1043,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      currentEndTransferGradient.setByProjectionOntoXYPlane(tempGradient);
+      currentEndTransferGradient.set(tempGradient);
 
       // reset timing
       submitTransferTiming(stepNumber, currentTransferDuration, currentTransferDurationAlpha);
@@ -1075,7 +1074,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      nextInitialTransferGradient.setByProjectionOntoXYPlane(tempGradient);
+      nextInitialTransferGradient.set(tempGradient);
 
       // compute end transfer duration gradient
       variation = -transferTwiddleSizeDuration * nextEndTransferDuration;
@@ -1085,7 +1084,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      nextEndTransferGradient.setByProjectionOntoXYPlane(tempGradient);
+      nextEndTransferGradient.set(tempGradient);
 
       // reset timing
       submitTransferTiming(stepNumber, nextTransferDuration, nextTransferDurationAlpha);
@@ -1100,7 +1099,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      higherTransferGradients.get(stepIndex - 2).setByProjectionOntoXYPlane(tempGradient);
+      higherTransferGradients.get(stepIndex - 2).set(tempGradient);
 
       // reset timing
       submitTransferTiming(stepIndex, originalDuration, -1.0);
@@ -1124,7 +1123,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      currentInitialSwingGradient.setByProjectionOntoXYPlane(tempGradient);
+      currentInitialSwingGradient.set(tempGradient);
 
       // compute end swing duration gradient
       variation = -swingTwiddleSizeDuration * currentEndSwingDuration;
@@ -1134,7 +1133,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      currentEndSwingGradient.setByProjectionOntoXYPlane(tempGradient);
+      currentEndSwingGradient.set(tempGradient);
 
       // reset timing
       submitSwingTiming(stepNumber, currentSwingDuration, currentSwingDurationAlpha);
@@ -1149,7 +1148,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      higherSwingGradients.get(stepIndex - 1).setByProjectionOntoXYPlane(tempGradient);
+      higherSwingGradients.get(stepIndex - 1).set(tempGradient);
 
       //reset timing
       submitSwingTiming(stepIndex, duration, -1.0);
@@ -1181,7 +1180,7 @@ public class DynamicReachabilityCalculator
       icpPlanner.setSwingDuration(stepNumber, duration);
    }
 
-   private void applyVariation(FramePoint comToPack)
+   private void applyVariation(FramePoint3D comToPack)
    {
       if (isInTransfer)
          icpPlanner.computeFinalCoMPositionInTransfer();
@@ -1191,7 +1190,7 @@ public class DynamicReachabilityCalculator
       icpPlanner.getFinalDesiredCenterOfMassPosition(comToPack);
    }
 
-   private void initializePlan(FramePoint comToPack)
+   private void initializePlan(FramePoint3D comToPack)
    {
       double currentInitialTime = icpPlanner.getInitialTime();
 
@@ -1204,7 +1203,7 @@ public class DynamicReachabilityCalculator
    }
 
 
-   private void computeGradient(FramePoint originalPosition, FramePoint adjustedPosition, double variation, FrameVector gradientToPack)
+   private void computeGradient(FramePoint3D originalPosition, FramePoint3D adjustedPosition, double variation, FrameVector3D gradientToPack)
    {
       originalPosition.changeFrame(worldFrame);
       tempPoint.setToZero(worldFrame);
@@ -1283,10 +1282,10 @@ public class DynamicReachabilityCalculator
       }
    }
 
-   private void extractGradient(FrameVector2d gradientToExtract, RobotSide stanceSide, FrameVector gradientToPack)
+   private void extractGradient(FrameVector2D gradientToExtract, RobotSide stanceSide, FrameVector3D gradientToPack)
    {
       gradientToPack.setToZero(worldFrame);
-      gradientToPack.setXY(gradientToExtract);
+      gradientToPack.set(gradientToExtract);
       gradientToPack.changeFrame(stepDirectionFrames.get(stanceSide));
    }
 
@@ -1296,7 +1295,7 @@ public class DynamicReachabilityCalculator
    private static class Vector2dZUpFrame extends ReferenceFrame
    {
       private static final long serialVersionUID = -1810366869361449743L;
-      private final FrameVector2d xAxis;
+      private final FrameVector2D xAxis;
       private final Vector3D x = new Vector3D();
       private final Vector3D y = new Vector3D();
       private final Vector3D z = new Vector3D();
@@ -1305,13 +1304,13 @@ public class DynamicReachabilityCalculator
       public Vector2dZUpFrame(String string, ReferenceFrame parentFrame)
       {
          super(string, parentFrame);
-         xAxis = new FrameVector2d(parentFrame);
+         xAxis = new FrameVector2D(parentFrame);
       }
 
-      public void setXAxis(FrameVector xAxis)
+      public void setXAxis(FrameVector3D xAxis)
       {
          xAxis.changeFrame(parentFrame);
-         this.xAxis.setByProjectionOntoXYPlane(xAxis);
+         this.xAxis.set(xAxis);
          this.xAxis.normalize();
          update();
       }

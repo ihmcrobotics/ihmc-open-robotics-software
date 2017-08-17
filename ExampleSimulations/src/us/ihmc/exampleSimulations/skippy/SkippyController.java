@@ -8,6 +8,10 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
@@ -20,13 +24,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
@@ -143,9 +143,9 @@ public class SkippyController implements RobotController
    private final YoDouble qShoulderIncludingOffset = new YoDouble("qShoulderIncludingOffset", registry);
    private final YoDouble qd_shoulder = new YoDouble("qd_shoulder", registry);
 
-   private final FramePoint tempFootLocation = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final FramePoint tempCoMLocation = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final FrameVector tempFootToCoM = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D tempFootLocation = new FramePoint3D(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D tempCoMLocation = new FramePoint3D(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D tempFootToCoM = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
    private final YoDouble z0 = new YoDouble("z0", registry);
    private final YoDouble kCapture = new YoDouble("kCapture", registry);
@@ -489,8 +489,8 @@ public class SkippyController implements RobotController
     */
    public void jointsToFootPositionVectors()
    {
-      FrameVector hipToFootInWorld = new FrameVector(ReferenceFrame.getWorldFrame());
-      FrameVector shoulderToFootInWorld = new FrameVector(ReferenceFrame.getWorldFrame());
+      FrameVector3D hipToFootInWorld = new FrameVector3D(ReferenceFrame.getWorldFrame());
+      FrameVector3D shoulderToFootInWorld = new FrameVector3D(ReferenceFrame.getWorldFrame());
       /*
        * Foot location in world
        */
@@ -652,7 +652,7 @@ public class SkippyController implements RobotController
     */
    public void cmpFromParameterizedReaction()
    {
-      FramePoint2d tempCMP = new FramePoint2d(ReferenceFrame.getWorldFrame());
+      FramePoint2D tempCMP = new FramePoint2D(ReferenceFrame.getWorldFrame());
 
       tempCMP.set(reactionForce.getFrameVector2dCopy());
       if (reactionForce.getZ() != 0.0)
@@ -660,7 +660,7 @@ public class SkippyController implements RobotController
       else
          tempCMP.set(0.0, 0.0);
       tempCMP.add(com.getFramePoint2dCopy());
-      this.cmpFromParameterizedReaction.setXY(tempCMP);
+      this.cmpFromParameterizedReaction.set(tempCMP, 0.0);
    }
 
    /*
@@ -685,7 +685,7 @@ public class SkippyController implements RobotController
    {
       ReferenceFrame bodyFrame = robot.updateAndGetBodyFrame();
 
-      FramePoint bodyPoint = new FramePoint(bodyFrame);
+      FramePoint3D bodyPoint = new FramePoint3D(bodyFrame);
       bodyPoint.changeFrame(ReferenceFrame.getWorldFrame());
 
       bodyLocation.set(bodyPoint);

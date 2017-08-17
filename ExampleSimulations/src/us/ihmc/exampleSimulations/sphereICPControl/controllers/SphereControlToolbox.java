@@ -1,15 +1,24 @@
 package us.ihmc.exampleSimulations.sphereICPControl.controllers;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -23,11 +32,17 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.geometry.*;
-import us.ihmc.robotics.math.frames.*;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -38,10 +53,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SphereControlToolbox
 {
@@ -163,8 +174,8 @@ public class SphereControlToolbox
 
       Graphics3DObject footstepGraphics = new Graphics3DObject();
       List<Point2D> contactPoints = new ArrayList<>();
-      for (FramePoint2d point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
-         contactPoints.add(point.getPointCopy());
+      for (FramePoint2D point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
+         contactPoints.add(new Point2D(point));
       footstepGraphics.addExtrudedPolygon(contactPoints, 0.02, YoAppearance.Color(Color.blue));
 
       YoGraphicShape nextFootstepViz = new YoGraphicShape("nextFootstep", footstepGraphics, yoNextFootstepPose, 1.0);
@@ -235,7 +246,7 @@ public class SphereControlToolbox
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
          RigidBody foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         List<FramePoint2d> contactFramePoints = contactableFoot.getContactPoints2d();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
          yoPlaneContactState.setFullyConstrained();
@@ -387,7 +398,7 @@ public class SphereControlToolbox
       return icp;
    }
 
-   public FramePoint2d getCapturePoint2d()
+   public FramePoint2D getCapturePoint2d()
    {
       return capturePoint2d;
    }
@@ -537,17 +548,17 @@ public class SphereControlToolbox
    }
 
 
-   private final FramePoint centerOfMass = new FramePoint();
-   private final FrameVector centerOfMassVelocity = new FrameVector();
-   private final FramePoint2d centerOfMass2d = new FramePoint2d();
-   private final FrameVector2d centerOfMassVelocity2d = new FrameVector2d();
+   private final FramePoint3D centerOfMass = new FramePoint3D();
+   private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
+   private final FramePoint2D centerOfMass2d = new FramePoint2D();
+   private final FrameVector2D centerOfMassVelocity2d = new FrameVector2D();
    public void computeCenterOfMass()
    {
       centerOfMass.changeFrame(worldFrame);
       centerOfMassVelocity.changeFrame(worldFrame);
 
-      centerOfMass2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMass);
-      centerOfMassVelocity2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassVelocity);
+      centerOfMass2d.setIncludingFrame(centerOfMass);
+      centerOfMassVelocity2d.setIncludingFrame(centerOfMassVelocity);
 
       yoCenterOfMass.set(centerOfMass);
       yoCenterOfMassVelocity.set(centerOfMassVelocity);
@@ -556,7 +567,7 @@ public class SphereControlToolbox
       yoCenterOfMassVelocity2d.set(centerOfMassVelocity2d);
    }
 
-   private final FramePoint2d capturePoint2d = new FramePoint2d();
+   private final FramePoint2D capturePoint2d = new FramePoint2D();
 
    public void computeCapturePoint()
    {
@@ -566,7 +577,7 @@ public class SphereControlToolbox
       CapturePointCalculator.computeCapturePoint(capturePoint2d, centerOfMass2d, centerOfMassVelocity2d, omega0.getDoubleValue());
 
       capturePoint2d.changeFrame(icp.getReferenceFrame());
-      icp.setXY(capturePoint2d);
+      icp.set(capturePoint2d, 0.0);
    }
 
    private ContinuousCMPICPPlannerParameters createICPPlannerParameters()

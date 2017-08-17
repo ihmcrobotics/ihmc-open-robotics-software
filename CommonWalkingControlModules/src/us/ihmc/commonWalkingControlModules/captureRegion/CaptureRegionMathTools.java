@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
 
 public class CaptureRegionMathTools
 {
@@ -14,7 +14,7 @@ public class CaptureRegionMathTools
    * This function computes the position of the capture point after the time dt has passed given
    * the current capture point and the Cop which is assumed to be at constant position over dt.
    */
-   public static void predictCapturePoint(FramePoint2d ICP, FramePoint2d CoP, double dt, double omega0, FramePoint2d predictedICPtoPack)
+   public static void predictCapturePoint(FramePoint2D ICP, FramePoint2D CoP, double dt, double omega0, FramePoint2D predictedICPtoPack)
    {
       // make sure everything is in the same frame:
       ICP.checkReferenceFrameMatch(CoP);
@@ -30,7 +30,7 @@ public class CaptureRegionMathTools
    /**
     * Takes a line and a circle and computes the intersection. If there is no intersection sets NaN.
     */
-   public static void solveIntersectionOfRayAndCircle(FramePoint2d pointA, FramePoint2d pointB, FrameVector2d vector, double R, FramePoint2d pointToPack)
+   public static void solveIntersectionOfRayAndCircle(FramePoint2D pointA, FramePoint2D pointB, FrameVector2D vector, double R, FramePoint2D pointToPack)
    {
       // Look at JPratt Notes February 18, 2009 for details on the following:
 
@@ -66,7 +66,7 @@ public class CaptureRegionMathTools
 
    private final Vector3D negZRotationAxis = new Vector3D(0.0, 0.0, -1.0);
    private final RigidBodyTransform rotation = new RigidBodyTransform();
-   private final FrameVector rotatedFromA = new FrameVector();
+   private final FrameVector3D rotatedFromA = new FrameVector3D();
    private final AxisAngle axisAngle = new AxisAngle();
 
    /**
@@ -74,8 +74,8 @@ public class CaptureRegionMathTools
    * a position specified by the alpha value. E.g. an alpha value of 0.5 will result in the point being in the
    * middle of the given directions.
    */
-   public void getPointBetweenVectorsAtDistanceFromOriginCircular(FrameVector2d directionA, FrameVector2d directionB, double alpha, double radius,
-         FramePoint2d midpoint, FramePoint2d pointToPack)
+   public void getPointBetweenVectorsAtDistanceFromOriginCircular(FrameVector2D directionA, FrameVector2D directionB, double alpha, double radius,
+         FramePoint2D midpoint, FramePoint2D pointToPack)
    {
       directionA.checkReferenceFrameMatch(directionB.getReferenceFrame());
       directionA.checkReferenceFrameMatch(midpoint.getReferenceFrame());

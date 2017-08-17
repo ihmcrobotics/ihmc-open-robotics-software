@@ -18,14 +18,14 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlG
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.robotics.controllers.PDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -73,7 +73,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
 
          RigidBody foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         List<FramePoint2d> contactFramePoints = contactableFoot.getContactPoints2d();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, parentRegistry);
          yoPlaneContactState.setFullyConstrained();
@@ -113,7 +113,7 @@ public class WrapperForMultipleToeOffCalculatorsTest
    public void testSetExitCMP()
    {
       RobotSide trailingSide = RobotSide.LEFT;
-      FramePoint exitCMP = new FramePoint();
+      FramePoint3D exitCMP = new FramePoint3D();
       exitCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
       exitCMP.setX(0.05);
 
@@ -128,8 +128,8 @@ public class WrapperForMultipleToeOffCalculatorsTest
    {
       RobotSide trailingSide = RobotSide.LEFT;
 
-      FramePoint exitCMP = new FramePoint();
-      FramePoint2d desiredCMP = new FramePoint2d();
+      FramePoint3D exitCMP = new FramePoint3D();
+      FramePoint2D desiredCMP = new FramePoint2D();
 
       exitCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
       desiredCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
@@ -148,9 +148,9 @@ public class WrapperForMultipleToeOffCalculatorsTest
    {
       RobotSide trailingSide = RobotSide.LEFT;
 
-      FramePoint exitCMP = new FramePoint();
-      FramePoint2d desiredCMP = new FramePoint2d();
-      FramePoint2d toeOffPoint = new FramePoint2d();
+      FramePoint3D exitCMP = new FramePoint3D();
+      FramePoint2D desiredCMP = new FramePoint2D();
+      FramePoint2D toeOffPoint = new FramePoint2D();
 
       exitCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
       desiredCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
@@ -248,19 +248,19 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
+         public YoPIDSE3Gains createSwingFootControlGains(YoVariableRegistry registry)
          {
             return null;
          }
 
          @Override
-         public YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry)
+         public YoPIDSE3Gains createHoldPositionFootControlGains(YoVariableRegistry registry)
          {
             return null;
          }
 
          @Override
-         public YoSE3PIDGainsInterface createToeOffFootControlGains(YoVariableRegistry registry)
+         public YoPIDSE3Gains createToeOffFootControlGains(YoVariableRegistry registry)
          {
             return null;
          }

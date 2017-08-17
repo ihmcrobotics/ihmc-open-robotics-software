@@ -1,11 +1,11 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class MovingMidFrameZUpFrame extends MovingReferenceFrame
@@ -14,9 +14,9 @@ public class MovingMidFrameZUpFrame extends MovingReferenceFrame
    private final MovingReferenceFrame frameOne;
    private final MovingReferenceFrame frameTwo;
 
-   private final FramePoint originOne = new FramePoint();
-   private final FramePoint originTwo = new FramePoint();
-   private final FrameVector vectorBetweenFrames = new FrameVector();
+   private final FramePoint3D originOne = new FramePoint3D();
+   private final FramePoint3D originTwo = new FramePoint3D();
+   private final FrameVector3D vectorBetweenFrames = new FrameVector3D();
    private final Vector2D xAxis = new Vector2D();
 
    private final Vector3D translation = new Vector3D();
@@ -58,9 +58,9 @@ public class MovingMidFrameZUpFrame extends MovingReferenceFrame
       transformToParent.setRotationYaw(Math.atan2(xAxis.getY(), xAxis.getX()));
    }
 
-   private final FrameVector linearVelocity = new FrameVector();
-   private final FrameVector linearVelocityOne = new FrameVector();
-   private final FrameVector linearVelocityTwo = new FrameVector();
+   private final FrameVector3D linearVelocity = new FrameVector3D();
+   private final FrameVector3D linearVelocityOne = new FrameVector3D();
+   private final FrameVector3D linearVelocityTwo = new FrameVector3D();
 
    @Override
    protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)

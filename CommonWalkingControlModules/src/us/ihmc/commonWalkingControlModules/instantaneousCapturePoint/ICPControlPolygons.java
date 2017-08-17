@@ -1,19 +1,19 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
+import java.awt.Color;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.awt.*;
 
 public class ICPControlPolygons
 {
@@ -68,6 +68,8 @@ public class ICPControlPolygons
          artifactList.add(footPolygonArtifact);
       }
 
+      artifactList.setVisible(VISUALIZE);
+
       if (yoGraphicsListRegistry != null)
       {
          yoGraphicsListRegistry.registerArtifactList(artifactList);
@@ -76,7 +78,7 @@ public class ICPControlPolygons
       parentRegistry.addChild(registry);
    }
 
-   private final FramePoint tempFramePoint = new FramePoint();
+   private final FramePoint3D tempFramePoint = new FramePoint3D();
 
    public void updateUsingContactStates(SideDependentList<? extends PlaneContactState> contactStates)
    {
@@ -121,8 +123,7 @@ public class ICPControlPolygons
 
       updateSupportPolygon(inDoubleSupport, neitherFootIsSupportingFoot, supportSide);
 
-      if (VISUALIZE)
-         visualize();
+      updateVisualize();
    }
 
    private void updateSupportPolygon(boolean inDoubleSupport, boolean neitherFootIsSupportingFoot, RobotSide supportSide)
@@ -146,7 +147,7 @@ public class ICPControlPolygons
       controlPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
    }
 
-   private void visualize()
+   private void updateVisualize()
    {
       controlPolygonViz.setFrameConvexPolygon2d(controlPolygonInWorld);
 

@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -10,6 +9,12 @@ import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,7 +26,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FramePoseTest
 {
@@ -173,8 +177,8 @@ public class FramePoseTest
       framePose.setPosition(1.0, 0.0, 1.0);
       framePose.setOrientation(RandomGeometry.nextQuaternion(random));
 
-      FrameVector rotationAxis = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
-      FramePoint rotationAxisOrigin = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
+      FrameVector3D rotationAxis = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
+      FramePoint3D rotationAxisOrigin = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
       framePose.rotatePoseAboutAxis(rotationAxis, rotationAxisOrigin, angleToRotate);
 
       Point3D actualPosePositionAfterRotation = new Point3D();
@@ -400,8 +404,8 @@ public class FramePoseTest
 
       FramePose thisPose = new FramePose(testFrame);
       FramePose thatPose = new FramePose(testFrame);
-      FrameVector actualTranslationNOTfromRotation = new FrameVector(testFrame);
-      FrameVector shouldEqualTotalTranslation = new FrameVector(testFrame);
+      FrameVector3D actualTranslationNOTfromRotation = new FrameVector3D(testFrame);
+      FrameVector3D shouldEqualTotalTranslation = new FrameVector3D(testFrame);
 
       double[] thetaToTest = new double[] { Math.toRadians(-90.0), Math.toRadians(-45.0), Math.toRadians(45.0), Math.toRadians(90.0) };
 
@@ -413,16 +417,16 @@ public class FramePoseTest
          Vector3D randomTranslation = RandomGeometry.nextVector3D(random);
          actualTranslationNOTfromRotation.setIncludingFrame(testFrame, randomTranslation);
 
-         thatPose.prependTranslation(actualTranslationNOTfromRotation.tuple);
+         thatPose.prependTranslation(actualTranslationNOTfromRotation);
 
-         FrameVector translationNOTfromRotation = thisPose.getTranslationNOTDueToRotationAboutFrame(thatPose);
-         FrameVector translationDueToRotation = thisPose.getTranslationDueToRotationAboutFrame(thatPose);
-         FrameVector totalTranslation = thisPose.getTranslationToOtherPoseTotal(thatPose);
+         FrameVector3D translationNOTfromRotation = thisPose.getTranslationNOTDueToRotationAboutFrame(thatPose);
+         FrameVector3D translationDueToRotation = thisPose.getTranslationDueToRotationAboutFrame(thatPose);
+         FrameVector3D totalTranslation = thisPose.getTranslationToOtherPoseTotal(thatPose);
 
          shouldEqualTotalTranslation.add(translationDueToRotation, translationNOTfromRotation);
 
-         FrameVectorTest.assertFrameVectorEquals(actualTranslationNOTfromRotation, translationNOTfromRotation, 1e-15);
-         FrameVectorTest.assertFrameVectorEquals(totalTranslation, shouldEqualTotalTranslation, 1e-15);
+         EuclidFrameTestTools.assertFrameTuple3DEquals(actualTranslationNOTfromRotation, translationNOTfromRotation, 1e-15);
+         EuclidFrameTestTools.assertFrameTuple3DEquals(totalTranslation, shouldEqualTotalTranslation, 1e-15);
       }
    }
 
@@ -460,11 +464,11 @@ public class FramePoseTest
       FramePose rotatedPose = new FramePose();
 
       ReferenceFrame rotationAxisFrame = ReferenceFrame.getWorldFrame();
-      FrameVector rotationAxis = new FrameVector(rotationAxisFrame, RandomGeometry.nextVector3D(random));
+      FrameVector3D rotationAxis = new FrameVector3D(rotationAxisFrame, RandomGeometry.nextVector3D(random));
       rotationAxis.normalize();
-      FramePoint rotationAxisOrigin = new FramePoint(rotationAxisFrame, RandomGeometry.nextVector3D(random));
+      FramePoint3D rotationAxisOrigin = new FramePoint3D(rotationAxisFrame, RandomGeometry.nextVector3D(random));
 
-      FrameVector computedAxis = new FrameVector();
+      FrameVector3D computedAxis = new FrameVector3D();
 
       int numberOfPassedTests = 0;
       for (double rotationAngle : AngleTools.generateArrayOfTestAngles(1000, 1e-3, true, false))
@@ -502,12 +506,12 @@ public class FramePoseTest
       FramePose rotatedPose = new FramePose();
 
       ReferenceFrame rotationAxisFrame = ReferenceFrame.getWorldFrame();
-      FrameVector rotationAxis = new FrameVector(rotationAxisFrame, RandomGeometry.nextVector3D(random));
+      FrameVector3D rotationAxis = new FrameVector3D(rotationAxisFrame, RandomGeometry.nextVector3D(random));
       rotationAxis.normalize();
-      FramePoint rotationAxisOrigin = new FramePoint(rotationAxisFrame, RandomGeometry.nextVector3D(random));
+      FramePoint3D rotationAxisOrigin = new FramePoint3D(rotationAxisFrame, RandomGeometry.nextVector3D(random));
 
-      FrameVector rotationAxisComputed = new FrameVector();
-      FramePoint rotationAxisOriginComputed = new FramePoint();
+      FrameVector3D rotationAxisComputed = new FrameVector3D();
+      FramePoint3D rotationAxisOriginComputed = new FramePoint3D();
 
       int numberOfPassedTests = 0;
       for (double rotationAngle : AngleTools.generateArrayOfTestAngles(100, 1e-5, false, true))
@@ -522,7 +526,7 @@ public class FramePoseTest
 
          String errorMsg = "Computed rotation axis, \n" + rotationAxisComputed + "\n is not parallel with actual rotation axis, \n" + rotationAxis
                + rotationAngleMsg + "\n Number of Passed Tests: " + numberOfPassedTests + "\n";
-         assertTrue(errorMsg, rotationAxisComputed.isEpsilonParallel(rotationAxis));
+         assertTrue(errorMsg, EuclidGeometryTools.areVector3DsParallel(rotationAxisComputed, rotationAxis, 1e-7));
 
          numberOfPassedTests++;
       }
@@ -538,13 +542,13 @@ public class FramePoseTest
       FramePose rotatedPose = new FramePose();
 
       ReferenceFrame rotationAxisFrame = ReferenceFrame.getWorldFrame();
-      FrameVector rotationAxis = new FrameVector(rotationAxisFrame, RandomGeometry.nextVector3D(random));
+      FrameVector3D rotationAxis = new FrameVector3D(rotationAxisFrame, RandomGeometry.nextVector3D(random));
       rotationAxis.normalize();
-      FramePoint rotationAxisOrigin = new FramePoint(rotationAxisFrame, RandomGeometry.nextVector3D(random));
+      FramePoint3D rotationAxisOrigin = new FramePoint3D(rotationAxisFrame, RandomGeometry.nextVector3D(random));
 
-      FrameVector rotationAxisComputed = new FrameVector();
-      FramePoint rotationAxisOriginComputed = new FramePoint();
-      FrameVector actualToComputedOrigin = new FrameVector();
+      FrameVector3D rotationAxisComputed = new FrameVector3D();
+      FramePoint3D rotationAxisOriginComputed = new FramePoint3D();
+      FrameVector3D actualToComputedOrigin = new FrameVector3D();
 
       int numberOfPassedTests = 0;
       for (double rotationAngle : AngleTools.generateArrayOfTestAngles(100, 1e-1, false, false))
@@ -563,7 +567,7 @@ public class FramePoseTest
          String errorMsg = "Computed rotation axis origin must coincide with actual origin, or lie along rotation axis.\n Alignment error = "
                + Math.toDegrees(actualToComputedOrigin.angle(rotationAxis)) + " degrees" + rotationAngleMsg + "\n Number of Passed Tests: "
                + numberOfPassedTests + "\n";
-         assertTrue(errorMsg, actualToComputedOrigin.isEpsilonParallel(rotationAxis));
+         assertTrue(errorMsg, EuclidGeometryTools.areVector3DsParallel(actualToComputedOrigin, rotationAxis, 1e-7));
 
          numberOfPassedTests++;
       }
@@ -579,12 +583,12 @@ public class FramePoseTest
       FramePose rotatedPose = new FramePose();
 
       ReferenceFrame rotationAxisFrame = ReferenceFrame.getWorldFrame();
-      FrameVector rotationAxis = new FrameVector(rotationAxisFrame, RandomGeometry.nextVector3D(random));
+      FrameVector3D rotationAxis = new FrameVector3D(rotationAxisFrame, RandomGeometry.nextVector3D(random));
       rotationAxis.normalize();
-      FramePoint rotationAxisOrigin = new FramePoint(rotationAxisFrame, RandomGeometry.nextVector3D(random));
+      FramePoint3D rotationAxisOrigin = new FramePoint3D(rotationAxisFrame, RandomGeometry.nextVector3D(random));
 
-      FrameVector rotationAxisComputed = new FrameVector();
-      FramePoint rotationAxisOriginComputed = new FramePoint();
+      FrameVector3D rotationAxisComputed = new FrameVector3D();
+      FramePoint3D rotationAxisOriginComputed = new FramePoint3D();
       FramePose rotatedPoseComputed = new FramePose(initialPose);
 
       int numberOfPassedTests = 0;

@@ -21,6 +21,10 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlP
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPTimingOptimizationController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -35,18 +39,14 @@ import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.controllers.PDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -201,8 +201,8 @@ public class StepAndTimingAdjustmentExampleGraphic
 
       Graphics3DObject footstepGraphics = new Graphics3DObject();
       List<Point2D> contactPoints = new ArrayList<>();
-      for (FramePoint2d point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
-         contactPoints.add(point.getPointCopy());
+      for (FramePoint2D point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
+         contactPoints.add(new Point2D(point));
       footstepGraphics.addExtrudedPolygon(contactPoints, 0.02, YoAppearance.Color(Color.blue));
 
       YoGraphicShape nextFootstepViz = new YoGraphicShape("nextFootstep", footstepGraphics, yoNextFootstepPose, 1.0);
@@ -275,7 +275,7 @@ public class StepAndTimingAdjustmentExampleGraphic
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
          RigidBody foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         List<FramePoint2d> contactFramePoints = contactableFoot.getContactPoints2d();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
          yoPlaneContactState.setFullyConstrained();
@@ -465,12 +465,12 @@ public class StepAndTimingAdjustmentExampleGraphic
    private boolean thirdTick = true;
 
    private final FramePose footstepPose = new FramePose();
-   private final FramePoint2d footstepPositionSolution = new FramePoint2d();
-   private final FramePoint2d desiredCMP = new FramePoint2d();
-   private final FramePoint2d desiredICP = new FramePoint2d();
-   private final FrameVector2d desiredICPVelocity = new FrameVector2d();
-   private final FramePoint2d currentICP = new FramePoint2d();
-   private final FramePoint2d perfectCMP = new FramePoint2d();
+   private final FramePoint2D footstepPositionSolution = new FramePoint2D();
+   private final FramePoint2D desiredCMP = new FramePoint2D();
+   private final FramePoint2D desiredICP = new FramePoint2D();
+   private final FrameVector2D desiredICPVelocity = new FrameVector2D();
+   private final FramePoint2D currentICP = new FramePoint2D();
+   private final FramePoint2D perfectCMP = new FramePoint2D();
 
    public void updateGraphic()
    {
@@ -608,7 +608,7 @@ public class StepAndTimingAdjustmentExampleGraphic
       footSpoof.setSoleFrame(nextSupportPose);
    }
 
-   private final FramePoint desiredICP3d = new FramePoint();
+   private final FramePoint3D desiredICP3d = new FramePoint3D();
    public void updateTrajectoyViz()
    {
       icpPlanner.clearPlan();
@@ -628,7 +628,7 @@ public class StepAndTimingAdjustmentExampleGraphic
          icpPlanner.compute(currentTime);
          icpPlanner.getDesiredCapturePointPosition(desiredICP);
          icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
-         desiredICP3d.setXY(desiredICP);
+         desiredICP3d.set(desiredICP, 0.0);
          bagOfBalls.setBall(desiredICP3d, i);
       }
 
@@ -746,19 +746,19 @@ public class StepAndTimingAdjustmentExampleGraphic
          }
 
          @Override
-         public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
+         public YoPIDSE3Gains createSwingFootControlGains(YoVariableRegistry registry)
          {
             return null;
          }
 
          @Override
-         public YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry)
+         public YoPIDSE3Gains createHoldPositionFootControlGains(YoVariableRegistry registry)
          {
             return null;
          }
 
          @Override
-         public YoSE3PIDGainsInterface createToeOffFootControlGains(YoVariableRegistry registry)
+         public YoPIDSE3Gains createToeOffFootControlGains(YoVariableRegistry registry)
          {
             return null;
          }

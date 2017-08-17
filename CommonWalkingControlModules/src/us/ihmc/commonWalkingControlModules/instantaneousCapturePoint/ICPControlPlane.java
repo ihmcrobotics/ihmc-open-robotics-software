@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -31,13 +31,13 @@ public class ICPControlPlane
       });
    }
 
-   public void projectPointOntoControlPlane(FramePoint pointToProject, FramePoint projectionToPack)
+   public void projectPointOntoControlPlane(FramePoint3D pointToProject, FramePoint3D projectionToPack)
    {
       pointToProject.changeFrame(centerOfMassFrame);
       projectPointOntoControlPlane(pointToProject, projectionToPack, controlPlaneHeight.getDoubleValue());
    }
 
-   private static void projectPointOntoControlPlane(FramePoint pointToProject, FramePoint projectionToPack, double height)
+   private static void projectPointOntoControlPlane(FramePoint3D pointToProject, FramePoint3D projectionToPack, double height)
    {
       double unprojectedHeight = pointToProject.getZ();
 
