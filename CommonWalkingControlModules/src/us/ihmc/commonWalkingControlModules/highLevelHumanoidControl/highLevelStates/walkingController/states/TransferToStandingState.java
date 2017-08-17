@@ -15,6 +15,8 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.awt.*;
+
 public class TransferToStandingState extends WalkingState
 {
    private final YoDouble maxICPErrorToSwitchToStanding = new YoDouble("maxICPErrorToSwitchToStanding", registry);
@@ -99,6 +101,21 @@ public class TransferToStandingState extends WalkingState
       pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
       balanceManager.setICPPlanTransferFromSide(previousSupportSide);
       balanceManager.initializeICPPlanForStanding(finalTransferTime);
+
+      if (previousSupportSide != null)
+      {
+         RobotSide previousSwingSide = previousSupportSide.getOppositeSide();
+         legConfigurationManager.setFullyExtendLeg(previousSwingSide, false);
+         legConfigurationManager.beginStraightening(previousSwingSide);
+      }
+      else
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            legConfigurationManager.setFullyExtendLeg(robotSide, false);
+            legConfigurationManager.setStraight(robotSide);
+         }
+      }
    }
 
    @Override
