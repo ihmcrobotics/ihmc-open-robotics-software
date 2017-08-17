@@ -4,7 +4,18 @@ import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 
+/**
+ * Provides a default implementation for PID gains in three dimensions.
+ * <p>
+ * If this object is created a {@link GainCoupling} can be specified. This gain
+ * coupling is used in case these PID gains will be used to create {@link YoPID3DGains}.
+ * In that case is it used to determine what YoVariables to create for tuning.
+ * Note, that regardless of the specified gain coupling the getters and setters
+ * in this implementation are designed for three dimensions.
+ * </p>
+ */
 public class DefaultPID3DGains implements PID3DGains
 {
    private final GainCoupling gainCoupling;

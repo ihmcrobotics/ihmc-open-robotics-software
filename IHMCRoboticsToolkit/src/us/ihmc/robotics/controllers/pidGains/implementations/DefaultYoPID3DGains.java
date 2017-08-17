@@ -13,6 +13,19 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * Provides a default implementation for Yo PID gains in three dimensions.
+ * <p>
+ * If this object is created a {@link GainCoupling} can be specified that will
+ * determine what YoVariables will be created for tuning.
+ * Note, that regardless of the specified gain coupling the getters and setters
+ * are designed for three dimensions.
+ * </p>
+ * <p>
+ * A flag can be provided to determine whether the integral gain tuning
+ * YoVariables will be created.
+ * </p>
+ */
 public class DefaultYoPID3DGains implements YoPID3DGains
 {
    private final GainCoupling gainCoupling;
