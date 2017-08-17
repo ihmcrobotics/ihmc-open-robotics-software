@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.controllers.pidGains.DampingUpdater;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;

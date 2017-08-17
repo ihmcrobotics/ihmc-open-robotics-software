@@ -13,22 +13,22 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.controllers.YoIndependentSE3PIDGains;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -562,8 +562,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public YoPIDSE3Gains createSwingFootControlGains(YoVariableRegistry registry)
    {
-      YoIndependentSE3PIDGains gains = new YoIndependentSE3PIDGains("SwingFoot", registry);
-
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       double kpX = 150.0; // Might cause some shakies.
@@ -580,6 +578,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains(GainCoupling.NONE, false);
       gains.setPositionProportionalGains(kpX, kpY, kpZ);
       gains.setPositionDampingRatios(zetaXZ, zetaY, zetaXZ);
       gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
@@ -587,14 +586,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setOrientationDampingRatios(zetaOrientationXY, zetaOrientationXY, zetaOrientationZ);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
-      return gains;
+      return new DefaultYoPIDSE3Gains("SwingFoot", gains, registry);
    }
 
    @Override
    public YoPIDSE3Gains createHoldPositionFootControlGains(YoVariableRegistry registry)
    {
-      YoFootSE3Gains gains = new YoFootSE3Gains("HoldFoot", registry);
-
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       double kpXY = 0.0; //40.0;
@@ -608,21 +605,20 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
-      gains.setPositionProportionalGains(kpXY, kpZ);
-      gains.setPositionDampingRatio(zetaXYZ);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains(GainCoupling.XY, false);
+      gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
+      gains.setPositionDampingRatios(zetaXYZ);
       gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
-      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
-      gains.setOrientationDampingRatio(zetaOrientation);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpXYOrientation, kpZOrientation);
+      gains.setOrientationDampingRatios(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
-      return gains;
+      return new DefaultYoPIDSE3Gains("HoldFoot", gains, registry);
    }
 
    @Override
    public YoPIDSE3Gains createToeOffFootControlGains(YoVariableRegistry registry)
    {
-      YoFootSE3Gains gains = new YoFootSE3Gains("ToeOffFoot", registry);
-
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       double kpXY = 40.0;
@@ -636,14 +632,15 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
-      gains.setPositionProportionalGains(kpXY, kpZ);
-      gains.setPositionDampingRatio(zetaXYZ);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains(GainCoupling.XY, false);
+      gains.setPositionProportionalGains(kpXY, kpXY, kpZ);
+      gains.setPositionDampingRatios(zetaXYZ);
       gains.setPositionMaxFeedbackAndFeedbackRate(maxLinearAcceleration, maxLinearJerk);
-      gains.setOrientationProportionalGains(kpXYOrientation, kpZOrientation);
-      gains.setOrientationDampingRatio(zetaOrientation);
+      gains.setOrientationProportionalGains(kpXYOrientation, kpXYOrientation, kpZOrientation);
+      gains.setOrientationDampingRatios(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
-      return gains;
+      return new DefaultYoPIDSE3Gains("ToeOffFoot", gains, registry);
    }
 
    @Override

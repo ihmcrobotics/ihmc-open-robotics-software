@@ -15,6 +15,7 @@ import us.ihmc.robotics.controllers.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
@@ -471,11 +472,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    /**
-    * Retrieves and returns the set of gains {@code YoOrientationPIDGainsInterface} associated to
+    * Retrieves and returns the set of orientation gains {@code YoPID3DGains} associated to
     * the given end-effector, if it does not exist it is created.
     *
     * @param endEffector the end-effector to which the gains are associated.
-    * @return the unique {@code YoOrientationPIDGainsInterface} associated with the given
+    * @return the unique {@code YoPID3DGains} associated with the given
     *         end-effector.
     */
    public YoPID3DGains getOrientationGains(RigidBody endEffector)
@@ -491,11 +492,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    /**
-    * Retrieves and returns the set of gains {@code YoPositionPIDGainsInterface} associated to the
+    * Retrieves and returns the set of position gains {@code YoPID3DGains} associated to the
     * given end-effector, if it does not exist it is created.
     *
     * @param endEffector the end-effector to which the gains are associated.
-    * @return the unique {@code YoPositionPIDGainsInterface} associated with the given end-effector.
+    * @return the unique {@code YoPID3DGains} associated with the given end-effector.
     */
    public YoPID3DGains getPositionGains(RigidBody endEffector)
    {
@@ -510,31 +511,17 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    /**
-    * Retrieves and returns the set of gains {@code YoSE3PIDGainsInterface} associated to the given
+    * Retrieves and returns the set of gains {@code YoPIDSE3Gains} associated to the given
     * end-effector, if it does not exist it is created.
     *
     * @param endEffector the end-effector to which the gains are associated.
-    * @return the unique {@code YoSE3PIDGainsInterface} associated with the given end-effector.
+    * @return the unique {@code YoPIDSE3Gains} associated with the given end-effector.
     */
    public YoPIDSE3Gains getSE3PIDGains(RigidBody endEffector)
    {
       YoPID3DGains positionGains = getPositionGains(endEffector);
       YoPID3DGains orientationGains = getOrientationGains(endEffector);
-
-      return new YoPIDSE3Gains()
-      {
-         @Override
-         public YoPID3DGains getPositionGains()
-         {
-            return positionGains;
-         }
-
-         @Override
-         public YoPID3DGains getOrientationGains()
-         {
-            return orientationGains;
-         }
-      };
+      return new DefaultYoPIDSE3Gains(positionGains, orientationGains);
    }
 
    /**

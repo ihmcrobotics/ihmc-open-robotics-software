@@ -8,9 +8,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.controllers.SE3PIDGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
@@ -58,7 +58,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    private final Vector3D feedForwardAngularAccelerationInWorld = new Vector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
-   private final SE3PIDGains gains = new SE3PIDGains();
+   private final DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
    /** This is the reference frame in which the angular part of the gains are to be applied. If {@code null}, it is applied in the control frame. */
    private ReferenceFrame angularGainsFrame = null;
    /** This is the reference frame in which the linear part of the gains are to be applied. If {@code null}, it is applied in the control frame. */
