@@ -86,7 +86,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    public void initializeParameters(ICPPlannerParameters icpPlannerParameters)
    {
-      initializeParameters(icpPlannerParameters, true);
+      initializeParameters(icpPlannerParameters, false);
    }
    
    public void initializeParameters(ICPPlannerParameters icpPlannerParameters, boolean computePredictedAngularMomentum)
@@ -244,8 +244,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceICPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
       
       referenceCoPGenerator.initializeForTransfer(this.initialTime.getDoubleValue());
-      referenceICPGenerator.initializeForTransfer(this.initialTime.getDoubleValue(), referenceCoPGenerator.getTransferCoPTrajectories(),
-                                                  referenceCoPGenerator.getSwingCoPTrajectories());
+      referenceICPGenerator.initializeForTransferFromCoPs(referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories());
       
       referenceICPGenerator.adjustDesiredTrajectoriesForInitialSmoothing();
       
@@ -276,8 +275,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceICPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
       
       referenceCoPGenerator.initializeForSwing(this.initialTime.getDoubleValue());
-      referenceICPGenerator.initializeForSwing(this.initialTime.getDoubleValue(), referenceCoPGenerator.getTransferCoPTrajectories(),
-                                               referenceCoPGenerator.getSwingCoPTrajectories());
+      referenceICPGenerator.initializeForSwingFromCoPs(referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories());
             
       angularMomentumGenerator.addFootstepCoPsToPlan(referenceCoPGenerator.getWaypoints(), referenceCoPGenerator.getNumberOfFootstepsRegistered()); //TODO: update CoP waypoints after adjustment
       angularMomentumGenerator.computeReferenceAngularMomentumStartingFromSingleSupport();
