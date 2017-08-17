@@ -1,8 +1,8 @@
 package us.ihmc.robotics.controllers.pidGains.implementations;
 
-import us.ihmc.robotics.controllers.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
