@@ -1,6 +1,5 @@
-package us.ihmc.robotics.controllers.pidGains.implementations;
+package us.ihmc.robotics.controllers.pidGains;
 
-import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;

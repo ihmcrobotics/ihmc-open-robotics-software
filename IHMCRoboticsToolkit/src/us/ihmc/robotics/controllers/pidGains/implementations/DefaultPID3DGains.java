@@ -3,6 +3,7 @@ package us.ihmc.robotics.controllers.pidGains.implementations;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 
 public class DefaultPID3DGains implements PID3DGains
 {
@@ -28,6 +29,12 @@ public class DefaultPID3DGains implements PID3DGains
    public DefaultPID3DGains(boolean useIntegrator)
    {
       this(GainCoupling.NONE, useIntegrator);
+   }
+
+   public DefaultPID3DGains(PID3DGainsReadOnly other)
+   {
+      this(other.getGainCoupling(), other.isUseIntegrator());
+      set(other);
    }
 
    public DefaultPID3DGains(GainCoupling gainCoupling, boolean useIntegrator)

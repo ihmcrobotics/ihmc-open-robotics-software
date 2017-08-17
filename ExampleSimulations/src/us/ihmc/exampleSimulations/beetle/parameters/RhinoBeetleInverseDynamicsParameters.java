@@ -1,12 +1,12 @@
 package us.ihmc.exampleSimulations.beetle.parameters;
 
-import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -41,14 +41,12 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
       bodySpatialAngularQPWeight.setVector(angularWeight);
       bodySpatialLinearQPWeight.setVector(linearWeight);
 
-      footGains = new YoFootSE3Gains(name + "FootGains", registry);
       DefaultYoPID3DGains positionGains = new DefaultYoPID3DGains(name + "FootPosition", GainCoupling.XY, false, registry);
       positionGains.setProportionalGains(getSwingXYProportionalGain(), getSwingXYProportionalGain(), getSwingZProportionalGain());
       positionGains.setDampingRatios(0.9);
-      footGains.setPositionGains(positionGains);
       DefaultYoPID3DGains orientationGains = new DefaultYoPID3DGains(name + "FootOrientation", GainCoupling.XY, false, registry);
       orientationGains.setProportionalGains(0.0, 0.0, 0.0);
-      footGains.setOrientationGains(orientationGains);
+      footGains = new DefaultYoPIDSE3Gains(positionGains, orientationGains);
 
       parentRegistry.addChild(registry);
    }

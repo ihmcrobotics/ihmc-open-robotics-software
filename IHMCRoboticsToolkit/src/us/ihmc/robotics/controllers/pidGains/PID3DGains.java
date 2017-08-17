@@ -169,6 +169,18 @@ public interface PID3DGains extends PID3DGainsReadOnly
     *
     * @param proportionalGain the new proportional gain for the three dimensions.
     * @param derivativeGain the new derivative gain for the three dimensions.
+    */
+   public default void setProportialAndDerivativeGains(double proportionalGain, double derivativeGain)
+   {
+      setProportionalGains(proportionalGain);
+      setDerivativeGains(derivativeGain);
+   }
+
+   /**
+    * Sets the gains for all three directions to the provided values.
+    *
+    * @param proportionalGain the new proportional gain for the three dimensions.
+    * @param derivativeGain the new derivative gain for the three dimensions.
     * @param integralGain the new integral gain for the three dimensions.
     * @param maxIntegralError the new maximum integral error.
     */
