@@ -1,8 +1,8 @@
 package us.ihmc.valkyrie.parameters;
 
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 
-public class ValkyrieFootstepPlanningParameters extends FootstepPlanningParameters
+public class ValkyrieFootstepPlanningParameters extends QuadTreeFootstepPlanningParameters
 {
    public ValkyrieFootstepPlanningParameters()
    {

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,12 +8,12 @@ import java.util.List;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.groundContactForce.FlatGroundContactForceOptimizer;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FlatGroundContactForceOptimizerTest
 {
-   
+
    private static final boolean showSCS = false;
 
    @Test
@@ -32,7 +32,7 @@ public class FlatGroundContactForceOptimizerTest
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
 
       double friction = 0.8;
-      int vectorsPerContact = 4;
+      int vectorsPerContact = 3;
       double regWeight = 1.0e-6;
       FlatGroundContactForceOptimizer optimizer = new FlatGroundContactForceOptimizer(friction, vectorsPerContact, regWeight, graphicsListRegistry, registry);
 
@@ -44,12 +44,12 @@ public class FlatGroundContactForceOptimizerTest
 
       Point3D comPosition = new Point3D(0.0, 0.0, 0.6);
 
-      
+
       SimulationConstructionSet scs = null;
-      
+
       if (showSCS)
       {
-         new SimulationConstructionSet(new Robot(getClass().getSimpleName()));
+         scs = new SimulationConstructionSet(new Robot(getClass().getSimpleName()));
          scs.addYoGraphicsListRegistry(graphicsListRegistry);
          scs.addYoVariableRegistry(registry);
       }

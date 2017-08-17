@@ -11,15 +11,15 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVectorTest;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.testing.JUnitTools;
 
 public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
@@ -89,7 +89,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       FrameVector3D accelerationOfPointFixedInFrameB = new FrameVector3D(ReferenceFrame.getWorldFrame());
       accel.getAccelerationOfPointFixedInBodyFrame(twist, pointFixedInFrameB, accelerationOfPointFixedInFrameB);
 
-      Vector3D expected = new Vector3D(pointFixedInFrameB.getVectorCopy());
+      Vector3D expected = new Vector3D(pointFixedInFrameB);
       expected.cross(twist.getAngularPart(), expected);
       expected.cross(twist.getAngularPart(), expected);
 
@@ -170,7 +170,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       crossPart.cross(omega, v);
       expected.add(crossPart);
       expected.changeFrame(accelerationOfPointFixedInFrameB.getReferenceFrame());
-      FrameVectorTest.assertFrameVectorEquals(expected, accelerationOfPointFixedInFrameB, 1e-12);
+      EuclidFrameTestTools.assertFrameTuple3DEquals(expected, accelerationOfPointFixedInFrameB, 1e-12);
    }
 
 

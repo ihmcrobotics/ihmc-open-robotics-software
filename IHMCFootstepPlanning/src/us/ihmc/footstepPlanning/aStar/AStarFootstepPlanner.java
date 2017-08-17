@@ -6,6 +6,7 @@ import java.util.PriorityQueue;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -13,10 +14,10 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.aStar.implementations.*;
+import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -194,7 +195,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
          }
 
          RobotSide nodeSide = nodeToExpand.getRobotSide();
-         if (nodeToExpand.equals(goalNodes.get(nodeSide)))
+         if (nodeToExpand.equals(goalNodes.get(nodeSide))) // ?
          {
             goalNode = goalNodes.get(nodeSide.getOppositeSide());
             graph.checkAndSetEdge(nodeToExpand, goalNode, 0.0);
@@ -204,6 +205,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
          HashSet<FootstepNode> neighbors = nodeExpansion.expandNode(nodeToExpand);
          for (FootstepNode neighbor : neighbors)
          {
+            /** Checks if the footstep (center of the foot) is on a planar region*/
             if (!nodeChecker.isNodeValid(neighbor, nodeToExpand))
                continue;
 
@@ -245,12 +247,12 @@ public class AStarFootstepPlanner implements FootstepPlanner
          throw new RuntimeException("Planner does not support goals other then " + supportedGoalType);
    }
 
-   public static AStarFootstepPlanner createFlatGroundPlanner(GraphVisualization viz, SideDependentList<ConvexPolygon2D> footPolygons, YoVariableRegistry registry)
+   public static AStarFootstepPlanner createFlatGroundPlanner(GraphVisualization viz, SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeExpansion expansion, YoVariableRegistry registry)
    {
       double yawWeight = 0.1;
 
       AlwaysValidNodeChecker nodeChecker = new AlwaysValidNodeChecker();
-      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
+      //SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper(footPolygons);
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(yawWeight, registry);
@@ -260,13 +262,13 @@ public class AStarFootstepPlanner implements FootstepPlanner
    }
 
    public static AStarFootstepPlanner createRoughTerrainPlanner(GraphVisualization viz, SideDependentList<ConvexPolygon2D> footPolygons,
-                                                                YoVariableRegistry registry)
+                                                                FootstepNodeExpansion expansion, YoVariableRegistry registry)
    {
       double yawWeight = 0.1;
 
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(footPolygons, snapper, registry);
-      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
+      //SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(yawWeight, registry);
       DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(yawWeight, registry);

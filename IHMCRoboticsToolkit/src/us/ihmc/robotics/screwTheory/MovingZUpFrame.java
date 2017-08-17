@@ -1,8 +1,8 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MovingZUpFrame extends MovingReferenceFrame
 {

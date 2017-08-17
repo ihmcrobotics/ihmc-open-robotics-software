@@ -2,7 +2,7 @@ package us.ihmc.wholeBodyController;
 
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
@@ -13,7 +13,7 @@ public interface WholeBodyControllerParameters
    /**
     * Returns the parameters used to create Footstep Plans.
     */
-   default public FootstepPlanningParameters getFootstepPlanningParameters()
+   default public QuadTreeFootstepPlanningParameters getQuadTreeFootstepPlanningParameters()
    {
       return null;
    }

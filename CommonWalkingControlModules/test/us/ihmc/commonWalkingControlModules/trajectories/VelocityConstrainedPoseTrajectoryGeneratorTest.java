@@ -10,15 +10,16 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
@@ -94,8 +95,8 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       FrameOrientation initialOrientation = new FrameOrientation(worldFrame);
       FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
 
-      FramePoint3D initialPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
-      FramePoint3D finalPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
+      FramePoint3D initialPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 10.0, 10.0, 10.0);
+      FramePoint3D finalPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 10.0, 10.0, 10.0);
 
       trajToTest.setInitialPoseWithoutInitialVelocity(initialPosition, initialOrientation);
       trajToTest.setFinalPoseWithoutFinalVelocity(new FramePose(finalPosition, finalOrientation));
@@ -150,9 +151,9 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       double time = 1.0;
       VelocityConstrainedPoseTrajectoryGenerator trajToTest = new VelocityConstrainedPoseTrajectoryGenerator("Traj1", worldFrame, registry);
 
-      FramePoint3D initialPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
-      FrameVector3D initialVelocity = FrameVector3D.generateRandomFrameVector(random, worldFrame);
-      FramePoint3D finalPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
+      FramePoint3D initialPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 10.0, 10.0, 10.0);
+      FrameVector3D initialVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame);
+      FramePoint3D finalPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 10.0, 10.0, 10.0);
 
       FrameOrientation initialOrientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0);
       FrameVector3D initialAngularVelocity = new FrameVector3D(worldFrame, 0.0, 0.0, 0.0);
@@ -258,13 +259,13 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       double time = 1.0;
       VelocityConstrainedPoseTrajectoryGenerator trajToTest = new VelocityConstrainedPoseTrajectoryGenerator("Traj1", worldFrame, registry);
 
-      FramePoint3D initialPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
-      FrameVector3D initialVelocity = FrameVector3D.generateRandomFrameVector(random, worldFrame);
-      FramePoint3D finalPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 10.0, 10.0, 10.0);
-      FrameVector3D finalVelocity = FrameVector3D.generateRandomFrameVector(random, worldFrame);
+      FramePoint3D initialPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 10.0, 10.0, 10.0);
+      FrameVector3D initialVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame);
+      FramePoint3D finalPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 10.0, 10.0, 10.0);
+      FrameVector3D finalVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame);
 
       FrameOrientation initialOrientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0);
-      FrameVector3D initialAngularVelocity = FrameVector3D.generateRandomFrameVector(random, worldFrame);
+      FrameVector3D initialAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame);
       FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
       FrameVector3D finalAngularVelocity = new FrameVector3D(worldFrame, 1.0, 0.0, 0.0);//.generateRandomFrameVector(random, worldFrame);
 
@@ -383,8 +384,8 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       VelocityConstrainedPoseTrajectoryGenerator trajToTest = new VelocityConstrainedPoseTrajectoryGenerator("blop", worldFrame, registry);
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
-      FramePoint3D initialPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 100.0, 100.0, 100.0);
-      FramePoint3D finalPosition = FramePoint3D.generateRandomFramePoint(random, worldFrame, 100.0, 100.0, 100.0);
+      FramePoint3D initialPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
+      FramePoint3D finalPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
 
       FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
       FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);

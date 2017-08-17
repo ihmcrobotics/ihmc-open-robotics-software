@@ -1,13 +1,16 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * Double-geodesic PD controller with feed forward for a left-invariant system (i.e. in body coordinates)
@@ -38,7 +41,7 @@ public class SE3PIDController
       this(namePrefix, bodyFrame, dt, null, registry);
    }
 
-   public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, double dt, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
+   public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, double dt, YoPIDSE3Gains gains, YoVariableRegistry registry)
    {
       this.bodyFrame = bodyFrame;
       if (gains != null)
@@ -219,18 +222,18 @@ public class SE3PIDController
       orientationController.setMaxProportionalError(maxProportionalError);
    }
 
-   public void setGains(SE3PIDGainsInterface gains)
+   public void setGains(PIDSE3Gains gains)
    {
       positionController.setGains(gains.getPositionGains());
       orientationController.setGains(gains.getOrientationGains());
    }
 
-   public void setPositionGains(PositionPIDGainsInterface gains)
+   public void setPositionGains(PID3DGains gains)
    {
       positionController.setGains(gains);
    }
 
-   public void setOrientationGains(OrientationPIDGainsInterface gains)
+   public void setOrientationGains(PID3DGains gains)
    {
       orientationController.setGains(gains);
    }

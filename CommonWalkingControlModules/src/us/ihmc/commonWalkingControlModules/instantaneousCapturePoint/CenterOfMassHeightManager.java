@@ -14,15 +14,15 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
@@ -71,13 +71,12 @@ public class CenterOfMassHeightManager
 
       //some nasty copying, There is a gain frame issue in the feedback controller so we need to set the gains for x, y, and z
       YoPDGains pdGains = walkingControllerParameters.createCoMHeightControlGains(registry);
-      YoSymmetricSE3PIDGains pidGains = new YoSymmetricSE3PIDGains("pelvisHeightManager", registry);
-      pidGains.setProportionalGains(pdGains.getKp(), pdGains.getKp(), pdGains.getKp());
-      pidGains.setDampingRatio(pdGains.getZeta());
+      SymmetricYoPIDSE3Gains pidGains = new SymmetricYoPIDSE3Gains("pelvisHeightManager", registry);
+      pidGains.setProportionalGains(pdGains.getKp());
+      pidGains.setDampingRatios(pdGains.getZeta());
 
       //this affects tracking in sim, not sure if it will be needed for the real robot
 //      pidGains.setMaxFeedbackAndFeedbackRate(pdGains.getMaximumFeedback(), pdGains.getMaximumFeedbackRate());
-      pidGains.createDerivativeGainUpdater(true);
 
       //User mode
       pelvisHeightControlState = new PelvisHeightControlState(pidGains, controllerToolbox, walkingControllerParameters, registry);

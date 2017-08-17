@@ -1,14 +1,14 @@
 package us.ihmc.simulationconstructionset.simulatedSensors;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.corruptors.NoisyYoDouble;
 import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RawSensorReader;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
@@ -175,7 +175,7 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
       compass.set(compassX.getDoubleValue(), compassY.getDoubleValue(), compassZ.getDoubleValue());
 
       rawSensors.setOrientation(orientation, imuIndex);
-      rawSensors.setAcceleration(acceleration.getVectorCopy(), imuIndex);
+      rawSensors.setAcceleration(new Vector3D(acceleration), imuIndex);
       rawSensors.setAngularVelocity(angularVelocity, imuIndex);
       rawSensors.setCompass(compass, imuIndex);
    }

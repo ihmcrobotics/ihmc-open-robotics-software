@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
@@ -16,9 +19,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
@@ -27,7 +28,6 @@ import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
@@ -308,8 +308,10 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       else
       {
          currentPosition.interpolate(initialPosition, finalPosition, quinticParameterPolynomial.getPosition());
-         currentVelocity.subAndScale(alphaVel, finalPosition, initialPosition);
-         currentAcceleration.subAndScale(alphaAcc, finalPosition, initialPosition);
+         currentVelocity.sub(finalPosition, initialPosition);
+         currentVelocity.scale(alphaVel);
+         currentAcceleration.sub(finalPosition, initialPosition);
+         currentAcceleration.scale(alphaAcc);
 
          currentOrientation.interpolate(initialOrientation, finalOrientation, quinticParameterPolynomial.getPosition());
          orientationInterpolationCalculator.computeAngularVelocity(currentAngularVelocity, initialOrientation, finalOrientation, alphaAngVel);

@@ -1,17 +1,21 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class AxisAngleOrientationController
 {
@@ -21,15 +25,13 @@ public class AxisAngleOrientationController
    private final YoFrameVector rotationErrorCumulated;
    private final YoFrameVector velocityError;
 
-   private final Matrix3DReadOnly proportionalGainMatrix;
-   private final Matrix3DReadOnly derivativeGainMatrix;
-   private final Matrix3DReadOnly integralGainMatrix;
+   private final Matrix3D tempGainMatrix = new Matrix3D();
 
    private final ReferenceFrame bodyFrame;
    private final FrameVector3D proportionalTerm;
    private final FrameVector3D derivativeTerm;
    private final FrameVector3D integralTerm;
-   
+
    private final FrameOrientation desiredOrientation = new FrameOrientation();
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardAngularAction = new FrameVector3D();
@@ -43,14 +45,14 @@ public class AxisAngleOrientationController
 
    private final double dt;
 
-   private final YoOrientationPIDGainsInterface gains;
+   private final YoPID3DGains gains;
 
    public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoVariableRegistry parentRegistry)
    {
       this(prefix, bodyFrame, dt, null, parentRegistry);
    }
 
-   public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoOrientationPIDGainsInterface gains,
+   public AxisAngleOrientationController(String prefix, ReferenceFrame bodyFrame, double dt, YoPID3DGains gains,
          YoVariableRegistry parentRegistry)
    {
       this.dt = dt;
@@ -58,12 +60,9 @@ public class AxisAngleOrientationController
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
 
       if (gains == null)
-         gains = new YoAxisAngleOrientationGains(prefix, registry);
+         gains = new DefaultYoPID3DGains(prefix, GainCoupling.NONE, true, registry);
 
       this.gains = gains;
-      proportionalGainMatrix = gains.createProportionalGainMatrix();
-      derivativeGainMatrix = gains.createDerivativeGainMatrix();
-      integralGainMatrix = gains.createIntegralGainMatrix();
 
       rotationErrorInBody = new YoFrameVector(prefix + "RotationErrorInBody", bodyFrame, registry);
       rotationErrorCumulated = new YoFrameVector(prefix + "RotationErrorCumulated", bodyFrame, registry);
@@ -119,7 +118,7 @@ public class AxisAngleOrientationController
       feedForward.changeFrame(bodyFrame);
       output.add(feedForward);
    }
-   
+
    /**
     * Computes using Twists, ignores linear part
     */
@@ -137,7 +136,7 @@ public class AxisAngleOrientationController
       compute(angularActionFromOrientationController, desiredOrientation, desiredAngularVelocity, null, feedForwardAngularAction);
       twistToPack.setAngularPart(angularActionFromOrientationController.getVector());
    }
-   
+
    private void checkBodyFrames(Twist desiredTwist, Twist currentTwist)
    {
       desiredTwist.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
@@ -173,7 +172,8 @@ public class AxisAngleOrientationController
       proportionalTerm.scale(errorAngleAxis.getAngle());
       rotationErrorInBody.set(proportionalTerm);
 
-      proportionalGainMatrix.transform(proportionalTerm.getVector());
+      gains.getProportionalGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(proportionalTerm.getVector());
    }
 
    private void computeDerivativeTerm(FrameVector3D desiredAngularVelocity, FrameVector3D currentAngularVelocity)
@@ -192,7 +192,8 @@ public class AxisAngleOrientationController
       }
 
       velocityError.set(derivativeTerm);
-      derivativeGainMatrix.transform(derivativeTerm.getVector());
+      gains.getDerivativeGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(derivativeTerm.getVector());
    }
 
    private void computeIntegralTerm()
@@ -216,7 +217,8 @@ public class AxisAngleOrientationController
       }
 
       rotationErrorCumulated.getFrameTuple(integralTerm);
-      integralGainMatrix.transform(integralTerm.getVector());
+      gains.getIntegralGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(integralTerm.getVector());
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
@@ -264,7 +266,7 @@ public class AxisAngleOrientationController
       gains.setMaxProportionalError(maxProportionalError);
    }
 
-   public void setGains(OrientationPIDGainsInterface gains)
+   public void setGains(PID3DGainsReadOnly gains)
    {
       this.gains.set(gains);
    }
