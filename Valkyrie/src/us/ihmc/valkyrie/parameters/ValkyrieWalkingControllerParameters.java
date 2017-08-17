@@ -371,7 +371,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    private PIDGains createArmControlGains()
    {
-      PIDGains armGains = new PIDGains("_NeckJointGains");
+      PIDGains armGains = new PIDGains("_ArmJointGains");
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       double kp = runningOnRealRobot ? 200.0 : 120.0; // 200.0
