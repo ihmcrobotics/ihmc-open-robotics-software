@@ -386,6 +386,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       kinematicsSolver.initialize();
 
       kinematicsSolver.holdCurrentTrajectoryMessages();
+      
       /*
        * set whole body tasks.
        */
