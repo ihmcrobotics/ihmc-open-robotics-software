@@ -21,18 +21,18 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlP
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -523,14 +523,14 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public YoSE3PIDGainsInterface createToeOffFootControlGains(YoVariableRegistry registry)
+      public YoPIDSE3Gains createToeOffFootControlGains(YoVariableRegistry registry)
       {
          // TODO Auto-generated method stub
          return null;
       }
 
       @Override
-      public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
+      public YoPIDSE3Gains createSwingFootControlGains(YoVariableRegistry registry)
       {
          // TODO Auto-generated method stub
          return null;
@@ -544,7 +544,7 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry)
+      public YoPIDSE3Gains createHoldPositionFootControlGains(YoVariableRegistry registry)
       {
          // TODO Auto-generated method stub
          return null;

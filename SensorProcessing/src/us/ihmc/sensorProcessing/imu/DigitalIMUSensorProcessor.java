@@ -2,10 +2,10 @@ package us.ihmc.sensorProcessing.imu;
 
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.sensors.ProcessedIMUSensorsWriteOnlyInterface;
 import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
 

@@ -1,18 +1,17 @@
 package us.ihmc.robotics.geometry.frameObjects;
 
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.geometry.AbstractFrameObject;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
-import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameEuclideanWaypoint extends AbstractFrameObject<FrameEuclideanWaypoint, EuclideanWaypoint>
+public class FrameEuclideanWaypoint extends FrameGeometryObject<FrameEuclideanWaypoint, EuclideanWaypoint>
       implements EuclideanWaypointInterface<FrameEuclideanWaypoint>
 {
    private final EuclideanWaypoint geometryObject;
@@ -176,11 +175,5 @@ public class FrameEuclideanWaypoint extends AbstractFrameObject<FrameEuclideanWa
    {
       euclideanWaypoint.setPosition(geometryObject.getPosition());
       euclideanWaypoint.setLinearVelocity(geometryObject.getLinearVelocity());
-   }
-
-   @Override
-   public String toString()
-   {
-      return WaypointToStringTools.waypointToString(this);
    }
 }

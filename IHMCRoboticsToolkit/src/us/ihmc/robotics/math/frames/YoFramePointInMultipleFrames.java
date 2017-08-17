@@ -3,14 +3,14 @@ package us.ihmc.robotics.math.frames;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameTuple2D;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameTuple3D;
-import us.ihmc.robotics.geometry.FrameTuple2D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMultipleFramesHolder
 {
@@ -61,16 +61,16 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
       set(yoFrameTuple);
    }
 
-   public void setXYIncludingFrame(FrameTuple2D<?, ?> frameTuple2d)
+   public void setIncludingFrame(FrameTuple2D<?, ?> frameTuple2d, double z)
    {
       multipleFramesHelper.switchCurrentReferenceFrame(frameTuple2d.getReferenceFrame());
-      setXY(frameTuple2d);
+      set(frameTuple2d, z);
    }
 
-   public void setXYIncludingFrame(YoFrameTuple2d<?, ?> yoFrameTuple2d)
+   public void setIncludingFrame(YoFrameTuple2d<?, ?> yoFrameTuple2d, double z)
    {
       multipleFramesHelper.switchCurrentReferenceFrame(yoFrameTuple2d.getReferenceFrame());
-      setXY(yoFrameTuple2d);
+      set(yoFrameTuple2d, z);
    }
 
    /**

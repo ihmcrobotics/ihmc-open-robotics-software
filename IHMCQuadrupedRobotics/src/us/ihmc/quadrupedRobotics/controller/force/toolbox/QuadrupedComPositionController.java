@@ -1,13 +1,15 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.EuclideanPositionController;
-import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedComPositionController
 {
@@ -43,7 +45,7 @@ public class QuadrupedComPositionController
 
    private final ReferenceFrame comZUpFrame;
    private final EuclideanPositionController comPositionController;
-   private final YoEuclideanPositionGains comPositionControllerGains;
+   private final YoPID3DGains comPositionControllerGains;
    private final YoFramePoint yoComPositionSetpoint;
    private final YoFrameVector yoComVelocitySetpoint;
    private final YoFrameVector yoComForceFeedforwardSetpoint;
@@ -52,7 +54,7 @@ public class QuadrupedComPositionController
    {
       this.comZUpFrame = comZUpFrame;
       comPositionController = new EuclideanPositionController("comPosition", comZUpFrame, controlDT, registry);
-      comPositionControllerGains = new YoEuclideanPositionGains("comPosition", registry);
+      comPositionControllerGains = new DefaultYoPID3DGains("comPosition", GainCoupling.NONE, true, registry);
       yoComPositionSetpoint = new YoFramePoint("comPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
       yoComVelocitySetpoint = new YoFrameVector("comVelocitySetpoint", ReferenceFrame.getWorldFrame(), registry);
       yoComForceFeedforwardSetpoint = new YoFrameVector("comForceFeedforwardSetpoint", ReferenceFrame.getWorldFrame(), registry);
@@ -63,7 +65,7 @@ public class QuadrupedComPositionController
       return comZUpFrame;
    }
 
-   public YoEuclideanPositionGains getGains()
+   public YoPID3DGains getGains()
    {
       return comPositionControllerGains;
    }

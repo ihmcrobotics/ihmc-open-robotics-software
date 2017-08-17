@@ -1,10 +1,13 @@
 package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * FrameLineSegment whose aim is to be used in 3D robot controllers. Keep GC-free!
@@ -13,7 +16,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * 
  * @author dcalvert
  */
-public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, LineSegment3D>
+public class FrameLineSegment extends FrameGeometryObject<FrameLineSegment, LineSegment3D>
 {
    private final LineSegment3D lineSegment3d;
 

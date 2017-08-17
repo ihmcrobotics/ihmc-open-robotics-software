@@ -10,10 +10,10 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CenterOfMassAccelerationCalculatorTest
 {
@@ -55,7 +55,7 @@ public class CenterOfMassAccelerationCalculatorTest
 
       Vector3D expected = jointAcceleration.getLinearPartCopy();
       rotationMatrix.transform(expected);
-      EuclidCoreTestTools.assertTuple3DEquals(expected, comAcceleration.getVectorCopy(), 1e-5);
+      EuclidCoreTestTools.assertTuple3DEquals(expected, comAcceleration, 1e-5);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -94,7 +94,7 @@ public class CenterOfMassAccelerationCalculatorTest
       FrameVector3D comAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame());
       comAccelerationCalculator.getCoMAcceleration(comAcceleration);
 
-      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), comAcceleration.getVectorCopy(), 1e-5);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), comAcceleration, 1e-5);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

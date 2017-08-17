@@ -2,6 +2,11 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.awt.Color;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -18,17 +23,12 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d.IntersectionResult;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * This class can detect if the foot is on partial support.
@@ -140,7 +140,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    public void compute(FramePoint2D desiredCoP, FramePoint2D centerOfPressure)
    {
       centerOfPressure.checkReferenceFrameMatch(soleFrame);
-      cop.setXYIncludingFrame(centerOfPressure);
+      cop.setIncludingFrame(centerOfPressure, 0.0);
       cop.changeFrame(worldFrame);
 
       // assuming flat ground:
@@ -157,7 +157,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       // intersect the foot plane and the ground plane
       footNormal.setIncludingFrame(soleFrame, 0.0, 0.0, 1.0);
       footNormal.changeFrame(worldFrame);
-      footNormal.getVector(footNormalVector);
+      footNormal.get(footNormalVector);
       footNormalVector.normalize();
       lineOfContactVector.cross(normal, footNormalVector);
       if (lineOfContactVector.epsilonEquals(zero, 10E-12)) return;
@@ -170,8 +170,8 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       angleFootGround.set(alpha);
       footRotating.set(alpha > angleTreshold.getDoubleValue());
 
-      centerOfRotation2d.setByProjectionOntoXYPlane(cop);
-      lineOfRotation2d.setByProjectionOntoXYPlane(lineOfContact);
+      centerOfRotation2d.set(cop);
+      lineOfRotation2d.set(lineOfContact);
       lineOfRotationInWorldFrame.set(centerOfRotation2d, lineOfRotation2d);
 
       lineOfRotationInSoleFrame.setIncludingFrame(lineOfRotationInWorldFrame);

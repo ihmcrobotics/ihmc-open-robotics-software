@@ -7,6 +7,11 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -22,17 +27,12 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -483,8 +483,8 @@ public class Step7IDandSCSRobot_pinKnee extends Robot
       centerOfMass.changeFrame(worldFrame);
       centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);
       centerOfMassVelocity.changeFrame(worldFrame); //to make sure that we are actually in world frame
-      centerOfMass2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMass);
-      centerOfMassVelocity2d.setByProjectionOntoXYPlaneIncludingFrame(centerOfMassVelocity);
+      centerOfMass2d.setIncludingFrame(centerOfMass);
+      centerOfMassVelocity2d.setIncludingFrame(centerOfMassVelocity);
 
       yoCoM.set(centerOfMass);
       yoCoMVelocity.set(centerOfMassVelocity);

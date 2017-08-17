@@ -12,18 +12,19 @@ import us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith.FootLeapOf
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPoseTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -34,7 +35,6 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoin
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
@@ -152,7 +152,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final SwingTrajectoryParameters swingTrajectoryParameters;
 
    public SwingState(FootControlHelper footControlHelper, YoFrameVector yoTouchdownVelocity, YoFrameVector yoTouchdownAcceleration,
-         YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
+         YoPIDSE3Gains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.SWING, footControlHelper, gains, registry);
 
@@ -272,10 +272,10 @@ public class SwingState extends AbstractUnconstrainedState
       FramePoint2D toeContactPoint2d = new FramePoint2D();
       contactableFoot.getToeOffContactPoint(toeContactPoint2d);
       FramePoint3D toeContactPoint = new FramePoint3D();
-      toeContactPoint.setXYIncludingFrame(toeContactPoint2d);
+      toeContactPoint.setIncludingFrame(toeContactPoint2d, 0.0);
       toeContactPoint.changeFrame(footFrame);
 
-      transformFromToeToAnkle.setTranslation(toeContactPoint.getVectorCopy());
+      transformFromToeToAnkle.setTranslation(toeContactPoint);
       return ReferenceFrame.constructFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() + "ToeFrame", footFrame, transformFromToeToAnkle);
    }
 

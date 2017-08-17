@@ -6,18 +6,18 @@ import us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith.PelvisLeap
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -65,7 +65,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame desiredPelvisFrame;
 
-   private final YoOrientationPIDGainsInterface gains;
+   private final YoPID3DGains gains;
 
    private Footstep nextFootstep;
    private final ReferenceFrame nextSoleZUpFrame;
@@ -73,7 +73,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
    private final PelvisOffsetTrajectoryWhileWalking offsetTrajectoryWhileWalking;
 
-   public ControllerPelvisOrientationManager(YoOrientationPIDGainsInterface gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
+   public ControllerPelvisOrientationManager(YoPID3DGains gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
                                              LeapOfFaithParameters leapOfFaithParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
                                              YoVariableRegistry parentRegistry)
    {

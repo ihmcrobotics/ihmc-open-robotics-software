@@ -1,11 +1,9 @@
 package us.ihmc.avatar;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Random;
-
-import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
@@ -14,8 +12,8 @@ import org.junit.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -24,10 +22,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
@@ -65,7 +61,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
    }
 
    @Test
-   public void testCircleWalk() throws SimulationExceededMaximumTimeException
+   public void testForwardWalk() throws SimulationExceededMaximumTimeException
    {
       setupTest();
       setupCameraSideView();

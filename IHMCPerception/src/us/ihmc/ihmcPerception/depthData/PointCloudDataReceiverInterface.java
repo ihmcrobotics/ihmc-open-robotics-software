@@ -2,8 +2,8 @@ package us.ihmc.ihmcPerception.depthData;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public interface PointCloudDataReceiverInterface
 {

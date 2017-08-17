@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -24,20 +25,18 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class RigidBodyControlManager
 {
@@ -143,8 +142,8 @@ public class RigidBodyControlManager
          loadBearingControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
    }
 
-   public void setGains(Map<String, YoPIDGains> jointspaceGains, YoOrientationPIDGainsInterface taskspaceOrientationGains,
-         YoPositionPIDGainsInterface taskspacePositionGains)
+   public void setGains(Map<String, YoPIDGains> jointspaceGains, YoPID3DGains taskspaceOrientationGains,
+                        YoPID3DGains taskspacePositionGains)
    {
       jointspaceControlState.setGains(jointspaceGains);
       taskspaceControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);

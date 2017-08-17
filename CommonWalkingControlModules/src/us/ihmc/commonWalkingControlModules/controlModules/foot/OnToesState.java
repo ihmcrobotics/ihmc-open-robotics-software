@@ -11,18 +11,18 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -60,7 +60,7 @@ public class OnToesState extends AbstractFootControlState
 
    private final ReferenceFrame soleZUpFrame;
 
-   public OnToesState(FootControlHelper footControlHelper, ToeOffCalculator toeOffCalculator, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
+   public OnToesState(FootControlHelper footControlHelper, ToeOffCalculator toeOffCalculator, YoPIDSE3Gains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.TOES, footControlHelper);
 
@@ -243,12 +243,12 @@ public class OnToesState extends AbstractFootControlState
    {
       toeOffCalculator.getToeOffContactPoint(toeOffContactPoint2d, robotSide);
 
-      contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
+      contactPointPosition.setIncludingFrame(toeOffContactPoint2d, 0.0);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       feedbackControlCommand.setControlFrameFixedInEndEffector(contactPointPosition);
       toeOffFrame.updateTranslation(contactPointPosition);
 
-      desiredContactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
+      desiredContactPointPosition.setIncludingFrame(toeOffContactPoint2d, 0.0);
       desiredContactPointPosition.changeFrame(worldFrame);
    }
 
@@ -257,12 +257,12 @@ public class OnToesState extends AbstractFootControlState
       toeOffCalculator.getToeOffContactLine(toeOffContactLine2d, robotSide);
       toeOffContactLine2d.midpoint(toeOffContactPoint2d);
 
-      contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
+      contactPointPosition.setIncludingFrame(toeOffContactPoint2d, 0.0);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       toeOffFrame.updateTranslation(contactPointPosition);
       feedbackControlCommand.setControlFrameFixedInEndEffector(contactPointPosition);
 
-      desiredContactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
+      desiredContactPointPosition.setIncludingFrame(toeOffContactPoint2d, 0.0);
       desiredContactPointPosition.changeFrame(worldFrame);
    }
 

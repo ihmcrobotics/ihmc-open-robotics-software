@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -10,16 +10,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.frameObjects.FrameSE3Waypoint;
 import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3TrajectoryPoint, SimpleSE3TrajectoryPoint>
       implements SE3TrajectoryPointInterface<FrameSE3TrajectoryPoint>
@@ -427,13 +424,4 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
    {
       return geometryObject.getAngularVelocityZ();
    }
-
-   @Override
-   public String toString()
-   {
-      NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
-      String timeToString = "time = " + doubleFormat.format(getTime());
-      return "SE3 trajectory point: (" + timeToString + ", " + geometryObject + ")";
-   }
-
 }

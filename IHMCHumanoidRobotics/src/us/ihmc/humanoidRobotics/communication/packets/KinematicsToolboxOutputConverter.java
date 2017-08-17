@@ -1,10 +1,12 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
@@ -18,9 +20,7 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

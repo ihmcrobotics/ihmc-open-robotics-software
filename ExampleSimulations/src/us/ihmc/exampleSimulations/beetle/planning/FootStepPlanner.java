@@ -3,6 +3,10 @@ package us.ihmc.exampleSimulations.beetle.planning;
 import java.awt.Color;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
@@ -12,22 +16,19 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FootStepPlanner
 {
@@ -144,7 +145,7 @@ public class FootStepPlanner
       offsetFromBodyToFoot.scale(footScalarFromNominalToBody.getX(), footScalarFromNominalToBody.getY(), footScalarFromNominalToBody.getZ());
       
       desiredVelocityScaled.setToNaN(desiredLinearVelocity.getReferenceFrame());
-      desiredVelocityScaled.scale(swingTime * swingTimeScalar.getDoubleValue(), desiredLinearVelocity);
+      desiredVelocityScaled.setAndScale(swingTime * swingTimeScalar.getDoubleValue(), desiredLinearVelocity);
       desiredVelocityScaled.changeFrame(centerOfMassFrameWithOrientation);
       
 //      if(desiredAngularVelocity.length() > 0.003)
@@ -163,7 +164,7 @@ public class FootStepPlanner
          bodyPoseProjectedInFuture.setToZero(bodyZUpFrame);
          bodyPoseProjectedInFuture.getPositionIncludingFrame(bodyPositionProjectedInFuture);
          centerOfTurn.changeFrame(bodyZUpFrame);
-         bodyPositionProjectedInFuture.yawAboutPoint(centerOfTurn, bodyPositionProjectedInFuture, desiredAngularVelocity.getZ() * swingTime);
+         GeometryTools.yawAboutPoint(bodyPositionProjectedInFuture, centerOfTurn, desiredAngularVelocity.getZ() * swingTime, bodyPositionProjectedInFuture);
          bodyPoseProjectedInFuture.setPosition(bodyPositionProjectedInFuture);
          bodyFrameProjectedInFuture.setPoseAndUpdate(bodyPoseProjectedInFuture);
          

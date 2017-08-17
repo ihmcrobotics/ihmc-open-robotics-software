@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.SideDependentList;
 

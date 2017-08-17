@@ -8,11 +8,11 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public abstract class TransferState extends WalkingState
