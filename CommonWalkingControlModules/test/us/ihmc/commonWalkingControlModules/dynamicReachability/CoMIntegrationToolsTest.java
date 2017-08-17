@@ -6,14 +6,14 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerS
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CoMIntegrationToolsTest
 {
@@ -57,10 +57,10 @@ public class CoMIntegrationToolsTest
       icpTrajectoryGenerator.setInitialCoMPosition(initialCoM, worldFrame);
       icpTrajectoryGenerator.initialize();
 
-      FramePoint finalCoM = new FramePoint();
+      FramePoint3D finalCoM = new FramePoint3D();
       icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM);
 
-      FramePoint dummyPoint = new FramePoint();
+      FramePoint3D dummyPoint = new FramePoint3D();
 
       double time = 0.0;
       while (time < duration)
@@ -142,10 +142,10 @@ public class CoMIntegrationToolsTest
       icpTrajectoryGenerator.setTrajectoryTime(swingInitialDuration, swingFinalDuration);
       icpTrajectoryGenerator.initialize();
 
-      FramePoint finalCoM = new FramePoint();
+      FramePoint3D finalCoM = new FramePoint3D();
       icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM);
 
-      FramePoint dummyPoint = new FramePoint();
+      FramePoint3D dummyPoint = new FramePoint3D();
 
       double time = 0.0;
       while (time < swingDuration)
@@ -229,10 +229,10 @@ public class CoMIntegrationToolsTest
       icpTrajectoryGenerator.setTrajectoryTime(swingInitialDuration, swingFinalDuration);
       icpTrajectoryGenerator.initialize();
 
-      FramePoint finalCoM = new FramePoint();
+      FramePoint3D finalCoM = new FramePoint3D();
       icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM);
 
-      FramePoint dummyPoint = new FramePoint();
+      FramePoint3D dummyPoint = new FramePoint3D();
 
       double time = 0.0;
       while (time < swingDuration)

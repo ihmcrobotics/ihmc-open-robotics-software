@@ -8,11 +8,11 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public abstract class TransferState extends WalkingState
@@ -28,13 +28,13 @@ public abstract class TransferState extends WalkingState
    protected final PelvisOrientationManager pelvisOrientationManager;
    protected final FeetManager feetManager;
 
-   private final FramePoint2d desiredICPLocal = new FramePoint2d();
-   private final FramePoint2d capturePoint2d = new FramePoint2d();
-   private final FramePoint2d desiredCMP = new FramePoint2d();
+   private final FramePoint2D desiredICPLocal = new FramePoint2D();
+   private final FramePoint2D capturePoint2d = new FramePoint2D();
+   private final FramePoint2D desiredCMP = new FramePoint2D();
 
-   private final FramePoint2d filteredDesiredCoP = new FramePoint2d();
-   private final FramePoint2d desiredCoP = new FramePoint2d();
-   private final FramePoint nextExitCMP = new FramePoint();
+   private final FramePoint2D filteredDesiredCoP = new FramePoint2D();
+   private final FramePoint2D desiredCoP = new FramePoint2D();
+   private final FramePoint3D nextExitCMP = new FramePoint3D();
 
    public TransferState(RobotSide transferToSide, WalkingStateEnum transferStateEnum, WalkingMessageHandler walkingMessageHandler,
          HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,

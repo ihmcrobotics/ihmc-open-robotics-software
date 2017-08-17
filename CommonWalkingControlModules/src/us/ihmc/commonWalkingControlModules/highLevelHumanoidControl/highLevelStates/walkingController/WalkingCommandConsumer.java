@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
@@ -46,7 +47,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTraject
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;

@@ -1,7 +1,7 @@
 package us.ihmc.robotics.kinematics;
 
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
 /**
@@ -22,7 +22,7 @@ public interface KinematicsFollowLine
     * @param direction Orientation that the end effector must maintain
     * @return true if possible and false if impossible
     */
-   public boolean setPath(FramePoint start, FramePoint stop, FrameVector direction);
+   public boolean setPath(FramePoint3D start, FramePoint3D stop, FrameVector3D direction);
 
    /**
     * Checks to see if the desired robot joint angles need to be changed.  If they do, update them and return the appropriate status

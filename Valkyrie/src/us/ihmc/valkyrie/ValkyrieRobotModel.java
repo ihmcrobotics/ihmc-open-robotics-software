@@ -22,8 +22,9 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
@@ -54,6 +55,7 @@ import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
 import us.ihmc.valkyrie.parameters.ValkyrieCapturePointPlannerParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlannerParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlanningParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
@@ -84,7 +86,8 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
    private final Map<String, Double> standPrepAngles = (Map<String, Double>) YamlWithIncludesLoader.load("standPrep", "setpoints.yaml");
    private final RobotTarget target;
-
+   private final PlanarRegionFootstepPlanningParameters planarRegionFootstepPlanningParameters;
+   
    private final String[] resourceDirectories;
    {
          resourceDirectories = new String[]{
@@ -173,6 +176,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
+      planarRegionFootstepPlanningParameters = new ValkyrieFootstepPlannerParameters();
       capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(runningOnRealRobot);
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, target);
       stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation, jointMap);
@@ -379,7 +383,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public FootstepPlanningParameters getFootstepPlanningParameters()
+   public QuadTreeFootstepPlanningParameters getQuadTreeFootstepPlanningParameters()
    {
       return new ValkyrieFootstepPlanningParameters();
    }
@@ -502,5 +506,14 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public SliderBoardParameters getSliderBoardParameters()
    {
       return new ValkyrieSliderBoardParameters();
+   }
+   
+   /**
+    * Adds robot specific footstep parameters
+    */
+   @Override
+   public PlanarRegionFootstepPlanningParameters getPlanarRegionFootstepPlannerParameters()
+   {
+      return planarRegionFootstepPlanningParameters;
    }
 }

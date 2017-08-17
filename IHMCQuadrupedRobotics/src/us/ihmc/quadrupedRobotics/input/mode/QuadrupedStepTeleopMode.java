@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
 import net.java.games.input.Event;
@@ -24,8 +26,6 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 
@@ -175,7 +175,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    private void sendSingleFootstep(RobotQuadrant quadrant, double xStride, double yStride)
    {
       // TODO: Compute footstep goal position using more robust method.
-      FramePoint goalPosition = new FramePoint(referenceFrames.getFootFrame(quadrant));
+      FramePoint3D goalPosition = new FramePoint3D(referenceFrames.getFootFrame(quadrant));
       goalPosition.changeFrame(referenceFrames.getBodyZUpFrame());
       goalPosition.add(xStride, yStride, 0.0);
       goalPosition.changeFrame(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
@@ -195,7 +195,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    private void sendXGaitFootsteps(QuadrupedXGaitSettings xGaitSettings, Vector3D planarVelocity, int numberOfSteps)
    {
       ReferenceFrame supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
-      FramePoint supportCentroid = new FramePoint();
+      FramePoint3D supportCentroid = new FramePoint3D();
       supportCentroid.setToZero(supportFrame);
       supportCentroid.changeFrame(ReferenceFrame.getWorldFrame());
       FrameOrientation supportOrientation = new FrameOrientation();

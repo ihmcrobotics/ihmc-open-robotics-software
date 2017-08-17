@@ -3,9 +3,9 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
 
 public class TurnThenStraightOverheadPath extends CompositeOverheadPath
@@ -14,19 +14,19 @@ public class TurnThenStraightOverheadPath extends CompositeOverheadPath
    private StraightLineOverheadPath straightLinePath;
    private final static double defaultNoTranslationTolerance = 1e-14;
 
-   public TurnThenStraightOverheadPath(FramePose2d startPose, FramePoint2d endPoint, double headingOffsetFromPath)
+   public TurnThenStraightOverheadPath(FramePose2d startPose, FramePoint2D endPoint, double headingOffsetFromPath)
    {
       this(startPose, endPoint, headingOffsetFromPath, defaultNoTranslationTolerance);
    }
 
-   public TurnThenStraightOverheadPath(FramePose2d startPose, FramePoint2d endPoint, double headingOffsetFromPath, double noTranslationTolerance)
+   public TurnThenStraightOverheadPath(FramePose2d startPose, FramePoint2D endPoint, double headingOffsetFromPath, double noTranslationTolerance)
    {
       super(calculatePaths(startPose, endPoint, headingOffsetFromPath, noTranslationTolerance));
       turningPath = (TurningOverheadPath) this.paths.get(0);
       straightLinePath = (StraightLineOverheadPath) this.paths.get(1);
    }
 
-   private static List<OverheadPath> calculatePaths(FramePose2d startPose, FramePoint2d endPoint, double headingOffset, double noTranslationTolerance)
+   private static List<OverheadPath> calculatePaths(FramePose2d startPose, FramePoint2D endPoint, double headingOffset, double noTranslationTolerance)
    {
       startPose.checkReferenceFrameMatch(endPoint);
       double heading = AngleTools.calculateHeading(startPose, endPoint, headingOffset, noTranslationTolerance);

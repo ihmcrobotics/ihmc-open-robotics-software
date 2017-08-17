@@ -2,15 +2,15 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
 import static org.junit.Assert.assertTrue;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepValidityMetric;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -146,8 +146,8 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       // chord offset from bisector(diameter) needed separate from circular center offset!
       if (DEBUG)
          System.out.println("SemiCircularStepValidityMetric: stance = " + stance.toString() + " and swingEnd = " + swingEnd);
-      FrameVector translationFromFootCenterToCircleCenter = getTranslationVector(stance, circleCenterOffset);
-      FrameVector vectorToSwingEnd = offCenterVectorToSwingEnd(stance, swingEnd, translationFromFootCenterToCircleCenter);
+      FrameVector3D translationFromFootCenterToCircleCenter = getTranslationVector(stance, circleCenterOffset);
+      FrameVector3D vectorToSwingEnd = offCenterVectorToSwingEnd(stance, swingEnd, translationFromFootCenterToCircleCenter);
       double magnitudeSquared = vectorToSwingEnd.lengthSquared();
       valid &= magnitudeSquared <= footReachLimitInMeters * footReachLimitInMeters;
       assertValidIfTrue(message + " In distance check", assertValidity);
@@ -185,11 +185,11 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       stance.getPose(stanceFramePose);
       swingEnd.getPose(endingFramePose);
 
-      FramePoint2d initialPoint = new FramePoint2d();
+      FramePoint2D initialPoint = new FramePoint2D();
       initialFramePose.getPosition2dIncludingFrame(initialPoint);
-      FramePoint2d stancePoint = new FramePoint2d();
+      FramePoint2D stancePoint = new FramePoint2D();
       stanceFramePose.getPosition2dIncludingFrame(stancePoint);
-      FramePoint2d endPoint = new FramePoint2d();
+      FramePoint2D endPoint = new FramePoint2D();
       endingFramePose.getPosition2dIncludingFrame(endPoint);
       boolean swingsThroughStanceLeg;
       if ((initialPoint.getX() == endPoint.getX()) && (initialPoint.getY() == endPoint.getY()))
@@ -214,12 +214,12 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
    {
       RobotSide stanceFootstepSide = stance.getRobotSide();
 
-      FrameVector offset1 = getPerpendicularOffset(stanceFootstepSide, stanceFramePose, circleCenterOffset);
-      FrameVector offset2 = getPerpendicularOffset(stanceFootstepSide, stanceFramePose, -3 * footReachLimitInMeters);
-      FramePoint2d stanceInsideOffset = new FramePoint2d(ReferenceFrame.getWorldFrame(), offset1.getX(), offset1.getY());
-      FramePoint2d stanceOutsideOffset = new FramePoint2d(ReferenceFrame.getWorldFrame(), offset2.getX(), offset2.getY());
+      FrameVector3D offset1 = getPerpendicularOffset(stanceFootstepSide, stanceFramePose, circleCenterOffset);
+      FrameVector3D offset2 = getPerpendicularOffset(stanceFootstepSide, stanceFramePose, -3 * footReachLimitInMeters);
+      FramePoint2D stanceInsideOffset = new FramePoint2D(ReferenceFrame.getWorldFrame(), offset1.getX(), offset1.getY());
+      FramePoint2D stanceOutsideOffset = new FramePoint2D(ReferenceFrame.getWorldFrame(), offset2.getX(), offset2.getY());
       FrameLineSegment2d crossThroughLine = new FrameLineSegment2d(stanceInsideOffset, stanceOutsideOffset);
-      FramePoint2d intersectionPoint = crossThroughLine.intersectionWith(swingLine);
+      FramePoint2D intersectionPoint = crossThroughLine.intersectionWith(swingLine);
       boolean swingsThroughStanceLeg;
       if (intersectionPoint == null)
          swingsThroughStanceLeg = false;
@@ -228,24 +228,24 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       return swingsThroughStanceLeg;
    }
 
-   private static FrameVector getPerpendicularOffset(RobotSide stanceFootstepSide, FramePose stanceFramePose, double semiCircleOffset)
+   private static FrameVector3D getPerpendicularOffset(RobotSide stanceFootstepSide, FramePose stanceFramePose, double semiCircleOffset)
    {
       double sideOffset = semiCircleOffset * ((stanceFootstepSide == RobotSide.LEFT) ? -1 : 1);
       double offsetDirAngle = stanceFramePose.getYaw() + Math.PI / 2;
-      FrameVector offset = new FrameVector(ReferenceFrame.getWorldFrame(), new double[] { Math.cos(offsetDirAngle) * sideOffset,
+      FrameVector3D offset = new FrameVector3D(ReferenceFrame.getWorldFrame(), new double[] { Math.cos(offsetDirAngle) * sideOffset,
             Math.sin(offsetDirAngle) * sideOffset, 0 });
 
-      FramePoint stanceFramePosition = new FramePoint();
+      FramePoint3D stanceFramePosition = new FramePoint3D();
       stanceFramePose.getPositionIncludingFrame(stanceFramePosition);
-      FrameVector offsetStart = new FrameVector(stanceFramePosition);
+      FrameVector3D offsetStart = new FrameVector3D(stanceFramePosition);
       offsetStart.add(offset);
 
       return offsetStart;
    }
 
-   private FrameVector offCenterVectorToSwingEnd(Footstep stance, Footstep swingEnd, FrameVector translationFromFootCenterToCircleCenter)
+   private FrameVector3D offCenterVectorToSwingEnd(Footstep stance, Footstep swingEnd, FrameVector3D translationFromFootCenterToCircleCenter)
    {
-      FramePoint circleCenter;
+      FramePoint3D circleCenter;
       FramePose stanceSole = new FramePose();
       FramePose swingEndSole = new FramePose();
       stance.getPose(stanceSole);
@@ -254,19 +254,19 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       circleCenter = stanceSole.getFramePointCopy();
       circleCenter.add(translationFromFootCenterToCircleCenter);//change frame of translation first?
 
-      FrameVector vectorToSwingEnd = new FrameVector(ReferenceFrame.getWorldFrame());
+      FrameVector3D vectorToSwingEnd = new FrameVector3D(ReferenceFrame.getWorldFrame());
       vectorToSwingEnd.set(swingEndSole.getFramePointCopy().getPoint());
       vectorToSwingEnd.sub(circleCenter);
 
       return vectorToSwingEnd;
    }
 
-   private FrameVector getTranslationVector(Footstep stance, double circleCenterOffset)
+   private FrameVector3D getTranslationVector(Footstep stance, double circleCenterOffset)
    {
       RobotSide stanceSide = stance.getRobotSide();
 
       double yCenterDisplacementTowardsExpectedOtherFoot = (stanceSide == RobotSide.LEFT) ? -circleCenterOffset : circleCenterOffset;
-      FrameVector translationFromFootCenterToCircleCenter = new FrameVector(stance.getSoleReferenceFrame(), 0.0, yCenterDisplacementTowardsExpectedOtherFoot,
+      FrameVector3D translationFromFootCenterToCircleCenter = new FrameVector3D(stance.getSoleReferenceFrame(), 0.0, yCenterDisplacementTowardsExpectedOtherFoot,
             0.0);
       translationFromFootCenterToCircleCenter.changeFrame(ReferenceFrame.getWorldFrame());
       return translationFromFootCenterToCircleCenter;

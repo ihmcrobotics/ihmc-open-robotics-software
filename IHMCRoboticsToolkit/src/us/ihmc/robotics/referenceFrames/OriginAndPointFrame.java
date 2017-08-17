@@ -1,15 +1,16 @@
 package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
 
 public class OriginAndPointFrame extends ReferenceFrame
 {
    private static final long serialVersionUID = -3583775854419464525L;
-   private final FramePoint origin;
-   private final FramePoint positionToPointAt;
+   private final FramePoint3D origin;
+   private final FramePoint3D positionToPointAt;
    private final Vector3D xAxis = new Vector3D();
    private final Vector3D yAxis = new Vector3D();
    private final Vector3D zAxis = new Vector3D();
@@ -19,11 +20,11 @@ public class OriginAndPointFrame extends ReferenceFrame
    public OriginAndPointFrame(String name, ReferenceFrame parentFrame)
    {
       super(name, parentFrame);
-      this.origin = new FramePoint(parentFrame);
-      this.positionToPointAt = new FramePoint(parentFrame);
+      this.origin = new FramePoint3D(parentFrame);
+      this.positionToPointAt = new FramePoint3D(parentFrame);
    }
 
-   public void setOriginAndPositionToPointAt(FramePoint origin, FramePoint positionToPointAt)
+   public void setOriginAndPositionToPointAt(FramePoint3D origin, FramePoint3D positionToPointAt)
    {
       origin.changeFrame(parentFrame);
       this.origin.set(origin);

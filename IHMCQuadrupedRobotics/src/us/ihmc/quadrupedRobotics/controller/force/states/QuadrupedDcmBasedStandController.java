@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -14,8 +16,6 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedDcmBasedStandController implements QuadrupedController
@@ -59,7 +59,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
 
    // feedback controllers
    private final LinearInvertedPendulumModel lipModel;
-   private final FramePoint dcmPositionEstimate;
+   private final FramePoint3D dcmPositionEstimate;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final DivergentComponentOfMotionController.Setpoints dcmPositionControllerSetpoints;
    private final DivergentComponentOfMotionController dcmPositionController;
@@ -95,7 +95,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
 
       // feedback controllers
       lipModel = controllerToolbox.getLinearInvertedPendulumModel();
-      dcmPositionEstimate = new FramePoint();
+      dcmPositionEstimate = new FramePoint3D();
       dcmPositionEstimator = controllerToolbox.getDcmPositionEstimator();
       dcmPositionControllerSetpoints = new DivergentComponentOfMotionController.Setpoints();
       dcmPositionController = controllerToolbox.getDcmPositionController();

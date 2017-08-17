@@ -5,6 +5,8 @@ import java.awt.Color;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -19,10 +21,8 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -81,13 +81,13 @@ public class CapturePointUpdatable implements Updatable
    @Override
    public void update(double time)
    {
-      FramePoint2d capturePoint = capturabilityBasedStatusSubsrciber.getCapturePoint();
+      FramePoint2D capturePoint = capturabilityBasedStatusSubsrciber.getCapturePoint();
       if (capturePoint != null)
       {
          yoCapturePoint.set(capturePoint);
       }
 
-      FramePoint2d desiredCapturePoint = capturabilityBasedStatusSubsrciber.getDesiredCapturePoint();
+      FramePoint2D desiredCapturePoint = capturabilityBasedStatusSubsrciber.getDesiredCapturePoint();
       if (desiredCapturePoint != null)
       {
          yoDesiredCapturePoint.set(desiredCapturePoint);
@@ -276,7 +276,7 @@ public class CapturePointUpdatable implements Updatable
       return projectedPoint;
    }
 
-   FramePoint2d tempFramePoint2d = new FramePoint2d();
+   FramePoint2D tempFramePoint2d = new FramePoint2D();
 
    private void updateCapturePointError()
    {

@@ -1,28 +1,29 @@
 package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
 
 public class ZUpPreserveYReferenceFrame extends ReferenceFrame
 {
    private static final long serialVersionUID = -1454797908129819243L;
    private final Vector3D translation = new Vector3D();
    private final ReferenceFrame worldFrame;
-   private final FramePoint origin;
+   private final FramePoint3D origin;
 
    public ZUpPreserveYReferenceFrame(ReferenceFrame worldFrame, ReferenceFrame nonZUpFrame, String name)
    {
-      this(worldFrame, new FramePoint(nonZUpFrame), name);
+      this(worldFrame, new FramePoint3D(nonZUpFrame), name);
    }
 
-   public ZUpPreserveYReferenceFrame(ReferenceFrame worldFrame, FramePoint origin, String name)
+   public ZUpPreserveYReferenceFrame(ReferenceFrame worldFrame, FramePoint3D origin, String name)
    {
       super(name, worldFrame, false, true);
       this.worldFrame = worldFrame;
-      this.origin = new FramePoint(origin);
+      this.origin = new FramePoint3D(origin);
       
       this.update();
    }

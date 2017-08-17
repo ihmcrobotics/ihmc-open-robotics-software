@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -10,16 +10,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.frameObjects.FrameSE3Waypoint;
 import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3TrajectoryPoint, SimpleSE3TrajectoryPoint>
       implements SE3TrajectoryPointInterface<FrameSE3TrajectoryPoint>
@@ -39,7 +36,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       setToZero(referenceFrame);
    }
 
-   public FrameSE3TrajectoryPoint(double time, FramePoint position, FrameOrientation orientation, FrameVector linearVelocity, FrameVector angularVelocity)
+   public FrameSE3TrajectoryPoint(double time, FramePoint3D position, FrameOrientation orientation, FrameVector3D linearVelocity, FrameVector3D angularVelocity)
    {
       this();
       setIncludingFrame(time, position, orientation, linearVelocity, angularVelocity);
@@ -63,7 +60,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       geometryObject.setPosition(position);
    }
 
-   public void setPosition(FramePoint position)
+   public void setPosition(FramePoint3D position)
    {
       checkReferenceFrameMatch(position);
       geometryObject.setPosition(position.getPoint());
@@ -87,7 +84,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       geometryObject.setLinearVelocity(linearVelocity);
    }
 
-   public void setLinearVelocity(FrameVector linearVelocity)
+   public void setLinearVelocity(FrameVector3D linearVelocity)
    {
       checkReferenceFrameMatch(linearVelocity);
       geometryObject.setLinearVelocity(linearVelocity.getVector());
@@ -99,7 +96,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       geometryObject.setAngularVelocity(angularVelocity);
    }
 
-   public void setAngularVelocity(FrameVector angularVelocity)
+   public void setAngularVelocity(FrameVector3D angularVelocity)
    {
       checkReferenceFrameMatch(angularVelocity);
       geometryObject.setAngularVelocity(angularVelocity.getVector());
@@ -117,7 +114,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       geometryObject.set(time, position, orientation, linearVelocity, angularVelocity);
    }
 
-   public void set(double time, FramePoint position, FrameOrientation orientation, FrameVector linearVelocity, FrameVector angularVelocity)
+   public void set(double time, FramePoint3D position, FrameOrientation orientation, FrameVector3D linearVelocity, FrameVector3D angularVelocity)
    {
       checkReferenceFrameMatch(position);
       checkReferenceFrameMatch(orientation);
@@ -126,7 +123,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       geometryObject.set(time, position.getPoint(), orientation.getQuaternion(), linearVelocity.getVector(), angularVelocity.getVector());
    }
 
-   public void setIncludingFrame(double time, FramePoint position, FrameOrientation orientation, FrameVector linearVelocity, FrameVector angularVelocity)
+   public void setIncludingFrame(double time, FramePoint3D position, FrameOrientation orientation, FrameVector3D linearVelocity, FrameVector3D angularVelocity)
    {
       position.checkReferenceFrameMatch(orientation);
       position.checkReferenceFrameMatch(linearVelocity);
@@ -273,15 +270,15 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       geometryObject.getAngularVelocity(angularVelocityToPack);
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       checkReferenceFrameMatch(positionToPack);
       geometryObject.getPosition(positionToPack.getPoint());
    }
 
-   public FramePoint getPositionCopy()
+   public FramePoint3D getPositionCopy()
    {
-      FramePoint positionCopy = new FramePoint(getReferenceFrame());
+      FramePoint3D positionCopy = new FramePoint3D(getReferenceFrame());
       getPosition(positionCopy);
       return positionCopy;
    }
@@ -307,33 +304,33 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       poseToPack.setOrientation(waypointData.getSO3Waypoint().getOrientation());
    }
 
-   public void getLinearVelocity(FrameVector linearVelocityToPack)
+   public void getLinearVelocity(FrameVector3D linearVelocityToPack)
    {
       checkReferenceFrameMatch(linearVelocityToPack);
       geometryObject.getLinearVelocity(linearVelocityToPack.getVector());
    }
 
-   public FrameVector getLinearVelocityCopy()
+   public FrameVector3D getLinearVelocityCopy()
    {
-      FrameVector linearVelocityCopy = new FrameVector(getReferenceFrame());
+      FrameVector3D linearVelocityCopy = new FrameVector3D(getReferenceFrame());
       getLinearVelocity(linearVelocityCopy);
       return linearVelocityCopy;
    }
 
-   public void getAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       checkReferenceFrameMatch(angularVelocityToPack);
       geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
    }
 
-   public FrameVector getAngularVelocityCopy()
+   public FrameVector3D getAngularVelocityCopy()
    {
-      FrameVector angularVelocityCopy = new FrameVector(getReferenceFrame());
+      FrameVector3D angularVelocityCopy = new FrameVector3D(getReferenceFrame());
       getAngularVelocity(angularVelocityCopy);
       return angularVelocityCopy;
    }
 
-   public void getPositionIncludingFrame(FramePoint positionToPack)
+   public void getPositionIncludingFrame(FramePoint3D positionToPack)
    {
       positionToPack.setToZero(getReferenceFrame());
       geometryObject.getPosition(positionToPack.getPoint());
@@ -351,13 +348,13 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       getPose(poseToPack);
    }
 
-   public void getLinearVelocityIncludingFrame(FrameVector linearVelocityToPack)
+   public void getLinearVelocityIncludingFrame(FrameVector3D linearVelocityToPack)
    {
       linearVelocityToPack.setToZero(getReferenceFrame());
       geometryObject.getLinearVelocity(linearVelocityToPack.getVector());
    }
 
-   public void getAngularVelocityIncludingFrame(FrameVector angularVelocityToPack)
+   public void getAngularVelocityIncludingFrame(FrameVector3D angularVelocityToPack)
    {
       angularVelocityToPack.setToZero(getReferenceFrame());
       geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
@@ -427,13 +424,4 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
    {
       return geometryObject.getAngularVelocityZ();
    }
-
-   @Override
-   public String toString()
-   {
-      NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
-      String timeToString = "time = " + doubleFormat.format(getTime());
-      return "SE3 trajectory point: (" + timeToString + ", " + geometryObject + ")";
-   }
-
 }

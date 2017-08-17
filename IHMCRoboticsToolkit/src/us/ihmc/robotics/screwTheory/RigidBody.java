@@ -5,12 +5,12 @@ import java.util.Collections;
 import java.util.List;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeHolder;
-import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
+import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 
 /**
  * {@code RigidBody} describes a link which used with {@code InverseDynamicsJoint}s describe a robot
@@ -284,7 +284,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     * @param comOffsetToPack the {@code FramePoint} in which the center of mass position is stored.
     *           Modified.
     */
-   public void getCoMOffset(FramePoint comOffsetToPack)
+   public void getCoMOffset(FramePoint3D comOffsetToPack)
    {
       inertia.getCenterOfMassOffset(comOffsetToPack);
    }
@@ -303,7 +303,7 @@ public class RigidBody implements NameBasedHashCodeHolder
     * @throws ReferenceFrameMismatchException if the argument is not expressed in the
     *            {@code bodyFixedFrame}.
     */
-   public void setCoMOffset(FramePoint comOffset)
+   public void setCoMOffset(FramePoint3D comOffset)
    {
       inertia.setCenterOfMassOffset(comOffset);
    }

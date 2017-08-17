@@ -2,14 +2,14 @@ package us.ihmc.simulationconstructionset;
 
 import net.jafama.FastMath;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.FloatingJointPhysics;
 
 public class FloatingJoint extends Joint implements FloatingSCSJoint
@@ -252,14 +252,14 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
    }
    
    @Override
-   public void getVelocity(FrameVector linearVelocityToPack)
+   public void getVelocity(FrameVector3D linearVelocityToPack)
    {
       linearVelocityToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), qd_x.getDoubleValue(), qd_y.getDoubleValue(), qd_z.getDoubleValue());
    }
    
 
    @Override
-   public void getAngularVelocity(FrameVector angularVelocityToPack, ReferenceFrame bodyFrame)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack, ReferenceFrame bodyFrame)
    {
       angularVelocityToPack.setIncludingFrame(bodyFrame, qd_wx.getDoubleValue(), qd_wy.getDoubleValue(), qd_wz.getDoubleValue());
    }
@@ -411,7 +411,7 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
       angularAccelerationInBodyToPack.set(qdd_wx.getDoubleValue(), qdd_wy.getDoubleValue(), qdd_wz.getDoubleValue());
    }
 
-   public void getAngularAcceleration(FrameVector angularAccelerationToPack, ReferenceFrame bodyFrame)
+   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack, ReferenceFrame bodyFrame)
    {
       angularAccelerationToPack.setIncludingFrame(bodyFrame, qdd_wx.getDoubleValue(), qdd_wy.getDoubleValue(), qdd_wz.getDoubleValue());      
    }
@@ -421,7 +421,7 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
       accelerationInWorldToPack.set(qdd_x.getDoubleValue(), qdd_y.getDoubleValue(), qdd_z.getDoubleValue()); 
    }
    
-   public void getLinearAcceleration(FrameVector linearAccelerationToPack)
+   public void getLinearAcceleration(FrameVector3D linearAccelerationToPack)
    {
       linearAccelerationToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), qdd_x.getDoubleValue(), qdd_y.getDoubleValue(), qdd_z.getDoubleValue()); 
    }

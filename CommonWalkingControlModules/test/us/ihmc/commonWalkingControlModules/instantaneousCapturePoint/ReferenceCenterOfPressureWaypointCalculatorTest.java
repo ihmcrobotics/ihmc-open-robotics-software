@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,20 +16,18 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPTrajectory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.ReferenceCoPTrajectoryGenerator;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -76,10 +74,10 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       for (RobotSide side : RobotSide.values)
       {
          ZUpFrame soleFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(),
-                                           new FramePoint(ReferenceFrame.getWorldFrame(), 0.0, side.negateIfRightSide(soleFrameYDisplacement), 0.0),
+                                           new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, side.negateIfRightSide(soleFrameYDisplacement), 0.0),
                                            "DummyRobot" + side.toString() + "FootSoleFrame");
          soleZUpFrames.put(side, soleFrame);
-         ZUpFrame ankleFrame = new ZUpFrame(soleFrame, new FramePoint(soleFrame, 0.0, 0.0, ankleFrameZDisplacement),
+         ZUpFrame ankleFrame = new ZUpFrame(soleFrame, new FramePoint3D(soleFrame, 0.0, 0.0, ankleFrameZDisplacement),
                                             "DummyRobot" + side.toString() + "AnkleSoleFrame");
          ankleZUpFrames.put(side, ankleFrame);
          List<Point2D> contactPoints = new ArrayList<>(numberOfContactPoints);
@@ -96,11 +94,11 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
          contactableFeet.put(side, contactableFoot);
          RigidBody feetBody = new RigidBody(side.toString() + "Feet", ReferenceFrame.getWorldFrame());
          feetBodies.put(side, feetBody);
-         List<FramePoint2d> contactFramePoints = new ArrayList<>();
-         contactFramePoints.add(new FramePoint2d(soleFrame, point1));
-         contactFramePoints.add(new FramePoint2d(soleFrame, point2));
-         contactFramePoints.add(new FramePoint2d(soleFrame, point3));
-         contactFramePoints.add(new FramePoint2d(soleFrame, point4));
+         List<FramePoint2D> contactFramePoints = new ArrayList<>();
+         contactFramePoints.add(new FramePoint2D(soleFrame, point1));
+         contactFramePoints.add(new FramePoint2D(soleFrame, point2));
+         contactFramePoints.add(new FramePoint2D(soleFrame, point3));
+         contactFramePoints.add(new FramePoint2D(soleFrame, point4));
 
          YoPlaneContactState contactState = new YoPlaneContactState("DummyRobot" + side.toString() + "FootContactState", feetBody, soleFrame,
                                                                     contactFramePoints, 10, parentRegistry);
@@ -156,7 +154,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
    public void sendFootStepMessages(int numberOfFootstepsToPlan)
    {
       RobotSide robotSide = RobotSide.LEFT;
-      FramePoint footstepLocation = new FramePoint();
+      FramePoint3D footstepLocation = new FramePoint3D();
       FrameOrientation footstepOrientation = new FrameOrientation();
       for (int i = 1; i < numberOfFootstepsToPlan + 1; i++)
       {
@@ -184,22 +182,22 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       CoPPointsInFoot firstStep = copList.get(0);
       {
          CoPTrajectoryPoint previousExitCoP = firstStep.get(0);
-         assertTrue(previousExitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.0, 0.0), EPSILON));
+         assertTrue(previousExitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, 0.0), EPSILON));
          assertTrue(firstStep.getCoPPointList().get(0) == exitCoPName);
          CoPTrajectoryPoint midStanceCoP = firstStep.get(1);         // TODO: replace by CMP
-         assertTrue(midStanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.0, 0.0), EPSILON));
+         assertTrue(midStanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, 0.0), EPSILON));
          assertTrue(firstStep.getCoPPointList().get(1) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = firstStep.get(2);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.0, -0.205), EPSILON));
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, -0.205), EPSILON));
          assertTrue(firstStep.getCoPPointList().get(2) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = firstStep.get(3);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.037, -0.190), EPSILON));
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.037, -0.190), EPSILON));
          assertTrue(firstStep.getCoPPointList().get(3) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = firstStep.get(4);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.06, -0.180), EPSILON));
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.06, -0.180), EPSILON));
          assertTrue(firstStep.getCoPPointList().get(4) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = firstStep.get(5);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.06, -0.180), EPSILON));
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.06, -0.180), EPSILON));
          assertTrue(firstStep.getCoPPointList().get(5) == exitCoPName);
       }
 
@@ -207,19 +205,19 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       CoPPointsInFoot secondStep = copList.get(1);
       {
          CoPTrajectoryPoint midstanceCoP = secondStep.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.150, 0.0), EPSILON));
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.150, 0.0), EPSILON));
          assertTrue(secondStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = secondStep.get(1);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.260, 0.205), EPSILON));
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.260, 0.205), EPSILON));
          assertTrue(secondStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = secondStep.get(2);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.337, 0.190), EPSILON));
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.337, 0.190), EPSILON));
          assertTrue(secondStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = secondStep.get(3);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.360, 0.180), EPSILON));
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.360, 0.180), EPSILON));
          assertTrue(secondStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = secondStep.get(4);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.360, 0.180), EPSILON));
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.360, 0.180), EPSILON));
          assertTrue(secondStep.getCoPPointList().get(4) == exitCoPName);
       }
 
@@ -227,19 +225,19 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       CoPPointsInFoot thirdStep = copList.get(2);
       {
          CoPTrajectoryPoint midstanceCoP = thirdStep.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.450, 0.0), EPSILON));
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.450, 0.0), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = thirdStep.get(1);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.560, -0.205), EPSILON));
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.560, -0.205), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = thirdStep.get(2);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.638, -0.190), EPSILON));
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.638, -0.190), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = thirdStep.get(3);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.660, -0.180), EPSILON));
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.660, -0.180), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = thirdStep.get(4);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.660,-0.180), EPSILON));
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.660,-0.180), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(4) == exitCoPName);
       }
 
@@ -247,7 +245,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       CoPPointsInFoot finalTransfer = copList.get(3);
       {
          CoPTrajectoryPoint midstanceCoP = finalTransfer.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.750, 0.0), EPSILON));
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.750, 0.0), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
       }
 
@@ -260,7 +258,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
    public void testDoubleSupportFootstepPlanMoving()
    {
       sendFootStepMessages(10);
-      //testCoPGenerator.setInitialCoPPosition(new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.1));
+      //testCoPGenerator.setInitialCoPPosition(new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.0, 0.1));
       testCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(false, RobotSide.RIGHT);
       List<CoPPointsInFoot> copList = testCoPGenerator.getWaypoints();
       CoPPointName exitCoPName = plannerParameters.getExitCoPName();
@@ -269,22 +267,22 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       CoPPointsInFoot firstStep = copList.get(0);
       {
          CoPTrajectoryPoint previousExitCoP = firstStep.get(0);
-         assertTrue(previousExitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.0, 0.180), EPSILON));
+         assertTrue(previousExitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, 0.180), EPSILON));
          assertTrue(firstStep.getCoPPointList().get(0) == exitCoPName);
          CoPTrajectoryPoint midStanceCoP = firstStep.get(1);
-         assertTrue(midStanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.0, 0.0), EPSILON));
+         assertTrue(midStanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, 0.0), EPSILON));
          assertTrue(firstStep.getCoPPointList().get(1) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = firstStep.get(2);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.0, -0.205), EPSILON));
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, -0.205), EPSILON));
          assertTrue(firstStep.getCoPPointList().get(2) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = firstStep.get(3);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.037, -0.190), EPSILON));
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.037, -0.190), EPSILON));
          assertTrue(firstStep.getCoPPointList().get(3) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = firstStep.get(4);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.06, -0.180), EPSILON));
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.06, -0.180), EPSILON));
          assertTrue(firstStep.getCoPPointList().get(4) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = firstStep.get(5);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.06, -0.180), EPSILON));
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.06, -0.180), EPSILON));
          assertTrue(firstStep.getCoPPointList().get(5) == exitCoPName);
       }
 
@@ -292,19 +290,19 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       CoPPointsInFoot secondStep = copList.get(1);
       {
          CoPTrajectoryPoint midstanceCoP = secondStep.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.150, 0.0), EPSILON));
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.150, 0.0), EPSILON));
          assertTrue(secondStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = secondStep.get(1);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.260, 0.205), EPSILON));
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.260, 0.205), EPSILON));
          assertTrue(secondStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = secondStep.get(2);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.337, 0.190), EPSILON));
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.337, 0.190), EPSILON));
          assertTrue(secondStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = secondStep.get(3);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.360, 0.180), EPSILON));
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.360, 0.180), EPSILON));
          assertTrue(secondStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = secondStep.get(4);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.360, 0.180), EPSILON));
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.360, 0.180), EPSILON));
          assertTrue(secondStep.getCoPPointList().get(4) == exitCoPName);
       }
 
@@ -312,19 +310,19 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       CoPPointsInFoot thirdStep = copList.get(2);
       {
          CoPTrajectoryPoint midstanceCoP = thirdStep.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.450, 0.0), EPSILON));
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.450, 0.0), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = thirdStep.get(1);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.560, -0.205), EPSILON));
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.560, -0.205), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = thirdStep.get(2);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.638, -0.190), EPSILON));
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.638, -0.190), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = thirdStep.get(3);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.660, -0.180), EPSILON));
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.660, -0.180), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = thirdStep.get(4);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.660,-0.180), EPSILON));
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.660,-0.180), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(4) == exitCoPName);
       }
 
@@ -332,7 +330,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       CoPPointsInFoot finalTransfer = copList.get(3);
       {
          CoPTrajectoryPoint midstanceCoP = finalTransfer.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.750, 0.0), EPSILON));
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.750, 0.0), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
       }
    }
@@ -353,16 +351,16 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       CoPPointsInFoot firstStep = copList.get(0);
       {
          CoPTrajectoryPoint entryCoP = firstStep.get(0);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.0, -0.205), EPSILON));
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, -0.205), EPSILON));
          assertTrue(firstStep.getCoPPointList().get(0) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = firstStep.get(1);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.037, -0.190), EPSILON));
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.037, -0.190), EPSILON));
          assertTrue(firstStep.getCoPPointList().get(1) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = firstStep.get(2);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.06, -0.180), EPSILON));
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.06, -0.180), EPSILON));
          assertTrue(firstStep.getCoPPointList().get(2) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = firstStep.get(3);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.06, -0.180), EPSILON));
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.06, -0.180), EPSILON));
          assertTrue(firstStep.getCoPPointList().get(3) == exitCoPName);
       }
 
@@ -370,19 +368,19 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       CoPPointsInFoot secondStep = copList.get(1);
       {
          CoPTrajectoryPoint midstanceCoP = secondStep.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.150, 0.0), EPSILON));
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.150, 0.0), EPSILON));
          assertTrue(secondStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = secondStep.get(1);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.260, 0.205), EPSILON));
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.260, 0.205), EPSILON));
          assertTrue(secondStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = secondStep.get(2);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.337, 0.190), EPSILON));
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.337, 0.190), EPSILON));
          assertTrue(secondStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = secondStep.get(3);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.360, 0.180), EPSILON));
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.360, 0.180), EPSILON));
          assertTrue(secondStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = secondStep.get(4);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.360, 0.180), EPSILON));
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.360, 0.180), EPSILON));
          assertTrue(secondStep.getCoPPointList().get(4) == exitCoPName);
       }
 
@@ -390,19 +388,19 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       CoPPointsInFoot thirdStep = copList.get(2);
       {
          CoPTrajectoryPoint midstanceCoP = thirdStep.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.450, 0.0), EPSILON));
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.450, 0.0), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
          CoPTrajectoryPoint entryCoP = thirdStep.get(1);
-         assertTrue(entryCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.560, -0.205), EPSILON));
+         assertTrue(entryCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.560, -0.205), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(1) == CoPPointName.HEEL_COP);
          CoPTrajectoryPoint ballCoP = thirdStep.get(2);
-         assertTrue(ballCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.638, -0.190), EPSILON));
+         assertTrue(ballCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.638, -0.190), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(2) == CoPPointName.BALL_COP);
          CoPTrajectoryPoint toeCoP = thirdStep.get(3);
-         assertTrue(toeCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.660, -0.180), EPSILON));
+         assertTrue(toeCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.660, -0.180), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(3) == CoPPointName.TOE_COP);
          CoPTrajectoryPoint exitCoP = thirdStep.get(4);
-         assertTrue(exitCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.660,-0.180), EPSILON));
+         assertTrue(exitCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.660,-0.180), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(4) == exitCoPName);
       }
 
@@ -410,7 +408,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       CoPPointsInFoot finalTransfer = copList.get(3);
       {
          CoPTrajectoryPoint midstanceCoP = finalTransfer.get(0);
-         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2d(worldFrame, 0.750, 0.0), EPSILON));
+         assertTrue(midstanceCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.750, 0.0), EPSILON));
          assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
       }
    }

@@ -1,10 +1,10 @@
 package us.ihmc.sensorProcessing;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -70,25 +70,25 @@ public class SingleRigidBodyRobot extends Robot
       bodyJoint.getTransformToWorld(transformToPack);
    }
 
-   public FrameVector getBodyVelocity()
+   public FrameVector3D getBodyVelocity()
    {
-      return new FrameVector(ReferenceFrame.getWorldFrame(), bodyJoint.getQdx().getDoubleValue(), bodyJoint.getQdy().getDoubleValue(), bodyJoint.getQdz().getDoubleValue());
+      return new FrameVector3D(ReferenceFrame.getWorldFrame(), bodyJoint.getQdx().getDoubleValue(), bodyJoint.getQdy().getDoubleValue(), bodyJoint.getQdz().getDoubleValue());
    }
 
-   public FrameVector getBodyAcceleration()
+   public FrameVector3D getBodyAcceleration()
    {
-      return new FrameVector(ReferenceFrame.getWorldFrame(), bodyJoint.getQddx().getDoubleValue(), bodyJoint.getQddy().getDoubleValue(), bodyJoint.getQddz().getDoubleValue());
+      return new FrameVector3D(ReferenceFrame.getWorldFrame(), bodyJoint.getQddx().getDoubleValue(), bodyJoint.getQddy().getDoubleValue(), bodyJoint.getQddz().getDoubleValue());
    }
    
-   public FrameVector getBodyAngularVelocityInBodyFrame(ReferenceFrame bodyFrame)
+   public FrameVector3D getBodyAngularVelocityInBodyFrame(ReferenceFrame bodyFrame)
    {
-      return new FrameVector(ReferenceFrame.getWorldFrame(), bodyJoint.getAngularVelocityInBody());
+      return new FrameVector3D(ReferenceFrame.getWorldFrame(), bodyJoint.getAngularVelocityInBody());
    }
 
    // Get Body Angular Acceleration
-   public FrameVector getBodyAngularAccelerationInBodyFrame(ReferenceFrame bodyFrame)
+   public FrameVector3D getBodyAngularAccelerationInBodyFrame(ReferenceFrame bodyFrame)
    {
-      return new FrameVector(ReferenceFrame.getWorldFrame(), bodyJoint.getAngularAccelerationInBody());
+      return new FrameVector3D(ReferenceFrame.getWorldFrame(), bodyJoint.getAngularAccelerationInBody());
    }
 
 

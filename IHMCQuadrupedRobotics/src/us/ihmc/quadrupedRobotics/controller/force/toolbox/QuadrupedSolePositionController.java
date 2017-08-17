@@ -1,30 +1,32 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.EuclideanPositionController;
-import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedSolePositionController
 {
    public static class Setpoints
    {
       private RobotQuadrant robotQuadrant;
-      private final FramePoint solePosition;
-      private final FrameVector soleLinearVelocity;
-      private final FrameVector soleForceFeedforward;
+      private final FramePoint3D solePosition;
+      private final FrameVector3D soleLinearVelocity;
+      private final FrameVector3D soleForceFeedforward;
 
       public Setpoints(RobotQuadrant robotQuadrant)
       {
          this.robotQuadrant = robotQuadrant;
-         this.solePosition = new FramePoint();
-         this.soleLinearVelocity = new FrameVector();
-         this.soleForceFeedforward = new FrameVector();
+         this.solePosition = new FramePoint3D();
+         this.soleLinearVelocity = new FrameVector3D();
+         this.soleForceFeedforward = new FrameVector3D();
       }
 
       public void initialize(QuadrupedTaskSpaceEstimator.Estimates estimates)
@@ -40,17 +42,17 @@ public class QuadrupedSolePositionController
          return robotQuadrant;
       }
 
-      public FramePoint getSolePosition()
+      public FramePoint3D getSolePosition()
       {
          return solePosition;
       }
 
-      public FrameVector getSoleLinearVelocity()
+      public FrameVector3D getSoleLinearVelocity()
       {
          return soleLinearVelocity;
       }
 
-      public FrameVector getSoleForceFeedforward()
+      public FrameVector3D getSoleForceFeedforward()
       {
          return soleForceFeedforward;
       }
@@ -59,7 +61,7 @@ public class QuadrupedSolePositionController
    private final RobotQuadrant robotQuadrant;
    private final ReferenceFrame soleFrame;
    private final EuclideanPositionController solePositionController;
-   private final YoEuclideanPositionGains solePositionControllerGains;
+   private final YoPID3DGains solePositionControllerGains;
    private final YoFramePoint yoSolePositionSetpoint;
    private final YoFrameVector yoSoleLinearVelocitySetpoint;
    private final YoFrameVector yoSoleForceFeedforwardSetpoint;
@@ -72,7 +74,7 @@ public class QuadrupedSolePositionController
       this.robotQuadrant = robotQuadrant;
       this.soleFrame = soleFrame;
       this.solePositionController = new EuclideanPositionController(prefix + "SolePosition", soleFrame, controlDT, registry);
-      this.solePositionControllerGains = new YoEuclideanPositionGains(prefix + "SolePosition", registry);
+      this.solePositionControllerGains = new DefaultYoPID3DGains(prefix + "SolePosition", GainCoupling.NONE, true, registry);
       this.yoSolePositionSetpoint = new YoFramePoint(prefix + "SolePositionSetpoint", worldFrame, registry);
       this.yoSoleLinearVelocitySetpoint = new YoFrameVector(prefix + "SoleLinearVelocitySetpoint", worldFrame, registry);
       this.yoSoleForceFeedforwardSetpoint = new YoFrameVector(prefix + "SoleForceFeedforwardSetpoint", worldFrame, registry);
@@ -83,7 +85,7 @@ public class QuadrupedSolePositionController
       return soleFrame;
    }
 
-   public YoEuclideanPositionGains getGains()
+   public YoPID3DGains getGains()
    {
       return solePositionControllerGains;
    }
@@ -94,12 +96,12 @@ public class QuadrupedSolePositionController
       solePositionController.resetIntegrator();
    }
 
-   public void compute(FrameVector soleForceCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
+   public void compute(FrameVector3D soleForceCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
    {
-      FramePoint solePositionSetpoint = setpoints.getSolePosition();
-      FrameVector soleLinearVelocitySetpoint = setpoints.getSoleLinearVelocity();
-      FrameVector soleLinearVelocityEstimate = estimates.getSoleLinearVelocity(robotQuadrant);
-      FrameVector soleForceFeedforwardSetpoint = setpoints.getSoleForceFeedforward();
+      FramePoint3D solePositionSetpoint = setpoints.getSolePosition();
+      FrameVector3D soleLinearVelocitySetpoint = setpoints.getSoleLinearVelocity();
+      FrameVector3D soleLinearVelocityEstimate = estimates.getSoleLinearVelocity(robotQuadrant);
+      FrameVector3D soleForceFeedforwardSetpoint = setpoints.getSoleForceFeedforward();
 
       ReferenceFrame solePositionSetpointFrame = solePositionSetpoint.getReferenceFrame();
       ReferenceFrame soleLinearVelocitySetpointFrame = soleLinearVelocitySetpoint.getReferenceFrame();

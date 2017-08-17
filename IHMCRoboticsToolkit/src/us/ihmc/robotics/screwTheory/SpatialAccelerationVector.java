@@ -2,13 +2,13 @@ package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Class represents the spatial acceleration of a rigid body. A spatial acceleration is the
@@ -254,7 +254,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
     * Packs the linear acceleration of a point that is fixed in bodyFrame, with respect to
     * baseFrame. The resulting vector is expressed in {@code this.getExpressedInFrame()}.
     */
-   public void getAccelerationOfPointFixedInBodyFrame(Twist twist, FramePoint pointFixedInBodyFrame, FrameVector linearAccelerationToPack)
+   public void getAccelerationOfPointFixedInBodyFrame(Twist twist, FramePoint3D pointFixedInBodyFrame, FrameVector3D linearAccelerationToPack)
    {
       pointFixedInBodyFrame.checkReferenceFrameMatch(expressedInFrame);
 
@@ -277,7 +277,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
    }
 
    public void setBasedOnOriginAcceleration(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame,
-                                            FrameVector angularAcceleration, FrameVector originAcceleration, Twist twistOfBodyWithRespectToBase)
+                                            FrameVector3D angularAcceleration, FrameVector3D originAcceleration, Twist twistOfBodyWithRespectToBase)
    {
       this.bodyFrame = bodyFrame;
       this.baseFrame = baseFrame;
@@ -286,7 +286,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, twistOfBodyWithRespectToBase);
    }
 
-   public void setBasedOnOriginAcceleration(FrameVector angularAcceleration, FrameVector originAcceleration, Twist twistOfBodyWithRespectToBase)
+   public void setBasedOnOriginAcceleration(FrameVector3D angularAcceleration, FrameVector3D originAcceleration, Twist twistOfBodyWithRespectToBase)
    {
       bodyFrame.checkReferenceFrameMatch(expressedInFrame);
       twistOfBodyWithRespectToBase.getBodyFrame().checkReferenceFrameMatch(bodyFrame);
@@ -301,7 +301,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       linearPart.sub(originAcceleration.getVector(), linearPart);
    }
 
-   public void getLinearAccelerationFromOriginAcceleration(Twist twistOfBodyWithRespectToBase, FrameVector linearAccelerationToPack)
+   public void getLinearAccelerationFromOriginAcceleration(Twist twistOfBodyWithRespectToBase, FrameVector3D linearAccelerationToPack)
    {
       bodyFrame.checkReferenceFrameMatch(expressedInFrame);
       twistOfBodyWithRespectToBase.getBodyFrame().checkReferenceFrameMatch(bodyFrame);

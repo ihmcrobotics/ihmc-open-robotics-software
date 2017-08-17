@@ -5,6 +5,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -13,12 +16,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -66,12 +66,12 @@ public class IMUYawDriftEstimator implements YawDriftProvider
    private final YoBoolean enableCompensation = new YoBoolean("enableIMUDriftYawCompensation", registry);
    private final YoBoolean integrateDriftRate = new YoBoolean("integrateDriftRate", registry);
 
-   private final FramePoint footPosition = new FramePoint();
-   private final FramePoint averagePosition = new FramePoint();
-   private final FrameVector referenceAverageToFootPosition = new FrameVector();
-   private final FrameVector currentAverageToFootPosition = new FrameVector();
+   private final FramePoint3D footPosition = new FramePoint3D();
+   private final FramePoint3D averagePosition = new FramePoint3D();
+   private final FrameVector3D referenceAverageToFootPosition = new FrameVector3D();
+   private final FrameVector3D currentAverageToFootPosition = new FrameVector3D();
    private final Twist footTwist = new Twist();
-   private final FrameVector footLinearVelocity = new FrameVector();
+   private final FrameVector3D footLinearVelocity = new FrameVector3D();
 
    private final double estimatorDT;
 

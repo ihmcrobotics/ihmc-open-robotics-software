@@ -4,6 +4,8 @@ import java.awt.Color;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -15,9 +17,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Class provides a CenterOfPressureCommand for the QP that is used to explore the foothold by shifting the
@@ -29,7 +29,7 @@ public class ExplorationHelper
    private final ExplorationParameters explorationParameters;
    private final ReferenceFrame soleFrame;
 
-   private final FramePoint2d desiredCenterOfPressure = new FramePoint2d();
+   private final FramePoint2D desiredCenterOfPressure = new FramePoint2D();
    private final YoDouble copCommandWeight;
    private final Vector2D commandWeight = new Vector2D();
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
@@ -42,10 +42,10 @@ public class ExplorationHelper
    private int lastCornerCropped = 0;
    private double lastShrunkTime = 0.0;
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
-   private final FramePoint2d currentCorner = new FramePoint2d();
+   private final FramePoint2D currentCorner = new FramePoint2D();
    private final YoInteger yoCurrentCorner;
 
-   private final FramePoint2d desiredCopInWorld = new FramePoint2d();
+   private final FramePoint2D desiredCopInWorld = new FramePoint2D();
    private final YoFramePoint2d yoDesiredCop;
 
    public ExplorationHelper(ContactableFoot contactableFoot, FootControlHelper footControlHelper, String prefix, YoVariableRegistry registry)
@@ -134,7 +134,7 @@ public class ExplorationHelper
       yoCurrentCorner.set(corner);
 
       supportPolygon.getFrameVertex(corner, currentCorner);
-      FramePoint2d centroid = supportPolygon.getCentroid();
+      FramePoint2D centroid = supportPolygon.getCentroid();
 
       currentCorner.changeFrame(soleFrame);
       centroid.changeFrame(soleFrame);

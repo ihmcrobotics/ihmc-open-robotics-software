@@ -31,6 +31,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -47,15 +50,12 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPoint;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -267,7 +267,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(referenceFrames.getPelvisZUpFrame(),
             bipedFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);
 
-      desiredVelocityControlModule.setDesiredVelocity(new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.15, 0.0, "desiredVelocityControlModule"));
+      desiredVelocityControlModule.setDesiredVelocity(new FrameVector2D(ReferenceFrame.getWorldFrame(), 0.15, 0.0));
       desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getSteppingParameters().getInPlaceWidth());
       desiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getSteppingParameters().getMaxStepLength());
       desiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getSteppingParameters().getMinStepWidth());
@@ -330,7 +330,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       referenceFrames.updateFrames();
 
-      FramePoint pelvisPosition = new FramePoint(pelvis.getParentJoint().getFrameAfterJoint());
+      FramePoint3D pelvisPosition = new FramePoint3D(pelvis.getParentJoint().getFrameAfterJoint());
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       pelvisPosition.changeFrame(midFootZUpGroundFrame);
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(numberOfTrajectoryPoints);
@@ -476,7 +476,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       referenceFrames.updateFrames();
 
-      FramePoint pelvisPosition = new FramePoint(pelvis.getParentJoint().getFrameAfterJoint());
+      FramePoint3D pelvisPosition = new FramePoint3D(pelvis.getParentJoint().getFrameAfterJoint());
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       pelvisPosition.changeFrame(midFootZUpGroundFrame);
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(numberOfTrajectoryPoints);
@@ -600,7 +600,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       referenceFrames.updateFrames();
 
-      FramePoint pelvisPosition = new FramePoint(pelvis.getParentJoint().getFrameAfterJoint());
+      FramePoint3D pelvisPosition = new FramePoint3D(pelvis.getParentJoint().getFrameAfterJoint());
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       pelvisPosition.changeFrame(midFootZUpGroundFrame);
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(numberOfTrajectoryPoints);
@@ -718,7 +718,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       double trajectoryTime = numberOfTrajectoryPoints * timePerWaypoint;
       RigidBody pelvis = fullRobotModel.getPelvis();
 
-      FramePoint pelvisPosition = new FramePoint(pelvis.getParentJoint().getFrameAfterJoint());
+      FramePoint3D pelvisPosition = new FramePoint3D(pelvis.getParentJoint().getFrameAfterJoint());
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(numberOfTrajectoryPoints);
@@ -1063,7 +1063,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 //      assertEquals(desiredPosition.getZ(), trajOutput, EPSILON_FOR_DESIREDS);
       // Ending up doing a rough check on the actual height
       MovingReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
-      FramePoint pelvisPosition = new FramePoint(pelvisFrame);
+      FramePoint3D pelvisPosition = new FramePoint3D(pelvisFrame);
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       double pelvisHeight = pelvisPosition.getZ();
       assertEquals(desiredPosition.getZ(), pelvisHeight, EPSILON_FOR_HEIGHT);

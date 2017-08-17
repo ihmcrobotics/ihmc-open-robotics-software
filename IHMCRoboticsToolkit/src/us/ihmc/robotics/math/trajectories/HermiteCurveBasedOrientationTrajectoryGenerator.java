@@ -4,6 +4,8 @@ import static us.ihmc.robotics.MathTools.square;
 
 import org.apache.commons.math3.util.Precision;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -15,14 +17,12 @@ import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameSO3TrajectoryPoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -203,7 +203,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       this.finalOrientation.set(tempOrientation);
    }
 
-   public void setInitialAngularVelocity(FrameVector initialAngularVelocity)
+   public void setInitialAngularVelocity(FrameVector3D initialAngularVelocity)
    {
       this.initialAngularVelocity.setAndMatchFrame(initialAngularVelocity);
    }
@@ -213,7 +213,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       this.initialAngularVelocity.setAndMatchFrame(initialAngularVelocity);
    }
 
-   public void setFinalAngularVelocity(FrameVector finalAngularVelocity)
+   public void setFinalAngularVelocity(FrameVector3D finalAngularVelocity)
    {
       this.finalAngularVelocity.setAndMatchFrame(finalAngularVelocity);
    }
@@ -242,7 +242,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       this.numberOfRevolutions.set(numberOfRevolutions);
    }
 
-   public void setInitialConditions(FrameOrientation initialOrientation, FrameVector initialAngularVelocity)
+   public void setInitialConditions(FrameOrientation initialOrientation, FrameVector3D initialAngularVelocity)
    {
       setInitialOrientation(initialOrientation);
       setInitialAngularVelocity(initialAngularVelocity);
@@ -254,7 +254,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       setInitialAngularVelocity(initialAngularVelocity);
    }
 
-   public void setFinalConditions(FrameOrientation finalOrientation, FrameVector finalAngularVelocity)
+   public void setFinalConditions(FrameOrientation finalOrientation, FrameVector3D finalAngularVelocity)
    {
       setFinalOrientation(finalOrientation);
       setFinalAngularVelocity(finalAngularVelocity);
@@ -267,7 +267,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    }
 
    private final FrameOrientation tempFrameOrientation = new FrameOrientation();
-   private final FrameVector tempFrameVector = new FrameVector();
+   private final FrameVector3D tempFrameVector = new FrameVector3D();
 
    public void setTrajectoryParameters(FrameSO3TrajectoryPoint initialFrameSO3Waypoint, FrameSO3TrajectoryPoint finalFrameSO3Waypoint)
    {
@@ -601,19 +601,19 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    }
 
    @Override
-   public void getAngularVelocity(FrameVector velocityToPack)
+   public void getAngularVelocity(FrameVector3D velocityToPack)
    {
       currentAngularVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
    @Override
-   public void getAngularAcceleration(FrameVector accelerationToPack)
+   public void getAngularAcceleration(FrameVector3D accelerationToPack)
    {
       currentAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
    @Override
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

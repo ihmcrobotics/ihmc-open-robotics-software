@@ -1,12 +1,12 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
 public class ConstantOrientationTrajectoryGenerator implements OrientationTrajectoryGenerator
@@ -56,17 +56,17 @@ public class ConstantOrientationTrajectoryGenerator implements OrientationTrajec
       orientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   public void getAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       angularVelocityToPack.setToZero(orientation.getReferenceFrame());
    }
 
-   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
    {
       angularAccelerationToPack.setToZero(orientation.getReferenceFrame());
    }
 
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

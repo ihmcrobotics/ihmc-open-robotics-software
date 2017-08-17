@@ -1,11 +1,11 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class PlanarJointReferenceFrame extends ReferenceFrame
 {
@@ -38,7 +38,7 @@ public class PlanarJointReferenceFrame extends ReferenceFrame
       this.update();
    }
 
-   public void setTranslationAndUpdate(FrameVector2d translation)
+   public void setTranslationAndUpdate(FrameVector2D translation)
    {
       translation.checkReferenceFrameMatch(parentFrame);
       this.translation.setX(translation.getX());

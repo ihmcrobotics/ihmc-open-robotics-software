@@ -3,9 +3,9 @@ package us.ihmc.robotics.weightMatrices;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixDimensionException;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * The {@code WeightMatrix3D} provides a simple way to define weights in a particular frame, which typically make up the main diagonal of a matrix. 

@@ -2,8 +2,8 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class CenterOfMassCalculator
 {
@@ -11,8 +11,8 @@ public class CenterOfMassCalculator
 
    private final RigidBody[] rigidBodies;
    private double totalMass;
-   private final FramePoint centerOfMass = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final FramePoint tempPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D centerOfMass = new FramePoint3D(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D tempPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
 
    public CenterOfMassCalculator(RigidBody rootBody, ReferenceFrame desiredFrame)
    {
@@ -53,12 +53,12 @@ public class CenterOfMassCalculator
       centerOfMass.scale(1.0 / totalMass);
    }
 
-   public FramePoint getCenterOfMass()
+   public FramePoint3D getCenterOfMass()
    {
-      return new FramePoint(centerOfMass);
+      return new FramePoint3D(centerOfMass);
    }
 
-   public void getCenterOfMass(FramePoint centerOfMassToPack)
+   public void getCenterOfMass(FramePoint3D centerOfMassToPack)
    {
       centerOfMassToPack.setIncludingFrame(this.centerOfMass);
    }

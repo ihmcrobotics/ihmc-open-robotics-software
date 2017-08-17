@@ -1,10 +1,10 @@
 package us.ihmc.simulationconstructionset.simulatedSensors;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.corruptors.NoisyYoDouble;
 import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.sensors.RawIMUSensorsInterface;
@@ -84,11 +84,11 @@ public class SimulatedMotionNodeIMURawSensorReader extends SimulatedIMURawSensor
       accelZ.update(perfAccelZ.getDoubleValue());
       
       //12112012 Acceleration output in worldFrame instead of imu frame
-      FrameVector noisyAcceleration = new FrameVector(imuFrame, accelX.getDoubleValue(), accelY.getDoubleValue(), accelZ.getDoubleValue());
+      FrameVector3D noisyAcceleration = new FrameVector3D(imuFrame, accelX.getDoubleValue(), accelY.getDoubleValue(), accelZ.getDoubleValue());
       noisyAcceleration.changeFrame(worldFrame);
       
       //12112012 Acceleration subtract gravity
-      noisyAcceleration.sub(new FrameVector(worldFrame, 0.0, 0.0, localGravityZ));
+      noisyAcceleration.sub(new FrameVector3D(worldFrame, 0.0, 0.0, localGravityZ));
       
       accelX.set(noisyAcceleration.getX());
       accelY.set(noisyAcceleration.getY());

@@ -2,6 +2,9 @@ package us.ihmc.exampleSimulations.skippy;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -10,9 +13,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -546,7 +546,7 @@ public class SkippyRobot extends Robot
    /**
     * Computes the CoM position and velocity and the ICP
     */
-   public void computeComAndICP(FramePoint comToPack, FrameVector comVelocityToPack, FramePoint icpToPack, FrameVector angularMomentumToPack)
+   public void computeComAndICP(FramePoint3D comToPack, FrameVector3D comVelocityToPack, FramePoint3D icpToPack, FrameVector3D angularMomentumToPack)
    {
       double totalMass = computeCOMMomentum(tempCOMPosition, tempLinearMomentum, tempAngularMomentum);
       angularMomentumToPack.set(tempAngularMomentum);
@@ -563,7 +563,7 @@ public class SkippyRobot extends Robot
 
    Vector3D tempJointAxis = new Vector3D();
    RigidBodyTransform transformJointToWorld = new RigidBodyTransform();
-   public void getHipJointAxis(FrameVector hipAxisToPack)
+   public void getHipJointAxis(FrameVector3D hipAxisToPack)
    {
       hipJoint.getJointAxis(tempJointAxis);
       hipJoint.getTransformToWorld(transformJointToWorld);
@@ -572,7 +572,7 @@ public class SkippyRobot extends Robot
       hipAxisToPack.normalize();
    }
 
-   public void getShoulderJointAxis(FrameVector shoulderAxisToPack)
+   public void getShoulderJointAxis(FrameVector3D shoulderAxisToPack)
    {
       shoulderJoint.getJointAxis(tempJointAxis);
       shoulderJoint.getTransformToWorld(transformJointToWorld);

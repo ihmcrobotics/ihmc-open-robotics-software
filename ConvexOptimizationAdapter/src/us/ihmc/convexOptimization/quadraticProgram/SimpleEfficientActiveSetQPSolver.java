@@ -99,7 +99,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
-   private boolean useWarmStart = false;
+   private boolean useWarmStart = true;
 
    private int previousNumberOfVariables = 0;
    private int previousNumberOfEqualityConstraints = 0;

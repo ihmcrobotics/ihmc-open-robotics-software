@@ -1,5 +1,8 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
@@ -8,13 +11,10 @@ import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
 import us.ihmc.robotics.alphaToAlpha.MultipleSegmentConstantSlope;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.Finishable;
 import us.ihmc.robotics.math.trajectories.ParabolicCartesianTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
@@ -33,10 +33,10 @@ public class QuadrupedSwingTrajectoryGenerator
    private final YoVariableRegistry registry;
    private final YoVariableDoubleProvider swingTimeDoubleProvider;
    
-   private final FramePoint desiredEndEffectorPosition = new FramePoint();
-   private final FramePoint initialPosition = new FramePoint();
-   private final FrameVector finalDesiredVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector zeroVector = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
+   private final FramePoint3D desiredEndEffectorPosition = new FramePoint3D();
+   private final FramePoint3D initialPosition = new FramePoint3D();
+   private final FrameVector3D finalDesiredVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D zeroVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
 
    private final YoDouble timeInStep, alphaTimeInStep, alphaIn, alphaOut;
    private final YoDouble alphaSlopeAtStart;
@@ -83,7 +83,7 @@ public class QuadrupedSwingTrajectoryGenerator
       bagOfBalls = new BagOfBalls(50, 0.01, prefix + "SwingTrajectoryBoB", registry, yoGraphicsListRegistry);
    }
    
-   public void initializeSwing(double swingTime, FramePoint swingInitial, double swingHeight, FramePoint swingTarget, FrameVector desiredFinalVelocity)
+   public void initializeSwing(double swingTime, FramePoint3D swingInitial, double swingHeight, FramePoint3D swingTarget, FrameVector3D desiredFinalVelocity)
    {
       bagOfBalls.reset();
       
@@ -101,7 +101,7 @@ public class QuadrupedSwingTrajectoryGenerator
       parabolicCartesianTrajectoryGenerator.initialize(initialPosition, zeroVector, zeroVector, swingTarget, finalDesiredVelocity);
    }
    
-   public void computeSwing(FramePoint framePointToPack)
+   public void computeSwing(FramePoint3D framePointToPack)
    {
       if (USE_NEW_SWING_GENERATOR)
       {
@@ -134,7 +134,7 @@ public class QuadrupedSwingTrajectoryGenerator
       }
    }
 
-   private void updateBagOfBalls(FramePoint desiredEndEffectorPosition)
+   private void updateBagOfBalls(FramePoint3D desiredEndEffectorPosition)
    {
       if(ballCounter % 10000 == 0)
       {

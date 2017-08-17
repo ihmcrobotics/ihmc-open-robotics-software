@@ -6,14 +6,14 @@ import java.util.Random;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Box3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
@@ -45,7 +45,7 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
    private final double step = 0.3;
    private final double linbeWidth = 0.03;
 
-   private final ArrayList<FramePoint> stepLocations = new ArrayList<>();
+   private final ArrayList<FramePoint3D> stepLocations = new ArrayList<>();
 
    public PointyRocksWorld(PointyRocksType type, int steps)
    {
@@ -87,7 +87,7 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
       Vector2D dimensions = new Vector2D(0.04, 0.04);
 
       addBlock(0.0, position, dimensions);
-      stepLocations.add(new FramePoint(worldFrame, position.getX(), position.getY(), 0.0));
+      stepLocations.add(new FramePoint3D(worldFrame, position.getX(), position.getY(), 0.0));
 
       addFinalBlock(step + length);
    }
@@ -110,8 +110,8 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
       addBlock(0.0, position, dimensions, blockColor);
 
       double y = steps%2 == 0 ? -0.15 : 0.15;
-      stepLocations.add(new FramePoint(worldFrame, distance, y, 0.0));
-      stepLocations.add(new FramePoint(worldFrame, distance, -y, 0.0));
+      stepLocations.add(new FramePoint3D(worldFrame, distance, y, 0.0));
+      stepLocations.add(new FramePoint3D(worldFrame, distance, -y, 0.0));
    }
 
    private void addGround()
@@ -137,7 +137,7 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
       Vector3D dimensions = new Vector3D(blockLength, linbeWidth, height);
       addBlock(yaw, position3d, dimensions, blockColor);
 
-      stepLocations.add(new FramePoint(worldFrame, position.getX(), position.getY(), 0.0));
+      stepLocations.add(new FramePoint3D(worldFrame, position.getX(), position.getY(), 0.0));
    }
 
    private void addBlock(double yaw, Vector2D position, Vector2D dimensions)
@@ -155,7 +155,7 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
       terrainObject.addTerrainObject(new RotatableBoxTerrainObject(block, color));
    }
 
-   public ArrayList<FramePoint> getStepLocations()
+   public ArrayList<FramePoint3D> getStepLocations()
    {
       return stepLocations;
    }

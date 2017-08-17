@@ -6,13 +6,13 @@ import org.ejml.alg.dense.misc.UnrolledInverseFromMinor;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -33,7 +33,7 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
    private final YoBoolean isInContact;
    private final YoDouble zForceThreshold;
    private final YoDouble measuredZForce;
-   private final FrameVector footForce = new FrameVector();
+   private final FrameVector3D footForce = new FrameVector3D();
    
    public ForceBasedTouchDownDetection(FullQuadrupedRobotModel robotModel, RobotQuadrant robotQuadrant, ReferenceFrame soleFrame, YoVariableRegistry parentRegistry)
    {

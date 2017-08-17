@@ -16,6 +16,10 @@ import georegression.struct.se.Se3_F64;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -26,12 +30,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameTuple;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameTuple;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MatrixTools
 {
@@ -692,49 +692,49 @@ public class MatrixTools
       to.setTranslation(new Vector3D(T.x, T.y, T.z));
    }
 
-   public static void transformFramePoint2dIntoColumnVector(DenseMatrix64F matrix, FramePoint2d framePoint)
+   public static void transformFramePoint2dIntoColumnVector(DenseMatrix64F matrix, FramePoint2D framePoint)
    {
       matrix.set(0, 0, framePoint.getX());
       matrix.set(1, 0, framePoint.getY());
    }
 
-   public static void transformColumnVectorIntoFramePoint2d(DenseMatrix64F matrix, FramePoint2d framePoint)
+   public static void transformColumnVectorIntoFramePoint2d(DenseMatrix64F matrix, FramePoint2D framePoint)
    {
       framePoint.setX(matrix.get(0, 0));
       framePoint.setY(matrix.get(1, 0));
    }
 
-   public static void transformFrameVector2dIntoColumnVector(DenseMatrix64F matrix, FrameVector2d frameVector)
+   public static void transformFrameVector2dIntoColumnVector(DenseMatrix64F matrix, FrameVector2D frameVector)
    {
       matrix.set(0, 0, frameVector.getX());
       matrix.set(1, 0, frameVector.getY());
    }
 
-   public static void transformColumnVectorIntoFrameVector2d(DenseMatrix64F matrix, FrameVector2d frameVector)
+   public static void transformColumnVectorIntoFrameVector2d(DenseMatrix64F matrix, FrameVector2D frameVector)
    {
       frameVector.setX(matrix.get(0, 0));
       frameVector.setY(matrix.get(1, 0));
    }
 
-   public static void transformFramePoint2dIntoRowVector(DenseMatrix64F matrix, FramePoint2d framePoint)
+   public static void transformFramePoint2dIntoRowVector(DenseMatrix64F matrix, FramePoint2D framePoint)
    {
       matrix.set(0, 0, framePoint.getX());
       matrix.set(0, 1, framePoint.getY());
    }
 
-   public static void transformRowVectorIntoFramePoint2d(DenseMatrix64F matrix, FramePoint2d framePoint)
+   public static void transformRowVectorIntoFramePoint2d(DenseMatrix64F matrix, FramePoint2D framePoint)
    {
       framePoint.setX(matrix.get(0, 0));
       framePoint.setX(matrix.get(0, 1));
    }
 
-   public static void transformFrameVector2dIntoRowVector(DenseMatrix64F matrix, FrameVector2d frameVector)
+   public static void transformFrameVector2dIntoRowVector(DenseMatrix64F matrix, FrameVector2D frameVector)
    {
       matrix.set(0, 0, frameVector.getX());
       matrix.set(0, 1, frameVector.getY());
    }
 
-   public static void transformRowVectorIntoFrameVector2d(DenseMatrix64F matrix, FrameVector2d frameVector)
+   public static void transformRowVectorIntoFrameVector2d(DenseMatrix64F matrix, FrameVector2D frameVector)
    {
       frameVector.setX(matrix.get(0, 0));
       frameVector.setY(matrix.get(0, 1));
@@ -782,7 +782,7 @@ public class MatrixTools
       tuple3d.setZ(ejmlVector.get(startIndex + 2, 0));
    }
 
-   public static void extractFrameTupleFromEJMLVector(FrameTuple<?, ?> frameTuple, DenseMatrix64F ejmlVector, ReferenceFrame desiredFrame, int startIndex)
+   public static void extractFrameTupleFromEJMLVector(FrameTuple3D<?, ?> frameTuple, DenseMatrix64F ejmlVector, ReferenceFrame desiredFrame, int startIndex)
    {
       frameTuple.setToZero(desiredFrame);
       frameTuple.setX(ejmlVector.get(startIndex + 0, 0));
@@ -824,7 +824,7 @@ public class MatrixTools
       ejmlVector.set(indices[2], 0, tuple3d.getZ());
    }
 
-   public static void insertFrameTupleIntoEJMLVector(FrameTuple<?, ?> frameTuple, DenseMatrix64F ejmlVector, int startIndex)
+   public static void insertFrameTupleIntoEJMLVector(FrameTuple3D<?, ?> frameTuple, DenseMatrix64F ejmlVector, int startIndex)
    {
       ejmlVector.set(startIndex + 0, 0, frameTuple.getX());
       ejmlVector.set(startIndex + 1, 0, frameTuple.getY());

@@ -32,15 +32,15 @@ import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelContr
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelController;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -88,12 +88,12 @@ public class WholeBodyVirtualModelControlSolver
    private final YoFrameVector yoAchievedMomentumRateLinear;
    private final YoFrameVector yoDesiredMomentumRateAngular;
    private final YoFrameVector yoAchievedMomentumRateAngular;
-   private final FrameVector achievedMomentumRateLinear = new FrameVector();
+   private final FrameVector3D achievedMomentumRateLinear = new FrameVector3D();
    private final Map<OneDoFJoint, RateLimitedYoVariable> jointTorqueSolutions = new HashMap<>();
 
    private final Wrench residualRootJointWrench = new Wrench();
-   private final FrameVector residualRootJointForce = new FrameVector();
-   private final FrameVector residualRootJointTorque = new FrameVector();
+   private final FrameVector3D residualRootJointForce = new FrameVector3D();
+   private final FrameVector3D residualRootJointTorque = new FrameVector3D();
 
    private final YoFrameVector yoResidualRootJointForce;
    private final YoFrameVector yoResidualRootJointTorque;
@@ -316,7 +316,7 @@ public class WholeBodyVirtualModelControlSolver
       }
    }
 
-   private FrameVector tempFrameVector = new FrameVector();
+   private FrameVector3D tempFrameVector = new FrameVector3D();
    private DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE);
 
    private void handleJointSpaceCommand(JointspaceAccelerationCommand command)
@@ -465,7 +465,7 @@ public class WholeBodyVirtualModelControlSolver
       return planeContactWrenchProcessor.getDesiredCenterOfPressureDataHolder();
    }
 
-   public FrameVector getAchievedMomentumRateLinear()
+   public FrameVector3D getAchievedMomentumRateLinear()
    {
       return achievedMomentumRateLinear;
    }

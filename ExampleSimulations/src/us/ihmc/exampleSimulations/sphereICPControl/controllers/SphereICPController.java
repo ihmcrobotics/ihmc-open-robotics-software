@@ -5,6 +5,11 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousC
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.YoICPControlGains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPProportionalController;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
@@ -13,15 +18,17 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.*;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -132,13 +139,13 @@ public class SphereICPController implements GenericSphereController
       parentRegistry.addChild(registry);
    }
 
-   private final FramePoint2d capturePoint2d = new FramePoint2d();
-   private final FramePoint desiredCapturePoint = new FramePoint();
-   private final FramePoint finalDesiredCapturePoint = new FramePoint();
-   private final FrameVector desiredCapturePointVelocity = new FrameVector();
-   private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
-   private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();
-   private final FrameVector2d desiredCapturePointVelocity2d = new FrameVector2d();
+   private final FramePoint2D capturePoint2d = new FramePoint2D();
+   private final FramePoint3D desiredCapturePoint = new FramePoint3D();
+   private final FramePoint3D finalDesiredCapturePoint = new FramePoint3D();
+   private final FrameVector3D desiredCapturePointVelocity = new FrameVector3D();
+   private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
+   private final FramePoint2D finalDesiredCapturePoint2d = new FramePoint2D();
+   private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
 
    private int counter = 0;
    public void doControl()
@@ -158,20 +165,20 @@ public class SphereICPController implements GenericSphereController
       desiredICP.set(desiredCapturePoint);
       desiredCapturePointVelocity.set(desiredCapturePointVelocity);
 
-      desiredCapturePoint2d.setByProjectionOntoXYPlane(desiredCapturePoint);
-      desiredCapturePointVelocity2d.setByProjectionOntoXYPlane(desiredCapturePointVelocity);
-      finalDesiredCapturePoint2d.setByProjectionOntoXYPlane(finalDesiredCapturePoint);
+      desiredCapturePoint2d.set(desiredCapturePoint);
+      desiredCapturePointVelocity2d.set(desiredCapturePointVelocity);
+      finalDesiredCapturePoint2d.set(finalDesiredCapturePoint);
 
-      FramePoint2d desiredCMP = icpController.doProportionalControl(null, capturePoint2d, desiredCapturePoint2d, finalDesiredCapturePoint2d,
+      FramePoint2D desiredCMP = icpController.doProportionalControl(null, capturePoint2d, desiredCapturePoint2d, finalDesiredCapturePoint2d,
             desiredCapturePointVelocity2d, null, omega0);
 
       double fZ = heightController.getVerticalForce();
-      FrameVector reactionForces = computeGroundReactionForce(desiredCMP, fZ);
+      FrameVector3D reactionForces = computeGroundReactionForce(desiredCMP, fZ);
       reactionForces.changeFrame(worldFrame);
       planarForces.setByProjectionOntoXYPlane(reactionForces);
 
       desiredCMP.changeFrame(worldFrame);
-      yoDesiredCMP.setXY(desiredCMP);
+      yoDesiredCMP.set(desiredCMP, 0.0);
 
       if (counter++ % simulatedTicksPerGraphicUpdate == 0)
       {
@@ -190,10 +197,10 @@ public class SphereICPController implements GenericSphereController
       return desiredForces.getVector3dCopy();
    }
 
-   private final FramePoint cmp3d = new FramePoint();
-   private final FrameVector groundReactionForce = new FrameVector();
-   private final FramePoint centerOfMass = new FramePoint();
-   private FrameVector computeGroundReactionForce(FramePoint2d cmp2d, double fZ)
+   private final FramePoint3D cmp3d = new FramePoint3D();
+   private final FrameVector3D groundReactionForce = new FrameVector3D();
+   private final FramePoint3D centerOfMass = new FramePoint3D();
+   private FrameVector3D computeGroundReactionForce(FramePoint2D cmp2d, double fZ)
    {
       centerOfMass.setToZero(centerOfMassFrame);
       WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, cmp2d, fZ, totalMass, omega0);

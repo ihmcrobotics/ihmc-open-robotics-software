@@ -1,26 +1,24 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPQPOptimizationSolver;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
+import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.AbstractSimpleICPOptimizationController.*;
 
 import java.util.ArrayList;
 
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.AbstractSimpleICPOptimizationController.yoNamePrefix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.math.frames.YoFrameVector2d;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimpleICPOptimizationSolutionHandler
 {
@@ -44,16 +42,16 @@ public class SimpleICPOptimizationSolutionHandler
 
    private final boolean debug;
 
-   private final FramePoint2d locationSolution = new FramePoint2d();
-   private final FramePoint2d previousLocationSolution = new FramePoint2d();
-   private final FramePoint2d clippedLocationSolution = new FramePoint2d();
+   private final FramePoint2D locationSolution = new FramePoint2D();
+   private final FramePoint2D previousLocationSolution = new FramePoint2D();
+   private final FramePoint2D clippedLocationSolution = new FramePoint2D();
 
-   private final FramePoint solutionLocation = new FramePoint();
-   private final FramePoint referenceLocation = new FramePoint();
-   private final FramePoint previousLocation = new FramePoint();
-   private final FrameVector solutionAdjustment = new FrameVector();
+   private final FramePoint3D solutionLocation = new FramePoint3D();
+   private final FramePoint3D referenceLocation = new FramePoint3D();
+   private final FramePoint3D previousLocation = new FramePoint3D();
+   private final FrameVector3D solutionAdjustment = new FrameVector3D();
 
-   private final FrameVector tempVector = new FrameVector();
+   private final FrameVector3D tempVector = new FrameVector3D();
 
    public SimpleICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, boolean debug, String yoNamePrefix, YoVariableRegistry registry)
    {
@@ -111,8 +109,8 @@ public class SimpleICPOptimizationSolutionHandler
       }
    }
 
-   private final FramePoint2d referenceFootstepLocation = new FramePoint2d();
-   public void extractFootstepSolutions(ArrayList<YoFramePoint2d> footstepSolutionsToPack, ArrayList<FramePoint2d> unclippedFootstepSolutionsToPack,
+   private final FramePoint2D referenceFootstepLocation = new FramePoint2D();
+   public void extractFootstepSolutions(ArrayList<YoFramePoint2d> footstepSolutionsToPack, ArrayList<FramePoint2D> unclippedFootstepSolutionsToPack,
          ArrayList<Footstep> upcomingFootsteps, int numberOfFootstepsToConsider, SimpleICPOptimizationQPSolver solver)
    {
       boolean firstStepAdjusted = false;
@@ -152,19 +150,19 @@ public class SimpleICPOptimizationSolutionHandler
       footstepWasAdjusted.set(false);
    }
 
-   public void updateVisualizers(FramePoint2d desiredICP, double footstepMultiplier)
+   public void updateVisualizers(FramePoint2D desiredICP, double footstepMultiplier)
    {
       adjustedICPReferenceLocation.set(clippedFootstepAdjustment);
       adjustedICPReferenceLocation.scale(footstepMultiplier);
       adjustedICPReferenceLocation.add(desiredICP);
    }
 
-   private boolean applyLocationDeadband(FramePoint2d solutionLocationToPack, FramePoint2d currentSolutionLocation, FramePoint2d referenceLocation2d,
+   private boolean applyLocationDeadband(FramePoint2D solutionLocationToPack, FramePoint2D currentSolutionLocation, FramePoint2D referenceLocation2d,
          ReferenceFrame deadbandFrame, double deadband, double deadbandResolution)
    {
-      solutionLocation.setXYIncludingFrame(solutionLocationToPack);
-      referenceLocation.setXYIncludingFrame(referenceLocation2d);
-      previousLocation.setXYIncludingFrame(currentSolutionLocation);
+      solutionLocation.setIncludingFrame(solutionLocationToPack, 0.0);
+      referenceLocation.setIncludingFrame(referenceLocation2d, 0.0);
+      previousLocation.setIncludingFrame(currentSolutionLocation, 0.0);
 
       solutionLocation.changeFrame(worldFrame);
       referenceLocation.changeFrame(worldFrame);
@@ -204,7 +202,7 @@ public class SimpleICPOptimizationSolutionHandler
          wasAdjusted = true;
 
       solutionLocation.changeFrame(solutionLocationToPack.getReferenceFrame());
-      solutionLocationToPack.setByProjectionOntoXYPlane(solutionLocation);
+      solutionLocationToPack.set(solutionLocation);
 
       return wasAdjusted;
    }
@@ -214,7 +212,7 @@ public class SimpleICPOptimizationSolutionHandler
       return footstepWasAdjusted.getBooleanValue();
    }
 
-   public FrameVector2d getFootstepAdjustment()
+   public FrameVector2D getFootstepAdjustment()
    {
       return footstepAdjustment.getFrameTuple2d();
    }

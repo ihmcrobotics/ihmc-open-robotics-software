@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ClearLidarBehavior;
@@ -16,7 +17,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;

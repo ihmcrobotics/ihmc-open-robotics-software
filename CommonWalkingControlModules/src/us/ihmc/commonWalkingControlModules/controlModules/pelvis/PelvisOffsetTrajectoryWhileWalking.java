@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.InterpolationTools;
@@ -9,10 +11,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -132,7 +132,7 @@ public class PelvisOffsetTrajectoryWhileWalking
       reset();
    }
 
-   private final FramePoint tmpPoint = new FramePoint();
+   private final FramePoint3D tmpPoint = new FramePoint3D();
    public void initializeTransfer(RobotSide transferToSide, double transferDuration, double swingDuration)
    {
       supportSide = transferToSide;
@@ -231,7 +231,7 @@ public class PelvisOffsetTrajectoryWhileWalking
       nextTransferDuration.set(0.0);
    }
 
-   private double computeStepAngle(FramePoint footLocation, RobotSide supportSide)
+   private double computeStepAngle(FramePoint3D footLocation, RobotSide supportSide)
    {
       double stepAngle = 0.0;
       if (Math.abs(footLocation.getX()) > pelvisYawStepLengthThreshold.getDoubleValue())
@@ -311,7 +311,7 @@ public class PelvisOffsetTrajectoryWhileWalking
       desiredWalkingPelvisOffsetOrientation.setPitch(desiredPitch);
    }
 
-   private final FramePoint tempPoint = new FramePoint();
+   private final FramePoint3D tempPoint = new FramePoint3D();
    private double computeAngleFromSoleToPelvis(ReferenceFrame soleFrame)
    {
       tempPoint.setToZero(pelvisFrame);

@@ -3,12 +3,12 @@ package us.ihmc.manipulation.planning.forwaypoint;
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SO3TrajectoryPointCalculator
 {

@@ -9,6 +9,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -23,8 +25,6 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseTest;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -100,13 +100,13 @@ public class PointCloudDataReceiver extends Thread implements ConnectionStateLis
          ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(side);
          for (Point2D point : contactPoints.get(side))
          {
-            FramePoint footContactPoint = new FramePoint(soleFrame, point.getX(), point.getY(), 0.0);
+            FramePoint3D footContactPoint = new FramePoint3D(soleFrame, point.getX(), point.getY(), 0.0);
 //            footContactPoint.scale(QuadTreePointUnderFeetScaling);
             footContactPoint.changeFrame(ReferenceFrame.getWorldFrame());
             depthDataFilter.getQuadTree().addPoint(footContactPoint.getX(), footContactPoint.getY(), footContactPoint.getZ());
          }
 
-         FramePoint footCenter = new FramePoint(soleFrame, 0.0, 0.0, 0.0);
+         FramePoint3D footCenter = new FramePoint3D(soleFrame, 0.0, 0.0, 0.0);
          footCenter.changeFrame(ReferenceFrame.getWorldFrame());
          depthDataFilter.getQuadTree().addPoint(footCenter.getX(), footCenter.getY(), footCenter.getZ());
 

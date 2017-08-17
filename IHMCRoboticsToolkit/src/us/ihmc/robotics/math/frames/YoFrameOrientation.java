@@ -3,22 +3,22 @@ package us.ihmc.robotics.math.frames;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.rotationConversion.QuaternionConversion;
 import us.ihmc.euclid.rotationConversion.RotationMatrixConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
 //since they contain YoVariables.
-public class YoFrameOrientation extends AbstractReferenceFrameHolder implements Clearable
+public class YoFrameOrientation implements ReferenceFrameHolder, Clearable
 {
    private final YoDouble yaw, pitch, roll; // This is where the data is stored. All operations must act on these numbers.
    private final ReferenceFrame referenceFrame;

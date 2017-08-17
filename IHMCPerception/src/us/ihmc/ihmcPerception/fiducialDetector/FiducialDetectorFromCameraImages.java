@@ -16,6 +16,7 @@ import georegression.struct.EulerType;
 import georegression.struct.se.Se3_F64;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -33,7 +34,6 @@ import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 
 public class FiducialDetectorFromCameraImages

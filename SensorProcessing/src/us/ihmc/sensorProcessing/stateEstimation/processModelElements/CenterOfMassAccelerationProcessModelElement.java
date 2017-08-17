@@ -5,10 +5,10 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
 
 public class CenterOfMassAccelerationProcessModelElement extends AbstractProcessModelElement
@@ -16,12 +16,12 @@ public class CenterOfMassAccelerationProcessModelElement extends AbstractProcess
    private static final boolean USE_INPUT_ACCELERATION = false;
    
    private static final int SIZE = 3;
-   private final ControlFlowOutputPort<FrameVector> centerOfMassAccelerationStatePort;
-   private final ControlFlowInputPort<FrameVector> centerOfMassAccelerationInputPort;
-   private final FrameVector comAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector comAccelerationDelta = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final ControlFlowOutputPort<FrameVector3D> centerOfMassAccelerationStatePort;
+   private final ControlFlowInputPort<FrameVector3D> centerOfMassAccelerationInputPort;
+   private final FrameVector3D comAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D comAccelerationDelta = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
-   public CenterOfMassAccelerationProcessModelElement(String name, YoVariableRegistry registry, ControlFlowOutputPort<FrameVector> centerOfMassAccelerationStatePort, ControlFlowInputPort<FrameVector> centerOfMassAccelerationInputPort)
+   public CenterOfMassAccelerationProcessModelElement(String name, YoVariableRegistry registry, ControlFlowOutputPort<FrameVector3D> centerOfMassAccelerationStatePort, ControlFlowInputPort<FrameVector3D> centerOfMassAccelerationInputPort)
    {
       super(centerOfMassAccelerationStatePort, TimeDomain.DISCRETE, false, SIZE, name, registry);
       this.centerOfMassAccelerationStatePort = centerOfMassAccelerationStatePort;

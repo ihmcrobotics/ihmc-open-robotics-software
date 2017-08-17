@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith;
 
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -99,7 +99,7 @@ public class PelvisLeapOfFaithModule
          phaseOutTime = Math.max(timeInLeapOfFaith - currentTimeInState, 0.0);
    }
 
-   private final FramePoint tempPoint = new FramePoint();
+   private final FramePoint3D tempPoint = new FramePoint3D();
    public void updateAngularOffsets()
    {
       orientationOffset.setToZero();

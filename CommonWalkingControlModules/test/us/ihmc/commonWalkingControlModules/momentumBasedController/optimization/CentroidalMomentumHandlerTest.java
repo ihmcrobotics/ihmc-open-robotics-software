@@ -6,10 +6,10 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -35,8 +35,8 @@ public class CentroidalMomentumHandlerTest
       CentroidalMomentumHandler centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(rootBody);
 
-      FrameVector actualCenterOfMassVelocity = new FrameVector();
-      FrameVector expectedCenterOfMassVelocity = new FrameVector();
+      FrameVector3D actualCenterOfMassVelocity = new FrameVector3D();
+      FrameVector3D expectedCenterOfMassVelocity = new FrameVector3D();
 
       for (int i = 0; i < ITERATIONS; i++)
       {
@@ -69,8 +69,8 @@ public class CentroidalMomentumHandlerTest
       CentroidalMomentumHandler centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
       CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(rootBody);
 
-      FrameVector actualCenterOfMassVelocity = new FrameVector();
-      FrameVector expectedCenterOfMassVelocity = new FrameVector();
+      FrameVector3D actualCenterOfMassVelocity = new FrameVector3D();
+      FrameVector3D expectedCenterOfMassVelocity = new FrameVector3D();
 
       for (int i = 0; i < ITERATIONS; i++)
       {

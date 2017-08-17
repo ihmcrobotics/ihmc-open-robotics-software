@@ -1,16 +1,16 @@
 package us.ihmc.robotics.math.frames;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.interfaces.PointInterface;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
 //since they contain YoVariables.
-public class YoFramePoint extends YoFrameTuple<YoFramePoint, FramePoint> implements PointInterface
+public class YoFramePoint extends YoFrameTuple<YoFramePoint, FramePoint3D> implements PointInterface
 {
    public YoFramePoint(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
    {
@@ -27,12 +27,12 @@ public class YoFramePoint extends YoFrameTuple<YoFramePoint, FramePoint> impleme
       super(xVariable, yVariable, zVariable, frame);
    }
 
-   protected FramePoint createEmptyFrameTuple()
+   protected FramePoint3D createEmptyFrameTuple()
    {
-      return new FramePoint();
+      return new FramePoint3D();
    }
 
-   public double distance(FramePoint framePoint)
+   public double distance(FramePoint3D framePoint)
    {
       return getFrameTuple().distance(framePoint);
    }
@@ -42,24 +42,19 @@ public class YoFramePoint extends YoFrameTuple<YoFramePoint, FramePoint> impleme
       return distance(yoFramePoint.getFrameTuple());
    }
 
-   public double getXYPlaneDistance(FramePoint framePoint)
+   public double getXYPlaneDistance(FramePoint3D framePoint)
    {
-      return getFrameTuple().getXYPlaneDistance(framePoint);
+      return getFrameTuple().distanceXY(framePoint);
    }
 
-   public double getXYPlaneDistance(FramePoint2d framePoint2d)
+   public double getXYPlaneDistance(FramePoint2D framePoint2d)
    {
-      return getFrameTuple().getXYPlaneDistance(framePoint2d);
+      return getFrameTuple().distanceXY(framePoint2d);
    }
 
    public double getXYPlaneDistance(YoFramePoint yoFramePoint)
    {
       return getXYPlaneDistance(yoFramePoint.getFrameTuple());
-   }
-
-   public double getXYPlaneDistance(YoFramePoint2d yoFramePoint2d)
-   {
-      return getXYPlaneDistance(yoFramePoint2d.getFrameTuple2d());
    }
 
    @Override

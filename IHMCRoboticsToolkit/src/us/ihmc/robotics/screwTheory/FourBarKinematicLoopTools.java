@@ -1,16 +1,16 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FourBarKinematicLoopTools
 {   
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean DEBUG = false;
 
-   public static void checkJointAxesAreParallel(FrameVector masterAxis, FrameVector jointBAxis, FrameVector jointCAxis, FrameVector jointDAxis)
+   public static void checkJointAxesAreParallel(FrameVector3D masterAxis, FrameVector3D jointBAxis, FrameVector3D jointCAxis, FrameVector3D jointDAxis)
    {
       masterAxis.changeFrame(worldFrame);
       jointBAxis.changeFrame(worldFrame);
@@ -71,7 +71,7 @@ public class FourBarKinematicLoopTools
       }     
    }
    
-   public static boolean checkFourBarConvexityAndOrientation(FrameVector2d vectorABProjected, FrameVector2d vectorBCProjected, FrameVector2d vectorCDProjected, FrameVector2d vectorDAProjected)
+   public static boolean checkFourBarConvexityAndOrientation(FrameVector2D vectorABProjected, FrameVector2D vectorBCProjected, FrameVector2D vectorCDProjected, FrameVector2D vectorDAProjected)
    {
       boolean ccwConvex = vectorABProjected.cross(vectorBCProjected) > 0.0 && vectorBCProjected.cross(vectorCDProjected) > 0.0 && vectorCDProjected.cross(vectorDAProjected) > 0.0;
       boolean cwConvex = vectorABProjected.cross(vectorBCProjected) < 0.0 && vectorBCProjected.cross(vectorCDProjected) < 0.0 && vectorCDProjected.cross(vectorDAProjected) < 0.0;

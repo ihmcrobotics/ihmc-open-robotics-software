@@ -7,8 +7,10 @@ import com.jme3.math.Transform;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.atlas.parameters.AtlasReachableFootstepExpansion;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
@@ -26,12 +28,14 @@ import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffset
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
@@ -98,6 +102,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
+   private final PlanarRegionFootstepPlanningParameters planarRegionFootstepPlannerParameters;
 
    private final RobotDescription robotDescription;
 
@@ -152,6 +157,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          capturePointPlannerParameters = new AtlasSmoothCMPPlannerParameters(atlasPhysicalProperties);
       else
          capturePointPlannerParameters = new AtlasContinuousCMPPlannerParameters(atlasPhysicalProperties);
+
+      planarRegionFootstepPlannerParameters = new AtlasFootstepPlannerParameters();
 
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
@@ -369,7 +376,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public FootstepPlanningParameters getFootstepPlanningParameters()
+   public QuadTreeFootstepPlanningParameters getQuadTreeFootstepPlanningParameters()
    {
       return new AtlasFootstepPlanningParameters();
    }
@@ -779,5 +786,14 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private void modifyLinkInertia(SDFLinkHolder linkHolder, Matrix3D inertia)
    {
       linkHolder.setInertia(inertia);
+   }
+   
+   /**
+    * Adds robot specific footstep parameters
+    */
+   @Override
+   public PlanarRegionFootstepPlanningParameters getPlanarRegionFootstepPlannerParameters()
+   {
+      return planarRegionFootstepPlannerParameters;
    }
 }

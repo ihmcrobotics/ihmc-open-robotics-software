@@ -2,12 +2,12 @@ package us.ihmc.robotics.math.frames;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
 //since they contain YoVariables.
-public class YoFrameVector2d extends YoFrameTuple2d<YoFrameVector2d, FrameVector2d>
+public class YoFrameVector2d extends YoFrameTuple2d<YoFrameVector2d, FrameVector2D>
 {
    public YoFrameVector2d(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
    {
@@ -29,9 +29,9 @@ public class YoFrameVector2d extends YoFrameTuple2d<YoFrameVector2d, FrameVector
       super(xVariable, yVariable, frame);
    }
 
-   protected FrameVector2d createEmptyFrameTuple2d()
+   protected FrameVector2D createEmptyFrameTuple2d()
    {
-      return new FrameVector2d();
+      return new FrameVector2D();
    }
 
    public double length()
@@ -44,7 +44,7 @@ public class YoFrameVector2d extends YoFrameTuple2d<YoFrameVector2d, FrameVector
       return getFrameTuple2d().lengthSquared();
    }
 
-   public double dot(FrameVector2d vector)
+   public double dot(FrameVector2D vector)
    {
       return getFrameTuple2d().dot(vector);
    }
@@ -54,7 +54,7 @@ public class YoFrameVector2d extends YoFrameTuple2d<YoFrameVector2d, FrameVector
       return dot(yoFrameVector.getFrameTuple2d());
    }
 
-   public double cross(FrameVector2d frameVector)
+   public double cross(FrameVector2D frameVector)
    {
       checkReferenceFrameMatch(frameVector);
 

@@ -2,10 +2,10 @@ package us.ihmc.robotics.trajectories;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class Parabolic3dCurveGenerator
 {
@@ -29,17 +29,17 @@ public class Parabolic3dCurveGenerator
 
 
 
-   public static ListOfPointsTrajectory generateParabolicListOfPointsTrajectory(FramePoint startPoint, FramePoint endPoint, double apexOfParabola,
+   public static ListOfPointsTrajectory generateParabolicListOfPointsTrajectory(FramePoint3D startPoint, FramePoint3D endPoint, double apexOfParabola,
            int numberOfPointsToGenerate)
    {
-      ArrayList<FramePoint> listOfPoints = generate3dParabola(startPoint, endPoint, apexOfParabola, numberOfPointsToGenerate);
+      ArrayList<FramePoint3D> listOfPoints = generate3dParabola(startPoint, endPoint, apexOfParabola, numberOfPointsToGenerate);
 
       ListOfPointsTrajectory ret = new ListOfPointsTrajectory(listOfPoints);
 
       return ret;
    }
 
-   public static ArrayList<FramePoint> generate3dParabola(FramePoint startFramePoint, FramePoint endFramePoint, double apexOfParabola, int numberOfPointsToGenerate)
+   public static ArrayList<FramePoint3D> generate3dParabola(FramePoint3D startFramePoint, FramePoint3D endFramePoint, double apexOfParabola, int numberOfPointsToGenerate)
    {
       startFramePoint.checkReferenceFrameMatch(endFramePoint);
       ReferenceFrame referenceFrame = startFramePoint.getReferenceFrame();
@@ -50,11 +50,11 @@ public class Parabolic3dCurveGenerator
       endFramePoint.get(endPoint);
       ArrayList<Point3D> listOf3dPoints = generate3dParabola(startPoint, endPoint, apexOfParabola, numberOfPointsToGenerate);
 
-      ArrayList<FramePoint> ret = new ArrayList<FramePoint>();
+      ArrayList<FramePoint3D> ret = new ArrayList<FramePoint3D>();
 
       for (Point3D point3d : listOf3dPoints)
       {
-         FramePoint pointToAdd = new FramePoint(referenceFrame, point3d);
+         FramePoint3D pointToAdd = new FramePoint3D(referenceFrame, point3d);
          ret.add(pointToAdd);
       }
 

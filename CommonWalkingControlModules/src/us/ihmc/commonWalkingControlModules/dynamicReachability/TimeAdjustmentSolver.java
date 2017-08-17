@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
 import us.ihmc.convexOptimization.quadraticProgram.*;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
@@ -206,7 +206,7 @@ public class TimeAdjustmentSolver
     *
     * @param gradient gradient of time segment. Not Modified.
     */
-   public void setCurrentInitialTransferGradient(FrameVector gradient)
+   public void setCurrentInitialTransferGradient(FrameVector3D gradient)
    {
       setGradient(currentInitialTransferIndex, gradient);
    }
@@ -217,7 +217,7 @@ public class TimeAdjustmentSolver
     *
     * @param gradient gradient of the time segment. Not Modified.
     */
-   public void setCurrentEndTransferGradient(FrameVector gradient)
+   public void setCurrentEndTransferGradient(FrameVector3D gradient)
    {
       setGradient(currentEndTransferIndex, gradient);
    }
@@ -228,7 +228,7 @@ public class TimeAdjustmentSolver
     *
     * @param gradient gradient of the time segment. Not Modified.
     */
-   public void setCurrentInitialSwingGradient(FrameVector gradient)
+   public void setCurrentInitialSwingGradient(FrameVector3D gradient)
    {
       setGradient(currentInitialSwingIndex, gradient);
    }
@@ -239,7 +239,7 @@ public class TimeAdjustmentSolver
     *
     * @param gradient gradient of the time segment. Not Modified.
     */
-   public void setCurrentEndSwingGradient(FrameVector gradient)
+   public void setCurrentEndSwingGradient(FrameVector3D gradient)
    {
       setGradient(currentEndSwingIndex, gradient);
    }
@@ -250,7 +250,7 @@ public class TimeAdjustmentSolver
     *
     * @param gradient gradient of the time segment. Not Modified.
     */
-   public void setNextInitialTransferGradient(FrameVector gradient)
+   public void setNextInitialTransferGradient(FrameVector3D gradient)
    {
       setGradient(nextInitialTransferIndex, gradient);
    }
@@ -260,7 +260,7 @@ public class TimeAdjustmentSolver
     *
     * @param gradient gradient of the time segment. Not Modified.
     */
-   public void setNextEndTransferGradient(FrameVector gradient)
+   public void setNextEndTransferGradient(FrameVector3D gradient)
    {
       setGradient(nextEndTransferIndex, gradient);
    }
@@ -268,12 +268,12 @@ public class TimeAdjustmentSolver
    /**
     * Sets the gradient of adjusting the time of the swing duration of upcoming steps.
     * In this case, {@param higherIndex} 0 represents the second swing phase, as that is the current swing index, and is set using
-    * {@link #setCurrentInitialSwingGradient(FrameVector)} and {@link @setCurrentEndSwingGradient(FrameVector)}.
+    * {@link #setCurrentInitialSwingGradient(FrameVector3D)} and {@link @setCurrentEndSwingGradient(FrameVector)}.
     *
     * @param higherIndex index of the swing phase to modify.
     * @param swingGradient gradient of the swing time. Not Modified.
     */
-   public void setHigherSwingGradient(int higherIndex, FrameVector swingGradient)
+   public void setHigherSwingGradient(int higherIndex, FrameVector3D swingGradient)
    {
       setGradient(6 + 2 * higherIndex, swingGradient);
    }
@@ -281,19 +281,19 @@ public class TimeAdjustmentSolver
    /**
     * Sets the gradient of adjusting the time of the transfer duration of upcoming steps.
     * In this case, {@param higherIndex} of 0 represents the third transfer phase. Transfer phase 0 is addressed using
-    * {@link #setCurrentInitialTransferGradient(FrameVector)} and {@link #setCurrentEndTransferGradient(FrameVector)},
-    * and transfer phase 1 is addressed using {@link #setNextInitialTransferGradient(FrameVector)} and
-    * {@link #setNextEndTransferGradient(FrameVector)}.
+    * {@link #setCurrentInitialTransferGradient(FrameVector3D)} and {@link #setCurrentEndTransferGradient(FrameVector3D)},
+    * and transfer phase 1 is addressed using {@link #setNextInitialTransferGradient(FrameVector3D)} and
+    * {@link #setNextEndTransferGradient(FrameVector3D)}.
     *
     * @param higherIndex index of the transfer phase to modify.
     * @param transferGradient gradient of the transfer time. Not Modified.
     */
-   public void setHigherTransferGradient(int higherIndex, FrameVector transferGradient)
+   public void setHigherTransferGradient(int higherIndex, FrameVector3D transferGradient)
    {
       setGradient(7 + 2 * higherIndex, transferGradient);
    }
 
-   private void setGradient(int colIndex, FrameVector gradient)
+   private void setGradient(int colIndex, FrameVector3D gradient)
    {
       double parallel = gradient.getX();
       double perpendicular = gradient.getY();

@@ -1,12 +1,13 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoContactPoint implements ContactPointInterface
 {
@@ -16,14 +17,14 @@ public class YoContactPoint implements ContactPointInterface
    private final String namePrefix;
    private final PlaneContactState parentContactState;
 
-   public YoContactPoint(String namePrefix, int index, FramePoint2d contactPointPosition2d, PlaneContactState parentContactState,
+   public YoContactPoint(String namePrefix, int index, FramePoint2D contactPointPosition2d, PlaneContactState parentContactState,
          YoVariableRegistry parentRegistry)
    {
       this(namePrefix, index, contactPointPosition2d.getReferenceFrame(), parentContactState, parentRegistry);
       setPosition(contactPointPosition2d);
    }
 
-   public YoContactPoint(String namePrefix, int index, FramePoint contactPointPosition, PlaneContactState parentContactState, YoVariableRegistry parentRegistry)
+   public YoContactPoint(String namePrefix, int index, FramePoint3D contactPointPosition, PlaneContactState parentContactState, YoVariableRegistry parentRegistry)
    {
       this(namePrefix, index, contactPointPosition.getReferenceFrame(), parentContactState, parentRegistry);
       setPosition(contactPointPosition);
@@ -54,19 +55,19 @@ public class YoContactPoint implements ContactPointInterface
    }
 
    @Override
-   public void getPosition2d(FramePoint2d framePoint2dToPack)
+   public void getPosition2d(FramePoint2D framePoint2dToPack)
    {
       yoPosition.getFrameTuple2dIncludingFrame(framePoint2dToPack);
    }
 
    @Override
-   public FramePoint getPosition()
+   public FramePoint3D getPosition()
    {
       return yoPosition.getFrameTuple();
    }
 
    @Override
-   public void getPosition(FramePoint framePointToPack)
+   public void getPosition(FramePoint3D framePointToPack)
    {
       yoPosition.getFrameTupleIncludingFrame(framePointToPack);
    }
@@ -79,25 +80,25 @@ public class YoContactPoint implements ContactPointInterface
    }
 
    @Override
-   public void setPosition(FramePoint position)
+   public void setPosition(FramePoint3D position)
    {
       this.yoPosition.set(position);
    }
 
    @Override
-   public void setPosition2d(FramePoint2d position2d)
+   public void setPosition2d(FramePoint2D position2d)
    {
-      yoPosition.setXY(position2d);
+      yoPosition.set(position2d);
    }
 
    public void setPosition2d(Point2D contactPointLocation)
    {
-      yoPosition.setXY(contactPointLocation);
+      yoPosition.set(contactPointLocation);
    }
 
-   public void setPosition(FramePoint2d contactPointLocation)
+   public void setPosition(FramePoint2D contactPointLocation)
    {
-      yoPosition.setXY(contactPointLocation);
+      yoPosition.set(contactPointLocation);
    }
 
    @Override
@@ -106,9 +107,14 @@ public class YoContactPoint implements ContactPointInterface
       return parentContactState;
    }
 
-   public boolean epsilonEquals(FramePoint2d contactPointPosition2d, double threshold)
+   public boolean epsilonEquals(FramePoint2D contactPointPosition2d, double threshold)
    {
-      return yoPosition.epsilonEquals(contactPointPosition2d, threshold);
+      yoPosition.checkReferenceFrameMatch(contactPointPosition2d);
+      if (!MathTools.epsilonEquals(yoPosition.getX(), contactPointPosition2d.getX(), threshold))
+         return false;
+      if (!MathTools.epsilonEquals(yoPosition.getY(), contactPointPosition2d.getY(), threshold))
+         return false;
+      return true;
    }
 
    @Override

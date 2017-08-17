@@ -2,8 +2,8 @@ package us.ihmc.quadrupedRobotics.planning;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -15,7 +15,7 @@ public class QuadrupedCenterOfPressureTools
     * @param solePosition contact position for each quadrant (input)
     * @param contactPressure vertical ground reaction forces for each quadrant (input)
     */
-   public static void computeCenterOfPressure(FramePoint copPosition, QuadrantDependentList<FramePoint> solePosition,
+   public static void computeCenterOfPressure(FramePoint3D copPosition, QuadrantDependentList<FramePoint3D> solePosition,
          QuadrantDependentList<MutableDouble> contactPressure)
    {
       // Compute center of pressure given the vertical force at each contact.
@@ -79,7 +79,7 @@ public class QuadrupedCenterOfPressureTools
       }
    }
 
-   private static void addPointWithScaleFactor(FramePoint point, FramePoint pointToAdd, double scaleFactor)
+   private static void addPointWithScaleFactor(FramePoint3D point, FramePoint3D pointToAdd, double scaleFactor)
    {
       point.checkReferenceFrameMatch(pointToAdd);
       point.add(scaleFactor * pointToAdd.getX(), scaleFactor * pointToAdd.getY(), scaleFactor * pointToAdd.getZ());

@@ -15,6 +15,9 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -28,10 +31,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationT
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -209,7 +209,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
          double rollRate = rollMagnitude * derivativeFactor;
          Vector3D angularVelocity = new Vector3D();
          RotationTools.computeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate(yaw, pitch, roll, yawRate, pitchRate, rollRate, angularVelocity);
-         FrameVector frameAngularVelcoity = new FrameVector(pelvisFrame, angularVelocity);
+         FrameVector3D frameAngularVelcoity = new FrameVector3D(pelvisFrame, angularVelocity);
          frameAngularVelcoity.changeFrame(worldFrame);
          frameAngularVelcoity.get(angularVelocity);
 
@@ -316,7 +316,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       messageToPack.setDefaultTransferDuration(transferDuration);
       for (int step = 0; step < steps; step++)
       {
-         FramePoint location = new FramePoint(midFootZUpGroundFrame);
+         FramePoint3D location = new FramePoint3D(midFootZUpGroundFrame);
          if (squareUp && step == steps - 1)
             location.setX(stepLength * step);
          else

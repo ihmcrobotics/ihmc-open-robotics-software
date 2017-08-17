@@ -14,13 +14,13 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CenterOfMassJacobianTest
 {
@@ -88,15 +88,15 @@ public class CenterOfMassJacobianTest
 
       CenterOfMassJacobian jacobianInOrder = new CenterOfMassJacobian(rigidBodiesInOrder, elevator.getBodyFixedFrame());
       jacobianInOrder.compute();
-      FrameVector velocityFromJacobianInOrder = new FrameVector(ReferenceFrame.getWorldFrame());
+      FrameVector3D velocityFromJacobianInOrder = new FrameVector3D(ReferenceFrame.getWorldFrame());
       jacobianInOrder.getCenterOfMassVelocity(velocityFromJacobianInOrder);
 
       CenterOfMassJacobian jacobianOutOrder = new CenterOfMassJacobian(rigidBodiesOutOrder, elevator.getBodyFixedFrame());
       jacobianOutOrder.compute();
-      FrameVector velocityFromJacobianOutOrder = new FrameVector(ReferenceFrame.getWorldFrame());
+      FrameVector3D velocityFromJacobianOutOrder = new FrameVector3D(ReferenceFrame.getWorldFrame());
       jacobianOutOrder.getCenterOfMassVelocity(velocityFromJacobianOutOrder);
 
-      EuclidCoreTestTools.assertTuple3DEquals(velocityFromJacobianInOrder.getVectorCopy(), velocityFromJacobianOutOrder.getVectorCopy(), 1e-5);
+      EuclidCoreTestTools.assertTuple3DEquals(velocityFromJacobianInOrder, velocityFromJacobianOutOrder, 1e-5);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -121,17 +121,17 @@ public class CenterOfMassJacobianTest
       ScrewTestTools.setRandomVelocities(revoluteJoints, random);
 
       jacobian.compute();
-      FrameVector velocityFromJacobian = new FrameVector(ReferenceFrame.getWorldFrame());
+      FrameVector3D velocityFromJacobian = new FrameVector3D(ReferenceFrame.getWorldFrame());
       jacobian.getCenterOfMassVelocity(velocityFromJacobian);
 
       RigidBody rootBody = elevator;
-      FrameVector velocityNumerical = computeCenterOfMassVelocityNumerically(sixDoFJoint, revoluteJoints, rootBody,
+      FrameVector3D velocityNumerical = computeCenterOfMassVelocityNumerically(sixDoFJoint, revoluteJoints, rootBody,
                                          ScrewTools.computeSupportAndSubtreeSuccessors(rootBody), elevator.getBodyFixedFrame());
 
       RotationMatrix rotation = new RotationMatrix();
       sixDoFJoint.getRotation(rotation);
 
-      EuclidCoreTestTools.assertTuple3DEquals(velocityNumerical.getVectorCopy(), velocityFromJacobian.getVectorCopy(), 4e-5);
+      EuclidCoreTestTools.assertTuple3DEquals(velocityNumerical, velocityFromJacobian, 4e-5);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -175,45 +175,45 @@ public class CenterOfMassJacobianTest
       ReferenceFrame rootJointFrame = rootJoint.getFrameAfterJoint();
       Twist rootJointTwist = new Twist();
       rootJoint.getJointTwist(rootJointTwist);
-      FrameVector rootJointLinearVelocity = new FrameVector(rootJointFrame);
+      FrameVector3D rootJointLinearVelocity = new FrameVector3D(rootJointFrame);
       rootJointTwist.getLinearPart(rootJointLinearVelocity);
       
       CenterOfMassJacobian jacobianBody = new CenterOfMassJacobian(ScrewTools.computeSupportAndSubtreeSuccessors(elevator), ScrewTools.computeSubtreeJoints(body0), elevator.getBodyFixedFrame());
       jacobianBody.compute();
-      FrameVector comVelocityBody = new FrameVector(worldFrame);
+      FrameVector3D comVelocityBody = new FrameVector3D(worldFrame);
       jacobianBody.getCenterOfMassVelocity(comVelocityBody);
       comVelocityBody.changeFrame(rootJointFrame);
       
       CenterOfMassJacobian jacobianWorld = new CenterOfMassJacobian(elevator);
       jacobianWorld.compute();
-      FrameVector comVelocityWorld = new FrameVector(worldFrame);
+      FrameVector3D comVelocityWorld = new FrameVector3D(worldFrame);
       jacobianWorld.getCenterOfMassVelocity(comVelocityWorld);
       comVelocityWorld.changeFrame(rootJointFrame);
       
-      FrameVector angularVelocityBody = new FrameVector(rootJointFrame);
+      FrameVector3D angularVelocityBody = new FrameVector3D(rootJointFrame);
       rootJointTwist.getAngularPart(angularVelocityBody);
 
       CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(elevator, rootJointFrame);
       centerOfMassCalculator.compute();
-      FramePoint centerOfMassBody = new FramePoint(worldFrame);
+      FramePoint3D centerOfMassBody = new FramePoint3D(worldFrame);
       centerOfMassCalculator.getCenterOfMass(centerOfMassBody);
-      FrameVector crossPart = new FrameVector(rootJointFrame);
+      FrameVector3D crossPart = new FrameVector3D(rootJointFrame);
       crossPart.cross(angularVelocityBody, centerOfMassBody);
       
-      FrameVector rootJointLinearVelocityBack = new FrameVector(comVelocityWorld);
+      FrameVector3D rootJointLinearVelocityBack = new FrameVector3D(comVelocityWorld);
       rootJointLinearVelocityBack.sub(crossPart);
       rootJointLinearVelocityBack.sub(comVelocityBody);
 
       assertTrue(rootJointLinearVelocity.epsilonEquals(rootJointLinearVelocityBack, 1e-12));
    }
    
-   public static FrameVector computeCenterOfMassVelocityNumerically(SixDoFJoint sixDoFJoint, ArrayList<RevoluteJoint> revoluteJoints, RigidBody rootBody,
+   public static FrameVector3D computeCenterOfMassVelocityNumerically(SixDoFJoint sixDoFJoint, ArrayList<RevoluteJoint> revoluteJoints, RigidBody rootBody,
            RigidBody[] rigidBodiesToUse, ReferenceFrame referenceFrame)
    {
       CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(rigidBodiesToUse, referenceFrame);
 
       centerOfMassCalculator.compute();
-      FramePoint centerOfMass1 = new FramePoint(centerOfMassCalculator.getCenterOfMass());
+      FramePoint3D centerOfMass1 = new FramePoint3D(centerOfMassCalculator.getCenterOfMass());
 
       double dt = 1e-8;
       if (sixDoFJoint != null)
@@ -222,9 +222,9 @@ public class CenterOfMassJacobianTest
       rootBody.updateFramesRecursively();
 
       centerOfMassCalculator.compute();
-      FramePoint centerOfMass2 = new FramePoint(centerOfMassCalculator.getCenterOfMass());
+      FramePoint3D centerOfMass2 = new FramePoint3D(centerOfMassCalculator.getCenterOfMass());
 
-      FrameVector velocityNumerical = new FrameVector(centerOfMass2);
+      FrameVector3D velocityNumerical = new FrameVector3D(centerOfMass2);
       velocityNumerical.sub(centerOfMass1);
       velocityNumerical.scale(1.0 / dt);
 
@@ -240,13 +240,13 @@ public class CenterOfMassJacobianTest
       ScrewTestTools.setRandomVelocities(joints, random);
 
       jacobian.compute();
-      FrameVector velocityFromJacobian = new FrameVector(ReferenceFrame.getWorldFrame());
+      FrameVector3D velocityFromJacobian = new FrameVector3D(ReferenceFrame.getWorldFrame());
       jacobian.getCenterOfMassVelocity(velocityFromJacobian);
 
       RigidBody rootBody = elevator;
-      FrameVector velocityNumerical = computeCenterOfMassVelocityNumerically(null, joints, rootBody, rigidBodies, referenceFrame);
+      FrameVector3D velocityNumerical = computeCenterOfMassVelocityNumerically(null, joints, rootBody, rigidBodies, referenceFrame);
 
-      EuclidCoreTestTools.assertTuple3DEquals(velocityNumerical.getVectorCopy(), velocityFromJacobian.getVectorCopy(), 1e-5);
+      EuclidCoreTestTools.assertTuple3DEquals(velocityNumerical, velocityFromJacobian, 1e-5);
    }
 
    private ArrayList<RevoluteJoint> setUpSingleJoint()

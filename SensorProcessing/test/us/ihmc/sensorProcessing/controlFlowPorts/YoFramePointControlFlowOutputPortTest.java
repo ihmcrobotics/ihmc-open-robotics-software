@@ -10,11 +10,11 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFramePointControlFlowOutputPortTest
 {
@@ -40,9 +40,9 @@ public class YoFramePointControlFlowOutputPortTest
       for (int i = 0; i < 1000; i++)
       {
          Vector3D vector = RandomGeometry.nextVector3D(rand, RandomNumbers.nextDouble(rand, Double.MIN_VALUE, Double.MAX_VALUE));
-         FramePoint dataIn = new FramePoint(frame, vector);
+         FramePoint3D dataIn = new FramePoint3D(frame, vector);
          controlFlowOutputPort.setData(dataIn);
-         FramePoint dataOut = controlFlowOutputPort.getData();
+         FramePoint3D dataOut = controlFlowOutputPort.getData();
 
          assertTrue("Expected: " + dataIn + ", but was: " + dataOut, dataIn.epsilonEquals(dataOut, EPS));
       }

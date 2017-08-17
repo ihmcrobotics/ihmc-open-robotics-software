@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SteppingStone
 {
@@ -189,7 +188,7 @@ public class SteppingStone
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point2D randomPoint = FramePoint2d.generateRandomFramePoint2d(random, ReferenceFrame.getWorldFrame(), xMin, xMax, yMin, yMax).getPointCopy();
+         Point2D randomPoint = EuclidCoreRandomTools.generateRandomPoint2D(random, xMin, xMax, yMin, yMax);
 
          if (randomPoint.distance(zeroFramePoint) > radius)
             continue;

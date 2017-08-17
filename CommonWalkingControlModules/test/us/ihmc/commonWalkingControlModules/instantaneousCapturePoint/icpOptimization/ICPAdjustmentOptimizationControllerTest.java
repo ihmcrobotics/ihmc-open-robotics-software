@@ -21,18 +21,18 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlP
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.controllers.PDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -105,16 +105,16 @@ public class ICPAdjustmentOptimizationControllerTest
 
       icpPlanner.updateCurrentPlan(true);
       double currentTime = 0.5;
-      FramePoint2d desiredICP = new FramePoint2d();
-      FrameVector2d desiredICPVelocity = new FrameVector2d();
-      FramePoint2d perfectCMP = new FramePoint2d();
+      FramePoint2D desiredICP = new FramePoint2D();
+      FrameVector2D desiredICPVelocity = new FrameVector2D();
+      FramePoint2D perfectCMP = new FramePoint2D();
       icpPlanner.compute(currentTime);
       icpPlanner.getDesiredCapturePointPosition(desiredICP);
       icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
       icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, perfectCMP, desiredICP, omega0);
 
-      FramePoint2d desiredCMP = new FramePoint2d();
+      FramePoint2D desiredCMP = new FramePoint2D();
       icpOptimizationController.getDesiredCMP(desiredCMP);
       PrintTools.debug("Desired CMP = " + desiredCMP);
       PrintTools.debug("Perfect CMP = " + perfectCMP);
@@ -159,7 +159,7 @@ public class ICPAdjustmentOptimizationControllerTest
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          RigidBody foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         List<FramePoint2d> contactFramePoints = contactableFoot.getContactPoints2d();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
          yoPlaneContactState.setFullyConstrained();
@@ -523,14 +523,14 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public YoSE3PIDGainsInterface createToeOffFootControlGains(YoVariableRegistry registry)
+      public YoPIDSE3Gains createToeOffFootControlGains(YoVariableRegistry registry)
       {
          // TODO Auto-generated method stub
          return null;
       }
 
       @Override
-      public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
+      public YoPIDSE3Gains createSwingFootControlGains(YoVariableRegistry registry)
       {
          // TODO Auto-generated method stub
          return null;
@@ -544,7 +544,7 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry)
+      public YoPIDSE3Gains createHoldPositionFootControlGains(YoVariableRegistry registry)
       {
          // TODO Auto-generated method stub
          return null;

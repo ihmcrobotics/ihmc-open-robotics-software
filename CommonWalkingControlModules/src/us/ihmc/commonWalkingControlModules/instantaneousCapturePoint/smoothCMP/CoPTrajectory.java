@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class CoPTrajectory extends YoSegmentedFrameTrajectory3D implements CoPTrajectoryInterface
@@ -25,7 +25,7 @@ public class CoPTrajectory extends YoSegmentedFrameTrajectory3D implements CoPTr
       this.stepNumber = stepNumber;
    }
 
-   public void setSegment(double initialTime, double finalTime, FramePoint initialPosition, FramePoint finalPosition)
+   public void setSegment(double initialTime, double finalTime, FramePoint3D initialPosition, FramePoint3D finalPosition)
    {
       //PrintTools.debug("Step:" + stepNumber + " " + trajectoryType.toString() + " Trajectory " + numberOfSegments.getIntegerValue() + " , InitialTime: " + initialTime + " FinalTime: " + finalTime + " InitialPosition: "
       //      + initialPosition.toString() + " FinalPosition: " + finalPosition.toString());

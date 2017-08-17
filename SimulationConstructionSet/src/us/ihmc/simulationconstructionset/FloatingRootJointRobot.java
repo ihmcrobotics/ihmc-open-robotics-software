@@ -1,12 +1,12 @@
 package us.ihmc.simulationconstructionset;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.tools.FormattingTools;
 
@@ -72,18 +72,18 @@ public class FloatingRootJointRobot extends RobotFromDescription
       return rootJoint;
    }
 
-   public FrameVector getRootJointVelocity()
+   public FrameVector3D getRootJointVelocity()
    {
-      FrameVector ret = new FrameVector(ReferenceFrame.getWorldFrame());
+      FrameVector3D ret = new FrameVector3D(ReferenceFrame.getWorldFrame());
       rootJoint.getVelocity(ret.getVector());
 
       return ret;
    }
 
-   public FrameVector getRootJointAngularVelocityInRootJointFrame(ReferenceFrame rootJointFrame)
+   public FrameVector3D getRootJointAngularVelocityInRootJointFrame(ReferenceFrame rootJointFrame)
    {
       Vector3D angularVelocity = rootJoint.getAngularVelocityInBody();
-      return new FrameVector(rootJointFrame, angularVelocity);
+      return new FrameVector3D(rootJointFrame, angularVelocity);
    }
 
    public Vector3D getPositionInWorld()

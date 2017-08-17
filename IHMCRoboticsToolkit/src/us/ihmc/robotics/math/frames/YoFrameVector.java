@@ -1,18 +1,18 @@
 package us.ihmc.robotics.math.frames;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.interfaces.VectorInterface;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
 //since they contain YoVariables.
-public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector> implements VectorInterface
+public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector3D> implements VectorInterface
 {
    public YoFrameVector(String namePrefix, ReferenceFrame frame, YoVariableRegistry registry)
    {
@@ -29,9 +29,9 @@ public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector> impl
       super(xVariable, yVariable, zVariable, frame);
    }
 
-   protected FrameVector createEmptyFrameTuple()
+   protected FrameVector3D createEmptyFrameTuple()
    {
-      return new FrameVector();
+      return new FrameVector3D();
    }
 
    public double length()
@@ -44,7 +44,7 @@ public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector> impl
       return getFrameTuple().lengthSquared();
    }
    
-   public void cross(FrameVector vector1, FrameVector vector2)
+   public void cross(FrameVector3D vector1, FrameVector3D vector2)
    {
       getFrameTuple().cross(vector1.getVector(), vector2.getVector());
       getYoValuesFromFrameTuple();
@@ -56,7 +56,7 @@ public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector> impl
       getYoValuesFromFrameTuple();
    }
 
-   public double dot(FrameVector vector)
+   public double dot(FrameVector3D vector)
    {
       return this.getFrameTuple().dot(vector);
    }

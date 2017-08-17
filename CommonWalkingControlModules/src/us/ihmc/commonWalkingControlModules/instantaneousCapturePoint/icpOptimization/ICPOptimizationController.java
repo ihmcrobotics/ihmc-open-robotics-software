@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface ICPOptimizationController
@@ -23,15 +23,15 @@ public interface ICPOptimizationController
    public void initializeForSingleSupport(double initialTime, RobotSide transferToSide, double omega0);
 
    public int getNumberOfFootstepsToConsider();
-   public void getDesiredCMP(FramePoint2d desiredCMP);
-   public void getFootstepSolution(int footstepIndex, FramePoint2d footstepSolutionToPack);
+   public void getDesiredCMP(FramePoint2D desiredCMP);
+   public void getFootstepSolution(int footstepIndex, FramePoint2D footstepSolutionToPack);
    public boolean wasFootstepAdjusted();
    public boolean useAngularMomentum();
 
-   public void compute(double currentTime, FramePoint2d desiredICP, FrameVector2d desiredICPVelocity, FramePoint2d perfectCMP, FramePoint2d currentICP, double omega0);
+   public void compute(double currentTime, FramePoint2D desiredICP, FrameVector2D desiredICPVelocity, FramePoint2D perfectCMP, FramePoint2D currentICP, double omega0);
 
    public void setFinalTransferSplitFractionToDefault();
-   public void setReferenceICPVelocity(FrameVector2d referenceICPVelocity);
+   public void setReferenceICPVelocity(FrameVector2D referenceICPVelocity);
    public double getOptimizedTimeRemaining();
    public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
 }

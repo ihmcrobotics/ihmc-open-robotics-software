@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.mechanics.virtualModelController.QuadrupedVirtualModelController;
@@ -11,7 +12,6 @@ import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.Quadruped
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -85,15 +85,15 @@ public class QuadrupedTaskSpaceController
 
    public static class Commands
    {
-      private final FrameVector comForce = new FrameVector();
-      private final FrameVector comTorque = new FrameVector();
-      private final QuadrantDependentList<FrameVector> soleForce = new QuadrantDependentList<>();
+      private final FrameVector3D comForce = new FrameVector3D();
+      private final FrameVector3D comTorque = new FrameVector3D();
+      private final QuadrantDependentList<FrameVector3D> soleForce = new QuadrantDependentList<>();
 
       public Commands()
       {
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
-            soleForce.set(robotQuadrant, new FrameVector());
+            soleForce.set(robotQuadrant, new FrameVector3D());
          }
          initialize();
       }
@@ -108,22 +108,22 @@ public class QuadrupedTaskSpaceController
          }
       }
 
-      public FrameVector getComForce()
+      public FrameVector3D getComForce()
       {
          return comForce;
       }
 
-      public FrameVector getComTorque()
+      public FrameVector3D getComTorque()
       {
          return comTorque;
       }
 
-      public FrameVector getSoleForce(RobotQuadrant robotQuadrant)
+      public FrameVector3D getSoleForce(RobotQuadrant robotQuadrant)
       {
          return soleForce.get(robotQuadrant);
       }
 
-      public QuadrantDependentList<FrameVector> getSoleForce()
+      public QuadrantDependentList<FrameVector3D> getSoleForce()
       {
          return soleForce;
       }
@@ -131,7 +131,7 @@ public class QuadrupedTaskSpaceController
 
    private final QuadrupedVirtualModelController virtualModelController;
    private final QuadrupedContactForceOptimization contactForceOptimization;
-   private final FrameVector contactForceStorage;
+   private final FrameVector3D contactForceStorage;
    private final YoVariableRegistry registry = new YoVariableRegistry("taskSpaceController");
    private final YoLong contactForceOptimizationSolveTime = new YoLong("contactForceOptimizationSolveTime", registry);
 
@@ -141,7 +141,7 @@ public class QuadrupedTaskSpaceController
       // virtual model controller
       virtualModelController = new QuadrupedVirtualModelController(fullRobotModel, referenceFrames, controlDT, registry, graphicsListRegistry);
       contactForceOptimization = new QuadrupedContactForceOptimization(referenceFrames, registry);
-      contactForceStorage = new FrameVector();
+      contactForceStorage = new FrameVector3D();
 
       parentRegistry.addChild(registry);
       reset();

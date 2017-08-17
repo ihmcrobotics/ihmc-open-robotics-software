@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -13,14 +15,12 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.geometry.PlaneFitter;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -75,7 +75,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
       FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
 
       //set to the sole pose
-      FramePoint position = new FramePoint();
+      FramePoint3D position = new FramePoint3D();
       FrameOrientation orientation = new FrameOrientation();
       footstep.getPose(position, orientation);
       originalFootstep.setLocation(position.getPoint());

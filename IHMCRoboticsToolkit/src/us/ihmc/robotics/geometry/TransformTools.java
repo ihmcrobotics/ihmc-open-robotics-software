@@ -2,6 +2,8 @@ package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -13,7 +15,7 @@ public class TransformTools
     * Creates a transform that transforms to the given point and rotates to make the z axis align
     * with the normal vector.
     */
-   public static RigidBodyTransform createTransformFromPointAndZAxis(FramePoint point, FrameVector zAxis)
+   public static RigidBodyTransform createTransformFromPointAndZAxis(FramePoint3D point, FrameVector3D zAxis)
    {
       RigidBodyTransform ret = new RigidBodyTransform();
       ret.setRotation(EuclidGeometryTools.axisAngleFromZUpToVector3D(zAxis.getVector()));

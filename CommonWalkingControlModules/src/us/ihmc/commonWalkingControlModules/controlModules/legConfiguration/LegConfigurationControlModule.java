@@ -4,16 +4,16 @@ import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParame
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.InterpolationTools;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
@@ -254,15 +254,15 @@ public class LegConfigurationControlModule
       // compute leg segment lengths
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       ReferenceFrame hipPitchFrame = fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH).getFrameAfterJoint();
-      FramePoint hipPoint = new FramePoint(hipPitchFrame);
-      FramePoint kneePoint = new FramePoint(fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH).getFrameBeforeJoint());
+      FramePoint3D hipPoint = new FramePoint3D(hipPitchFrame);
+      FramePoint3D kneePoint = new FramePoint3D(fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH).getFrameBeforeJoint());
       kneePoint.changeFrame(hipPitchFrame);
 
       thighLength = hipPoint.distance(kneePoint);
 
       ReferenceFrame kneePitchFrame = fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH).getFrameAfterJoint();
       kneePoint.setToZero(kneePitchFrame);
-      FramePoint anklePoint = new FramePoint(fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH).getFrameBeforeJoint());
+      FramePoint3D anklePoint = new FramePoint3D(fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH).getFrameBeforeJoint());
       anklePoint.changeFrame(kneePitchFrame);
 
       shinLength = kneePoint.distance(anklePoint);

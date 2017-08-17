@@ -3,9 +3,9 @@ package us.ihmc.quadrupedRobotics.mechanics.inverseKinematics;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
 import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -26,12 +26,12 @@ public class QuadrupedLinkLengths
          ReferenceFrame kneePitchFrame = quadrupedReferenceFrames.getKneeFrame(robotQuadrant);
          ReferenceFrame footFrame = quadrupedReferenceFrames.getFootFrame(robotQuadrant);
 
-         FramePoint legAttachment = new FramePoint(legAttachmentFrame);
-         FramePoint beforeHipPitch = new FramePoint(beforeHipPitchFrame);
-         FramePoint hipPitch = new FramePoint(hipPitchFrame);
-         FramePoint beforeKneePitch = new FramePoint(beforeKneePitchFrame);
-         FramePoint kneePitch = new FramePoint(kneePitchFrame);
-         FramePoint foot = new FramePoint(footFrame);
+         FramePoint3D legAttachment = new FramePoint3D(legAttachmentFrame);
+         FramePoint3D beforeHipPitch = new FramePoint3D(beforeHipPitchFrame);
+         FramePoint3D hipPitch = new FramePoint3D(hipPitchFrame);
+         FramePoint3D beforeKneePitch = new FramePoint3D(beforeKneePitchFrame);
+         FramePoint3D kneePitch = new FramePoint3D(kneePitchFrame);
+         FramePoint3D foot = new FramePoint3D(footFrame);
 
          beforeHipPitch.changeFrame(legAttachmentFrame);
          double hipLength = legAttachment.distance(beforeHipPitch);

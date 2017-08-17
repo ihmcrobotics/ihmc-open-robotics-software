@@ -1,14 +1,14 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class CoMHeightTimeDerivativesData
 {
    private ReferenceFrame frameOfCenterOfMassHeight;
    private double comHeight, comHeightVelocity, comHeightAcceleration;
 
-   public void getComHeight(FramePoint framePointToPack)
+   public void getComHeight(FramePoint3D framePointToPack)
    {
       framePointToPack.setIncludingFrame(frameOfCenterOfMassHeight, 0.0, 0.0, comHeight);
    }

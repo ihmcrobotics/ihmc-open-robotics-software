@@ -1,10 +1,10 @@
 package us.ihmc.robotics.math.trajectories.providers;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
 
 
@@ -22,12 +22,12 @@ public class YoVelocityProvider implements VectorProvider
       this.frameVector = new YoFrameVector(name, referenceFrame, registry);
    }
 
-   public void get(FrameVector velocityToPack)
+   public void get(FrameVector3D velocityToPack)
    {
       frameVector.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void set(FrameVector frameVector)
+   public void set(FrameVector3D frameVector)
    {
       this.frameVector.set(frameVector);
    }

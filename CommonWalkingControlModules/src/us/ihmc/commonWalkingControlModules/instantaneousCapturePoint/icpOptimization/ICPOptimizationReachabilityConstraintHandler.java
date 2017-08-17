@@ -1,26 +1,31 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.SimpleICPOptimizationQPSolver;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ICPOptimizationReachabilityConstraintHandler
 {
@@ -129,14 +134,14 @@ public class ICPOptimizationReachabilityConstraintHandler
       solver.addReachabilityPolygon(polygon2d);
    }
 
-   private final FramePoint2d adjustedLocation = new FramePoint2d();
-   private final FramePoint2d referenceLocation = new FramePoint2d();
-   private final FrameVector2d adjustmentDirection = new FrameVector2d();
+   private final FramePoint2D adjustedLocation = new FramePoint2D();
+   private final FramePoint2D referenceLocation = new FramePoint2D();
+   private final FrameVector2D adjustmentDirection = new FrameVector2D();
    private final FrameLine2d motionLine = new FrameLine2d();
 
    private final FrameConvexPolygonWithLineIntersector2d lineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
 
-   public void updateReachabilityBasedOnAdjustment(ArrayList<YoFramePoint2d> upcomingFootstepLocations, ArrayList<FramePoint2d> footstepSolutions,
+   public void updateReachabilityBasedOnAdjustment(ArrayList<YoFramePoint2d> upcomingFootstepLocations, ArrayList<FramePoint2D> footstepSolutions,
                                                    boolean wasAdjusted)
    {
       if (!wasAdjusted)
@@ -149,7 +154,7 @@ public class ICPOptimizationReachabilityConstraintHandler
 
       adjustmentDirection.set(adjustedLocation);
       adjustmentDirection.sub(referenceLocation);
-      adjustmentDirection.rotate90();
+      EuclidGeometryTools.perpendicularVector2D(adjustmentDirection, adjustmentDirection);
 
       motionLine.setPoint(adjustedLocation);
       motionLine.setVector(adjustmentDirection);
@@ -164,7 +169,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       contractedReachabilityPolygon.setConvexPolygon2d(polygon2d.getConvexPolygon2d());
    }
 
-   public void updateReachabilityBasedOnAdjustment(List<Footstep> upcomingFootsteps, ArrayList<FramePoint2d> footstepSolutions, boolean wasAdjusted)
+   public void updateReachabilityBasedOnAdjustment(List<Footstep> upcomingFootsteps, ArrayList<FramePoint2D> footstepSolutions, boolean wasAdjusted)
    {
       if (!wasAdjusted)
          return;
@@ -176,7 +181,7 @@ public class ICPOptimizationReachabilityConstraintHandler
 
       adjustmentDirection.set(adjustedLocation);
       adjustmentDirection.sub(referenceLocation);
-      adjustmentDirection.rotate90();
+      EuclidGeometryTools.perpendicularVector2D(adjustmentDirection, adjustmentDirection);
 
       motionLine.setPoint(adjustedLocation);
       motionLine.setVector(adjustmentDirection);
