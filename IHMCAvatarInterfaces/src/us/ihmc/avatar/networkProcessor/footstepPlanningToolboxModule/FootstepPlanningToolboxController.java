@@ -31,6 +31,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlannerUtils;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.aStar.AStarFootstepPlanner;
+import us.ihmc.footstepPlanning.aStar.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
@@ -86,7 +87,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final RobotContactPointParameters contactPointParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final FootstepDataListWithSwingOverTrajectoriesAssembler footstepDataListWithSwingOverTrajectoriesAssembler;
-
+   private final FootstepNodeExpansion expansion;
+   
    private final PacketCommunicator packetCommunicator;
    private long plannerCount = 0;
    private double dt;
@@ -102,6 +104,13 @@ public class FootstepPlanningToolboxController extends ToolboxController
       this.dt = dt;
       packetCommunicator.attachListener(PlanarRegionsListMessage.class, createPlanarRegionsConsumer());
 
+      /**
+       * A robot specific node expansion can be achieved with this. 
+       * Currently only supported in A-star planner for Atlas and Valkyrie.
+       * Use SimpleSideBasedExpansion ( defaults to Atlas) if using other robots or add custom footstep expansion class.
+       * */ 
+      this.expansion = drcRobotModel.getPlanarRegionFootstepPlannerParameters().getReachableFootstepExpansion();
+
       SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame = createFootPolygonsFromContactPoints(contactPointParameters);
 
       humanoidReferenceFrames = createHumanoidReferenceFrames(fullHumanoidRobotModel);
@@ -109,7 +118,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       plannerMap.put(Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame, fullHumanoidRobotModel));
       plannerMap.put(Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
-      plannerMap.put(Planners.A_STAR, AStarFootstepPlanner.createRoughTerrainPlanner(null, contactPointsInSoleFrame, registry));
+      plannerMap.put(Planners.A_STAR, AStarFootstepPlanner.createRoughTerrainPlanner(null, contactPointsInSoleFrame, expansion, registry));
       activePlanner.set(Planners.PLANAR_REGION_BIPEDAL);
 
       usePlanarRegions.set(true);
