@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class CoMHeightPartialDerivativesData
 {

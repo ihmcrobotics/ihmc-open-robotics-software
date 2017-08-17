@@ -40,7 +40,7 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
-    compile group: 'us.ihmc', name: 'euclid', version: '0.5.0'
+    compile group: 'us.ihmc', name: 'euclid', version: '0.6.0'
     compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
 
     compile ihmc.getProjectDependency(":SimulationConstructionSet")

@@ -9,16 +9,16 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
 public class SpatialAccelerationCalculatorTest
@@ -81,7 +81,7 @@ public class SpatialAccelerationCalculatorTest
             rootPosition.changeFrame(bodyFrame);
             rootAngularAcceleration.changeFrame(bodyFrame);
             Vector3D crossPart = new Vector3D();
-            crossPart.cross(rootPosition.getVectorCopy(), rootAngularAcceleration.getVector());
+            crossPart.cross(new Vector3D(rootPosition), rootAngularAcceleration.getVector());
             expectedAcceleration.linearPart.add(crossPart);
 
             expectedAcceleration.setAngularPart(rootAngularAcceleration);
@@ -707,7 +707,7 @@ public class SpatialAccelerationCalculatorTest
       FramePoint3D rootToBody = new FramePoint3D(rootAcceleration.getExpressedInFrame());
       rootToBody.changeFrame(expectedAcceleration.getExpressedInFrame());
       Vector3D crossPart = new Vector3D();
-      crossPart.cross(rootToBody.getVectorCopy(), rootAngularAcceleration.getVector());
+      crossPart.cross(rootToBody, rootAngularAcceleration.getVector());
       expectedAcceleration.linearPart.add(crossPart);
       expectedAcceleration.linearPart.add(rootLinearAcceleration.getVector());
 

@@ -1,10 +1,10 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameSO3TrajectoryPointList extends FrameTrajectoryPointList<FrameSO3TrajectoryPointList, FrameSO3TrajectoryPoint, SimpleSO3TrajectoryPoint>
 {

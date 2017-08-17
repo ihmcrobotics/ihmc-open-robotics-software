@@ -5,13 +5,13 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameLine;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.geometry.FrameLine3D;
 
 public class FramePlane3dTest
 {
@@ -124,7 +124,7 @@ public class FramePlane3dTest
 	   
 	   FramePoint3D origin = new FramePoint3D(worldFrame, 0.0, 1.0, -1.0);
 	   FrameVector3D direction = new FrameVector3D(worldFrame, 1.0, 0.0, 1.0);
-	   FrameLine line = new FrameLine(origin, direction);
+	   FrameLine3D line = new FrameLine3D(origin, direction);
 	   
 	   FramePoint3D pointToPack = new FramePoint3D(worldFrame);
 	   plane.getIntersectionWithLine(pointToPack, line);

@@ -1,7 +1,7 @@
 package us.ihmc.graphicsDescription.plotting.frames;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 @SuppressWarnings("serial")
 public abstract class PlotterReferenceFrame extends ReferenceFrame

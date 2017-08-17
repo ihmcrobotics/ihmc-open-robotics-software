@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 
@@ -18,7 +19,7 @@ public class HeightMapBestFitPlaneCalculator
    {
    }
 
-   public Plane3D calculatePlane(HeightMapWithPoints heightMap, Point2D center, double kernelSizeX, double kernelSizeY) throws InsufficientDataException
+   public Plane3D calculatePlane(HeightMapWithPoints heightMap, Point2DBasics center, double kernelSizeX, double kernelSizeY) throws InsufficientDataException
    {
       if ((kernelSizeX == 0) || (kernelSizeY == 0))
          throw new RuntimeException("empty search region.");
@@ -29,7 +30,7 @@ public class HeightMapBestFitPlaneCalculator
       return ret;
    }
 
-   public Plane3D calculatePlane(HeightMapWithPoints heightMap, Point2D center, double xExtent, double yExtent, InclusionFunction<Point3D> kernelMask)
+   public Plane3D calculatePlane(HeightMapWithPoints heightMap, Point2DBasics center, double xExtent, double yExtent, InclusionFunction<Point3D> kernelMask)
            throws InsufficientDataException
    {
       if ((xExtent == 0) || (yExtent == 0))

@@ -10,12 +10,13 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFramePointInMultipleFramesTest
 {
@@ -157,7 +158,7 @@ public class YoFramePointInMultipleFramesTest
       YoFramePointInMultipleFrames yoFramePointInMultipleFrames = new YoFramePointInMultipleFrames("blop", registry, new ReferenceFrame[]{worldFrame, frameA});
       yoFramePointInMultipleFrames.switchCurrentReferenceFrame(worldFrame);
       
-      FramePoint3D framePoint = FramePoint3D.generateRandomFramePoint(random, frameA, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
+      FramePoint3D framePoint = EuclidFrameRandomTools.generateRandomFramePoint3D(random, frameA, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
       
       yoFramePointInMultipleFrames.setIncludingFrame(framePoint);
       assertTrue(framePoint.epsilonEquals(yoFramePointInMultipleFrames.getFrameTuple(), 1e-10));

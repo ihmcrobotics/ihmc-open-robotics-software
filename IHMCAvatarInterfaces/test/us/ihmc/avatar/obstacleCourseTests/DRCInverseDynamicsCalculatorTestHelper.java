@@ -8,19 +8,17 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -43,6 +41,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DRCInverseDynamicsCalculatorTestHelper
 {
@@ -161,13 +161,13 @@ public class DRCInverseDynamicsCalculatorTestHelper
       computedRootJointForces.set(rootJointForce);
       computedRootJointTorques.set(rootJointTorque);
 
-      rootJointExternalForcePoint.setForce(rootJointForce.getVectorCopy());
-      rootJointExternalForcePoint.setMoment(rootJointTorque.getVectorCopy());
+      rootJointExternalForcePoint.setForce(new Vector3D(rootJointForce));
+      rootJointExternalForcePoint.setMoment(new Vector3D(rootJointTorque));
 
       FramePoint3D rootJointPosition = new FramePoint3D(bodyFixedFrame);
       rootJointPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-      rootJointExternalForcePoint.setOffsetWorld(rootJointPosition.getPointCopy());
+      rootJointExternalForcePoint.setOffsetWorld(rootJointPosition);
       Vector3D offsetInJoint = rootJointExternalForcePoint.getOffsetCopy();
 
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
@@ -295,11 +295,11 @@ public class DRCInverseDynamicsCalculatorTestHelper
       rootJointExternalForcePoint.getForce(simulatedRootJointForce);
       rootJointExternalForcePoint.getMoment(simulatedRootJointTorque);
 
-      Vector3D forceErrorVector = rootJointForce.getVectorCopy();
+      Vector3D forceErrorVector = new Vector3D(rootJointForce);
       forceErrorVector.sub(simulatedRootJointForce);
       double rootJointForceError = forceErrorVector.length();
 
-      Vector3D torqueErrorVector = rootJointTorque.getVectorCopy();
+      Vector3D torqueErrorVector = new Vector3D(rootJointTorque);
       torqueErrorVector.sub(simulatedRootJointTorque);
       double rootJointTorqueError = forceErrorVector.length();
 
@@ -532,8 +532,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
          pointOfApplication.changeFrame(footFrame);
 
          Vector3D torqueFromLeverArm = new Vector3D();
-         Vector3D leverArm = pointOfApplication.getVectorCopy();
-         torqueFromLeverArm.cross(leverArm, externalForcePointForce.getVectorCopy());
+         Vector3D leverArm = new Vector3D(pointOfApplication);
+         torqueFromLeverArm.cross(leverArm, externalForcePointForce);
 
          externalForcePointMoment.add(torqueFromLeverArm);
 
@@ -577,7 +577,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       rootJointTwist.getLinearPart(linearVelocityInWorld);
 
       linearVelocityInWorld.changeFrame(ReferenceFrame.getWorldFrame());
-      floatingJoint.setVelocity(linearVelocityInWorld.getVectorCopy());
+      floatingJoint.setVelocity(new Vector3D(linearVelocityInWorld));
    }
 
    public void setFullRobotModelRootJointPositionAndOrientationToMatchRobot(FloatingInverseDynamicsJoint sixDoFJoint, FloatingJoint floatingJoint)
@@ -715,7 +715,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
          pointOfWrenchApplication.changeFrame(ReferenceFrame.getWorldFrame());
 
          ExternalForcePoint footExternalForcePoint = feetExternalForcePoints.get(robotSide);
-         footExternalForcePoint.setOffsetWorld(pointOfWrenchApplication.getPointCopy());
+         footExternalForcePoint.setOffsetWorld(pointOfWrenchApplication);
 
          FrameVector3D wrenchForce = wrench.getLinearPartAsFrameVectorCopy();
          wrenchForce.changeFrame(ReferenceFrame.getWorldFrame());
@@ -723,8 +723,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
          FrameVector3D wrenchTorque = wrench.getAngularPartAsFrameVectorCopy();
          wrenchTorque.changeFrame(ReferenceFrame.getWorldFrame());
 
-         footExternalForcePoint.setForce(wrenchForce.getVectorCopy());
-         footExternalForcePoint.setMoment(wrenchTorque.getVectorCopy());
+         footExternalForcePoint.setForce(new Vector3D(wrenchForce));
+         footExternalForcePoint.setMoment(new Vector3D(wrenchTorque));
       }
    }
 
