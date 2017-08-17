@@ -142,7 +142,7 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
       int i;
       for (i = 0; i < getNumberOfSegments(); i++)
          nodeTime[i + 1] = segments.get(i).getFinalTime();
-      for (; i < maxNumberOfSegments + 1; i++)
+      for (; i < maxNumberOfSegments; i++)
          nodeTime[i + 1] = Double.NaN;
       return nodeTime;
    }
