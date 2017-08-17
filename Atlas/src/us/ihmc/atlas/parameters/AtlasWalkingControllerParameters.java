@@ -8,13 +8,7 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
-import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
@@ -77,6 +71,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final SwingTrajectoryParameters swingTrajectoryParameters;
    private final ICPOptimizationParameters icpOptimizationParameters;
    private final AtlasSteppingParameters steppingParameters;
+   private final LeapOfFaithParameters leapOfFaithParameters;
 
    public AtlasWalkingControllerParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
@@ -98,6 +93,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       toeOffParameters = new AtlasToeOffParameters(jointMap);
       swingTrajectoryParameters = new AtlasSwingTrajectoryParameters(target, jointMap.getModelScale());
       steppingParameters = new AtlasSteppingParameters(jointMap);
+      leapOfFaithParameters = new AtlasLeapOfFaithParameters(runningOnRealRobot);
 
       if (USE_SIMPLE_ICP_OPTIMIZATION)
          icpOptimizationParameters = new AtlasSimpleICPOptimizationParameters(runningOnRealRobot);
@@ -950,7 +946,14 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       return steppingParameters;
    }
-   
+
+   /** {@inheritDoc} */
+   @Override
+   public LeapOfFaithParameters getLeapOfFaithParameters()
+   {
+      return leapOfFaithParameters;
+   }
+
    @Override
    public boolean alwaysAllowMomentum()
    {
