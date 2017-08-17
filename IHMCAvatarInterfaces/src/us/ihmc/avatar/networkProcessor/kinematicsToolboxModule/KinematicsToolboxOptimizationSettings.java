@@ -16,7 +16,7 @@ public class KinematicsToolboxOptimizationSettings implements ControllerCoreOpti
    @Override
    public double getJointAccelerationWeight()
    {
-      return 11.0;
+      return 0.5;
    }
 
    /** @inheritDoc */

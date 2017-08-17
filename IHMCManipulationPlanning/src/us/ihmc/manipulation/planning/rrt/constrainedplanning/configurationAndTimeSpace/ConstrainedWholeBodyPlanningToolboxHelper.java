@@ -22,11 +22,11 @@ public class ConstrainedWholeBodyPlanningToolboxHelper
       CTTaskNode.midZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
    }
    
-   public static void setFullRobotModelFactory(FullHumanoidRobotModelFactory toolboxFullRobotModelFactory)
-   {
-      if(CTTaskNode.initialRobotModel != null)
-         CTTaskNode.nodeTester = new WheneverWholeBodyKinematicsSolver(toolboxFullRobotModelFactory, CTTaskNode.initialRobotModel);
-      else
-         PrintTools.error("should be define initial robot model see 'GenericTaskNode.initialRobotModel' ");
-   }
+//   public static void setFullRobotModelFactory(FullHumanoidRobotModelFactory toolboxFullRobotModelFactory)
+//   {
+//      if(CTTaskNode.initialRobotModel != null)
+//         CTTaskNode.nodeTester = new WheneverWholeBodyKinematicsSolver(toolboxFullRobotModelFactory, CTTaskNode.initialRobotModel);
+//      else
+//         PrintTools.error("should be define initial robot model see 'GenericTaskNode.initialRobotModel' ");
+//   }
 }

@@ -78,7 +78,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
    {
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, false);
+      kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, true);
       cwbPlanningToolboxModule = new ConstrainedWholeBodyPlanningToolboxModule(robotModel, fullRobotModel, null, visulaizerOn);
       toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT,
                                                                                    PacketDestination.KINEMATICS_TOOLBOX_MODULE);
@@ -205,7 +205,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       setupCWBPlanningToolboxModule();
    }
 
-   //   @Test
+//      @Test
    public void testForToolboxPacket() throws SimulationExceededMaximumTimeException, IOException
    {
       if (visulaizerOn)
@@ -275,10 +275,12 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("End");
    }
 
-   //   @Test
+//      @Test
    public void testForInverseKinematicsToolbox() throws SimulationExceededMaximumTimeException, IOException
    {
-      ThreadTools.sleep(10000);
+      if (visulaizerOn)
+            ThreadTools.sleep(6000);
+      
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -309,8 +311,8 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
       FramePose desiredHandPose = new FramePose(handControlFrame);
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPose.prependTranslation(0.50, 0.0, 0.3);
-      ik.setTrajectoryTime(0.5);
+      desiredHandPose.prependTranslation(0.20, 0.0, 0.0);   // when prepend in z direction, left hand movement is strange.      
+      ik.setTrajectoryTime(3.0);
       ik.setDesiredHandPose(robotSide, desiredHandPose);
       ik.holdCurrentChestOrientation();
       ik.holdCurrentPelvisOrientation();
@@ -380,7 +382,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       kinematicsSolver.initialize();
       kinematicsSolver.holdCurrentTrajectoryMessages();
       
-      Point3D desiredPoint = new Point3D(0.5, 0.35, 1.0);
+      Point3D desiredPoint = new Point3D(0.5, 0.35, 1.5);
       Quaternion desiredOrientation = new Quaternion();
       Pose3D desiredPose = new Pose3D(desiredPoint, desiredOrientation);
 

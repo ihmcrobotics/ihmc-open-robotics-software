@@ -48,6 +48,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -137,12 +138,22 @@ public class WheneverWholeBodyKinematicsSolver
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
 
-   private static int maximumCntForUpdateInternal = 1000;
+   private static int maximumCntForUpdateInternal = 500;
    private static int cntForUpdateInternal = 0;
+   
+   private static int maximumCntForJointLimit = 30;
+   private static int cntForJointLimit = 0;
 
    private static int numberOfTest = 0;
 
    private boolean isSolved = false;
+   private boolean isJointLimit = false;
+   
+   private static double handWeight = 50.0;
+   private static double chestWeight = 10.0;
+   private static double pelvisWeight = 10.0;
+   
+   private SideDependentList<ControlFrameMovement> handMovements = new SideDependentList<>();
 
    public WheneverWholeBodyKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
@@ -167,13 +178,19 @@ public class WheneverWholeBodyKinematicsSolver
       inverseKinematicsSolution = new KinematicsToolboxOutputStatus(oneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
 
-      gains.setProportionalGain(800.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      gains.setProportionalGain(1.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
 
-      footWeight.set(200.0);
+      footWeight.set(50.0);
       momentumWeight.set(1.0);
-      privilegedWeight.set(1.0);
-      privilegedConfigurationGain.set(50.0);
-      privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
+      privilegedWeight.set(0.02);
+      privilegedConfigurationGain.set(0.02);
+      
+//      gains.setProportionalGain(800.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+//
+//      footWeight.set(200.0);
+//      momentumWeight.set(1.0);
+//      privilegedWeight.set(1.0);
+//      privilegedConfigurationGain.set(50.0);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -181,49 +198,8 @@ public class WheneverWholeBodyKinematicsSolver
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
          initialFootPoses.put(robotSide, new YoFramePoseUsingQuaternions(sidePrefix + "FootInitial", worldFrame, registry));
+         handMovements.put(robotSide, new ControlFrameMovement(desiredFullRobotModel.getHand(robotSide)));
       }
-   }
-
-   public WheneverWholeBodyKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory, FullHumanoidRobotModel sdfFullRobotModel)
-   {
-      this.fullRobotModelFactory = fullRobotModelFactory;
-      outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
-
-      this.desiredFullRobotModel = fullRobotModelFactory.createFullRobotModel();
-
-      referenceFrames = new HumanoidReferenceFrames(this.desiredFullRobotModel);
-      rootBody = this.desiredFullRobotModel.getElevator();
-      rootJoint = this.desiredFullRobotModel.getRootJoint();
-
-      populateJointLimitReductionFactors();
-      populateListOfControllableRigidBodies();
-
-      controllerCore = createControllerCore();
-      feedbackControllerDataHolder = controllerCore.getWholeBodyFeedbackControllerDataHolder();
-
-      oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(this.desiredFullRobotModel);
-      Arrays.stream(oneDoFJoints).forEach(joint -> jointNameBasedHashCodeMap.put(joint.getNameBasedHashCode(), joint));
-
-      inverseKinematicsSolution = new KinematicsToolboxOutputStatus(oneDoFJoints);
-      inverseKinematicsSolution.setDestination(-1);
-
-      gains.setProportionalGain(800.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
-
-      footWeight.set(200.0);
-      momentumWeight.set(1.0);
-      privilegedWeight.set(1.0);
-      privilegedConfigurationGain.set(50.0);
-      privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         String side = robotSide.getCamelCaseNameForMiddleOfExpression();
-         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
-         initialFootPoses.put(robotSide, new YoFramePoseUsingQuaternions(sidePrefix + "FootInitial", worldFrame, registry));
-      }
-
-      updateRobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel), sdfFullRobotModel.getRootJoint());
    }
 
    public WholeBodyControllerCore createControllerCore()
@@ -231,7 +207,7 @@ public class WheneverWholeBodyKinematicsSolver
       InverseDynamicsJoint[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(desiredFullRobotModel);
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       WheneverKinematicsSolverSetting optimizationSettings = new WheneverKinematicsSolverSetting();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(1.0, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
                                                                             null, registry);
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
@@ -282,40 +258,13 @@ public class WheneverWholeBodyKinematicsSolver
       return command;
    }
 
-   public boolean initialize2()
-   {
-      controllerCore.initialize();
-      userFeedbackCommands.clear();
-      isSolved = false;
-      cntForUpdateInternal = 0;
-      solutionQualityOld.setToNaN();
-      //---------------------------------------------      
-      RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
-      wholeBodyFunctions.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints);
-      //---------------------------------------------                        
-      desiredFullRobotModel.updateFrames();
-
-      for (RobotSide robotSide : RobotSide.values)
-         isFootInSupport.get(robotSide).set(true);
-
-      // Initialize the initialCenterOfMassPosition and initialFootPoses to match the current state of the robot.
-      updateCoMPositionAndFootPoses();
-
-      // By default, always hold the support foot/feet and center of mass in place. This can be changed on the fly by sending a KinematicsToolboxConfigurationMessage.
-      holdSupportFootPose.set(true);
-      holdCenterOfMassXYPosition.set(true);
-
-      // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
-      snapPrivilegedConfigurationToCurrent();
-
-      return true;
-   }
-
    public boolean initialize()
    {
       userFeedbackCommands.clear();
       isSolved = false;
+      isJointLimit = false;
       cntForUpdateInternal = 0;
+      cntForJointLimit = 0;
       solutionQualityOld.setToNaN();
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
@@ -391,7 +340,7 @@ public class WheneverWholeBodyKinematicsSolver
       inverseKinematicsSolution.setDesiredJointState(rootJoint, oneDoFJoints);
       inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
 
-      double solutionStableThreshold = 0.001;
+      double solutionStableThreshold = 0.0005;
       double solutionQualityThreshold = 0.005;
 
       double deltaSolutionQuality = solutionQuality.getDoubleValue() - solutionQualityOld.getDoubleValue();
@@ -399,7 +348,7 @@ public class WheneverWholeBodyKinematicsSolver
       boolean isSolutionGoodEnough = solutionQuality.getDoubleValue() < solutionQualityThreshold;
       boolean isGoodSolutionCur = isSolutionStable && isSolutionGoodEnough;
 
-      if (DEBUG)
+      if (true)
          PrintTools.info("" + cntForUpdateInternal + " cur SQ " + solutionQuality.getDoubleValue() + " old " + solutionQualityOld.getDoubleValue() + " "
                + isSolutionStable + " " + isSolutionGoodEnough + " " + isGoodSolutionCur);
 
@@ -408,7 +357,16 @@ public class WheneverWholeBodyKinematicsSolver
          isSolved = true;
 
       }
-
+      
+      double rightHandMovement = handMovements.get(RobotSide.RIGHT).getDeltaPose(desiredFullRobotModel.getHand(RobotSide.RIGHT));
+      double leftHandMovement = handMovements.get(RobotSide.LEFT).getDeltaPose(desiredFullRobotModel.getHand(RobotSide.LEFT));
+      double highMovement = (rightHandMovement <= leftHandMovement) ? rightHandMovement : leftHandMovement;
+      
+      
+      PrintTools.info(""+cntForUpdateInternal+" "+rightHandMovement +" "+leftHandMovement);
+            
+      
+      
       solutionQualityOld.set(solutionQuality.getDoubleValue());
       cntForUpdateInternal++;
    }
@@ -421,10 +379,22 @@ public class WheneverWholeBodyKinematicsSolver
    public boolean isSolved()
    {
       numberOfTest++;
-
+      
       for (int i = 0; i < maximumCntForUpdateInternal; i++)
       {
          updateInternal();
+         
+         /*
+          * terminate case: joint limit.
+          */
+         if(isJointLimit)
+         {
+            PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal +" "+ solutionQuality.getDoubleValue());
+            return false;
+         }
+         /*
+          * terminate case: solved.
+          */
          if (isSolved)
          {
             if (DEBUG)
@@ -664,7 +634,6 @@ public class WheneverWholeBodyKinematicsSolver
          handSelectionMatrices.get(robotSide).setLinearAxisSelection(true, true, true);
          handSelectionMatrices.get(robotSide).setAngularAxisSelection(true, true, true);
 
-         double handWeight = 20.0;
          handWeightMatrices.get(robotSide).setLinearWeights(handWeight, handWeight, handWeight);
          handWeightMatrices.get(robotSide).setAngularWeights(handWeight, handWeight, handWeight);
 
@@ -684,7 +653,6 @@ public class WheneverWholeBodyKinematicsSolver
       pelvisSelectionMatrix.setLinearAxisSelection(false, false, true);
       pelvisSelectionMatrix.setAngularAxisSelection(true, true, true);
 
-      double pelvisWeight = 10.0;
       pelvisWeightMatrix.setLinearWeights(pelvisWeight, pelvisWeight, pelvisWeight);
       pelvisWeightMatrix.setAngularWeights(pelvisWeight, pelvisWeight, pelvisWeight);
 
@@ -698,7 +666,6 @@ public class WheneverWholeBodyKinematicsSolver
       chestSelectionMatrix.setLinearAxisSelection(false, false, false);
       chestSelectionMatrix.setAngularAxisSelection(true, true, true);
 
-      double chestWeight = 10.0;
       chestWeightMatrix.setLinearWeights(chestWeight, chestWeight, chestWeight);
       chestWeightMatrix.setAngularWeights(chestWeight, chestWeight, chestWeight);
 
@@ -711,8 +678,8 @@ public class WheneverWholeBodyKinematicsSolver
       handSelectionMatrices.get(robotSide).setLinearAxisSelection(true, true, true);
       handSelectionMatrices.get(robotSide).setAngularAxisSelection(true, true, true);
 
-      handWeightMatrices.get(robotSide).setLinearWeights(20.0, 20.0, 20.0);
-      handWeightMatrices.get(robotSide).setAngularWeights(20.0, 20.0, 20.0);
+      handWeightMatrices.get(robotSide).setLinearWeights(handWeight, handWeight, handWeight);
+      handWeightMatrices.get(robotSide).setAngularWeights(handWeight, handWeight, handWeight);
 
       /*
        * The Z coordinate is upward like as robot coordinate and matched when
@@ -748,6 +715,9 @@ public class WheneverWholeBodyKinematicsSolver
       pelvisSelectionMatrix.clearLinearSelection();
       pelvisSelectionMatrix.selectLinearZ(true);
       pelvisSelectionMatrix.setSelectionFrame(worldFrame);
+      
+      pelvisWeightMatrix.setLinearWeights(pelvisWeight, pelvisWeight, pelvisWeight);
+      pelvisWeightMatrix.setAngularWeights(pelvisWeight, pelvisWeight, pelvisWeight);
 
       FramePoint3D desiredPointToWorld = new FramePoint3D(referenceFrames.getMidFootZUpGroundFrame(), new Point3D(0, 0, desiredHeightToMidZUp));
       FrameOrientation desiredOrientationToWorld = new FrameOrientation(referenceFrames.getMidFootZUpGroundFrame(), new Quaternion());
@@ -767,7 +737,6 @@ public class WheneverWholeBodyKinematicsSolver
       chestSelectionMatrix.setLinearAxisSelection(false, false, false);
       chestSelectionMatrix.setAngularAxisSelection(true, true, true);
 
-      double chestWeight = 10.0;
       chestWeightMatrix.setLinearWeights(chestWeight, chestWeight, chestWeight);
       chestWeightMatrix.setAngularWeights(chestWeight, chestWeight, chestWeight);
 

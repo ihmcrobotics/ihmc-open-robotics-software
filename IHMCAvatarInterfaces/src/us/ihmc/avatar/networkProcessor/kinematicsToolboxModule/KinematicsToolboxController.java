@@ -283,6 +283,8 @@ public class KinematicsToolboxController extends ToolboxController
     * user submitted.
     */
    private final YoInteger numberOfActiveCommands = new YoInteger("numberOfActiveCommands", registry);
+   
+   private final YoInteger countUpdateInternal = new YoInteger("countUpdateInternal", registry);
 
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                       FullHumanoidRobotModel desiredFullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -309,12 +311,20 @@ public class KinematicsToolboxController extends ToolboxController
       inverseKinematicsSolution = new KinematicsToolboxOutputStatus(oneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
 
-      gains.setProportionalGain(800.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      gains.setProportionalGain(1.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
 
-      footWeight.set(200.0);
+      footWeight.set(50.0);
       momentumWeight.set(1.0);
-      privilegedWeight.set(1.0);
-      privilegedConfigurationGain.set(50.0);
+      privilegedWeight.set(0.02);
+      privilegedConfigurationGain.set(0.02);
+      
+//      gains.setProportionalGain(800.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+//
+//      footWeight.set(200.0);
+//      momentumWeight.set(1.0);
+//      privilegedWeight.set(1.0);
+//      privilegedConfigurationGain.set(50.0);
+      
       privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -384,7 +394,9 @@ public class KinematicsToolboxController extends ToolboxController
       InverseDynamicsJoint[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(desiredFullRobotModel);
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
+//      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
+//                                                                            null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(1.0, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
                                                                             null, registry);
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       toolbox.setupForInverseKinematicsSolver();
@@ -518,6 +530,7 @@ public class KinematicsToolboxController extends ToolboxController
    @Override
    protected void updateInternal()
    {
+      countUpdateInternal.increment();
       // Updating the reference frames and twist calculator.
       updateTools();
 
