@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,14 +9,14 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
-import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SmoothCapturePointToolboxTest
@@ -111,11 +111,11 @@ public class SmoothCapturePointToolboxTest
          
          for(int i = 0; i < numberOfCoefficients-1; i++)
          {
-            EuclidCoreTestTools.assertTuple3DEquals("", entryCornerPointsByHandToPack.get(i).getPointCopy(), entryCornerPointsToPack.get(i).getPointCopy(), EPSILON);
-            EuclidCoreTestTools.assertTuple3DEquals("", exitCornerPointsByHandToPack.get(i).getPointCopy(), exitCornerPointsToPack.get(i).getPointCopy(), EPSILON);
+            EuclidCoreTestTools.assertTuple3DEquals("", entryCornerPointsByHandToPack.get(i), entryCornerPointsToPack.get(i), EPSILON);
+            EuclidCoreTestTools.assertTuple3DEquals("", exitCornerPointsByHandToPack.get(i), exitCornerPointsToPack.get(i), EPSILON);
             
-            EuclidCoreTestTools.assertTuple3DEquals("", entryCornerPointsToPackDecoupled.get(i).getPointCopy(), entryCornerPointsToPack.get(i).getPointCopy(), EPSILON);
-            EuclidCoreTestTools.assertTuple3DEquals("", exitCornerPointsToPackDecoupled.get(i).getPointCopy(), exitCornerPointsToPack.get(i).getPointCopy(), EPSILON);
+            EuclidCoreTestTools.assertTuple3DEquals("", entryCornerPointsToPackDecoupled.get(i), entryCornerPointsToPack.get(i), EPSILON);
+            EuclidCoreTestTools.assertTuple3DEquals("", exitCornerPointsToPackDecoupled.get(i), exitCornerPointsToPack.get(i), EPSILON);
          }
       }
    }
@@ -304,16 +304,17 @@ public class SmoothCapturePointToolboxTest
 //         PrintTools.debug("ICP vel calc: " + icpVelocityDesiredCurrent.toString());
 //         PrintTools.debug("ICP vel hand: " + icpVelocityDesiredCurrentByHand.toString());
          
-         EuclidCoreTestTools.assertTuple3DEquals("", icpVelocityDesiredCurrent.getVectorCopy(), icpVelocityDesiredCurrentByHand.getVectorCopy(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals("", icpVelocityDesiredCurrent, icpVelocityDesiredCurrentByHand, EPSILON);
          
          // Dynamics
          linear3D.compute(time);
          FramePoint3D cmpPositionDesiredCurrent = new FramePoint3D(worldFrame, linear3D.getPosition());
          
          FrameVector3D icpVelocityDesiredCurrentDynamics = new FrameVector3D(worldFrame);
-         icpVelocityDesiredCurrentDynamics.subAndScale(omega0, icpPositionDesiredCurrent, cmpPositionDesiredCurrent);
+         icpVelocityDesiredCurrentDynamics.sub(icpPositionDesiredCurrent, cmpPositionDesiredCurrent);
+         icpVelocityDesiredCurrentDynamics.scale(omega0);
          
-         EuclidCoreTestTools.assertTuple3DEquals("", icpVelocityDesiredCurrent.getVectorCopy(), icpVelocityDesiredCurrentDynamics.getVectorCopy(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals("", icpVelocityDesiredCurrent, icpVelocityDesiredCurrentDynamics, EPSILON);
       }
    }
    
@@ -366,16 +367,17 @@ public class SmoothCapturePointToolboxTest
 //         PrintTools.debug("ICP vel calc: " + icpVelocityDesiredCurrent.toString());
 //         PrintTools.debug("ICP vel hand: " + icpVelocityDesiredCurrentByHand.toString());
          
-         EuclidCoreTestTools.assertTuple3DEquals("", icpVelocityDesiredCurrent.getVectorCopy(), icpVelocityDesiredCurrentByHand.getVectorCopy(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals("", icpVelocityDesiredCurrent, icpVelocityDesiredCurrentByHand, EPSILON);
          
          // Dynamics
          cubic3D.compute(time);
          FramePoint3D cmpPositionDesiredCurrent = new FramePoint3D(worldFrame, cubic3D.getPosition());
          
          FrameVector3D icpVelocityDesiredCurrentDynamics = new FrameVector3D(worldFrame);
-         icpVelocityDesiredCurrentDynamics.subAndScale(omega0, icpPositionDesiredCurrent, cmpPositionDesiredCurrent);
+         icpVelocityDesiredCurrentDynamics.sub(icpPositionDesiredCurrent, cmpPositionDesiredCurrent);
+         icpVelocityDesiredCurrentDynamics.scale(omega0);
          
-         EuclidCoreTestTools.assertTuple3DEquals("", icpVelocityDesiredCurrent.getVectorCopy(), icpVelocityDesiredCurrentDynamics.getVectorCopy(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals("", icpVelocityDesiredCurrent, icpVelocityDesiredCurrentDynamics, EPSILON);
       }
    }
    
@@ -397,9 +399,9 @@ public class SmoothCapturePointToolboxTest
       double gamma =  Math.exp(omega0*(time-timeFinal));
       
       icpPositionDesiredCurrent.setToZero();
-      icpPositionDesiredCurrent.scaleAdd(1.0, icpPositionDesiredCurrent.getPointCopy(), alpha, cmpRefInit.getPointCopy());
-      icpPositionDesiredCurrent.scaleAdd(1.0, icpPositionDesiredCurrent.getPointCopy(), beta, cmpRefFinal.getPointCopy());
-      icpPositionDesiredCurrent.scaleAdd(1.0, icpPositionDesiredCurrent.getPointCopy(), gamma, icpPositionDesiredFinal.getPointCopy());
+      icpPositionDesiredCurrent.scaleAdd(alpha, cmpRefInit             , icpPositionDesiredCurrent);
+      icpPositionDesiredCurrent.scaleAdd(beta, cmpRefFinal             , icpPositionDesiredCurrent);
+      icpPositionDesiredCurrent.scaleAdd(gamma, icpPositionDesiredFinal, icpPositionDesiredCurrent);
    }
    
    public static void calculateICPPositionByHand3DCubic(double omega0, double time, YoFrameTrajectory3D cubic3D, FramePoint3D icpPositionDesiredFinal, FramePoint3D icpPositionDesiredCurrent)
@@ -420,9 +422,9 @@ public class SmoothCapturePointToolboxTest
       double gamma =  Math.exp(omega0*(time-timeFinal));
       
       icpPositionDesiredCurrent.setToZero();
-      icpPositionDesiredCurrent.scaleAdd(1.0, icpPositionDesiredCurrent.getPointCopy(), alpha, cmpRefInit.getPointCopy());
-      icpPositionDesiredCurrent.scaleAdd(1.0, icpPositionDesiredCurrent.getPointCopy(), beta, cmpRefFinal.getPointCopy());
-      icpPositionDesiredCurrent.scaleAdd(1.0, icpPositionDesiredCurrent.getPointCopy(), gamma, icpPositionDesiredFinal.getPointCopy());
+      icpPositionDesiredCurrent.scaleAdd(alpha, cmpRefInit             , icpPositionDesiredCurrent);
+      icpPositionDesiredCurrent.scaleAdd(beta, cmpRefFinal             , icpPositionDesiredCurrent);
+      icpPositionDesiredCurrent.scaleAdd(gamma, icpPositionDesiredFinal, icpPositionDesiredCurrent);
    }
    
    public static void calculateICPVelocityByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint3D icpPositionDesiredFinal, FrameVector3D icpVelocityDesiredCurrent)
@@ -443,9 +445,9 @@ public class SmoothCapturePointToolboxTest
       double dGamma = omega0 * Math.exp(omega0*(time-timeFinal));
       
       icpVelocityDesiredCurrent.setToZero();
-      icpVelocityDesiredCurrent.scaleAdd(1.0, icpVelocityDesiredCurrent.getVectorCopy(), dAlpha, cmpRefInit.getPointCopy());
-      icpVelocityDesiredCurrent.scaleAdd(1.0, icpVelocityDesiredCurrent.getVectorCopy(), dBeta, cmpRefFinal.getPointCopy());
-      icpVelocityDesiredCurrent.scaleAdd(1.0, icpVelocityDesiredCurrent.getVectorCopy(), dGamma, icpPositionDesiredFinal.getPointCopy());
+      icpVelocityDesiredCurrent.scaleAdd(dAlpha, cmpRefInit             , icpVelocityDesiredCurrent);
+      icpVelocityDesiredCurrent.scaleAdd(dBeta, cmpRefFinal             , icpVelocityDesiredCurrent);
+      icpVelocityDesiredCurrent.scaleAdd(dGamma, icpPositionDesiredFinal, icpVelocityDesiredCurrent);
    }
    
    public static void calculateICPVelocityByHand3DCubic(double omega0, double time, YoFrameTrajectory3D cubic3D, FramePoint3D icpPositionDesiredFinal, FrameVector3D icpVelocityDesiredCurrent)
@@ -466,9 +468,9 @@ public class SmoothCapturePointToolboxTest
       double dGamma = omega0 * Math.exp(omega0*(time-timeFinal));
       
       icpVelocityDesiredCurrent.setToZero();
-      icpVelocityDesiredCurrent.scaleAdd(1.0, icpVelocityDesiredCurrent.getVectorCopy(), dAlpha, cmpRefInit.getPointCopy());
-      icpVelocityDesiredCurrent.scaleAdd(1.0, icpVelocityDesiredCurrent.getVectorCopy(), dBeta, cmpRefFinal.getPointCopy());
-      icpVelocityDesiredCurrent.scaleAdd(1.0, icpVelocityDesiredCurrent.getVectorCopy(), dGamma, icpPositionDesiredFinal.getPointCopy());
+      icpVelocityDesiredCurrent.scaleAdd(dAlpha, cmpRefInit.getPoint()             , icpVelocityDesiredCurrent);
+      icpVelocityDesiredCurrent.scaleAdd(dBeta, cmpRefFinal.getPoint()             , icpVelocityDesiredCurrent);
+      icpVelocityDesiredCurrent.scaleAdd(dGamma, icpPositionDesiredFinal.getPoint(), icpVelocityDesiredCurrent);
    }
    
    public static double calculateSigmaLinear(double t, double T, double omega0)

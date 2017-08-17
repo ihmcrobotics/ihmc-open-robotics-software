@@ -5,12 +5,12 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoTrajectory;
-import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameTuple3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 
 /**
  * @author Tim Seyde
@@ -106,9 +106,9 @@ public class SmoothCapturePointToolbox
       for(Direction dir : Direction.values())
       {
          YoTrajectory cmpPolynomial = cmpPolynomial3D.getYoTrajectory(dir);    
-         double icpPositionDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 0, cmpPolynomial, finalCapturePoint.get(dir));
+         double icpPositionDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 0, cmpPolynomial, finalCapturePoint.getElement(dir.getIndex()));
          
-         desiredCapturePointToPack.set(dir, icpPositionDesired);
+         desiredCapturePointToPack.setElement(dir.getIndex(), icpPositionDesired);
       }
    }  
    
@@ -125,9 +125,9 @@ public class SmoothCapturePointToolbox
       for(Direction dir : Direction.values())
       {
          YoTrajectory cmpPolynomial = cmpPolynomial3D.getYoTrajectory(dir);    
-         double icpVelocityDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 1, cmpPolynomial, finalCapturePoint.get(dir));
+         double icpVelocityDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 1, cmpPolynomial, finalCapturePoint.getElement(dir.getIndex()));
          
-         desiredCapturePointVelocityToPack.set(dir, icpVelocityDesired);
+         desiredCapturePointVelocityToPack.setElement(dir.getIndex(), icpVelocityDesired);
       }
    }
    
@@ -144,9 +144,9 @@ public class SmoothCapturePointToolbox
       for(Direction dir : Direction.values())
       {
          YoTrajectory cmpPolynomial = cmpPolynomial3D.getYoTrajectory(dir);    
-         double icpAccelerationDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 2, cmpPolynomial, finalCapturePoint.get(dir));
+         double icpAccelerationDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 2, cmpPolynomial, finalCapturePoint.getElement(dir.getIndex()));
          
-         desiredCapturePointAccelerationToPack.set(dir, icpAccelerationDesired);
+         desiredCapturePointAccelerationToPack.setElement(dir.getIndex(), icpAccelerationDesired);
       }
    }  
    

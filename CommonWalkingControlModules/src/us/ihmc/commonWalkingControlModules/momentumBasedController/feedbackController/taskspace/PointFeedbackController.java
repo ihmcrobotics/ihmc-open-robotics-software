@@ -19,13 +19,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
@@ -222,7 +222,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       desiredLinearAcceleration.setIncludingFrame(proportionalFeedback);
       desiredLinearAcceleration.add(derivativeFeedback);
       desiredLinearAcceleration.add(integralFeedback);
-      desiredLinearAcceleration.limitLength(gains.getMaximumFeedback());
+      desiredLinearAcceleration.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
       rateLimitedFeedbackLinearAcceleration.update();
       rateLimitedFeedbackLinearAcceleration.getFrameTupleIncludingFrame(desiredLinearAcceleration);
@@ -251,7 +251,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       desiredLinearVelocity.setIncludingFrame(proportionalFeedback);
       desiredLinearVelocity.add(integralFeedback);
-      desiredLinearVelocity.limitLength(gains.getMaximumFeedback());
+      desiredLinearVelocity.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
       rateLimitedFeedbackLinearVelocity.update();
       rateLimitedFeedbackLinearVelocity.getFrameTupleIncludingFrame(desiredLinearVelocity);
@@ -305,7 +305,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredPosition, currentPosition);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
-      feedbackTermToPack.limitLength(gains.getMaximumProportionalError());
+      feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
       yoErrorPosition.set(feedbackTermToPack);
 
       if (linearGainsFrame != null)
@@ -344,7 +344,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredLinearVelocity, currentLinearVelocity);
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
-      feedbackTermToPack.limitLength(gains.getMaximumDerivativeError());
+      feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
       yoErrorLinearVelocity.set(feedbackTermToPack);
 
       if (linearGainsFrame != null)
@@ -386,7 +386,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       feedbackTermToPack.scale(dt);
       feedbackTermToPack.add(yoErrorPositionIntegrated.getFrameTuple());
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
-      feedbackTermToPack.limitLength(maximumIntegralError);
+      feedbackTermToPack.clipToMaxLength(maximumIntegralError);
       yoErrorPositionIntegrated.set(feedbackTermToPack);
 
       if (linearGainsFrame != null)

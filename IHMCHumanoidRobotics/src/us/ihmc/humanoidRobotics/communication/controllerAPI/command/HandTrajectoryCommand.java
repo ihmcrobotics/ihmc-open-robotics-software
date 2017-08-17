@@ -1,11 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-
 import java.util.Random;
+
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTrajectoryCommand, HandTrajectoryMessage>
 {
@@ -25,8 +25,8 @@ public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTr
    public HandTrajectoryCommand(Random random)
    {
       this(RobotSide.generateRandomRobotSide(random),
-            ReferenceFrame.generateRandomReferenceFrame("dataFrame", random, ReferenceFrame.getWorldFrame()),
-            ReferenceFrame.generateRandomReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame()));
+            EuclidFrameRandomTools.generateRandomReferenceFrame("dataFrame", random, ReferenceFrame.getWorldFrame()),
+            EuclidFrameRandomTools.generateRandomReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame()));
    }
 
    @Override

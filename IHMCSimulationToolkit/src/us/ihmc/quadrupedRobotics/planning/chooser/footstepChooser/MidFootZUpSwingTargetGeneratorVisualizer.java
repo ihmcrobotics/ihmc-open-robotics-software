@@ -3,6 +3,10 @@ package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 import java.awt.Color;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -20,15 +24,12 @@ import us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser.QuadrupedGaitS
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -272,11 +273,11 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
 
       FramePoint3D endPoint = new FramePoint3D(temporaryCentroid);
       endPoint.add(0.4,0.0,0.0);
-      endPoint.yawAboutPoint(temporaryCentroid, endPoint, nominalYaw.getDoubleValue());
+      GeometryTools.yawAboutPoint(endPoint, temporaryCentroid, nominalYaw.getDoubleValue(), endPoint);
       nominalYawEndpoint.set(endPoint);
 
       FramePoint2D endpointTwoD = new FramePoint2D();
-      endPoint.getFramePoint2d(endpointTwoD);
+      endpointTwoD.setIncludingFrame(endPoint);
       nominalYawLineSegment.set(centroid.getFramePoint2dCopy(), endpointTwoD);
       nominalYawGraphic.update();
 

@@ -10,6 +10,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
 import us.ihmc.footstepPlanning.roughTerrainPlanning.FootstepPlannerOnRoughTerrainTest;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -68,7 +69,8 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
       if (visualizePlanner)
          visualization = new FootstepNodeVisualization(1000, 1.0, null);
       SideDependentList<ConvexPolygon2D> footPolygons = PlanningTestTools.createDefaultFootPolygons();
-      planner = AStarFootstepPlanner.createRoughTerrainPlanner(visualization, footPolygons, new YoVariableRegistry("TestRegistry"));
+      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
+      planner = AStarFootstepPlanner.createRoughTerrainPlanner(visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
    }
 
    @After

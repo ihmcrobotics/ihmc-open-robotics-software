@@ -10,12 +10,12 @@ import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoConcatenatedSplinesTest
 {
@@ -49,8 +49,8 @@ public class YoConcatenatedSplinesTest
             FrameVector3D actualVelocity = concatenatedSplines.getVelocity();
             for (Direction direction : Direction.values())
             {
-               assertEquals(expectedPosition.get(direction), actualPosition.get(direction), EPSILON);
-               assertEquals(expectedVelocity.get(direction), actualVelocity.get(direction), EPSILON);
+               assertEquals(expectedPosition.getElement(direction.getIndex()), actualPosition.getElement(direction.getIndex()), EPSILON);
+               assertEquals(expectedVelocity.getElement(direction.getIndex()), actualVelocity.getElement(direction.getIndex()), EPSILON);
             }
          }
       }
@@ -89,8 +89,8 @@ public class YoConcatenatedSplinesTest
          FrameVector3D actualVelocity = concatenatedSplines.getVelocity();
          for (Direction direction : Direction.values())
          {
-            assertEquals(expectedPosition.get(direction), actualPosition.get(direction), EPSILON);
-            assertEquals(expectedVelocity.get(direction), actualVelocity.get(direction), EPSILON);
+            assertEquals(expectedPosition.getElement(direction.getIndex()), actualPosition.getElement(direction.getIndex()), EPSILON);
+            assertEquals(expectedVelocity.getElement(direction.getIndex()), actualVelocity.getElement(direction.getIndex()), EPSILON);
          }
       }
    }
@@ -127,8 +127,8 @@ public class YoConcatenatedSplinesTest
             FrameVector3D respacedVelocity = respacedSplines.getVelocity();
             for (Direction direction : Direction.values())
             {
-               assertEquals(originalPosition.get(direction), respacedPosition.get(direction), EPSILON);
-               assertEquals(originalVelocity.get(direction), respacedVelocity.get(direction), EPSILON);
+               assertEquals(originalPosition.getElement(direction.getIndex()), respacedPosition.getElement(direction.getIndex()), EPSILON);
+               assertEquals(originalVelocity.getElement(direction.getIndex()), respacedVelocity.getElement(direction.getIndex()), EPSILON);
             }
          }
       }
@@ -198,7 +198,7 @@ public class YoConcatenatedSplinesTest
 
          for (Direction direction : Direction.values())
          {
-            positions[i].set(direction, RandomNumbers.nextDouble(random, -5.0, 5.0));
+            positions[i].setElement(direction.ordinal(), RandomNumbers.nextDouble(random, -5.0, 5.0));
          }
       }
 
@@ -214,7 +214,7 @@ public class YoConcatenatedSplinesTest
 
          for (Direction direction : Direction.values())
          {
-            velocities[i].set(direction, RandomNumbers.nextDouble(random, -5.0, 5.0));
+            velocities[i].setElement(direction.ordinal(), RandomNumbers.nextDouble(random, -5.0, 5.0));
          }
       }
 

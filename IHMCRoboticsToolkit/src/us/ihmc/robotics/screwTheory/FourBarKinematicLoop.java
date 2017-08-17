@@ -6,16 +6,17 @@ import java.util.Collections;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2D;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.kinematics.fourbar.ConstantSideFourBarCalculatorWithDerivatives;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FourBarKinematicLoop
 {
@@ -85,7 +86,7 @@ public class FourBarKinematicLoop
       // Rotation axis
       FrameVector3D masterJointAxis = masterJointA.getJointAxis();
       masterJointAxis.changeFrame(masterJointA.getFrameBeforeJoint());
-      frameBeforeFourBarWithZAlongJointAxis = ReferenceFrame
+      frameBeforeFourBarWithZAlongJointAxis = GeometryTools
             .constructReferenceFrameFromPointAndAxis(name + "FrameWithZAlongJointAxis", new FramePoint3D(masterJointA.getFrameBeforeJoint()), Axis.Z,
                   masterJointAxis);
 
@@ -193,12 +194,12 @@ public class FourBarKinematicLoop
       vectorDAClosurePoint.sub(masterJointAPosition, jointDClosedLoopPosition);
       vectorCDClosurePoint.sub(jointDClosedLoopPosition, jointCPosition);
 
-      vectorBCProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorBC);
-      vectorCDProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorCD);
-      vectorDAProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorDA);
-      vectorABProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorAB);
-      vectorDAClosurePointProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorDAClosurePoint);
-      vectorCDClosurePointProjectedToPack.setByProjectionOntoXYPlaneIncludingFrame(vectorCDClosurePoint);
+      vectorBCProjectedToPack.setIncludingFrame(vectorBC);
+      vectorCDProjectedToPack.setIncludingFrame(vectorCD);
+      vectorDAProjectedToPack.setIncludingFrame(vectorDA);
+      vectorABProjectedToPack.setIncludingFrame(vectorAB);
+      vectorDAClosurePointProjectedToPack.setIncludingFrame(vectorDAClosurePoint);
+      vectorCDClosurePointProjectedToPack.setIncludingFrame(vectorCDClosurePoint);
 
       if (DEBUG)
       {

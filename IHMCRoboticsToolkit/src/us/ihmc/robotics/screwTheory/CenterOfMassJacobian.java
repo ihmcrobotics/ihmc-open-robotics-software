@@ -11,11 +11,11 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CenterOfMassJacobian
 {
@@ -193,7 +193,7 @@ public class CenterOfMassJacobian
    {
       getCenterOfMassVelocity(tempFrameVector);
       tempFrameVector.changeFrame(desiredOutputFrame);
-      centerOfMassVelocityToPack.setByProjectionOntoXYPlaneIncludingFrame(tempFrameVector);
+      centerOfMassVelocityToPack.setIncludingFrame(tempFrameVector);
    }
 
    private void setColumn(Twist twist, FramePoint3D comPositionScaledByMass, double subTreeMass, int column)

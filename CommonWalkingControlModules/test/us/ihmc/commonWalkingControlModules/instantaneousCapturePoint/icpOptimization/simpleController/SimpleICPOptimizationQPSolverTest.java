@@ -5,12 +5,12 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.jcodec.common.Assert;
 import org.junit.Test;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.SimpleICPOptimizationQPSolver;
+
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SimpleICPOptimizationQPSolverTest
 {
@@ -40,8 +40,8 @@ public class SimpleICPOptimizationQPSolverTest
       FrameVector2D cmpCoPDifferenceExpected = new FrameVector2D();
       FrameVector2D copFeedbackExpected = new FrameVector2D();
 
-      Assert.assertTrue(copFeedback.eplilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.eplilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -70,8 +70,8 @@ public class SimpleICPOptimizationQPSolverTest
       copFeedbackExpected.set(icpError);
       copFeedbackExpected.scale(3.0);
 
-      Assert.assertTrue(copFeedback.eplilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.eplilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -99,8 +99,8 @@ public class SimpleICPOptimizationQPSolverTest
       copFeedbackExpected.set(icpError);
       copFeedbackExpected.scale(3.0);
 
-      Assert.assertTrue(copFeedback.eplilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.eplilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -141,8 +141,8 @@ public class SimpleICPOptimizationQPSolverTest
       copFeedbackExpected.setY(Math.min(copFeedbackExpected.getY(), sideLength));
       copFeedbackExpected.sub(perfectCMP);
 
-      Assert.assertTrue(copFeedback.eplilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.eplilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -190,8 +190,8 @@ public class SimpleICPOptimizationQPSolverTest
       // find delta
       copFeedbackExpected.sub(perfectCMP);
 
-      Assert.assertTrue(copFeedback.eplilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.eplilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -235,8 +235,8 @@ public class SimpleICPOptimizationQPSolverTest
 
       footstepLocationExpected.set(desiredFootstepLocation);
 
-      Assert.assertTrue(copFeedback.eplilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.eplilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
       Assert.assertTrue(footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
@@ -280,8 +280,8 @@ public class SimpleICPOptimizationQPSolverTest
       icpError.scale(1.0 / footstepMultiplier);
       footstepLocationExpected.add(icpError);
 
-      Assert.assertTrue(copFeedback.eplilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.eplilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
       Assert.assertTrue(footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
@@ -326,8 +326,8 @@ public class SimpleICPOptimizationQPSolverTest
       icpError.scale(1.0 / footstepMultiplier);
       footstepLocationExpected.add(icpError);
 
-      Assert.assertTrue(copFeedback.eplilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.eplilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
       Assert.assertTrue(footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
@@ -396,8 +396,8 @@ public class SimpleICPOptimizationQPSolverTest
       footstepLocationExpected.setX(desiredFootstepLocation.getX() + solution.get(2));
       footstepLocationExpected.setY(desiredFootstepLocation.getY() + solution.get(3));
 
-      Assert.assertTrue(copFeedback.eplilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.eplilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
       Assert.assertTrue(footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
@@ -467,8 +467,8 @@ public class SimpleICPOptimizationQPSolverTest
       footstepLocationExpected.setX(desiredFootstepLocation.getX() + solution.get(2));
       footstepLocationExpected.setY(desiredFootstepLocation.getY() + solution.get(3));
 
-      Assert.assertTrue(copFeedback.eplilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.eplilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
       Assert.assertTrue(footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
@@ -521,8 +521,8 @@ public class SimpleICPOptimizationQPSolverTest
 
       footstepLocationExpected.add(desiredFootstepLocation);
 
-      Assert.assertTrue(copFeedback.eplilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.eplilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
       Assert.assertTrue(footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -10,11 +10,11 @@ import org.junit.Test;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointToolbox;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SmoothCoMIntegrationToolsTest
@@ -258,7 +258,7 @@ public class SmoothCoMIntegrationToolsTest
 //         PrintTools.debug("CoM vel hand: " + comVelocityDesiredCurrentByHand.toString());
 //         PrintTools.debug("");
          
-         EuclidCoreTestTools.assertTuple3DEquals("", comVelocityDesiredCurrent.getVectorCopy(), comVelocityDesiredCurrentByHand.getVectorCopy(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals("", comVelocityDesiredCurrent, comVelocityDesiredCurrentByHand, EPSILON);
          
          // Dynamics
          linear3D.compute(time);
@@ -266,14 +266,16 @@ public class SmoothCoMIntegrationToolsTest
          icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, linear3D, icpPositionDesiredFinal, icpPositionDesiredCurrent);
          
          FrameVector3D comVelocityDesiredCurrentDynamics = new FrameVector3D(worldFrame);
-         comVelocityDesiredCurrentDynamics.subAndScale(omega0, icpPositionDesiredCurrent, comPositionDesiredCurrent);
+         comVelocityDesiredCurrentDynamics.sub(icpPositionDesiredCurrent, comPositionDesiredCurrent);
+         comVelocityDesiredCurrentDynamics.scale(omega0);
          
-         EuclidCoreTestTools.assertTuple3DEquals("", comVelocityDesiredCurrent.getVectorCopy(), comVelocityDesiredCurrentDynamics.getVectorCopy(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals("", comVelocityDesiredCurrent, comVelocityDesiredCurrentDynamics, EPSILON);
          
          FrameVector3D comVelocityDesiredCurrentDynamicsByHand = new FrameVector3D(worldFrame);
-         comVelocityDesiredCurrentDynamicsByHand.subAndScale(omega0, icpPositionDesiredCurrent, comPositionDesiredCurrentByHand);
+         comVelocityDesiredCurrentDynamicsByHand.sub(icpPositionDesiredCurrent, comPositionDesiredCurrentByHand);
+         comVelocityDesiredCurrentDynamicsByHand.scale(omega0);
          
-         EuclidCoreTestTools.assertTuple3DEquals("", comVelocityDesiredCurrentByHand.getVectorCopy(), comVelocityDesiredCurrentDynamicsByHand.getVectorCopy(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals("", comVelocityDesiredCurrentByHand, comVelocityDesiredCurrentDynamicsByHand, EPSILON);
       }
    }
    

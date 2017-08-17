@@ -19,13 +19,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -237,7 +237,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularAcceleration.setIncludingFrame(proportionalFeedback);
       desiredAngularAcceleration.add(derivativeFeedback);
       desiredAngularAcceleration.add(integralFeedback);
-      desiredAngularAcceleration.limitLength(gains.getMaximumFeedback());
+      desiredAngularAcceleration.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackAngularAcceleration.setAndMatchFrame(desiredAngularAcceleration);
       rateLimitedFeedbackAngularAcceleration.update();
       rateLimitedFeedbackAngularAcceleration.getFrameTupleIncludingFrame(desiredAngularAcceleration);
@@ -264,7 +264,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       desiredAngularVelocity.setIncludingFrame(proportionalFeedback);
       desiredAngularVelocity.add(integralFeedback);
-      desiredAngularVelocity.limitLength(gains.getMaximumFeedback());
+      desiredAngularVelocity.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
       rateLimitedFeedbackAngularVelocity.update();
       rateLimitedFeedbackAngularVelocity.getFrameTupleIncludingFrame(desiredAngularVelocity);
@@ -321,7 +321,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredOrientation.normalizeAndLimitToPiMinusPi();
       desiredOrientation.getRotationVectorIncludingFrame(feedbackTermToPack);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
-      feedbackTermToPack.limitLength(gains.getMaximumProportionalError());
+      feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
       yoErrorRotationVector.setAndMatchFrame(feedbackTermToPack);
       yoErrorOrientation.setRotationVector(yoErrorRotationVector);
 
@@ -362,7 +362,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredAngularVelocity, currentAngularVelocity);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
-      feedbackTermToPack.limitLength(gains.getMaximumDerivativeError());
+      feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
       yoErrorAngularVelocity.set(feedbackTermToPack);
 
       if (angularGainsFrame != null)
@@ -410,7 +410,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       errorOrientationCumulated.getRotationVectorIncludingFrame(feedbackTermToPack);
       feedbackTermToPack.scale(dt);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
-      feedbackTermToPack.limitLength(maximumIntegralError);
+      feedbackTermToPack.clipToMaxLength(maximumIntegralError);
       yoErrorRotationVectorIntegrated.set(feedbackTermToPack);
 
       if (angularGainsFrame != null)

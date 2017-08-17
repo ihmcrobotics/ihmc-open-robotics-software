@@ -11,12 +11,13 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameOrientationTest
 {
@@ -78,8 +79,8 @@ public class FrameOrientationTest
 
 	   for (int i=0; i<numberOfTests; i++)
 	   {
-	      ReferenceFrame frameOne = ReferenceFrame.generateRandomReferenceFrame("frameOne", random, worldFrame);
-	      ReferenceFrame frameTwo = ReferenceFrame.generateRandomReferenceFrame("frameTwo", random, worldFrame);
+	      ReferenceFrame frameOne = EuclidFrameRandomTools.generateRandomReferenceFrame("frameOne", random, worldFrame);
+	      ReferenceFrame frameTwo = EuclidFrameRandomTools.generateRandomReferenceFrame("frameTwo", random, worldFrame);
 
 	      RigidBodyTransform transformFromOneToTwoOriginal = frameOne.getTransformToDesiredFrame(frameTwo);
 	      transformFromOneToTwoOriginal.setTranslation(new Vector3D());
@@ -269,8 +270,8 @@ public class FrameOrientationTest
       {
          RigidBodyTransform originalTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
          originalTransform.setTranslation(0.0, 0.0, 0.0);
-         ReferenceFrame randomFrame_A = ReferenceFrame.generateRandomReferenceFrame("randomFrameA" + i, random, worldFrame);
-         ReferenceFrame randomFrame_B = ReferenceFrame.generateRandomReferenceFrame("randomFrameB" + i, random, worldFrame);
+         ReferenceFrame randomFrame_A = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrameA" + i, random, worldFrame);
+         ReferenceFrame randomFrame_B = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrameB" + i, random, worldFrame);
          RigidBodyTransform randomTransformToWorld = randomFrame_B.getTransformToDesiredFrame(worldFrame);
          randomTransformToWorld.setTranslation(0.0, 0.0, 0.0);
          Quaternion randomQuaternionForTransformToWorld = new Quaternion();
@@ -318,8 +319,8 @@ public class FrameOrientationTest
       {
          RigidBodyTransform originalTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
          originalTransform.setTranslation(0.0, 0.0, 0.0);
-         ReferenceFrame randomFrame_A = ReferenceFrame.generateRandomReferenceFrame("randomFrameA" + i, random, worldFrame);
-         ReferenceFrame randomFrame_B = ReferenceFrame.generateRandomReferenceFrame("randomFrameB" + i, random, worldFrame);
+         ReferenceFrame randomFrame_A = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrameA" + i, random, worldFrame);
+         ReferenceFrame randomFrame_B = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrameB" + i, random, worldFrame);
          RigidBodyTransform randomTransformToWorld = randomFrame_B.getTransformToDesiredFrame(worldFrame);
          randomTransformToWorld.setTranslation(0.0, 0.0, 0.0);
          Quaternion randomQuaternionForTransformToWorld = new Quaternion();

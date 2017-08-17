@@ -1,13 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.integrateCoMPositionUsingConstantCMP;
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCapturePointAcceleration;
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCapturePointPosition;
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCapturePointVelocity;
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCentroidalMomentumPivot;
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCentroidalMomentumPivotVelocity;
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCornerPointsDoubleSupport;
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCornerPointsSingleSupport;
+import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.*;
+import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +9,9 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -25,15 +22,10 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -101,8 +93,8 @@ import us.ihmc.yoVariables.variable.YoBoolean;
  * <li>To get the ICP position, use either {@link #getDesiredCapturePointPosition(FramePoint3D)},
  * {@link #getDesiredCapturePointPosition(FramePoint2D)}, or
  * {@link #getDesiredCapturePointPosition(YoFramePoint)}.
- * <li>To get the ICP velocity, use either {@link #getDesiredCapturePointVelocity(FrameVector3D)},
- * {@link #getDesiredCapturePointVelocity(FrameVector2D)}, or
+ * <li>To get the ICP velocity, use either {@link #getDesiredCapturePointVelocity(FrameVector)},
+ * {@link #getDesiredCapturePointVelocity(FrameVector2d)}, or
  * {@link #getDesiredCapturePointVelocity(YoFrameVector)}.
  * <li>To get the CoM position, use either {@link #getDesiredCenterOfMassPosition(FramePoint3D)},
  * {@link #getDesiredCenterOfMassPosition(FramePoint2D)}, or
@@ -111,8 +103,8 @@ import us.ihmc.yoVariables.variable.YoBoolean;
  * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint3D)}, or
  * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint2D)}.
  * <li>To get the CMP velocity, use either
- * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector3D)}, or
- * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector2D)}.
+ * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector)}, or
+ * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector2d)}.
  * </ul>
  * </ul>
  * </p>
