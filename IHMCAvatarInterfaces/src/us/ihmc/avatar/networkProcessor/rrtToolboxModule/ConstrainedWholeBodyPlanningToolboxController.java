@@ -198,6 +198,10 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
             if (true)
             {
                rootNode.convertDataToNormalizedData(taskRegion);
+               
+               PrintTools.info(""+bestScoreInitialGuess);
+               for(int i =0;i<rootNode.getDimensionOfNodeData();i++)
+                  PrintTools.info(""+i+" "+rootNode.getNodeData(i));
 
                tree = new CTTaskNodeTree(rootNode);
                tree.setTaskRegion(taskRegion);
@@ -237,7 +241,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          if (numberOfExpanding == 0)
          {
             state = CWBToolboxState.SHORTCUT_PATH;
-
          }
 
          break;
@@ -268,7 +271,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
           * terminate toolbox
           */
          isDone.set(true);
-         state = CWBToolboxState.SHORTCUT_PATH;
+         state = CWBToolboxState.GENERATE_MOTION;
 
          PrintTools.info("the size of the path is " + tree.getPath().size());
 
@@ -369,8 +372,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    private boolean isValidNode(CTTaskNode node)
    {
-      kinematicsSolver = new WheneverWholeBodyKinematicsSolver(drcRobotModelFactory);
-
       if (node.getParentNode() != null)
       {
          PrintTools.warn("this node has parent node.");

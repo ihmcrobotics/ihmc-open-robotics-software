@@ -28,7 +28,7 @@ public class CTTaskNodeTree
     */
    private double matricRatioTimeToTask = 0.4;
 
-   private double maximumDisplacementOfStep = 0.25;
+   private double maximumDisplacementOfStep = 0.15;
    private double maximumTimeGapOfStep = 0.02;
 
    private int dimensionOfTask;
