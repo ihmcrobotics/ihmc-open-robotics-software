@@ -78,7 +78,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
    {
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, true);
+      kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, false);
       cwbPlanningToolboxModule = new ConstrainedWholeBodyPlanningToolboxModule(robotModel, fullRobotModel, null, visulaizerOn);
       toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT,
                                                                                    PacketDestination.KINEMATICS_TOOLBOX_MODULE);
@@ -261,8 +261,8 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       ConstrainedWholeBodyPlanningRequestPacket packet = new ConstrainedWholeBodyPlanningRequestPacket();
 
       ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory = endeffectorTrajectory;
-      packet.setNumberOfExpanding(400);
-      packet.setNumberOfFindInitialGuess(50);
+      packet.setNumberOfExpanding(1);
+      packet.setNumberOfFindInitialGuess(500);
 
       packet.setInitialRobotConfigration(sdfFullRobotModel);
 
@@ -384,6 +384,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       
 //      Point3D desiredPoint = new Point3D(0.5, 0.35, 1.8);
       Point3D desiredPoint = new Point3D(0.5, 0.35, 1.5);
+//      Point3D desiredPoint = new Point3D(0.5, 0.35, 1.0);
       Quaternion desiredOrientation = new Quaternion();
       Pose3D desiredPose = new Pose3D(desiredPoint, desiredOrientation);
 

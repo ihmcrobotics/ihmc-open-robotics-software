@@ -241,6 +241,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          if (numberOfExpanding == 0)
          {
             state = CWBToolboxState.SHORTCUT_PATH;
+            
+            PrintTools.info("Total update solver "+kinematicsSolver.numberOfTest);
          }
 
          break;

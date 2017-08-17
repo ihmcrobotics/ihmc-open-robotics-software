@@ -352,6 +352,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          boolean isSolutionStable = deltaSolutionQuality > 0.0 && deltaSolutionQuality < 1.0e-5;
          boolean isSolutionGoodEnough = newestSolution.getSolutionQuality() < solutionQualityThreshold.getDoubleValue();
          boolean sendSolutionToController = isSolutionStable && isSolutionGoodEnough;
+         
+         PrintTools.info(""+yoCountDoControl.getIntegerValue()+" ");
          if (!isPaused())
          {
             if (isSolutionStable && !isSolutionGoodEnough)

@@ -141,7 +141,7 @@ public class WheneverWholeBodyKinematicsSolver
    private static int maximumCntForUpdateInternal = 120;
    private static int cntForUpdateInternal = 0;
    
-   private static int numberOfTest = 0;
+   public static int numberOfTest = 0;
 
    private boolean isSolved = false;
    private boolean isJointLimit = false;
@@ -393,6 +393,7 @@ public class WheneverWholeBodyKinematicsSolver
          if(isJointLimit)
          {
             PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal +" "+ solutionQuality.getDoubleValue());
+            numberOfTest= numberOfTest+cntForUpdateInternal;
             return false;
          }
          /*
@@ -404,9 +405,11 @@ public class WheneverWholeBodyKinematicsSolver
                printOutRobotModel(desiredFullRobotModel, referenceFrames.getMidFootZUpGroundFrame());
             PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal +" "+ solutionQuality.getDoubleValue());
 
+            numberOfTest= numberOfTest+cntForUpdateInternal;
             return isSolved;
          }
       }
+      numberOfTest= numberOfTest+cntForUpdateInternal;
       PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal +" "+ solutionQuality.getDoubleValue());
       return false;
    }
@@ -867,8 +870,8 @@ public class WheneverWholeBodyKinematicsSolver
       upperValue = upperValue / limitSize;
       lowerValue = lowerValue / limitSize;
 
-      double diffUpper = Math.abs((upperValue - aJointValue) * (upperValue - aJointValue));
-      double diffLower = Math.abs((aJointValue - lowerValue) * (aJointValue - lowerValue));
+      double diffUpper = Math.abs((upperValue - aJointValue) * (upperValue - aJointValue) * (upperValue - aJointValue));
+      double diffLower = Math.abs((aJointValue - lowerValue) * (aJointValue - lowerValue) * (aJointValue - lowerValue));
 
       if (diffUpper > diffLower)
          jointLimitScore = diffLower;
