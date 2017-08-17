@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
@@ -28,6 +29,7 @@ public class TransferToStandingState extends WalkingState
    private final BalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
+   private final LegConfigurationManager legConfigurationManager;
 
    public TransferToStandingState(WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
@@ -43,6 +45,7 @@ public class TransferToStandingState extends WalkingState
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
+      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       doFootExplorationInTransferToStanding.set(false);
    }
