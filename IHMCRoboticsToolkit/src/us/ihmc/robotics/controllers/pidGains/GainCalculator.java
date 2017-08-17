@@ -1,4 +1,4 @@
-package us.ihmc.robotics.controllers;
+package us.ihmc.robotics.controllers.pidGains;
 
 public class GainCalculator
 {
