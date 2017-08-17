@@ -38,7 +38,7 @@ Eval.me(extraSourceSets).each {
 
 // SEARCH FOR BUILDS ON DISK TO INCLUDE
 
-if (startParameter.searchUpwards)
+if (Boolean.valueOf(automaticallyIncludeBuilds) == true && startParameter.searchUpwards)
 {
    def assembler = new IHMCCompositeBuildAssembler(rootProject, logger, Integer.valueOf(workspaceDirectoryLevel))
    assembler.findCompositeBuilds().forEach {
@@ -55,9 +55,9 @@ class IHMCCompositeBuildAssembler
 
    private Path rootProjectPath
    private Path workspacePath
-   private Map<String, String> projectNameReplacements
    private Map<String, Path> buildFolderNameToPathMap
-   private Set<String> transitiveBuildFolderKeys
+   private Map<String, BuildProperties> buildFolderNameToPropertiesMap
+   private Set<String> transitiveBuildFolderNames
 
    public IHMCCompositeBuildAssembler(ProjectDescriptor rootProject, Logger logger, int workspaceDirectoryLevel)
    {
@@ -71,9 +71,9 @@ class IHMCCompositeBuildAssembler
          workspacePath = workspacePath.resolve("..")
       }
       workspacePath = workspacePath.toRealPath()
-      projectNameReplacements = projectNameReplacements()
       buildFolderNameToPathMap = new HashMap<String, Path>()
-      transitiveBuildFolderKeys = new TreeSet<String>()
+      buildFolderNameToPropertiesMap = new HashMap<String, BuildProperties>()
+      transitiveBuildFolderNames = new TreeSet<String>()
    }
 
    public List<String> findCompositeBuilds()
@@ -86,9 +86,9 @@ class IHMCCompositeBuildAssembler
 
       List<String> buildsToInclude = new ArrayList<>()
       findTransitivesRecursive(rootProjectPath)
-      for (String transitiveKey : transitiveBuildFolderKeys)
+      for (String transitiveKey : transitiveBuildFolderNames)
       {
-         if (!loadPropertiesAndDetermineIfItsExcluded(buildFolderNameToPathMap.get(transitiveKey)))
+         if (!buildFolderNameToPropertiesMap.get(transitiveKey).exclude)
          {
             String relativizedPathName = rootProjectPath.relativize(buildFolderNameToPathMap.get(transitiveKey)).toString()
             if (!relativizedPathName.isEmpty()) // Including itself
@@ -106,22 +106,6 @@ class IHMCCompositeBuildAssembler
       return buildsToInclude
    }
 
-   private boolean loadPropertiesAndDetermineIfItsExcluded(Path projectPath)
-   {
-      Properties properties = new Properties()
-      properties.load(new FileInputStream(projectPath.resolve("gradle.properties").toFile()))
-      for (String propertyKey : properties.keySet())
-      {
-         if (propertyKey == "excludeFromCompositeBuild" && properties.get(propertyKey) == "true")
-         {
-            logger.quiet("[ihmc-build] Excluding " + projectPath.fileName.toString() + ". Propertry excludeFromCompositeBuild = " + properties.get(propertyKey))
-            return true
-         }
-      }
-
-      return false
-   }
-
    private void findTransitivesRecursive(Path projectDir)
    {
       SortedSet<String> dependencies = parseDependenciesFromGradleFile(projectDir.resolve("build.gradle"))
@@ -129,7 +113,7 @@ class IHMCCompositeBuildAssembler
       dependencies.each {
          List<String> newMatchingKeys = findMatchingBuildKey(it)
 
-         transitiveBuildFolderKeys.addAll(newMatchingKeys)
+         transitiveBuildFolderNames.addAll(newMatchingKeys)
          for (String newMatchingKey : newMatchingKeys)
          {
             logger.info("[ihmc-build] Adding module: " + newMatchingKey)
@@ -138,15 +122,15 @@ class IHMCCompositeBuildAssembler
       }
    }
 
-   private List<String> findMatchingBuildKey(String hyphenatedName)
+   private List<String> findMatchingBuildKey(String dependencyNameAsDeclared)
    {
       List<String> matched = new ArrayList<>();
-      for (String folderName : buildFolderNameToPathMap.keySet())
+      for (String buildFolderNameToCheck : buildFolderNameToPathMap.keySet())
       {
-         if (!transitiveBuildFolderKeys.contains(folderName) && matchNames(folderName, hyphenatedName))
+         if (!transitiveBuildFolderNames.contains(buildFolderNameToCheck) && matchNames(buildFolderNameToCheck, dependencyNameAsDeclared))
          {
-            logger.info("Matched: " + hyphenatedName + " to " + folderName + "  " + hyphenatedToPascalCased(hyphenatedName))
-            matched.add(folderName)
+            logger.info("Matched: " + dependencyNameAsDeclared + " to " + buildFolderNameToCheck + "  " + toPascalCased(dependencyNameAsDeclared))
+            matched.add(buildFolderNameToCheck)
          }
       }
 
@@ -159,24 +143,75 @@ class IHMCCompositeBuildAssembler
          if (Files.isDirectory(it) && Files.exists(it.resolve("build.gradle")))
          {
             buildFolderNameToPathMap.put(it.fileName.toString(), it)
+            buildFolderNameToPropertiesMap.put(it.fileName.toString(), loadProperties(it))
+
             mapDirectory(it)
          }
       }
    }
 
-   private boolean matchNames(String directoryName, String buildName)
+   private BuildProperties loadProperties(Path projectPath)
    {
-      if (directoryName == buildName) return true
-      if (directoryName == hyphenatedToPascalCased(buildName)) return true
-
-      if (buildName.contains("-"))
+      Properties properties = new Properties()
+      properties.load(new FileInputStream(projectPath.resolve("gradle.properties").toFile()))
+      BuildProperties buildProperties = new BuildProperties()
+      for (String propertyKey : properties.keySet())
       {
-         String possibleMainProject = buildName.substring(0, buildName.lastIndexOf("-"))
-         if (possibleMainProject != buildName)
+         if (propertyKey == "excludeFromCompositeBuild")
          {
-            if (directoryName == possibleMainProject) return true
-            if (directoryName == hyphenatedToPascalCased(possibleMainProject)) return true
+            buildProperties.exclude = Boolean.valueOf(properties.get(propertyKey))
+            if (buildProperties.exclude)
+            {
+               logger.quiet("[ihmc-build] Excluding " + projectPath.fileName.toString() + ". Property excludeFromCompositeBuild = " + properties.get(propertyKey))
+            }
          }
+         if (propertyKey == "pascalCasedName")
+         {
+            buildProperties.pascalCasedName = properties.get(propertyKey)
+         }
+         if (propertyKey == "hyphenatedName")
+         {
+            buildProperties.hyphenatedName = properties.get(propertyKey)
+         }
+         if (propertyKey == "extraSourceSets")
+         {
+            buildProperties.extraSourceSets.addAll(Eval.me(properties.get(propertyKey)))
+         }
+      }
+
+      if (buildProperties.pascalCasedName == null)
+      {
+         buildProperties.pascalCasedName = toPascalCased(projectPath.fileName.toString())
+      }
+      if (buildProperties.hyphenatedName == null)
+      {
+         buildProperties.hyphenatedName = toHyphenated(projectPath.fileName.toString())
+      }
+
+      return buildProperties
+   }
+
+   private class BuildProperties
+   {
+      String hyphenatedName = null
+      String pascalCasedName = null
+      boolean exclude = false
+      List<String> extraSourceSets = new ArrayList<String>()
+   }
+
+   private boolean matchNames(String buildFolderNameToCheck, String dependencyNameAsDeclared)
+   {
+      if (dependencyNameAsDeclared == buildFolderNameToCheck) return true
+
+      BuildProperties buildToCheckProperties = buildFolderNameToPropertiesMap.get(buildFolderNameToCheck)
+
+      if (dependencyNameAsDeclared == buildToCheckProperties.pascalCasedName) return true
+      if (dependencyNameAsDeclared == buildToCheckProperties.hyphenatedName) return true
+
+      for (String extraSourceSet : buildToCheckProperties.extraSourceSets)
+      {
+         if (dependencyNameAsDeclared == buildToCheckProperties.pascalCasedName + extraSourceSet.capitalize()) return true
+         if (dependencyNameAsDeclared == buildToCheckProperties.hyphenatedName + "-" + extraSourceSet) return true
       }
 
       return false
@@ -274,21 +309,60 @@ class IHMCCompositeBuildAssembler
       }
    }
 
-   private String hyphenatedToPascalCased(String hyphenated)
+   private String toPascalCased(String hyphenated)
    {
       String[] split = hyphenated.split("-")
       String pascalCased = ""
       for (String section : split)
       {
-         if (projectNameReplacements.containsKey(section))
-         {
-            pascalCased += projectNameReplacements.get(section)
-         } else
-         {
-            pascalCased += capitalize(section)
-         }
+         pascalCased += capitalize(section)
       }
       return pascalCased
+   }
+
+   private String toHyphenated(String pascalCased)
+   {
+      String hyphenated = pascalCasedToPrehyphenated(pascalCased);
+
+      hyphenated = hyphenated.substring(1, hyphenated.length() - 1);
+
+      return hyphenated;
+   }
+
+   private String pascalCasedToPrehyphenated(String pascalCased)
+   {
+      List<String> parts = new ArrayList<>();
+      String part = "";
+
+      for (int i = 0; i < pascalCased.length(); i++)
+      {
+         String character = String.valueOf(pascalCased.charAt(i));
+         if (isAllUpperCase(character) || isNumeric(character))
+         {
+            if (!part.isEmpty())
+            {
+               parts.add(part.toLowerCase());
+            }
+            part = character;
+         } else
+         {
+            part += character;
+         }
+      }
+      if (!part.isEmpty())
+      {
+         parts.add(part.toLowerCase());
+      }
+
+      String hyphenated = "";
+      for (int i = 0; i < parts.size(); i++)
+      {
+         hyphenated += '-';
+         hyphenated += parts.get(i);
+      }
+      hyphenated += '-';
+
+      return hyphenated;
    }
 
    private String capitalize(final String str)
@@ -308,33 +382,42 @@ class IHMCCompositeBuildAssembler
       return new StringBuilder(strLen).append(Character.toTitleCase(firstChar)).append(str.substring(1)).toString()
    }
 
-   private Map<String, String> projectNameReplacements()
+   private boolean isAllUpperCase(final CharSequence cs)
    {
-      def projectNameReplacements = [:]
-      projectNameReplacements["ihmc"] = "IHMC"
-      projectNameReplacements["vt"] = "VT"
-      projectNameReplacements["javafx"] = "JavaFX"
-      projectNameReplacements["jmonkey"] = "JMonkey"
-      projectNameReplacements["ros"] = "ROS"
-      projectNameReplacements["ros1"] = "ROS1"
-      projectNameReplacements["ros2"] = "ROS2"
-      projectNameReplacements["lla"] = "LLA"
-      projectNameReplacements["devops"] = "DevOps"
-      projectNameReplacements["ejml"] = "EJML"
-      projectNameReplacements["icub"] = "ICub"
-      projectNameReplacements["dds"] = "DDS"
-      projectNameReplacements["rtps"] = "RTPS"
-      projectNameReplacements["sri"] = "SRI"
-      projectNameReplacements["ethercat"] = "EtherCAT"
-      projectNameReplacements["imu"] = "IMU"
-      projectNameReplacements["icp"] = "ICP"
-      projectNameReplacements["it"] = "IT"
-      projectNameReplacements["ipxe"] = "IPXE"
-      projectNameReplacements["aot"] = "AOT"
-      projectNameReplacements["joctomap"] = "JOctoMap"
-      projectNameReplacements["mav"] = "MAV"
-      projectNameReplacements["megabots"] = "MegaBots"
-      projectNameReplacements["megabot"] = "MegaBot"
-      return projectNameReplacements
+      if (cs == null || isEmpty(cs))
+      {
+         return false;
+      }
+      final int sz = cs.length();
+      for (int i = 0; i < sz; i++)
+      {
+         if (Character.isUpperCase(cs.charAt(i)) == false)
+         {
+            return false;
+         }
+      }
+      return true;
+   }
+
+   private boolean isNumeric(final CharSequence cs)
+   {
+      if (isEmpty(cs))
+      {
+         return false;
+      }
+      final int sz = cs.length();
+      for (int i = 0; i < sz; i++)
+      {
+         if (Character.isDigit(cs.charAt(i)) == false)
+         {
+            return false;
+         }
+      }
+      return true;
+   }
+
+   private boolean isEmpty(final CharSequence cs)
+   {
+      return cs == null || cs.length() == 0;
    }
 }
