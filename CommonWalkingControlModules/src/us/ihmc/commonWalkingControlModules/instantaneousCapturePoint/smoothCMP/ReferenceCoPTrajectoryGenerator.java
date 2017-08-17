@@ -1227,4 +1227,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    {
       return (activeTrajectory.getTrajectoryType() == WalkingTrajectoryType.SWING && activeTrajectory.getCurrentSegmentIndex() == activeTrajectory.getNumberOfSegments() - 1);
    }
+
+   public double getCurrentStateFinalTime()
+   {
+      return activeTrajectory.getNodeTimes()[activeTrajectory.getNumberOfSegments()];
+   }
 }
