@@ -138,7 +138,7 @@ public class WheneverWholeBodyKinematicsSolver
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
 
-   private static int maximumCntForUpdateInternal = 500;
+   private static int maximumCntForUpdateInternal = 200;
    private static int cntForUpdateInternal = 0;
    
    private static int maximumCntForJointLimit = 30;
@@ -295,7 +295,7 @@ public class WheneverWholeBodyKinematicsSolver
       // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
       snapPrivilegedConfigurationToCurrent();
       
-      updateInternal();
+//      updateInternal();
       //      if (DEBUG)
       //         PrintTools.info("Initial posture ");
       //      HumanoidReferenceFrames desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
@@ -358,12 +358,35 @@ public class WheneverWholeBodyKinematicsSolver
 
       }
       
+      double movementThreshold = 3.0e-5;
+      double errorThreshold = 1.0e-3;
+      
       double rightHandMovement = handMovements.get(RobotSide.RIGHT).getDeltaPose(desiredFullRobotModel.getHand(RobotSide.RIGHT));
+      double rightHandError = handMovements.get(RobotSide.RIGHT).getError();
+      
       double leftHandMovement = handMovements.get(RobotSide.LEFT).getDeltaPose(desiredFullRobotModel.getHand(RobotSide.LEFT));
-      double highMovement = (rightHandMovement <= leftHandMovement) ? rightHandMovement : leftHandMovement;
+      double leftHandError = handMovements.get(RobotSide.LEFT).getError();
       
+      if(rightHandMovement < movementThreshold)
+      {
+         PrintTools.info("Right Hand movement is stable");
+         if(rightHandError > errorThreshold)
+            PrintTools.info("Right Hand cannot converged");
+      }
+         
+      if(leftHandMovement < movementThreshold)
+      {
+         PrintTools.info("Left Hand movement is stable");
+         if(leftHandError > errorThreshold)
+         {
+            isJointLimit = true;
+            PrintTools.info("Left Hand cannot converged");
+         }
+            
+      }
       
-      PrintTools.info(""+cntForUpdateInternal+" "+rightHandMovement +" "+leftHandMovement);
+//      PrintTools.info(""+cntForUpdateInternal+" "+ RobotSide.RIGHT+" "+rightHandError +" "+rightHandMovement);
+//      PrintTools.info(""+cntForUpdateInternal+" "+ RobotSide.LEFT+" "+leftHandError +" "+leftHandMovement);
             
       
       
@@ -643,6 +666,8 @@ public class WheneverWholeBodyKinematicsSolver
          desiredHandFramePose.changeFrame(worldFrame);
 
          handFramePoses.get(robotSide).set(desiredHandFramePose);
+         
+         handMovements.get(robotSide).setDesiredPose(new Pose3D(desiredHandFramePose.getPosition(), desiredHandFramePose.getOrientation()));
       }
 
       ReferenceFrame desiredPelvisReferenceFrame = currentFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
@@ -708,6 +733,8 @@ public class WheneverWholeBodyKinematicsSolver
       desiredPoseToWorld.changeFrame(worldFrame);
 
       handFramePoses.get(robotSide).set(desiredPoseToWorld);
+      
+      handMovements.get(robotSide).setDesiredPose(new Pose3D(handFramePoses.get(robotSide).getPosition(), handFramePoses.get(robotSide).getOrientation()));
    }
 
    public void setDesiredPelvisHeight(double desiredHeightToMidZUp)

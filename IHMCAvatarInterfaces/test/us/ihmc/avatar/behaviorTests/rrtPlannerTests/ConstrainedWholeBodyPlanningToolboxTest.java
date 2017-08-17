@@ -382,6 +382,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       kinematicsSolver.initialize();
       kinematicsSolver.holdCurrentTrajectoryMessages();
       
+//      Point3D desiredPoint = new Point3D(0.5, 0.35, 1.8);
       Point3D desiredPoint = new Point3D(0.5, 0.35, 1.5);
       Quaternion desiredOrientation = new Quaternion();
       Pose3D desiredPose = new Pose3D(desiredPoint, desiredOrientation);
@@ -389,7 +390,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       kinematicsSolver.setDesiredHandPose(RobotSide.LEFT, desiredPose);
 
       kinematicsSolver.putTrajectoryMessages();
-      kinematicsSolver.isSolved();
+      PrintTools.info(""+kinematicsSolver.isSolved());
 
       showUpFullRobotModelWithConfiguration(sdfFullRobotModel);
       
