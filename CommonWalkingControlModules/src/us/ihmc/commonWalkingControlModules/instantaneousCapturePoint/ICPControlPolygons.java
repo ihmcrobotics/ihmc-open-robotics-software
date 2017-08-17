@@ -68,6 +68,8 @@ public class ICPControlPolygons
          artifactList.add(footPolygonArtifact);
       }
 
+      artifactList.setVisible(VISUALIZE);
+
       if (yoGraphicsListRegistry != null)
       {
          yoGraphicsListRegistry.registerArtifactList(artifactList);
@@ -121,8 +123,7 @@ public class ICPControlPolygons
 
       updateSupportPolygon(inDoubleSupport, neitherFootIsSupportingFoot, supportSide);
 
-      if (VISUALIZE)
-         visualize();
+      updateVisualize();
    }
 
    private void updateSupportPolygon(boolean inDoubleSupport, boolean neitherFootIsSupportingFoot, RobotSide supportSide)
@@ -146,7 +147,7 @@ public class ICPControlPolygons
       controlPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
    }
 
-   private void visualize()
+   private void updateVisualize()
    {
       controlPolygonViz.setFrameConvexPolygon2d(controlPolygonInWorld);
 
