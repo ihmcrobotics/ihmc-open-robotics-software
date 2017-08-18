@@ -143,10 +143,10 @@ public class PlanarRegionPotentialNextStepCalculatorTest
             node = null;
       }
 
-      Point3D solePosition = endNode.getSolePosition();
+      Point3D solePosition = BipedalFootstepPlannerNodeUtils.getSolePosition(endNode);
       EuclidCoreTestTools.assertTuple3DEquals(goalPosition, solePosition, 0.25);
 
-      double soleYaw = endNode.getSoleYaw();
+      double soleYaw = BipedalFootstepPlannerNodeUtils.getSoleYaw(endNode);
       double goalYaw = goalOrientation.getYaw();
       double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(soleYaw, goalYaw);
 
