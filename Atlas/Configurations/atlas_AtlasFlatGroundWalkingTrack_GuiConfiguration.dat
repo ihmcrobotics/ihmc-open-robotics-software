@@ -121,9 +121,9 @@ null,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>2.0651345697747114</Camera X>
- <Camera Y>-7.957913707075943</Camera Y>
- <Camera Z>3.9448703065296282</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

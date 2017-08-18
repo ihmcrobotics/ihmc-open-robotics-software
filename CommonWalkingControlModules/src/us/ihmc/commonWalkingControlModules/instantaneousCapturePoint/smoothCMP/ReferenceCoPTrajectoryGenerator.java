@@ -124,8 +124,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    private int footstepIndex = 0;
    private int plannedFootstepIndex = -1;
-   private int numberOfSwingSegments = 10;
-   private int numberOfTransferSegments = 10;
+   private int numberOfSwingSegments = 3;
+   private int numberOfTransferSegments = 2;
    private CoPTrajectory activeTrajectory;
    private double initialTime;
    private FramePoint3D tempDoubleSupportPolygonCentroid = new FramePoint3D();

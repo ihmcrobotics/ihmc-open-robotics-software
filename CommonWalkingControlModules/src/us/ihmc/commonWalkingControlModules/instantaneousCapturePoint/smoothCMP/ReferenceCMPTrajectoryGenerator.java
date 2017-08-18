@@ -33,7 +33,7 @@ public class ReferenceCMPTrajectoryGenerator
    private double initialTime;
    private int numberOfRegisteredSteps;
    private final int maxNumberOfCoefficients = 10;
-   private final int maxNumberOfSegments = 25;
+   private final int maxNumberOfSegments = 5;
    private CMPTrajectory activeTrajectory;
 
    private final FramePoint3D desiredCMP = new FramePoint3D();
