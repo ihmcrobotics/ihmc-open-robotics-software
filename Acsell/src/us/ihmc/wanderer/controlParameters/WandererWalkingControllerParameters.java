@@ -2,9 +2,7 @@ package us.ihmc.wanderer.controlParameters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -20,11 +18,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.PDGains;
 import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -166,44 +164,6 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       return gains;
    }
 
-   private YoPID3DGains createPelvisOrientationControlGains(YoVariableRegistry registry)
-   {
-      SymmetricYoPIDSE3Gains gains = new SymmetricYoPIDSE3Gains("PelvisOrientation", registry);
-
-      double kp = 100;//600.0;
-      double zeta = 0.4;//0.8;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
-      double maxAccel = Double.POSITIVE_INFINITY;
-      double maxJerk = Double.POSITIVE_INFINITY;
-
-      gains.setProportionalGains(kp);
-      gains.setDampingRatios(zeta);
-      gains.setIntegralGains(ki, maxIntegralError);
-      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
-
-      return gains;
-   }
-
-   private YoPID3DGains createChestControlGains(YoVariableRegistry registry)
-   {
-      SymmetricYoPIDSE3Gains gains = new SymmetricYoPIDSE3Gains("ChestOrientation", registry);
-
-      double kp = runningOnRealRobot ? 100.0 : 100.0;
-      double zeta = runningOnRealRobot ? 0.7 : 0.8;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 12.0 : 18.0;
-      double maxJerk = runningOnRealRobot ? 180.0 : 270.0;
-
-      gains.setProportionalGains(kp);
-      gains.setDampingRatios(zeta);
-      gains.setIntegralGains(ki, maxIntegralError);
-      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
-
-      return gains;
-   }
-
    /** {@inheritDoc} */
    @Override
    public List<ImmutablePair<PIDGains, List<String>>> getJointSpaceControlGains()
@@ -239,23 +199,49 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       return spineGains;
    }
 
-   private Map<String, YoPID3DGains> taskspaceAngularGains = null;
    /** {@inheritDoc} */
    @Override
-   public Map<String, YoPID3DGains> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
+   public List<ImmutablePair<String, PID3DGains>> getTaskspaceOrientationControlGains()
    {
-      if (taskspaceAngularGains != null)
-         return taskspaceAngularGains;
+      List<ImmutablePair<String, PID3DGains>> taskspaceAngularGains = new ArrayList<>();
 
-      taskspaceAngularGains = new HashMap<>();
+      PID3DGains chestAngularGains = createChestOrientationControlGains();
+      taskspaceAngularGains.add(new ImmutablePair<>(jointMap.getChestName(), chestAngularGains));
 
-      YoPID3DGains chestAngularGains = createChestControlGains(registry);
-      taskspaceAngularGains.put(jointMap.getChestName(), chestAngularGains);
-
-      YoPID3DGains pelvisAngularGains = createPelvisOrientationControlGains(registry);
-      taskspaceAngularGains.put(jointMap.getPelvisName(), pelvisAngularGains);
+      PID3DGains pelvisAngularGains = createPelvisOrientationControlGains();
+      taskspaceAngularGains.add(new ImmutablePair<>(jointMap.getPelvisName(), pelvisAngularGains));
 
       return taskspaceAngularGains;
+   }
+
+   private PID3DGains createPelvisOrientationControlGains()
+   {
+      double kp = 100;//600.0;
+      double zeta = 0.4;//0.8;
+      double maxAccel = Double.POSITIVE_INFINITY;
+      double maxJerk = Double.POSITIVE_INFINITY;
+
+      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XYZ, false);
+      gains.setProportionalGains(kp);
+      gains.setDampingRatios(zeta);
+      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
+
+      return gains;
+   }
+
+   private PID3DGains createChestOrientationControlGains()
+   {
+      double kp = runningOnRealRobot ? 100.0 : 100.0;
+      double zeta = runningOnRealRobot ? 0.7 : 0.8;
+      double maxAccel = runningOnRealRobot ? 12.0 : 18.0;
+      double maxJerk = runningOnRealRobot ? 180.0 : 270.0;
+
+      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XYZ, false);
+      gains.setProportionalGains(kp);
+      gains.setDampingRatios(zeta);
+      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
+
+      return gains;
    }
 
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;

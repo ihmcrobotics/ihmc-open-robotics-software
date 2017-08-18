@@ -58,6 +58,7 @@ public class HighLevelControlManagerFactory
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
    private final Map<String, YoPIDGains> jointGainMap = new HashMap<>();
+   private final Map<String, YoPID3DGains> taskspaceOrientationGainMap = new HashMap<>();
 
    public HighLevelControlManagerFactory(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
@@ -77,6 +78,7 @@ public class HighLevelControlManagerFactory
       angularMomentumModifierParameters = walkingControllerParameters.getICPAngularMomentumModifierParameters();
 
       ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, registry);
+      ParameterTools.extractGainMap("Orientation", walkingControllerParameters.getTaskspaceOrientationControlGains(), taskspaceOrientationGainMap, registry);
    }
 
    public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
@@ -142,8 +144,8 @@ public class HighLevelControlManagerFactory
          return null;
 
       // Gains
-      YoPID3DGains taskspaceOrientationGains = walkingControllerParameters.getOrCreateTaskspaceOrientationControlGains(registry).get(bodyName);
-      YoPID3DGains taskspacePositionGains = walkingControllerParameters.getOrCreateTaskspacePositionControlGains(registry).get(bodyName);
+      YoPID3DGains taskspaceOrientationGains = taskspaceOrientationGainMap.get(bodyName);
+      YoPID3DGains taskspacePositionGains = taskspaceOrientationGainMap.get(bodyName);
 
       // Weights
       TObjectDoubleHashMap<String> jointspaceWeights = momentumOptimizationSettings.getJointspaceWeights();
@@ -222,7 +224,7 @@ public class HighLevelControlManagerFactory
          return null;
 
       String pelvisName = controllerToolbox.getFullRobotModel().getPelvis().getName();
-      YoPID3DGains pelvisGains = walkingControllerParameters.getOrCreateTaskspaceOrientationControlGains(registry).get(pelvisName);
+      YoPID3DGains pelvisGains = taskspaceOrientationGainMap.get(pelvisName);
       PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
       LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
       Vector3D pelvisAngularWeight = momentumOptimizationSettings.getPelvisAngularWeight();
