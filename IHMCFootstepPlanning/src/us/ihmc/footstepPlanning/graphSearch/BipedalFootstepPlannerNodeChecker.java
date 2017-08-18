@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -256,7 +255,6 @@ public class BipedalFootstepPlannerNodeChecker
       if (listener != null)
       {
          listener.nodeUnderConsiderationWasSuccessful(node);
-         System.out.println("accepted node");
       }
    }
 
@@ -270,8 +268,6 @@ public class BipedalFootstepPlannerNodeChecker
 
    private void notifyListenerNodeUnderConsiderationWasRejected(BipedalFootstepPlannerNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
    {
-      PrintTools.info("rejected node. reason: " + reason);
-
       if (listener != null)
       {
          listener.nodeUnderConsiderationWasRejected(nodeToExpand, reason);

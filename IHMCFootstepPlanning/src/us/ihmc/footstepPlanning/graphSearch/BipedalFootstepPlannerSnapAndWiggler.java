@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -18,9 +17,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by stephen on 8/18/17.
- */
 public class BipedalFootstepPlannerSnapAndWiggler
 {
    private PlanarRegionsList planarRegionsList;
@@ -218,8 +214,6 @@ public class BipedalFootstepPlannerSnapAndWiggler
 
    private void notifyListenerNodeUnderConsiderationWasRejected(BipedalFootstepPlannerNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
    {
-      PrintTools.info("rejected node. reason: " + reason);
-
       if (listener != null)
       {
          listener.nodeUnderConsiderationWasRejected(nodeToExpand, reason);

@@ -89,7 +89,7 @@ public class BipedalFootstepPlannerNodeTest
 
          assertEquals(1.0, xAxisAInWorld.dot(xAxisBInWorld), 1e-7);
 
-         assertTrue(nodeA.epsilonEquals(nodeB, 1e-7));
+         assertTrue(nodeA.equals(nodeB));
          assertTrue(nodeA.hashCode() == nodeB.hashCode());
       }
 
