@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.configurations;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
@@ -10,6 +11,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccele
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.YoJointAccelerationIntegrationParameters;
 import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ParameterTools
@@ -47,6 +51,19 @@ public class ParameterTools
          {
             parameterMapToPack.put(jointName, yoParameters);
          }
+      }
+   }
+
+   public static void extractGainMap(String suffix, List<ImmutablePair<String, PID3DGains>> gains, Map<String, YoPID3DGains> yoGainsToPack, YoVariableRegistry registry)
+   {
+      yoGainsToPack.clear();
+      for (ImmutablePair<String, PID3DGains> bodyGain : gains)
+      {
+         String bodyName = bodyGain.getLeft();
+         PID3DGains gain = bodyGain.getRight();
+         String gainName = WordUtils.capitalizeFully(bodyGain.getLeft()) + suffix;
+         YoPID3DGains yoGains = new DefaultYoPID3DGains(gainName, gain, registry);
+         yoGainsToPack.put(bodyName, yoGains);
       }
    }
 }

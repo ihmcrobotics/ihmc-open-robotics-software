@@ -38,10 +38,14 @@ public class PelvisOrientationManager
 
    private final FrameOrientation tempOrientation = new FrameOrientation();
 
+   private final YoPID3DGains gains;
+
    public PelvisOrientationManager(YoPID3DGains gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
                                    LeapOfFaithParameters leapOfFaithParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
                                    YoVariableRegistry parentRegistry)
    {
+      this.gains = gains;
+
       parentRegistry.addChild(registry);
       YoDouble yoTime = controllerToolbox.getYoTime();
       String namePrefix = getClass().getSimpleName();
@@ -258,5 +262,10 @@ public class PelvisOrientationManager
             ret.addCommand(state.getFeedbackControlCommand());
       }
       return ret;
+   }
+
+   public YoPID3DGains getGains()
+   {
+      return gains;
    }
 }
