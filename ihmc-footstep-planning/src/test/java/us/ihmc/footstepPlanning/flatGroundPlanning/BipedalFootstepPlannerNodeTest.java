@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNode;
+import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeUtils;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -66,7 +67,7 @@ public class BipedalFootstepPlannerNodeTest
          nodeA = new BipedalFootstepPlannerNode(robotSide, transform);
          nodeB = new BipedalFootstepPlannerNode(nodeA);
 
-         nodeB.removePitchAndRoll();
+         BipedalFootstepPlannerNodeUtils.removePitchAndRoll(nodeB);
 
          RigidBodyTransform transformA = new RigidBodyTransform();
          RigidBodyTransform transformB = new RigidBodyTransform();
@@ -102,9 +103,9 @@ public class BipedalFootstepPlannerNodeTest
       BipedalFootstepPlannerNode node = new BipedalFootstepPlannerNode(RobotSide.LEFT, soleTransform);
       
       Vector2D shiftVector = new Vector2D(1.0, 2.0);
-      node.shiftInSoleFrame(shiftVector);
+      BipedalFootstepPlannerNodeUtils.shiftInSoleFrame(shiftVector, node);
 
-      Point3D solePosition = node.getSolePosition();
+      Point3D solePosition = BipedalFootstepPlannerNodeUtils.getSolePosition(node);
       EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.0, 2.0, 0.0), solePosition, 1e-7);
       
       soleTransform = new RigidBodyTransform();
@@ -112,9 +113,9 @@ public class BipedalFootstepPlannerNodeTest
       node = new BipedalFootstepPlannerNode(RobotSide.LEFT, soleTransform);
       
       shiftVector = new Vector2D(1.0, 2.0);
-      node.shiftInSoleFrame(shiftVector);
+      BipedalFootstepPlannerNodeUtils.shiftInSoleFrame(shiftVector, node);
 
-      solePosition = node.getSolePosition();
+      solePosition = BipedalFootstepPlannerNodeUtils.getSolePosition(node);
       EuclidCoreTestTools.assertTuple3DEquals(new Point3D(-2.0, 1.0, 0.0), solePosition, 1e-7);
    }
 }

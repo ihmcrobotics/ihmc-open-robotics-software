@@ -13,6 +13,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class BipedalFootstepPlannerNode
 {
@@ -55,30 +56,6 @@ public class BipedalFootstepPlannerNode
       this.singleStepCost = singleStepCost;
    }
 
-   public RigidBodyTransform getTransformToParentCopy()
-   {
-      if (parentNode == null)
-         return null;
-
-      RigidBodyTransform transformToParent = new RigidBodyTransform();
-
-      getTransformToParent(transformToParent);
-      return transformToParent;
-   }
-   
-   public void getTransformToParent(RigidBodyTransform transformToParentToPack)
-   {
-      if (parentNode == null)
-      {
-         transformToParentToPack.setIdentity();
-      }
-      
-      parentNode.getSoleTransform(transformToParentToPack);
-      transformToParentToPack.invert();
-
-      transformToParentToPack.multiply(soleTransform);
-   }
-
    public RobotSide getRobotSide()
    {
       return footstepSide;
@@ -99,32 +76,9 @@ public class BipedalFootstepPlannerNode
       soleTransformToPack.set(soleTransform);
    }
 
-   public Point3D getSolePosition()
+   public void setSoleTransform(RigidBodyTransform soleTransform)
    {
-      Point3D currentSolePosition = new Point3D();
-      soleTransform.transform(currentSolePosition);
-      return currentSolePosition;
-   }
-
-   public double getSoleYaw()
-   {
-      Vector3D eulerAngles = new Vector3D();
-      soleTransform.getRotationEuler(eulerAngles);
-      return eulerAngles.getZ();
-   }
-
-   public void transformSoleTransformWithSnapTransformFromZeroZ(RigidBodyTransform snapTransform, PlanarRegion planarRegion)
-   {
-      // Ignore the z since the snap transform snapped from z = 0. Keep everything else.
-      soleTransform.setTranslationZ(0.0);
-      soleTransform.preMultiply(snapTransform);
-   }
-
-   public void shiftInSoleFrame(Vector2D shiftVector)
-   {
-      RigidBodyTransform shiftTransform = new RigidBodyTransform();
-      shiftTransform.setTranslation(new Vector3D(shiftVector.getX(), shiftVector.getY(), 0.0));
-      soleTransform.multiply(shiftTransform);
+      this.soleTransform.set(soleTransform);
    }
 
    public BipedalFootstepPlannerNode getParentNode()
@@ -160,13 +114,6 @@ public class BipedalFootstepPlannerNode
    public void getChildren(ArrayList<BipedalFootstepPlannerNode> childrenNodesToPack)
    {
       childrenNodesToPack.addAll(childrenNodes);
-   }
-
-   public double getCostToHereFromStart()
-   {
-      if (parentNode == null)
-         return getSingleStepCost();
-      return getSingleStepCost() + parentNode.getCostToHereFromStart();
    }
 
    public double getEstimatedCostToGoal()
@@ -207,7 +154,6 @@ public class BipedalFootstepPlannerNode
       this.percentageOfFoothold = percentageOfFoothold;
    }
 
-
    public ConvexPolygon2D getPartialFootholdPolygon()
    {
       return partialFootholdPolygon;
@@ -216,10 +162,5 @@ public class BipedalFootstepPlannerNode
    public void setPartialFootholdPolygon(ConvexPolygon2D partialFootholdPolygon)
    {
       this.partialFootholdPolygon = partialFootholdPolygon;
-   }
-
-   public void removePitchAndRoll()
-   {
-      RotationTools.removePitchAndRollFromTransform(soleTransform);
    }
 }

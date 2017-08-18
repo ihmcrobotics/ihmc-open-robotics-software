@@ -239,7 +239,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
             continue;
 
          // if going to the node is more expensive then going to the goal there is no point in expanding it.
-         double costToNode = nodeToExpand.getCostToHereFromStart();
+         double costToNode = BipedalFootstepPlannerNodeUtils.getCostFromStartToNode(nodeToExpand);
          if (costToNode > smallestCostToGoal.getDoubleValue())
             continue;
 
@@ -247,7 +247,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          BipedalFootstepPlannerNode equivalentNode = checkIfNearbyNodeAlreadyExistsAndStoreIfNot(nodeToExpand);
          if (equivalentNode != null)
          {
-            double costToGoToEquivalentNode = equivalentNode.getCostToHereFromStart();
+            double costToGoToEquivalentNode = BipedalFootstepPlannerNodeUtils.getCostFromStartToNode(equivalentNode);
 
             if (MathTools.epsilonEquals(costToNode, costToGoToEquivalentNode, 1.0e-5))
                nodeToExpand = equivalentNode;
@@ -310,7 +310,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 
    private void setNodesCostsAndRememberIfClosestYet(BipedalFootstepPlannerNode nodeToSetCostOf)
    {
-      Point3D currentPosition = nodeToSetCostOf.getSolePosition();
+      Point3D currentPosition = BipedalFootstepPlannerNodeUtils.getSolePosition(nodeToSetCostOf);
       Point3D goalPosition = planarRegionPotentialNextStepCalculator.getGoalPosition(nodeToSetCostOf.getRobotSide());
       Vector3D currentToGoalVector = new Vector3D();
       currentToGoalVector.sub(goalPosition, currentPosition);

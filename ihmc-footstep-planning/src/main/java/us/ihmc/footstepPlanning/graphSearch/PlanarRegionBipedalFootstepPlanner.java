@@ -172,7 +172,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             nodeToExpand = stack.pollLast();
 
          // if going to the node is more expensive then going to the goal there is no point in expanding it.
-         double costToNode = nodeToExpand.getCostToHereFromStart();
+         double costToNode = BipedalFootstepPlannerNodeUtils.getCostFromStartToNode(nodeToExpand);
          if (costToNode > smallestCostToGoal)
             continue;
 
@@ -180,7 +180,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          BipedalFootstepPlannerNode equivalentNode = checkIfNearbyNodeAlreadyExistsAndStoreIfNot(nodeToExpand);
          if (equivalentNode != null)
          {
-            double costToGoToEquivalentNode = equivalentNode.getCostToHereFromStart();
+            double costToGoToEquivalentNode = BipedalFootstepPlannerNodeUtils.getCostFromStartToNode(equivalentNode);
 
             if (MathTools.epsilonEquals(costToNode, costToGoToEquivalentNode, 1.0e-5))
                nodeToExpand = equivalentNode;
@@ -241,15 +241,15 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          @Override
          public int compare(BipedalFootstepPlannerNode o1, BipedalFootstepPlannerNode o2)
          {
-            double cost1 = o1.getCostToHereFromStart();
-            double cost2 = o2.getCostToHereFromStart();
+            double cost1 = BipedalFootstepPlannerNodeUtils.getCostFromStartToNode(o1);
+            double cost2 = BipedalFootstepPlannerNodeUtils.getCostFromStartToNode(o2);
             if(cost1 == cost2) return 0;
             return cost1 < cost2 ? -1 : 1;
          }
       });
 
       bestGoalNode = goalNodes.get(0);
-      double costToGoal = bestGoalNode.getCostToHereFromStart();
+      double costToGoal = BipedalFootstepPlannerNodeUtils.getCostFromStartToNode(bestGoalNode);
       if (costToGoal < smallestCostToGoal)
       {
          PrintTools.info("Reduced cost to goal: " + costToGoal);
@@ -265,7 +265,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
       for (BipedalFootstepPlannerNode node : nodesToAddFromWorstToBest)
       {
-         if (node.getCostToHereFromStart() > smallestCostToGoal)
+         if (BipedalFootstepPlannerNodeUtils.getCostFromStartToNode(node) > smallestCostToGoal)
             continue;
 
          stack.push(node);

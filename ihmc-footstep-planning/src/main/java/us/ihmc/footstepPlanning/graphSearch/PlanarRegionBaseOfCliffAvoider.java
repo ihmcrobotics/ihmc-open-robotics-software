@@ -112,12 +112,13 @@ public class PlanarRegionBaseOfCliffAvoider
 
             if (visualize)
             {
-               beforeAdjustmentPosition.setPosition(nodeToExpand.getSolePosition());
+               beforeAdjustmentPosition.setPosition(BipedalFootstepPlannerNodeUtils.getSolePosition(nodeToExpand));
             }
-            nodeToExpand.shiftInSoleFrame(shiftVectorInSoleFrame);
+
+            BipedalFootstepPlannerNodeUtils.shiftInSoleFrame(shiftVectorInSoleFrame, nodeToExpand);
             if(visualize)
             {
-               afterAdjustmentPosition.setPosition(nodeToExpand.getSolePosition());
+               afterAdjustmentPosition.setPosition(BipedalFootstepPlannerNodeUtils.getSolePosition(nodeToExpand));
             }            
          }
       }
