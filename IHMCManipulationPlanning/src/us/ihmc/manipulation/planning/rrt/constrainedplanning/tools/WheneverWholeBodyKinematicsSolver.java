@@ -114,7 +114,6 @@ public class WheneverWholeBodyKinematicsSolver
 
    private final YoDouble footWeight = new YoDouble("footWeight", registry);
    private final YoDouble momentumWeight = new YoDouble("momentumWeight", registry);
-   private int tickCount = 0;
 
    private final EnumMap<LegJointName, YoDouble> legJointLimitReductionFactors = new EnumMap<>(LegJointName.class);
    private final List<RigidBody> listOfControllableRigidBodies = new ArrayList<>();
@@ -138,18 +137,21 @@ public class WheneverWholeBodyKinematicsSolver
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
 
-   private static int maximumCntForUpdateInternal = 120;
+   private static int maximumCntForUpdateInternal = 200;
    private static int cntForUpdateInternal = 0;
-   
+
    public static int numberOfTest = 0;
 
    private boolean isSolved = false;
    private boolean isJointLimit = false;
-   
+
    private static double handWeight = 50.0;
    private static double chestWeight = 10.0;
    private static double pelvisWeight = 10.0;
-   
+
+   private static double movementThreshold = 5.0e-5;
+   private static double errorThreshold = 1.0e-3;
+
    private SideDependentList<ControlFrameMovement> handMovements = new SideDependentList<>();
 
    public WheneverWholeBodyKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory)
@@ -181,13 +183,6 @@ public class WheneverWholeBodyKinematicsSolver
       momentumWeight.set(1.0);
       privilegedWeight.set(0.02);
       privilegedConfigurationGain.set(0.02);
-      
-//      gains.setProportionalGain(800.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
-//
-//      footWeight.set(200.0);
-//      momentumWeight.set(1.0);
-//      privilegedWeight.set(1.0);
-//      privilegedConfigurationGain.set(50.0);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -290,7 +285,7 @@ public class WheneverWholeBodyKinematicsSolver
 
       // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
       snapPrivilegedConfigurationToCurrent();
-      
+
       return true;
    }
 
@@ -344,32 +339,32 @@ public class WheneverWholeBodyKinematicsSolver
       {
          isSolved = true;
       }
-      
-      double movementThreshold = 2.0e-5;
-      double errorThreshold = 1.0e-3;
-      
+
       double rightHandMovement = handMovements.get(RobotSide.RIGHT).getDeltaPose(desiredFullRobotModel.getHand(RobotSide.RIGHT));
       double rightHandError = handMovements.get(RobotSide.RIGHT).getError();
-      
+
       double leftHandMovement = handMovements.get(RobotSide.LEFT).getDeltaPose(desiredFullRobotModel.getHand(RobotSide.LEFT));
       double leftHandError = handMovements.get(RobotSide.LEFT).getError();
+
+      if(DEBUG)
+         PrintTools.info(""+cntForUpdateInternal+" "+leftHandMovement+" "+leftHandError);
       
-      if(rightHandMovement < movementThreshold)
+      if (rightHandMovement < movementThreshold)
       {
-         if(rightHandError > errorThreshold)
+         if (rightHandError > errorThreshold)
          {
-            isJointLimit = true;
-         }  
+//            isJointLimit = true;
+         }
       }
-         
-      if(leftHandMovement < movementThreshold)
+
+      if (leftHandMovement < movementThreshold)
       {
-         if(leftHandError > errorThreshold)
+         if (leftHandError > errorThreshold)
          {
-            isJointLimit = true;
-         }  
+//            isJointLimit = true;
+         }
       }
-      
+
       solutionQualityOld.set(solutionQuality.getDoubleValue());
       cntForUpdateInternal++;
    }
@@ -382,18 +377,18 @@ public class WheneverWholeBodyKinematicsSolver
    public boolean isSolved()
    {
       numberOfTest++;
-      
+
       for (int i = 0; i < maximumCntForUpdateInternal; i++)
       {
          updateInternal();
-         
+
          /*
           * terminate case: joint limit.
           */
-         if(isJointLimit)
+         if (isJointLimit)
          {
-            PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal +" "+ solutionQuality.getDoubleValue());
-            numberOfTest= numberOfTest+cntForUpdateInternal;
+            PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
+            numberOfTest = numberOfTest + cntForUpdateInternal;
             return false;
          }
          /*
@@ -403,15 +398,29 @@ public class WheneverWholeBodyKinematicsSolver
          {
             if (DEBUG)
                printOutRobotModel(desiredFullRobotModel, referenceFrames.getMidFootZUpGroundFrame());
-            PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal +" "+ solutionQuality.getDoubleValue());
+            PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
 
-            numberOfTest= numberOfTest+cntForUpdateInternal;
+            numberOfTest = numberOfTest + cntForUpdateInternal;
             return isSolved;
          }
       }
-      numberOfTest= numberOfTest+cntForUpdateInternal;
-      PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal +" "+ solutionQuality.getDoubleValue());
+      numberOfTest = numberOfTest + cntForUpdateInternal;
+      PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
+      
+      PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_YAW).getQ());
+      PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL).getQ());
+      PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_PITCH).getQ());
+      PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_ROLL).getQ());
+      PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH).getQ());
+      PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_ROLL).getQ());
+      PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SECOND_WRIST_PITCH).getQ());
+      
       return false;
+   }
+   
+   public double getEndEffectorError(RobotSide robotSide)
+   {
+      return handMovements.get(robotSide).getError();
    }
 
    public int getCntForUpdateInternal()
@@ -560,14 +569,6 @@ public class WheneverWholeBodyKinematicsSolver
 
    private void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
-//      System.out.println(newConfigurationData.rootTranslation);
-//      System.out.println(newConfigurationData.rootOrientation);
-//      System.out.println(newConfigurationData.jointAngles[3]);
-//      System.out.println(newConfigurationData.jointAngles[4]);
-//      System.out.println(newConfigurationData.jointAngles[5]);
-//      System.out.println(newConfigurationData.jointAngles[6]);
-//      System.out.println(newConfigurationData.jointAngles[7]);      
-//      System.out.println(newConfigurationData.jointAngles[8]);
       latestRobotConfigurationDataReference.set(newConfigurationData);
    }
 
@@ -649,7 +650,7 @@ public class WheneverWholeBodyKinematicsSolver
          desiredHandFramePose.changeFrame(worldFrame);
 
          handFramePoses.get(robotSide).set(desiredHandFramePose);
-         
+
          handMovements.get(robotSide).setDesiredPose(new Pose3D(desiredHandFramePose.getPosition(), desiredHandFramePose.getOrientation()));
       }
 
@@ -689,7 +690,7 @@ public class WheneverWholeBodyKinematicsSolver
       handWeightMatrices.get(robotSide).setLinearWeights(handWeight, handWeight, handWeight);
       handWeightMatrices.get(robotSide).setAngularWeights(handWeight, handWeight, handWeight);
 
-      /*
+      /**
        * The Z coordinate is upward like as robot coordinate and matched when
        * human thumb up ahead. The X coordinate is forward like as robot
        * coordinate and matched when human punch out ahead.
@@ -716,7 +717,7 @@ public class WheneverWholeBodyKinematicsSolver
       desiredPoseToWorld.changeFrame(worldFrame);
 
       handFramePoses.get(robotSide).set(desiredPoseToWorld);
-      
+
       handMovements.get(robotSide).setDesiredPose(new Pose3D(handFramePoses.get(robotSide).getPosition(), handFramePoses.get(robotSide).getOrientation()));
    }
 
@@ -725,7 +726,7 @@ public class WheneverWholeBodyKinematicsSolver
       pelvisSelectionMatrix.clearLinearSelection();
       pelvisSelectionMatrix.selectLinearZ(true);
       pelvisSelectionMatrix.setSelectionFrame(worldFrame);
-      
+
       pelvisWeightMatrix.setLinearWeights(pelvisWeight, pelvisWeight, pelvisWeight);
       pelvisWeightMatrix.setAngularWeights(pelvisWeight, pelvisWeight, pelvisWeight);
 
