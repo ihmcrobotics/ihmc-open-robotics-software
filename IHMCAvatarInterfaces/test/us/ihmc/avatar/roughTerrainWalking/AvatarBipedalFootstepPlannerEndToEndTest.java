@@ -9,6 +9,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -27,6 +28,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -69,6 +71,8 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    public static final double CINDER_BLOCK_HEIGHT_VARIATION = 0.1;
    public static final double CINDER_BLOCK_FIELD_PLATFORM_LENGTH = 0.6;
 
+   private volatile boolean planCompleted = false;
+
    @Before
    public void setup()
    {
@@ -86,6 +90,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       FullHumanoidRobotModel fullHumanoidRobotModel = getRobotModel().createFullRobotModel();
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullHumanoidRobotModel.getForceSensorDefinitions()));
       humanoidRobotDataReceiver = new HumanoidRobotDataReceiver(fullHumanoidRobotModel, forceSensorDataHolder);
+      planCompleted = false;
    }
 
    @After
@@ -97,6 +102,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       toolboxCommunicator.closeConnection();
       toolboxCommunicator.disconnect();
       toolboxCommunicator = null;
+      planCompleted = false;
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -125,13 +131,13 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
          @Override
          public void receivedPacket(FootstepPlanningToolboxOutputStatus packet)
          {
-            System.out.println("Received result from planner: " + packet.planningResult.name());
             outputStatus.set(packet);
          }
       });
 
       drcSimulationTestHelper.getControllerCommunicator().connect();
       drcSimulationTestHelper.getControllerCommunicator().attachListener(RobotConfigurationData.class, humanoidRobotDataReceiver);
+      drcSimulationTestHelper.getControllerCommunicator().attachListener(WalkingStatusMessage.class, this::listenForWalkingComplete);
 
       BlockingSimulationRunner blockingSimulationRunner = drcSimulationTestHelper.getBlockingSimulationRunner();
       ToolboxStateMessage wakeUpMessage = new ToolboxStateMessage(ToolboxStateMessage.ToolboxState.WAKE_UP);
@@ -189,17 +195,21 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
          }
       }
 
+      planCompleted = false;
       if(outputStatus.get().footstepDataList.size() > 0)
       {
          drcSimulationTestHelper.send(outputStatus.get().footstepDataList);
 
-         try
+         while(!planCompleted)
          {
-            blockingSimulationRunner.simulateAndBlockAndCatchExceptions(45.0);
-         }
-         catch(BlockingSimulationRunner.SimulationExceededMaximumTimeException e)
-         {
-            fail();
+            try
+            {
+               blockingSimulationRunner.simulateAndBlockAndCatchExceptions(1.0);
+            }
+            catch(BlockingSimulationRunner.SimulationExceededMaximumTimeException e)
+            {
+               fail();
+            }
          }
       }
 
@@ -239,5 +249,13 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       boolean generateGroundPlane = false;
       return new PlanarRegionsListDefinedEnvironment("cinderBlockFieldEnvironment", cinderBlockField,
                                                      allowablePenetrationThickness, generateGroundPlane);
+   }
+
+   private void listenForWalkingComplete(WalkingStatusMessage walkingStatusMessage)
+   {
+      if(walkingStatusMessage.status == WalkingStatusMessage.Status.COMPLETED)
+      {
+         planCompleted = true;
+      }
    }
 }

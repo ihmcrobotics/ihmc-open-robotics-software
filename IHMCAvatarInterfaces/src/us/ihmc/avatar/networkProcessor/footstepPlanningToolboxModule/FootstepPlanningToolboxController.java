@@ -305,7 +305,6 @@ public class FootstepPlanningToolboxController extends ToolboxController
       }
       else
       {
-         System.out.println("Found a plan!");
          if (planarRegionsList.isPresent())
          {
             PrintTools.debug(this, "Planar regions present. Assembling footstep data list message");
