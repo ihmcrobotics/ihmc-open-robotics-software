@@ -635,4 +635,9 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       positionToPack.setToZero(referenceFrame);
       super.getEndPoint(positionToPack.getPoint());
    }
+   
+   public boolean isValidTrajectory()
+   {
+      return super.isValidTrajectory();
+   }
 }
