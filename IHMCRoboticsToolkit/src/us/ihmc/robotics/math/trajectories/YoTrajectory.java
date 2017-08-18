@@ -440,4 +440,13 @@ public class YoTrajectory
    {
       return polynomial;
    }
+
+   public boolean isValidTrajectory()
+   {
+      boolean retVal = (getInitialTime() < getFinalTime()) && Double.isFinite(getInitialTime()) && Double.isFinite(getFinalTime());
+      double[] coeffs = getCoefficients();
+      for(int i = 0; retVal && i < coeffs.length; i++)
+         retVal &= Double.isFinite(coeffs[i]);
+      return retVal;
+   }
 }

@@ -954,6 +954,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public boolean alwaysAllowMomentum()
    {
-      return true;
+      return false;
    }
 }

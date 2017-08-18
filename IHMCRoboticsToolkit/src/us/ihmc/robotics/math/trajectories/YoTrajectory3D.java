@@ -703,4 +703,9 @@ public class YoTrajectory3D
       compute(getFinalTime());
       positionToPack.set(getPosition());
    }
+
+   public boolean isValidTrajectory()
+   {
+      return (getYoTrajectoryX().isValidTrajectory() && getYoTrajectoryY().isValidTrajectory() && getYoTrajectoryZ().isValidTrajectory());
+   }
 }

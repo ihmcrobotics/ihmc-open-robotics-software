@@ -522,6 +522,16 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       planIsAvailable.set(true);
    }
 
+   private void printTimes()
+   {
+      for(int i = 0; i < getNumberOfFootstepsRegistered(); i++)
+      {
+         PrintTools.error("T" + i + ": " + transferDurations.get(i).getDoubleValue());
+         PrintTools.error("S" + i + ": " + swingDurations.get(i).getDoubleValue());
+      }
+      PrintTools.error("T" + getNumberOfFootstepsRegistered() + ": " + transferDurations.get(getNumberOfFootstepsRegistered()).getDoubleValue());
+   }
+
    @Override
    public void computeReferenceCoPsStartingFromSingleSupport(RobotSide supportSide)
    {
