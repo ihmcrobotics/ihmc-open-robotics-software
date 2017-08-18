@@ -32,6 +32,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -68,10 +69,11 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    public static final double CINDER_BLOCK_SIZE = 0.4;
    public static final int CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS = 5;
    public static final int CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS = 6;
-   public static final double CINDER_BLOCK_HEIGHT_VARIATION = 0.1;
+   public static final double CINDER_BLOCK_HEIGHT_VARIATION = 0.0;
    public static final double CINDER_BLOCK_FIELD_PLATFORM_LENGTH = 0.6;
 
    private volatile boolean planCompleted = false;
+   private AtomicReference<FootstepPlanningToolboxOutputStatus> outputStatus;
 
    @Before
    public void setup()
@@ -109,7 +111,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    @Test
    public void testSteppingStones() throws IOException
    {
-      final AtomicReference<FootstepPlanningToolboxOutputStatus> outputStatus = new AtomicReference<>();
+      outputStatus = new AtomicReference<>();
       outputStatus.set(null);
 
       if(drcSimulationTestHelper != null)
@@ -121,19 +123,11 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup();
 
       DRCRobotModel robotModel = getRobotModel();
-      boolean automaticallySimulate = true;
       drcSimulationTestHelper = new DRCSimulationTestHelper(steppingStonesEnvironment, "steppingStonesTestHelper", startingLocation,
                                                             simulationTestingParameters, robotModel, networkModuleParameters);
 
       toolboxCommunicator.connect();
-      toolboxCommunicator.attachListener(FootstepPlanningToolboxOutputStatus.class, new PacketConsumer<FootstepPlanningToolboxOutputStatus>()
-      {
-         @Override
-         public void receivedPacket(FootstepPlanningToolboxOutputStatus packet)
-         {
-            outputStatus.set(packet);
-         }
-      });
+      toolboxCommunicator.attachListener(FootstepPlanningToolboxOutputStatus.class, this::setOutputStatus);
 
       drcSimulationTestHelper.getControllerCommunicator().connect();
       drcSimulationTestHelper.getControllerCommunicator().attachListener(RobotConfigurationData.class, humanoidRobotDataReceiver);
@@ -147,11 +141,12 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       {
          try
          {
-            blockingSimulationRunner.simulateAndBlockAndCatchExceptions(1.0);
+            blockingSimulationRunner.simulateAndBlock(1.0);
          }
-         catch(BlockingSimulationRunner.SimulationExceededMaximumTimeException e)
+         catch(BlockingSimulationRunner.SimulationExceededMaximumTimeException | ControllerFailureException e)
          {
-            fail();
+            e.printStackTrace();
+            fail(e.getMessage());
          }
 
          humanoidRobotDataReceiver.updateRobotModel();
@@ -173,11 +168,12 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
       try
       {
-         blockingSimulationRunner.simulateAndBlockAndCatchExceptions(1.0);
+         blockingSimulationRunner.simulateAndBlock(1.0);
       }
-      catch(BlockingSimulationRunner.SimulationExceededMaximumTimeException e)
+      catch(BlockingSimulationRunner.SimulationExceededMaximumTimeException | ControllerFailureException e)
       {
-         fail();
+         e.printStackTrace();
+         fail(e.getMessage());
       }
 
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(cinderBlockField);
@@ -187,11 +183,12 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       {
          try
          {
-            blockingSimulationRunner.simulateAndBlockAndCatchExceptions(1.0);
+            blockingSimulationRunner.simulateAndBlock(1.0);
          }
-         catch(BlockingSimulationRunner.SimulationExceededMaximumTimeException e)
+         catch(BlockingSimulationRunner.SimulationExceededMaximumTimeException | ControllerFailureException e)
          {
-            fail();
+            e.printStackTrace();
+            fail(e.getMessage());
          }
       }
 
@@ -204,11 +201,12 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
          {
             try
             {
-               blockingSimulationRunner.simulateAndBlockAndCatchExceptions(1.0);
+               blockingSimulationRunner.simulateAndBlock(1.0);
             }
-            catch(BlockingSimulationRunner.SimulationExceededMaximumTimeException e)
+            catch(BlockingSimulationRunner.SimulationExceededMaximumTimeException | ControllerFailureException e)
             {
-               fail();
+               e.printStackTrace();
+               fail(e.getMessage());
             }
          }
       }
@@ -257,5 +255,10 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       {
          planCompleted = true;
       }
+   }
+
+   private void setOutputStatus(FootstepPlanningToolboxOutputStatus packet)
+   {
+      outputStatus.set(packet);
    }
 }
