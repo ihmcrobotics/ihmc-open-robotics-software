@@ -25,11 +25,6 @@ public class FastFourierTransform
    private ComplexNumber[] coefficients;
    private ComplexNumber[] transformedCoeffs;
 
-   public FastFourierTransform()
-   {
-      this(2048);
-   }
-
    private int temp;
 
    public FastFourierTransform(int maxNumberOfCoefficients)

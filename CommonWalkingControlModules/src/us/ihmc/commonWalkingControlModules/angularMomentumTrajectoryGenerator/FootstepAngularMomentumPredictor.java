@@ -32,7 +32,8 @@ import us.ihmc.yoVariables.variable.YoVariable;
  */
 public class FootstepAngularMomentumPredictor implements AngularMomentumTrajectoryGeneratorInterface
 {
-   private static final boolean DEBUG = true;
+   // Shit ton of YoVariables shall be created if thou sets this flag to true
+   private static final boolean DEBUG = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector3D zeroVector = new FrameVector3D();
@@ -40,7 +41,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private final int maxNumberOfTrajectoryCoefficients = 7;
    private final int numberOfSwingSegments = 1;
    private final int numberOfTransferSegments = 2;
-   private final int maxNumberOfFootstepsToConsider = 10;
+   private final int maxNumberOfFootstepsToConsider = 4;
    private final TrajectoryMathTools trajMathTools;
 
    private final YoBoolean computePredictedAngularMomentum;
@@ -264,6 +265,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       {
          comTrajDebug = null;
          swingTrajDebug = null;
+         supportTrajDebug = null;
          anguMomTrajDebug = null;
          comPosDebug = null;
          comVelDebug = null;
