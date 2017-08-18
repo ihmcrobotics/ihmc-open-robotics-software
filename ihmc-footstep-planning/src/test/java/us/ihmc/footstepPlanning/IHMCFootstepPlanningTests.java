@@ -16,7 +16,6 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
    us.ihmc.footstepPlanning.flatGroundPlanning.TurnWalkTurnPlannerTest.class,
    us.ihmc.footstepPlanning.graphSearch.PlanarRegionBaseOfCliffAvoiderTest.class,
    us.ihmc.footstepPlanning.graphSearch.PlanarRegionPotentialNextStepCalculatorTest.class,
-   us.ihmc.footstepPlanning.graphSearch.SimplePlanarRegionBipedalAnytimeFootstepPlannerTest.class,
    us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionPolygonSnapperTest.class,
    us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapperTest.class,
    us.ihmc.footstepPlanning.polygonWiggling.PolygonWigglingTest.class,

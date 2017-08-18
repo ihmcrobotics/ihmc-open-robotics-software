@@ -134,6 +134,71 @@ public class BipedalFootstepPlannerNode
       return true;
    }
 
+   private final Vector3D tempPointA = new Vector3D();
+   private final Vector3D tempPointB = new Vector3D();
+   private final Vector3D tempRotationVectorA = new Vector3D();
+   private final Vector3D tempRotationVectorB = new Vector3D();
+
+   @Override
+   public boolean equals(Object o)
+   {
+      if (!(o instanceof BipedalFootstepPlannerNode))
+      {
+         return false;
+      }
+      else
+      {
+         BipedalFootstepPlannerNode otherNode = (BipedalFootstepPlannerNode) o;
+
+         if (getRobotSide() != otherNode.getRobotSide())
+         {
+            return false;
+         }
+
+         this.soleTransform.getTranslation(tempPointA);
+         EuclidCoreMissingTools.roundToGivenPrecision(tempPointA, gridSizeX);
+
+         otherNode.soleTransform.getTranslation(tempPointB);
+         EuclidCoreMissingTools.roundToGivenPrecision(tempPointB, gridSizeX);
+
+         tempPointA.sub(tempPointB);
+         tempPointA.setZ(0.0);
+
+         if (!(tempPointA.length() < 1e-10))
+            return false;
+
+         this.soleTransform.getRotationEuler(tempRotationVectorA);
+         double thisYaw = AngleTools.roundToGivenPrecisionForAngle(tempRotationVectorA.getZ(), gridSizeYaw);
+
+         otherNode.soleTransform.getRotationEuler(tempRotationVectorB);
+         double otherYaw = AngleTools.roundToGivenPrecisionForAngle(tempRotationVectorB.getZ(), gridSizeYaw);
+
+         //         tempRotationVectorA.sub(tempRotationVectorB);
+         double yawDifference = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(thisYaw, otherYaw));
+         if (!(yawDifference < 1e-10))
+            return false;
+
+         return true;
+      }
+   }
+
+   @Override
+   public int hashCode()
+   {
+      this.soleTransform.getTranslation(tempPointA);
+      EuclidCoreMissingTools.roundToGivenPrecision(tempPointA, gridSizeX);
+
+      this.soleTransform.getRotationEuler(tempRotationVectorA);
+      AngleTools.roundToGivenPrecisionForAngles(tempRotationVectorA, gridSizeYaw);
+
+      int result = getRobotSide() == null ? 0 : getRobotSide().hashCode();
+      result = 3 * result + (int) Math.round(tempPointA.getX() / gridSizeX);
+      result = 3 * result + (int) Math.round(tempPointA.getY() / gridSizeX);
+      //      result = 3 * result + (int) Math.round(tempRotationVectorA.getX() / YAW_ROTATION_THRESHOLD_TO_CONSIDER_NODES_EQUAL);
+
+      return result;
+   }
+
    public String toString()
    {
       return soleTransform.toString();
