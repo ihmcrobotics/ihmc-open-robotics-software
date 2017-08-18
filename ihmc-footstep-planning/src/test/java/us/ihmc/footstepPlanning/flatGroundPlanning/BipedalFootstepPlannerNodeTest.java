@@ -21,46 +21,6 @@ public class BipedalFootstepPlannerNodeTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
-   public void testEqualsAndHashMethodsWithHardCodedTransforms()
-   {
-      BipedalFootstepPlannerNode nodeA, nodeB;
-
-      RigidBodyTransform transformA = new RigidBodyTransform();
-      RigidBodyTransform transformB = new RigidBodyTransform();
-
-      transformA.setTranslation(1.799, 0.499, 5.35);
-      transformB.setTranslation(1.801, 0.501, -4.43);
-
-      nodeA = new BipedalFootstepPlannerNode(RobotSide.LEFT, transformA);
-      nodeB = new BipedalFootstepPlannerNode(RobotSide.LEFT, transformB);
-
-      assertTrue(nodeA.equals(nodeB));
-      assertTrue(nodeA.hashCode() == nodeB.hashCode());
-
-      transformA.setRotationEulerAndZeroTranslation(1.5001, -2.0001, -30.2);
-      transformB.setRotationEulerAndZeroTranslation(1.4999, -1.9999, -30.2);
-
-      nodeA = new BipedalFootstepPlannerNode(RobotSide.RIGHT, transformA);
-      nodeB = new BipedalFootstepPlannerNode(RobotSide.RIGHT, transformB);
-
-      assertTrue(nodeA.equals(nodeB));
-      assertTrue(nodeA.hashCode() == nodeB.hashCode());
-
-      double positionThreshold = BipedalFootstepPlannerNode.getXyDistanceThresholdToConsiderNodesEqual();
-      double rotationThreshold = BipedalFootstepPlannerNode.getYawRotationThresholdToConsiderNodesEqual();
-
-      transformA.setTranslation(1.496, -2.52, 499.2);
-      transformB.setTranslation(1.496 + 1.01 * positionThreshold, -2.52 + 1.01 * positionThreshold, -30.3);
-
-      nodeA = new BipedalFootstepPlannerNode(RobotSide.RIGHT, transformA);
-      nodeB = new BipedalFootstepPlannerNode(RobotSide.RIGHT, transformB);
-
-      assertTrue(!nodeA.equals(nodeB));
-      assertTrue(nodeA.hashCode() != nodeB.hashCode());
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 300000)
    public void testEqualsAndHashMethodsWithRandomTransforms()
    {
       Random random = new Random(3823L);
