@@ -63,6 +63,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 public class FootstepPlanningToolboxController extends ToolboxController
 {
    private final boolean visualize = true;
+   private HumanoidRobotDataReceiver robotDataReceiver;
 
    private enum Planners
    {
@@ -88,7 +89,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final WalkingControllerParameters walkingControllerParameters;
    private final FootstepDataListWithSwingOverTrajectoriesAssembler footstepDataListWithSwingOverTrajectoriesAssembler;
    private final FootstepNodeExpansion expansion;
-   
+
+   private final double collisionSphereRadius = 0.2;
    private final PacketCommunicator packetCommunicator;
    private long plannerCount = 0;
    private double dt;
@@ -115,6 +117,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       humanoidReferenceFrames = createHumanoidReferenceFrames(fullHumanoidRobotModel);
       footstepDataListWithSwingOverTrajectoriesAssembler = new FootstepDataListWithSwingOverTrajectoriesAssembler(humanoidReferenceFrames, walkingControllerParameters, parentRegistry, new YoGraphicsListRegistry());
+      footstepDataListWithSwingOverTrajectoriesAssembler.setCollisionSphereRadius(collisionSphereRadius);
 
       plannerMap.put(Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame, fullHumanoidRobotModel));
       plannerMap.put(Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
@@ -134,7 +137,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
       footstepPlanner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       footstepPlanner.setExitAfterInitialSolution(false);
-      footstepPlanner.setTimeout(5.0);
+      footstepPlanner.setTimeout(20.0);
 
       if (visualize)
       {
@@ -149,8 +152,9 @@ public class FootstepPlanningToolboxController extends ToolboxController
    @Override
    protected void updateInternal()
    {
+      robotDataReceiver.updateRobotModel();
       toolboxTime.add(dt);
-      if (toolboxTime.getDoubleValue() > 10.0)
+      if (toolboxTime.getDoubleValue() > 20.0)
       {
          reportMessage(packResult(null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION));
          isDone.set(true);
@@ -272,7 +276,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    public HumanoidReferenceFrames createHumanoidReferenceFrames(FullHumanoidRobotModel fullHumanoidRobotModel)
    {
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullHumanoidRobotModel.getForceSensorDefinitions()));
-      HumanoidRobotDataReceiver robotDataReceiver = new HumanoidRobotDataReceiver(fullHumanoidRobotModel, forceSensorDataHolder);
+      robotDataReceiver = new HumanoidRobotDataReceiver(fullHumanoidRobotModel, forceSensorDataHolder);
 
       packetCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
       return robotDataReceiver.getReferenceFrames();
@@ -301,6 +305,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       }
       else
       {
+         System.out.println("Found a plan!");
          if (planarRegionsList.isPresent())
          {
             PrintTools.debug(this, "Planar regions present. Assembling footstep data list message");

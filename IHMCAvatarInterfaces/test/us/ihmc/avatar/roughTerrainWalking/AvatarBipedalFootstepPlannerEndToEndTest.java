@@ -1,0 +1,243 @@
+package us.ihmc.avatar.roughTerrainWalking;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import us.ihmc.avatar.DRCStartingLocation;
+import us.ihmc.avatar.MultiRobotTestInterface;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
+import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.packets.PlanarRegionsListMessage;
+import us.ihmc.communication.packets.ToolboxStateMessage;
+import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
+import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
+public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiRobotTestInterface
+{
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+
+   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private DRCNetworkModuleParameters networkModuleParameters;
+   private HumanoidRobotDataReceiver humanoidRobotDataReceiver;
+
+   private PacketCommunicator toolboxCommunicator;
+   private PlanarRegionsList cinderBlockField;
+   public static final double CINDER_BLOCK_START_X = 0.0;
+   public static final double CINDER_BLOCK_START_Y = 0.0;
+   public static final double CINDER_BLOCK_HEIGHT = 0.1;
+   public static final double CINDER_BLOCK_SIZE = 0.4;
+   public static final int CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS = 5;
+   public static final int CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS = 6;
+   public static final double CINDER_BLOCK_HEIGHT_VARIATION = 0.1;
+   public static final double CINDER_BLOCK_FIELD_PLATFORM_LENGTH = 0.6;
+
+   @Before
+   public void setup()
+   {
+      cinderBlockField = PlanarRegionsListExamples
+            .generateCinderBlockField(CINDER_BLOCK_START_X, CINDER_BLOCK_START_Y, CINDER_BLOCK_SIZE, CINDER_BLOCK_HEIGHT, CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS,
+                                      CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS, CINDER_BLOCK_HEIGHT_VARIATION);
+
+      networkModuleParameters = new DRCNetworkModuleParameters();
+      networkModuleParameters.enableFootstepPlanningToolbox(true);
+      networkModuleParameters.enableLocalControllerCommunicator(true);
+      networkModuleParameters.enableNetworkProcessor(true);
+
+      toolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.FOOTSTEP_PLANNING_TOOLBOX_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+
+      FullHumanoidRobotModel fullHumanoidRobotModel = getRobotModel().createFullRobotModel();
+      ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullHumanoidRobotModel.getForceSensorDefinitions()));
+      humanoidRobotDataReceiver = new HumanoidRobotDataReceiver(fullHumanoidRobotModel, forceSensorDataHolder);
+   }
+
+   @After
+   public void tearDown()
+   {
+      cinderBlockField = null;
+      networkModuleParameters = null;
+
+      toolboxCommunicator.closeConnection();
+      toolboxCommunicator.disconnect();
+      toolboxCommunicator = null;
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
+   public void testSteppingStones() throws IOException
+   {
+      final AtomicReference<FootstepPlanningToolboxOutputStatus> outputStatus = new AtomicReference<>();
+      outputStatus.set(null);
+
+      if(drcSimulationTestHelper != null)
+      {
+         drcSimulationTestHelper.destroySimulation();
+      }
+
+      CommonAvatarEnvironmentInterface steppingStonesEnvironment = createSteppingStonesEnvironment();
+      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup();
+
+      DRCRobotModel robotModel = getRobotModel();
+      boolean automaticallySimulate = true;
+      drcSimulationTestHelper = new DRCSimulationTestHelper(steppingStonesEnvironment, "steppingStonesTestHelper", startingLocation,
+                                                            simulationTestingParameters, robotModel, networkModuleParameters);
+
+      toolboxCommunicator.connect();
+      toolboxCommunicator.attachListener(FootstepPlanningToolboxOutputStatus.class, new PacketConsumer<FootstepPlanningToolboxOutputStatus>()
+      {
+         @Override
+         public void receivedPacket(FootstepPlanningToolboxOutputStatus packet)
+         {
+            System.out.println("Received result from planner: " + packet.planningResult.name());
+            outputStatus.set(packet);
+         }
+      });
+
+      drcSimulationTestHelper.getControllerCommunicator().connect();
+      drcSimulationTestHelper.getControllerCommunicator().attachListener(RobotConfigurationData.class, humanoidRobotDataReceiver);
+
+      BlockingSimulationRunner blockingSimulationRunner = drcSimulationTestHelper.getBlockingSimulationRunner();
+      ToolboxStateMessage wakeUpMessage = new ToolboxStateMessage(ToolboxStateMessage.ToolboxState.WAKE_UP);
+      toolboxCommunicator.send(wakeUpMessage);
+
+      while(!humanoidRobotDataReceiver.framesHaveBeenSetUp())
+      {
+         try
+         {
+            blockingSimulationRunner.simulateAndBlockAndCatchExceptions(1.0);
+         }
+         catch(BlockingSimulationRunner.SimulationExceededMaximumTimeException e)
+         {
+            fail();
+         }
+
+         humanoidRobotDataReceiver.updateRobotModel();
+      }
+
+      ReferenceFrame soleFrame = humanoidRobotDataReceiver.getReferenceFrames().getSoleFrame(RobotSide.LEFT);
+      FramePose initialStancePose = new FramePose(soleFrame, new Point3D(0.0, 0.0, 0.001), new AxisAngle());
+      initialStancePose.changeFrame(ReferenceFrame.getWorldFrame());
+      RobotSide initialStanceSide = RobotSide.LEFT;
+      double courseLength = CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS * CINDER_BLOCK_SIZE + CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
+      FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame(), new Pose3D(courseLength, 0.0, 0.001, 0.0, 0.0, 0.0));
+
+      YoGraphicsListRegistry graphicsListRegistry = createStartAndGoalGraphics(initialStancePose, goalPose);
+      drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(graphicsListRegistry);
+
+      FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket(initialStancePose, initialStanceSide, goalPose);
+      requestPacket.setAssumeFlatGround(false);
+      toolboxCommunicator.send(requestPacket);
+
+      try
+      {
+         blockingSimulationRunner.simulateAndBlockAndCatchExceptions(1.0);
+      }
+      catch(BlockingSimulationRunner.SimulationExceededMaximumTimeException e)
+      {
+         fail();
+      }
+
+      PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(cinderBlockField);
+      toolboxCommunicator.send(planarRegionsListMessage);
+
+      while(outputStatus.get() == null)
+      {
+         try
+         {
+            blockingSimulationRunner.simulateAndBlockAndCatchExceptions(1.0);
+         }
+         catch(BlockingSimulationRunner.SimulationExceededMaximumTimeException e)
+         {
+            fail();
+         }
+      }
+
+      if(outputStatus.get().footstepDataList.size() > 0)
+      {
+         drcSimulationTestHelper.send(outputStatus.get().footstepDataList);
+
+         try
+         {
+            blockingSimulationRunner.simulateAndBlockAndCatchExceptions(45.0);
+         }
+         catch(BlockingSimulationRunner.SimulationExceededMaximumTimeException e)
+         {
+            fail();
+         }
+      }
+
+      FloatingJoint rootJoint = drcSimulationTestHelper.getRobot().getRootJoint();
+      Point3D rootJointPosition = new Point3D();
+      rootJoint.getPosition(rootJointPosition);
+
+      double errorThreshold = 0.3;
+      double xPositionErrorMagnitude = Math.abs(rootJointPosition.getX() - goalPose.getX());
+      double yPositionErrorMagnitude = Math.abs(rootJointPosition.getY() - goalPose.getY());
+      assertTrue(xPositionErrorMagnitude < errorThreshold);
+      assertTrue(yPositionErrorMagnitude < errorThreshold);
+   }
+
+   private YoGraphicsListRegistry createStartAndGoalGraphics(FramePose initialStancePose, FramePose goalPose)
+   {
+      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+      YoGraphicsList graphicsList = new YoGraphicsList("testViz");
+
+      YoFramePose yoInitialStancePose = new YoFramePose("initialStancePose", initialStancePose.getReferenceFrame(), drcSimulationTestHelper.getYovariableRegistry());
+      yoInitialStancePose.set(initialStancePose);
+
+      YoFramePose yoGoalPose = new YoFramePose("goalStancePose", goalPose.getReferenceFrame(), drcSimulationTestHelper.getYovariableRegistry());
+      yoGoalPose.set(goalPose);
+
+      YoGraphicCoordinateSystem startPoseGraphics = new YoGraphicCoordinateSystem("startPose", yoInitialStancePose, 13.0);
+      YoGraphicCoordinateSystem goalPoseGraphics = new YoGraphicCoordinateSystem("goalPose", yoGoalPose, 13.0);
+
+      graphicsList.add(startPoseGraphics);
+      graphicsList.add(goalPoseGraphics);
+      return graphicsListRegistry;
+   }
+
+   private CommonAvatarEnvironmentInterface createSteppingStonesEnvironment()
+   {
+      double allowablePenetrationThickness = 0.01;
+      boolean generateGroundPlane = false;
+      return new PlanarRegionsListDefinedEnvironment("cinderBlockFieldEnvironment", cinderBlockField,
+                                                     allowablePenetrationThickness, generateGroundPlane);
+   }
+}
