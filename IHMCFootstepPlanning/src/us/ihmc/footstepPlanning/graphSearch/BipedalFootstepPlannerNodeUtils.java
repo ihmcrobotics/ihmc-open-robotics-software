@@ -24,7 +24,7 @@ public class BipedalFootstepPlannerNodeUtils
    {
       // Ignore the z since the snap transform snapped from z = 0. Keep everything else.
       RigidBodyTransform soleTransform = new RigidBodyTransform();
-      node.setSoleTransform(soleTransform);
+      node.getSoleTransform(soleTransform);
 
       soleTransform.setTranslationZ(0.0);
       soleTransform.preMultiply(snapTransform);
@@ -35,7 +35,7 @@ public class BipedalFootstepPlannerNodeUtils
    public static Point3D getSolePosition(BipedalFootstepPlannerNode node)
    {
       RigidBodyTransform soleTransform = new RigidBodyTransform();
-      node.setSoleTransform(soleTransform);
+      node.getSoleTransform(soleTransform);
 
       Point3D currentSolePosition = new Point3D();
       soleTransform.transform(currentSolePosition);
@@ -45,7 +45,7 @@ public class BipedalFootstepPlannerNodeUtils
    public static double getSoleYaw(BipedalFootstepPlannerNode node)
    {
       RigidBodyTransform soleTransform = new RigidBodyTransform();
-      node.setSoleTransform(soleTransform);
+      node.getSoleTransform(soleTransform);
 
       Vector3D eulerAngles = new Vector3D();
       soleTransform.getRotationEuler(eulerAngles);
