@@ -283,7 +283,7 @@ public class KinematicsToolboxController extends ToolboxController
     * user submitted.
     */
    private final YoInteger numberOfActiveCommands = new YoInteger("numberOfActiveCommands", registry);
-   
+
    private final YoInteger countUpdateInternal = new YoInteger("countUpdateInternal", registry);
 
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
@@ -317,14 +317,14 @@ public class KinematicsToolboxController extends ToolboxController
       momentumWeight.set(1.0);
       privilegedWeight.set(0.02);
       privilegedConfigurationGain.set(0.02);
-      
-//      gains.setProportionalGain(800.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
-//
-//      footWeight.set(200.0);
-//      momentumWeight.set(1.0);
-//      privilegedWeight.set(1.0);
-//      privilegedConfigurationGain.set(50.0);
-      
+
+      //      gains.setProportionalGain(800.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      //
+      //      footWeight.set(200.0);
+      //      momentumWeight.set(1.0);
+      //      privilegedWeight.set(1.0);
+      //      privilegedConfigurationGain.set(50.0);
+
       privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -394,8 +394,8 @@ public class KinematicsToolboxController extends ToolboxController
       InverseDynamicsJoint[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(desiredFullRobotModel);
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
-//      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
-//                                                                            null, registry);
+      //      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
+      //                                                                            null, registry);
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(1.0, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
                                                                             null, registry);
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
@@ -549,8 +549,9 @@ public class KinematicsToolboxController extends ToolboxController
       FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
 
       /*
-       * Submitting and requesting the controller core to run the feedback controllers, formulate
-       * and solve the optimization problem for this control tick.
+       * Submitting and requesting the controller core to run the feedback
+       * controllers, formulate and solve the optimization problem for this
+       * control tick.
        */
       controllerCore.reset();
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
@@ -599,9 +600,9 @@ public class KinematicsToolboxController extends ToolboxController
          holdSupportFootPose.set(command.holdSupportFootPositions());
 
          /*
-          * If there is a new privileged configuration, the desired robot state is updated alongside
-          * with the privileged configuration and the initial center of mass position and foot
-          * poses.
+          * If there is a new privileged configuration, the desired robot state
+          * is updated alongside with the privileged configuration and the
+          * initial center of mass position and foot poses.
           */
          KinematicsToolboxHelper.setRobotStateFromPrivilegedConfigurationData(command, rootJoint, jointNameBasedHashCodeMap);
          if (command.hasPrivilegedJointAngles() || command.hasPrivilegedRootJointPosition() || command.hasPrivilegedRootJointOrientation())
@@ -629,9 +630,10 @@ public class KinematicsToolboxController extends ToolboxController
 
       FeedbackControlCommandList inputs = new FeedbackControlCommandList();
       /*
-       * By using the map, we ensure that there is only one command per end-effector (including the
-       * center of mass). The map is also useful for remembering commands received during the
-       * previous control ticks of the same run.
+       * By using the map, we ensure that there is only one command per
+       * end-effector (including the center of mass). The map is also useful for
+       * remembering commands received during the previous control ticks of the
+       * same run.
        */
       userFeedbackCommands.values().forEach(inputs::addCommand);
       return inputs;
