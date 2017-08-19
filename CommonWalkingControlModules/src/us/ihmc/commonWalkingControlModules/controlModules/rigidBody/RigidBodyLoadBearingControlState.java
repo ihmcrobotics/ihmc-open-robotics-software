@@ -20,11 +20,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -34,6 +30,9 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 {
@@ -135,10 +134,10 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       spatialFeedbackControlCommand.setWeightsForSolver(taskspaceAngularWeight, taskspaceLinearWeight);
    }
 
-   public void setGains(YoOrientationPIDGainsInterface taskspaceOrientationGains, YoPositionPIDGainsInterface taskspacePositionGains)
+   public void setGains(YoPID3DGains taskspaceOrientationGains, YoPID3DGains taskspacePositionGains)
    {
-      spatialFeedbackControlCommand.setGains(taskspaceOrientationGains);
-      spatialFeedbackControlCommand.setGains(taskspacePositionGains);
+      spatialFeedbackControlCommand.setOrientationGains(taskspaceOrientationGains);
+      spatialFeedbackControlCommand.setPositionGains(taskspacePositionGains);
    }
 
    public void setCoefficientOfFriction(double coefficientOfFriction)

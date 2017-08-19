@@ -63,7 +63,7 @@ public class StandingState extends WalkingState
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
-      legConfigurationManager = managerFactory.getOrCreateKneeAngleManager();
+      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
       doPreparePelvisForLocomotion.set(walkingControllerParameters.doPreparePelvisForLocomotion());
@@ -96,8 +96,8 @@ public class StandingState extends WalkingState
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         legConfigurationManager.setStraight(robotSide);
          legConfigurationManager.setFullyExtendLeg(robotSide, false);
+         legConfigurationManager.setStraight(robotSide);
       }
    }
 

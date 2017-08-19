@@ -389,7 +389,6 @@ public class BalanceManager
 
       icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint2d);
       icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
-      icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
 
       pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
       pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCapturePointVelocity2d);
@@ -444,6 +443,7 @@ public class BalanceManager
          linearMomentumRateOfChangeControlModule.setDefaultMomentumWeight();
       }
 
+      CapturePointTools.computeDesiredCentroidalMomentumPivot(desiredCapturePoint2d, desiredCapturePointVelocity2d, omega0, perfectCMP);
       linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(this.controlHeightWithMomentum.getBooleanValue() && controlHeightWithMomentum);
       linearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
       linearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d);

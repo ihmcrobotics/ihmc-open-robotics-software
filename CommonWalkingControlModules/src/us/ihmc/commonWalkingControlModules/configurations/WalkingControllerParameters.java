@@ -18,11 +18,10 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -208,9 +207,9 @@ public abstract class WalkingControllerParameters
     *
     * TODO: remove registry
     */
-   public Map<String, YoOrientationPIDGainsInterface> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
+   public Map<String, YoPID3DGains> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
    {
-      return new HashMap<String, YoOrientationPIDGainsInterface>();
+      return new HashMap<String, YoPID3DGains>();
    }
 
    /**
@@ -224,9 +223,9 @@ public abstract class WalkingControllerParameters
     *
     * TODO: remove registry
     */
-   public Map<String, YoPositionPIDGainsInterface> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
+   public Map<String, YoPID3DGains> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
    {
-      return new HashMap<String, YoPositionPIDGainsInterface>();
+      return new HashMap<String, YoPID3DGains>();
    }
 
    /**
@@ -299,7 +298,7 @@ public abstract class WalkingControllerParameters
     *
     * TODO: remove registry
     */
-   public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);
+   public abstract YoPIDSE3Gains createSwingFootControlGains(YoVariableRegistry registry);
 
    /**
     * Returns the gains used for the foot when in support. Note that these gains are only used when the foot
@@ -308,7 +307,7 @@ public abstract class WalkingControllerParameters
     *
     * TODO: remove registry
     */
-   public abstract YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry);
+   public abstract YoPIDSE3Gains createHoldPositionFootControlGains(YoVariableRegistry registry);
 
    /**
     * Returns the gains used for the foot when in the toe off state. Note that some parts of the foot orientation
@@ -316,7 +315,7 @@ public abstract class WalkingControllerParameters
     *
     * TODO: remove registry
     */
-   public abstract YoSE3PIDGainsInterface createToeOffFootControlGains(YoVariableRegistry registry);
+   public abstract YoPIDSE3Gains createToeOffFootControlGains(YoVariableRegistry registry);
 
    /**
     * Specifies if the arm controller should be switching

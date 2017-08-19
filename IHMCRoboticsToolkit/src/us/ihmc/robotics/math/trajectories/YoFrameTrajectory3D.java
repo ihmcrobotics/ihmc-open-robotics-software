@@ -640,4 +640,10 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
    {
       return super.isValidTrajectory();
    }
+   
+   public void set(FrameTrajectory3D trajToCopy)
+   {
+      checkReferenceFrameMatch(trajToCopy);
+      super.set(trajToCopy);
+   }
 }

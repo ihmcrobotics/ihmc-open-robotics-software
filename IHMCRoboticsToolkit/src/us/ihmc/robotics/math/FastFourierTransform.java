@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 
 import java.util.List;
@@ -60,9 +61,13 @@ public class FastFourierTransform
                + coefficients.length);
       int index = 0;
       for (; index < coefficients.length; index++)
+      {
          this.coefficients[index].setToPurelyReal(coefficients[index]);
+      }
       for (; index < maxNumberOfCoefficients; index++)
+      {
          this.coefficients[index].setToPurelyReal(0.0);
+      }
    }
 
    private ComplexNumber tempComplex1 = new ComplexNumber(), tempComplex2 = new ComplexNumber(), tempComplex = new ComplexNumber();
