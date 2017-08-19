@@ -1,30 +1,28 @@
 package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.WalkingTrajectoryType;
-import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class AngularMomentumTrajectory extends YoSegmentedFrameTrajectory3D implements AngularMomentumTrajectoryInterface
+public class AngularMomentumTrajectory extends SegmentedFrameTrajectory3D implements AngularMomentumTrajectoryInterface
 {
-   private YoFrameVector momentum;
-   private YoFrameVector torque;
-   private YoFrameVector rotatum;
-   private YoFrameTrajectory3D torqueTrajectory;
+   private FrameVector3D momentum;
+   private FrameVector3D torque;
+   private FrameVector3D rotatum;
+   private FrameTrajectory3D torqueTrajectory;
 
-   public AngularMomentumTrajectory(String namePrefix, int stepNumber, WalkingTrajectoryType type, YoVariableRegistry registry, ReferenceFrame referenceFrame,
+   public AngularMomentumTrajectory(int stepNumber, WalkingTrajectoryType type, ReferenceFrame referenceFrame,
                                     int maxNumberOfSegments, int maxNumberOfCoefficients)
    {
-      super(namePrefix + stepNumber + type.toString() + "AngularMomentum", maxNumberOfSegments, maxNumberOfCoefficients, registry);
-      momentum = new YoFrameVector(namePrefix + stepNumber + type.toString() + "Position", referenceFrame, registry);
-      torque = new YoFrameVector(namePrefix + stepNumber + type.toString() + "Velocity", referenceFrame, registry);
-      rotatum = new YoFrameVector(namePrefix + stepNumber + type.toString() + "Acceleration", referenceFrame, registry);
-      torqueTrajectory = new YoFrameTrajectory3D(namePrefix + stepNumber + type.toString() + "TorqueTrajectory", maxNumberOfCoefficients - 1, referenceFrame,
-                                                 registry);
+      super(maxNumberOfSegments, maxNumberOfCoefficients);
+      momentum = new FrameVector3D(referenceFrame);
+      torque = new FrameVector3D(referenceFrame);
+      rotatum = new FrameVector3D(referenceFrame);
+      torqueTrajectory = new FrameTrajectory3D(maxNumberOfCoefficients - 1, referenceFrame);
    }
 
    @Override
@@ -58,15 +56,15 @@ public class AngularMomentumTrajectory extends YoSegmentedFrameTrajectory3D impl
    }
 
    @Override
-   public void set(YoFrameTrajectory3D computedAngularMomentumTrajectory)
+   public void set(FrameTrajectory3D computedAngularMomentumTrajectory)
    {
       segments.get(getNumberOfSegments()).set(computedAngularMomentumTrajectory);
-      numberOfSegments.increment();
+      numberOfSegments++;
    }
 
    public void set(double t0, double tFinal, FramePoint3D z0, FramePoint3D zf)
    {
       segments.get(getNumberOfSegments()).setLinear(t0, tFinal, z0, zf);
-      numberOfSegments.increment();
+      numberOfSegments++;
    }
 }

@@ -8,10 +8,10 @@ public class TransferAngularMomentumTrajectory extends AngularMomentumTrajectory
 {
    private final static WalkingTrajectoryType type = WalkingTrajectoryType.TRANSFER;
 
-   public TransferAngularMomentumTrajectory(String namePrefix, int stepNumber, YoVariableRegistry registry, ReferenceFrame referenceFrame,
+   public TransferAngularMomentumTrajectory(int stepNumber, ReferenceFrame referenceFrame,
                                             int maxNumberOfSegments, int maxNumberOfCoefficients)
    {
-      super(namePrefix, stepNumber, type, registry, referenceFrame, maxNumberOfSegments, maxNumberOfCoefficients);
+      super(stepNumber, type, referenceFrame, maxNumberOfSegments, maxNumberOfCoefficients);
    }
 
 }
