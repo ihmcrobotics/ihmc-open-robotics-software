@@ -6,9 +6,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class SwingCoPTrajectory extends CoPTrajectory
 {
    private final static WalkingTrajectoryType type = WalkingTrajectoryType.SWING;   
-   public SwingCoPTrajectory(String namePrefix, int stepNumber, CoPSplineType splineType, int maxNumberOfSegments, YoVariableRegistry registry)
+   public SwingCoPTrajectory(int stepNumber, CoPSplineType splineType, int maxNumberOfSegments)
    {
-      super(namePrefix, stepNumber, splineType, maxNumberOfSegments, type, registry);
+      super(stepNumber, splineType, maxNumberOfSegments, type);
    }
 
 }

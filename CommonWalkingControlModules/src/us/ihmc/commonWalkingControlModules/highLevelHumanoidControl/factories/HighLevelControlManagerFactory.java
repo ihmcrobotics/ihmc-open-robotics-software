@@ -21,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.PrintTools;
@@ -31,9 +30,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -140,8 +138,8 @@ public class HighLevelControlManagerFactory
 
       // Gains
       Map<String, YoPIDGains> jointspaceGains = walkingControllerParameters.getOrCreateJointSpaceControlGains(registry);
-      YoOrientationPIDGainsInterface taskspaceOrientationGains = walkingControllerParameters.getOrCreateTaskspaceOrientationControlGains(registry).get(bodyName);
-      YoPositionPIDGainsInterface taskspacePositionGains = walkingControllerParameters.getOrCreateTaskspacePositionControlGains(registry).get(bodyName);
+      YoPID3DGains taskspaceOrientationGains = walkingControllerParameters.getOrCreateTaskspaceOrientationControlGains(registry).get(bodyName);
+      YoPID3DGains taskspacePositionGains = walkingControllerParameters.getOrCreateTaskspacePositionControlGains(registry).get(bodyName);
 
       // Weights
       TObjectDoubleHashMap<String> jointspaceWeights = momentumOptimizationSettings.getJointspaceWeights();
@@ -191,7 +189,13 @@ public class HighLevelControlManagerFactory
       return feetManager;
    }
 
+   @Deprecated
    public LegConfigurationManager getOrCreateKneeAngleManager()
+   {
+      return getOrCreateLegConfigurationManager();
+   }
+
+   public LegConfigurationManager getOrCreateLegConfigurationManager()
    {
       if (legConfigurationManager != null)
          return legConfigurationManager;
@@ -220,7 +224,7 @@ public class HighLevelControlManagerFactory
          return null;
 
       String pelvisName = controllerToolbox.getFullRobotModel().getPelvis().getName();
-      YoOrientationPIDGainsInterface pelvisGains = walkingControllerParameters.getOrCreateTaskspaceOrientationControlGains(registry).get(pelvisName);
+      YoPID3DGains pelvisGains = walkingControllerParameters.getOrCreateTaskspaceOrientationControlGains(registry).get(pelvisName);
       PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
       LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
       Vector3D pelvisAngularWeight = momentumOptimizationSettings.getPelvisAngularWeight();

@@ -64,7 +64,7 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    @Override
    public double getFeedbackRegularizationWeight()
    {
-      return runningOnRealRobot ? 0.0001 : 0.00001;
+      return runningOnRealRobot ? 0.00001 : 0.00001;
    }
 
    /** {@inheritDoc} */
@@ -85,14 +85,17 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    @Override
    public double getDynamicRelaxationWeight()
    {
-      return runningOnRealRobot ? 500.0 : (useAngularMomentum ? 100000.0 : 1000.0);
+      return runningOnRealRobot ? 10000.0 : (useAngularMomentum ? 100000.0 : 1000.0);
    }
 
    /** {@inheritDoc} */
    @Override
    public double getDynamicRelaxationDoubleSupportWeightModifier()
    {
-      return runningOnRealRobot ? 1.0 : (useAngularMomentum ? 100.0 : 4.0);
+      if (useAngularMomentum)
+         return runningOnRealRobot ? 50.0 : 100.0;
+      else
+         return runningOnRealRobot ? 1.0 : 4.0;
    }
 
    /** {@inheritDoc} */
@@ -211,7 +214,7 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    @Override
    public double getLateralReachabilityOuterLimit()
    {
-      return 0.85;
+      return runningOnRealRobot ? 0.5 : 0.85;
    }
 
    /** {@inheritDoc} */
@@ -225,14 +228,14 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    @Override
    public double getForwardReachabilityLimit()
    {
-      return 0.9;
+      return runningOnRealRobot ? 0.65 : 0.9;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getBackwardReachabilityLimit()
    {
-      return -0.5;
+      return runningOnRealRobot ? -0.3 : -0.5;
    }
 
    /** {@inheritDoc} */

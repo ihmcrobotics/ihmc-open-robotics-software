@@ -708,4 +708,10 @@ public class YoTrajectory3D
    {
       return (getYoTrajectoryX().isValidTrajectory() && getYoTrajectoryY().isValidTrajectory() && getYoTrajectoryZ().isValidTrajectory());
    }
+   
+   public void set(Trajectory3D trajToCopy)
+   {
+      for (int index = 0; index < 3; index++)
+         getYoTrajectory(index).set(trajToCopy.getTrajectory(index));
+   }
 }

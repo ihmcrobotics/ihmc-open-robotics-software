@@ -51,7 +51,7 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
-    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
+    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
     //testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 }
 
