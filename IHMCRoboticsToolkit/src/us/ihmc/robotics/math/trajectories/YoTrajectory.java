@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class YoTrajectory
+public class YoTrajectory extends Trajectory
 {
    private String name;
    private YoPolynomial polynomial;
@@ -18,6 +18,7 @@ public class YoTrajectory
 
    public YoTrajectory(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
    {
+      super(maximumNumberOfCoefficients);
       this.name = name;
       tInitial = new YoDouble(name + "t0", registry);
       tFinal = new YoDouble(name + "tF", registry);
@@ -27,6 +28,7 @@ public class YoTrajectory
 
    public YoTrajectory(YoDouble[] coefficients, YoInteger numberOfCoefficients, YoDouble tInitial, YoDouble tFinal)
    {
+      super(numberOfCoefficients.getIntegerValue());
       polynomial = new YoPolynomial(coefficients, numberOfCoefficients);
       this.tInitial = tInitial;
       this.tFinal = tFinal;
@@ -108,8 +110,6 @@ public class YoTrajectory
          coefficients[index] = polynomial.getCoefficient(index);
       for(; index < coefficients.length; index++)
          coefficients[index] = 0;
-//      for(index = 0; index < coefficients.length; index++)
-//         PrintTools.debug(coefficients[index] + "");      
       return coefficients;
    }
 

@@ -224,17 +224,15 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
-         TransferCoPTrajectory transferCoPTrajectory = new TransferCoPTrajectory(namePrefix, i, orderOfSplineInterpolation.getEnumValue(),
-                                                                                 this.numberOfTransferSegments, registry);
-         SwingCoPTrajectory swingCoPTrajectory = new SwingCoPTrajectory(namePrefix, i, orderOfSplineInterpolation.getEnumValue(), this.numberOfSwingSegments,
-                                                                        registry);
+         TransferCoPTrajectory transferCoPTrajectory = new TransferCoPTrajectory(i, orderOfSplineInterpolation.getEnumValue(),
+                                                                                 this.numberOfTransferSegments);
+         SwingCoPTrajectory swingCoPTrajectory = new SwingCoPTrajectory(i, orderOfSplineInterpolation.getEnumValue(), this.numberOfSwingSegments);
          transferCoPTrajectories.add(transferCoPTrajectory);
          swingCoPTrajectories.add(swingCoPTrajectory);
       }
       // Also save the final transfer trajectory
-      TransferCoPTrajectory transferCoPTrajectory = new TransferCoPTrajectory(namePrefix, maxNumberOfFootstepsToConsider,
-                                                                              orderOfSplineInterpolation.getEnumValue(), this.numberOfTransferSegments,
-                                                                              registry);
+      TransferCoPTrajectory transferCoPTrajectory = new TransferCoPTrajectory(maxNumberOfFootstepsToConsider,
+                                                                              orderOfSplineInterpolation.getEnumValue(), this.numberOfTransferSegments);
       transferCoPTrajectories.add(transferCoPTrajectory);
 
       soleZUpFrames = bipedSupportPolygons.getSoleZUpFrames();
