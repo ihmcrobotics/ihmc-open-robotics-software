@@ -99,23 +99,16 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Method will set robot specific parameters in the provided {@link #ToeSlippingDetector}.
-    * Note that this method is only called if {@link #enableToeOffSlippingDetection()} returns {@code true}.
+    * Method returns robot specific parameters for the {@link #ToeSlippingDetector}.
+    * <p>
+    * Must be overwritten if {@link #enableToeOffSlippingDetection()} returns {@code true}.
     * </p>
-    * Override this method to configure the parameters as follows:
-    * </p>
-    * {@code double forceMagnitudeThreshold = 25.0;}</br>
-    * {@code double velocityThreshold = 0.4;}</br>
-    * {@code double double slippageDistanceThreshold = 0.04;}</br>
-    * {@code double filterBreakFrequency = 10.0;}</br>
-    * {@code toeSlippingDetectorToConfigure.configure(forceMagnitudeThreshold, velocityThreshold, slippageDistanceThreshold, filterBreakFrequency);}
-    * </p>
-    * @param toeSlippingDetectorToConfigure (modified)
+    * @return the parameters for slip detection during toe off.
     * @see ToeSlippingDetector#configure(double, double, double, double)
     */
-   public void configureToeSlippingDetector(ToeSlippingDetector toeSlippingDetectorToConfigure)
+   public ToeSlippingDetectorParameters getToeSlippingDetectorParameters()
    {
-      throw new RuntimeException("Override this method if using the " + ToeSlippingDetector.class.getSimpleName());
+      return null;
    }
 
    /**
