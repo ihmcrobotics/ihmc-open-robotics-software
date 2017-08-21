@@ -1,9 +1,13 @@
 package us.ihmc.valkyrie.parameters;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -19,23 +23,19 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlG
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.PDGains;
+import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ValkyrieWalkingControllerParameters extends WalkingControllerParameters
 {
@@ -45,9 +45,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    private final ValkyrieJointMap jointMap;
 
-   private Map<String, YoPIDGains> jointspaceGains = null;
-   private Map<String, YoPID3DGains> taskspaceAngularGains = null;
-   private Map<String, YoPID3DGains> taskspaceLinearGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
@@ -183,9 +180,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
+   public PDGains getCoMHeightControlGains()
    {
-      YoPDGains gains = new YoPDGains("CoMHeight", registry);
+      PDGains gains = new PDGains("_CoMHeight");
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -198,15 +195,133 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setZeta(zeta);
       gains.setMaximumFeedback(maxAcceleration);
       gains.setMaximumFeedbackRate(maxJerk);
-      gains.createDerivativeGainUpdater(true);
 
       return gains;
    }
 
-   private YoPID3DGains createPelvisOrientationControlGains(YoVariableRegistry registry)
+   /** {@inheritDoc} */
+   @Override
+   public List<ImmutablePair<PIDGains, List<String>>> getJointSpaceControlGains()
    {
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XY, false);
+      List<String> spineNames = new ArrayList<>();
+      List<String> neckNames = new ArrayList<>();
+      List<String> armNames = new ArrayList<>();
 
+      Arrays.stream(jointMap.getSpineJointNames()).forEach(n -> spineNames.add(jointMap.getSpineJointName(n)));
+      Arrays.stream(jointMap.getNeckJointNames()).forEach(n -> neckNames.add(jointMap.getNeckJointName(n)));
+      for (RobotSide side : RobotSide.values)
+      {
+         Arrays.stream(jointMap.getArmJointNames()).forEach(n -> armNames.add(jointMap.getArmJointName(side, n)));
+      }
+
+      PIDGains spineGains = createSpineControlGains();
+      PIDGains neckGains = createNeckControlGains();
+      PIDGains armGains = createArmControlGains();
+
+      List<ImmutablePair<PIDGains, List<String>>> jointspaceGains = new ArrayList<>();
+      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(spineGains, spineNames));
+      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(neckGains, neckNames));
+      jointspaceGains.add(new ImmutablePair<PIDGains, List<String>>(armGains, armNames));
+
+      return jointspaceGains;
+   }
+
+   private PIDGains createSpineControlGains()
+   {
+      PIDGains spineGains = new PIDGains("_SpineJointGains");
+      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
+
+      double kp = 50.0;
+      double zeta = runningOnRealRobot ? 0.3 : 0.8;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+
+      spineGains.setKp(kp);
+      spineGains.setZeta(zeta);
+      spineGains.setKi(ki);
+      spineGains.setMaxIntegralError(maxIntegralError);
+      spineGains.setMaximumFeedback(maxAccel);
+      spineGains.setMaximumFeedbackRate(maxJerk);
+
+      return spineGains;
+   }
+
+   private PIDGains createNeckControlGains()
+   {
+      PIDGains gains = new PIDGains("_NeckJointGains");
+      boolean realRobot = target == RobotTarget.REAL_ROBOT;
+
+      double kp = 40.0;
+      double zeta = realRobot ? 0.4 : 0.8;
+      double maxAccel = 18.0;
+      double maxJerk = 270.0;
+
+      gains.setKp(kp);
+      gains.setZeta(zeta);
+      gains.setMaximumFeedback(maxAccel);
+      gains.setMaximumFeedbackRate(maxJerk);
+
+      return gains;
+   }
+
+   private PIDGains createArmControlGains()
+   {
+      PIDGains armGains = new PIDGains("_ArmJointGains");
+      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
+
+      double kp = runningOnRealRobot ? 200.0 : 120.0; // 200.0
+      double zeta = runningOnRealRobot ? 1.0 : 0.7;
+      double ki = runningOnRealRobot ? 0.0 : 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 50.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 750.0 : Double.POSITIVE_INFINITY;
+
+      armGains.setKp(kp);
+      armGains.setZeta(zeta);
+      armGains.setKi(ki);
+      armGains.setMaxIntegralError(maxIntegralError);
+      armGains.setMaximumFeedback(maxAccel);
+      armGains.setMaximumFeedbackRate(maxJerk);
+
+      return armGains;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public List<ImmutableTriple<String, PID3DGains, List<String>>> getTaskspaceOrientationControlGains()
+   {
+      List<ImmutableTriple<String, PID3DGains, List<String>>> taskspaceAngularGains = new ArrayList<>();
+
+      PID3DGains chestAngularGains = createChestOrientationControlGains();
+      List<String> chestGainBodies = new ArrayList<>();
+      chestGainBodies.add(jointMap.getChestName());
+      taskspaceAngularGains.add(new ImmutableTriple<>("Chest", chestAngularGains, chestGainBodies));
+
+      PID3DGains headAngularGains = createHeadOrientationControlGains();
+      List<String> headGainBodies = new ArrayList<>();
+      headGainBodies.add(jointMap.getHeadName());
+      taskspaceAngularGains.add(new ImmutableTriple<>("Head", headAngularGains, headGainBodies));
+
+      PID3DGains handAngularGains = createHandOrientationControlGains();
+      List<String> handGainBodies = new ArrayList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         handGainBodies.add(jointMap.getHandName(robotSide));
+      }
+      taskspaceAngularGains.add(new ImmutableTriple<>("Hand", handAngularGains, handGainBodies));
+
+      PID3DGains pelvisAngularGains = createPelvisOrientationControlGains();
+      List<String> pelvisGainBodies = new ArrayList<>();
+      pelvisGainBodies.add(jointMap.getPelvisName());
+      taskspaceAngularGains.add(new ImmutableTriple<>("Pelvis", pelvisAngularGains, pelvisGainBodies));
+
+      return taskspaceAngularGains;
+   }
+
+   private PID3DGains createPelvisOrientationControlGains()
+   {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       double kpXY = runningOnRealRobot ? 100.0 : 100.0; // 160.0
@@ -216,14 +331,15 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double maxAccel = runningOnRealRobot ? 18.0 : 18.0;
       double maxJerk = runningOnRealRobot ? 270.0 : 270.0;
 
+      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XY, false);
       gains.setProportionalGains(kpXY, kpXY, kpZ);
       gains.setDampingRatios(zetaXY, zetaXY, zetaZ);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return new DefaultYoPID3DGains("PelvisOrientation", gains, registry);
+      return gains;
    }
 
-   private YoPID3DGains createHeadOrientationControlGains(YoVariableRegistry registry)
+   private PID3DGains createHeadOrientationControlGains()
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -238,32 +354,11 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setDampingRatios(zeta, zeta, zeta);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return new DefaultYoPID3DGains("HeadOrientation", gains, registry);
-   }
-
-   private YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
-   {
-      YoPIDGains gains = new YoPIDGains("HeadJointspace", registry);
-      boolean realRobot = target == RobotTarget.REAL_ROBOT;
-
-      double kp = 40.0;
-      double zeta = realRobot ? 0.4 : 0.8;
-      double maxAccel = 18.0;
-      double maxJerk = 270.0;
-
-      gains.setKp(kp);
-      gains.setZeta(zeta);
-      gains.setMaximumFeedback(maxAccel);
-      gains.setMaximumFeedbackRate(maxJerk);
-      gains.createDerivativeGainUpdater(true);
-
       return gains;
    }
 
-   private YoPID3DGains createChestControlGains(YoVariableRegistry registry)
+   private PID3DGains createChestOrientationControlGains()
    {
-      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XY, false);
-
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       double kpXY = runningOnRealRobot ? 80.0 : 100.0;
@@ -273,179 +368,72 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double maxAccel = runningOnRealRobot ? 12.0 : 18.0;
       double maxJerk = runningOnRealRobot ? 180.0 : 270.0;
 
+      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XY, false);
       gains.setProportionalGains(kpXY, kpXY, kpZ);
       gains.setDampingRatios(zetaXY, zetaXY, zetaZ);
       gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return new DefaultYoPID3DGains("ChestOrientation", gains, registry);
+      return gains;
    }
 
-   private YoPIDGains createSpineControlGains(YoVariableRegistry registry)
+   private PID3DGains createHandOrientationControlGains()
    {
-      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-
-      double kp = 50.0;
-      double zeta = runningOnRealRobot ? 0.3 : 0.8;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-
-      YoPIDGains spineGains = new YoPIDGains("SpineJointspace", registry);
-      spineGains.setKp(kp);
-      spineGains.setZeta(zeta);
-      spineGains.setKi(ki);
-      spineGains.setMaximumIntegralError(maxIntegralError);
-      spineGains.setMaximumFeedback(maxAccel);
-      spineGains.setMaximumFeedbackRate(maxJerk);
-      spineGains.createDerivativeGainUpdater(true);
-
-      return spineGains;
-   }
-
-   private YoPIDGains createArmControlGains(YoVariableRegistry registry)
-   {
-      YoPIDGains armGains = new YoPIDGains("ArmJointspace", registry);
-      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-
-      double kp = runningOnRealRobot ? 200.0 : 120.0; // 200.0
-      double zeta = runningOnRealRobot ? 1.0 : 0.7;
-      double ki = runningOnRealRobot ? 0.0 : 0.0;
-      double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 50.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 750.0 : Double.POSITIVE_INFINITY;
-
-      armGains.setKp(kp);
-      armGains.setZeta(zeta);
-      armGains.setKi(ki);
-      armGains.setMaximumIntegralError(maxIntegralError);
-      armGains.setMaximumFeedback(maxAccel);
-      armGains.setMaximumFeedbackRate(maxJerk);
-      armGains.createDerivativeGainUpdater(true);
-
-      return armGains;
-   }
-
-   private YoPID3DGains createHandOrientationControlGains(YoVariableRegistry registry)
-   {
-      SymmetricYoPIDSE3Gains orientationGains = new SymmetricYoPIDSE3Gains("HandOrientation", registry);
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
       double kp = 100.0;
       double zeta = runningOnRealRobot ? 0.6 : 1.0;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
       double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
 
-      orientationGains.setProportionalGains(kp);
-      orientationGains.setDampingRatios(zeta);
-      orientationGains.setIntegralGains(ki, maxIntegralError);
-      orientationGains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
+      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XYZ, false);
+      gains.setProportionalGains(kp);
+      gains.setDampingRatios(zeta);
+      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
 
-      return orientationGains;
-   }
-
-   private YoPID3DGains createHandPositionControlGains(YoVariableRegistry registry)
-   {
-      SymmetricYoPIDSE3Gains positionGains = new SymmetricYoPIDSE3Gains("HandPosition", registry);
-      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-
-      double kp = 100.0;
-      double zeta = runningOnRealRobot ? 0.6 : 1.0;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-
-      positionGains.setProportionalGains(kp);
-      positionGains.setDampingRatios(zeta);
-      positionGains.setIntegralGains(ki, maxIntegralError);
-      positionGains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
-
-      return positionGains;
+      return gains;
    }
 
    /** {@inheritDoc} */
    @Override
-   public Map<String, YoPIDGains> getOrCreateJointSpaceControlGains(YoVariableRegistry registry)
+   public List<ImmutableTriple<String, PID3DGains, List<String>>> getTaskspacePositionControlGains()
    {
-      if (jointspaceGains != null)
-         return jointspaceGains;
+      List<ImmutableTriple<String, PID3DGains, List<String>>> taskspaceLinearGains = new ArrayList<>();
 
-      jointspaceGains = new HashMap<>();
-
-      YoPIDGains spineGains = createSpineControlGains(registry);
-      for (SpineJointName name : jointMap.getSpineJointNames())
-         jointspaceGains.put(jointMap.getSpineJointName(name), spineGains);
-
-      YoPIDGains headGains = createHeadJointspaceControlGains(registry);
-      for (NeckJointName name : jointMap.getNeckJointNames())
-         jointspaceGains.put(jointMap.getNeckJointName(name), headGains);
-
-      YoPIDGains armGains = createArmControlGains(registry);
+      PID3DGains handLinearGains = createHandPositionControlGains();
+      List<String> handGainBodies = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         for (ArmJointName name : jointMap.getArmJointNames())
-            jointspaceGains.put(jointMap.getArmJointName(robotSide, name), armGains);
+         handGainBodies.add(jointMap.getHandName(robotSide));
       }
-
-      return jointspaceGains;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public Map<String, YoPID3DGains> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
-   {
-      if (taskspaceAngularGains != null)
-         return taskspaceAngularGains;
-
-      taskspaceAngularGains = new HashMap<>();
-
-      YoPID3DGains chestAngularGains = createChestControlGains(registry);
-      taskspaceAngularGains.put(jointMap.getChestName(), chestAngularGains);
-
-      YoPID3DGains headAngularGains = createHeadOrientationControlGains(registry);
-      taskspaceAngularGains.put(jointMap.getHeadName(), headAngularGains);
-
-      YoPID3DGains handAngularGains = createHandOrientationControlGains(registry);
-      for (RobotSide robotSide : RobotSide.values)
-         taskspaceAngularGains.put(jointMap.getHandName(robotSide), handAngularGains);
-
-      YoPID3DGains pelvisAngularGains = createPelvisOrientationControlGains(registry);
-      taskspaceAngularGains.put(jointMap.getPelvisName(), pelvisAngularGains);
-
-      return taskspaceAngularGains;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public Map<String, YoPID3DGains> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
-   {
-      if (taskspaceLinearGains != null)
-         return taskspaceLinearGains;
-
-      taskspaceLinearGains = new HashMap<>();
-
-      YoPID3DGains handLinearGains = createHandPositionControlGains(registry);
-      for (RobotSide robotSide : RobotSide.values)
-         taskspaceLinearGains.put(jointMap.getHandName(robotSide), handLinearGains);
+      taskspaceLinearGains.add(new ImmutableTriple<>("Hand", handLinearGains, handGainBodies));
 
       return taskspaceLinearGains;
    }
 
+   private PID3DGains createHandPositionControlGains()
+   {
+      boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
+
+      double kp = 100.0;
+      double zeta = runningOnRealRobot ? 0.6 : 1.0;
+      double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+
+      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XYZ, false);
+      gains.setProportionalGains(kp);
+      gains.setDampingRatios(zeta);
+      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
+
+      return gains;
+   }
+
    /** {@inheritDoc} */
    @Override
-   public RigidBodyControlMode getDefaultControlModeForRigidBody(String bodyName)
+   public Map<String, RigidBodyControlMode> getDefaultControlModesForRigidBodies()
    {
-      if (bodyName.equals(jointMap.getChestName()))
-      {
-         return RigidBodyControlMode.TASKSPACE;
-      }
-      else
-      {
-         return RigidBodyControlMode.JOINTSPACE;
-      }
+      Map<String, RigidBodyControlMode> defaultControlModes = new HashMap<>();
+      defaultControlModes.put(jointMap.getChestName(), RigidBodyControlMode.TASKSPACE);
+      return defaultControlModes;
    }
 
    /** {@inheritDoc} */
@@ -560,7 +548,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public YoPIDSE3Gains createSwingFootControlGains(YoVariableRegistry registry)
+   public PIDSE3Gains getSwingFootControlGains()
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -586,11 +574,11 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setOrientationDampingRatios(zetaOrientationXY, zetaOrientationXY, zetaOrientationZ);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
-      return new DefaultYoPIDSE3Gains("SwingFoot", gains, registry);
+      return gains;
    }
 
    @Override
-   public YoPIDSE3Gains createHoldPositionFootControlGains(YoVariableRegistry registry)
+   public PIDSE3Gains getHoldPositionFootControlGains()
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -613,11 +601,11 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setOrientationDampingRatios(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
-      return new DefaultYoPIDSE3Gains("HoldFoot", gains, registry);
+      return gains;
    }
 
    @Override
-   public YoPIDSE3Gains createToeOffFootControlGains(YoVariableRegistry registry)
+   public PIDSE3Gains getToeOffFootControlGains()
    {
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -640,7 +628,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setOrientationDampingRatios(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
-      return new DefaultYoPIDSE3Gains("ToeOffFoot", gains, registry);
+      return gains;
    }
 
    @Override
