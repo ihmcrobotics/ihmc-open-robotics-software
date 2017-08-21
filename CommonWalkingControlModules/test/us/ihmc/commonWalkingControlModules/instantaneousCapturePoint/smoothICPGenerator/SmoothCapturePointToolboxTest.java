@@ -86,7 +86,19 @@ public class SmoothCapturePointToolboxTest
          {
             FrameTrajectory3D cmpPolynomial3D = new FrameTrajectory3D(numberOfCoefficients, ReferenceFrame.getWorldFrame());
             cmpPolynomial3D.setLinear(t0, tFinal, copsToPack.get(i), copsToPack.get(i+1));
+            cmpPolynomial3D.compute(t0);
+            EuclidCoreTestTools.assertTuple3DEquals(copsToPack.get(i), cmpPolynomial3D.getPosition(), EPSILON);
+            cmpPolynomial3D.compute(tFinal);
+            EuclidCoreTestTools.assertTuple3DEquals(copsToPack.get(i+1), cmpPolynomial3D.getPosition(), EPSILON);
+            assertEquals(t0, cmpPolynomial3D.getInitialTime(), EPSILON);
+            assertEquals(tFinal, cmpPolynomial3D.getFinalTime(), EPSILON);
             cmpPolynomials3D.set(i, cmpPolynomial3D);
+            cmpPolynomials3D.get(i).compute(t0);
+            EuclidCoreTestTools.assertTuple3DEquals(copsToPack.get(i), cmpPolynomials3D.get(i).getPosition(), EPSILON);
+            cmpPolynomials3D.get(i).compute(tFinal);
+            EuclidCoreTestTools.assertTuple3DEquals(copsToPack.get(i+1), cmpPolynomials3D.get(i).getPosition(), EPSILON);
+            assertEquals(t0, cmpPolynomials3D.get(i).getInitialTime(), EPSILON);
+            assertEquals(tFinal, cmpPolynomials3D.get(i).getFinalTime(), EPSILON);
          }
          icpToolbox.computeDesiredCornerPoints3D(entryCornerPointsToPack, exitCornerPointsToPack, cmpPolynomials3D, omega0);
          icpToolbox.computeDesiredCornerPoints(entryCornerPointsToPackDecoupled, exitCornerPointsToPackDecoupled, cmpPolynomials3D, omega0);
@@ -103,13 +115,21 @@ public class SmoothCapturePointToolboxTest
                exitCornerPointsByHandToPack.set(i-1, newEntryICP);
             }
          }
-         PrintTools.debug("Test " + j + ":");
-         PrintTools.debug("Entry Calc: " + entryCornerPointsToPack.toString());
-         PrintTools.debug("Entry Hand: " + entryCornerPointsByHandToPack.toString());
-         PrintTools.debug("Exit Calc: " + exitCornerPointsToPack.toString());
-         PrintTools.debug("Exit Hand: " + exitCornerPointsByHandToPack.toString());
-         PrintTools.debug("");
-         
+//         PrintTools.debug("Test " + j + ":");
+//         PrintTools.debug("Entry Calc: " + entryCornerPointsToPack.toString());
+//         PrintTools.debug("Entry Hand: " + entryCornerPointsByHandToPack.toString());
+//         PrintTools.debug("Exit Calc: " + exitCornerPointsToPack.toString());
+//         PrintTools.debug("Exit Hand: " + exitCornerPointsByHandToPack.toString());
+//         PrintTools.debug("");
+         for (int i = 0; i < numberOfCoPWaypoints-1; i++)
+         {
+            cmpPolynomials3D.get(i).compute(t0);
+            assertEquals(t0, cmpPolynomials3D.get(i).getInitialTime(), EPSILON);
+            assertEquals(tFinal, cmpPolynomials3D.get(i).getFinalTime(), EPSILON);
+            EuclidCoreTestTools.assertTuple3DEquals(copsToPack.get(i), cmpPolynomials3D.get(i).getPosition(), EPSILON);
+            cmpPolynomials3D.get(i).compute(tFinal);
+            EuclidCoreTestTools.assertTuple3DEquals(copsToPack.get(i+1), cmpPolynomials3D.get(i).getPosition(), EPSILON);
+         }
          for(int i = 0; i < numberOfCoefficients-1; i++)
          {
             EuclidCoreTestTools.assertTuple3DEquals("", entryCornerPointsByHandToPack.get(i), entryCornerPointsToPack.get(i), EPSILON);

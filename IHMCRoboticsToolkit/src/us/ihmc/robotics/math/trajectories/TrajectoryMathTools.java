@@ -152,11 +152,11 @@ public class TrajectoryMathTools
    {
       int numberOfCoeffsToSet = trajectory1.getNumberOfCoefficients() + trajectory2.getNumberOfCoefficients() - 1;
 
-      fft.setCoefficients(trajectory1.getCoefficients());
+      fft.setCoefficients(trajectory1.getCoefficients(), trajectory1.getNumberOfCoefficients());
       tempComplexReference = fft.getForwardTransform();
       ComplexNumber.copyComplexArray(tempComplex1, tempComplexReference);
 
-      fft.setCoefficients(trajectory2.getCoefficients());
+      fft.setCoefficients(trajectory2.getCoefficients(), trajectory2.getNumberOfCoefficients());
       tempComplexReference = fft.getForwardTransform();
       ComplexNumber.copyComplexArray(tempComplex2, tempComplexReference);
 

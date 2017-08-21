@@ -70,6 +70,22 @@ public class FastFourierTransform
       }
    }
 
+   public void setCoefficients(double[] coefficients, int numberOfCoefficientsToUse)
+   {
+      if (coefficients.length > maxNumberOfCoefficients)
+         throw new RuntimeException("Insufficient number of coefficients for FFT transform, max: " + maxNumberOfCoefficients + ", provided: "
+               + numberOfCoefficientsToUse);
+      int index = 0;
+      for (; index < numberOfCoefficientsToUse; index++)
+      {
+         this.coefficients[index].setToPurelyReal(coefficients[index]);
+      }
+      for (; index < maxNumberOfCoefficients; index++)
+      {
+         this.coefficients[index].setToPurelyReal(0.0);
+      }
+   }
+   
    private ComplexNumber tempComplex1 = new ComplexNumber(), tempComplex2 = new ComplexNumber(), tempComplex = new ComplexNumber();
 
    public ComplexNumber[] getForwardTransform()
