@@ -59,6 +59,7 @@ public class HighLevelControlManagerFactory
 
    private final Map<String, YoPIDGains> jointGainMap = new HashMap<>();
    private final Map<String, YoPID3DGains> taskspaceOrientationGainMap = new HashMap<>();
+   private final Map<String, YoPID3DGains> taskspacePositionGainMap = new HashMap<>();
 
    public HighLevelControlManagerFactory(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
@@ -79,6 +80,7 @@ public class HighLevelControlManagerFactory
 
       ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, registry);
       ParameterTools.extractGainMap("Orientation", walkingControllerParameters.getTaskspaceOrientationControlGains(), taskspaceOrientationGainMap, registry);
+      ParameterTools.extractGainMap("Position", walkingControllerParameters.getTaskspacePositionControlGains(), taskspacePositionGainMap, registry);
    }
 
    public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
@@ -145,7 +147,7 @@ public class HighLevelControlManagerFactory
 
       // Gains
       YoPID3DGains taskspaceOrientationGains = taskspaceOrientationGainMap.get(bodyName);
-      YoPID3DGains taskspacePositionGains = taskspaceOrientationGainMap.get(bodyName);
+      YoPID3DGains taskspacePositionGains = taskspacePositionGainMap.get(bodyName);
 
       // Weights
       TObjectDoubleHashMap<String> jointspaceWeights = momentumOptimizationSettings.getJointspaceWeights();
