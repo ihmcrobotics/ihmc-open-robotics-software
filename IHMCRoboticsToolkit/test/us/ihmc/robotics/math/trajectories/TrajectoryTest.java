@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
+import us.ihmc.commons.Epsilons;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.MathTools;
 
@@ -13,6 +14,23 @@ public class TrajectoryTest
    private static double EPSILON = 1e-6;
 
    String namePrefix = "TrajectoryTest";
+   
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testLinearSet()
+   {
+      Trajectory traj = new Trajectory(2);
+      assertEquals(0, traj.getNumberOfCoefficients());
+      traj.setLinear(1, 2, 3, 5);
+      assertEquals(1, traj.getInitialTime(), Epsilons.ONE_BILLIONTH);
+      assertEquals(2, traj.getFinalTime(), Epsilons.ONE_BILLIONTH);
+      traj.compute(traj.getInitialTime());
+      assertEquals(3.0, traj.getPosition(), Epsilons.ONE_BILLIONTH);
+      traj.compute(traj.getFinalTime());
+      assertEquals(5.0, traj.getPosition(), Epsilons.ONE_BILLIONTH);
+      assertEquals(2, traj.getCoefficient(1), Epsilons.ONE_BILLIONTH);
+      assertEquals(1, traj.getCoefficient(0), Epsilons.ONE_BILLIONTH);
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
