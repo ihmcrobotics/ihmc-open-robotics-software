@@ -98,11 +98,16 @@ public class FeetManager
       PIDSE3Gains toeGains = walkingControllerParameters.getToeOffFootControlGains();
       YoPIDSE3Gains toeOffFootControlGains = new DefaultYoPIDSE3Gains("ToeOffFoot", toeGains, registry);
 
-      walkingControllerParameters.getOrCreateExplorationParameters(registry);
+      ExplorationParameters explorationParameters = null;
+      if (walkingControllerParameters.createFootholdExplorationTools())
+      {
+         explorationParameters = new ExplorationParameters(registry);
+      }
+
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, toeOffCalculator, walkingControllerParameters, swingFootControlGains,
-               holdPositionFootControlGains, toeOffFootControlGains, controllerToolbox, registry);
+               holdPositionFootControlGains, toeOffFootControlGains, controllerToolbox, explorationParameters, registry);
 
          footControlModules.put(robotSide, footControlModule);
       }

@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
@@ -44,7 +43,6 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 
 
@@ -810,19 +808,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public double getCoPErrorThresholdForHighCoPDamping()
    {
       return Double.POSITIVE_INFINITY; //0.075;
-   }
-
-//   private ExplorationParameters explorationParameters = null;
-   /** {@inheritDoc} */
-   @Override
-   public ExplorationParameters getOrCreateExplorationParameters(YoVariableRegistry registry)
-   {
-      return null;
-
-      // GW: Disabled this for now since it creates lots of debugging yoVariables.
-//      if (explorationParameters == null)
-//         explorationParameters = new ExplorationParameters(registry);
-//      return explorationParameters;
    }
 
    /** {@inheritDoc} */
