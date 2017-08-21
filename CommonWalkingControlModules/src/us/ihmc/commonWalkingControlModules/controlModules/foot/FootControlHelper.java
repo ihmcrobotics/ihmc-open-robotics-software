@@ -75,7 +75,7 @@ public class FootControlHelper
          double controlDT = controllerToolbox.getControlDT();
          FootSwitchInterface footSwitch = controllerToolbox.getFootSwitches().get(robotSide);
          toeSlippingDetector = new ToeSlippingDetector(namePrefix, controlDT, foot, footSwitch, registry);
-         walkingControllerParameters.configureToeSlippingDetector(toeSlippingDetector);
+         toeSlippingDetector.configure(walkingControllerParameters.getToeSlippingDetectorParameters());
       }
       else
       {

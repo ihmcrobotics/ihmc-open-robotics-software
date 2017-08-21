@@ -18,8 +18,8 @@ import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParame
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeSlippingDetectorParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
@@ -141,13 +141,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public void configureToeSlippingDetector(ToeSlippingDetector toeSlippingDetectorToConfigure)
+   public ToeSlippingDetectorParameters getToeSlippingDetectorParameters()
    {
-      double forceMagnitudeThreshold = 25.0;
-      double velocityThreshold = 0.4;
-      double slippageDistanceThreshold = 0.04;
-      double filterBreakFrequency = 10.0;
-      toeSlippingDetectorToConfigure.configure(forceMagnitudeThreshold, velocityThreshold, slippageDistanceThreshold, filterBreakFrequency);
+      return new ToeSlippingDetectorParameters();
    }
 
    /** @inheritDoc */
