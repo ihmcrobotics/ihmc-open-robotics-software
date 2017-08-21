@@ -59,6 +59,11 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
    {
       return 0.08;
    }
+   
+   protected FootstepDataListMessage getFootstepDataListMessage()
+   {
+      return new FootstepDataListMessage();
+   }
 
    @Test
    public void testForwardWalk() throws SimulationExceededMaximumTimeException
@@ -72,7 +77,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
 
       RobotSide side = RobotSide.LEFT;
       
-      FootstepDataListMessage footMessage = new FootstepDataListMessage();
+      FootstepDataListMessage footMessage = getFootstepDataListMessage();
       ArrayList<Point3D> rootLocations = new ArrayList<>();
       
       ControllerSpy controllerSpy = new ControllerSpy(drcSimulationTestHelper);
