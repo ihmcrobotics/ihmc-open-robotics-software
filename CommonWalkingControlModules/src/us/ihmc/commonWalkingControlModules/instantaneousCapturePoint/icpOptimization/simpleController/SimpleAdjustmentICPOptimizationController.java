@@ -109,7 +109,7 @@ public class SimpleAdjustmentICPOptimizationController extends AbstractSimpleICP
       this.currentICP.set(currentICP);
       this.desiredICP.set(desiredICP);
       this.desiredICPVelocity.set(desiredICPVelocity);
-      this.perfectCMP.set(perfectCMP);
+      this.yoPerfectCMP.set(perfectCMP);
 
       this.icpError.set(currentICP);
       this.icpError.sub(desiredICP);

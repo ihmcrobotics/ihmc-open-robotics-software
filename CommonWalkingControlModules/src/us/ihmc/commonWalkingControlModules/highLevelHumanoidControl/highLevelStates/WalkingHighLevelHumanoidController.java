@@ -172,7 +172,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       this.feetManager = managerFactory.getOrCreateFeetManager();
-      this.legConfigurationManager = managerFactory.getOrCreateKneeAngleManager();
+      this.legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       RigidBody head = fullRobotModel.getHead();
       RigidBody chest = fullRobotModel.getChest();
