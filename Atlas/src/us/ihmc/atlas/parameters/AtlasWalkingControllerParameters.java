@@ -826,17 +826,24 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public String[] getJointsWithRestrictiveLimits(JointLimitParameters jointLimitParametersToPack)
+   public String[] getJointsWithRestrictiveLimits()
    {
-      jointLimitParametersToPack.setMaxAbsJointVelocity(9.0);
-      jointLimitParametersToPack.setJointLimitDistanceForMaxVelocity(30.0 * Math.PI/180.0);
-      jointLimitParametersToPack.setJointLimitFilterBreakFrequency(15.0);
-      jointLimitParametersToPack.setVelocityControlGain(30.0);
-
       String bkxName = jointMap.getSpineJointName(SpineJointName.SPINE_ROLL);
       String bkyName = jointMap.getSpineJointName(SpineJointName.SPINE_PITCH);
       String[] joints = {bkxName, bkyName};
       return joints;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public JointLimitParameters getJointLimitParametersForJointsWithRestictiveLimits()
+   {
+      JointLimitParameters parameters = new JointLimitParameters();
+      parameters.setMaxAbsJointVelocity(9.0);
+      parameters.setJointLimitDistanceForMaxVelocity(30.0 * Math.PI/180.0);
+      parameters.setJointLimitFilterBreakFrequency(15.0);
+      parameters.setVelocityControlGain(30.0);
+      return parameters;
    }
 
    /** {@inheritDoc} */
