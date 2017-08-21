@@ -23,7 +23,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.robotics.controllers.PDGains;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -628,19 +628,19 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       }
 
       @Override
-      public YoPIDSE3Gains createSwingFootControlGains(YoVariableRegistry registry)
+      public PIDSE3Gains getSwingFootControlGains()
       {
          return null;
       }
 
       @Override
-      public YoPIDSE3Gains createHoldPositionFootControlGains(YoVariableRegistry registry)
+      public PIDSE3Gains getHoldPositionFootControlGains()
       {
          return null;
       }
 
       @Override
-      public YoPIDSE3Gains createToeOffFootControlGains(YoVariableRegistry registry)
+      public PIDSE3Gains getToeOffFootControlGains()
       {
          return null;
       }
