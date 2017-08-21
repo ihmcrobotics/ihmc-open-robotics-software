@@ -20,6 +20,7 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehav
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.PartialFootholdBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestICPOptimizationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.debug.TestSmoothICPPlannerBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
@@ -235,6 +236,9 @@ public class IHMCHumanoidBehaviorManager
 
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_ICP_OPTIMIZATION,
             new TestICPOptimizationBehavior(behaviorCommunicationBridge, referenceFrames, yoTime));
+      
+      dispatcher.addBehavior(HumanoidBehaviorType.TEST_SMOOTH_ICP_PLANNER,
+                             new TestSmoothICPPlannerBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions));
 
       dispatcher.addBehavior(HumanoidBehaviorType.PUSH_AND_WALK,
                              new PushAndWalkBehavior(behaviorCommunicationBridge, referenceFrames, fullRobotModel, walkingControllerParameters, yoGraphicsListRegistry));

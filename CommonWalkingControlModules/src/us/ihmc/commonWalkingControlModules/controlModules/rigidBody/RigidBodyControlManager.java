@@ -153,6 +153,12 @@ public class RigidBodyControlManager
 
    public void setDefaultControlMode(RigidBodyControlMode defaultControlMode)
    {
+      if (defaultControlMode == null)
+      {
+         this.defaultControlMode.set(RigidBodyControlMode.JOINTSPACE);
+         return;
+      }
+
       if (defaultControlMode == RigidBodyControlMode.TASKSPACE && homePose == null)
       {
          throw new RuntimeException("Need to define home pose if default control mode for body " + bodyName + " is set to TASKSPACE.");
