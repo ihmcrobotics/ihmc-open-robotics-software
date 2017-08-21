@@ -1,32 +1,25 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
-
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.*;
 
 public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 {
@@ -38,7 +31,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    protected SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
 
    protected RobotSide initialSide;
-   protected RigidBodyTransform initialFootPose = new RigidBodyTransform();
+   protected BipedalFootstepPlannerNode startNode;
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -49,7 +42,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
    protected final ArrayList<BipedalFootstepPlannerNode> goalNodes = new ArrayList<>();
    protected final YoBoolean exitAfterInitialSolution = new YoBoolean("exitAfterInitialSolution", registry);
-   protected BipedalFootstepPlannerNode startNode, bestGoalNode;
+   protected BipedalFootstepPlannerNode bestGoalNode;
    protected FootstepPlan footstepPlan = null;
 
    protected BipedalFootstepPlannerListener listener;
@@ -108,8 +101,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    public final void setInitialStanceFoot(FramePose stanceFootPose, RobotSide initialSide)
    {
       stanceFootPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      this.initialSide = initialSide;
-      stanceFootPose.getPose(initialFootPose);
+      startNode = new BipedalFootstepPlannerNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), initialSide);
       initialStanceFootWasSet = true;
    }
 
@@ -138,7 +130,6 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    protected void initialize()
    {
       stack.clear();
-      startNode = new BipedalFootstepPlannerNode(initialSide, initialFootPose);
       notifiyListenersStartNodeWasAdded(startNode);
       stack.push(startNode);
       mapToAllExploredNodes.clear();

@@ -5,31 +5,25 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class BipedalFootstepPlannerNodeUtils
 {
-   public static void shiftInSoleFrame(Vector2D shiftVector, BipedalFootstepPlannerNode node)
+   public static RigidBodyTransform shiftInSoleFrame(Vector2D shiftVector, RigidBodyTransform soleTransform)
    {
       RigidBodyTransform shiftTransform = new RigidBodyTransform();
       shiftTransform.setTranslation(new Vector3D(shiftVector.getX(), shiftVector.getY(), 0.0));
-
-      RigidBodyTransform soleTransform = new RigidBodyTransform();
-      node.getSoleTransform(soleTransform);
-
       soleTransform.multiply(shiftTransform);
-      node.setSoleTransform(soleTransform);
+      return soleTransform;
    }
 
-   public static void transformSoleTransformWithSnapTransformFromZeroZ(RigidBodyTransform snapTransform, BipedalFootstepPlannerNode node)
+   public static RigidBodyTransform getSnappedSoleTransform(BipedalFootstepPlannerNode node, RigidBodyTransform snapTransform)
    {
-      // Ignore the z since the snap transform snapped from z = 0. Keep everything else.
       RigidBodyTransform soleTransform = new RigidBodyTransform();
       node.getSoleTransform(soleTransform);
-
       soleTransform.setTranslationZ(0.0);
       soleTransform.preMultiply(snapTransform);
-
-      node.setSoleTransform(soleTransform);
+      return soleTransform;
    }
 
    public static Point3D getSolePosition(BipedalFootstepPlannerNode node)
@@ -50,14 +44,6 @@ public class BipedalFootstepPlannerNodeUtils
       Vector3D eulerAngles = new Vector3D();
       soleTransform.getRotationEuler(eulerAngles);
       return eulerAngles.getZ();
-   }
-
-   public static void removePitchAndRoll(BipedalFootstepPlannerNode node)
-   {
-      RigidBodyTransform soleTransform = new RigidBodyTransform();
-      node.getSoleTransform(soleTransform);
-      RotationTools.removePitchAndRollFromTransform(soleTransform);
-      node.setSoleTransform(soleTransform);
    }
 
    public static double getCostFromStartToNode(BipedalFootstepPlannerNode node)

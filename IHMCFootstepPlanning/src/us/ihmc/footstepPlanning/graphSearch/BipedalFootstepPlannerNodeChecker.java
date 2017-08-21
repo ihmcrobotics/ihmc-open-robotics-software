@@ -43,8 +43,6 @@ public class BipedalFootstepPlannerNodeChecker
       this.snapAndWiggler = new BipedalFootstepPlannerSnapAndWiggler(parameters);
       this.parameters = parameters;
       this.baseOfCliffAvoider = new PlanarRegionBaseOfCliffAvoider(registry, graphicsListRegistry);
-      ;
-      this.controllerPolygonsInSoleFrame = controllerPolygonsInSoleFrame;
    }
 
    public void setStartNode(BipedalFootstepPlannerNode startNode)
@@ -77,24 +75,19 @@ public class BipedalFootstepPlannerNodeChecker
 
    public boolean snapNodeAndCheckIfAcceptableToExpand(BipedalFootstepPlannerNode nodeToExpand)
    {
-      BipedalFootstepPlannerNodeUtils.removePitchAndRoll(nodeToExpand);
+      // Make sure popped node is a good one and can be expanded...
+      boolean snapSucceded = snapToPlanarRegionAndCheckIfGoodSnap(nodeToExpand);
+      if (!snapSucceded)
+         return false;
 
-      if (nodeToExpand != startNode) // StartNode is from an actual footstep, so we don't need to snap it...
+      boolean goodFootstep = checkIfGoodFootstep(nodeToExpand);
+      if (!goodFootstep)
+         return false;
+
+      boolean differentFromParent = checkIfDifferentFromGrandParent(nodeToExpand);
       {
-         // Make sure popped node is a good one and can be expanded...
-         boolean snapSucceded = snapToPlanarRegionAndCheckIfGoodSnap(nodeToExpand);
-         if (!snapSucceded)
+         if (!differentFromParent)
             return false;
-
-         boolean goodFootstep = checkIfGoodFootstep(nodeToExpand);
-         if (!goodFootstep)
-            return false;
-
-         boolean differentFromParent = checkIfDifferentFromGrandParent(nodeToExpand);
-         {
-            if (!differentFromParent)
-               return false;
-         }
       }
 
       notifyListenerNodeUnderConsiderationWasSuccessful(nodeToExpand);
@@ -114,8 +107,8 @@ public class BipedalFootstepPlannerNodeChecker
             return false;
          }
 
-         BipedalFootstepPlannerNodeUtils.transformSoleTransformWithSnapTransformFromZeroZ(nodeToExpandSnapTransform, nodeToExpand);
-         baseOfCliffAvoider.shiftAwayFromCliffBottoms(parameters, planarRegionsList, nodeToExpand);
+         RigidBodyTransform snappedSoleTransform = BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(nodeToExpand, nodeToExpandSnapTransform);
+         baseOfCliffAvoider.shiftAwayFromCliffBottoms(parameters, planarRegionsList, snappedSoleTransform);
 
          boolean isEnoughArea = checkIfEnoughArea(nodeToExpand, planarRegion);
          if (!isEnoughArea)
@@ -241,7 +234,7 @@ public class BipedalFootstepPlannerNodeChecker
          return true;
       }
 
-      if (grandParentNode.epsilonEquals(nodeToExpand, 1e-1))
+      if (grandParentNode.equals(nodeToExpand))
       {
          notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_IN_PLACE);
          return false;

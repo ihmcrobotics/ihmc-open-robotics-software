@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -18,9 +17,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by stephen on 8/18/17.
- */
 public class BipedalFootstepPlannerSnapAndWiggler
 {
    private PlanarRegionsList planarRegionsList;
@@ -84,9 +80,7 @@ public class BipedalFootstepPlannerSnapAndWiggler
          return null;
       }
 
-      BipedalFootstepPlannerNode nodeAfterSnap = new BipedalFootstepPlannerNode(bipedalFootstepPlannerNode);
-      BipedalFootstepPlannerNodeUtils.transformSoleTransformWithSnapTransformFromZeroZ(snapTransform, bipedalFootstepPlannerNode);
-      //      notifyListenerNodeSnappedAndStillSelectedForExpansion(nodeAfterSnap);
+      BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(bipedalFootstepPlannerNode, snapTransform);
 
       WiggleParameters wiggleParameters = new WiggleParameters();
       wiggleParameters.deltaInside = wiggleInsideDelta;
@@ -110,7 +104,7 @@ public class BipedalFootstepPlannerSnapAndWiggler
 
       if (wiggleTransformLocalToLocal == null)
       {
-         notifyListenerNodeUnderConsiderationWasRejected(nodeAfterSnap, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
+         notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
 
          //TODO: Possibly have different node costs depending on how firm on ground they are.
          if (parameters.getRejectIfCannotFullyWiggleInside())
@@ -218,8 +212,6 @@ public class BipedalFootstepPlannerSnapAndWiggler
 
    private void notifyListenerNodeUnderConsiderationWasRejected(BipedalFootstepPlannerNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
    {
-      PrintTools.info("rejected node. reason: " + reason);
-
       if (listener != null)
       {
          listener.nodeUnderConsiderationWasRejected(nodeToExpand, reason);

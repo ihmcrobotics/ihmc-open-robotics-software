@@ -80,9 +80,7 @@ public class BipedalFootstepPlannerSnapAndWiggler
          return null;
       }
 
-      BipedalFootstepPlannerNode nodeAfterSnap = new BipedalFootstepPlannerNode(bipedalFootstepPlannerNode);
-      BipedalFootstepPlannerNodeUtils.transformSoleTransformWithSnapTransformFromZeroZ(snapTransform, bipedalFootstepPlannerNode);
-      //      notifyListenerNodeSnappedAndStillSelectedForExpansion(nodeAfterSnap);
+      BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(bipedalFootstepPlannerNode, snapTransform);
 
       WiggleParameters wiggleParameters = new WiggleParameters();
       wiggleParameters.deltaInside = wiggleInsideDelta;
@@ -106,7 +104,7 @@ public class BipedalFootstepPlannerSnapAndWiggler
 
       if (wiggleTransformLocalToLocal == null)
       {
-         notifyListenerNodeUnderConsiderationWasRejected(nodeAfterSnap, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
+         notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
 
          //TODO: Possibly have different node costs depending on how firm on ground they are.
          if (parameters.getRejectIfCannotFullyWiggleInside())
