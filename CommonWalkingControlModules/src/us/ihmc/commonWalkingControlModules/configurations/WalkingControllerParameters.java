@@ -237,16 +237,20 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Returns the default control mode for a rigid body. The modes are defined in {@link RigidBodyControlMode}
-    * and by default the mode should be {@link RigidBodyControlMode#JOINTSPACE}. In some cases (e.g. the chest)
-    * it makes more sense to use the default mode {@link RigidBodyControlMode#TASKSPACE}.
+    * Returns a map with default control modes for each rigid body.
+    * <p>
+    * The key of the map is the rigid body name as defined in the joint map. Possible
+    * control modes are defined in {@link RigidBodyControlMode}. By default (if a body
+    * is not contained in the map) {@link RigidBodyControlMode#JOINTSPACE} will be used
+    * for the body. In some cases (e.g. the chest) it makes more sense to use the default
+    * mode {@link RigidBodyControlMode#TASKSPACE}.
+    * </p>
     *
-    * @param bodyName is the name of the {@link RigidBody}
     * @return the default control mode of the body
     */
-   public RigidBodyControlMode getDefaultControlModeForRigidBody(String bodyName)
+   public Map<String, RigidBodyControlMode> getDefaultControlModesForRigidBodies()
    {
-      return RigidBodyControlMode.JOINTSPACE;
+      return new HashMap<>();
    }
 
    /**
