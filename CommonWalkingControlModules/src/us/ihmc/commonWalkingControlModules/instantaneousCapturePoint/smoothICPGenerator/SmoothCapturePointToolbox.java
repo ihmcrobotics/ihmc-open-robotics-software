@@ -22,7 +22,7 @@ public class SmoothCapturePointToolbox
 {
    // private static final ThreadLocal<DenseMatrix64F> dummyName = new ThreadLocal<>();
    
-   private static final int defaultSize = 1000;
+   private static final int defaultSize = 100;
    
    private final DenseMatrix64F tPowersDerivativeVector = new DenseMatrix64F(defaultSize, 1);
    private final DenseMatrix64F tPowersDerivativeVectorTranspose = new DenseMatrix64F(defaultSize, 1);
