@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
@@ -34,12 +35,10 @@ import us.ihmc.robotics.controllers.PDGains;
 import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -68,7 +67,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final ICPAngularMomentumModifierParameters angularMomentumModifierParameters;
    private final double massScale;
 
-   private Map<String, YoPID3DGains> taskspaceLinearGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
@@ -271,26 +269,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return gains;
    }
 
-   private YoPID3DGains createHandPositionControlGains(YoVariableRegistry registry)
-   {
-      SymmetricYoPIDSE3Gains positionGains = new SymmetricYoPIDSE3Gains("HandPosition", registry);
-
-      double kp = runningOnRealRobot ? 40.0 :100.0;
-      // When doing position control, the damping here seems to result into some kind of spring.
-      double zeta = runningOnRealRobot ? 0.0 : 1.0;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
-      double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
-      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
-
-      positionGains.setProportionalGains(kp);
-      positionGains.setDampingRatios(zeta);
-      positionGains.setIntegralGains(ki, maxIntegralError);
-      positionGains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
-
-      return positionGains;
-   }
-
    /** {@inheritDoc} */
    @Override
    public List<ImmutablePair<PIDGains, List<String>>> getJointSpaceControlGains()
@@ -379,22 +357,32 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public List<ImmutablePair<String, PID3DGains>> getTaskspaceOrientationControlGains()
+   public List<ImmutableTriple<String, PID3DGains, List<String>>> getTaskspaceOrientationControlGains()
    {
-      List<ImmutablePair<String, PID3DGains>> taskspaceAngularGains = new ArrayList<>();
+      List<ImmutableTriple<String, PID3DGains, List<String>>> taskspaceAngularGains = new ArrayList<>();
 
       PID3DGains chestAngularGains = createChestOrientationControlGains();
-      taskspaceAngularGains.add(new ImmutablePair<>(jointMap.getChestName(), chestAngularGains));
+      List<String> chestGainBodies = new ArrayList<>();
+      chestGainBodies.add(jointMap.getChestName());
+      taskspaceAngularGains.add(new ImmutableTriple<>("Chest", chestAngularGains, chestGainBodies));
 
       PID3DGains headAngularGains = createHeadOrientationControlGains();
-      taskspaceAngularGains.add(new ImmutablePair<>(jointMap.getHeadName(), headAngularGains));
+      List<String> headGainBodies = new ArrayList<>();
+      headGainBodies.add(jointMap.getHeadName());
+      taskspaceAngularGains.add(new ImmutableTriple<>("Head", headAngularGains, headGainBodies));
 
       PID3DGains handAngularGains = createHandOrientationControlGains();
+      List<String> handGainBodies = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
-         taskspaceAngularGains.add(new ImmutablePair<>(jointMap.getHandName(robotSide), handAngularGains));
+      {
+         handGainBodies.add(jointMap.getHandName(robotSide));
+      }
+      taskspaceAngularGains.add(new ImmutableTriple<>("Hand", handAngularGains, handGainBodies));
 
       PID3DGains pelvisAngularGains = createPelvisOrientationControlGains();
-      taskspaceAngularGains.add(new ImmutablePair<>(jointMap.getPelvisName(), pelvisAngularGains));
+      List<String> pelvisGainBodies = new ArrayList<>();
+      pelvisGainBodies.add(jointMap.getPelvisName());
+      taskspaceAngularGains.add(new ImmutableTriple<>("Pelvis", pelvisAngularGains, pelvisGainBodies));
 
       return taskspaceAngularGains;
    }
@@ -467,18 +455,35 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public Map<String, YoPID3DGains> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
+   public List<ImmutableTriple<String, PID3DGains, List<String>>> getTaskspacePositionControlGains()
    {
-      if (taskspaceLinearGains != null)
-         return taskspaceLinearGains;
+      List<ImmutableTriple<String, PID3DGains, List<String>>> taskspaceLinearGains = new ArrayList<>();
 
-      taskspaceLinearGains = new HashMap<>();
-
-      YoPID3DGains handLinearGains = createHandPositionControlGains(registry);
+      PID3DGains handLinearGains = createHandPositionControlGains();
+      List<String> handGainBodies = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
-         taskspaceLinearGains.put(jointMap.getHandName(robotSide), handLinearGains);
+      {
+         handGainBodies.add(jointMap.getHandName(robotSide));
+      }
+      taskspaceLinearGains.add(new ImmutableTriple<>("Hand", handLinearGains, handGainBodies));
 
       return taskspaceLinearGains;
+   }
+
+   private PID3DGains createHandPositionControlGains()
+   {
+      double kp = runningOnRealRobot ? 40.0 :100.0;
+      // When doing position control, the damping here seems to result into some kind of spring.
+      double zeta = runningOnRealRobot ? 0.0 : 1.0;
+      double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+
+      DefaultPID3DGains gains = new DefaultPID3DGains(GainCoupling.XYZ, false);
+      gains.setProportionalGains(kp);
+      gains.setDampingRatios(zeta);
+      gains.setMaxFeedbackAndFeedbackRate(maxAccel, maxJerk);
+
+      return gains;
    }
 
    /** {@inheritDoc} */

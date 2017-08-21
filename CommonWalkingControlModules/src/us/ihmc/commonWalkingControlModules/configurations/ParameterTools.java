@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.configurations;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.text.WordUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
@@ -54,16 +53,19 @@ public class ParameterTools
       }
    }
 
-   public static void extractGainMap(String suffix, List<ImmutablePair<String, PID3DGains>> gains, Map<String, YoPID3DGains> yoGainsToPack, YoVariableRegistry registry)
+   public static void extractGainMap(String suffix, List<ImmutableTriple<String, PID3DGains, List<String>>> gains, Map<String, YoPID3DGains> yoGainsToPack, YoVariableRegistry registry)
    {
       yoGainsToPack.clear();
-      for (ImmutablePair<String, PID3DGains> bodyGain : gains)
+      for (ImmutableTriple<String, PID3DGains, List<String>> gainTriple : gains)
       {
-         String bodyName = bodyGain.getLeft();
-         PID3DGains gain = bodyGain.getRight();
-         String gainName = WordUtils.capitalizeFully(bodyGain.getLeft()) + suffix;
+         String gainName = gainTriple.getLeft() + suffix;
+         PID3DGains gain = gainTriple.getMiddle();
          YoPID3DGains yoGains = new DefaultYoPID3DGains(gainName, gain, registry);
-         yoGainsToPack.put(bodyName, yoGains);
+
+         for (String bodyName : gainTriple.getRight())
+         {
+            yoGainsToPack.put(bodyName, yoGains);
+         }
       }
    }
 }

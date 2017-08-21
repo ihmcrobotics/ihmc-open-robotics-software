@@ -24,7 +24,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.controllers.PDGains;
 import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
@@ -198,33 +197,43 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Returns a list with pairs of rigid body name and orientation control gains for that body.
-    * If a joint is not contained in the map, taskspace orientation or pose control is not
+    * Returns a list of triples containing taskspace orientation control gains.
+    * <p>
+    * Each triple contains gains for one body group:</br>
+    *  - The name of the body group that the gain is used for (e.g. Hands).</br>
+    *  - The gains for the body group.</br>
+    *  - The names of all rigid bodies in the body group.
+    * </p>
+    * If a body is not contained in the list, taskspace orientation or pose control is not
     * supported for that rigid body. These gains will be used by the controller for tracking
     * taskspace orientation trajectories (or the orientation part of a pose trajectory) for a
     * rigid body.
     *
     * @return list containing orientation PID gains and the corresponding rigid bodies
     */
-   public List<ImmutablePair<String, PID3DGains>> getTaskspaceOrientationControlGains()
+   public List<ImmutableTriple<String, PID3DGains, List<String>>> getTaskspaceOrientationControlGains()
    {
       return new ArrayList<>();
    }
 
    /**
-    * The map returned contains all controller gains for tracking taskspace position trajectories
-    * (or the position part of a pose trajectory) for a rigid body. The key of the map is the rigid
-    * body name as defined in the robot joint map. If a joint is not contained in the map, taskspace
-    * position or pose control is not supported for that rigid body.
+    * Returns a list of triples containing taskspace position control gains.
+    * <p>
+    * Each triple contains gains for one body group:</br>
+    *  - The name of the body group that the gain is used for (e.g. Hands).</br>
+    *  - The gains for the body group.</br>
+    *  - The names of all rigid bodies in the body group.
+    * </p>
+    * If a body is not contained in the list, taskspace position or pose control is not
+    * supported for that rigid body. These gains will be used by the controller for tracking
+    * taskspace position trajectories (or the position part of a pose trajectory) for a
+    * rigid body.
     *
-    * @param registry used to create the gains the first time this function is called during a run
-    * @return map containing taskspace position PID gains by rigid body name
-    *
-    * TODO: remove registry
+    * @return list containing orientation PID gains and the corresponding rigid bodies
     */
-   public Map<String, YoPID3DGains> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
+   public List<ImmutableTriple<String, PID3DGains, List<String>>> getTaskspacePositionControlGains()
    {
-      return new HashMap<String, YoPID3DGains>();
+      return new ArrayList<>();
    }
 
    /**

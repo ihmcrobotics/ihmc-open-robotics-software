@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
@@ -201,15 +202,19 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public List<ImmutablePair<String, PID3DGains>> getTaskspaceOrientationControlGains()
+   public List<ImmutableTriple<String, PID3DGains, List<String>>> getTaskspaceOrientationControlGains()
    {
-      List<ImmutablePair<String, PID3DGains>> taskspaceAngularGains = new ArrayList<>();
+      List<ImmutableTriple<String, PID3DGains, List<String>>> taskspaceAngularGains = new ArrayList<>();
 
       PID3DGains chestAngularGains = createChestOrientationControlGains();
-      taskspaceAngularGains.add(new ImmutablePair<>(jointMap.getChestName(), chestAngularGains));
+      List<String> chestGainBodies = new ArrayList<>();
+      chestGainBodies.add(jointMap.getChestName());
+      taskspaceAngularGains.add(new ImmutableTriple<>("Chest", chestAngularGains, chestGainBodies));
 
       PID3DGains pelvisAngularGains = createPelvisOrientationControlGains();
-      taskspaceAngularGains.add(new ImmutablePair<>(jointMap.getPelvisName(), pelvisAngularGains));
+      List<String> pelvisGainBodies = new ArrayList<>();
+      pelvisGainBodies.add(jointMap.getPelvisName());
+      taskspaceAngularGains.add(new ImmutableTriple<>("Pelvis", pelvisAngularGains, pelvisGainBodies));
 
       return taskspaceAngularGains;
    }
