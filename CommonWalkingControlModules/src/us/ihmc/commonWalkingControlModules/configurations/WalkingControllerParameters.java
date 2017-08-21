@@ -9,7 +9,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -27,7 +26,6 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class WalkingControllerParameters
 {
@@ -563,14 +561,11 @@ public abstract class WalkingControllerParameters
    }
 
    /**
-    * Get the parameters for foothold exploration. The parameters should be created the first time this
-    * method is called.
-    *
-    * TODO: remove registry
+    * Determines whether the classes and variables for foothold exploration are created.
     */
-   public ExplorationParameters getOrCreateExplorationParameters(YoVariableRegistry registry)
+   public boolean createFootholdExplorationTools()
    {
-      return null;
+      return false;
    }
 
    /**
