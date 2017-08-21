@@ -4,6 +4,7 @@ import us.ihmc.avatar.logProcessor.LogDataProcessorFunction;
 import us.ihmc.avatar.logProcessor.LogDataProcessorHelper;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.PartialFootholdControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -29,11 +30,11 @@ public class FootRotationProcessor implements LogDataProcessorFunction
       WalkingControllerParameters walkingControllerParameters = logDataProcessorHelper.getWalkingControllerParameters();
       controllerToolbox = logDataProcessorHelper.getHighLevelHumanoidControllerToolbox();
 
-      walkingControllerParameters.getOrCreateExplorationParameters(registry);
+      ExplorationParameters explorationParameters = new ExplorationParameters(registry);
       for (RobotSide robotSide : RobotSide.values)
       {
          PartialFootholdControlModule partialFootholdControlModule = new PartialFootholdControlModule(robotSide, controllerToolbox,
-               walkingControllerParameters, registry, yoGraphicsListRegistry);
+               walkingControllerParameters, explorationParameters, registry, yoGraphicsListRegistry);
          partialFootholdControlModules.put(robotSide, partialFootholdControlModule);
       }
    }
