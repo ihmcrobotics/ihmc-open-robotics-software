@@ -441,7 +441,12 @@ public class PlanarRegionPotentialNextStepCalculator
 
       RobotSide nextSide = nodeToExpand.getRobotSide().getOppositeSide();
 
-      BipedalFootstepPlannerNode childNode = new BipedalFootstepPlannerNode(nextSide, nextTransform);
+      Vector3D nextStepTranslation = new Vector3D();
+      nextTransform.getTranslation(nextStepTranslation);
+
+      double nextStepYaw = nodeToExpand.getYaw() + stepYaw;
+
+      BipedalFootstepPlannerNode childNode = new BipedalFootstepPlannerNode(nextStepTranslation.getX(), nextStepTranslation.getY(), nextStepYaw, nextSide);
       childNode.setParentNode(nodeToExpand);
       nodeToExpand.addChild(childNode);
       return childNode;

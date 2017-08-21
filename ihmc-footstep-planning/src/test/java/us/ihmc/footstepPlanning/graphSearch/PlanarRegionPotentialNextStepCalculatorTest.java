@@ -14,6 +14,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
@@ -71,7 +72,7 @@ public class PlanarRegionPotentialNextStepCalculatorTest
       int maxNumberOfExpectedFootsteps = 20;
 
       testAndVisualizeToGoal(goalPosition, goalOrientation, calculator, listener, maxNumberOfExpectedFootsteps);
-      
+
       goalPosition = new Point3D(5.0, 0.0, 0.0);
       goalOrientation = new AxisAngle(new Vector3D(0.0, 0.0, 1.0), 0.0);
       maxNumberOfExpectedFootsteps = 20;
@@ -117,11 +118,10 @@ public class PlanarRegionPotentialNextStepCalculatorTest
       EuclidCoreTestTools.assertTuple3DEquals(goalPosition, averageGoalPosition, 0.001);
 
       RobotSide footstepSide = RobotSide.LEFT;
-      RigidBodyTransform soleTransform = new RigidBodyTransform();
 
       ArrayList<BipedalFootstepPlannerNode> nodes = new ArrayList<>();
 
-      BipedalFootstepPlannerNode node = new BipedalFootstepPlannerNode(footstepSide, soleTransform);
+      BipedalFootstepPlannerNode node = new BipedalFootstepPlannerNode(0.0, 0.0, 0.0, footstepSide);
       calculator.setStartNode(node);
       nodes.add(node);
 
