@@ -30,7 +30,7 @@ import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.controllers.PDGains;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -523,14 +523,14 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public YoPIDSE3Gains createToeOffFootControlGains(YoVariableRegistry registry)
+      public PIDSE3Gains getToeOffFootControlGains()
       {
          // TODO Auto-generated method stub
          return null;
       }
 
       @Override
-      public YoPIDSE3Gains createSwingFootControlGains(YoVariableRegistry registry)
+      public PIDSE3Gains getSwingFootControlGains()
       {
          // TODO Auto-generated method stub
          return null;
@@ -544,7 +544,7 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public YoPIDSE3Gains createHoldPositionFootControlGains(YoVariableRegistry registry)
+      public PIDSE3Gains getHoldPositionFootControlGains()
       {
          // TODO Auto-generated method stub
          return null;

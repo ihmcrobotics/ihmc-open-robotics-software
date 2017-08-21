@@ -20,10 +20,9 @@ import us.ihmc.robotics.controllers.PDGains;
 import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -31,7 +30,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.wanderer.parameters.WandererPhysicalProperties;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class WandererWalkingControllerParameters extends WalkingControllerParameters
 {
@@ -269,7 +267,7 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public YoPIDSE3Gains createSwingFootControlGains(YoVariableRegistry registry)
+   public PIDSE3Gains getSwingFootControlGains()
    {
       double kpXY = 150.0;
       double kpZ = 200.0; // 200.0 Trying to smash the ground there
@@ -291,11 +289,11 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       gains.setOrientationDampingRatios(zetaXYOrientation, zetaXYOrientation, zetaZOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxOrientationAcceleration, maxOrientationJerk);
 
-      return new DefaultYoPIDSE3Gains("SwingFoot", gains, registry);
+      return gains;
    }
 
    @Override
-   public YoPIDSE3Gains createHoldPositionFootControlGains(YoVariableRegistry registry)
+   public PIDSE3Gains getHoldPositionFootControlGains()
    {
       double kpXY = 100.0;
       double kpZ = 0.0;
@@ -316,11 +314,11 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       gains.setOrientationDampingRatios(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
-      return new DefaultYoPIDSE3Gains("HoldFoot", gains, registry);
+      return gains;
    }
 
    @Override
-   public YoPIDSE3Gains createToeOffFootControlGains(YoVariableRegistry registry)
+   public PIDSE3Gains getToeOffFootControlGains()
    {
       double kpXY = 100.0;
       double kpZ = 0.0;
@@ -341,7 +339,7 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
       gains.setOrientationDampingRatios(zetaOrientation);
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
-      return new DefaultYoPIDSE3Gains("ToeOffFoot", gains, registry);
+      return gains;
    }
 
    @Override

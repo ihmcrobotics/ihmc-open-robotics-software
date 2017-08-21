@@ -24,7 +24,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.controllers.PDGains;
 import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
-import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -307,27 +307,21 @@ public abstract class WalkingControllerParameters
 
    /**
     * Returns the gains used for the foot pose when in swing.
-    *
-    * TODO: remove registry
     */
-   public abstract YoPIDSE3Gains createSwingFootControlGains(YoVariableRegistry registry);
+   public abstract PIDSE3Gains getSwingFootControlGains();
 
    /**
     * Returns the gains used for the foot when in support. Note that these gains are only used when the foot
     * is not loaded or close to tipping. Of that is not the case the foot pose when in support is not controlled
     * using a feedback controller.
-    *
-    * TODO: remove registry
     */
-   public abstract YoPIDSE3Gains createHoldPositionFootControlGains(YoVariableRegistry registry);
+   public abstract PIDSE3Gains getHoldPositionFootControlGains();
 
    /**
     * Returns the gains used for the foot when in the toe off state. Note that some parts of the foot orientation
     * will not use these gains. The foot pitch for example is usually not controlled explicitly during tow off.
-    *
-    * TODO: remove registry
     */
-   public abstract YoPIDSE3Gains createToeOffFootControlGains(YoVariableRegistry registry);
+   public abstract PIDSE3Gains getToeOffFootControlGains();
 
    /**
     * Specifies if the arm controller should be switching
