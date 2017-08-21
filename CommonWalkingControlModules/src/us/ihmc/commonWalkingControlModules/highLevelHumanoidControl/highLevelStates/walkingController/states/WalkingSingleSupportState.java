@@ -69,7 +69,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
-      legConfigurationManager = managerFactory.getOrCreateKneeAngleManager();
+      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       fractionOfSwingToStraightenSwingLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfSwingToStraightenLeg());
       fractionOfSwingToCollapseStanceLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfSwingToCollapseStanceLeg());

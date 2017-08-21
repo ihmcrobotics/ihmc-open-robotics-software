@@ -142,7 +142,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
 
    protected final FramePoint2D currentICP = new FramePoint2D();
    protected final FramePoint2D desiredICP = new FramePoint2D();
-   protected final FramePoint2D perfectCMP = new FramePoint2D();
+   private final FramePoint2D perfectCMP = new FramePoint2D();
    protected final FrameVector2D desiredICPVelocity = new FrameVector2D();
 
    protected final SimpleICPOptimizationQPSolver solver;
@@ -507,6 +507,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
          double recursionMultiplier = Math.exp(-omega0 * recursionTime);
          this.footstepMultiplier.set(recursionMultiplier);
 
+         yoPerfectCMP.getFrameTuple2d(perfectCMP);
          predictedEndOfStateICP.set(desiredICP);
          predictedEndOfStateICP.sub(perfectCMP);
          predictedEndOfStateICP.scale(Math.exp(omega0 * timeRemainingInState.getDoubleValue()));
@@ -526,6 +527,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       NoConvergenceException noConvergenceException = null;
       try
       {
+         yoPerfectCMP.getFrameTuple2d(perfectCMP);
          solver.compute(icpError, perfectCMP);
       }
       catch (NoConvergenceException e)
@@ -573,7 +575,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       feedbackCMPDelta.set(feedbackCoPDelta);
       feedbackCMPDelta.add(cmpCoPDifferenceSolution);
 
-      yoPerfectCMP.set(perfectCMP);
+      yoPerfectCMP.getFrameTuple2d(perfectCMP);
       feedbackCMP.set(perfectCMP);
       feedbackCMP.add(feedbackCMPDelta);
 

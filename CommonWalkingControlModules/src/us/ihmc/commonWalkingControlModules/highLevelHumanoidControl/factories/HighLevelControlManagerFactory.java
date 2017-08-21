@@ -197,7 +197,13 @@ public class HighLevelControlManagerFactory
       return feetManager;
    }
 
+   @Deprecated
    public LegConfigurationManager getOrCreateKneeAngleManager()
+   {
+      return getOrCreateLegConfigurationManager();
+   }
+
+   public LegConfigurationManager getOrCreateLegConfigurationManager()
    {
       if (legConfigurationManager != null)
          return legConfigurationManager;
