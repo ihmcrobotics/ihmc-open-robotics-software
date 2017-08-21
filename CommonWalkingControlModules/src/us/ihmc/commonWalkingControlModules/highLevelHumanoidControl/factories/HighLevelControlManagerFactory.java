@@ -164,7 +164,7 @@ public class HighLevelControlManagerFactory
 
       ContactablePlaneBody contactableBody = controllerToolbox.getContactableBody(bodyToControl);
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      RigidBodyControlMode defaultControlModeForRigidBody = walkingControllerParameters.getDefaultControlModeForRigidBody(bodyName);
+      RigidBodyControlMode defaultControlModeForRigidBody = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, homePose, positionControlledJoints,
             integrationSettings, trajectoryFrames, controlFrame, baseFrame, contactableBody, yoTime, graphicsListRegistry, registry);
