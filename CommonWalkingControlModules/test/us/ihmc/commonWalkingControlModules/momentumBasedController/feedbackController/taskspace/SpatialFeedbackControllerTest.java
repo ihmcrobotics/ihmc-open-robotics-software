@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Random;
@@ -26,8 +27,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.controllers.SE3PIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -37,6 +37,7 @@ import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public final class SpatialFeedbackControllerTest
 {
@@ -77,7 +78,7 @@ public final class SpatialFeedbackControllerTest
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      
+
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null,
                                                                             null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
@@ -86,9 +87,9 @@ public final class SpatialFeedbackControllerTest
 
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
       spatialFeedbackControlCommand.set(elevator, endEffector);
-      SE3PIDGains gains = new SE3PIDGains();
-      gains.setPositionGains(100.0, 50.0);
-      gains.setOrientationGains(100.0, 50.0);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
+      gains.getPositionGains().setProportialAndDerivativeGains(100.0, 50.0);
+      gains.getOrientationGains().setProportialAndDerivativeGains(100.0, 50.0);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
       spatialFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
@@ -107,7 +108,7 @@ public final class SpatialFeedbackControllerTest
       FramePoint3D currentPosition = new FramePoint3D();
       FrameOrientation currentOrientation = new FrameOrientation();
       FrameOrientation differenceOrientation = new FrameOrientation();
-      
+
       FrameVector3D positionError = new FrameVector3D();
       FrameVector3D rotationError = new FrameVector3D();
 
@@ -133,7 +134,7 @@ public final class SpatialFeedbackControllerTest
          currentPosition.setIncludingFrame(bodyFixedPointToControl);
          currentPosition.changeFrame(worldFrame);
          positionError.sub(desiredPosition, currentPosition);
-         
+
          currentOrientation.setToZero(bodyFixedPointToControl.getReferenceFrame());
          currentOrientation.changeFrame(worldFrame);
 
@@ -191,9 +192,9 @@ public final class SpatialFeedbackControllerTest
 
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
       spatialFeedbackControlCommand.set(elevator, endEffector);
-      SE3PIDGains gains = new SE3PIDGains();
-      gains.setPositionGains(100.0, 50.0);
-      gains.setOrientationGains(100.0, 50.0);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
+      gains.getPositionGains().setProportialAndDerivativeGains(100.0, 50.0);
+      gains.getOrientationGains().setProportialAndDerivativeGains(100.0, 50.0);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
       spatialFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
@@ -230,7 +231,7 @@ public final class SpatialFeedbackControllerTest
       FramePoint3D currentPosition = new FramePoint3D();
       FrameOrientation currentOrientation = new FrameOrientation();
       FrameOrientation differenceOrientation = new FrameOrientation();
-      
+
       FrameVector3D positionError = new FrameVector3D();
       FrameVector3D rotationError = new FrameVector3D();
 
@@ -273,7 +274,7 @@ public final class SpatialFeedbackControllerTest
          currentPosition.setIncludingFrame(bodyFixedPointToControl);
          currentPosition.changeFrame(worldFrame);
          positionError.sub(desiredPosition, currentPosition);
-         
+
          currentOrientation.setToZero(bodyFixedPointToControl.getReferenceFrame());
          currentOrientation.changeFrame(worldFrame);
 

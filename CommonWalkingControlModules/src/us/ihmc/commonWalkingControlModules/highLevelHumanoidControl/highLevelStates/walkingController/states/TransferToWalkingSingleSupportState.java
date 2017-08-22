@@ -29,7 +29,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
       this.minimumTransferTime.set(minimumTransferTime);
 
-      legConfigurationManager = managerFactory.getOrCreateKneeAngleManager();
+      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       fractionOfTransferToCollapseLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfTransferToCollapseLeg());
    }

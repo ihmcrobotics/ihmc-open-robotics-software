@@ -9,16 +9,16 @@ import gnu.trove.list.array.TIntArrayList;
 
 /**
  * Solves a Quadratic Program using a simple active set method.
- * Does not work for problems where having multiple inequality constraints 
- * in the active set make the problem infeasible. Seems to work well for 
+ * Does not work for problems where having multiple inequality constraints
+ * in the active set make the problem infeasible. Seems to work well for
  * problems with benign inequality constraints, such as variable bounds.
- * 
+ *
  *  Algorithm is very fast when it can find a solution.
- * 
+ *
  * Uses the algorithm and naming convention found in MIT Paper
  * "An efficiently solvable quadratic program for stabilizing dynamic locomotion"
  * by Scott Kuindersma, Frank Permenter, and Russ Tedrake.
- * 
+ *
  * @author JerryPratt
  *
  */
@@ -99,7 +99,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
-   private boolean useWarmStart = true;
+   private boolean useWarmStart = false;
 
    private int previousNumberOfVariables = 0;
    private int previousNumberOfEqualityConstraints = 0;
