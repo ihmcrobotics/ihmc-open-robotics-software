@@ -18,17 +18,19 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.InterpolationTools;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * This is the active foot state when the foot is in flat support. Usually the command to the QP
@@ -103,7 +105,7 @@ public class SupportState extends AbstractFootControlState
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
-   public SupportState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface holdPositionGains, YoVariableRegistry parentRegistry)
+   public SupportState(FootControlHelper footControlHelper, YoPIDSE3Gains holdPositionGains, YoVariableRegistry parentRegistry)
    {
       super(ConstraintType.FULL, footControlHelper);
       String prefix = footControlHelper.getRobotSide().getLowerCaseName() + "Foot";
@@ -151,8 +153,8 @@ public class SupportState extends AbstractFootControlState
       explorationHelper = new ExplorationHelper(contactableFoot, footControlHelper, prefix, registry);
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
       requestFootholdExploration = new YoBoolean(prefix + "RequestFootholdExploration", registry);
-      ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
-      if (explorationParameters != null)
+      ExplorationParameters explorationParameters = footControlHelper.getExplorationParameters();
+      if (walkingControllerParameters.createFootholdExplorationTools() && explorationParameters != null)
       {
          recoverTime = explorationParameters.getRecoverTime();
          timeBeforeExploring = explorationParameters.getTimeBeforeExploring();

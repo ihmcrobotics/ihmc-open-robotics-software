@@ -101,6 +101,11 @@ public class LegConfigurationManager
       return (legConfigurationControlState.equals(LegConfigurationType.BENT));
    }
 
+   private boolean isLegCurrentlyStraightening(RobotSide robotSide)
+   {
+      return (legConfigurationControlModules.get(robotSide).getCurrentKneeControlState() == LegConfigurationType.STRAIGHTEN);
+   }
+
    public void collapseLegDuringTransfer(RobotSide transferSide)
    {
       if (attemptToStraightenLegs.getBooleanValue())
@@ -184,7 +189,7 @@ public class LegConfigurationManager
 
    public void setStraight(RobotSide robotSide)
    {
-      if (attemptToStraightenLegs.getBooleanValue())
+      if (attemptToStraightenLegs.getBooleanValue() && !isLegCurrentlyStraightening(robotSide))
       {
          legConfigurationControlModules.get(robotSide).setKneeAngleState(LegConfigurationType.STRAIGHT);
       }
@@ -192,7 +197,7 @@ public class LegConfigurationManager
 
    public void beginStraightening(RobotSide robotSide)
    {
-      if (attemptToStraightenLegs.getBooleanValue())
+      if (attemptToStraightenLegs.getBooleanValue() && !isLegCurrentlyStraightening(robotSide))
       {
          legConfigurationControlModules.get(robotSide).setKneeAngleState(LegConfigurationType.STRAIGHTEN);
       }

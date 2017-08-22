@@ -25,6 +25,7 @@ import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.color.ColorConversions;
+import us.ihmc.graphicsDescription.color.Gradient;
 import us.ihmc.yoVariables.dataBuffer.DataEntry;
 import us.ihmc.yoVariables.dataBuffer.DataEntryHolder;
 import us.ihmc.yoVariables.dataBuffer.TimeDataHolder;
@@ -33,7 +34,6 @@ import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.tools.color.Gradient;
 
 public class JavaFXHeatmapGraph
 {
@@ -60,6 +60,8 @@ public class JavaFXHeatmapGraph
    private Point2D gridCenter;
    private Point2D plotPencil;
    private Point2D viewRange;
+   
+   private final java.awt.Color[] rainbow = Gradient.createRainbow(500);
 
    public JavaFXHeatmapGraph(YoVariableRegistry registry, GraphIndicesHolder graphIndicesHolder, SelectedVariableHolder selectedVariableHolder,
                              DataEntryHolder dataEntryHolder, TimeDataHolder dataBuffer)
@@ -238,7 +240,7 @@ public class JavaFXHeatmapGraph
    {
       double maxHeat = 30.0;
       int heatIndex = (int) MathTools.roundToPrecision(MathTools.clamp((heat / maxHeat) * 500.0, 0.0, 499.0), 1.0);
-      return ColorConversions.awtToJfx(Gradient.GRADIENT_RAINBOW[heatIndex]);
+      return ColorConversions.awtToJfx(rainbow[heatIndex]);
    }
 
    private void fillRect(double x, double y, double width, double height)

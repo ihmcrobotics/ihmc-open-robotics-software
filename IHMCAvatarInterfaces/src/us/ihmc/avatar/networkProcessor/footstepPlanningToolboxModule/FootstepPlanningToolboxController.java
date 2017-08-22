@@ -31,6 +31,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlannerUtils;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.aStar.AStarFootstepPlanner;
+import us.ihmc.footstepPlanning.aStar.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
@@ -62,6 +63,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 public class FootstepPlanningToolboxController extends ToolboxController
 {
    private final boolean visualize = true;
+   private HumanoidRobotDataReceiver robotDataReceiver;
 
    private enum Planners
    {
@@ -86,7 +88,9 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final RobotContactPointParameters contactPointParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final FootstepDataListWithSwingOverTrajectoriesAssembler footstepDataListWithSwingOverTrajectoriesAssembler;
+   private final FootstepNodeExpansion expansion;
 
+   private final double collisionSphereRadius = 0.2;
    private final PacketCommunicator packetCommunicator;
    private long plannerCount = 0;
    private double dt;
@@ -102,14 +106,22 @@ public class FootstepPlanningToolboxController extends ToolboxController
       this.dt = dt;
       packetCommunicator.attachListener(PlanarRegionsListMessage.class, createPlanarRegionsConsumer());
 
+      /**
+       * A robot specific node expansion can be achieved with this. 
+       * Currently only supported in A-star planner for Atlas and Valkyrie.
+       * Use SimpleSideBasedExpansion ( defaults to Atlas) if using other robots or add custom footstep expansion class.
+       * */ 
+      this.expansion = drcRobotModel.getPlanarRegionFootstepPlannerParameters().getReachableFootstepExpansion();
+
       SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame = createFootPolygonsFromContactPoints(contactPointParameters);
 
       humanoidReferenceFrames = createHumanoidReferenceFrames(fullHumanoidRobotModel);
       footstepDataListWithSwingOverTrajectoriesAssembler = new FootstepDataListWithSwingOverTrajectoriesAssembler(humanoidReferenceFrames, walkingControllerParameters, parentRegistry, new YoGraphicsListRegistry());
+      footstepDataListWithSwingOverTrajectoriesAssembler.setCollisionSphereRadius(collisionSphereRadius);
 
       plannerMap.put(Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame, fullHumanoidRobotModel));
       plannerMap.put(Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
-      plannerMap.put(Planners.A_STAR, AStarFootstepPlanner.createRoughTerrainPlanner(null, contactPointsInSoleFrame, registry));
+      plannerMap.put(Planners.A_STAR, AStarFootstepPlanner.createRoughTerrainPlanner(null, contactPointsInSoleFrame, expansion, registry));
       activePlanner.set(Planners.PLANAR_REGION_BIPEDAL);
 
       usePlanarRegions.set(true);
@@ -125,7 +137,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
       footstepPlanner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       footstepPlanner.setExitAfterInitialSolution(false);
-      footstepPlanner.setTimeout(5.0);
+      footstepPlanner.setTimeout(20.0);
 
       if (visualize)
       {
@@ -140,8 +152,9 @@ public class FootstepPlanningToolboxController extends ToolboxController
    @Override
    protected void updateInternal()
    {
+      robotDataReceiver.updateRobotModel();
       toolboxTime.add(dt);
-      if (toolboxTime.getDoubleValue() > 10.0)
+      if (toolboxTime.getDoubleValue() > 20.0)
       {
          reportMessage(packResult(null, FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION));
          isDone.set(true);
@@ -263,7 +276,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    public HumanoidReferenceFrames createHumanoidReferenceFrames(FullHumanoidRobotModel fullHumanoidRobotModel)
    {
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullHumanoidRobotModel.getForceSensorDefinitions()));
-      HumanoidRobotDataReceiver robotDataReceiver = new HumanoidRobotDataReceiver(fullHumanoidRobotModel, forceSensorDataHolder);
+      robotDataReceiver = new HumanoidRobotDataReceiver(fullHumanoidRobotModel, forceSensorDataHolder);
 
       packetCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
       return robotDataReceiver.getReferenceFrames();
