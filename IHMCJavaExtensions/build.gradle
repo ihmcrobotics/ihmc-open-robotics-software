@@ -27,6 +27,7 @@ mainDependencies {
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
    compile group: 'commons-io', name: 'commons-io', version: '2.4'
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
 }
 
 testDependencies {
