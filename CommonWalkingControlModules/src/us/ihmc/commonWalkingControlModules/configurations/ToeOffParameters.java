@@ -112,6 +112,23 @@ public abstract class ToeOffParameters
    }
 
    /**
+    * To enable that feature, {@link ToeOffParameters#doToeOffIfPossible()} return true is required.
+    */
+   public boolean doToeOffWhenHittingKneeLimit()
+   {
+      return false;
+   }
+
+   /**
+    * Knee limit that triggers {@link ToeOffParameters#doToeOffWhenHittingKneeLimit()}.
+    * The maximum limit is taken between the returned value and the joint limit.
+    */
+   public double getKneeUpperLimitToTriggerToeOff()
+   {
+      return 1.2;
+   }
+
+   /**
     * Sets the maximum pitch of the foot during toe off to be fed into the whole-body controller
     * @return maximum pitch angle
     */
