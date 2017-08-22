@@ -11,29 +11,35 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.footstepPlanning.aStar.implementations.*;
+import us.ihmc.footstepPlanning.aStar.implementations.EuclideanBasedCost;
+import us.ihmc.footstepPlanning.aStar.implementations.EuclideanDistanceHeuristics;
+import us.ihmc.footstepPlanning.aStar.implementations.FlatGroundFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.aStar.implementations.SimpleGridResolutionBasedExpansion;
+import us.ihmc.footstepPlanning.aStar.implementations.SimpleNodeChecker;
+import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AStarPlanarRegionsPlannerTest
@@ -180,7 +186,8 @@ public class AStarPlanarRegionsPlannerTest
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
       FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame());
-      goalPose.setX(1.0);
+      Point3D goalPosition = new Point3D(1.0, 0.0, 0.0);
+      goalPose.setPosition(goalPosition);
       goal.setGoalPoseBetweenFeet(goalPose);
       FramePose startPose = new FramePose();
       RobotSide startSide = RobotSide.LEFT;
@@ -189,7 +196,7 @@ public class AStarPlanarRegionsPlannerTest
 
       // create planner
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
-      AlwaysValidNodeChecker nodeChecker = new AlwaysValidNodeChecker();
+      FootstepNodeChecker nodeChecker = new SimpleNodeChecker();
       EuclideanDistanceHeuristics heuristics = new EuclideanDistanceHeuristics(registry);
       SimpleGridResolutionBasedExpansion expansion = new SimpleGridResolutionBasedExpansion();
       EuclideanBasedCost stepCostCalculator = new EuclideanBasedCost(registry);
@@ -222,7 +229,11 @@ public class AStarPlanarRegionsPlannerTest
          assertEquals(FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION, planner.plan());
 
          planner.setTimeout(Double.POSITIVE_INFINITY);
-         planner.setPlanarRegions(new PlanarRegionsList());
+         generator = new PlanarRegionsListGenerator();
+         generator.addRectangle(0.05, 0.05);
+         generator.translate(1.0, 0.0, 0.0);
+         generator.addRectangle(0.05, 0.5);
+         planner.setPlanarRegions(generator.getPlanarRegionsList());
          assertEquals(FootstepPlanningResult.NO_PATH_EXISTS, planner.plan());
       }
       else
