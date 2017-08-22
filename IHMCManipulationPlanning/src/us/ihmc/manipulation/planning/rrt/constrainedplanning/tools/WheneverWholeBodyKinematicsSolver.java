@@ -321,37 +321,30 @@ public class WheneverWholeBodyKinematicsSolver
       double solutionStableThreshold = 0.0004;
       double solutionQualityThreshold = 0.005;
 
-//      double deltaSolutionQuality = solutionQuality.getDoubleValue() - solutionQualityOld.getDoubleValue();
-      deltaSolutionQuality = solutionQuality.getDoubleValue() - solutionQualityOld.getDoubleValue();
+      double deltaSolutionQuality = solutionQuality.getDoubleValue() - solutionQualityOld.getDoubleValue();
       boolean isSolutionStable = (Math.abs(deltaSolutionQuality) < solutionStableThreshold);
       boolean isSolutionGoodEnough = solutionQuality.getDoubleValue() < solutionQualityThreshold;
       boolean isGoodSolutionCur = isSolutionStable && isSolutionGoodEnough;
-      
+
       if (isGoodSolutionCur)
       {
          isSolved = true;
       }
-      
-      
-      boolean isSolutionUltimateStable = (Math.abs(deltaSolutionQuality) < solutionUltimateStableThreshold);
-      
-      if (DEBUG)
-         PrintTools.info("" + cntForUpdateInternal + " cur SQ " + solutionQuality.getDoubleValue() + " "
-               + isSolutionGoodEnough + " " + isSolutionStable + " " + isGoodSolutionCur + " "+isSolutionUltimateStable);      
 
-      if(isSolutionUltimateStable)
+      boolean isSolutionUltimateStable = (Math.abs(deltaSolutionQuality) < solutionUltimateStableThreshold);
+
+      if (DEBUG)
+         PrintTools.info("" + cntForUpdateInternal + " cur SQ " + solutionQuality.getDoubleValue() + " " + isSolutionGoodEnough + " " + isSolutionStable + " "
+               + isGoodSolutionCur + " " + isSolutionUltimateStable);
+
+      if (isSolutionUltimateStable)
       {
          isJointLimit = true;
       }
-      
-      
-     
 
       solutionQualityOld.set(solutionQuality.getDoubleValue());
       cntForUpdateInternal++;
    }
-   
-   double deltaSolutionQuality;
 
    public boolean getIsSolved()
    {
@@ -371,8 +364,8 @@ public class WheneverWholeBodyKinematicsSolver
           */
          if (isJointLimit)
          {
-            PrintTools.info("cntForUpdateInternal "+" FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
-            
+            PrintTools.info("cntForUpdateInternal " + " FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
+
             return false;
          }
          /*
@@ -382,13 +375,13 @@ public class WheneverWholeBodyKinematicsSolver
          {
             if (DEBUG)
                printOutRobotModel(desiredFullRobotModel, referenceFrames.getMidFootZUpGroundFrame());
-            PrintTools.info("cntForUpdateInternal "+" TRUE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
+            PrintTools.info("cntForUpdateInternal " + " TRUE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
 
             return isSolved;
          }
       }
-      PrintTools.info("cntForUpdateInternal "+" FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue() + " "+deltaSolutionQuality);
-            
+      PrintTools.info("cntForUpdateInternal " + " FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
+
       return false;
    }
 
