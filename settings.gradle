@@ -2,7 +2,7 @@ rootProject.name = hyphenatedName
 
 println 'Evaluating ' + pascalCasedName + ' settings.gradle'
 
-if (startParameter.searchUpwards && automaticallyIncludeBuilds == "true")
+if (startParameter.searchUpwards && includeBuildsFromWorkspace == "true")
 {
    settingsDir.list().each { childDir ->
       if (new File(settingsDir, childDir + "/build.gradle").exists())
