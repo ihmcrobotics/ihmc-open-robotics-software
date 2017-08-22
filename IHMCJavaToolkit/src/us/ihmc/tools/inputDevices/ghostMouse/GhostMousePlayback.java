@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-import us.ihmc.tools.inputDevices.mouse.MouseButton;
-import us.ihmc.tools.inputDevices.mouse.MousePressedOrReleased;
+import us.ihmc.graphicsDescription.input.mouse.MouseButton;
+import us.ihmc.graphicsDescription.input.mouse.MousePressedOrReleased;
 
 public class GhostMousePlayback
 {
