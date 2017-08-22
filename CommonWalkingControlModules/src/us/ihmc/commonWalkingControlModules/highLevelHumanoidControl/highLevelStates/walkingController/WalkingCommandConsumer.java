@@ -124,7 +124,7 @@ public class WalkingCommandConsumer
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
 
       isAutomaticManipulationAbortEnabled.set(walkingControllerParameters.allowAutomaticManipulationAbort());
-      icpErrorThresholdToAbortManipulation.set(0.04);
+      icpErrorThresholdToAbortManipulation.set(walkingControllerParameters.getICPErrorThresholdForManipulationAbort());
       minimumDurationBetweenTwoManipulationAborts.set(5.0);
       manipulationIgnoreInputsDurationAfterAbort.set(2.0);
       timeOfLastManipulationAbortRequest.set(Double.NEGATIVE_INFINITY);

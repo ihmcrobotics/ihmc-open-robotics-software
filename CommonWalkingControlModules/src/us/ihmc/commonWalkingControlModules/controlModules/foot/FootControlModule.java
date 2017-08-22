@@ -67,7 +67,7 @@ public class FootControlModule
 
    public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
          YoPIDSE3Gains swingFootControlGains, YoPIDSE3Gains holdPositionFootControlGains, YoPIDSE3Gains toeOffFootControlGains,
-         HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+         HighLevelHumanoidControllerToolbox controllerToolbox, ExplorationParameters explorationParameters, YoVariableRegistry parentRegistry)
    {
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction);
@@ -78,7 +78,7 @@ public class FootControlModule
       String namePrefix = sidePrefix + "Foot";
       registry = new YoVariableRegistry(sidePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
-      footControlHelper = new FootControlHelper(robotSide, walkingControllerParameters, controllerToolbox, registry);
+      footControlHelper = new FootControlHelper(robotSide, walkingControllerParameters, controllerToolbox, explorationParameters, registry);
 
       this.controllerToolbox = controllerToolbox;
       this.robotSide = robotSide;

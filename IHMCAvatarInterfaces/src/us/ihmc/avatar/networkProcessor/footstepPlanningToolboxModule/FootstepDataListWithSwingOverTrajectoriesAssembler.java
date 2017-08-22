@@ -178,4 +178,9 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
       footstepDataListMessage.setExecutionMode(executionMode);
       return footstepDataListMessage;
    }
+
+   public void setCollisionSphereRadius(double collisionSphereRadius)
+   {
+      this.swingOverPlanarRegionsTrajectoryExpander.setCollisionSphereRadius(collisionSphereRadius);
+   }
 }
