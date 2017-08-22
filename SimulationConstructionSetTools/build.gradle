@@ -28,6 +28,7 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
    compile group: "us.ihmc", name: "simulation-construction-set", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
 }
 
 testDependencies {

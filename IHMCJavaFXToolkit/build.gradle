@@ -33,7 +33,6 @@ mainDependencies {
    }
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
 }
 
 visualizersDependencies {

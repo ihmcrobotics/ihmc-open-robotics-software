@@ -34,6 +34,7 @@ mainDependencies {
    compile group: 'com.google.guava', name: 'guava', version: '18.0'
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
    compile group: "us.ihmc", name: "ihmc-java-extensions", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
 }
 
 testDependencies {
