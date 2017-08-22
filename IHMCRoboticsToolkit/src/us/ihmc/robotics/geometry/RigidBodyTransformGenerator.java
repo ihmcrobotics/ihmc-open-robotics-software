@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.Axis;
 
@@ -66,7 +67,7 @@ public class RigidBodyTransformGenerator
       transform.multiply(tempTransform);
    }
 
-   public void translate(Vector3D translationVector)
+   public void translate(Tuple3DReadOnly translationVector)
    {
       tempTransform.setTranslationAndIdentityRotation(translationVector);
       transform.set(transform);
