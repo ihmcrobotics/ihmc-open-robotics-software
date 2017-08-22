@@ -149,11 +149,6 @@ public class WheneverWholeBodyKinematicsSolver
    private static double chestWeight = 10.0;
    private static double pelvisWeight = 10.0;
 
-   private static double movementThreshold = 3.0e-5;
-   private static double errorThreshold = 1.0e-3;
-
-   private SideDependentList<ControlFrameMovement> handMovements = new SideDependentList<>();
-
    public WheneverWholeBodyKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
       this.fullRobotModelFactory = fullRobotModelFactory;
@@ -190,7 +185,6 @@ public class WheneverWholeBodyKinematicsSolver
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
          initialFootPoses.put(robotSide, new YoFramePoseUsingQuaternions(sidePrefix + "FootInitial", worldFrame, registry));
-         handMovements.put(robotSide, new ControlFrameMovement(desiredFullRobotModel.getHand(robotSide)));
       }
    }
 
@@ -323,57 +317,41 @@ public class WheneverWholeBodyKinematicsSolver
       inverseKinematicsSolution.setDesiredJointState(rootJoint, oneDoFJoints);
       inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
 
-      double solutionStableThreshold = 0.0005;
+      double solutionUltimateStableThreshold = 0.0001;
+      double solutionStableThreshold = 0.0004;
       double solutionQualityThreshold = 0.005;
 
-      double deltaSolutionQuality = solutionQuality.getDoubleValue() - solutionQualityOld.getDoubleValue();
+//      double deltaSolutionQuality = solutionQuality.getDoubleValue() - solutionQualityOld.getDoubleValue();
+      deltaSolutionQuality = solutionQuality.getDoubleValue() - solutionQualityOld.getDoubleValue();
       boolean isSolutionStable = (Math.abs(deltaSolutionQuality) < solutionStableThreshold);
       boolean isSolutionGoodEnough = solutionQuality.getDoubleValue() < solutionQualityThreshold;
       boolean isGoodSolutionCur = isSolutionStable && isSolutionGoodEnough;
-
-      if (DEBUG)
-         PrintTools.info("" + cntForUpdateInternal + " cur SQ " + solutionQuality.getDoubleValue() + " old " + solutionQualityOld.getDoubleValue() + " "
-               + isSolutionStable + " " + isSolutionGoodEnough + " " + isGoodSolutionCur);
-
+      
       if (isGoodSolutionCur)
       {
          isSolved = true;
       }
-
-      double rightHandMovement = handMovements.get(RobotSide.RIGHT).getDeltaPose(desiredFullRobotModel.getHand(RobotSide.RIGHT));
-      double rightHandError = handMovements.get(RobotSide.RIGHT).getError();
-
-      double leftHandMovement = handMovements.get(RobotSide.LEFT).getDeltaPose(desiredFullRobotModel.getHand(RobotSide.LEFT));
-      double leftHandError = handMovements.get(RobotSide.LEFT).getError();
-
-      if(DEBUG)
-         PrintTools.info(""+cntForUpdateInternal+" "+leftHandMovement+" "+leftHandError);
       
       
+      boolean isSolutionUltimateStable = (Math.abs(deltaSolutionQuality) < solutionUltimateStableThreshold);
       
-      if (rightHandMovement < movementThreshold)
+      if (DEBUG)
+         PrintTools.info("" + cntForUpdateInternal + " cur SQ " + solutionQuality.getDoubleValue() + " "
+               + isSolutionGoodEnough + " " + isSolutionStable + " " + isGoodSolutionCur + " "+isSolutionUltimateStable);      
+
+      if(isSolutionUltimateStable)
       {
-         if (rightHandError > errorThreshold)
-         {
-            PrintTools.info("Right Arm joint limit "+ rightHandMovement + " "+rightHandError+" ");
-            PrintTools.info(""+handMovements.get(RobotSide.RIGHT).tempErrorPosition+" "+handMovements.get(RobotSide.RIGHT).tempErrorOrientation);
-            isJointLimit = true;
-         }
+         isJointLimit = true;
       }
-
-      if (leftHandMovement < movementThreshold)
-      {
-         if (leftHandError > errorThreshold)
-         {
-            PrintTools.info("Left Arm joint limit "+ leftHandMovement + " "+leftHandError+" ");
-            PrintTools.info(""+handMovements.get(RobotSide.LEFT).tempErrorPosition+" "+handMovements.get(RobotSide.LEFT).tempErrorOrientation);
-            isJointLimit = true;
-         }
-      }
+      
+      
+     
 
       solutionQualityOld.set(solutionQuality.getDoubleValue());
       cntForUpdateInternal++;
    }
+   
+   double deltaSolutionQuality;
 
    public boolean getIsSolved()
    {
@@ -393,16 +371,7 @@ public class WheneverWholeBodyKinematicsSolver
           */
          if (isJointLimit)
          {
-            PrintTools.info("Joint Limit cntForUpdateInternal " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
-            
-            
-            PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_YAW).getQ());
-            PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL).getQ());
-            PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_PITCH).getQ());
-            PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_ROLL).getQ());
-            PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH).getQ());
-            PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_ROLL).getQ());
-            PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SECOND_WRIST_PITCH).getQ());
+            PrintTools.info("cntForUpdateInternal "+" FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
             
             return false;
          }
@@ -413,29 +382,14 @@ public class WheneverWholeBodyKinematicsSolver
          {
             if (DEBUG)
                printOutRobotModel(desiredFullRobotModel, referenceFrames.getMidFootZUpGroundFrame());
-            PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
+            PrintTools.info("cntForUpdateInternal "+" TRUE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
 
             return isSolved;
          }
       }
-      PrintTools.info("Time Expire cntForUpdateInternal " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
-      
-      PrintTools.info(""+handMovements.get(RobotSide.RIGHT).getDeltaPose(desiredFullRobotModel.getHand(RobotSide.RIGHT)) +" "+handMovements.get(RobotSide.LEFT).getDeltaPose(desiredFullRobotModel.getHand(RobotSide.LEFT)));
-      
-      PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_YAW).getQ());
-      PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL).getQ());
-      PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_PITCH).getQ());
-      PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_ROLL).getQ());
-      PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH).getQ());
-      PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_ROLL).getQ());
-      PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SECOND_WRIST_PITCH).getQ());
-      
+      PrintTools.info("cntForUpdateInternal "+" FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue() + " "+deltaSolutionQuality);
+            
       return false;
-   }
-   
-   public double getEndEffectorError(RobotSide robotSide)
-   {
-      return handMovements.get(robotSide).getError();
    }
 
    public int getCntForUpdateInternal()
@@ -665,8 +619,6 @@ public class WheneverWholeBodyKinematicsSolver
          desiredHandFramePose.changeFrame(worldFrame);
 
          handFramePoses.get(robotSide).set(desiredHandFramePose);
-
-         handMovements.get(robotSide).setDesiredPose(new Pose3D(desiredHandFramePose.getPosition(), desiredHandFramePose.getOrientation()));
       }
 
       ReferenceFrame desiredPelvisReferenceFrame = currentFullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
@@ -732,8 +684,6 @@ public class WheneverWholeBodyKinematicsSolver
       desiredPoseToWorld.changeFrame(worldFrame);
 
       handFramePoses.get(robotSide).set(desiredPoseToWorld);
-
-      handMovements.get(robotSide).setDesiredPose(new Pose3D(handFramePoses.get(robotSide).getPosition(), handFramePoses.get(robotSide).getOrientation()));
    }
 
    public void setDesiredPelvisHeight(double desiredHeightToMidZUp)
