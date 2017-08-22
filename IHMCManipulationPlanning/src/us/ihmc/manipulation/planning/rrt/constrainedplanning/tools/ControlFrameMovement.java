@@ -1,6 +1,5 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.tools;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.rotationConversion.AxisAngleConversion;
@@ -13,7 +12,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 public class ControlFrameMovement
 {
    private static double ratioPositionToOrientation = 1.0;
-
+   
    private Pose3D controlPose;
    private Pose3D controlPoseOld;
 
@@ -41,6 +40,7 @@ public class ControlFrameMovement
 
    private void setInitialPose(Pose3D controlPose)
    {
+      this.controlPose = new Pose3D(controlPose);
       this.controlPoseOld = new Pose3D(controlPose);
       this.deltaPose = 0.0;
    }
@@ -52,6 +52,9 @@ public class ControlFrameMovement
 
    public double getError()
    {
+      tempErrorPosition = Pose3DMovementCalculator.getDeltaPosition(controlPose, desiredPose);
+      tempErrorOrientation = Pose3DMovementCalculator.getDeltaOrientation(controlPose, desiredPose);
+      
       return ratioPositionToOrientation * Pose3DMovementCalculator.getDeltaOrientation(controlPose, desiredPose)
             + Pose3DMovementCalculator.getDeltaPosition(controlPose, desiredPose);
    }
@@ -71,6 +74,9 @@ public class ControlFrameMovement
       controlPoseOld = new Pose3D(newPose);
       return deltaPose;
    }
+
+   public double tempErrorPosition = 0.0;
+   public double tempErrorOrientation = 0.0;
 
    static class Pose3DMovementCalculator
    {
@@ -95,6 +101,11 @@ public class ControlFrameMovement
          AxisAngle toWayPoint = new AxisAngle(toGoal);
          double fullAngle = toWayPoint.getAngle();
 
+         if(fullAngle > Math.PI)
+            fullAngle = 2.0*Math.PI - fullAngle;
+         else if(fullAngle < -Math.PI)
+            fullAngle = 2.0*Math.PI + fullAngle;
+         
          return fullAngle;
       }
 

@@ -36,10 +36,8 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWh
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.GenericTaskNode;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.CTTaskNodeTreeVisualizer;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.ControlFrameMovement;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -205,7 +203,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       setupCWBPlanningToolboxModule();
    }
 
-      @Test
+         @Test
    public void testForToolboxPacket() throws SimulationExceededMaximumTimeException, IOException
    {
       if (visulaizerOn)
@@ -261,8 +259,8 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       ConstrainedWholeBodyPlanningRequestPacket packet = new ConstrainedWholeBodyPlanningRequestPacket();
 
       ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory = endeffectorTrajectory;
+      packet.setNumberOfFindInitialGuess(30);
       packet.setNumberOfExpanding(20);
-      packet.setNumberOfFindInitialGuess(10);
 
       packet.setInitialRobotConfigration(sdfFullRobotModel);
 
@@ -275,12 +273,12 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("End");
    }
 
-//      @Test
+   //      @Test
    public void testForInverseKinematicsToolbox() throws SimulationExceededMaximumTimeException, IOException
    {
       if (visulaizerOn)
-            ThreadTools.sleep(6000);
-      
+         ThreadTools.sleep(6000);
+
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -311,7 +309,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
       FramePose desiredHandPose = new FramePose(handControlFrame);
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPose.prependTranslation(0.20, 0.0, 0.0);   // when prepend in z direction, left hand movement is strange.      
+      desiredHandPose.prependTranslation(0.20, 0.0, 0.0); // when prepend in z direction, left hand movement is strange.      
       ik.setTrajectoryTime(3.0);
       ik.setDesiredHandPose(robotSide, desiredHandPose);
       ik.holdCurrentChestOrientation();
@@ -329,11 +327,11 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("End");
    }
 
-//   @Test
+   //   @Test
    public void testForSolver() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-      
+
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -381,24 +379,24 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
       kinematicsSolver.initialize();
       kinematicsSolver.holdCurrentTrajectoryMessages();
-      
-//      Point3D desiredPoint = new Point3D(0.5, 0.35, 1.8);
+
+      //      Point3D desiredPoint = new Point3D(0.5, 0.35, 1.8);
       Point3D desiredPoint = new Point3D(0.5, 0.35, 1.5);
-//      Point3D desiredPoint = new Point3D(0.5, 0.35, 1.0);
+      //      Point3D desiredPoint = new Point3D(0.5, 0.35, 1.0);
       Quaternion desiredOrientation = new Quaternion();
       Pose3D desiredPose = new Pose3D(desiredPoint, desiredOrientation);
 
       kinematicsSolver.setDesiredHandPose(RobotSide.LEFT, desiredPose);
 
       kinematicsSolver.putTrajectoryMessages();
-      PrintTools.info(""+kinematicsSolver.isSolved());
+      PrintTools.info("" + kinematicsSolver.isSolved());
 
       showUpFullRobotModelWithConfiguration(sdfFullRobotModel);
-      
+
       showUpFullRobotModelWithConfiguration(kinematicsSolver.getDesiredFullRobotModel());
-      
+
       scs.addStaticLinkGraphics(getXYZAxis(desiredPose));
-      
+
       System.out.println("End");
    }
 
@@ -483,6 +481,39 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       pose3D = new Pose3D(translation, orientation);
 
       scs.addStaticLinkGraphics(getXYZAxis(pose3D));
+
+      System.out.println("End");
+   }
+
+   //    @Test
+   public void testForControlFrameMovement() throws SimulationExceededMaximumTimeException, IOException
+   {
+      /**
+       * test orientation error when the orientation is diffent as much as Math.PI*2.0 rotation.
+       */
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+      System.out.println("Start");
+
+      Quaternion orientationOne = new Quaternion();
+      Quaternion orientationTwo = new Quaternion();
+
+      orientationOne.appendRollRotation(Math.PI * 1.99);
+
+      Pose3D poseOne = new Pose3D(new Point3D(1.0, 1.0, 1.0), orientationOne);
+      Pose3D poseTwo = new Pose3D(new Point3D(1.0, 1.0, 1.0), orientationTwo);
+
+      ControlFrameMovement movement = new ControlFrameMovement(poseOne);
+      movement.setDesiredPose(poseTwo);
+
+      PrintTools.info("error is " + movement.getError() + " " + movement.tempErrorPosition + " " + movement.tempErrorOrientation);
+
+      scs.addStaticLinkGraphics(getXYZAxis(poseOne));
+      scs.addStaticLinkGraphics(getXYZAxis(poseTwo));
 
       System.out.println("End");
    }

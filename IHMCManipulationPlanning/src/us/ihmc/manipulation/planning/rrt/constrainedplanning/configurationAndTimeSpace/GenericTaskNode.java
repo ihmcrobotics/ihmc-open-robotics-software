@@ -1,14 +1,6 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
-import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
-import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePose;
 
 public class GenericTaskNode extends CTTaskNode
 {
@@ -75,87 +67,9 @@ public class GenericTaskNode extends CTTaskNode
       setNodeData(10, eeConfigurationSpace.getRotationYaw());
    }
 
-   private ConfigurationSpace getEndEffectorConfigurationSpace()
-   {
-      ConfigurationSpace configurationSpace = new ConfigurationSpace();
-      configurationSpace.setTranslation(getNodeData(5), getNodeData(6), getNodeData(7));
-      configurationSpace.setRotation(getNodeData(8), getNodeData(9), getNodeData(10));
-      return configurationSpace;
-   }
-
-   public Pose3D getEndEffectorPose()
-   {
-      /*
-       * to world frame.
-       */
-      return constrainedEndEffectorTrajectory.getEndEffectorPose(getNodeData(0), getEndEffectorConfigurationSpace());
-   }
-
-   @Override
-   public boolean isValidNode()
-   {
-      /*
-       * using @code WheneverWholeBodyKinematicsSolver. set initial
-       * configuration
-       */
-
-      if (getParentNode() != null)
-      {
-         nodeTester.updateRobotConfigurationDataJointsOnly(getParentNode().getOneDoFJoints());
-         for (int i = 0; i < getParentNode().getOneDoFJoints().length; i++)
-         {
-            double jointPosition = getParentNode().getOneDoFJoints()[i].getQ();
-         }
-      }
-      else
-      {
-         PrintTools.warn("parentNode is required.");
-         nodeTester.updateRobotConfigurationDataJointsOnly(FullRobotModelUtils.getAllJointsExcludingHands(initialRobotModel));
-      }
-
-      nodeTester.initialize();
-
-      nodeTester.holdCurrentTrajectoryMessages();
-      /*
-       * set whole body tasks.
-       */
-      Pose3D desiredPose = getEndEffectorPose();
-      FramePoint3D desiredPointToWorld = new FramePoint3D(worldFrame, desiredPose.getPosition());
-      FrameOrientation desiredOrientationToWorld = new FrameOrientation(worldFrame, desiredPose.getOrientation());
-
-      FramePose desiredPoseToWorld = new FramePose(desiredPointToWorld, desiredOrientationToWorld);
-
-      desiredPoseToWorld.changeFrame(midZUpFrame);
-
-      Pose3D desiredPoseToMidZUp = new Pose3D(new Point3D(desiredPoseToWorld.getPosition()), new Quaternion(desiredPoseToWorld.getOrientation()));
-      desiredPoseToMidZUp.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);
-
-      nodeTester.setDesiredHandPose(constrainedEndEffectorTrajectory.getRobotSide(), desiredPoseToMidZUp);
-      nodeTester.setHandSelectionMatrixFree(constrainedEndEffectorTrajectory.getAnotherRobotSide());
-
-      Quaternion desiredChestOrientation = new Quaternion();
-      desiredChestOrientation.appendYawRotation(getNodeData(2));
-
-      PrintTools.info("c yaw " + getNodeData(2) * 180 / Math.PI);
-      desiredChestOrientation.appendPitchRotation(getNodeData(3));
-      desiredChestOrientation.appendRollRotation(getNodeData(4));
-      nodeTester.setDesiredChestOrientation(desiredChestOrientation);
-
-      nodeTester.setDesiredPelvisHeight(getNodeData(1));
-
-      nodeTester.putTrajectoryMessages();
-
-      setIsValidNode(nodeTester.isSolved());
-
-      setConfigurationJoints(nodeTester.getFullRobotModelCopy());
-
-      return isValid;
-   }
-
    @Override
    public CTTaskNode createNode()
    {
       return new GenericTaskNode();
    }
-
 }

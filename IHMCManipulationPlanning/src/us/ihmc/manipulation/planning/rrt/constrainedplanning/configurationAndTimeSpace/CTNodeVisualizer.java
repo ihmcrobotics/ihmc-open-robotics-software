@@ -50,7 +50,7 @@ public class CTNodeVisualizer
    public void updateVisualizer(CTTaskNode newNode)
    {
       String prefix = ""+configurationIndex+""+updateCnt;
-      if (newNode.getIsValidNode())
+      if (newNode.getValidity())
       {
          if(newNode.getParentNode() != null)
          {

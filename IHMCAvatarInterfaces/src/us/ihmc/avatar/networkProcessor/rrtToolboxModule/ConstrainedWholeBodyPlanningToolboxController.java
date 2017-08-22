@@ -119,7 +119,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private int numberOfInitialGuess = 30;
 
    private static int terminateToolboxCondition = 700;
-   /*
+   
+   /**
     * Toolbox state
     */
    private CWBToolboxState state;
@@ -143,7 +144,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       this.state = CWBToolboxState.DO_NOTHING;
 
       this.endeffectorPose = new YoFramePose("endeffectorPose", ReferenceFrame.getWorldFrame(), registry);
-      this.endeffectorFrame = new YoGraphicCoordinateSystem("endeffectorPoseFrame", this.endeffectorPose, 0.15);
+      this.endeffectorFrame = new YoGraphicCoordinateSystem("endeffectorPoseFrame", this.endeffectorPose, 0.25);
       this.endeffectorFrame.setVisible(true);
 
       yoGraphicsRegistry.registerYoGraphic("endeffectorPoseViz", this.endeffectorFrame);
@@ -154,6 +155,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    @Override
    protected void updateInternal()
    {
+      updateCount.increment();
       PrintTools.info("update toolbox " + updateCount.getIntegerValue() + " " + state);
 
       // ************************************************************************************************************** //
@@ -175,7 +177,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
          isValidNode(visualizedNode);
          double scoreInitialGuess = kinematicsSolver.getArmJointLimitScore(constrainedEndEffectorTrajectory.getRobotSide());
-         if (!visualizedNode.getIsValidNode())
+         if (!visualizedNode.getValidity())
             scoreInitialGuess = 0.0;
 
          jointlimitScore.set(scoreInitialGuess);
@@ -234,7 +236,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          }
 
          visualizedNode = tree.getNewNode().createNodeCopy();
-         visualizedNode.setIsValidNode(tree.getNewNode().getIsValidNode());
+         visualizedNode.setValidity(tree.getNewNode().getValidity());
 
          /*
           * terminate expanding tree.
@@ -292,8 +294,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       updateVisualizers();
       updateYoVariables();
 
-      // ************************************************************************************************************** //
-      updateCount.increment();
+      // ************************************************************************************************************** //      
       if (updateCount.getIntegerValue() == terminateToolboxCondition)
          isDone.set(true);
    }
@@ -437,7 +438,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       node.setConfigurationJoints(kinematicsSolver.getFullRobotModelCopy());
       //      node.setConfigurationJoints(kinematicsSolver.getDesiredFullRobotModel());
 
-      node.setIsValidNode(result);
+      node.setValidity(result);
 
       cntKinematicSolver.set(kinematicsSolver.getCntForUpdateInternal());
 
@@ -474,10 +475,10 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       if (visualizedNode != null)
       {
          treeStateVisualizer.setCurrentNormalizedTime(visualizedNode.getNormalizedNodeData(0));
-         treeStateVisualizer.setCurrentCTTaskNodeValidity(visualizedNode.getIsValidNode());
+         treeStateVisualizer.setCurrentCTTaskNodeValidity(visualizedNode.getValidity());
          treeStateVisualizer.updateVisualizer();
 
-         currentIsValid.set(visualizedNode.getIsValidNode());
+         currentIsValid.set(visualizedNode.getValidity());
          currentTrajectoryTime.set(visualizedNode.getNormalizedNodeData(0));
          if (startYoVariableServer)
             treeVisualizer.update(visualizedNode);

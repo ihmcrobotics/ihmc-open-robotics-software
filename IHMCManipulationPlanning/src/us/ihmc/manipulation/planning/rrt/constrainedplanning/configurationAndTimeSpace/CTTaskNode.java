@@ -6,12 +6,9 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.NodeData;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public abstract class CTTaskNode
@@ -20,20 +17,13 @@ public abstract class CTTaskNode
    private NodeData normalizedNodeData;
    private ArrayList<CTTaskNode> childNodes;
    private CTTaskNode parentNode;
-   
-   protected boolean isValid = true;  
-   
-   protected OneDoFJoint[] configurationJoints;   
+
+   protected boolean validity = true;
+
+   protected OneDoFJoint[] configurationJoints;
    protected Vector3D configurationTranslation;
    protected Quaternion configurationRotation;
-   
-   public static WheneverWholeBodyKinematicsSolver nodeTester;
-   public static FullHumanoidRobotModel initialRobotModel;
-   public static ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
-   
-   public static ReferenceFrame midZUpFrame;
-   public static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   
+
    public CTTaskNode()
    {
 
@@ -74,7 +64,7 @@ public abstract class CTTaskNode
    {
       return nodeData.getQ(index);
    }
-   
+
    public final double getNormalizedNodeData(int index)
    {
       return normalizedNodeData.getQ(index);
@@ -89,7 +79,7 @@ public abstract class CTTaskNode
    {
       nodeData.setQ(index, data);
    }
-   
+
    public final void setNormalizedNodeData(int index, double data)
    {
       normalizedNodeData.setQ(index, data);
@@ -115,7 +105,7 @@ public abstract class CTTaskNode
    {
       parentNode = node;
    }
-   
+
    public final void clearParentNode()
    {
       parentNode = null;
@@ -125,36 +115,31 @@ public abstract class CTTaskNode
    {
       return parentNode;
    }
-   
-   public void printNodeData()
+
+   public final void printNodeData()
    {
-      for(int i=0;i<getDimensionOfNodeData();i++)
-         PrintTools.info("" + i +" "+getNodeData(i));
+      for (int i = 0; i < getDimensionOfNodeData(); i++)
+         PrintTools.info("" + i + " " + getNodeData(i));
    }
-   
-   public double getTime()
+
+   public final double getTime()
    {
       return getNodeData(0);
    }
-   
-   public void setIsValidNode(boolean value)
-   {
-      isValid = value;
-   }
-   
-   public void convertDataToNormalizedData(TaskRegion nodeRegion)
+
+   public final void convertDataToNormalizedData(TaskRegion nodeRegion)
    {
       normalizedNodeData = new NodeData(getDimensionOfNodeData());
-      for(int i=0;i<getDimensionOfNodeData();i++)
+      for (int i = 0; i < getDimensionOfNodeData(); i++)
       {
          double normalizedValue = 0;
-         if(i == 0)
+         if (i == 0)
          {
             normalizedValue = (getNodeData(i) - nodeRegion.getLowerLimit(i)) / nodeRegion.getTrajectoryTime();
          }
          else
          {
-            if(nodeRegion.isEnable(i))
+            if (nodeRegion.isEnable(i))
                normalizedValue = (getNodeData(i) - nodeRegion.getLowerLimit(i)) / nodeRegion.sizeOfRegion(i);
             else
                normalizedValue = 0;
@@ -162,86 +147,86 @@ public abstract class CTTaskNode
          normalizedNodeData.setQ(i, normalizedValue);
       }
    }
-   
-   public void convertNormalizedDataToData(TaskRegion nodeRegion)
+
+   public final void convertNormalizedDataToData(TaskRegion nodeRegion)
    {
       nodeData = new NodeData(getDimensionOfNodeData());
-      for(int i=0;i<getDimensionOfNodeData();i++)
+      for (int i = 0; i < getDimensionOfNodeData(); i++)
       {
          double value = 0;
-         if(i==0)
+         if (i == 0)
          {
-            value = getNormalizedNodeData(i)*nodeRegion.getTrajectoryTime() + nodeRegion.getLowerLimit(i);
+            value = getNormalizedNodeData(i) * nodeRegion.getTrajectoryTime() + nodeRegion.getLowerLimit(i);
          }
          else
          {
-            value = getNormalizedNodeData(i)*nodeRegion.sizeOfRegion(i) + nodeRegion.getLowerLimit(i);         
+            value = getNormalizedNodeData(i) * nodeRegion.sizeOfRegion(i) + nodeRegion.getLowerLimit(i);
          }
          nodeData.setQ(i, value);
       }
    }
-   
-   /*
-    * alpha is within 0 ~ 1.
+
+   /**
+    * alpha is within 0 ~ 1 and a ratio from this to towardNode.
     * if i, the createdNewNode would be towardNode.
     * if 0, the createdNewNode would be this.
     */
-   public CTTaskNode createNewNodeTowardNode(CTTaskNode towardNode, double alpha)
+   public final CTTaskNode createNewNodeTowardNode(CTTaskNode towardNode, double alpha)
    {
       /*
        * clamping alpha first.
        */
-      if(alpha > 1)
+      if (alpha > 1)
          alpha = 1;
-      else if(alpha < 0)
+      else if (alpha < 0)
          alpha = 0;
       else
          ;
-      
+
       CTTaskNode createdNewNode = this.createNode();
-      
-      for(int i=0;i<createdNewNode.getDimensionOfNodeData();i++)
+
+      for (int i = 0; i < createdNewNode.getDimensionOfNodeData(); i++)
       {
          double stepToward;
          stepToward = (towardNode.getNodeData(i) - this.getNodeData(i)) * alpha;
-         createdNewNode.setNodeData(i, this.getNodeData(i)+stepToward);
-         
+         createdNewNode.setNodeData(i, this.getNodeData(i) + stepToward);
+
          stepToward = (towardNode.getNormalizedNodeData(i) - this.getNormalizedNodeData(i)) * alpha;
-         createdNewNode.setNormalizedNodeData(i, this.getNormalizedNodeData(i)+stepToward);
-      }      
+         createdNewNode.setNormalizedNodeData(i, this.getNormalizedNodeData(i) + stepToward);
+      }
       createdNewNode.setParentNode(this);
       return createdNewNode;
    }
-   
-   /*
+
+   /**
     * this method is only used to create optimal path in CTTaskNodeTree.
     */
-   public CTTaskNode createNodeCopy()
+   public final CTTaskNode createNodeCopy()
    {
       CTTaskNode nodeCopy = createNode();
-      
+
       nodeCopy.nodeData = new NodeData(this.nodeData);
       nodeCopy.normalizedNodeData = new NodeData(this.normalizedNodeData);
-      
+
       nodeCopy.configurationJoints = this.configurationJoints;
       nodeCopy.configurationTranslation = this.configurationTranslation;
       nodeCopy.configurationRotation = this.configurationRotation;
-            
+
       return nodeCopy;
    }
-   
-   public void setConfigurationJoints(FullHumanoidRobotModel robot)
+
+   public final void setConfigurationJoints(FullHumanoidRobotModel robot)
    {
       this.configurationJoints = FullRobotModelUtils.getAllJointsExcludingHands(robot);
       this.configurationTranslation = new Vector3D(robot.getRootJoint().getTranslationForReading());
       this.configurationRotation = new Quaternion(robot.getRootJoint().getRotationForReading());
    }
-   
+
    public OneDoFJoint[] getOneDoFJoints()
    {
       return configurationJoints;
    }
-   
+
    public Vector3D getRootTranslation()
    {
       return configurationTranslation;
@@ -251,14 +236,16 @@ public abstract class CTTaskNode
    {
       return configurationRotation;
    }
-   
-   public boolean getIsValidNode()
-   {
-      return isValid;
-   }
-   
-   public abstract boolean isValidNode();
-   
-   public abstract CTTaskNode createNode();
 
+   public void setValidity(boolean value)
+   {
+      validity = value;
+   }
+
+   public boolean getValidity()
+   {
+      return validity;
+   }
+
+   public abstract CTTaskNode createNode();
 }
