@@ -78,8 +78,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    private final YoInteger cntKinematicSolver = new YoInteger("cntKinematicSolver", registry);
    
-   private final YoDouble endeffectorError = new YoDouble("endeffectorError", registry);
-   
    /*
     * Visualizer
     */
@@ -88,8 +86,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private CTTaskNode visualizedNode;
 
    private OneDoFJoint[] initialOneDoFJoints;
-
-   private Vector3D initialTranslationOfRootJoint;
+   private Vector3D initialTranslationOfRootJoint;   
    private Quaternion initialRotationOfRootJoint;
 
    private FullHumanoidRobotModel visualizedFullRobotModel;
@@ -494,8 +491,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       solutionQuality.set(kinematicsSolver.getSolution().getSolutionQuality());
       endeffectorFrame.setVisible(true);
       endeffectorFrame.update();
-      
-      endeffectorError.set(kinematicsSolver.getEndEffectorError(constrainedEndEffectorTrajectory.getRobotSide()));
    }
    
    /**

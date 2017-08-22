@@ -260,7 +260,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
       ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory = endeffectorTrajectory;
       packet.setNumberOfFindInitialGuess(30);
-      packet.setNumberOfExpanding(20);
+      packet.setNumberOfExpanding(100);
 
       packet.setInitialRobotConfigration(sdfFullRobotModel);
 
@@ -481,39 +481,6 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       pose3D = new Pose3D(translation, orientation);
 
       scs.addStaticLinkGraphics(getXYZAxis(pose3D));
-
-      System.out.println("End");
-   }
-
-   //    @Test
-   public void testForControlFrameMovement() throws SimulationExceededMaximumTimeException, IOException
-   {
-      /**
-       * test orientation error when the orientation is diffent as much as Math.PI*2.0 rotation.
-       */
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
-      drcBehaviorTestHelper.updateRobotModel();
-      System.out.println("Start");
-
-      Quaternion orientationOne = new Quaternion();
-      Quaternion orientationTwo = new Quaternion();
-
-      orientationOne.appendRollRotation(Math.PI * 1.99);
-
-      Pose3D poseOne = new Pose3D(new Point3D(1.0, 1.0, 1.0), orientationOne);
-      Pose3D poseTwo = new Pose3D(new Point3D(1.0, 1.0, 1.0), orientationTwo);
-
-      ControlFrameMovement movement = new ControlFrameMovement(poseOne);
-      movement.setDesiredPose(poseTwo);
-
-      PrintTools.info("error is " + movement.getError() + " " + movement.tempErrorPosition + " " + movement.tempErrorOrientation);
-
-      scs.addStaticLinkGraphics(getXYZAxis(poseOne));
-      scs.addStaticLinkGraphics(getXYZAxis(poseTwo));
 
       System.out.println("End");
    }
