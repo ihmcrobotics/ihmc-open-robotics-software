@@ -1,5 +1,6 @@
 package us.ihmc.robotics.controllers;
 
+import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -152,6 +153,7 @@ public class YoPDGains implements PDGainsInterface
    {
       VariableChangedListener kdUpdater = new VariableChangedListener()
       {
+         @Override
          public void variableChanged(YoVariable<?> v)
          {
             kd.set(GainCalculator.computeDerivativeGain(kp.getDoubleValue(), zeta.getDoubleValue()));
@@ -173,6 +175,16 @@ public class YoPDGains implements PDGainsInterface
       this.maximumFeedback.set(other.maximumFeedback.getDoubleValue());
       this.maximumFeedbackRate.set(other.maximumFeedbackRate.getDoubleValue());
       this.positionDeadband.set(other.positionDeadband.getDoubleValue());
+   }
+
+   public void set(PDGains pdGains)
+   {
+      setKp(pdGains.getKp());
+      setKd(pdGains.getKd());
+      setZeta(pdGains.getZeta());
+      setMaximumOutput(pdGains.getMaximumOutput());
+      setMaximumFeedback(pdGains.getMaximumFeedback());
+      setPositionDeadband(pdGains.getPositionDeadband());
    }
 
 }

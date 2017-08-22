@@ -8,6 +8,7 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -171,7 +172,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       this.feetManager = managerFactory.getOrCreateFeetManager();
-      this.legConfigurationManager = managerFactory.getOrCreateKneeAngleManager();
+      this.legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       RigidBody head = fullRobotModel.getHead();
       RigidBody chest = fullRobotModel.getChest();
@@ -224,17 +225,24 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       boolean enableHighCoPDamping = highCoPDampingDuration > 0.0 && !Double.isInfinite(coPErrorThreshold);
       controllerToolbox.setHighCoPDampingParameters(enableHighCoPDamping, highCoPDampingDuration, coPErrorThreshold);
 
-      JointLimitParameters limitParameters = new JointLimitParameters();
-      String[] jointNamesRestrictiveLimits = walkingControllerParameters.getJointsWithRestrictiveLimits(limitParameters);
+      String[] jointNamesRestrictiveLimits = walkingControllerParameters.getJointsWithRestrictiveLimits();
+      JointLimitParameters limitParameters = walkingControllerParameters.getJointLimitParametersForJointsWithRestictiveLimits();
       OneDoFJoint[] jointsWithRestrictiveLimit = ScrewTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFjoints, jointNamesRestrictiveLimits), OneDoFJoint.class);
       for (OneDoFJoint joint : jointsWithRestrictiveLimit)
+      {
+         if (limitParameters == null)
+         {
+            throw new RuntimeException("Must define joint limit parameters if using joints with restrictive limits.");
+         }
          jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
+      }
 
       if (walkingControllerParameters.enableJointAccelerationIntegrationForAllJoints())
       {
          accelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
          jointAccelerationIntegrationParameters = new HashMap<>();
-         Map<String, JointAccelerationIntegrationParametersReadOnly> parameters = walkingControllerParameters.getJointAccelerationIntegrationParameters(registry);
+         Map<String, JointAccelerationIntegrationParametersReadOnly> parameters = new HashMap<>();
+         ParameterTools.extractAccelerationIntegrationParameterMap(walkingControllerParameters.getJointAccelerationIntegrationParameters(), parameters, registry);
 
          for (InverseDynamicsJoint joint : controllerToolbox.getControlledJoints())
          {

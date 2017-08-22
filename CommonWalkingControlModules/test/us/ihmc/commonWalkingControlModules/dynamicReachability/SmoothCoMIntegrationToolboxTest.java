@@ -17,7 +17,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class SmoothCoMIntegrationToolsTest
+public class SmoothCoMIntegrationToolboxTest
 {
    private static final int nTests = 20;
    private static final double omega0 = 3.4;
@@ -25,7 +25,7 @@ public class SmoothCoMIntegrationToolsTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private Random random = new Random();
    
-   String namePrefix = "SmoothCoMIntegrationToolsTest";
+   String namePrefix = "SmoothCoMIntegrationToolboxTest";
    
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
    private final SmoothCoMIntegrationToolbox comToolbox = new SmoothCoMIntegrationToolbox(icpToolbox);
@@ -219,7 +219,7 @@ public class SmoothCoMIntegrationToolsTest
          FramePoint3D comPositionDesiredInitial = new FramePoint3D(worldFrame, cmp0.getPoint());
          
          FramePoint3D icpPositionDesiredInitial = new FramePoint3D(worldFrame);
-         icpToolbox.computeDesiredCapturePointPosition(omega0, t0, icpPositionDesiredFinal, linear3D, icpPositionDesiredInitial);
+         icpToolbox.computeDesiredCapturePointPosition3D(omega0, t0, icpPositionDesiredFinal, linear3D, icpPositionDesiredInitial);
 
          // Position
          FramePoint3D comPositionDesiredCurrent = new FramePoint3D(worldFrame);

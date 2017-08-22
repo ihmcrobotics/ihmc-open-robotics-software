@@ -57,19 +57,6 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
    }
 
    @Override
-   public String getKpPelvisOrientationName()
-   {
-      return "kpXYAngularPelvisOrientation";
-   }
-
-   @Override
-   public String getZetaPelvisOrientationName()
-   {
-      return "zetaXYAngularPelvisOrientation";
-   }
-
-
-   @Override
    public InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(FullRobotModel controllersFullRobotModel, FloatingRootJointRobot robot)
    {
       return null;

@@ -45,7 +45,7 @@ public class DynamicReachabilityCalculator
    private static final boolean VISUALIZE_REACHABILITY = false;
 
    private static final double epsilon = 0.005;
-   private static final double stanceLegLengthToeOffFactor = 1.1;
+   private static final double stanceLegLengthToeOffFactor = 1.02;
 
    private static final double gradientThresholdForConsideration = 0.005;
 
