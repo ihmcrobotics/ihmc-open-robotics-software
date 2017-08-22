@@ -42,8 +42,6 @@ public class CTTaskNodeTree
       this.rootNode = rootNode.createNodeCopy();
       this.wholeNodes.add(this.rootNode);
 
-//      this.nodeRegion = new CTTaskNodeRegion(this.rootNode.getDimensionOfNodeData());
-
       this.dimensionOfTask = rootNode.getDimensionOfNodeData() - 1;
 
       this.taskNames = new ArrayList<String>();
@@ -57,8 +55,6 @@ public class CTTaskNodeTree
       this.rootNode = rootNode;
       this.wholeNodes.add(this.rootNode);
 
-//      this.nodeRegion = new CTTaskNodeRegion(this.rootNode.getDimensionOfNodeData());
-
       this.dimensionOfTask = rootNode.getDimensionOfNodeData() - 1;
 
       this.taskNames = new ArrayList<String>();
@@ -69,7 +65,7 @@ public class CTTaskNodeTree
          for (int i = 1; i < this.dimensionOfTask + 1; i++)
             this.taskNames.add("Task_" + i + "_" + taskNames[i - 1]);
    }
-   
+
    public void setTaskRegion(TaskRegion taskRegion)
    {
       this.nodeRegion = taskRegion;
@@ -96,26 +92,26 @@ public class CTTaskNodeTree
       Random randomManager = new Random();
 
       double exceedIntentionalRatio = 1.0;
-      
-      if(isUniform)
+
+      if (isUniform)
          exceedIntentionalRatio = 0.0;
       else
          exceedIntentionalRatio = 1.0;
-      
+
       double value = randomManager.nextDouble() * (1.0 + exceedIntentionalRatio);
-      
-      if(index == 0)
+
+      if (index == 0)
          ;
       else
       {
-         value = value - 0.5*exceedIntentionalRatio;
-         
+         value = value - 0.5 * exceedIntentionalRatio;
+
          if (value >= 1)
             value = 1;
          if (value <= 0)
             value = 0;
-      }   
-      
+      }
+
       node.setNormalizedNodeData(index, value);
    }
 
@@ -130,77 +126,50 @@ public class CTTaskNodeTree
       matricRatioTimeToTask = ratio;
    }
 
-   public void expandTree(int numberOfExpanding)
-   {
-      this.rootNode.convertDataToNormalizedData(this.nodeRegion);
-
-      for (int i = 0; i < numberOfExpanding; i++)
-      {
-         PrintTools.info("expanding process " + i);
-         if (expandingTree())
-         {
-            PrintTools.info("expanding is done " + i);
-            ArrayList<CTTaskNode> revertedPath = new ArrayList<CTTaskNode>();
-            CTTaskNode currentNode = newNode;
-            revertedPath.add(currentNode);
-
-            while (true)
-            {
-               currentNode = currentNode.getParentNode();
-               if (currentNode != null)
-               {
-                  revertedPath.add(currentNode);
-               }
-               else
-                  break;
-            }
-
-            int revertedPathSize = revertedPath.size();
-
-            path.clear();
-            for (int j = 0; j < revertedPathSize; j++)
-               path.add(revertedPath.get(revertedPathSize - 1 - j));
-
-            PrintTools.info("Constructed Tree size is " + revertedPathSize);
-
-//            optimalPath.clear();
-//            for (int j = 0; j < path.size(); j++)
-//            {
-//               CTTaskNode node = path.get(i).createNodeCopy();
-//               optimalPath.add(node);
-//            }
-
-            break;
-         }
-      }
-   }
-   
-   public void testMonteCarlo(int numberOfExpanding)
-   {
-      this.rootNode.convertDataToNormalizedData(this.nodeRegion);
-      
-      for(int i=0;i<numberOfExpanding;i++)
-      {
-         PrintTools.info("expanding process " + i);
-         
-         updateRandomConfiguration();
-         this.newNode = this.randomNode.createNodeCopy();
-                  
-         this.newNode.convertNormalizedDataToData(nodeRegion);
-         this.newNode.setParentNode(this.nearNode);
-
-         if (this.newNode.isValidNode())
-         {
-            nearNode.addChildNode(this.newNode);
-            wholeNodes.add(newNode);
-         }
-         else
-         {
-            this.newNode.clearParentNode();
-            failNodes.add(this.newNode);
-         }
-      }
-   }
+   //   public void expandTree(int numberOfExpanding)
+   //   {
+   //      this.rootNode.convertDataToNormalizedData(this.nodeRegion);
+   //
+   //      for (int i = 0; i < numberOfExpanding; i++)
+   //      {
+   //         PrintTools.info("expanding process " + i);
+   //         if (expandingTree())
+   //         {
+   //            PrintTools.info("expanding is done " + i);
+   //            ArrayList<CTTaskNode> revertedPath = new ArrayList<CTTaskNode>();
+   //            CTTaskNode currentNode = newNode;
+   //            revertedPath.add(currentNode);
+   //
+   //            while (true)
+   //            {
+   //               currentNode = currentNode.getParentNode();
+   //               if (currentNode != null)
+   //               {
+   //                  revertedPath.add(currentNode);
+   //               }
+   //               else
+   //                  break;
+   //            }
+   //
+   //            int revertedPathSize = revertedPath.size();
+   //
+   //            path.clear();
+   //            for (int j = 0; j < revertedPathSize; j++)
+   //               path.add(revertedPath.get(revertedPathSize - 1 - j));
+   //
+   //            PrintTools.info("Constructed Tree size is " + revertedPathSize);
+   //
+   ////            optimalPath.clear();
+   ////            for (int j = 0; j < path.size(); j++)
+   ////            {
+   ////               CTTaskNode node = path.get(i).createNodeCopy();
+   ////               optimalPath.add(node);
+   ////            }
+   //
+   //            break;
+   //         }
+   //      }
+   //   }
 
    private double getNormalizedTaskDisplacement(CTTaskNode nodeOne, CTTaskNode nodeTwo)
    {
@@ -244,23 +213,23 @@ public class CTTaskNodeTree
     * As long as the tree does not reach the trajectory time, this method
     * returns false.
     */
-   public boolean expandingTree()
-   {
-      updateRandomConfiguration();
-      updateNearestNode();
-      updateNewConfiguration();
-      if (connectNewConfiguration())
-      {
-         if (this.newNode.getTime() == getTrajectoryTime())
-            return true;
-         else
-            return false;
-      }
-      else
-      {
-         return false;
-      }
-   }
+   //   public boolean expandingTree()
+   //   {
+   //      updateRandomConfiguration();
+   //      updateNearestNode();
+   //      updateNewConfiguration();
+   //      if (connectNewConfiguration())
+   //      {
+   //         if (this.newNode.getTime() == getTrajectoryTime())
+   //            return true;
+   //         else
+   //            return false;
+   //      }
+   //      else
+   //      {
+   //         return false;
+   //      }
+   //   }
 
    public void updateRandomConfiguration()
    {
@@ -286,8 +255,8 @@ public class CTTaskNodeTree
             optMatric = curMatric;
             nearNode = curNode;
          }
-      }     
-      
+      }
+
       this.nearNode = nearNode;
    }
 
@@ -347,21 +316,7 @@ public class CTTaskNodeTree
       {
          double iDisplacement = (this.randomNode.getNormalizedNodeData(i) - nearNode.getNormalizedNodeData(i)) / displacement * expandingDisplacement;
          newNode.setNormalizedNodeData(i, nearNode.getNormalizedNodeData(i) + iDisplacement);
-         //         PrintTools.info("expandingDisplacement "+ displacement + " " + expandingDisplacement + " " + iDisplacement +" "+(this.randomNode.getNormalizedNodeData(i) - nearNode.getNormalizedNodeData(i)));
       }
-
-      //      for (int i = 0; i < this.randomNode.getDimensionOfNodeData(); i++)
-      //      {
-      //         PrintTools.info("randomNode "+randomNode.getNormalizedNodeData(i) + " ");
-      //      }
-      //      for (int i = 0; i < nearNode.getDimensionOfNodeData(); i++)
-      //      {
-      //         PrintTools.info("nearNode "+nearNode.getNormalizedNodeData(i) + " ");
-      //      }
-      //      for (int i = 0; i < newNode.getDimensionOfNodeData(); i++)
-      //      {
-      //         PrintTools.info("newNode "+newNode.getNormalizedNodeData(i) + " ");
-      //      }
 
       this.newNode = newNode;
    }
@@ -369,34 +324,34 @@ public class CTTaskNodeTree
    /*
     * When the new configuration is valid, return true.
     */
-   private boolean connectNewConfiguration()
-   {
-      this.newNode.convertNormalizedDataToData(nodeRegion);
-      this.newNode.setParentNode(this.nearNode);
+   //   private boolean connectNewConfiguration()
+   //   {
+   //      this.newNode.convertNormalizedDataToData(nodeRegion);
+   //      this.newNode.setParentNode(this.nearNode);
+   //
+   //      if (this.newNode.isValidNode())
+   //      {
+   //         nearNode.addChildNode(this.newNode);
+   //         wholeNodes.add(newNode);
+   //         //         PrintTools.info("this new Configuration is added on tree");      
+   //
+   //         return true;
+   //      }
+   //      else
+   //      {
+   //         this.newNode.clearParentNode();
+   //         failNodes.add(this.newNode);
+   //         //         PrintTools.info("this new Configuration cannot be added on tree");
+   //         return false;
+   //      }
+   //   }
 
-      if (this.newNode.isValidNode())
-      {
-         nearNode.addChildNode(this.newNode);
-         wholeNodes.add(newNode);
-         //         PrintTools.info("this new Configuration is added on tree");      
-
-         return true;
-      }
-      else
-      {
-         this.newNode.clearParentNode();
-         failNodes.add(this.newNode);
-         //         PrintTools.info("this new Configuration cannot be added on tree");
-         return false;
-      }
-   }
-   
    public void connectNewNode(boolean connect)
    {
-      if(connect)
+      if (connect)
       {
          this.nearNode.addChildNode(this.newNode);
-         this.wholeNodes.add(this.newNode);   
+         this.wholeNodes.add(this.newNode);
       }
       else
       {
@@ -428,12 +383,12 @@ public class CTTaskNodeTree
    {
       return nodeRegion;
    }
-   
+
    public CTTaskNode getNewNode()
    {
       return newNode;
    }
-   
+
    public CTTaskNode getNearNode()
    {
       return nearNode;
@@ -459,111 +414,114 @@ public class CTTaskNodeTree
       return optimalPath;
    }
 
-   //   public void saveNodes()
-   //   {
-   //      String fileName = "/home/shadylady/tree.txt";
-   //      BufferedWriter bw = null;
-   //      FileWriter fw = null;
-   //      
-   //      System.out.println("Save Start");
-   //      try {
-   //         String savingContent = "";
-   //         
-   //         /*
-   //          * whole nodes
-   //          */
-   //         for(int i=0;i<getWholeNodes().size();i++)
-   //         {
-   //            String convertedNodeData = "";            
-   //            
-   //            convertedNodeData = convertedNodeData + "1\t";
-   //            for(int j=0;j<getWholeNodes().get(i).getDimensionOfNodeData();j++)
-   //            {
-   //               convertedNodeData = convertedNodeData + String.format("%.3f\t", getWholeNodes().get(i).getNodeData(j));               
-   //            }
-   //            
-   //            if(getWholeNodes().get(i).getParentNode() == null)
-   //            {
-   //               for(int j=0;j<getWholeNodes().get(i).getDimensionOfNodeData();j++)
-   //               {
-   //                  convertedNodeData = convertedNodeData + "0\t";               
-   //               }
-   //            }
-   //            else
-   //            {
-   //               for(int j=0;j<getWholeNodes().get(i).getDimensionOfNodeData();j++)
-   //               {
-   //                  convertedNodeData = convertedNodeData + String.format("%.3f\t", getWholeNodes().get(i).getParentNode().getNodeData(j));               
-   //               }   
-   //            }
-   //            convertedNodeData = convertedNodeData + "\n";
-   //            
-   //            savingContent = savingContent + convertedNodeData;
-   //         }
-   //         
-   //         /*
-   //          * fail nodes
-   //          */
-   //         for(int i=0;i<getFailNodes().size();i++)
-   //         {
-   //            String convertedNodeData = "";            
-   //            
-   //            convertedNodeData = convertedNodeData + "2\t";
-   //            for(int j=0;j<getFailNodes().get(i).getDimensionOfNodeData();j++)
-   //            {
-   //               convertedNodeData = convertedNodeData + String.format("%.3f\t", getFailNodes().get(i).getNodeData(j));               
-   //            }
-   //            convertedNodeData = convertedNodeData + "\n";
-   //            
-   //            savingContent = savingContent + convertedNodeData;
-   //         }
-   //         
-   //         /*
-   //          * path nodes
-   //          */
-   //         if(getPath().size() > 1)
-   //         {
-   //            for(int i=0;i<getPath().size();i++)
-   //            {
-   //               String convertedNodeData = "";            
-   //               
-   //               convertedNodeData = convertedNodeData + "3\t";
-   //               for(int j=0;j<getPath().get(i).getDimensionOfNodeData();j++)
-   //               {
-   //                  convertedNodeData = convertedNodeData + String.format("%.3f\t", getPath().get(i).getNodeData(j));               
-   //               }
-   //               convertedNodeData = convertedNodeData + "\n";
-   //               
-   //               savingContent = savingContent + convertedNodeData;
-   //            }
-   //         }
-   //         
-   //         fw = new FileWriter(fileName);
-   //         bw = new BufferedWriter(fw);
-   //         bw.write(savingContent);
-   //
-   //         System.out.println("Save Done");
-   //
-   //      } catch (IOException e) {
-   //
-   //         e.printStackTrace();
-   //
-   //      } finally {
-   //
-   //         try {
-   //
-   //            if (bw != null)
-   //               bw.close();
-   //
-   //            if (fw != null)
-   //               fw.close();
-   //
-   //         } catch (IOException ex) {
-   //
-   //            ex.printStackTrace();
-   //
-   //         }
-   //
-   //      }
-   //   }
+   /*
+   public void saveNodes()
+   {
+      String fileName = "/home/shadylady/tree.txt";
+      BufferedWriter bw = null;
+      FileWriter fw = null;
+
+      System.out.println("Save Start");
+      try
+      {
+         String savingContent = "";
+
+         // whole nodes
+         for (int i = 0; i < getWholeNodes().size(); i++)
+         {
+            String convertedNodeData = "";
+
+            convertedNodeData = convertedNodeData + "1\t";
+            for (int j = 0; j < getWholeNodes().get(i).getDimensionOfNodeData(); j++)
+            {
+               convertedNodeData = convertedNodeData + String.format("%.3f\t", getWholeNodes().get(i).getNodeData(j));
+            }
+
+            if (getWholeNodes().get(i).getParentNode() == null)
+            {
+               for (int j = 0; j < getWholeNodes().get(i).getDimensionOfNodeData(); j++)
+               {
+                  convertedNodeData = convertedNodeData + "0\t";
+               }
+            }
+            else
+            {
+               for (int j = 0; j < getWholeNodes().get(i).getDimensionOfNodeData(); j++)
+               {
+                  convertedNodeData = convertedNodeData + String.format("%.3f\t", getWholeNodes().get(i).getParentNode().getNodeData(j));
+               }
+            }
+            convertedNodeData = convertedNodeData + "\n";
+
+            savingContent = savingContent + convertedNodeData;
+         }
+
+         // fail nodes
+         for (int i = 0; i < getFailNodes().size(); i++)
+         {
+            String convertedNodeData = "";
+
+            convertedNodeData = convertedNodeData + "2\t";
+            for (int j = 0; j < getFailNodes().get(i).getDimensionOfNodeData(); j++)
+            {
+               convertedNodeData = convertedNodeData + String.format("%.3f\t", getFailNodes().get(i).getNodeData(j));
+            }
+            convertedNodeData = convertedNodeData + "\n";
+
+            savingContent = savingContent + convertedNodeData;
+         }
+
+         // path nodes
+         if (getPath().size() > 1)
+         {
+            for (int i = 0; i < getPath().size(); i++)
+            {
+               String convertedNodeData = "";
+
+               convertedNodeData = convertedNodeData + "3\t";
+               for (int j = 0; j < getPath().get(i).getDimensionOfNodeData(); j++)
+               {
+                  convertedNodeData = convertedNodeData + String.format("%.3f\t", getPath().get(i).getNodeData(j));
+               }
+               convertedNodeData = convertedNodeData + "\n";
+
+               savingContent = savingContent + convertedNodeData;
+            }
+         }
+
+         fw = new FileWriter(fileName);
+         bw = new BufferedWriter(fw);
+         bw.write(savingContent);
+
+         System.out.println("Save Done");
+
+      }
+      catch (IOException e)
+      {
+
+         e.printStackTrace();
+
+      } finally
+      {
+
+         try
+         {
+
+            if (bw != null)
+               bw.close();
+
+            if (fw != null)
+               fw.close();
+
+         }
+         catch (IOException ex)
+         {
+
+            ex.printStackTrace();
+
+         }
+
+      }
+   }
+   */
 }

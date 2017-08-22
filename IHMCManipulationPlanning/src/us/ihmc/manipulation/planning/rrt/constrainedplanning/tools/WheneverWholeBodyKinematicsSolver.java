@@ -149,7 +149,7 @@ public class WheneverWholeBodyKinematicsSolver
    private static double chestWeight = 10.0;
    private static double pelvisWeight = 10.0;
 
-   private static double movementThreshold = 5.0e-5;
+   private static double movementThreshold = 3.0e-5;
    private static double errorThreshold = 1.0e-3;
 
    private SideDependentList<ControlFrameMovement> handMovements = new SideDependentList<>();
@@ -349,11 +349,15 @@ public class WheneverWholeBodyKinematicsSolver
       if(DEBUG)
          PrintTools.info(""+cntForUpdateInternal+" "+leftHandMovement+" "+leftHandError);
       
+      
+      
       if (rightHandMovement < movementThreshold)
       {
          if (rightHandError > errorThreshold)
          {
-//            isJointLimit = true;
+            PrintTools.info("Right Arm joint limit "+ rightHandMovement + " "+rightHandError+" ");
+            PrintTools.info(""+handMovements.get(RobotSide.RIGHT).tempErrorPosition+" "+handMovements.get(RobotSide.RIGHT).tempErrorOrientation);
+            isJointLimit = true;
          }
       }
 
@@ -361,7 +365,9 @@ public class WheneverWholeBodyKinematicsSolver
       {
          if (leftHandError > errorThreshold)
          {
-//            isJointLimit = true;
+            PrintTools.info("Left Arm joint limit "+ leftHandMovement + " "+leftHandError+" ");
+            PrintTools.info(""+handMovements.get(RobotSide.LEFT).tempErrorPosition+" "+handMovements.get(RobotSide.LEFT).tempErrorOrientation);
+            isJointLimit = true;
          }
       }
 
@@ -387,8 +393,17 @@ public class WheneverWholeBodyKinematicsSolver
           */
          if (isJointLimit)
          {
-            PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
-            numberOfTest = numberOfTest + cntForUpdateInternal;
+            PrintTools.info("Joint Limit cntForUpdateInternal " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
+            
+            
+            PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_YAW).getQ());
+            PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL).getQ());
+            PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_PITCH).getQ());
+            PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_ROLL).getQ());
+            PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH).getQ());
+            PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_ROLL).getQ());
+            PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SECOND_WRIST_PITCH).getQ());
+            
             return false;
          }
          /*
@@ -400,12 +415,12 @@ public class WheneverWholeBodyKinematicsSolver
                printOutRobotModel(desiredFullRobotModel, referenceFrames.getMidFootZUpGroundFrame());
             PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
 
-            numberOfTest = numberOfTest + cntForUpdateInternal;
             return isSolved;
          }
       }
-      numberOfTest = numberOfTest + cntForUpdateInternal;
-      PrintTools.info("cntForUpdateInternal " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
+      PrintTools.info("Time Expire cntForUpdateInternal " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
+      
+      PrintTools.info(""+handMovements.get(RobotSide.RIGHT).getDeltaPose(desiredFullRobotModel.getHand(RobotSide.RIGHT)) +" "+handMovements.get(RobotSide.LEFT).getDeltaPose(desiredFullRobotModel.getHand(RobotSide.LEFT)));
       
       PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_YAW).getQ());
       PrintTools.info(""+desiredFullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL).getQ());

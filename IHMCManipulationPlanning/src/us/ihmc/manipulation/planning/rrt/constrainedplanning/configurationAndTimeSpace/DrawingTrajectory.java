@@ -90,7 +90,7 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
       taskNodeRegion.setRandomRegion(1, 0.75, 0.90);
       taskNodeRegion.setRandomRegion(2, -25.0 / 180 * Math.PI, 25.0 / 180 * Math.PI);
       taskNodeRegion.setRandomRegion(3, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
-      taskNodeRegion.setRandomRegion(4, -0.0 / 180 * Math.PI, 0.0 / 180 * Math.PI);
+      taskNodeRegion.setRandomRegion(4, -3.0 / 180 * Math.PI, 3.0 / 180 * Math.PI);
       taskNodeRegion.setRandomRegion(5, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(6, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(7, 0.0, 0.0);
