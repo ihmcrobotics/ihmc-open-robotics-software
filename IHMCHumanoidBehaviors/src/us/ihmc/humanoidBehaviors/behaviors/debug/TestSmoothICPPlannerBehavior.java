@@ -56,10 +56,10 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
 
    // Default parameters
    private final int defaultNumberOfSteps = 5;
-   private final double defaultStepLength = 0.5;
+   private final double defaultStepLength = 0.35;
    private final double defaultStepWidth = 0.25;
-   private final double defaultSwingTime = 0.6;
-   private final double defaultTransferTime = 0.2;
+   private final double defaultSwingTime = 1.0;
+   private final double defaultTransferTime = 0.35;
    private final double defaultInitialTransferTime = 1.0;
    private final double defaultFinalTransferTime = 1.0;
    
