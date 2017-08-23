@@ -50,6 +50,7 @@ public class YoVariableExplorerTabbedPane extends JPanel implements RegistrySele
    private JPanel variableDisplayPanel;
    private YoVariableSearchPanel variableSearchPanel;
    private YoEntryBox entryBox;
+   private boolean onlyParametersState = false;
    private JCheckBox onlyParameters;
    private Timer alertChangeListenersTimer;
    private TimerTask alertChangeListenersTask;
@@ -72,6 +73,7 @@ public class YoVariableExplorerTabbedPane extends JPanel implements RegistrySele
       this.rootRegistry = rootRegistry;
       this.selectedVariableHolder = selectedVariableHolder;
       this.tabPane = new JTabbedPane();
+      this.tabPane.addChangeListener(new TabChangedAction());
       
       entryBox = new YoEntryBox(entryBoxArrayPanel, selectedVariableHolder);
 
@@ -212,6 +214,7 @@ public class YoVariableExplorerTabbedPane extends JPanel implements RegistrySele
          tabPane.setTitleAt(tabIndex, split[split.length - 1]);
       }
 
+      updateOnlyParametersCheckboxEnabled();
    }
 
    public YoVariablePanel getVisibleVarPanel()
@@ -335,6 +338,33 @@ public class YoVariableExplorerTabbedPane extends JPanel implements RegistrySele
    public YoVariableSearchPanel getYoVariableSearchPanel()
    {
       return variableSearchPanel;
+   }
+
+   private void updateOnlyParametersCheckboxEnabled()
+   {
+      if (tabPane.getSelectedComponent().equals(variableDisplayPanel) && visibleVarPanel != null && visibleVarPanelRegistry == null)
+      {
+         onlyParametersState = onlyParameters.isSelected();
+         onlyParameters.setEnabled(false);
+         onlyParameters.setSelected(false);
+      }
+
+      else if (!onlyParameters.isEnabled())
+      {
+         onlyParameters.setSelected(onlyParametersState);
+         onlyParameters.setEnabled(true);
+      }
+   }
+
+   private class TabChangedAction implements ChangeListener
+   {
+
+      @Override
+      public void stateChanged(ChangeEvent e)
+      {
+         updateOnlyParametersCheckboxEnabled();
+      }
+      
    }
    
    private class ShowOnlyParameterAction implements ActionListener
