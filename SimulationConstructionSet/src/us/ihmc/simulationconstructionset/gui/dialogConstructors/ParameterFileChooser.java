@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.io.File;
 import java.util.Collections;
@@ -29,8 +28,8 @@ public class ParameterFileChooser
    public ParameterFileChooser(NameSpace defaultRoot)
    {
       rootPath = new JTextField("", 30);
-      
-      if(defaultRoot == null)
+
+      if (defaultRoot == null)
       {
          rootPath.setText("");
       }
@@ -41,15 +40,14 @@ public class ParameterFileChooser
 
       JPanel extraPanel = new JPanel();
       extraPanel.setLayout(new GridLayout(2, 1));
-      
+
       extraPanel.add(new JLabel("Parameter root path:"));
-      
+
       JPanel textHolder = new JPanel();
       textHolder.add(rootPath);
       rootPath.setAlignmentY(Component.TOP_ALIGNMENT);
       extraPanel.add(textHolder);
 
-      
       fileChooser = new JFileChooser();
       fileChooser.setFileFilter(new MyFileFilter("xml", "XML Files"));
       fileChooser.setAccessory(extraPanel);
@@ -72,30 +70,36 @@ public class ParameterFileChooser
       if (returnVal == JFileChooser.APPROVE_OPTION)
       {
 
-         try
+         if (rootPath.getText().trim().isEmpty())
          {
-            if (rootPath.getText().trim().isEmpty())
+            registries = Collections.singletonList(registry);
+         }
+         else
+         {
+            NameSpace fullNameSpace;
+
+            try
             {
-               registries = Collections.singletonList(registry);
+               fullNameSpace = new NameSpace(rootPath.getText().trim());
             }
-            else
+            catch (RuntimeException e)
             {
-               YoVariableRegistry root = registry.getRegistry(new NameSpace(rootPath.getText().trim()));
-               if (root == null)
-               {
-                  JOptionPane.showMessageDialog(parent, "Cannot find registry with namespace " + rootPath.getText(), "Unknown root", JOptionPane.ERROR_MESSAGE);
-                  return false;
-               }
-               
+               JOptionPane.showMessageDialog(parent, "Invalid namespace. " + e.getMessage(), "Invalid namespace", JOptionPane.ERROR_MESSAGE);
+               return false;
+            }
+
+            try
+            {
+               YoVariableRegistry root = registry.getRegistry(fullNameSpace);
                registries = Collections.unmodifiableList(root.getChildren());
             }
-         }
-         catch (RuntimeException e)
-         {
-            JOptionPane.showMessageDialog(parent, "Invalid namespace " + e.getMessage(), "Invalid namespace", JOptionPane.ERROR_MESSAGE);
-            return false;
-         }
+            catch (RuntimeException e)
+            {
+               JOptionPane.showMessageDialog(parent, "Cannot find registry with namespace " + rootPath.getText(), "Unknown root", JOptionPane.ERROR_MESSAGE);
+               return false;
+            }
 
+         }
 
          parameterFile = fileChooser.getSelectedFile();
 
