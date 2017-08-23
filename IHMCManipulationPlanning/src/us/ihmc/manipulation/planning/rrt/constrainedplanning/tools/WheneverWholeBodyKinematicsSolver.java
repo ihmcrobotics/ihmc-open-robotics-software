@@ -346,12 +346,12 @@ public class WheneverWholeBodyKinematicsSolver
       cntForUpdateInternal++;
    }
 
-   public boolean getIsSolved()
+   public boolean getIKResult()
    {
       return isSolved;
    }
 
-   public boolean isSolved()
+   public boolean solve()
    {
       numberOfTest++;
 

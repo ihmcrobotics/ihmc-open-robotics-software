@@ -77,7 +77,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private double bestScoreInitialGuess = 0;
 
    private final YoInteger cntKinematicSolver = new YoInteger("cntKinematicSolver", registry);
-   
+
    /*
     * Visualizer
     */
@@ -86,7 +86,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private CTTaskNode visualizedNode;
 
    private OneDoFJoint[] initialOneDoFJoints;
-   private Vector3D initialTranslationOfRootJoint;   
+   private Vector3D initialTranslationOfRootJoint;
    private Quaternion initialRotationOfRootJoint;
 
    private FullHumanoidRobotModel visualizedFullRobotModel;
@@ -116,7 +116,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private int numberOfInitialGuess = 30;
 
    private static int terminateToolboxCondition = 700;
-   
+
    /**
     * Toolbox state
     */
@@ -172,7 +172,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
          visualizedNode = initialGuessNode;
 
-         isValidNode(visualizedNode);
+         updateValidity(visualizedNode);
          double scoreInitialGuess = kinematicsSolver.getArmJointLimitScore(constrainedEndEffectorTrajectory.getRobotSide());
          if (!visualizedNode.getValidity())
             scoreInitialGuess = 0.0;
@@ -199,10 +199,10 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
             if (true)
             {
                rootNode.convertDataToNormalizedData(taskRegion);
-               
-               PrintTools.info(""+bestScoreInitialGuess);
-               for(int i =0;i<rootNode.getDimensionOfNodeData();i++)
-                  PrintTools.info(""+i+" "+rootNode.getNodeData(i));
+
+               PrintTools.info("" + bestScoreInitialGuess);
+               for (int i = 0; i < rootNode.getDimensionOfNodeData(); i++)
+                  PrintTools.info("" + i + " " + rootNode.getNodeData(i));
 
                tree = new CTTaskNodeTree(rootNode);
                tree.setTaskRegion(taskRegion);
@@ -218,7 +218,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          tree.getNewNode().convertNormalizedDataToData(taskRegion);
          tree.getNewNode().setParentNode(tree.getNearNode());
 
-         if (isValidNode(tree.getNewNode()))
+         if (updateValidity(tree.getNewNode()))
          {
             tree.connectNewNode(true);
             if (tree.getNewNode().getTime() == constrainedEndEffectorTrajectory.getTrajectoryTime())
@@ -242,8 +242,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          if (numberOfExpanding == 0)
          {
             state = CWBToolboxState.SHORTCUT_PATH;
-            
-            PrintTools.info("Total update solver "+kinematicsSolver.numberOfTest);
+
+            PrintTools.info("Total update solver " + kinematicsSolver.numberOfTest);
          }
 
          break;
@@ -372,7 +372,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       return result;
    }
 
-   private boolean isValidNode(CTTaskNode node)
+   private boolean updateValidity(CTTaskNode node)
    {
       if (node.getParentNode() != null)
       {
@@ -389,7 +389,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       kinematicsSolver.initialize();
 
       kinematicsSolver.holdCurrentTrajectoryMessages();
-      
+
       /*
        * set whole body tasks.
        */
@@ -403,7 +403,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
        */
       Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(node.getNodeData(0), configurationSpace);
       setEndEffectorPose(desiredPose);
-      
+
       /*
        * for kinematics solver, append offset
        */
@@ -425,15 +425,20 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       /*
        * result
        */
-      boolean ikResult = kinematicsSolver.isSolved();
+      kinematicsSolver.solve();
+      boolean ikResult = kinematicsSolver.getIKResult();
+      
+//      boolean ikResult = kinematicsSolver.solve();
       boolean colResult = isCollisionFree();
       boolean result = false;
+      
+      if(!colResult)
+         PrintTools.info("this pose collid");
 
       if (ikResult && colResult)
          result = true;
 
       node.setConfigurationJoints(kinematicsSolver.getFullRobotModelCopy());
-      //      node.setConfigurationJoints(kinematicsSolver.getDesiredFullRobotModel());
 
       node.setValidity(result);
 
@@ -442,6 +447,9 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       return result;
    }
 
+   /**
+    * get collision result
+    */
    private boolean isCollisionFree()
    {
       RobotCollisionModel robotCollisionModel = new RobotCollisionModel(kinematicsSolver.getDesiredFullRobotModel());
@@ -487,12 +495,12 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
     */
    private void updateYoVariables()
    {
-      isGoodkinematicSolution.set(kinematicsSolver.getIsSolved());
+      isGoodkinematicSolution.set(kinematicsSolver.getIKResult());
       solutionQuality.set(kinematicsSolver.getSolution().getSolutionQuality());
       endeffectorFrame.setVisible(true);
       endeffectorFrame.update();
    }
-   
+
    /**
     * update end effector pose
     */

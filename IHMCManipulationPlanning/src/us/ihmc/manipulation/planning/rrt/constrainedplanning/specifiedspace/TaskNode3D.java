@@ -73,7 +73,7 @@ public class TaskNode3D extends TaskNode
 
       nodeTester.putTrajectoryMessages();
 
-      setIsValidNode(nodeTester.isSolved());
+      setIsValidNode(nodeTester.solve());
 
       setConfigurationJoints(nodeTester.getFullRobotModelCopy());
 

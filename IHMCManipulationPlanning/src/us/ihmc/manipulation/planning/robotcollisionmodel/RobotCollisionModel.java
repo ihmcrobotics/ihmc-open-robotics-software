@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisio
 
 public class RobotCollisionModel
 {
-   private static boolean Debug = false;
+   private static boolean DEBUG = false;
    private FullHumanoidRobotModel fullRobotModel;
 
    public SimpleCollisionDetector collisionDetector = new SimpleCollisionDetector();
@@ -94,47 +94,47 @@ public class RobotCollisionModel
       Point3D translationLFoot = new Point3D(0.02, 0, 0.01);
       leftFoot = new CollisionModelBox(shapeFactory, fullRobotModel.getFoot(RobotSide.LEFT).getBodyFixedFrame(), translationLFoot, 0.26, 0.135, 0.06);
 
-      if (Debug)
+      if (DEBUG)
          PrintTools.info("CollisionShape Define Finished");
    }
 
    private void setCollisionMaskAndGroup()
    {
-      if (Debug)
+      if (DEBUG)
          PrintTools.info("setCollisionMaskAndGroup Started");
 
-      chestBody.getCollisionShape().setCollisionMask     (0b00000000000001);
-      pelvisBody.getCollisionShape().setCollisionMask    (0b00000000000010);
-      rightUpperArm.getCollisionShape().setCollisionMask (0b00000000000100);
-      rightLowerArm.getCollisionShape().setCollisionMask (0b00000000001000);
-      rightWrist.getCollisionShape().setCollisionMask    (0b00000000010000);
-      leftUpperArm.getCollisionShape().setCollisionMask  (0b00000000100000);
-      leftLowerArm.getCollisionShape().setCollisionMask  (0b00000001000000);
-      leftWrist.getCollisionShape().setCollisionMask     (0b00000010000000);
-      rightUpperLeg.getCollisionShape().setCollisionMask (0b00000100000000);
-      rightLowerLeg.getCollisionShape().setCollisionMask (0b00001000000000);
-      rightFoot.getCollisionShape().setCollisionMask     (0b00010000000000);
-      leftUpperLeg.getCollisionShape().setCollisionMask  (0b00100000000000);
-      leftLowerLeg.getCollisionShape().setCollisionMask  (0b01000000000000);
-      leftFoot.getCollisionShape().setCollisionMask      (0b10000000000000);
+      chestBody.getCollisionShape().setCollisionMask(0b00000000000001);
+      pelvisBody.getCollisionShape().setCollisionMask(0b00000000000010);
+      rightUpperArm.getCollisionShape().setCollisionMask(0b00000000000100);
+      rightLowerArm.getCollisionShape().setCollisionMask(0b00000000001000);
+      rightWrist.getCollisionShape().setCollisionMask(0b00000000010000);
+      leftUpperArm.getCollisionShape().setCollisionMask(0b00000000100000);
+      leftLowerArm.getCollisionShape().setCollisionMask(0b00000001000000);
+      leftWrist.getCollisionShape().setCollisionMask(0b00000010000000);
+      rightUpperLeg.getCollisionShape().setCollisionMask(0b00000100000000);
+      rightLowerLeg.getCollisionShape().setCollisionMask(0b00001000000000);
+      rightFoot.getCollisionShape().setCollisionMask(0b00010000000000);
+      leftUpperLeg.getCollisionShape().setCollisionMask(0b00100000000000);
+      leftLowerLeg.getCollisionShape().setCollisionMask(0b01000000000000);
+      leftFoot.getCollisionShape().setCollisionMask(0b10000000000000);
 
-      chestBody.getCollisionShape().setCollisionGroup    (0b00000011011000); // R lower arm, R hand, L lower arm, L hand                       3 4 6 7
-      pelvisBody.getCollisionShape().setCollisionGroup   (0b00000011011000); // R lower arm, R hand, L lower arm, L hand                       3 4 6 7
+      chestBody.getCollisionShape().setCollisionGroup(0b00000011011000); // R lower arm, R hand, L lower arm, L hand                       3 4 6 7
+      pelvisBody.getCollisionShape().setCollisionGroup(0b00000011011000); // R lower arm, R hand, L lower arm, L hand                       3 4 6 7
       rightUpperArm.getCollisionShape().setCollisionGroup(0b00000011000000); // L lower arm, L hand                                            6 7
       rightLowerArm.getCollisionShape().setCollisionGroup(0b00000011100011); // L lower arm, L hand, chest, pelvis , L upper arm               6 7 0 1 5
-      rightWrist.getCollisionShape().setCollisionGroup   (0b00000111100011); // L lower arm, L hand, chest, pelvis, R upper Leg, L upper arm   6 7 0 1 8 5
-      leftUpperArm.getCollisionShape().setCollisionGroup (0b00000000011000); // R lower arm, R hand                                            3 4
-      leftLowerArm.getCollisionShape().setCollisionGroup (0b00000000011111); // R lower arm, R hand, chest, pelvis , R upper arm               3 4 0 1 2
-      leftWrist.getCollisionShape().setCollisionGroup    (0b00100000011111); // R lower arm, R hand, chest, pelvis, L upper Leg, R upper arm   3 4 0 1 11 2
+      rightWrist.getCollisionShape().setCollisionGroup(0b00000111100011); // L lower arm, L hand, chest, pelvis, R upper Leg, L upper arm   6 7 0 1 8 5
+      leftUpperArm.getCollisionShape().setCollisionGroup(0b00000000011000); // R lower arm, R hand                                            3 4
+      leftLowerArm.getCollisionShape().setCollisionGroup(0b00000000011111); // R lower arm, R hand, chest, pelvis , R upper arm               3 4 0 1 2
+      leftWrist.getCollisionShape().setCollisionGroup(0b00100000011111); // R lower arm, R hand, chest, pelvis, L upper Leg, R upper arm   3 4 0 1 11 2
 
       rightUpperLeg.getCollisionShape().setCollisionGroup(0b11100000010000); // R hand, L upper leg, L lower leg, L foot                       4 11 12 13
       rightLowerLeg.getCollisionShape().setCollisionGroup(0b11100000000000); // L upper leg, L lower leg, L foot                               11 12 13
-      rightFoot.getCollisionShape().setCollisionGroup    (0b11100000000000); // L upper leg, L lower leg, L foot                               11 12 13
-      leftUpperLeg.getCollisionShape().setCollisionGroup (0b00011110000000); // L hand, R upper leg, R lower leg, R foot                       7 8 9 10
-      leftLowerLeg.getCollisionShape().setCollisionGroup (0b00011100000000); // R upper leg, R lower leg, R foot                               8 9 10
-      leftFoot.getCollisionShape().setCollisionGroup     (0b00011100000000); // R upper leg, R lower leg, R foot                               8 9 10
+      rightFoot.getCollisionShape().setCollisionGroup(0b11100000000000); // L upper leg, L lower leg, L foot                               11 12 13
+      leftUpperLeg.getCollisionShape().setCollisionGroup(0b00011110000000); // L hand, R upper leg, R lower leg, R foot                       7 8 9 10
+      leftLowerLeg.getCollisionShape().setCollisionGroup(0b00011100000000); // R upper leg, R lower leg, R foot                               8 9 10
+      leftFoot.getCollisionShape().setCollisionGroup(0b00011100000000); // R upper leg, R lower leg, R foot                               8 9 10
 
-      if (Debug)
+      if (DEBUG)
       {
          PrintTools.info("chestBody Mask " + chestBody.getCollisionShape().getCollisionMask() + " Group " + chestBody.getCollisionShape().getCollisionGroup());
          PrintTools.info("pelvisBody Mask " + pelvisBody.getCollisionShape().getCollisionMask() + " Group "
@@ -168,7 +168,7 @@ public class RobotCollisionModel
 
    public void update()
    {
-      if (Debug)
+      if (DEBUG)
          PrintTools.info("update Start");
 
       chestBody.updateRighdBodyTransform();
@@ -215,7 +215,7 @@ public class RobotCollisionModel
       leftLowerLeg.updateCollisionShape();
       leftFoot.updateCollisionShape();
 
-      if (Debug)
+      if (DEBUG)
          PrintTools.info("update Finished");
    }
 
@@ -231,12 +231,17 @@ public class RobotCollisionModel
       {
          for (int i = 0; i < collisionDetectionResult.getNumberOfCollisions(); i++)
          {
-            //            PrintTools.info("collid A "+collisionDetectionResult.getCollision(i).getShapeA().getCollisionMask()+ " collid B "+ collisionDetectionResult.getCollision(i).getShapeB().getCollisionMask());
-            //            System.out.println(collisionDetectionResult.getCollision(i).getShapeA().getCollisionMask());
-            //            System.out.println(collisionDetectionResult.getCollision(i).getShapeB().getCollisionMask());
+            if (DEBUG)
+            {
+               PrintTools.info("collid A " + collisionDetectionResult.getCollision(i).getShapeA().getCollisionMask() + " collid B "
+                     + collisionDetectionResult.getCollision(i).getShapeB().getCollisionMask());
+               System.out.println(collisionDetectionResult.getCollision(i).getShapeA().getCollisionMask());
+               System.out.println(collisionDetectionResult.getCollision(i).getShapeB().getCollisionMask());
+            }
 
          }
-         //         PrintTools.info("Collid! "+collisionDetectionResult.getNumberOfCollisions());
+         if (DEBUG)
+            PrintTools.info("Collid! " + collisionDetectionResult.getNumberOfCollisions());
          return false;
       }
       return true;
