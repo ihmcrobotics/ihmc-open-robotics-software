@@ -204,7 +204,8 @@ public class PlanarRegionPotentialNextStepCalculator
       RobotSide currentSide = nodeToExpand.getRobotSide();
       RobotSide nextSide = currentSide.getOppositeSide();
 
-      Point3D goalSolePosition = goalPositions.get(nextSide);
+      Point3D goalSolePosition = new Point3D(goalPositions.get(nextSide));
+      goalSolePosition.setZ(0.0);
 
       //      stepReach.set(goalSolePosition.distance(currentSolePosition));
       double stepReach = goalSolePosition.distance(currentSolePosition);

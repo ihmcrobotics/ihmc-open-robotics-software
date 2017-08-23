@@ -25,12 +25,11 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 {
    protected final Deque<BipedalFootstepPlannerNode> stack = new ArrayDeque<BipedalFootstepPlannerNode>();
 
+   private final BipedalFootstepPlannerParameters parameters;
    protected final PlanarRegionPotentialNextStepCalculator planarRegionPotentialNextStepCalculator;
    protected final HashMap<Integer, List<BipedalFootstepPlannerNode>> mapToAllExploredNodes = new HashMap<>();
 
    protected SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
-
-   protected RobotSide initialSide;
    protected BipedalFootstepPlannerNode startNode;
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -44,12 +43,14 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    protected final YoBoolean exitAfterInitialSolution = new YoBoolean("exitAfterInitialSolution", registry);
    protected BipedalFootstepPlannerNode bestGoalNode;
    protected FootstepPlan footstepPlan = null;
+   private PlanarRegionsList planarRegionsList;
 
    protected BipedalFootstepPlannerListener listener;
 
    public PlanarRegionBipedalFootstepPlanner(BipedalFootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
+      this.parameters = parameters;
 
       planarRegionPotentialNextStepCalculator = new PlanarRegionPotentialNextStepCalculator(parameters, parentRegistry, null);
       exitAfterInitialSolution.set(true);
@@ -115,6 +116,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
+      this.planarRegionsList = planarRegionsList;
       planarRegionPotentialNextStepCalculator.setPlanarRegions(planarRegionsList);
    }
 
@@ -124,7 +126,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       if (bestGoalNode == null)
          return null;
 
-      return new FootstepPlan(bestGoalNode);
+      return BipedalFootstepPlannerNodeUtils.createFootstepPlanFromEndNode(bestGoalNode, planarRegionsList, parameters, footPolygonsInSoleFrame);
    }
 
    protected void initialize()
@@ -285,7 +287,6 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       else
       {
          int size = nodesWithThisHash.size();
-//         System.out.println(size);
 
          for (int i = 0; i < size; i++)
          {
