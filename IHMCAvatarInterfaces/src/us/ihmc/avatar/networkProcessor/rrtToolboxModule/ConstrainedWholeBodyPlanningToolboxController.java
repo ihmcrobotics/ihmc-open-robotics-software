@@ -116,6 +116,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private int numberOfExpanding = 1;
 
    private int numberOfInitialGuess = 1;
+   
+   private int numberOfMotionPath = 1;
 
    private static int terminateToolboxCondition = 1000;
 
@@ -202,8 +204,24 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
     */
    private void generateMotion()
    {
-      state = CWBToolboxState.DO_NOTHING;
-      isDone.set(true);
+      int sizeOfPath = tree.getPath().size();
+      
+      
+      kinematicsSolver = new WheneverWholeBodyKinematicsSolver(drcRobotModelFactory);
+
+      kinematicsSolver.updateRobotConfigurationData(tree.getPath().get(sizeOfPath - numberOfMotionPath));
+
+      kinematicsSolver.initialize();
+      kinematicsSolver.holdCurrentTrajectoryMessages();
+      kinematicsSolver.putTrajectoryMessages();
+      
+      
+      numberOfMotionPath--;
+      if(numberOfMotionPath == 0)
+      {
+         state = CWBToolboxState.DO_NOTHING;
+         isDone.set(true);   
+      }
    }
 
    /**
@@ -230,14 +248,15 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       tree.getPath().clear();
       for (int j = 0; j < revertedPathSize; j++)
-         tree.getPath().add(revertedPath.get(revertedPathSize - 1 - j));
+         tree.addNodeOnPath(revertedPath.get(revertedPathSize - 1 - j));
 
       PrintTools.info("the size of the path is " + tree.getPath().size());
 
+      numberOfMotionPath = tree.getPath().size();
       /*
        * terminate state
        */
-      state = CWBToolboxState.GENERATE_MOTION;
+      state = CWBToolboxState.GENERATE_MOTION;      
    }
 
    /**

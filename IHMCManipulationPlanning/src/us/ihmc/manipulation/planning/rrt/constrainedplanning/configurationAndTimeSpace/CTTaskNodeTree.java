@@ -413,6 +413,11 @@ public class CTTaskNodeTree
    {
       return path;
    }
+   
+   public void addNodeOnPath(CTTaskNode node)
+   {
+      path.add(node);
+   }
 
    public ArrayList<CTTaskNode> getWholeNodes()
    {
