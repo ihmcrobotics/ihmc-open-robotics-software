@@ -65,14 +65,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final boolean visualize = true;
    private HumanoidRobotDataReceiver robotDataReceiver;
 
-   private enum Planners
-   {
-      PLANAR_REGION_BIPEDAL,
-      PLAN_THEN_SNAP,
-      A_STAR
-   }
-   private final YoEnum<Planners> activePlanner = new YoEnum<>("activePlanner", registry, Planners.class);
-   private final EnumMap<Planners, FootstepPlanner> plannerMap = new EnumMap<>(Planners.class);
+   private final YoEnum<FootstepPlanningRequestPacket.Planners> activePlanner = new YoEnum<>("activePlanner", registry, FootstepPlanningRequestPacket.Planners.class);
+   private final EnumMap<FootstepPlanningRequestPacket.Planners, FootstepPlanner> plannerMap = new EnumMap<>(FootstepPlanningRequestPacket.Planners.class);
 
    private final AtomicReference<FootstepPlanningRequestPacket> latestRequestReference = new AtomicReference<FootstepPlanningRequestPacket>(null);
    private final AtomicReference<PlanarRegionsListMessage> latestPlanarRegionsReference = new AtomicReference<PlanarRegionsListMessage>(null);
@@ -119,10 +113,10 @@ public class FootstepPlanningToolboxController extends ToolboxController
       footstepDataListWithSwingOverTrajectoriesAssembler = new FootstepDataListWithSwingOverTrajectoriesAssembler(humanoidReferenceFrames, walkingControllerParameters, parentRegistry, new YoGraphicsListRegistry());
       footstepDataListWithSwingOverTrajectoriesAssembler.setCollisionSphereRadius(collisionSphereRadius);
 
-      plannerMap.put(Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame, fullHumanoidRobotModel));
-      plannerMap.put(Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
-      plannerMap.put(Planners.A_STAR, AStarFootstepPlanner.createRoughTerrainPlanner(null, contactPointsInSoleFrame, expansion, registry));
-      activePlanner.set(Planners.PLANAR_REGION_BIPEDAL);
+      plannerMap.put(FootstepPlanningRequestPacket.Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame, fullHumanoidRobotModel));
+      plannerMap.put(FootstepPlanningRequestPacket.Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
+      plannerMap.put(FootstepPlanningRequestPacket.Planners.A_STAR, AStarFootstepPlanner.createRoughTerrainPlanner(null, contactPointsInSoleFrame, expansion, registry));
+      activePlanner.set(FootstepPlanningRequestPacket.Planners.PLANAR_REGION_BIPEDAL);
 
       usePlanarRegions.set(true);
       isDone.set(true);
@@ -223,6 +217,13 @@ public class FootstepPlanningToolboxController extends ToolboxController
       FootstepPlanningRequestPacket request = latestRequestReference.getAndSet(null);
       if (request == null)
          return false;
+
+      FootstepPlanningRequestPacket.Planners requestedPlannerType = request.requestedPlannerType;
+
+      if(requestedPlannerType != null)
+      {
+         activePlanner.set(requestedPlannerType);
+      }
 
       usePlanarRegions.set(!request.assumeFlatGround);
 

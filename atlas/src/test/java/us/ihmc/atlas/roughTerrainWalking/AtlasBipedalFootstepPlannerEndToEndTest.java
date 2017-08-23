@@ -29,8 +29,8 @@ public class AtlasBipedalFootstepPlannerEndToEndTest extends AvatarBipedalFootst
    @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test
-   public void testSteppingStones() throws IOException
+   public void testShortCinderBlockField() throws IOException
    {
-      super.testSteppingStones();
+      super.testShortCinderBlockField();
    }
 }

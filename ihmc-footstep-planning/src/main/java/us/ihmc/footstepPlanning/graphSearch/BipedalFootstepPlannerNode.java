@@ -19,9 +19,9 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class BipedalFootstepPlannerNode
 {
-   public static final double gridSizeX = 0.05;
-   public static final double gridSizeY = 0.05;
-   public static final double gridSizeYaw = Math.PI / 18.0;
+   public static final double gridSizeX = 0.025;
+   public static final double gridSizeY = 0.025;
+   public static final double gridSizeYaw = Math.toRadians(2.0);
 
    private final int xIndex;
    private final int yIndex;
