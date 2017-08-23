@@ -601,7 +601,6 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    
    private JMenu createParameterMenu()
    {
-      System.out.println("CREATING PARAMETER MENU");
       JMenu parameterMenu = new JMenu("Parameters");
       parameterMenu.setName("Parameters");
       parameterMenu.setMnemonic('p');
