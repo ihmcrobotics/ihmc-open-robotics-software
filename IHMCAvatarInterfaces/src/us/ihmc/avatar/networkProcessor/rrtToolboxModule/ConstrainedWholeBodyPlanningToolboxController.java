@@ -18,7 +18,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWh
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
@@ -116,10 +115,12 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private int numberOfExpanding = 1;
 
    private int numberOfInitialGuess = 1;
-   
+
    private int numberOfMotionPath = 1;
 
    private static int terminateToolboxCondition = 1000;
+
+   private CTTaskNodeWholeBodyTrajectoryMessageFactory ctTaskNodeWholeBodyTrajectoryMessageFactory;
 
    /**
     * Toolbox state
@@ -205,18 +206,23 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private void generateMotion()
    {
       int sizeOfPath = tree.getPath().size();
-      
+
       kinematicsSolver.updateRobotConfigurationData(tree.getPath().get(sizeOfPath - numberOfMotionPath));
 
       kinematicsSolver.initialize();
       kinematicsSolver.holdCurrentTrajectoryMessages();
       kinematicsSolver.putTrajectoryMessages();
-      
+
       numberOfMotionPath--;
-      if(numberOfMotionPath == 0)
+      if (numberOfMotionPath == 0)
       {
          state = CWBToolboxState.DO_NOTHING;
-         isDone.set(true);   
+         isDone.set(true);
+
+         /*
+          * generate WholeBodyTrajectoryMessage.
+          */
+         ctTaskNodeWholeBodyTrajectoryMessageFactory = new CTTaskNodeWholeBodyTrajectoryMessageFactory();
       }
    }
 
@@ -252,7 +258,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       /*
        * terminate state
        */
-      state = CWBToolboxState.GENERATE_MOTION;      
+      state = CWBToolboxState.GENERATE_MOTION;
    }
 
    /**
@@ -261,7 +267,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private void expandingTree()
    {
       expandingCount.increment();
-      
+
       tree.updateRandomConfiguration();
       tree.updateNearestNode();
       tree.updateNewConfiguration();

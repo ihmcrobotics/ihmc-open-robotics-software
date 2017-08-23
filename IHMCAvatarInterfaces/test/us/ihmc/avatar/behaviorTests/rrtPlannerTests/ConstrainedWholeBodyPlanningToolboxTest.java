@@ -38,7 +38,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWh
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.ControlFrameMovement;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -203,9 +202,15 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
       setupCWBPlanningToolboxModule();
    }
+   
+//   @Test
+   public void testForBehavior() throws SimulationExceededMaximumTimeException, IOException
+   {
+      
+   }
 
    @Test
-   public void testForToolboxPacket() throws SimulationExceededMaximumTimeException, IOException
+   public void testForToolbox() throws SimulationExceededMaximumTimeException, IOException
    {
       if (visulaizerOn)
          ThreadTools.sleep(1000);
@@ -271,6 +276,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("Send packet done" + drcBehaviorTestHelper.getYoTime());
 
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+      
       System.out.println("End");
    }
 
