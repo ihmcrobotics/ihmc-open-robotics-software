@@ -259,7 +259,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       ConstrainedWholeBodyPlanningRequestPacket packet = new ConstrainedWholeBodyPlanningRequestPacket();
 
       ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory = endeffectorTrajectory;
-      packet.setNumberOfFindInitialGuess(30);
+      packet.setNumberOfFindInitialGuess(50);
       packet.setNumberOfExpanding(100);
 
       packet.setInitialRobotConfigration(sdfFullRobotModel);
@@ -389,7 +389,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       kinematicsSolver.setDesiredHandPose(RobotSide.LEFT, desiredPose);
 
       kinematicsSolver.putTrajectoryMessages();
-      PrintTools.info("" + kinematicsSolver.isSolved());
+      PrintTools.info("" + kinematicsSolver.solve());
 
       showUpFullRobotModelWithConfiguration(sdfFullRobotModel);
 

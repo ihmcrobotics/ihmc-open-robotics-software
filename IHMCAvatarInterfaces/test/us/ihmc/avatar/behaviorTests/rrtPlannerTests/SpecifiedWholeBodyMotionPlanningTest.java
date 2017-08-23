@@ -281,7 +281,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
 
       wbikTester.putTrajectoryMessages();
 
-      PrintTools.info("" + wbikTester.isSolved());
+      PrintTools.info("" + wbikTester.solve());
 
       /*
        * reversible test
@@ -304,7 +304,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
 
       wbikTester.putTrajectoryMessages();
 
-      PrintTools.info("" + wbikTester.isSolved());
+      PrintTools.info("" + wbikTester.solve());
 
       /*
        * reversible test
@@ -327,7 +327,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
 
       wbikTester.putTrajectoryMessages();
 
-      PrintTools.info("" + wbikTester.isSolved());
+      PrintTools.info("" + wbikTester.solve());
 
       /*
        * Show up
@@ -530,7 +530,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
 
       wbikTester.putTrajectoryMessages();
 
-      PrintTools.info("" + wbikTester.isSolved());
+      PrintTools.info("" + wbikTester.solve());
       createdFullRobotModel = wbikTester.getDesiredFullRobotModel();
 
       showUpFullRobotModelWithConfiguration(createdFullRobotModel);
@@ -560,7 +560,7 @@ public abstract class SpecifiedWholeBodyMotionPlanningTest implements MultiRobot
 
       wbikTester.putTrajectoryMessages();
 
-      PrintTools.info("" + wbikTester.isSolved());
+      PrintTools.info("" + wbikTester.solve());
       createdFullRobotModel = wbikTester.getDesiredFullRobotModel();
 
       showUpFullRobotModelWithConfiguration(createdFullRobotModel);
