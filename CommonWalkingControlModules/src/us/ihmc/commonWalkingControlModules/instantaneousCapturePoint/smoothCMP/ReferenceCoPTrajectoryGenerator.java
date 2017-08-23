@@ -1,13 +1,8 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
-import java.awt.Robot;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-
-import javax.management.RuntimeErrorException;
-
-import org.apache.batik.svggen.SwingSVGPrettyPrint;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPPlanningTools;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPTrajectoryPoint;
