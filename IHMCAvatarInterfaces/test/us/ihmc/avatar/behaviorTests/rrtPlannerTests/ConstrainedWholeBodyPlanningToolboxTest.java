@@ -34,6 +34,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
@@ -203,11 +204,11 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       setupCWBPlanningToolboxModule();
    }
 
-         @Test
+   @Test
    public void testForToolboxPacket() throws SimulationExceededMaximumTimeException, IOException
    {
       if (visulaizerOn)
-         ThreadTools.sleep(4000);
+         ThreadTools.sleep(1000);
 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -226,15 +227,15 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       Quaternion initialOrientation = new Quaternion();
       initialOrientation.appendRollRotation(Math.PI * 0.5);
       initialOrientation.appendYawRotation(Math.PI * 0.5);
-      initialOrientation.appendPitchRotation(-Math.PI * 0.3);
+      initialOrientation.appendPitchRotation(-Math.PI * 0.4);
       HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, new Point3D(0.6, 0.35, 1.0), initialOrientation,
                                                                                referenceFrames.getMidFootZUpGroundFrame());
       drcBehaviorTestHelper.send(lhandTrajectoryMessage);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
 
       initialOrientation = new Quaternion();
-      initialOrientation.appendPitchRotation(Math.PI * 0.3);
-      HandTrajectoryMessage rhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2.0, new Point3D(-0.1, -0.45, 0.8), initialOrientation,
+      initialOrientation.appendPitchRotation(Math.PI * 0.4);
+      HandTrajectoryMessage rhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2.0, new Point3D(-0.1, -0.5, 0.7), initialOrientation,
                                                                                referenceFrames.getMidFootZUpGroundFrame());
       drcBehaviorTestHelper.send(rhandTrajectoryMessage);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(4.0);
@@ -254,13 +255,13 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
        * constrained end effector trajectory.
        */
       System.out.println("Send packet " + drcBehaviorTestHelper.getYoTime());
-      DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0, RobotSide.LEFT);
+      ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0, RobotSide.LEFT);
 
       ConstrainedWholeBodyPlanningRequestPacket packet = new ConstrainedWholeBodyPlanningRequestPacket();
 
       ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory = endeffectorTrajectory;
-      packet.setNumberOfFindInitialGuess(50);
-      packet.setNumberOfExpanding(100);
+      packet.setNumberOfFindInitialGuess(100);
+      packet.setNumberOfExpanding(500);
 
       packet.setInitialRobotConfigration(sdfFullRobotModel);
 
