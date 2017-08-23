@@ -31,6 +31,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -48,7 +49,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -489,6 +489,15 @@ public class WheneverWholeBodyKinematicsSolver
       privilegedConfigurationCommand.setDefaultMaxVelocity(privilegedMaxVelocity.getDoubleValue());
       privilegedConfigurationCommandReference.set(privilegedConfigurationCommand);
    }
+   
+   public void updateRobotConfigurationData(CTTaskNode node)
+   {
+      OneDoFJoint[] joints = node.getOneDoFJoints();
+      Vector3D translation = node.getRootTranslation();
+      Quaternion rotation = node.getRootRotation();
+      
+      updateRobotConfigurationData(joints, translation, rotation);
+   }
 
    public void updateRobotConfigurationData(OneDoFJoint[] joints, Vector3D translation, Quaternion rotation)
    {
@@ -836,8 +845,8 @@ public class WheneverWholeBodyKinematicsSolver
 //      double diffUpper = Math.abs((upperValue - aJointValue) * (upperValue - aJointValue) * (upperValue - aJointValue) * (upperValue - aJointValue));
 //      double diffLower = Math.abs((aJointValue - lowerValue) * (aJointValue - lowerValue) * (aJointValue - lowerValue) * (aJointValue - lowerValue));
       
-      double diffUpper = Math.pow(base, Math.abs(upperValue - aJointValue));
-      double diffLower = Math.pow(base, Math.abs(aJointValue - lowerValue));
+      double diffUpper = Math.pow(base, Math.abs((upperValue - aJointValue)*(upperValue - aJointValue)));
+      double diffLower = Math.pow(base, Math.abs((aJointValue - lowerValue)*(aJointValue - lowerValue)));
       
       
       jointLimitScore = (diffUpper > diffLower)? diffUpper : diffLower;
