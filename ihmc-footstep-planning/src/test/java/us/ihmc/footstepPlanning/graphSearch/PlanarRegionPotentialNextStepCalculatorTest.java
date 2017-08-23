@@ -152,10 +152,8 @@ public class PlanarRegionPotentialNextStepCalculatorTest
 
       assertTrue("didn't reach goal yaw of " + goalYaw + ". Instead last foot was at yaw of " + soleYaw, Math.abs(angleDifference) < 0.1);
 
-      FootstepPlan footstepPlan = new FootstepPlan(endNode);
-//      System.out.println(footstepPlan.getNumberOfSteps());
+      FootstepPlan footstepPlan = BipedalFootstepPlannerNodeUtils.createFootstepPlanFromEndNode(endNode, null, null, null);
       listener.solutionWasFound(footstepPlan);
-
       assertTrue(footstepPlan.getNumberOfSteps() <= maxNumberOfExpectedFootsteps);
    }
 

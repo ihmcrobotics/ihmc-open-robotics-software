@@ -17,29 +17,6 @@ public class FootstepPlan
    {
    }
 
-   public FootstepPlan(BipedalFootstepPlannerNode endNode)
-   {
-      clear();
-      BipedalFootstepPlannerNode node = endNode;
-
-      while (node != null)
-      {
-         RigidBodyTransform soleTransform = new RigidBodyTransform();
-         node.getSoleTransform(soleTransform);
-
-         FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), soleTransform);
-         SimpleFootstep simpleFootstep = addFootstep(node.getRobotSide(), framePose);
-         if (node.isPartialFoothold())
-         {
-            simpleFootstep.setFoothold(node.getPartialFootholdPolygon());
-         }
-
-         node = node.getParentNode();
-      }
-
-      reverse();
-   }
-
    public int getNumberOfSteps()
    {
       return footsteps.size();

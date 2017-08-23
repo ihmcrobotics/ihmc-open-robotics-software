@@ -1,10 +1,18 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class BipedalFootstepPlannerNodeUtils
@@ -51,5 +59,47 @@ public class BipedalFootstepPlannerNodeUtils
       if (node.getParentNode() == null)
          return node.getSingleStepCost();
       return node.getSingleStepCost() + getCostFromStartToNode(node.getParentNode());
+   }
+
+   public static FootstepPlan createFootstepPlanFromEndNode(BipedalFootstepPlannerNode endNode, PlanarRegionsList planarRegionsList, BipedalFootstepPlannerParameters plannerParameters,
+                                                            SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame)
+   {
+      FootstepPlan footstepPlan = new FootstepPlan();
+      footstepPlan.clear();
+      BipedalFootstepPlannerNode node = endNode;
+
+      BipedalFootstepPlannerSnapAndWiggler snapAndWiggler = null;
+      if(planarRegionsList != null)
+      {
+         snapAndWiggler = new BipedalFootstepPlannerSnapAndWiggler(plannerParameters);
+         snapAndWiggler.setFootPolygonsInSoleFrame(footPolygonsInSoleFrame);
+         snapAndWiggler.setPlanarRegionsList(planarRegionsList);
+      }
+
+      while (node != null)
+      {
+         RigidBodyTransform soleTransform;
+
+         if(planarRegionsList == null)
+         {
+            soleTransform = new RigidBodyTransform();
+            node.getSoleTransform(soleTransform);
+         }
+         else
+         {
+            RigidBodyTransform snapTransform = snapAndWiggler.getSnapAndWiggleTransform(plannerParameters.getWiggleInsideDelta(), node, new PlanarRegion());
+            soleTransform = getSnappedSoleTransform(node, snapTransform);
+         }
+
+         FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), soleTransform);
+         SimpleFootstep simpleFootstep = footstepPlan.addFootstep(node.getRobotSide(), framePose);
+         if (node.isPartialFoothold())
+            simpleFootstep.setFoothold(node.getPartialFootholdPolygon());
+
+         node = node.getParentNode();
+      }
+
+      footstepPlan.reverse();
+      return footstepPlan;
    }
 }
