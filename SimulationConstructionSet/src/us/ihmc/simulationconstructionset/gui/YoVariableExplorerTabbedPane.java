@@ -134,6 +134,7 @@ public class YoVariableExplorerTabbedPane extends JPanel implements RegistrySele
       insertTab("Search", variableSearchPanel, tabIndex++);
       this.variableSearchPanel = variableSearchPanel;
       tabPane.setSelectedComponent(variableSearchPanel);
+      this.variableSearchPanel.setShowOnlyParameters(onlyParameters.isSelected());
    }
 
    private void insertTab(String name, JComponent component, int tabIndex)
@@ -364,25 +365,30 @@ public class YoVariableExplorerTabbedPane extends JPanel implements RegistrySele
       {
          updateOnlyParametersCheckboxEnabled();
       }
-      
+
    }
-   
+
    private class ShowOnlyParameterAction implements ActionListener
    {
 
       @Override
       public void actionPerformed(ActionEvent e)
       {
-         if(nameSpaceHierarchyTree != null)
+         if (nameSpaceHierarchyTree != null)
          {
             nameSpaceHierarchyTree.filterParameters(onlyParameters.isSelected());
          }
-         
-         if(visibleVarPanelRegistry != null)
+
+         if (visibleVarPanelRegistry != null)
          {
             setVisibleVarPanel(visibleVarPanelRegistry);
          }
+
+         if (variableSearchPanel != null)
+         {
+            variableSearchPanel.setShowOnlyParameters(onlyParameters.isSelected());
+         }
       }
-      
+
    }
 }
