@@ -206,15 +206,11 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    {
       int sizeOfPath = tree.getPath().size();
       
-      
-      kinematicsSolver = new WheneverWholeBodyKinematicsSolver(drcRobotModelFactory);
-
       kinematicsSolver.updateRobotConfigurationData(tree.getPath().get(sizeOfPath - numberOfMotionPath));
 
       kinematicsSolver.initialize();
       kinematicsSolver.holdCurrentTrajectoryMessages();
       kinematicsSolver.putTrajectoryMessages();
-      
       
       numberOfMotionPath--;
       if(numberOfMotionPath == 0)
