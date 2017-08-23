@@ -3,11 +3,12 @@ package us.ihmc.simulationconstructionset.gui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.LinkedHashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -20,9 +21,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
-import us.ihmc.yoVariables.registry.NameSpace;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceHierarchyTree;
 import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceSearchPanel;
@@ -30,6 +28,9 @@ import us.ihmc.simulationconstructionset.gui.hierarchyTree.RegistrySelectedListe
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanelJPopupMenu;
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariableSearchPanel;
+import us.ihmc.yoVariables.registry.NameSpace;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoVariableList;
 
 public class YoVariableExplorerTabbedPane extends JPanel implements RegistrySelectedListener
 {
@@ -41,6 +42,8 @@ public class YoVariableExplorerTabbedPane extends JPanel implements RegistrySele
    private JTabbedPane tabPane;
    
    private YoVariablePanel visibleVarPanel;
+   private YoVariableRegistry visibleVarPanelRegistry;
+   
    private JScrollPane scrollPane;
    private NameSpaceHierarchyTree nameSpaceHierarchyTree;
    private JSplitPane splitPane;
@@ -89,7 +92,8 @@ public class YoVariableExplorerTabbedPane extends JPanel implements RegistrySele
 
       onlyParameters = new JCheckBox("Show parameters only");
       onlyParameters.setAlignmentX(Component.LEFT_ALIGNMENT);
-      
+      onlyParameters.addActionListener(new ShowOnlyParameterAction());
+
       scrollPane = new JScrollPane();
       scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
       scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -118,6 +122,7 @@ public class YoVariableExplorerTabbedPane extends JPanel implements RegistrySele
       this.add(tabPane, BorderLayout.CENTER);
 
       tabPane.setMinimumSize(new Dimension(246, 100));
+      
       createAndStartPeriodicUIUpdateThread();
    }
 
@@ -152,7 +157,7 @@ public class YoVariableExplorerTabbedPane extends JPanel implements RegistrySele
 
    public void addExtraVarPanel(YoVariablePanel extraVarPanel)
    {
-      setVisibleVarPanel(extraVarPanel);
+      setVisibleVarPanel(extraVarPanel, null);
    }
 
    public void setVisibleVarPanel(String nameSpaceName)
@@ -171,12 +176,20 @@ public class YoVariableExplorerTabbedPane extends JPanel implements RegistrySele
 
    public void setVisibleVarPanel(YoVariableRegistry registry)
    {
-      YoVariablePanel varPanel = new YoVariableRegistryVarPanel(registry, selectedVariableHolder, varPanelJPopupMenu);
+      YoVariablePanel varPanel;
+      if(onlyParameters.isSelected())
+      {
+         varPanel = new YoVariableRegistryParameterPanel(registry, selectedVariableHolder, varPanelJPopupMenu);
+      }
+      else
+      {
+         varPanel = new YoVariableRegistryVarPanel(registry, selectedVariableHolder, varPanelJPopupMenu);
+      }
 
-      setVisibleVarPanel(varPanel);
+      setVisibleVarPanel(varPanel, registry);
    }
 
-   public void setVisibleVarPanel(YoVariablePanel varPanel)
+   private void setVisibleVarPanel(YoVariablePanel varPanel, YoVariableRegistry registry)
    {
       if (visibleVarPanel != null)
       {
@@ -184,6 +197,7 @@ public class YoVariableExplorerTabbedPane extends JPanel implements RegistrySele
       }
 
       visibleVarPanel = varPanel;
+      visibleVarPanelRegistry = registry;
       scrollPane.add(visibleVarPanel);
       scrollPane.setViewportView(visibleVarPanel);
       Integer tabIndex = tabIndices.get(variableDisplayPanel);
@@ -253,6 +267,8 @@ public class YoVariableExplorerTabbedPane extends JPanel implements RegistrySele
 
       visibleVarPanel = null;
 
+      onlyParameters = null;
+      
       if (scrollPane != null)
       {
          scrollPane.removeAll();
@@ -319,5 +335,24 @@ public class YoVariableExplorerTabbedPane extends JPanel implements RegistrySele
    public YoVariableSearchPanel getYoVariableSearchPanel()
    {
       return variableSearchPanel;
+   }
+   
+   private class ShowOnlyParameterAction implements ActionListener
+   {
+
+      @Override
+      public void actionPerformed(ActionEvent e)
+      {
+         if(nameSpaceHierarchyTree != null)
+         {
+            nameSpaceHierarchyTree.filterParameters(onlyParameters.isSelected());
+         }
+         
+         if(visibleVarPanelRegistry != null)
+         {
+            setVisibleVarPanel(visibleVarPanelRegistry);
+         }
+      }
+      
    }
 }
