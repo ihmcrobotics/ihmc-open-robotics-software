@@ -2,12 +2,15 @@ package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -427,6 +430,70 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       RobotSide initialStanceSide = RobotSide.LEFT;
       FramePose goalPose = new FramePose(worldFrame);
       goalPose.setPosition(4.0, 0.0, 0.0);
+
+      FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList,
+            !visualize());
+      if (visualize())
+         PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose);
+      assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
+   }
+
+   public void testSpiralStaircase()
+   {
+      ConvexPolygon2D circlePolygon = new ConvexPolygon2D();
+      ArrayList<ConvexPolygon2D> steps = new ArrayList<>();
+
+      int circleVertices = 10;
+      double circleRadius = 1.0;
+      double stepWidth = 0.5;
+      double stepHeight = 0.175;
+
+      for (int i = 0; i < circleVertices; i++)
+      {
+         ConvexPolygon2D stepPolygon = new ConvexPolygon2D();
+
+         double x = circleRadius * Math.sin(2.0 * Math.PI * i / circleVertices);
+         double y = circleRadius * Math.cos(2.0 * Math.PI * i / circleVertices);
+         Point2D vertex = new Point2D(x, y);
+         circlePolygon.addVertex(vertex);
+         stepPolygon.addVertex(vertex);
+
+         double xNext = circleRadius * Math.sin(2.0 * Math.PI * (i + 1) / circleVertices);
+         double yNext = circleRadius * Math.cos(2.0 * Math.PI * (i + 1) / circleVertices);
+         Point2D nextVertex = new Point2D(xNext, yNext);
+         stepPolygon.addVertex(nextVertex);
+
+         double xOutside1 = (circleRadius + stepWidth) * Math.sin(2.0 * Math.PI * i / circleVertices);
+         double yOutside1 = (circleRadius + stepWidth) * Math.cos(2.0 * Math.PI * i / circleVertices);
+         Point2D outsideVertex1 = new Point2D(xOutside1, yOutside1);
+         stepPolygon.addVertex(outsideVertex1);
+
+         double xOutside2 = (circleRadius + stepWidth) * Math.sin(2.0 * Math.PI * (i + 1) / circleVertices);
+         double yOutside2 = (circleRadius + stepWidth) * Math.cos(2.0 * Math.PI * (i + 1) / circleVertices);
+         Point2D outside2Vertex = new Point2D(xOutside2, yOutside2);
+         stepPolygon.addVertex(outside2Vertex);
+
+         stepPolygon.update();
+         steps.add(stepPolygon);
+      }
+      circlePolygon.update();
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(0.0, 0.0, 0.0001);
+      generator.addPolygon(circlePolygon);
+      for (ConvexPolygon2D step : steps)
+      {
+         generator.addPolygon(step);
+         generator.translate(0.0, 0.0, stepHeight);
+      }
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      // define start and goal conditions
+      FramePose initialStanceFootPose = new FramePose(worldFrame);
+      initialStanceFootPose.setPosition(0.0, 0.15, 0.0);
+      RobotSide initialStanceSide = RobotSide.LEFT;
+      FramePose goalPose = new FramePose(worldFrame);
+      goalPose.setPosition(-0.1, 1.25, stepHeight * (circleVertices - 1));
 
       FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList,
             !visualize());
