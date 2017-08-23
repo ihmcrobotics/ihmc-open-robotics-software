@@ -184,7 +184,7 @@ public class CTTaskNodeTree
 
       return Math.sqrt(squaredDisplacement);
    }
-   
+
    private double getNormalizedDisplacement(CTTaskNode nodeOne, CTTaskNode nodeTwo)
    {
       double squaredDisplacement = 0;
@@ -203,18 +203,22 @@ public class CTTaskNodeTree
    {
       return nodeNew.getNormalizedNodeData(0) - nodeOld.getNormalizedNodeData(0);
    }
-   
+
    private double getMatric(CTTaskNode nodeOne, CTTaskNode nodeTwo)
    {
       double normalizedtimeGap = getNormalizedTimeGap(nodeOne, nodeTwo);
+      double normalizedTaskDisplacement = getNormalizedTaskDisplacement(nodeOne, nodeTwo);
 
       if (normalizedtimeGap <= 0)
          return Double.MAX_VALUE;
       else
       {
          double matric = 0;
-//         matric = normalizedtimeGap * matricRatioTimeToTask + getNormalizedTaskDisplacement(nodeOne, nodeTwo) * (1 - matricRatioTimeToTask);
-         matric = getNormalizedDisplacement(nodeOne, nodeTwo);
+
+         matric = normalizedtimeGap * normalizedtimeGap * matricRatioTimeToTask
+               + normalizedTaskDisplacement * normalizedTaskDisplacement * (1 - matricRatioTimeToTask);
+         matric = Math.sqrt(matric);
+         //         matric = getNormalizedDisplacement(nodeOne, nodeTwo);
          return matric;
       }
    }
@@ -413,7 +417,7 @@ public class CTTaskNodeTree
    {
       return path;
    }
-   
+
    public void addNodeOnPath(CTTaskNode node)
    {
       path.add(node);
@@ -435,113 +439,39 @@ public class CTTaskNodeTree
    }
 
    /*
-   public void saveNodes()
-   {
-      String fileName = "/home/shadylady/tree.txt";
-      BufferedWriter bw = null;
-      FileWriter fw = null;
-
-      System.out.println("Save Start");
-      try
-      {
-         String savingContent = "";
-
-         // whole nodes
-         for (int i = 0; i < getWholeNodes().size(); i++)
-         {
-            String convertedNodeData = "";
-
-            convertedNodeData = convertedNodeData + "1\t";
-            for (int j = 0; j < getWholeNodes().get(i).getDimensionOfNodeData(); j++)
-            {
-               convertedNodeData = convertedNodeData + String.format("%.3f\t", getWholeNodes().get(i).getNodeData(j));
-            }
-
-            if (getWholeNodes().get(i).getParentNode() == null)
-            {
-               for (int j = 0; j < getWholeNodes().get(i).getDimensionOfNodeData(); j++)
-               {
-                  convertedNodeData = convertedNodeData + "0\t";
-               }
-            }
-            else
-            {
-               for (int j = 0; j < getWholeNodes().get(i).getDimensionOfNodeData(); j++)
-               {
-                  convertedNodeData = convertedNodeData + String.format("%.3f\t", getWholeNodes().get(i).getParentNode().getNodeData(j));
-               }
-            }
-            convertedNodeData = convertedNodeData + "\n";
-
-            savingContent = savingContent + convertedNodeData;
-         }
-
-         // fail nodes
-         for (int i = 0; i < getFailNodes().size(); i++)
-         {
-            String convertedNodeData = "";
-
-            convertedNodeData = convertedNodeData + "2\t";
-            for (int j = 0; j < getFailNodes().get(i).getDimensionOfNodeData(); j++)
-            {
-               convertedNodeData = convertedNodeData + String.format("%.3f\t", getFailNodes().get(i).getNodeData(j));
-            }
-            convertedNodeData = convertedNodeData + "\n";
-
-            savingContent = savingContent + convertedNodeData;
-         }
-
-         // path nodes
-         if (getPath().size() > 1)
-         {
-            for (int i = 0; i < getPath().size(); i++)
-            {
-               String convertedNodeData = "";
-
-               convertedNodeData = convertedNodeData + "3\t";
-               for (int j = 0; j < getPath().get(i).getDimensionOfNodeData(); j++)
-               {
-                  convertedNodeData = convertedNodeData + String.format("%.3f\t", getPath().get(i).getNodeData(j));
-               }
-               convertedNodeData = convertedNodeData + "\n";
-
-               savingContent = savingContent + convertedNodeData;
-            }
-         }
-
-         fw = new FileWriter(fileName);
-         bw = new BufferedWriter(fw);
-         bw.write(savingContent);
-
-         System.out.println("Save Done");
-
-      }
-      catch (IOException e)
-      {
-
-         e.printStackTrace();
-
-      } finally
-      {
-
-         try
-         {
-
-            if (bw != null)
-               bw.close();
-
-            if (fw != null)
-               fw.close();
-
-         }
-         catch (IOException ex)
-         {
-
-            ex.printStackTrace();
-
-         }
-
-      }
-   }
-   */
+    * public void saveNodes() { String fileName = "/home/shadylady/tree.txt";
+    * BufferedWriter bw = null; FileWriter fw = null;
+    * System.out.println("Save Start"); try { String savingContent = ""; //
+    * whole nodes for (int i = 0; i < getWholeNodes().size(); i++) { String
+    * convertedNodeData = ""; convertedNodeData = convertedNodeData + "1\t"; for
+    * (int j = 0; j < getWholeNodes().get(i).getDimensionOfNodeData(); j++) {
+    * convertedNodeData = convertedNodeData + String.format("%.3f\t",
+    * getWholeNodes().get(i).getNodeData(j)); } if
+    * (getWholeNodes().get(i).getParentNode() == null) { for (int j = 0; j <
+    * getWholeNodes().get(i).getDimensionOfNodeData(); j++) { convertedNodeData
+    * = convertedNodeData + "0\t"; } } else { for (int j = 0; j <
+    * getWholeNodes().get(i).getDimensionOfNodeData(); j++) { convertedNodeData
+    * = convertedNodeData + String.format("%.3f\t",
+    * getWholeNodes().get(i).getParentNode().getNodeData(j)); } }
+    * convertedNodeData = convertedNodeData + "\n"; savingContent =
+    * savingContent + convertedNodeData; } // fail nodes for (int i = 0; i <
+    * getFailNodes().size(); i++) { String convertedNodeData = "";
+    * convertedNodeData = convertedNodeData + "2\t"; for (int j = 0; j <
+    * getFailNodes().get(i).getDimensionOfNodeData(); j++) { convertedNodeData =
+    * convertedNodeData + String.format("%.3f\t",
+    * getFailNodes().get(i).getNodeData(j)); } convertedNodeData =
+    * convertedNodeData + "\n"; savingContent = savingContent +
+    * convertedNodeData; } // path nodes if (getPath().size() > 1) { for (int i
+    * = 0; i < getPath().size(); i++) { String convertedNodeData = "";
+    * convertedNodeData = convertedNodeData + "3\t"; for (int j = 0; j <
+    * getPath().get(i).getDimensionOfNodeData(); j++) { convertedNodeData =
+    * convertedNodeData + String.format("%.3f\t",
+    * getPath().get(i).getNodeData(j)); } convertedNodeData = convertedNodeData
+    * + "\n"; savingContent = savingContent + convertedNodeData; } } fw = new
+    * FileWriter(fileName); bw = new BufferedWriter(fw);
+    * bw.write(savingContent); System.out.println("Save Done"); } catch
+    * (IOException e) { e.printStackTrace(); } finally { try { if (bw != null)
+    * bw.close(); if (fw != null) fw.close(); } catch (IOException ex) {
+    * ex.printStackTrace(); } } }
+    */
 }
