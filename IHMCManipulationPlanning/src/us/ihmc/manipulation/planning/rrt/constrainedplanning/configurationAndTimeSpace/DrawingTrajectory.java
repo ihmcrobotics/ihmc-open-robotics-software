@@ -65,7 +65,7 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
        */
       double arcAngle = time / getTrajectoryTime() * Math.PI * 2;
 
-      Point3D arcCenterPoint = new Point3D(0.55, 0.0, 1.2);
+      Point3D arcCenterPoint = new Point3D(0.53, 0.0, 1.2);
       Quaternion arcCenterOrientation = new Quaternion();
       arcCenterOrientation.appendPitchRotation(-Math.PI * 0.5);
       RigidBodyTransform arcCenterRigidBodyController = new RigidBodyTransform(arcCenterOrientation, arcCenterPoint);

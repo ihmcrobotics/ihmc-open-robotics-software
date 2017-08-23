@@ -106,23 +106,25 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    private CTTaskNodeTree tree;
 
+   private TaskRegion taskRegion;
+
    /*
     * API
     */
    private final AtomicReference<ConstrainedWholeBodyPlanningRequestPacket> latestRequestReference = new AtomicReference<ConstrainedWholeBodyPlanningRequestPacket>(null);
 
-   private int numberOfExpanding = 100;
+   private int numberOfExpanding = 1;
 
-   private int numberOfInitialGuess = 30;
+   private int numberOfInitialGuess = 1;
 
-   private static int terminateToolboxCondition = 700;
+   private static int terminateToolboxCondition = 1000;
 
    /**
     * Toolbox state
     */
    private CWBToolboxState state;
 
-   enum CWBToolboxState
+   private enum CWBToolboxState
    {
       DO_NOTHING, FIND_INITIAL_GUESS, EXPAND_TREE, SHORTCUT_PATH, GENERATE_MOTION
    }
@@ -155,8 +157,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       updateCount.increment();
       PrintTools.info("update toolbox " + updateCount.getIntegerValue() + " " + state);
 
-      // ************************************************************************************************************** //
-      TaskRegion taskRegion = constrainedEndEffectorTrajectory.getTaskRegion();
+      // ************************************************************************************************************** //      
       switch (state)
       {
       case DO_NOTHING:
@@ -164,122 +165,22 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          break;
       case FIND_INITIAL_GUESS:
 
-         GenericTaskNode initialGuessNode = new GenericTaskNode();
-
-         tree.setRandomNormalizedNodeData(initialGuessNode, true);
-         initialGuessNode.setNormalizedNodeData(0, 0);
-         initialGuessNode.convertNormalizedDataToData(taskRegion);
-
-         visualizedNode = initialGuessNode;
-
-         updateValidity(visualizedNode);
-         double scoreInitialGuess = kinematicsSolver.getArmJointLimitScore(constrainedEndEffectorTrajectory.getRobotSide());
-         if (!visualizedNode.getValidity())
-            scoreInitialGuess = 0.0;
-
-         jointlimitScore.set(scoreInitialGuess);
-
-         if (bestScoreInitialGuess < scoreInitialGuess)
-         {
-            bestScoreInitialGuess = scoreInitialGuess;
-
-            rootNode = visualizedNode.createNodeCopy();
-            rootNode = new GenericTaskNode(visualizedNode);
-         }
-
-         /*
-          * terminate finding initial guess.
-          */
-         numberOfInitialGuess--;
-         if (numberOfInitialGuess == 0)
-         {
-            PrintTools.info("initial guess terminate");
-            state = CWBToolboxState.EXPAND_TREE;
-
-            if (true)
-            {
-               rootNode.convertDataToNormalizedData(taskRegion);
-
-               PrintTools.info("" + bestScoreInitialGuess);
-               for (int i = 0; i < rootNode.getDimensionOfNodeData(); i++)
-                  PrintTools.info("" + i + " " + rootNode.getNodeData(i));
-
-               tree = new CTTaskNodeTree(rootNode);
-               tree.setTaskRegion(taskRegion);
-            }
-         }
+         findInitialGuess();
 
          break;
       case EXPAND_TREE:
 
-         tree.updateRandomConfiguration();
-         tree.updateNearestNode();
-         tree.updateNewConfiguration();
-         tree.getNewNode().convertNormalizedDataToData(taskRegion);
-         tree.getNewNode().setParentNode(tree.getNearNode());
-
-         if (updateValidity(tree.getNewNode()))
-         {
-            tree.connectNewNode(true);
-            if (tree.getNewNode().getTime() == constrainedEndEffectorTrajectory.getTrajectoryTime())
-            {
-               PrintTools.info("terminate expanding");
-               numberOfExpanding = 1; // for terminate
-            }
-         }
-         else
-         {
-            tree.connectNewNode(false);
-         }
-
-         visualizedNode = tree.getNewNode().createNodeCopy();
-         visualizedNode.setValidity(tree.getNewNode().getValidity());
-
-         /*
-          * terminate expanding tree.
-          */
-         numberOfExpanding--;
-         if (numberOfExpanding == 0)
-         {
-            state = CWBToolboxState.SHORTCUT_PATH;
-
-            PrintTools.info("Total update solver " + kinematicsSolver.numberOfTest);
-         }
+         expandingTree();
 
          break;
       case SHORTCUT_PATH:
 
-         ArrayList<CTTaskNode> revertedPath = new ArrayList<CTTaskNode>();
-         CTTaskNode currentNode = tree.getNewNode();
-         revertedPath.add(currentNode);
-
-         while (true)
-         {
-            currentNode = currentNode.getParentNode();
-            if (currentNode != null)
-            {
-               revertedPath.add(currentNode);
-            }
-            else
-               break;
-         }
-
-         int revertedPathSize = revertedPath.size();
-
-         tree.getPath().clear();
-         for (int j = 0; j < revertedPathSize; j++)
-            tree.getPath().add(revertedPath.get(revertedPathSize - 1 - j));
-
-         /*
-          * terminate toolbox
-          */
-         isDone.set(true);
-         state = CWBToolboxState.GENERATE_MOTION;
-
-         PrintTools.info("the size of the path is " + tree.getPath().size());
+         shortcutPath();
 
          break;
       case GENERATE_MOTION:
+
+         generateMotion();
 
          break;
       }
@@ -294,6 +195,139 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       // ************************************************************************************************************** //      
       if (updateCount.getIntegerValue() == terminateToolboxCondition)
          isDone.set(true);
+   }
+
+   /**
+    * state == GENERATE_MOTION
+    */
+   private void generateMotion()
+   {
+      state = CWBToolboxState.DO_NOTHING;
+      isDone.set(true);
+   }
+
+   /**
+    * state = SHORTCUT_PATH
+    */
+   private void shortcutPath()
+   {
+      ArrayList<CTTaskNode> revertedPath = new ArrayList<CTTaskNode>();
+      CTTaskNode currentNode = tree.getNewNode();
+      revertedPath.add(currentNode);
+
+      while (true)
+      {
+         currentNode = currentNode.getParentNode();
+         if (currentNode != null)
+         {
+            revertedPath.add(currentNode);
+         }
+         else
+            break;
+      }
+
+      int revertedPathSize = revertedPath.size();
+
+      tree.getPath().clear();
+      for (int j = 0; j < revertedPathSize; j++)
+         tree.getPath().add(revertedPath.get(revertedPathSize - 1 - j));
+
+      PrintTools.info("the size of the path is " + tree.getPath().size());
+
+      /*
+       * terminate state
+       */
+      state = CWBToolboxState.GENERATE_MOTION;
+   }
+
+   /**
+    * state == EXPAND_TREE
+    */
+   private void expandingTree()
+   {
+      expandingCount.increment();
+      
+      tree.updateRandomConfiguration();
+      tree.updateNearestNode();
+      tree.updateNewConfiguration();
+      tree.getNewNode().convertNormalizedDataToData(taskRegion);
+      tree.getNewNode().setParentNode(tree.getNearNode());
+
+      if (updateValidity(tree.getNewNode()))
+      {
+         tree.connectNewNode(true);
+         if (tree.getNewNode().getTime() == constrainedEndEffectorTrajectory.getTrajectoryTime())
+         {
+            PrintTools.info("terminate expanding");
+            numberOfExpanding = 1; // for terminate
+         }
+      }
+      else
+      {
+         tree.connectNewNode(false);
+      }
+
+      visualizedNode = tree.getNewNode().createNodeCopy();
+      visualizedNode.setValidity(tree.getNewNode().getValidity());
+
+      /*
+       * terminate expanding tree.
+       */
+      numberOfExpanding--;
+      if (numberOfExpanding == 0)
+      {
+         state = CWBToolboxState.SHORTCUT_PATH;
+
+         PrintTools.info("Total update solver");
+      }
+   }
+
+   /**
+    * state == FIND_INITIAL_GUESS
+    */
+   private void findInitialGuess()
+   {
+      GenericTaskNode initialGuessNode = new GenericTaskNode();
+
+      tree.setRandomNormalizedNodeData(initialGuessNode, true);
+      initialGuessNode.setNormalizedNodeData(0, 0);
+      initialGuessNode.convertNormalizedDataToData(taskRegion);
+
+      visualizedNode = initialGuessNode;
+
+      updateValidity(visualizedNode);
+      double scoreInitialGuess = kinematicsSolver.getArmJointLimitScore(constrainedEndEffectorTrajectory.getRobotSide());
+      if (!visualizedNode.getValidity())
+         scoreInitialGuess = 0.0;
+
+      jointlimitScore.set(scoreInitialGuess);
+
+      if (bestScoreInitialGuess < scoreInitialGuess)
+      {
+         bestScoreInitialGuess = scoreInitialGuess;
+
+         rootNode = visualizedNode.createNodeCopy();
+         rootNode = new GenericTaskNode(visualizedNode);
+      }
+
+      /*
+       * terminate finding initial guess.
+       */
+      numberOfInitialGuess--;
+      if (numberOfInitialGuess == 0)
+      {
+         PrintTools.info("initial guess terminate");
+         state = CWBToolboxState.EXPAND_TREE;
+
+         rootNode.convertDataToNormalizedData(taskRegion);
+
+         PrintTools.info("" + bestScoreInitialGuess);
+         for (int i = 0; i < rootNode.getDimensionOfNodeData(); i++)
+            PrintTools.info("" + i + " " + rootNode.getNodeData(i));
+
+         tree = new CTTaskNodeTree(rootNode);
+         tree.setTaskRegion(taskRegion);
+      }
    }
 
    @Override
@@ -336,6 +370,10 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       rootNode.convertDataToNormalizedData(constrainedEndEffectorTrajectory.getTaskRegion());
 
+      /*
+       * bring constrainedEndEffectorTrajectory
+       */
+      taskRegion = constrainedEndEffectorTrajectory.getTaskRegion();
       if (startYoVariableServer)
       {
          treeVisualizer = new CTTreeVisualizer(tree);
@@ -372,17 +410,20 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       return result;
    }
 
+   /**
+    * update validity of input node. 
+    */
    private boolean updateValidity(CTTaskNode node)
    {
       if (node.getParentNode() != null)
       {
-         PrintTools.warn("this node has parent node.");
+         // PrintTools.warn("this node has parent node.");
          kinematicsSolver.updateRobotConfigurationData(node.getParentNode().getOneDoFJoints(), node.getParentNode().getRootTranslation(),
                                                        node.getParentNode().getRootRotation());
       }
       else
       {
-         PrintTools.warn("parentNode is required.");
+         // PrintTools.warn("parentNode is required.");
          kinematicsSolver.updateRobotConfigurationData(initialOneDoFJoints, initialTranslationOfRootJoint, initialRotationOfRootJoint);
       }
 
@@ -427,13 +468,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
        */
       kinematicsSolver.solve();
       boolean ikResult = kinematicsSolver.getIKResult();
-      
-//      boolean ikResult = kinematicsSolver.solve();
       boolean colResult = isCollisionFree();
       boolean result = false;
-      
-      if(!colResult)
-         PrintTools.info("this pose collid");
 
       if (ikResult && colResult)
          result = true;

@@ -26,7 +26,7 @@ public class CTTaskNodeTree
     * If @param matricRatioTimeToTask is 0.3, the matric will be obtained as
     * much as (getNormalizedTimeGap*0.3 + getNormalizedTaskDisplacement*0.7).
     */
-   private double matricRatioTimeToTask = 0.4;
+   private static double matricRatioTimeToTask = 0.4;
 
    private double maximumDisplacementOfStep = 0.15;
    private double maximumTimeGapOfStep = 0.02;
@@ -91,7 +91,7 @@ public class CTTaskNodeTree
    {
       Random randomManager = new Random();
 
-      double exceedIntentionalRatio = 1.0;
+      double exceedIntentionalRatio = 0.7;
 
       if (isUniform)
          exceedIntentionalRatio = 0.0;
@@ -184,12 +184,26 @@ public class CTTaskNodeTree
 
       return Math.sqrt(squaredDisplacement);
    }
+   
+   private double getNormalizedDisplacement(CTTaskNode nodeOne, CTTaskNode nodeTwo)
+   {
+      double squaredDisplacement = 0;
+
+      for (int i = 0; i < rootNode.getDimensionOfNodeData(); i++)
+      {
+         double nodeOneValue = nodeOne.getNormalizedNodeData(i);
+         double nodeTwoValue = nodeTwo.getNormalizedNodeData(i);
+         squaredDisplacement = squaredDisplacement + (nodeOneValue - nodeTwoValue) * (nodeOneValue - nodeTwoValue);
+      }
+
+      return Math.sqrt(squaredDisplacement);
+   }
 
    private double getNormalizedTimeGap(CTTaskNode nodeOld, CTTaskNode nodeNew)
    {
       return nodeNew.getNormalizedNodeData(0) - nodeOld.getNormalizedNodeData(0);
    }
-
+   
    private double getMatric(CTTaskNode nodeOne, CTTaskNode nodeTwo)
    {
       double normalizedtimeGap = getNormalizedTimeGap(nodeOne, nodeTwo);
@@ -199,7 +213,8 @@ public class CTTaskNodeTree
       else
       {
          double matric = 0;
-         matric = normalizedtimeGap * matricRatioTimeToTask + getNormalizedTaskDisplacement(nodeOne, nodeTwo) * (1 - matricRatioTimeToTask);
+//         matric = normalizedtimeGap * matricRatioTimeToTask + getNormalizedTaskDisplacement(nodeOne, nodeTwo) * (1 - matricRatioTimeToTask);
+         matric = getNormalizedDisplacement(nodeOne, nodeTwo);
          return matric;
       }
    }

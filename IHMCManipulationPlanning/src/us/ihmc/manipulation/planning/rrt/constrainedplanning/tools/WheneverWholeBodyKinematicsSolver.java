@@ -137,7 +137,7 @@ public class WheneverWholeBodyKinematicsSolver
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
 
-   private static int maximumCntForUpdateInternal = 200;
+   private static int maximumCntForUpdateInternal = 100;
    private static int cntForUpdateInternal = 0;
 
    public static int numberOfTest = 0;
@@ -364,7 +364,8 @@ public class WheneverWholeBodyKinematicsSolver
           */
          if (isJointLimit)
          {
-            PrintTools.info("cntForUpdateInternal " + " FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
+            if (DEBUG)
+               PrintTools.info("cntForUpdateInternal " + " FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
 
             return false;
          }
@@ -375,7 +376,8 @@ public class WheneverWholeBodyKinematicsSolver
          {
             if (DEBUG)
                printOutRobotModel(desiredFullRobotModel, referenceFrames.getMidFootZUpGroundFrame());
-            PrintTools.info("cntForUpdateInternal " + " TRUE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
+            if (DEBUG)
+               PrintTools.info("cntForUpdateInternal " + " TRUE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
 
             return isSolved;
          }
@@ -829,13 +831,16 @@ public class WheneverWholeBodyKinematicsSolver
       upperValue = upperValue / limitSize;
       lowerValue = lowerValue / limitSize;
 
-      double diffUpper = Math.abs((upperValue - aJointValue) * (upperValue - aJointValue) * (upperValue - aJointValue));
-      double diffLower = Math.abs((aJointValue - lowerValue) * (aJointValue - lowerValue) * (aJointValue - lowerValue));
-
-      if (diffUpper > diffLower)
-         jointLimitScore = diffLower;
-      else
-         jointLimitScore = diffUpper;
+      double base = 100.0;      
+      
+//      double diffUpper = Math.abs((upperValue - aJointValue) * (upperValue - aJointValue) * (upperValue - aJointValue) * (upperValue - aJointValue));
+//      double diffLower = Math.abs((aJointValue - lowerValue) * (aJointValue - lowerValue) * (aJointValue - lowerValue) * (aJointValue - lowerValue));
+      
+      double diffUpper = Math.pow(base, Math.abs(upperValue - aJointValue));
+      double diffLower = Math.pow(base, Math.abs(aJointValue - lowerValue));
+      
+      
+      jointLimitScore = (diffUpper > diffLower)? diffUpper : diffLower;
 
       if (DEBUG)
          PrintTools.info("" + jointName + " " + jointLimitScore + " " + aJointValue + " " + upperValue + " " + lowerValue);

@@ -1,6 +1,7 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
 import java.awt.Color;
+import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -15,7 +16,7 @@ public class CTNodeVisualizer
    private int configurationIndex;
 
    private int updateCnt;
-   
+
    private boolean enabled;
    private String ctaskName;
 
@@ -33,48 +34,56 @@ public class CTNodeVisualizer
 
       plotter.setViewRange(1.5);
       plotter.setXYZoomEnabled(true);
-      plotter.setShowLabels(true);   
+      plotter.setShowLabels(true);
       plotter.setFocusPointX(0.5);
       plotter.setFocusPointY(0.5);
-      
+
       this.enabled = enabled;
    }
-   
+
    public void initialize()
    {
-      updateCnt = 0;      
-      if(enabled)
+      updateCnt = 0;
+      if (enabled)
          plotter.showInNewWindow(ctaskName, false);
    }
 
    public void updateVisualizer(CTTaskNode newNode)
    {
-      String prefix = ""+configurationIndex+""+updateCnt;
+      String prefix = "" + configurationIndex + "" + updateCnt;
       if (newNode.getValidity())
       {
-         if(newNode.getParentNode() != null)
+         if (newNode.getParentNode() != null)
          {
             PrintTools.info("parent");
             CTTaskNode parentNode = newNode.getParentNode();
-            LineArtifact lineArtifact = new LineArtifact(prefix+"_line", new Point2D(parentNode.getNormalizedNodeData(0), parentNode.getNormalizedNodeData(configurationIndex)),
+            LineArtifact lineArtifact = new LineArtifact(prefix + "_line",
+                                                         new Point2D(parentNode.getNormalizedNodeData(0), parentNode.getNormalizedNodeData(configurationIndex)),
                                                          new Point2D(newNode.getNormalizedNodeData(0), newNode.getNormalizedNodeData(configurationIndex)));
             lineArtifact.setColor(Color.blue);
-            plotter.addArtifact(lineArtifact);   
+            plotter.addArtifact(lineArtifact);
          }
-         
-         CircleArtifact nodeArtifact = new CircleArtifact(prefix+"_valid", newNode.getNormalizedNodeData(0), newNode.getNormalizedNodeData(configurationIndex), 0.01, true);
+
+         CircleArtifact nodeArtifact = new CircleArtifact(prefix + "_valid", newNode.getNormalizedNodeData(0),
+                                                          newNode.getNormalizedNodeData(configurationIndex), 0.01, true);
          nodeArtifact.setColor(Color.blue);
-         
+
          plotter.addArtifact(nodeArtifact);
-         
+
       }
       else
       {
-         CircleArtifact nodeArtifact = new CircleArtifact(prefix+"_invalid", newNode.getNormalizedNodeData(0), newNode.getNormalizedNodeData(configurationIndex), 0.01, true);
+         CircleArtifact nodeArtifact = new CircleArtifact(prefix + "_invalid", newNode.getNormalizedNodeData(0),
+                                                          newNode.getNormalizedNodeData(configurationIndex), 0.01, true);
          nodeArtifact.setColor(Color.red);
          plotter.addArtifact(nodeArtifact);
       }
       plotter.update();
       updateCnt++;
+   }
+
+   public void showUpPath(ArrayList<CTTaskNode> path)
+   {
+
    }
 }
