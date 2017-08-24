@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.forceDevelopment.states;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -29,8 +31,6 @@ import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachine;
@@ -79,7 +79,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
 
    // feedback controllers
    private final LinearInvertedPendulumModel lipModel;
-   private final FramePoint dcmPositionEstimate;
+   private final FramePoint3D dcmPositionEstimate;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final DivergentComponentOfMotionController.Setpoints dcmPositionControllerSetpoints;
    private final DivergentComponentOfMotionController dcmPositionController;
@@ -99,7 +99,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
    // planning
    private double bodyYawSetpoint;
    private final GroundPlaneEstimator groundPlaneEstimator;
-   private final QuadrantDependentList<FramePoint> groundPlanePositions;
+   private final QuadrantDependentList<FramePoint3D> groundPlanePositions;
    private final PiecewisePeriodicDcmTrajectory nominalPeriodicDcmTrajectory;
 
    // state machine
@@ -135,7 +135,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
 
       // feedback controllers
       lipModel = controllerToolbox.getLinearInvertedPendulumModel();
-      dcmPositionEstimate = new FramePoint();
+      dcmPositionEstimate = new FramePoint3D();
       dcmPositionEstimator = controllerToolbox.getDcmPositionEstimator();
       dcmPositionControllerSetpoints = new DivergentComponentOfMotionController.Setpoints();
       dcmPositionController = controllerToolbox.getDcmPositionController();
@@ -158,7 +158,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       groundPlanePositions = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         groundPlanePositions.set(robotQuadrant, new FramePoint());
+         groundPlanePositions.set(robotQuadrant, new FramePoint3D());
       }
       nominalPeriodicDcmTrajectory = new PiecewisePeriodicDcmTrajectory(1, gravity, inputProvider.getComPositionInput().getZ());
 
@@ -292,8 +292,8 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       timedStepController.removeSteps();
    }
 
-   private void computeNominalCmpPositions(RobotQuadrant hindSupportQuadrant, RobotQuadrant frontSupportQuadrant, FramePoint nominalCmpPositionAtSoS,
-         FramePoint nominalCmpPositionAtEoS)
+   private void computeNominalCmpPositions(RobotQuadrant hindSupportQuadrant, RobotQuadrant frontSupportQuadrant, FramePoint3D nominalCmpPositionAtSoS,
+         FramePoint3D nominalCmpPositionAtEoS)
    {
       taskSpaceEstimates.getSolePosition(hindSupportQuadrant).changeFrame(worldFrame);
       taskSpaceEstimates.getSolePosition(frontSupportQuadrant).changeFrame(worldFrame);
@@ -312,8 +312,8 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       nominalCmpPositionAtEoS.add(xOffset, yOffset, 0.0);
    }
 
-   private void computeNominalDcmPositions(FramePoint nominalCmpPositionAtSoS, FramePoint nominalCmpPositionAtEoS, FramePoint nominalDcmPositionAtSoS,
-         FramePoint nominalDcmPositionAtEoS)
+   private void computeNominalDcmPositions(FramePoint3D nominalCmpPositionAtSoS, FramePoint3D nominalCmpPositionAtEoS, FramePoint3D nominalDcmPositionAtSoS,
+         FramePoint3D nominalDcmPositionAtEoS)
    {
       double timeAtEoS = doubleSupportDurationParameter.get();
       double relativeYawAtEoS = planarVelocityProvider.get().getZ() * timeAtEoS;
@@ -325,7 +325,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       nominalPeriodicDcmTrajectory.getPosition(nominalDcmPositionAtEoS);
    }
 
-   private void computeFootholdPosition(RobotQuadrant robotQuadrant, FramePoint cmpPosition, double bodyYaw, FramePoint footholdPosition)
+   private void computeFootholdPosition(RobotQuadrant robotQuadrant, FramePoint3D cmpPosition, double bodyYaw, FramePoint3D footholdPosition)
    {
       // compute foothold position based on the nominal stance and desired cmp
       taskSpaceEstimates.getSolePosition(robotQuadrant).changeFrame(worldFrame);
@@ -342,19 +342,19 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
    private class QuadSupportState implements FiniteStateMachineState<TrotEvent>
    {
       private final ThreeDoFMinimumJerkTrajectory dcmTrajectory;
-      private final FramePoint cmpPositionAtSoSNominal;
-      private final FramePoint cmpPositionAtEoSNominal;
-      private final FramePoint dcmPositionAtSoSNominal;
-      private final FramePoint dcmPositionAtEoSNominal;
+      private final FramePoint3D cmpPositionAtSoSNominal;
+      private final FramePoint3D cmpPositionAtEoSNominal;
+      private final FramePoint3D dcmPositionAtSoSNominal;
+      private final FramePoint3D dcmPositionAtEoSNominal;
       private final TimeInterval timeInterval;
 
       public QuadSupportState()
       {
          dcmTrajectory = new ThreeDoFMinimumJerkTrajectory();
-         cmpPositionAtSoSNominal = new FramePoint();
-         cmpPositionAtEoSNominal = new FramePoint();
-         dcmPositionAtSoSNominal = new FramePoint();
-         dcmPositionAtEoSNominal = new FramePoint();
+         cmpPositionAtSoSNominal = new FramePoint3D();
+         cmpPositionAtEoSNominal = new FramePoint3D();
+         dcmPositionAtSoSNominal = new FramePoint3D();
+         dcmPositionAtEoSNominal = new FramePoint3D();
          timeInterval = new TimeInterval();
       }
 
@@ -409,13 +409,13 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       private final RobotQuadrant supportQuadrants[];
       private final RobotQuadrant swingQuadrants[];
       private final PiecewiseForwardDcmTrajectory dcmTrajectory;
-      private final FramePoint cmpPositionAtSoSNominal;
-      private final FramePoint cmpPositionAtEoSNominal;
-      private final FramePoint dcmPositionAtSoSNominal;
-      private final FramePoint dcmPositionAtEoSNominal;
-      private final FramePoint cmpPositionAtEoS;
-      private final FramePoint dcmPositionAtEoS;
-      private final FramePoint footholdPosition;
+      private final FramePoint3D cmpPositionAtSoSNominal;
+      private final FramePoint3D cmpPositionAtEoSNominal;
+      private final FramePoint3D dcmPositionAtSoSNominal;
+      private final FramePoint3D dcmPositionAtEoSNominal;
+      private final FramePoint3D cmpPositionAtEoS;
+      private final FramePoint3D dcmPositionAtEoS;
+      private final FramePoint3D footholdPosition;
       private final QuadrupedTimedStep timedStep;
       private final Point3D timedStepGoalPosition;
       private final QuadrantDependentList<Point3D> timedStepGoalPositionAtSoS;
@@ -425,13 +425,13 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
          supportQuadrants = new RobotQuadrant[] {hindSupportQuadrant, frontSupportQuadrant};
          swingQuadrants = new RobotQuadrant[] {hindSupportQuadrant.getAcrossBodyQuadrant(), frontSupportQuadrant.getAcrossBodyQuadrant()};
          dcmTrajectory = new PiecewiseForwardDcmTrajectory(1, gravity, lipModel.getComHeight());
-         cmpPositionAtSoSNominal = new FramePoint();
-         cmpPositionAtEoSNominal = new FramePoint();
-         dcmPositionAtSoSNominal = new FramePoint();
-         dcmPositionAtEoSNominal = new FramePoint();
-         cmpPositionAtEoS = new FramePoint();
-         dcmPositionAtEoS = new FramePoint();
-         footholdPosition = new FramePoint();
+         cmpPositionAtSoSNominal = new FramePoint3D();
+         cmpPositionAtEoSNominal = new FramePoint3D();
+         dcmPositionAtSoSNominal = new FramePoint3D();
+         dcmPositionAtEoSNominal = new FramePoint3D();
+         cmpPositionAtEoS = new FramePoint3D();
+         dcmPositionAtEoS = new FramePoint3D();
+         footholdPosition = new FramePoint3D();
          timedStep = new QuadrupedTimedStep();
          timedStepGoalPosition = new Point3D();
          timedStepGoalPositionAtSoS = new QuadrantDependentList<>();
@@ -501,7 +501,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
          dcmTrajectory.getVelocity(dcmPositionControllerSetpoints.getDcmVelocity());
 
          // adjust swing foot goal position based on dcm tracking error
-         FramePoint dcmPositionSetpoint = dcmPositionControllerSetpoints.getDcmPosition();
+         FramePoint3D dcmPositionSetpoint = dcmPositionControllerSetpoints.getDcmPosition();
          dcmPositionSetpoint.changeFrame(worldFrame);
          dcmPositionEstimate.changeFrame(worldFrame);
          for (int i = 0; i < 2; i++)

@@ -1,7 +1,7 @@
 package us.ihmc.robotics.sensors;
 
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Wrench;
 
 // TODO Nuke that interface
@@ -11,7 +11,7 @@ public interface FootSwitchInterface
    
    public abstract double computeFootLoadPercentage();
 
-   public abstract void computeAndPackCoP(FramePoint2d copToPack);
+   public abstract void computeAndPackCoP(FramePoint2D copToPack);
 
    public abstract void updateCoP();
 

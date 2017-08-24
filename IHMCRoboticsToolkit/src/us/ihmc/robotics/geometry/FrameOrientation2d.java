@@ -1,9 +1,10 @@
 package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.geometry.Orientation2D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
-public class FrameOrientation2d extends AbstractFrameObject<FrameOrientation2d, Orientation2D>
+public class FrameOrientation2d extends FrameGeometryObject<FrameOrientation2d, Orientation2D>
 {
    private final Orientation2D orientation;
 
@@ -59,12 +60,6 @@ public class FrameOrientation2d extends AbstractFrameObject<FrameOrientation2d, 
       }
 
       orientation.setYaw(yaw);
-   }
-
-   @Override
-   public String toString()
-   {
-      return "FrameOrientation2D: " + orientation + "-" + referenceFrame;
    }
 
    public double difference(FrameOrientation2d other)

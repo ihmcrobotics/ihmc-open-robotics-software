@@ -3,17 +3,16 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -31,7 +30,7 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
    private final YoFramePoint modifiedCMPPosition;
    private final YoFrameVector modifiedCMPVelocity;
 
-   private final FrameVector cmpOffsetFromCoP = new FrameVector();
+   private final FrameVector3D cmpOffsetFromCoP = new FrameVector3D();
    private final YoFrameVector cmpOffset;
    private final AlphaFilteredYoFrameVector filteredCMPOffset;
 
@@ -87,15 +86,15 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
       }
    }
 
-   private final FramePoint desiredCMPPosition = new FramePoint();
-   private final FrameVector desiredCMPVelocity = new FrameVector();
+   private final FramePoint3D desiredCMPPosition = new FramePoint3D();
+   private final FrameVector3D desiredCMPVelocity = new FrameVector3D();
 
-   private final FramePoint desiredICPPosition = new FramePoint();
-   private final FrameVector desiredICPVelocity = new FrameVector();
-   private final FrameVector desiredICPAcceleration = new FrameVector();
+   private final FramePoint3D desiredICPPosition = new FramePoint3D();
+   private final FrameVector3D desiredICPVelocity = new FrameVector3D();
+   private final FrameVector3D desiredICPAcceleration = new FrameVector3D();
 
    // TODO have this guy account for the desired difference between the CMP and CoP.
-   public void modifyDesiredICPForAngularMomentum(FramePoint copEstimate, RobotSide supportSide)
+   public void modifyDesiredICPForAngularMomentum(FramePoint3D copEstimate, RobotSide supportSide)
    {
       super.getDesiredCentroidalMomentumPivotPosition(desiredCMPPosition);
       super.getDesiredCentroidalMomentumPivotVelocity(desiredCMPVelocity);
@@ -158,10 +157,10 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
       }
    }
 
-   private void estimateCurrentTimeWithModifiedCMP(FramePoint desiredCoPFromAngularMomentum)
+   private void estimateCurrentTimeWithModifiedCMP(FramePoint3D desiredCoPFromAngularMomentum)
    {
-      double copCMPDistance = desiredCMPPosition.getXYPlaneDistance(desiredCoPFromAngularMomentum);
-      double distanceFromCMP = desiredICPPosition.getXYPlaneDistance(modifiedCMPPosition.getFrameTuple());
+      double copCMPDistance = desiredCMPPosition.distanceXY(desiredCoPFromAngularMomentum);
+      double distanceFromCMP = desiredICPPosition.distanceXY(modifiedCMPPosition.getFrameTuple());
 
       double modifiedTimeInState = 1.0 / super.getOmega0() * Math.log(distanceFromCMP / copCMPDistance);
       modifiedTimeInCurrentState.set(modifiedTimeInState);
@@ -170,14 +169,14 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCapturePointVelocity(FrameVector desiredCapturePointVelocityToPack)
+   public void getDesiredCapturePointVelocity(FrameVector3D desiredCapturePointVelocityToPack)
    {
       modifiedICPVelocity.getFrameTupleIncludingFrame(desiredCapturePointVelocityToPack);
    }
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCapturePointVelocity(FrameVector2d desiredCapturePointVelocityToPack)
+   public void getDesiredCapturePointVelocity(FrameVector2D desiredCapturePointVelocityToPack)
    {
       modifiedICPVelocity.getFrameTuple2dIncludingFrame(desiredCapturePointVelocityToPack);
    }
@@ -191,28 +190,28 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCentroidalMomentumPivotPosition(FramePoint desiredCentroidalMomentumPivotPositionToPack)
+   public void getDesiredCentroidalMomentumPivotPosition(FramePoint3D desiredCentroidalMomentumPivotPositionToPack)
    {
       modifiedCMPPosition.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
    }
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCentroidalMomentumPivotPosition(FramePoint2d desiredCentroidalMomentumPivotPositionToPack)
+   public void getDesiredCentroidalMomentumPivotPosition(FramePoint2D desiredCentroidalMomentumPivotPositionToPack)
    {
       modifiedCMPPosition.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
    }
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector desiredCentroidalMomentumPivotVelocityToPack)
+   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector3D desiredCentroidalMomentumPivotVelocityToPack)
    {
       modifiedCMPVelocity.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
    }
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2d desiredCentroidalMomentumPivotVelocityToPack)
+   public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2D desiredCentroidalMomentumPivotVelocityToPack)
    {
       modifiedCMPVelocity.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
    }

@@ -3,10 +3,10 @@ package us.ihmc.robotics.screwTheory;
 import java.util.List;
 
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class InverseDynamicsMechanismExplorer
 {

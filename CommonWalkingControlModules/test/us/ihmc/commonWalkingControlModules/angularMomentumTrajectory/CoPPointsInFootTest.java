@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.angularMomentumTrajectory;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -8,15 +7,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPTrajectoryPoint;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
@@ -70,7 +67,7 @@ public class CoPPointsInFootTest
    @Test
    public void testAddandSetIncludingFrame()
    {
-      FramePoint testLocation = new FramePoint(footSpoof.getSoleFrame(), 0.01, 0.0, 0.01);
+      FramePoint3D testLocation = new FramePoint3D(footSpoof.getSoleFrame(), 0.01, 0.0, 0.01);
       assert (copPointsInFoot.getCoPPointList().isEmpty());
       copPointsInFoot.addAndSetIncludingFrame(CoPPointName.BALL_COP, 0.0, testLocation);
       assert (copPointsInFoot.getCoPPointList().size() == 1);

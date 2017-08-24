@@ -2,13 +2,13 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.AbstractICPOptimizationController;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomentumRateOfChangeControlModule
@@ -17,14 +17,14 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomen
    private final BipedSupportPolygons bipedSupportPolygons;
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-         double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
+         double controlDT, double totalMass, double gravityZ, YoICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(referenceFrames, bipedSupportPolygons, controlDT, totalMass, gravityZ, icpControlGains, parentRegistry, yoGraphicsListRegistry, true);
    }
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-         double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
+         double controlDT, double totalMass, double gravityZ, YoICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
    {
       super("", referenceFrames, gravityZ, totalMass, parentRegistry, yoGraphicsListRegistry, use2DProjection);
@@ -36,7 +36,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomen
 
    }
 
-   public void computeCMPInternal(FramePoint2d desiredCMPPreviousValue)
+   public void computeCMPInternal(FramePoint2D desiredCMPPreviousValue)
    {
       if (supportSide != supportLegPreviousTick.getEnumValue())
       {
@@ -92,7 +92,7 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomen
    }
 
    @Override
-   public ICPOptimizationController getICPOptimizationController()
+   public AbstractICPOptimizationController getICPOptimizationController()
    {
       return null;
    }
@@ -104,5 +104,5 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomen
    }
 
    @Override
-   public void setReferenceICPVelocity(FrameVector2d referenceICPVelocity) {}
+   public void setReferenceICPVelocity(FrameVector2D referenceICPVelocity) {}
 }

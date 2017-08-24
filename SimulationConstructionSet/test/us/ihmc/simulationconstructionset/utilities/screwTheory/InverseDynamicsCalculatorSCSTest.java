@@ -12,6 +12,8 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -19,9 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -556,8 +556,8 @@ public class InverseDynamicsCalculatorSCSTest
       sixDoFJoint.setRotation(yaw, pitch, roll);
    }
    
-   private final FrameVector linearVelocityFrameVector = new FrameVector();
-   private final FrameVector angularVelocityFrameVector = new FrameVector();
+   private final FrameVector3D linearVelocityFrameVector = new FrameVector3D();
+   private final FrameVector3D angularVelocityFrameVector = new FrameVector3D();
    
    private void setRandomVelocity(FloatingJoint floatingJoint, SixDoFJoint sixDoFJoint)
    {
@@ -588,8 +588,8 @@ public class InverseDynamicsCalculatorSCSTest
       Twist bodyTwist = new Twist();
       sixDoFJoint.getJointTwist(bodyTwist);
 
-      FrameVector originAcceleration = new FrameVector(sixDoFJoint.getFrameBeforeJoint());
-      FrameVector angularAcceleration = new FrameVector(sixDoFJoint.getFrameAfterJoint());
+      FrameVector3D originAcceleration = new FrameVector3D(sixDoFJoint.getFrameBeforeJoint());
+      FrameVector3D angularAcceleration = new FrameVector3D(sixDoFJoint.getFrameAfterJoint());
 
       floatingJoint.getLinearAccelerationInWorld(originAcceleration.getVector());
       floatingJoint.getAngularAccelerationInBody(angularAcceleration.getVector());

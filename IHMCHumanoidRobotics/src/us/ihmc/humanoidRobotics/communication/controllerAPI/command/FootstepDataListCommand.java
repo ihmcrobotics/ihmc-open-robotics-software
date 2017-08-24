@@ -3,11 +3,11 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import java.util.ArrayList;
 
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCommand, FootstepDataListMessage>
 {

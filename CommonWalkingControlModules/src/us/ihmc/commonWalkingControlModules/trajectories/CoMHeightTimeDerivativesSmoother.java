@@ -3,16 +3,16 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 
 import Jama.Matrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.linearDynamicSystems.ComplexConjugateMode;
 import us.ihmc.robotics.linearDynamicSystems.EigenvalueDecomposer;
 import us.ihmc.robotics.linearDynamicSystems.SingleRealMode;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CoMHeightTimeDerivativesSmoother
 {
@@ -24,7 +24,7 @@ public class CoMHeightTimeDerivativesSmoother
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final FramePoint centerOfMassHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D centerOfMassHeightPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
 
    private final YoBoolean hasBeenInitialized = new YoBoolean("hasBeenInitialized", registry);
 

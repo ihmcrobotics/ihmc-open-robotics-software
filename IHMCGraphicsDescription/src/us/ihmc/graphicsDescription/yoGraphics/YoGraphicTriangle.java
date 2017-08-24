@@ -2,6 +2,8 @@ package us.ihmc.graphicsDescription.yoGraphics;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -14,9 +16,7 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, GraphicsUpdatable
 {
@@ -94,19 +94,19 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
       }
    }
 
-   public void updatePointOne(FramePoint framePointOne)
+   public void updatePointOne(FramePoint3D framePointOne)
    {
       pointOne.set(framePointOne);
       update();
    }
 
-   public void updatePointTwo(FramePoint framePointTwo)
+   public void updatePointTwo(FramePoint3D framePointTwo)
    {
       pointTwo.set(framePointTwo);
       update();
    }
 
-   public void updatePointThree(FramePoint framePointThree)
+   public void updatePointThree(FramePoint3D framePointThree)
    {
       pointThree.set(framePointThree);
       update();

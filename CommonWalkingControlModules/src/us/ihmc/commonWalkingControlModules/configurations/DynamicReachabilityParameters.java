@@ -31,7 +31,7 @@ public class DynamicReachabilityParameters
     */
    public double getMaximumDesiredKneeBend()
    {
-      return 0.2;
+      return 0.25;
    }
 
    /**

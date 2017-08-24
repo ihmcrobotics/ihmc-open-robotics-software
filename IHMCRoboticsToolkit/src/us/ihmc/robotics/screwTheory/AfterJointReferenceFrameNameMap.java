@@ -3,7 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class AfterJointReferenceFrameNameMap
 {

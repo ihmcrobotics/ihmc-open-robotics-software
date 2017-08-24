@@ -1,57 +1,52 @@
 package us.ihmc.exampleSimulations.beetle.parameters;
 
-import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootPositionGains;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class RhinoBeetleVirtualModelControlParameters implements HexapodControllerParameters
 {
    private final String name = "vmcParams_";
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
-   
-   private final YoSE3PIDGainsInterface footGains;
-   
+
+   private final YoPIDSE3Gains footGains;
+
    //body spatial feeback controller params
    private final Vector3D linearWeight = new Vector3D(1.0, 1.0, 10.0);
    private final Vector3D angularWeight = new Vector3D(1.0, 1.0, 1.0);
-   private final YoSymmetricSE3PIDGains bodySpatialGains;
+   private final SymmetricYoPIDSE3Gains bodySpatialGains;
    private final double bodyProportionalGains = 8000.0;
    private final double bodyDampingRatio = 3.0;
    private final YoFrameVector bodySpatialLinearQPWeight;
    private final YoFrameVector bodySpatialAngularQPWeight;
    private final SelectionMatrix6D bodySpatialSelectionMatrix = new SelectionMatrix6D();
-   
+
    public RhinoBeetleVirtualModelControlParameters(YoVariableRegistry parentRegistry)
    {
-      bodySpatialGains = new YoSymmetricSE3PIDGains(name + "bodySpatialGains", registry);
-      bodySpatialGains.setProportionalGain(bodyProportionalGains);
-      bodySpatialGains.setDampingRatio(bodyDampingRatio);
-      bodySpatialGains.createDerivativeGainUpdater(true);
-      
+      bodySpatialGains = new SymmetricYoPIDSE3Gains(name + "bodySpatialGains", registry);
+      bodySpatialGains.setProportionalGains(bodyProportionalGains);
+      bodySpatialGains.setDampingRatios(bodyDampingRatio);
+
       bodySpatialLinearQPWeight = new YoFrameVector(name + "bodySpatial_linear_QPWeight", ReferenceFrame.getWorldFrame(), registry);
       bodySpatialAngularQPWeight = new YoFrameVector(name + "bodySpatial_angular_QPWeight", ReferenceFrame.getWorldFrame(), registry);
       bodySpatialAngularQPWeight.setVector(angularWeight);
       bodySpatialLinearQPWeight.setVector(linearWeight);
-      
-      
-      footGains = new YoFootSE3Gains(name + "FootGains", registry);
-      YoFootPositionGains positionGains = new YoFootPositionGains(name + "footPositionGains", registry);
-      positionGains.setProportionalGains(getSwingXYProportionalGain(), getSwingZProportionalGain());
-      positionGains.setDampingRatio(0.9);
-      positionGains.createDerivativeGainUpdater(true);
-      footGains.set(positionGains);
-      YoFootOrientationGains orientationGains = new YoFootOrientationGains(name + "footOrientationGains", registry);
+
+      DefaultYoPID3DGains positionGains = new DefaultYoPID3DGains(name + "FootPosition", GainCoupling.XY, false, registry);
+      positionGains.setProportionalGains(getSwingXYProportionalGain(), getSwingXYProportionalGain(), getSwingZProportionalGain());
+      positionGains.setDampingRatios(0.9);
+      DefaultYoPID3DGains orientationGains = new DefaultYoPID3DGains(name + "FootOrientation", GainCoupling.XY, false, registry);
       orientationGains.setProportionalGains(0.0, 0.0, 0.0);
-      footGains.set(orientationGains);
-      
+      footGains = new DefaultYoPIDSE3Gains(positionGains, orientationGains);
+
       parentRegistry.addChild(registry);
    }
 
@@ -74,7 +69,7 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
    }
 
    @Override
-   public SE3PIDGainsInterface getBodySpatialGains()
+   public PIDSE3Gains getBodySpatialGains()
    {
       return bodySpatialGains;
    }
@@ -98,7 +93,7 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
    }
 
    @Override
-   public YoSE3PIDGainsInterface getFootGains()
+   public YoPIDSE3Gains getFootGains()
    {
       return footGains;
    }

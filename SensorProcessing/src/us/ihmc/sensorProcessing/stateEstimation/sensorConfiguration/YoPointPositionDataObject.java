@@ -1,10 +1,10 @@
 package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 
@@ -30,7 +30,7 @@ public class YoPointPositionDataObject extends PointPositionDataObject
    }
 
    @Override
-   public void set(FramePoint measurementPointInBodyFrame, FramePoint positionOfMeasurementPointInWorldFrame, boolean isPointPositionValid)
+   public void set(FramePoint3D measurementPointInBodyFrame, FramePoint3D positionOfMeasurementPointInWorldFrame, boolean isPointPositionValid)
    {
       bodyFixedReferenceFrameName = measurementPointInBodyFrame.getReferenceFrame().getName();
       this.isPointPositionValid = isPointPositionValid;

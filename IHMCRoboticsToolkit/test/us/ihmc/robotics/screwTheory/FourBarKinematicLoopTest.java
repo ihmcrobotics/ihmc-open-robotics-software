@@ -10,14 +10,15 @@ import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FourBarKinematicLoopTest
 {
@@ -55,12 +56,12 @@ public class FourBarKinematicLoopTest
    public void testPlanarSquareWithRotatedJointFrames()
    {
       // initialize to a square of unit length
-      FrameVector jointAxis = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
-      FrameVector jointAtoD = new FrameVector(worldFrame, 1.0, 0.0, 0.0);
-      FramePoint jointAPosition = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
-      FramePoint jointBPosition = new FramePoint(worldFrame, 0.0, 1.0, 0.0);
-      FramePoint jointCPosition = new FramePoint(worldFrame, 1.0, 1.0, 0.0);
-      FramePoint jointDPosition = new FramePoint(worldFrame, 1.0, 0.0, 0.0);
+      FrameVector3D jointAxis = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
+      FrameVector3D jointAtoD = new FrameVector3D(worldFrame, 1.0, 0.0, 0.0);
+      FramePoint3D jointAPosition = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
+      FramePoint3D jointBPosition = new FramePoint3D(worldFrame, 0.0, 1.0, 0.0);
+      FramePoint3D jointCPosition = new FramePoint3D(worldFrame, 1.0, 1.0, 0.0);
+      FramePoint3D jointDPosition = new FramePoint3D(worldFrame, 1.0, 0.0, 0.0);
 
       initializeFourBarWithRandomlyRotatedJointFrames(jointAPosition, jointBPosition, jointCPosition, jointDPosition, jointAxis, jointAxis, jointAxis,
             jointAxis);
@@ -346,12 +347,12 @@ public class FourBarKinematicLoopTest
    public void testJointLimitsNearFourBarConstraint()
    {
       // initialize to quadrilateral with side lengths 2.0, 1.0, 0.5, 1.0
-      FrameVector jointAxis = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
-      FrameVector jointAtoD = new FrameVector(worldFrame, 0.0, 1.0, random.nextDouble());
-      FramePoint jointAPosition = new FramePoint(worldFrame, 0.0, 0.0, random.nextDouble());
-      FramePoint jointBPosition = new FramePoint(worldFrame, 2.0, 0.0, random.nextDouble());
-      FramePoint jointCPosition = new FramePoint(worldFrame, 2.0 + Math.sqrt(0.5), Math.sqrt(0.5), random.nextDouble());
-      FramePoint jointDPosition = new FramePoint(worldFrame, 2.0 + Math.sqrt(0.5), 0.5 + Math.sqrt(0.5), random.nextDouble());
+      FrameVector3D jointAxis = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
+      FrameVector3D jointAtoD = new FrameVector3D(worldFrame, 0.0, 1.0, random.nextDouble());
+      FramePoint3D jointAPosition = new FramePoint3D(worldFrame, 0.0, 0.0, random.nextDouble());
+      FramePoint3D jointBPosition = new FramePoint3D(worldFrame, 2.0, 0.0, random.nextDouble());
+      FramePoint3D jointCPosition = new FramePoint3D(worldFrame, 2.0 + Math.sqrt(0.5), Math.sqrt(0.5), random.nextDouble());
+      FramePoint3D jointDPosition = new FramePoint3D(worldFrame, 2.0 + Math.sqrt(0.5), 0.5 + Math.sqrt(0.5), random.nextDouble());
 
       initializeFourBarWithRandomlyRotatedJointFrames(jointAPosition, jointBPosition, jointCPosition, jointDPosition, jointAxis, jointAxis, jointAxis, jointAxis);
       boolean recomputeJointLimits = false;
@@ -777,7 +778,7 @@ public class FourBarKinematicLoopTest
       int numTests = 50;
       Random random = new Random(538L);
       DenseMatrix64F jacobian = new DenseMatrix64F(6, 1);
-      FrameVector tempLinearVelocity = new FrameVector();
+      FrameVector3D tempLinearVelocity = new FrameVector3D();
       double expectedLinearX, expectedLinearY, expectedLinearZ, expectedAngularX, expectedAngularY, expectedAngularZ;
       ReferenceFrame outputJointFrame;
 
@@ -917,13 +918,13 @@ public class FourBarKinematicLoopTest
       passiveJointD.setQ(random.nextDouble());
    }
 
-   private void initializeFourBarWithRandomlyRotatedJointFrames(FramePoint jointAPosition, FramePoint jointBPosition, FramePoint jointCPosition, FramePoint jointDPosition,
-         FrameVector jointAxisA, FrameVector jointAxisB, FrameVector jointAxisC, FrameVector jointAxisD)
+   private void initializeFourBarWithRandomlyRotatedJointFrames(FramePoint3D jointAPosition, FramePoint3D jointBPosition, FramePoint3D jointCPosition, FramePoint3D jointDPosition,
+         FrameVector3D jointAxisA, FrameVector3D jointAxisB, FrameVector3D jointAxisC, FrameVector3D jointAxisD)
    {
-      ReferenceFrame jointAFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointAFrame", jointAPosition, Axis.Z, new FrameVector(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
-      ReferenceFrame jointBFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointBFrame", jointBPosition, Axis.Z, new FrameVector(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
-      ReferenceFrame jointCFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointCFrame", jointCPosition, Axis.Z, new FrameVector(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
-      ReferenceFrame jointDFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointDFrame", jointDPosition, Axis.Z, new FrameVector(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
+      ReferenceFrame jointAFrame = GeometryTools.constructReferenceFrameFromPointAndAxis("jointAFrame", jointAPosition, Axis.Z, new FrameVector3D(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
+      ReferenceFrame jointBFrame = GeometryTools.constructReferenceFrameFromPointAndAxis("jointBFrame", jointBPosition, Axis.Z, new FrameVector3D(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
+      ReferenceFrame jointCFrame = GeometryTools.constructReferenceFrameFromPointAndAxis("jointCFrame", jointCPosition, Axis.Z, new FrameVector3D(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
+      ReferenceFrame jointDFrame = GeometryTools.constructReferenceFrameFromPointAndAxis("jointDFrame", jointDPosition, Axis.Z, new FrameVector3D(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
 
       Vector3D jointAxisAFrameA = new Vector3D();
       Vector3D jointAxisBFrameB = new Vector3D();
@@ -1010,10 +1011,10 @@ public class FourBarKinematicLoopTest
       System.out.println("joint c = " + passiveJointC.getQ() / Math.PI);
       System.out.println("joint d = " + passiveJointD.getQ() / Math.PI);
 
-      FramePoint jointAPosition = new FramePoint(masterJointA.getFrameBeforeJoint());
-      FramePoint jointBPosition = new FramePoint(passiveJointB.getFrameBeforeJoint());
-      FramePoint jointCPosition = new FramePoint(passiveJointC.getFrameBeforeJoint());
-      FramePoint jointDPosition = new FramePoint(passiveJointD.getFrameBeforeJoint());
+      FramePoint3D jointAPosition = new FramePoint3D(masterJointA.getFrameBeforeJoint());
+      FramePoint3D jointBPosition = new FramePoint3D(passiveJointB.getFrameBeforeJoint());
+      FramePoint3D jointCPosition = new FramePoint3D(passiveJointC.getFrameBeforeJoint());
+      FramePoint3D jointDPosition = new FramePoint3D(passiveJointD.getFrameBeforeJoint());
 
       jointAPosition.changeFrame(worldFrame);
       jointBPosition.changeFrame(worldFrame);
@@ -1033,10 +1034,10 @@ public class FourBarKinematicLoopTest
       passiveJointC.setQ(0.0);
       passiveJointD.setQ(0.0);
 
-      FramePoint jointAPosition = new FramePoint(masterJointA.getFrameBeforeJoint());
-      FramePoint jointBPosition = new FramePoint(passiveJointB.getFrameBeforeJoint());
-      FramePoint jointCPosition = new FramePoint(passiveJointC.getFrameBeforeJoint());
-      FramePoint jointDPosition = new FramePoint(passiveJointD.getFrameBeforeJoint());
+      FramePoint3D jointAPosition = new FramePoint3D(masterJointA.getFrameBeforeJoint());
+      FramePoint3D jointBPosition = new FramePoint3D(passiveJointB.getFrameBeforeJoint());
+      FramePoint3D jointCPosition = new FramePoint3D(passiveJointC.getFrameBeforeJoint());
+      FramePoint3D jointDPosition = new FramePoint3D(passiveJointD.getFrameBeforeJoint());
 
       jointAPosition.changeFrame(worldFrame);
       jointBPosition.changeFrame(worldFrame);

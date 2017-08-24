@@ -10,6 +10,8 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
@@ -25,8 +27,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -337,48 +337,48 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    }
 
    @Override
-   public void getEstimatedAngularVelocity(FrameVector estimatedAngularVelocityToPack)
+   public void getEstimatedAngularVelocity(FrameVector3D estimatedAngularVelocityToPack)
    {
       pelvisRotationalStateUpdater.getEstimatedAngularVelocity(estimatedAngularVelocityToPack);
    }
 
    @Override
-   public void setEstimatedAngularVelocity(FrameVector estimatedAngularVelocity)
+   public void setEstimatedAngularVelocity(FrameVector3D estimatedAngularVelocity)
    {
       // Do nothing, IMU is trusted
    }
 
    @Override
-   public void getEstimatedCoMPosition(FramePoint estimatedCoMPositionToPack)
+   public void getEstimatedCoMPosition(FramePoint3D estimatedCoMPositionToPack)
    {
       pelvisLinearStateUpdater.getEstimatedCoMPosition(estimatedCoMPositionToPack);
    }
 
    @Override
-   public void setEstimatedCoMPosition(FramePoint estimatedCoMPosition)
+   public void setEstimatedCoMPosition(FramePoint3D estimatedCoMPosition)
    {
       pelvisLinearStateUpdater.initializeCoMPositionToActual(estimatedCoMPosition);
    }
 
    @Override
-   public void getEstimatedCoMVelocity(FrameVector estimatedCoMVelocityToPack)
+   public void getEstimatedCoMVelocity(FrameVector3D estimatedCoMVelocityToPack)
    {
       pelvisLinearStateUpdater.getEstimatedCoMVelocity(estimatedCoMVelocityToPack);
    }
 
    @Override
-   public void setEstimatedCoMVelocity(FrameVector estimatedCoMVelocity)
+   public void setEstimatedCoMVelocity(FrameVector3D estimatedCoMVelocity)
    {
    }
 
    @Override
-   public void getEstimatedPelvisPosition(FramePoint estimatedPelvisPositionToPack)
+   public void getEstimatedPelvisPosition(FramePoint3D estimatedPelvisPositionToPack)
    {
       pelvisLinearStateUpdater.getEstimatedPelvisPosition(estimatedPelvisPositionToPack);
    }
 
    @Override
-   public void getEstimatedPelvisLinearVelocity(FrameVector estimatedPelvisLinearVelocityToPack)
+   public void getEstimatedPelvisLinearVelocity(FrameVector3D estimatedPelvisLinearVelocityToPack)
    {
       pelvisLinearStateUpdater.getEstimatedPelvisLinearVelocity(estimatedPelvisLinearVelocityToPack);
    }

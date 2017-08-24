@@ -1,8 +1,8 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.geometry.Cylinder3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameCylinder3d extends FrameShape3d<FrameCylinder3d, Cylinder3D>
 {
@@ -50,16 +50,5 @@ public class FrameCylinder3d extends FrameShape3d<FrameCylinder3d, Cylinder3D>
    public double getHeight()
    {
       return cylinder3d.getHeight();
-   }
-
-   @Override
-   public String toString()
-   {
-      StringBuilder builder = new StringBuilder();
-
-      builder.append("ReferenceFrame: " + referenceFrame + ")\n");
-      builder.append(cylinder3d.toString());
-
-      return builder.toString();
    }
 }

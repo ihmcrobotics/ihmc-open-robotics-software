@@ -15,23 +15,42 @@ public interface SteppingParameters extends FootstepParameters
 
    public abstract double getInPlaceWidth();
 
-   public abstract double getDesiredStepForward(); //???
+   public abstract double getDesiredStepForward();
 
-   public abstract double getStepPitch(); //???
+   public abstract double getStepPitch();
 
    public abstract double getMaxStepUp();
 
    public abstract double getMaxStepDown();
 
    public abstract double getMaxSwingHeightFromStanceFoot();
-   
-   public abstract double  getMinSwingHeightFromStanceFoot();
-  
-   public abstract double getMaxAngleTurnOutwards(); //the maximum angle the foot can turn outwards in a step
 
-   public abstract double getMaxAngleTurnInwards(); //the maximum angle the foot can turn inwards in a step
+   /**
+    * Returns the minimum swing height from the stance foot for this robot. It is also the default swing height
+    * used in the controller unless a different value is specified.
+    */
+   public default double getMinSwingHeightFromStanceFoot()
+   {
+      return 0.1;
+   }
 
-   public abstract double getMinAreaPercentForValidFootstep(); //the minimum percentage of area that the robot can take a step with
+   /**
+    * Returns the maximum angle the foot can turn outwards in a step.
+    */
+   public abstract double getMaxAngleTurnOutwards();
 
-   public abstract double getDangerAreaPercentForValidFootstep(); //the percentage of footstep area below which large footsteps cannot be taken
+   /**
+    * Returns the maximum angle the foot can turn inwards in a step.
+    */
+   public abstract double getMaxAngleTurnInwards();
+
+   /**
+    * Returns the minimum percentage of area that the robot can take a step with.
+    */
+   public abstract double getMinAreaPercentForValidFootstep();
+
+   /**
+    * Returns the percentage of footstep area below which large footsteps cannot be taken.
+    */
+   public abstract double getDangerAreaPercentForValidFootstep();
 }

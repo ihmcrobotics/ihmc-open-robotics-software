@@ -6,24 +6,24 @@ import java.util.Comparator;
 import java.util.List;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class DesiredFootstepCalculatorTools
 {
    public static double computeMinZPointWithRespectToAnkleInWorldFrame(RotationMatrix footToWorldRotation, ContactablePlaneBody contactableBody)
    {
-      List<FramePoint> footPoints = contactableBody.getContactPointsCopy();
+      List<FramePoint3D> footPoints = contactableBody.getContactPointsCopy();
       double minZ = Double.POSITIVE_INFINITY;
-      FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      FramePoint3D tempFramePoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
       Vector3D tempVector = new Vector3D();
-      for (FramePoint footPoint : footPoints)
+      for (FramePoint3D footPoint : footPoints)
       {
          tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
@@ -38,11 +38,11 @@ public class DesiredFootstepCalculatorTools
 
    public static double computeMinZPointWithRespectToSoleInWorldFrame(RotationMatrix footToWorldRotation, ContactablePlaneBody contactableBody)
    {
-      List<FramePoint> footPoints = contactableBody.getContactPointsCopy();
+      List<FramePoint3D> footPoints = contactableBody.getContactPointsCopy();
       double minZ = Double.POSITIVE_INFINITY;
-      FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      FramePoint3D tempFramePoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
       Vector3D tempVector = new Vector3D();
-      for (FramePoint footPoint : footPoints)
+      for (FramePoint3D footPoint : footPoints)
       {
          tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getSoleFrame());
@@ -55,14 +55,14 @@ public class DesiredFootstepCalculatorTools
       return minZ;
    }
 
-   public static FramePoint computeMinZWithRespectToAnkleInWorldFramePoint(RotationMatrix footToWorldRotation, ContactablePlaneBody contactableBody)
+   public static FramePoint3D computeMinZWithRespectToAnkleInWorldFramePoint(RotationMatrix footToWorldRotation, ContactablePlaneBody contactableBody)
    {
-      List<FramePoint> footPoints = contactableBody.getContactPointsCopy();
+      List<FramePoint3D> footPoints = contactableBody.getContactPointsCopy();
       double minZ = Double.POSITIVE_INFINITY;
-      FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
-      FramePoint minZPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      FramePoint3D tempFramePoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
+      FramePoint3D minZPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
       Vector3D tempVector = new Vector3D();
-      for (FramePoint footPoint : footPoints)
+      for (FramePoint3D footPoint : footPoints)
       {
          tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
@@ -82,11 +82,11 @@ public class DesiredFootstepCalculatorTools
    public static double computeMaxXWithRespectToAnkleInFrame(RotationMatrix footToWorldRotation, ContactablePlaneBody contactableBody, ReferenceFrame frame)
    {
       RigidBodyTransform worldToDesiredHeadingFrame = frame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
-      List<FramePoint> footPoints = contactableBody.getContactPointsCopy();
+      List<FramePoint3D> footPoints = contactableBody.getContactPointsCopy();
       double maxX = Double.NEGATIVE_INFINITY;
-      FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      FramePoint3D tempFramePoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
       Vector3D tempVector = new Vector3D();
-      for (FramePoint footPoint : footPoints)
+      for (FramePoint3D footPoint : footPoints)
       {
          tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
@@ -100,27 +100,28 @@ public class DesiredFootstepCalculatorTools
       return maxX;
    }
 
-   public static FramePoint computeMinZPointInFrame(RigidBodyTransform footToWorldTransform, ContactablePlaneBody contactableBody, ReferenceFrame frame)
+   public static FramePoint3D computeMinZPointInFrame(RigidBodyTransform footToWorldTransform, ContactablePlaneBody contactableBody, ReferenceFrame frame)
    {
-      List<FramePoint> footPoints = contactableBody.getContactPointsCopy();
+      List<FramePoint3D> footPoints = contactableBody.getContactPointsCopy();
 
       ReferenceFrame bodyFrame = contactableBody.getFrameAfterParentJoint();
 
       return computeMinZPointInFrame(footToWorldTransform, footPoints, bodyFrame, frame);
    }
 
-   public static FramePoint computeMinZPointInFrame(RigidBodyTransform footToWorldTransform, List<FramePoint> footPoints, ReferenceFrame bodyFrame,
+   public static FramePoint3D computeMinZPointInFrame(RigidBodyTransform footToWorldTransform, List<FramePoint3D> footPoints, ReferenceFrame bodyFrame,
          ReferenceFrame frame)
    {
-      FramePoint minFramePoint = new FramePoint(frame);
+      FramePoint3D minFramePoint = new FramePoint3D(frame);
       minFramePoint.setZ(Double.POSITIVE_INFINITY);
-      FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      FramePoint3D tempFramePoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
       boolean pointFound = false;
-      for (FramePoint footPoint : footPoints)
+      for (FramePoint3D footPoint : footPoints)
       {
          tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(bodyFrame);
-         tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
+         tempFramePoint.applyTransform(footToWorldTransform);
+         tempFramePoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), tempFramePoint);
          tempFramePoint.changeFrame(frame);
 
          if (tempFramePoint.getZ() < minFramePoint.getZ())
@@ -136,18 +137,19 @@ public class DesiredFootstepCalculatorTools
       return minFramePoint;
    }
 
-   public static FramePoint computeMaxXPointInFrame(RigidBodyTransform footToWorldTransform, ContactablePlaneBody contactableBody, ReferenceFrame frame)
+   public static FramePoint3D computeMaxXPointInFrame(RigidBodyTransform footToWorldTransform, ContactablePlaneBody contactableBody, ReferenceFrame frame)
    {
-      List<FramePoint> footPoints = contactableBody.getContactPointsCopy();
-      FramePoint maxFramePoint = new FramePoint(frame);
+      List<FramePoint3D> footPoints = contactableBody.getContactPointsCopy();
+      FramePoint3D maxFramePoint = new FramePoint3D(frame);
       maxFramePoint.setX(Double.NEGATIVE_INFINITY);
-      FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      FramePoint3D tempFramePoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
       boolean pointFound = false;
-      for (FramePoint footPoint : footPoints)
+      for (FramePoint3D footPoint : footPoints)
       {
          tempFramePoint.setIncludingFrame(footPoint);
          tempFramePoint.changeFrame(contactableBody.getFrameAfterParentJoint());
-         tempFramePoint.changeFrameUsingTransform(ReferenceFrame.getWorldFrame(), footToWorldTransform);
+         tempFramePoint.applyTransform(footToWorldTransform);
+         tempFramePoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), tempFramePoint);
          tempFramePoint.changeFrame(frame);
 
          if (tempFramePoint.getX() > maxFramePoint.getX())
@@ -163,12 +165,12 @@ public class DesiredFootstepCalculatorTools
       return maxFramePoint;
    }
 
-   public static List<FramePoint> computeMaximumPointsInDirection(List<FramePoint> framePoints, FrameVector searchDirection, int nPoints)
+   public static List<FramePoint3D> computeMaximumPointsInDirection(List<FramePoint3D> framePoints, FrameVector3D searchDirection, int nPoints)
    {
       if (framePoints.size() < nPoints)
          throw new RuntimeException("Not enough points");
       searchDirection.changeFrame(framePoints.get(0).getReferenceFrame());
-      List<FramePoint> ret = new ArrayList<FramePoint>(framePoints);
+      List<FramePoint3D> ret = new ArrayList<FramePoint3D>(framePoints);
       Collections.sort(ret, new SearchDirectionFramePointComparator(searchDirection));
 
       while (ret.size() > nPoints)
@@ -194,9 +196,9 @@ public class DesiredFootstepCalculatorTools
       return ret;
    }
 
-   public static int[] findMaximumPointIndexesInDirection(List<FramePoint> framePoints, FrameVector searchDirection, int nPoints)
+   public static int[] findMaximumPointIndexesInDirection(List<FramePoint3D> framePoints, FrameVector3D searchDirection, int nPoints)
    {
-      List<FramePoint> maximumPoints = computeMaximumPointsInDirection(framePoints, searchDirection, nPoints);
+      List<FramePoint3D> maximumPoints = computeMaximumPointsInDirection(framePoints, searchDirection, nPoints);
 
       int[] indexes = new int[nPoints];
 
@@ -208,17 +210,17 @@ public class DesiredFootstepCalculatorTools
       return indexes;
    }
 
-   private static class SearchDirectionFramePointComparator implements Comparator<FramePoint>
+   private static class SearchDirectionFramePointComparator implements Comparator<FramePoint3D>
    {
-      private final FrameVector searchDirection;
-      private final FrameVector differenceVector = new FrameVector(ReferenceFrame.getWorldFrame());
+      private final FrameVector3D searchDirection;
+      private final FrameVector3D differenceVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
-      public SearchDirectionFramePointComparator(FrameVector searchDirection)
+      public SearchDirectionFramePointComparator(FrameVector3D searchDirection)
       {
          this.searchDirection = searchDirection;
       }
 
-      public int compare(FramePoint o1, FramePoint o2)
+      public int compare(FramePoint3D o1, FramePoint3D o2)
       {
          differenceVector.setIncludingFrame(o1);
          differenceVector.sub(o2);

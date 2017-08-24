@@ -1,15 +1,15 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -59,7 +59,7 @@ public class FootstepAdjustor
     * This function takes a footstep and a captureRegion and if necessary projects the footstep
     * into the capture region. Returns true if the footstep was changed.
     */
-   public boolean adjustFootstep(Footstep footstep, FramePoint2d supportCentroid, FrameConvexPolygon2d captureRegion)
+   public boolean adjustFootstep(Footstep footstep, FramePoint2D supportCentroid, FrameConvexPolygon2d captureRegion)
    {
       boolean footstepChanged = false;
 
@@ -100,16 +100,16 @@ public class FootstepAdjustor
       return footstepChanged;
    }
 
-   private final FramePoint2d nextStep2d = new FramePoint2d();
-   private final FramePoint2d projection = new FramePoint2d();
-   private final FrameVector2d direction = new FrameVector2d();
+   private final FramePoint2D nextStep2d = new FramePoint2D();
+   private final FramePoint2D projection = new FramePoint2D();
+   private final FrameVector2D direction = new FrameVector2D();
 
    /** 
     * This function projects the footstep midpoint in the capture region.
     * Might be a bit conservative it should be sufficient to slightly overlap the capture region
     * and the touch-down polygon.
     */
-   private void projectFootstepInCaptureRegion(Footstep footstep, FramePoint2d projectionPoint, FrameConvexPolygon2d captureRegion)
+   private void projectFootstepInCaptureRegion(Footstep footstep, FramePoint2D projectionPoint, FrameConvexPolygon2d captureRegion)
    {
       // this is only tested with footsteps in world frame
       ReferenceFrame footstepFrame = footstep.getFootstepPose().getReferenceFrame();
@@ -138,8 +138,8 @@ public class FootstepAdjustor
       calculateTouchdownFootPolygon(footstep, captureRegion.getReferenceFrame(), touchdownFootPolygon);
    }
 
-   private final FramePoint2d centroid2d = new FramePoint2d();
-   private final FramePoint centroid3d = new FramePoint();
+   private final FramePoint2D centroid2d = new FramePoint2D();
+   private final FramePoint3D centroid3d = new FramePoint3D();
 
    /**
     * This function takes a footstep and calculates the touch-down polygon in the
@@ -148,7 +148,7 @@ public class FootstepAdjustor
    private void calculateTouchdownFootPolygon(Footstep footstep, ReferenceFrame desiredFrame, FrameConvexPolygon2d polygonToPack)
    {
       footstep.getPosition(centroid3d);
-      centroid3d.getFramePoint2d(centroid2d);
+      centroid2d.setIncludingFrame(centroid3d);
       centroid2d.changeFrame(desiredFrame);
 
       polygonToPack.setIncludingFrameAndUpdate(footstep.getSoleReferenceFrame(), defaultSupportPolygons.get(footstep.getRobotSide()));

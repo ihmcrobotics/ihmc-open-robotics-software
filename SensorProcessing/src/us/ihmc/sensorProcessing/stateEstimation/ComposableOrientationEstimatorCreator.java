@@ -10,12 +10,12 @@ import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameQuaternionControlFlowOutputPort;
 import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameVectorControlFlowOutputPort;
@@ -88,10 +88,10 @@ public class ComposableOrientationEstimatorCreator
       private final ControlFlowGraph controlFlowGraph;
       
       private final ControlFlowOutputPort<FrameOrientation> orientationStatePort;
-      private final ControlFlowOutputPort<FrameVector> angularVelocityStatePort;
+      private final ControlFlowOutputPort<FrameVector3D> angularVelocityStatePort;
 
       private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
-      private final ControlFlowInputPort<FrameVector> desiredAngularAccelerationInputPort;
+      private final ControlFlowInputPort<FrameVector3D> desiredAngularAccelerationInputPort;
       private final ReferenceFrame estimationFrame;
 
       public ComposableOrientationEstimator(String name, double controlDT, ReferenceFrame estimationFrame, ControlFlowGraph controlFlowGraph,
@@ -169,7 +169,7 @@ public class ComposableOrientationEstimatorCreator
 
          ControlFlowInputPort<Vector3D> angularVelocityMeasurementPort = measurementInputPort;
 
-         ControlFlowOutputPort<FrameVector> biasPort = new YoFrameVectorControlFlowOutputPort(this, biasName, measurementFrame, registry);
+         ControlFlowOutputPort<FrameVector3D> biasPort = new YoFrameVectorControlFlowOutputPort(this, biasName, measurementFrame, registry);
          BiasProcessModelElement biasProcessModelElement = new BiasProcessModelElement(biasPort, measurementFrame, biasName, registry);
          DenseMatrix64F biasProcessNoiseCovariance = angularVelocitySensorConfiguration.getBiasProcessNoiseCovariance();
          biasProcessModelElement.setProcessNoiseCovarianceBlock(biasProcessNoiseCovariance);
@@ -192,17 +192,17 @@ public class ComposableOrientationEstimatorCreator
          estimatedOrientationToPack.setIncludingFrame(orientationStatePort.getData());
       }
 
-      public void getEstimatedAngularVelocity(FrameVector estimatedAngularVelocityToPack)
+      public void getEstimatedAngularVelocity(FrameVector3D estimatedAngularVelocityToPack)
       {
          estimatedAngularVelocityToPack.setIncludingFrame(angularVelocityStatePort.getData());
       }
 
-      public void getEstimatedCoMPosition(FramePoint estimatedCoMPositionToPack)
+      public void getEstimatedCoMPosition(FramePoint3D estimatedCoMPositionToPack)
       {
          // Do nothing.
       }
       
-      public void getEstimatedCoMVelocity(FrameVector estimatedCoMVelocityToPack)
+      public void getEstimatedCoMVelocity(FrameVector3D estimatedCoMVelocityToPack)
       {
          // Do nothing.
       }
@@ -212,17 +212,17 @@ public class ComposableOrientationEstimatorCreator
          orientationStatePort.setData(orientation);
       }
 
-      public void setEstimatedAngularVelocity(FrameVector angularVelocity)
+      public void setEstimatedAngularVelocity(FrameVector3D angularVelocity)
       {
          angularVelocityStatePort.setData(angularVelocity);
       }
 
-      public void setEstimatedCoMPosition(FramePoint estimatedCoMPosition)
+      public void setEstimatedCoMPosition(FramePoint3D estimatedCoMPosition)
       {
          // do nothing
       }
 
-      public void setEstimatedCoMVelocity(FrameVector estimatedCoMVelocity)
+      public void setEstimatedCoMVelocity(FrameVector3D estimatedCoMVelocity)
       {
          // do nothing
       }
@@ -263,12 +263,12 @@ public class ComposableOrientationEstimatorCreator
          setEstimatedOrientation(initialOrientation);
       }
 
-      public ControlFlowInputPort<FrameVector> getDesiredAngularAccelerationInputPort()
+      public ControlFlowInputPort<FrameVector3D> getDesiredAngularAccelerationInputPort()
       {
          return desiredAngularAccelerationInputPort;
       }
 
-      public ControlFlowInputPort<FrameVector> getDesiredCenterOfMassAccelerationInputPort()
+      public ControlFlowInputPort<FrameVector3D> getDesiredCenterOfMassAccelerationInputPort()
       {
          return null;
       }
@@ -288,12 +288,12 @@ public class ComposableOrientationEstimatorCreator
          return controlFlowGraph;
       }
 
-      public void getEstimatedPelvisPosition(FramePoint estimatedPelvisPositionToPack)
+      public void getEstimatedPelvisPosition(FramePoint3D estimatedPelvisPositionToPack)
       {
          throw new RuntimeException("No pelvis position estimated with this state estimator (" + getClass().getSimpleName() + ").");
       }
 
-      public void getEstimatedPelvisLinearVelocity(FrameVector estimatedPelvisLinearVelocityToPack)
+      public void getEstimatedPelvisLinearVelocity(FrameVector3D estimatedPelvisLinearVelocityToPack)
       {
          throw new RuntimeException("No pelvis velocity estimated with this state estimator (" + getClass().getSimpleName() + ").");
       }

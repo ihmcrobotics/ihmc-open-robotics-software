@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 /**
  * Computes Jacobian derivative times velocity vector Useful for dealing with task space

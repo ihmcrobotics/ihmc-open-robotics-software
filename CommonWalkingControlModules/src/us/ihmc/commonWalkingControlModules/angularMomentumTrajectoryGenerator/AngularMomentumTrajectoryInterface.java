@@ -1,15 +1,15 @@
 package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
-import java.util.List;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3DInterface;
+import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 
-import us.ihmc.robotics.geometry.FrameVector;
-
-public interface AngularMomentumTrajectoryInterface
+public interface AngularMomentumTrajectoryInterface extends SegmentedFrameTrajectory3DInterface
 {
-   public void reset();
-   public void update(double timeInState);
-   public void update(double timeInState, FrameVector desiredAngularMomentumToPack);
-   public void update(double timeInState, FrameVector desiredAngularMomentumToPack, FrameVector desiredTorqueToPack);
-   public List<YoFrameTrajectory3D> getPolynomials();
-   public int getNumberOfSegments();
+   void update(double timeInState, FrameVector3D desiredAngularMomentumToPack);
+   void update(double timeInState, FrameVector3D desiredAngularMomentumToPack, FrameVector3D desiredTorqueToPack);
+   void update(double timeInState, FrameVector3D desiredAngularMomentumToPack, FrameVector3D desiredTorqueToPack, FrameVector3D desiredRotatumToPack);
+   void set(YoFrameTrajectory3D computedAngularMomentumTrajectory);
+   void set(double t0, double tFinal, FramePoint3D z0, FramePoint3D zf);
 }

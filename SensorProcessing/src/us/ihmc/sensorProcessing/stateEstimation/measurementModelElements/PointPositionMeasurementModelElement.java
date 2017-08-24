@@ -7,12 +7,12 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 
@@ -20,7 +20,7 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
 {
    public static final int SIZE = 3;
 
-   private final ControlFlowOutputPort<FramePoint> centerOfMassPositionPort;
+   private final ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort;
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
 
    private final ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort;
@@ -32,7 +32,7 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
    private final RotationMatrix rotationFromEstimationToWorld = new RotationMatrix();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final Matrix3D tempMatrix = new Matrix3D();
-   private final FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D tempFramePoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final Vector3D residualVector = new Vector3D();
 
    private final AfterJointReferenceFrameNameMap referenceFrameMap;
@@ -40,7 +40,7 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
    private final boolean assumePerfectIMU;
    
    public PointPositionMeasurementModelElement(String name, ControlFlowInputPort<PointPositionDataObject> pointPositionMeasurementInputPort,
-         ControlFlowOutputPort<FramePoint> centerOfMassPositionPort, ControlFlowOutputPort<FrameOrientation> orientationPort, ReferenceFrame estimationFrame,
+         ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort, ControlFlowOutputPort<FrameOrientation> orientationPort, ReferenceFrame estimationFrame,
          AfterJointReferenceFrameNameMap referenceFrameMap, boolean assumePerfectIMU, YoVariableRegistry registry)
    {
       super(SIZE, name, registry);
@@ -75,7 +75,7 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
       CommonOps.setIdentity(getOutputMatrixBlock(centerOfMassPositionPort));
    }
    
-   private final FramePoint tempCenterOfMassPosition = new FramePoint();
+   private final FramePoint3D tempCenterOfMassPosition = new FramePoint3D();
    
    private void computeOrientationStateOutputBlock()
    {

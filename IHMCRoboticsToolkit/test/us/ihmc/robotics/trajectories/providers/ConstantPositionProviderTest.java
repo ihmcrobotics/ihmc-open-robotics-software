@@ -8,8 +8,8 @@ import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class ConstantPositionProviderTest
 {
@@ -23,8 +23,8 @@ public class ConstantPositionProviderTest
       Random random = new Random();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       double[] xyz = RandomNumbers.nextDoubleArray(random, 3, Double.MAX_VALUE);
-      FramePoint positionExpected = new FramePoint(worldFrame, xyz);
-      FramePoint positionActual = new FramePoint(positionExpected);
+      FramePoint3D positionExpected = new FramePoint3D(worldFrame, xyz);
+      FramePoint3D positionActual = new FramePoint3D(positionExpected);
       ConstantPositionProvider constantPositionProvider = new ConstantPositionProvider(positionActual);
       constantPositionProvider.getPosition(positionActual);
       

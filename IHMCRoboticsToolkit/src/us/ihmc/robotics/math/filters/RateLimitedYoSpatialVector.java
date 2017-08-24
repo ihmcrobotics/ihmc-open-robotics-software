@@ -1,9 +1,9 @@
 package us.ihmc.robotics.math.filters;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoSpatialVector;
 
@@ -61,7 +61,7 @@ public class RateLimitedYoSpatialVector extends YoSpatialVector
       rateLimitedAngularPart.update(rawAngularPart);
    }
 
-   public void update(FrameVector rawLinearPart, FrameVector rawAngularPart)
+   public void update(FrameVector3D rawLinearPart, FrameVector3D rawAngularPart)
    {
       rateLimitedLinearPart.update(rawLinearPart);
       rateLimitedAngularPart.update(rawAngularPart);

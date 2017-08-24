@@ -2,16 +2,16 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPath;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.StraightLineOverheadPath;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -19,7 +19,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 public class TranslationFootstepGenerator extends AbstractFootstepGenerator
 {
    // private static final boolean DEBUG = false;
-   private FramePoint2d endPoint;
+   private FramePoint2D endPoint;
    private StraightLineOverheadPath footstepPath;
    protected final YoDouble forwardWalkingStepLength = new YoDouble("translationalForwardWalkingStepLength", registry);
    protected final YoDouble backwardWalkingStepLength = new YoDouble("translationalBackwardStepLength", registry);
@@ -29,14 +29,14 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
    private boolean isRightwardPath;
    private boolean isForwardPath;
 
-   public TranslationFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FramePoint2d endPoint, TranslationalPathParameters translationalPathType)
+   public TranslationFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FramePoint2D endPoint, TranslationalPathParameters translationalPathType)
    {
       super(feet, soleFrames);
       setPathParameters(translationalPathType);
       this.endPoint = endPoint;
    }
 
-   public TranslationFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FramePoint2d endPoint,
+   public TranslationFootstepGenerator(SideDependentList<RigidBody> feet, SideDependentList<ReferenceFrame> soleFrames, FramePoint2D endPoint,
          TranslationalPathParameters translationalPathType, RobotSide startStanceSide)
    {
       super(feet, soleFrames, startStanceSide);
@@ -75,9 +75,9 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
       double totalDistance = footstepPath.getDistance();
 
       FramePose2d poseAtS0 = footstepPath.getPoseAtS(0);
-      FramePoint2d position = new FramePoint2d();
+      FramePoint2D position = new FramePoint2D();
       poseAtS0.getPositionIncludingFrame(position);
-      FramePoint2d position2 = new FramePoint2d();
+      FramePoint2D position2 = new FramePoint2D();
       footstepPath.getPoseAtS(1).getPositionIncludingFrame(position2);
       position2.sub(position);
       double pathAngle = Math.atan2(position2.getY(), position2.getX());
@@ -179,7 +179,7 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
          stepWidth = MathTools.clamp(initialDeltaFeetY - Math.abs(lrStepLength) * 2, minimumStepWidth, nominalStepWidth);
 
       boolean isSideStep = startWithNearSideFoot;
-      FramePoint2d currentPathPosition = position;
+      FramePoint2D currentPathPosition = position;
 
       currentPathPosition = displacePosition(currentPathPosition, yaw, initialFBFeetOffsetAdjustment, initialLRFeetOffsetAdjustment);
 
@@ -193,7 +193,7 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
 
       // Do two square up steps
       //    stepWidth = nominalStepWidth;//Changing to nominal at end can cause overstep if stepWidth is smaller than stepWidth for the rest of the path.
-      FramePoint2d position3 = new FramePoint2d();
+      FramePoint2D position3 = new FramePoint2D();
       footstepPath.getPoseAtS(1).getPositionIncludingFrame(position3);
       addFootstep(ret, position3, stepWidth, yaw);
       addFootstep(ret, position3, stepWidth, yaw);
@@ -230,7 +230,7 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
       return startWithNearSideFoot;
    }
 
-   private void addFootstep(ArrayList<Footstep> ret, FramePoint2d currentPathPosition, double stepWidth, double yaw)
+   private void addFootstep(ArrayList<Footstep> ret, FramePoint2D currentPathPosition, double stepWidth, double yaw)
    {
       Footstep footstep = getFootstepAtPosition(currentFootstepSide, currentPathPosition, stepWidth, yaw);
       ret.add(footstep);
@@ -238,20 +238,20 @@ public class TranslationFootstepGenerator extends AbstractFootstepGenerator
       currentFootstepSide = currentFootstepSide.getOppositeSide();
    }
 
-   private Footstep getFootstepAtPosition(RobotSide currentFootstepSide, FramePoint2d footstepPosition2d, double stepWidth, double yaw)
+   private Footstep getFootstepAtPosition(RobotSide currentFootstepSide, FramePoint2D footstepPosition2d, double stepWidth, double yaw)
    {
       double footHeading = yaw;
-      FramePoint2d footstepPosition = offsetFootstepFromPath(currentFootstepSide, footstepPosition2d, footHeading, stepWidth / 2);
+      FramePoint2D footstepPosition = offsetFootstepFromPath(currentFootstepSide, footstepPosition2d, footHeading, stepWidth / 2);
       FramePose2d footstepPose2d = new FramePose2d(WORLD_FRAME, footstepPosition.getPoint(), yaw);
 
       return createFootstep(currentFootstepSide, footstepPose2d);
    }
 
-   protected FramePoint2d displacePosition(FramePoint2d footstepPosition2d, double forwardHeading, double offsetForward, double offsetLeft)
+   protected FramePoint2D displacePosition(FramePoint2D footstepPosition2d, double forwardHeading, double offsetForward, double offsetLeft)
    {
       double xOffset = offsetForward * Math.cos(forwardHeading) - offsetLeft * Math.sin(forwardHeading);
       double yOffset = offsetForward * Math.sin(forwardHeading) + offsetLeft * Math.cos(forwardHeading);
-      FrameVector2d offsetVector = new FrameVector2d(WORLD_FRAME, xOffset, yOffset);
+      FrameVector2D offsetVector = new FrameVector2D(WORLD_FRAME, xOffset, yOffset);
       footstepPosition2d.changeFrame(WORLD_FRAME);
       footstepPosition2d.add(offsetVector);
 

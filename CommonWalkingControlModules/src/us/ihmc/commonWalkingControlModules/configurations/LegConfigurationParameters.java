@@ -19,7 +19,7 @@ public class LegConfigurationParameters
 
    public double getSupportKneeCollapsingDurationFractionOfStep()
    {
-      return 0.65;
+      return 0.5;
    }
 
    /**
@@ -90,7 +90,7 @@ public class LegConfigurationParameters
     */
    public double getFractionOfSwingToCollapseStanceLeg()
    {
-      return 0.75;
+      return 0.55;
    }
 
    /**

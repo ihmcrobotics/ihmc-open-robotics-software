@@ -1,8 +1,8 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.geometry.Torus3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameTorus3d extends FrameShape3d<FrameTorus3d, Torus3D>
 {
@@ -50,16 +50,5 @@ public class FrameTorus3d extends FrameShape3d<FrameTorus3d, Torus3D>
    public double getThickness()
    {
       return torus3d.getTubeRadius();
-   }
-
-   @Override
-   public String toString()
-   {
-      StringBuilder builder = new StringBuilder();
-
-      builder.append("ReferenceFrame: " + referenceFrame + ")\n");
-      builder.append(torus3d.toString());
-
-      return builder.toString();
    }
 }

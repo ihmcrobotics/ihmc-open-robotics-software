@@ -1,10 +1,10 @@
 package us.ihmc.quadrupedRobotics.geometry;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.shapes.FrameEllipsoid3d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedGeometryTools
@@ -26,9 +26,9 @@ public class QuadrupedGeometryTools
       ReferenceFrame kneePitchFrame = referenceFrames.getKneeFrame(robotQuadrant);
       ReferenceFrame footFrame = referenceFrames.getFootFrame(robotQuadrant);
 
-      FramePoint hipPitch = new FramePoint(hipPitchFrame);
-      FramePoint kneePitch = new FramePoint(kneePitchFrame);
-      FramePoint foot = new FramePoint(footFrame);
+      FramePoint3D hipPitch = new FramePoint3D(hipPitchFrame);
+      FramePoint3D kneePitch = new FramePoint3D(kneePitchFrame);
+      FramePoint3D foot = new FramePoint3D(footFrame);
 
       kneePitch.changeFrame(hipPitchFrame);
       double thighLength = kneePitch.distance(hipPitch);

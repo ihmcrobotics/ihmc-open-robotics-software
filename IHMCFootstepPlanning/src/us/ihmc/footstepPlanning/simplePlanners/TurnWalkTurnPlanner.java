@@ -2,18 +2,18 @@ package us.ihmc.footstepPlanning.simplePlanners;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class TurnWalkTurnPlanner implements FootstepPlanner
@@ -71,7 +71,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    {
       stanceFootFrame.setPoseAndUpdate(initialStanceFootPose);
 
-      FramePoint2d goalPoint = new FramePoint2d();
+      FramePoint2D goalPoint = new FramePoint2D();
       goalPose.getPositionIncludingFrame(goalPoint);
 
       ArrayList<FramePose2d> footstepList = new ArrayList<>();
@@ -84,7 +84,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       addTurnInPlaceToFacePoint(footstepList, robotPoseInWorld, goalPoint);
 
       // walk
-      FramePoint2d robotPosition = new FramePoint2d();
+      FramePoint2D robotPosition = new FramePoint2D();
       robotPoseInWorld.getPositionIncludingFrame(robotPosition);
       double distanceToTravel = robotPosition.distance(goalPoint);
       addStraightWalk(footstepList, robotPosition, distanceToTravel);
@@ -93,7 +93,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       FramePose2d stanceFootPose = new FramePose2d(stanceFootFrame);
       stanceFootPose.changeFrame(goalPose.getReferenceFrame());
       double turningAngle = AngleTools.trimAngleMinusPiToPi(goalPose.getYaw() - stanceFootPose.getYaw());
-      FramePoint2d pointToTurnAbout = new FramePoint2d(stanceFootFrame, new Point2D(0.0, lastStepSide.negateIfLeftSide(STRAIGHT_STEP_WIDTH / 2.0)));
+      FramePoint2D pointToTurnAbout = new FramePoint2D(stanceFootFrame, new Point2D(0.0, lastStepSide.negateIfLeftSide(STRAIGHT_STEP_WIDTH / 2.0)));
       addTurnInPlace(footstepList, turningAngle, pointToTurnAbout);
 
       // square up
@@ -109,7 +109,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       return FootstepPlanningResult.OPTIMAL_SOLUTION;
    }
 
-   private void addSquareUp(ArrayList<FramePose2d> footstepList, FramePoint2d robotPosition)
+   private void addSquareUp(ArrayList<FramePose2d> footstepList, FramePoint2D robotPosition)
    {
       robotPosition.changeFrame(stanceFootFrame);
       if (Math.abs(robotPosition.getX()) > 0.001)
@@ -133,7 +133,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       lastStepSide = lastStepSide.getOppositeSide();
    }
 
-   private void addStraightWalk(ArrayList<FramePose2d> footstepList, FramePoint2d startingPoint, double distanceToTravel)
+   private void addStraightWalk(ArrayList<FramePose2d> footstepList, FramePoint2D startingPoint, double distanceToTravel)
    {
 
       if(distanceToTravel<epsilon)
@@ -141,7 +141,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
 
       double straightSteps = Math.ceil(distanceToTravel / STRAIGHT_STEP_LENGTH);
       double stepLength = distanceToTravel / straightSteps;
-      FramePoint2d startingPointInWorld = new FramePoint2d(startingPoint);
+      FramePoint2D startingPointInWorld = new FramePoint2D(startingPoint);
       startingPointInWorld.changeFrame(ReferenceFrame.getWorldFrame());
 
       for (int i = 0; i < straightSteps; i++)
@@ -168,20 +168,20 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
       }
    }
 
-   private void addTurnInPlaceToFacePoint(ArrayList<FramePose2d> footstepList, FramePose2d robotPose, FramePoint2d goalPoint)
+   private void addTurnInPlaceToFacePoint(ArrayList<FramePose2d> footstepList, FramePose2d robotPose, FramePoint2D goalPoint)
    {
       double turningAngle = AngleTools.calculateHeading(robotPose, goalPoint, -robotPose.getYaw(), 0.0);
-      FramePoint2d pointToTurnAbout = new FramePoint2d();
+      FramePoint2D pointToTurnAbout = new FramePoint2D();
       robotPose.getPositionIncludingFrame(pointToTurnAbout);
       addTurnInPlace(footstepList, turningAngle, pointToTurnAbout);
    }
 
-   private void addTurnInPlace(ArrayList<FramePose2d> footstepList, double turningAngle, FramePoint2d pointToTurnAbout)
+   private void addTurnInPlace(ArrayList<FramePose2d> footstepList, double turningAngle, FramePoint2D pointToTurnAbout)
    {
       if(Math.abs(turningAngle)<epsilon)
          return;
 
-      FramePoint2d pointToTurnAboutInWorld = new FramePoint2d(pointToTurnAbout);
+      FramePoint2D pointToTurnAboutInWorld = new FramePoint2D(pointToTurnAbout);
       pointToTurnAboutInWorld.changeFrame(ReferenceFrame.getWorldFrame());
 
       pointToTurnAbout.changeFrame(stanceFootFrame);

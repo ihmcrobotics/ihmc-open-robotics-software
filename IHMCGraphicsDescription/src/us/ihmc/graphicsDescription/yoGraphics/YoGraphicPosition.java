@@ -3,6 +3,8 @@ package us.ihmc.graphicsDescription.yoGraphics;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -16,12 +18,10 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2dInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
 {
@@ -152,7 +152,7 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
       setPosition(tuple3d.getX(), tuple3d.getY(), tuple3d.getZ());
    }
 
-   public void setPosition(FramePoint position)
+   public void setPosition(FramePoint3D position)
    {
       this.x.set(position.getX());
       this.y.set(position.getY());
@@ -170,7 +170,7 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
          point3d.setZ(0.0);
    }
 
-   public void getPosition(FramePoint framePoint)
+   public void getPosition(FramePoint3D framePoint)
    {
       framePoint.setX(this.getX());
       framePoint.setY(this.getY());

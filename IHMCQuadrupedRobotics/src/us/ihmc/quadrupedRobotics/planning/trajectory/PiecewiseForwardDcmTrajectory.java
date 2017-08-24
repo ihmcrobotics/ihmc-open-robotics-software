@@ -1,9 +1,10 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +17,12 @@ public class PiecewiseForwardDcmTrajectory
    private double gravity;
    private double comHeight;
    private final double[] timeAtSoS;
-   private final FramePoint[] dcmPositionAtSoS;
-   private final FramePoint[] vrpPositionAtSoS;
-   private final FramePoint dcmPosition;
-   private final FrameVector dcmVelocity;
+   private final FramePoint3D[] dcmPositionAtSoS;
+   private final FramePoint3D[] vrpPositionAtSoS;
+   private final FramePoint3D dcmPosition;
+   private final FrameVector3D dcmVelocity;
    private final List<MutableDouble> temporaryDouble;
-   private final List<FramePoint> temporaryFramePoint;
+   private final List<FramePoint3D> temporaryFramePoint;
 
    public PiecewiseForwardDcmTrajectory(int maxSteps, double gravity, double comHeight)
    {
@@ -34,19 +35,19 @@ public class PiecewiseForwardDcmTrajectory
       this.gravity = gravity;
       this.comHeight = Math.max(comHeight, 0.001);
       this.timeAtSoS = new double[maxSteps];
-      this.dcmPositionAtSoS = new FramePoint[maxSteps];
-      this.vrpPositionAtSoS = new FramePoint[maxSteps];
+      this.dcmPositionAtSoS = new FramePoint3D[maxSteps];
+      this.vrpPositionAtSoS = new FramePoint3D[maxSteps];
       for (int i = 0; i < maxSteps; i++)
       {
-         this.dcmPositionAtSoS[i] = new FramePoint(ReferenceFrame.getWorldFrame());
-         this.vrpPositionAtSoS[i] = new FramePoint(ReferenceFrame.getWorldFrame());
+         this.dcmPositionAtSoS[i] = new FramePoint3D(ReferenceFrame.getWorldFrame());
+         this.vrpPositionAtSoS[i] = new FramePoint3D(ReferenceFrame.getWorldFrame());
       }
-      this.dcmPosition = new FramePoint(ReferenceFrame.getWorldFrame());
-      this.dcmVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
+      this.dcmPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
+      this.dcmVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
       this.temporaryDouble = new ArrayList<>();
       this.temporaryDouble.add(new MutableDouble(0));
       this.temporaryFramePoint = new ArrayList<>();
-      this.temporaryFramePoint.add(new FramePoint());
+      this.temporaryFramePoint.add(new FramePoint3D());
    }
 
    /**
@@ -58,7 +59,7 @@ public class PiecewiseForwardDcmTrajectory
     * @param cmpPositionAtSoS centroidal moment pivot position at the start of each step
     * @param dcmPositionAtSoS divergent component of motion position at the start of the first step
     */
-   public void initializeTrajectory(int numSteps, List<MutableDouble> timeAtSoS, List<FramePoint> cmpPositionAtSoS, FramePoint dcmPositionAtSoS)
+   public void initializeTrajectory(int numSteps, List<MutableDouble> timeAtSoS, List<FramePoint3D> cmpPositionAtSoS, FramePoint3D dcmPositionAtSoS)
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       double naturalFrequency = Math.sqrt(gravity / comHeight);
@@ -91,7 +92,7 @@ public class PiecewiseForwardDcmTrajectory
       computeTrajectory(this.timeAtSoS[0]);
    }
 
-   public void initializeTrajectory(double timeAtSoS, FramePoint cmpPositionAtSoS, FramePoint dcmPositionAtSoS)
+   public void initializeTrajectory(double timeAtSoS, FramePoint3D cmpPositionAtSoS, FramePoint3D dcmPositionAtSoS)
    {
       this.temporaryDouble.get(0).setValue(timeAtSoS);
       this.temporaryFramePoint.get(0).setIncludingFrame(cmpPositionAtSoS);
@@ -132,12 +133,12 @@ public class PiecewiseForwardDcmTrajectory
       return timeAtSoS[0];
    }
 
-   public void getPosition(FramePoint dcmPosition)
+   public void getPosition(FramePoint3D dcmPosition)
    {
       dcmPosition.setIncludingFrame(this.dcmPosition);
    }
 
-   public void getVelocity(FrameVector dcmVelocity)
+   public void getVelocity(FrameVector3D dcmVelocity)
    {
       dcmVelocity.setIncludingFrame(this.dcmVelocity);
    }
@@ -151,17 +152,17 @@ public class PiecewiseForwardDcmTrajectory
       List<MutableDouble> timeAtSoS = new ArrayList(2);
       timeAtSoS.add(0, new MutableDouble(0.0));
       timeAtSoS.add(1, new MutableDouble(0.4));
-      List<FramePoint> cmpPositionAtSoS = new ArrayList<>(2);
-      cmpPositionAtSoS.add(0, new FramePoint());
-      cmpPositionAtSoS.add(1, new FramePoint());
+      List<FramePoint3D> cmpPositionAtSoS = new ArrayList<>(2);
+      cmpPositionAtSoS.add(0, new FramePoint3D());
+      cmpPositionAtSoS.add(1, new FramePoint3D());
       cmpPositionAtSoS.get(0).set(0.0, 0.0, 0.0);
       cmpPositionAtSoS.get(1).set(0.0, -0.4, 0.0);
 
-      FramePoint dcmPositionAtSoS = new FramePoint(ReferenceFrame.getWorldFrame());
+      FramePoint3D dcmPositionAtSoS = new FramePoint3D(ReferenceFrame.getWorldFrame());
       dcmPositionAtSoS.set(0.0, -0.05, comHeight);
       dcmTrajectory.initializeTrajectory(2, timeAtSoS, cmpPositionAtSoS, dcmPositionAtSoS);
 
-      FramePoint dcmPosition = new FramePoint(ReferenceFrame.getWorldFrame());
+      FramePoint3D dcmPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
       for (int i = 0; i < timeAtSoS.size(); i++)
       {
          dcmTrajectory.computeTrajectory(timeAtSoS.get(i).doubleValue());

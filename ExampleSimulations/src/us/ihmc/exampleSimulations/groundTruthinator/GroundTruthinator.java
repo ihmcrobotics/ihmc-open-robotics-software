@@ -2,18 +2,18 @@ package us.ihmc.exampleSimulations.groundTruthinator;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class GroundTruthinator
 {
    ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ArrayList<GroundTruthinatorSensor> sensors = new ArrayList<>();
-   private final ArrayList<FrameVector> estimatedCableVectors = new ArrayList<FrameVector>();
-   private final ArrayList<FrameVector> correctionVectors = new ArrayList<FrameVector>();
+   private final ArrayList<FrameVector3D> estimatedCableVectors = new ArrayList<FrameVector3D>();
+   private final ArrayList<FrameVector3D> correctionVectors = new ArrayList<FrameVector3D>();
 
    public void addSensor(GroundTruthinatorSensor sensor)
    {
@@ -59,13 +59,13 @@ public class GroundTruthinator
 
       correctionVectors.clear();
 
-      FrameVector averageCorrectionVector = new FrameVector(worldFrame);
+      FrameVector3D averageCorrectionVector = new FrameVector3D(worldFrame);
 
       double squaredError = 0.0;
 
       for (int i=0; i<numberOfSensors; i++)
       {
-         FrameVector correctionVector = new FrameVector(estimatedCableVectors.get(i));
+         FrameVector3D correctionVector = new FrameVector3D(estimatedCableVectors.get(i));
          correctionVector.normalize();
          double errorCableLength = errorCableLengths[i];
          squaredError += errorCableLength * errorCableLength;
@@ -119,7 +119,7 @@ public class GroundTruthinator
 
       for (int i = 0; i < numberOfSensors; i++)
       {
-         FrameVector cableVector = new FrameVector(ReferenceFrame.getWorldFrame());
+         FrameVector3D cableVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
          estimatedCableVectors.add(cableVector);
 
          GroundTruthinatorSensor sensor = getSensor(i);

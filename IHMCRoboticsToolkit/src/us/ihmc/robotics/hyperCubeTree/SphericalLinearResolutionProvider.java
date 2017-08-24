@@ -1,13 +1,13 @@
 package us.ihmc.robotics.hyperCubeTree;
 
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class SphericalLinearResolutionProvider implements ResolutionProvider
 {
    private static final boolean DEBUG = false;
-   private final FramePoint center;
-   private final FramePoint centerInWorldTemp;
+   private final FramePoint3D center;
+   private final FramePoint3D centerInWorldTemp;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final double[] tempCenter = new double[3];
    private final OneDimensionalBounds linearRegion;
@@ -17,15 +17,15 @@ public class SphericalLinearResolutionProvider implements ResolutionProvider
    private final double innerRadiusSquared;
    private final LowPassTimingReporter timer = new LowPassTimingReporter(5);
 
-   public SphericalLinearResolutionProvider(FramePoint center, double radius1, double innerResolution, double radius2, double outerResolution)
+   public SphericalLinearResolutionProvider(FramePoint3D center, double radius1, double innerResolution, double radius2, double outerResolution)
    {
       this(center, new OneDimensionalBounds(Math.abs(radius1), Math.abs(radius2)), innerResolution, outerResolution);
    }
 
-   public SphericalLinearResolutionProvider(FramePoint center, OneDimensionalBounds bounds, double innerResolution, double exteriorResolution)
+   public SphericalLinearResolutionProvider(FramePoint3D center, OneDimensionalBounds bounds, double innerResolution, double exteriorResolution)
    {
       this.center = center;
-      centerInWorldTemp = new FramePoint(center);
+      centerInWorldTemp = new FramePoint3D(center);
       centerInWorldTemp.changeFrame(worldFrame);
       this.linearRegion = bounds;
       this.centerResolution = innerResolution;

@@ -5,6 +5,10 @@ import us.ihmc.commonWalkingControlModules.configurations.CoPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ReferenceCentroidalMomentumPivotLocationsCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -15,14 +19,10 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -47,12 +47,12 @@ public class ICPOptimizationInputHandler
    private final ArrayList<YoFramePointInMultipleFrames> entryCornerPoints = new ArrayList<>();
    private final ArrayList<YoFramePointInMultipleFrames> exitCornerPoints = new ArrayList<>();
 
-   private final ArrayList<FrameVector2d> entryOffsets = new ArrayList<>();
-   private final ArrayList<FrameVector2d> exitOffsets = new ArrayList<>();
+   private final ArrayList<FrameVector2D> entryOffsets = new ArrayList<>();
+   private final ArrayList<FrameVector2D> exitOffsets = new ArrayList<>();
    private final ArrayList<YoFrameVector2d> yoEntryOffsets = new ArrayList<>();
    private final ArrayList<YoFrameVector2d> yoExitOffsets = new ArrayList<>();
 
-   private final FramePoint2d cmpOffsetRecursion = new FramePoint2d();
+   private final FramePoint2D cmpOffsetRecursion = new FramePoint2D();
 
    private final String yoNamePrefix;
 
@@ -89,8 +89,8 @@ public class ICPOptimizationInputHandler
 
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
       {
-         entryOffsets.add(new FrameVector2d(worldFrame));
-         exitOffsets.add(new FrameVector2d(worldFrame));
+         entryOffsets.add(new FrameVector2D(worldFrame));
+         exitOffsets.add(new FrameVector2D(worldFrame));
          YoFrameVector2d entryOffset = new YoFrameVector2d("entryOffset" + i, worldFrame, registry);
          YoFrameVector2d exitOffset = new YoFrameVector2d("exitOffset" + i, worldFrame, registry);
          yoEntryOffsets.add(entryOffset);
@@ -186,7 +186,7 @@ public class ICPOptimizationInputHandler
       }
    }
 
-   private final FramePoint2d totalOffsetEffect = new FramePoint2d();
+   private final FramePoint2D totalOffsetEffect = new FramePoint2D();
    private void computeCMPOffsetRecursion(StateMultiplierCalculator stateMultiplierCalculator, ArrayList<YoFramePoint2d> upcomingFootstepLocations,
          int numberOfFootstepsToConsider)
    {
@@ -208,9 +208,9 @@ public class ICPOptimizationInputHandler
       }
    }
 
-   public void computeFinalICPRecursion(StateMultiplierCalculator stateMultiplierCalculator, FramePoint2d finalICPRecursionToPack)
+   public void computeFinalICPRecursion(StateMultiplierCalculator stateMultiplierCalculator, FramePoint2D finalICPRecursionToPack)
    {
-      finalICPRecursionToPack.setByProjectionOntoXYPlane(finalICP.getFrameTuple());
+      finalICPRecursionToPack.set(finalICP.getFrameTuple());
 
       finalICPRecursionToPack.scale(stateMultiplierCalculator.getFinalICPRecursionMultiplier());
       finalICPRecursionToPack.scale(stateMultiplierCalculator.getStateEndCurrentMultiplier());
@@ -224,13 +224,13 @@ public class ICPOptimizationInputHandler
          finalICP.set(referenceCMPsCalculator.getEntryCMPs().get(numberOfFootstepsToConsider + 1));
    }
 
-   private final FramePoint2d stanceCMPProjection = new FramePoint2d();
-   private final FramePoint2d beginningOfStateICPProjection = new FramePoint2d();
-   private final FrameVector2d beginningOfStateICPVelocityProjection = new FrameVector2d();
-   private final FramePoint2d cmpOffsetRecursionProjection = new FramePoint2d();
+   private final FramePoint2D stanceCMPProjection = new FramePoint2D();
+   private final FramePoint2D beginningOfStateICPProjection = new FramePoint2D();
+   private final FrameVector2D beginningOfStateICPVelocityProjection = new FrameVector2D();
+   private final FramePoint2D cmpOffsetRecursionProjection = new FramePoint2D();
 
-   public void computeCMPConstantEffects(StateMultiplierCalculator stateMultiplierCalculator, FramePoint2d cmpConstantEffectsToPack,
-         FramePoint2d beginningOfStateICP, FrameVector2d beginningOfStateICPVelocity, boolean useTwoCMPs, boolean isInTransfer)
+   public void computeCMPConstantEffects(StateMultiplierCalculator stateMultiplierCalculator, FramePoint2D cmpConstantEffectsToPack,
+         FramePoint2D beginningOfStateICP, FrameVector2D beginningOfStateICPVelocity, boolean useTwoCMPs, boolean isInTransfer)
    {
       computeStanceCMPProjection(stateMultiplierCalculator, stanceCMPProjection, useTwoCMPs, isInTransfer);
       computeBeginningOfStateICPProjection(stateMultiplierCalculator, beginningOfStateICPProjection, beginningOfStateICP);
@@ -250,10 +250,10 @@ public class ICPOptimizationInputHandler
    }
 
 
-   private final FramePoint2d stanceEntryCMP2d = new FramePoint2d(worldFrame);
-   private final FramePoint2d stanceExitCMP2d = new FramePoint2d(worldFrame);
+   private final FramePoint2D stanceEntryCMP2d = new FramePoint2D(worldFrame);
+   private final FramePoint2D stanceExitCMP2d = new FramePoint2D(worldFrame);
 
-   private void computeStanceCMPProjection(StateMultiplierCalculator stateMultiplierCalculator, FramePoint2d stanceCMPProjectionToPack,
+   private void computeStanceCMPProjection(StateMultiplierCalculator stateMultiplierCalculator, FramePoint2D stanceCMPProjectionToPack,
          boolean useTwoCMPs, boolean isInTransfer)
    {
       int footstepIndex;
@@ -264,21 +264,21 @@ public class ICPOptimizationInputHandler
 
       if (useTwoCMPs)
       {
-         FramePoint stanceEntryCMP = referenceCMPsCalculator.getEntryCMPs().get(footstepIndex).getFrameTuple();
-         FramePoint stanceExitCMP = referenceCMPsCalculator.getExitCMPs().get(footstepIndex).getFrameTuple();
+         FramePoint3D stanceEntryCMP = referenceCMPsCalculator.getEntryCMPs().get(footstepIndex).getFrameTuple();
+         FramePoint3D stanceExitCMP = referenceCMPsCalculator.getExitCMPs().get(footstepIndex).getFrameTuple();
 
-         stanceEntryCMP2d.setByProjectionOntoXYPlane(stanceEntryCMP);
-         stanceExitCMP2d.setByProjectionOntoXYPlane(stanceExitCMP);
+         stanceEntryCMP2d.set(stanceEntryCMP);
+         stanceExitCMP2d.set(stanceExitCMP);
 
          this.stanceEntryCMP.set(stanceEntryCMP2d);
          this.stanceExitCMP.set(stanceExitCMP2d);
       }
       else
       {
-         FramePoint stanceEntryCMP = referenceCMPsCalculator.getEntryCMPs().get(footstepIndex).getFrameTuple();
+         FramePoint3D stanceEntryCMP = referenceCMPsCalculator.getEntryCMPs().get(footstepIndex).getFrameTuple();
 
          stanceExitCMP2d.setToZero();
-         stanceEntryCMP2d.setByProjectionOntoXYPlane(stanceEntryCMP);
+         stanceEntryCMP2d.set(stanceEntryCMP);
 
          this.stanceExitCMP.setToNaN();
          this.stanceEntryCMP.set(stanceEntryCMP2d);
@@ -296,15 +296,15 @@ public class ICPOptimizationInputHandler
       stanceCMPProjectionToPack.add(stanceExitCMP2d);
    }
 
-   private void computeBeginningOfStateICPProjection(StateMultiplierCalculator stateMultiplierCalculator, FramePoint2d beginningOfStateICPProjectionToPack,
-         FramePoint2d beginningOfStateICP)
+   private void computeBeginningOfStateICPProjection(StateMultiplierCalculator stateMultiplierCalculator, FramePoint2D beginningOfStateICPProjectionToPack,
+         FramePoint2D beginningOfStateICP)
    {
       beginningOfStateICPProjectionToPack.set(beginningOfStateICP);
       beginningOfStateICPProjectionToPack.scale(stateMultiplierCalculator.getInitialICPCurrentMultiplier());
    }
 
    private void computeBeginningOfStateICPVelocityProjection(StateMultiplierCalculator stateMultiplierCalculator,
-         FrameVector2d beginningOfStateICPVelocityProjectionToPack, FrameVector2d beginningOfStateICPVelocity)
+         FrameVector2D beginningOfStateICPVelocityProjectionToPack, FrameVector2D beginningOfStateICPVelocity)
    {
       beginningOfStateICPVelocityProjectionToPack.set(beginningOfStateICPVelocity);
       beginningOfStateICPVelocityProjectionToPack.scale(stateMultiplierCalculator.getInitialICPVelocityCurrentMultiplier());
@@ -314,14 +314,14 @@ public class ICPOptimizationInputHandler
    {
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
       {
-         FrameVector2d entryOffset = entryOffsets.get(i);
-         FrameVector2d exitOffset = exitOffsets.get(i);
+         FrameVector2D entryOffset = entryOffsets.get(i);
+         FrameVector2D exitOffset = exitOffsets.get(i);
 
          entryOffset.setToZero(worldFrame);
          exitOffset.setToZero(worldFrame);
 
-         entryOffset.setByProjectionOntoXYPlane(referenceCMPsCalculator.getEntryCMPs().get(i + 1).getFrameTuple());
-         exitOffset.setByProjectionOntoXYPlane(referenceCMPsCalculator.getExitCMPs().get(i + 1).getFrameTuple());
+         entryOffset.set(referenceCMPsCalculator.getEntryCMPs().get(i + 1).getFrameTuple());
+         exitOffset.set(referenceCMPsCalculator.getExitCMPs().get(i + 1).getFrameTuple());
 
          entryOffset.sub(upcomingFootstepLocations.get(i).getFrameTuple2d());
          exitOffset.sub(upcomingFootstepLocations.get(i).getFrameTuple2d());
@@ -331,27 +331,27 @@ public class ICPOptimizationInputHandler
       }
    }
 
-   public ArrayList<FrameVector2d> getEntryOffsets()
+   public ArrayList<FrameVector2D> getEntryOffsets()
    {
       return entryOffsets;
    }
 
-   public ArrayList<FrameVector2d> getExitOffsets()
+   public ArrayList<FrameVector2D> getExitOffsets()
    {
       return exitOffsets;
    }
 
-   public FramePoint2d getStanceEntryCMP()
+   public FramePoint2D getStanceEntryCMP()
    {
       return stanceEntryCMP.getFrameTuple2d();
    }
 
-   public FramePoint2d getStanceExitCMP()
+   public FramePoint2D getStanceExitCMP()
    {
       return stanceExitCMP.getFrameTuple2d();
    }
 
-   public FramePoint getFinalICP()
+   public FramePoint3D getFinalICP()
    {
       return finalICP.getFrameTuple();
    }

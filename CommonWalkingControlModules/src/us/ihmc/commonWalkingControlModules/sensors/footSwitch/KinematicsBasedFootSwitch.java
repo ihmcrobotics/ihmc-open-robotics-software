@@ -1,14 +1,14 @@
 package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -79,7 +79,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       parentRegistry.addChild(registry);
    }
 
-   FramePoint tmpFramePoint = new FramePoint();
+   FramePoint3D tmpFramePoint = new FramePoint3D();
 
    private Point3D getPointInWorld(ReferenceFrame frame)
    {
@@ -124,7 +124,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    }
 
    @Override
-   public void computeAndPackCoP(FramePoint2d copToPack)
+   public void computeAndPackCoP(FramePoint2D copToPack)
    {
       copToPack.setToNaN(getMeasurementFrame());
    }

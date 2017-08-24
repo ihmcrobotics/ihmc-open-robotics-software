@@ -2,14 +2,14 @@ package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
 import java.awt.Color;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 
 public class SimpleDesiredHeadingControlModuleVisualizer
@@ -49,8 +49,8 @@ public class SimpleDesiredHeadingControlModuleVisualizer
 
    private void updatedDesiredHeadingLine(double desiredHeading)
    {
-      FramePoint2d endpoint1 = processedSensors.getCenterOfMassGroundProjectionInFrame(ReferenceFrame.getWorldFrame()).toFramePoint2d();
-      FramePoint2d endpoint2 = new FramePoint2d(endpoint1);
+      FramePoint2D endpoint1 = new FramePoint2D(processedSensors.getCenterOfMassGroundProjectionInFrame(ReferenceFrame.getWorldFrame()));
+      FramePoint2D endpoint2 = new FramePoint2D(endpoint1);
       double length = 1.0;
       endpoint2.setX(endpoint2.getX() + length * Math.cos(desiredHeading));
       endpoint2.setY(endpoint2.getY() + length * Math.sin(desiredHeading));
@@ -61,8 +61,8 @@ public class SimpleDesiredHeadingControlModuleVisualizer
 
    private void updatedFinalHeadingLine(double desiredHeadingFinal)
    {
-      FramePoint2d endpoint1 = processedSensors.getCenterOfMassGroundProjectionInFrame(ReferenceFrame.getWorldFrame()).toFramePoint2d();
-      FramePoint2d endpoint2 = new FramePoint2d(endpoint1);
+      FramePoint2D endpoint1 = new FramePoint2D(processedSensors.getCenterOfMassGroundProjectionInFrame(ReferenceFrame.getWorldFrame()));
+      FramePoint2D endpoint2 = new FramePoint2D(endpoint1);
       double length = 1.0;
       endpoint2.setX(endpoint2.getX() + length * Math.cos(desiredHeadingFinal));
       endpoint2.setY(endpoint2.getY() + length * Math.sin(desiredHeadingFinal));

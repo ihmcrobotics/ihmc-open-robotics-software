@@ -5,31 +5,31 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
 
 public class AngularAccelerationProcessModelElement extends AbstractProcessModelElement
 {
    private static final int SIZE = 3;
-   private final ControlFlowOutputPort<FrameVector> angularAccelerationStatePort;
-   private final ControlFlowInputPort<FrameVector> angularAccelerationInputPort;
-   private final FrameVector angularAcceleration;
-   private final FrameVector angularAccelerationDelta;
+   private final ControlFlowOutputPort<FrameVector3D> angularAccelerationStatePort;
+   private final ControlFlowInputPort<FrameVector3D> angularAccelerationInputPort;
+   private final FrameVector3D angularAcceleration;
+   private final FrameVector3D angularAccelerationDelta;
    private final ReferenceFrame estimationFrame;
    private final Vector3D angularAccelerationVector3d = new Vector3D();
 
    public AngularAccelerationProcessModelElement(String name, ReferenceFrame estimationFrame, YoVariableRegistry registry,
-           ControlFlowOutputPort<FrameVector> angularAccelerationStatePort, ControlFlowInputPort<FrameVector> angularAccelerationInputPort)
+           ControlFlowOutputPort<FrameVector3D> angularAccelerationStatePort, ControlFlowInputPort<FrameVector3D> angularAccelerationInputPort)
    {
       super(angularAccelerationStatePort, TimeDomain.DISCRETE, false, SIZE, name, registry);
       this.angularAccelerationStatePort = angularAccelerationStatePort;
       this.angularAccelerationInputPort = angularAccelerationInputPort;
-      this.angularAcceleration = new FrameVector(estimationFrame);
-      this.angularAccelerationDelta = new FrameVector(estimationFrame);
+      this.angularAcceleration = new FrameVector3D(estimationFrame);
+      this.angularAccelerationDelta = new FrameVector3D(estimationFrame);
 
       this.estimationFrame = estimationFrame;
       computeAngularAccelerationInputMatrixBlock();
@@ -49,7 +49,7 @@ public class AngularAccelerationProcessModelElement extends AbstractProcessModel
 
    public void propagateState(double dt)
    {
-      FrameVector angularAccelerationInputData = angularAccelerationInputPort.getData();
+      FrameVector3D angularAccelerationInputData = angularAccelerationInputPort.getData();
 
       // TODO: Figure out how to deal best with HumanoidReferenceFrames here.
       // Upon generation, the generator might not know what the estimation frame will

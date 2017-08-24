@@ -7,19 +7,19 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
 
 public class OrientationProcessModelElement extends AbstractProcessModelElement
 {
    static final int SIZE = 3;
-   private final ControlFlowOutputPort<FrameVector> angularVelocityPort;
+   private final ControlFlowOutputPort<FrameVector3D> angularVelocityPort;
    private final ControlFlowOutputPort<FrameOrientation> orientationPort;
 
    private final Vector3D angularVelocity = new Vector3D();
@@ -31,7 +31,7 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
    private final Quaternion quaternion = new Quaternion();
    private final FrameOrientation orientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
 
-   public OrientationProcessModelElement(ControlFlowOutputPort<FrameVector> angularVelocityPort, ControlFlowOutputPort<FrameOrientation> orientationPort,
+   public OrientationProcessModelElement(ControlFlowOutputPort<FrameVector3D> angularVelocityPort, ControlFlowOutputPort<FrameOrientation> orientationPort,
            String name, YoVariableRegistry registry)
    {
       super(orientationPort, TimeDomain.CONTINUOUS, true, SIZE, name, registry);
