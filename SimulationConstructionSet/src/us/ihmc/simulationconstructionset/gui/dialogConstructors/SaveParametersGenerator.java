@@ -12,18 +12,19 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class SaveParametersGenerator implements SaveParametersConstructor
 {
    private final SimulationConstructionSet scs;
+   private ParameterFileChooser fileChooser;
 
    public SaveParametersGenerator(SimulationConstructionSet scs)
    {
       this.scs = scs;
+      this.fileChooser = new ParameterFileChooser();
    }
 
    @Override
    public void constructDialog()
    {
-      ParameterFileChooser fileChooser = new ParameterFileChooser(scs.getParameterRootPath());
 
-      if (fileChooser.showDialog(scs.getJFrame(), scs.getRootRegistry(), true))
+      if (fileChooser.showDialog(scs.getJFrame(), scs.getRootRegistry(), scs.getParameterRootPath(), true))
       {
          XmlParameterWriter writer = new XmlParameterWriter();
          for(YoVariableRegistry child : fileChooser.getRegistries())
@@ -41,16 +42,14 @@ public class SaveParametersGenerator implements SaveParametersConstructor
             JOptionPane.showMessageDialog(scs.getJFrame(), "Cannot write to " + fileChooser.getFile() + "\n" + e.getMessage(), "Cannot write to file", JOptionPane.ERROR_MESSAGE);
          }
       }
-      
-      fileChooser.closeAndDispose();
 
    }
 
    @Override
    public void closeAndDispose()
    {
-      // TODO Auto-generated method stub
-
+      this.fileChooser.closeAndDispose();
+      this.fileChooser = null;
    }
 
 }
