@@ -10,6 +10,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -17,14 +20,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoLong;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -32,7 +33,6 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.tools.FormattingTools;
@@ -56,13 +56,13 @@ public class TaskspaceHandControlState extends HandControlState
 
    // temp stuff:
    private final FramePose desiredPose = new FramePose();
-   private final FramePoint desiredPosition = new FramePoint(worldFrame);
-   private final FrameVector desiredLinearVelocity = new FrameVector(worldFrame);
-   private final FrameVector feedForwardLinearAcceleration = new FrameVector(worldFrame);
+   private final FramePoint3D desiredPosition = new FramePoint3D(worldFrame);
+   private final FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D(worldFrame);
 
    private final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
-   private final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
-   private final FrameVector feedForwardAngularAcceleration = new FrameVector(worldFrame);
+   private final FrameVector3D desiredAngularVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D(worldFrame);
    private final FrameSE3TrajectoryPoint initialTrajectoryPoint = new FrameSE3TrajectoryPoint();
 
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
@@ -73,7 +73,7 @@ public class TaskspaceHandControlState extends HandControlState
    private final ReferenceFrame endEffectorFrame;
    private final ReferenceFrame chestFrame;
 
-   private final YoSE3PIDGainsInterface gains;
+   private final YoPIDSE3Gains gains;
    private final YoFrameVector yoAngularWeight;
    private final YoFrameVector yoLinearWeight;
    private final Vector3D angularWeight = new Vector3D();
@@ -86,7 +86,7 @@ public class TaskspaceHandControlState extends HandControlState
    private final YoLong numberOfQueuedCommands;
    private final RecyclingArrayDeque<HandTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(HandTrajectoryCommand.class);
 
-   public TaskspaceHandControlState(String namePrefix, RigidBody base, RigidBody endEffector, RigidBody chest, YoSE3PIDGainsInterface gains,
+   public TaskspaceHandControlState(String namePrefix, RigidBody base, RigidBody endEffector, RigidBody chest, YoPIDSE3Gains gains,
          Collection<ReferenceFrame> trajectoryFrames, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
@@ -329,7 +329,7 @@ public class TaskspaceHandControlState extends HandControlState
       return maximumNumberOfWaypoints;
    }
 
-   private final FramePoint tempFramePoint = new FramePoint();
+   private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final FrameOrientation tempFrameOrientation = new FrameOrientation();
 
    private void updateControlFrameAndDesireds(ReferenceFrame newControlFrame, boolean initializeToCurrent, FrameSE3TrajectoryPoint trajectoryPointToPack)

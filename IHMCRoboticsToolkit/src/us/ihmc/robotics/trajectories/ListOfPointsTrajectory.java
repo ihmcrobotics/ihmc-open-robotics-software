@@ -2,35 +2,35 @@ package us.ihmc.robotics.trajectories;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ListOfPointsTrajectory
 {
-   private ArrayList<FramePoint> listOfPoints;
+   private ArrayList<FramePoint3D> listOfPoints;
    private double lengthOfPath;
    private LinearInterpolater linearInterpolater;
    private double[] alpha;
 
-   public ListOfPointsTrajectory(final ArrayList<FramePoint> listOfPointsForSegment)
+   public ListOfPointsTrajectory(final ArrayList<FramePoint3D> listOfPointsForSegment)
    {
       if ((listOfPointsForSegment == null) || (listOfPointsForSegment.size() < 2))
       {
          throw new RuntimeException("listOfPoints must have at least 2 elements.");
       }
 
-      this.listOfPoints = new ArrayList<FramePoint>();
+      this.listOfPoints = new ArrayList<FramePoint3D>();
 
       // add the start and end point
-      this.listOfPoints.add(new FramePoint(listOfPointsForSegment.get(0)));
+      this.listOfPoints.add(new FramePoint3D(listOfPointsForSegment.get(0)));
 
       for (int i = 1; i < listOfPointsForSegment.size(); i++)
       {
          double distanceToPreviousPoint = listOfPointsForSegment.get(i).distance(listOfPointsForSegment.get(i - 1));
          if (distanceToPreviousPoint > 0.0)
-            this.listOfPoints.add(new FramePoint(listOfPointsForSegment.get(i)));
+            this.listOfPoints.add(new FramePoint3D(listOfPointsForSegment.get(i)));
       }
 
       // set all the Z's to zero and add to list
@@ -45,11 +45,11 @@ public class ListOfPointsTrajectory
 
    public static ListOfPointsTrajectory createListOfPointsTrajectory(ArrayList<Point2D> points, ReferenceFrame referenceFrame)
    {
-      ArrayList<FramePoint> framePoints = new ArrayList<FramePoint>(points.size());
+      ArrayList<FramePoint3D> framePoints = new ArrayList<FramePoint3D>(points.size());
 
       for (Point2D point : points)
       {
-         FramePoint framePoint = new FramePoint(referenceFrame, point.getX(), point.getY(), 0.0);
+         FramePoint3D framePoint = new FramePoint3D(referenceFrame, point.getX(), point.getY(), 0.0);
          framePoints.add(framePoint);
       }
 
@@ -115,9 +115,9 @@ public class ListOfPointsTrajectory
       return listOfPoints.size();
    }
 
-   public ArrayList<FramePoint> getOriginalList()
+   public ArrayList<FramePoint3D> getOriginalList()
    {
-      return new ArrayList<FramePoint>(listOfPoints);
+      return new ArrayList<FramePoint3D>(listOfPoints);
    }
 
 
@@ -135,16 +135,16 @@ public class ListOfPointsTrajectory
 
    public class FramePointAndAlpha
    {
-      private final FramePoint framePoint;
+      private final FramePoint3D framePoint;
       private final double alpha;
 
-      FramePointAndAlpha(FramePoint framePoint, double alpha)
+      FramePointAndAlpha(FramePoint3D framePoint, double alpha)
       {
          this.framePoint = framePoint;
          this.alpha = alpha;
       }
 
-      public FramePoint getFramePoint()
+      public FramePoint3D getFramePoint()
       {
          return framePoint;
       }
@@ -156,7 +156,7 @@ public class ListOfPointsTrajectory
    }
 
 
-   private double[] calculateLengthOfPath(ArrayList<FramePoint> pointsOnPath)
+   private double[] calculateLengthOfPath(ArrayList<FramePoint3D> pointsOnPath)
    {
       double[] distanceOnPath = new double[pointsOnPath.size()];
       distanceOnPath[0] = 0.0;
@@ -170,7 +170,7 @@ public class ListOfPointsTrajectory
    }
 
 
-   public double getAlpha(FramePoint pointToCheck)
+   public double getAlpha(FramePoint3D pointToCheck)
    {
       double minimumDistance = Double.POSITIVE_INFINITY;
       double alphaToReturn = 1.0;
@@ -183,7 +183,7 @@ public class ListOfPointsTrajectory
          if (alpha > 1.0)
             alpha = 1.0;
 
-         FramePoint testPoint = this.getPointOnPath(alpha);
+         FramePoint3D testPoint = this.getPointOnPath(alpha);
          double distance = testPoint.distance(pointToCheck);
          if (distance < minimumDistance)
          {
@@ -195,7 +195,7 @@ public class ListOfPointsTrajectory
       return alphaToReturn;
    }
 
-   public int getIndexOfClosestPoint(FramePoint pointToCheck)
+   public int getIndexOfClosestPoint(FramePoint3D pointToCheck)
    {
       double alpha = getAlpha(pointToCheck);
 
@@ -220,18 +220,18 @@ public class ListOfPointsTrajectory
 
    }
 
-   public FramePoint getPointOnPath(double alpha)
+   public FramePoint3D getPointOnPath(double alpha)
    {
       return getPointOnPath(alpha, false);
    }
 
-   public FramePoint getPointOnPathAndAddToInternalList(double alpha)
+   public FramePoint3D getPointOnPathAndAddToInternalList(double alpha)
    {
       return getPointOnPath(alpha, true);
    }
 
 
-   private FramePoint getPointOnPath(double alpha, boolean addToInternalRepresentation)
+   private FramePoint3D getPointOnPath(double alpha, boolean addToInternalRepresentation)
    {
       if (alpha < 0.0)
          alpha = 0.0;
@@ -249,10 +249,10 @@ public class ListOfPointsTrajectory
 
       double fractionBetweenPoints = indexDouble - indexBefore;
 
-      FramePoint beforePoint = new FramePoint(listOfPoints.get(indexBefore));
-      FramePoint afterPoint = new FramePoint(listOfPoints.get(indexAfter));
+      FramePoint3D beforePoint = new FramePoint3D(listOfPoints.get(indexBefore));
+      FramePoint3D afterPoint = new FramePoint3D(listOfPoints.get(indexAfter));
 
-      FrameVector vectorBetweenPoints = new FrameVector(beforePoint.getReferenceFrame());
+      FrameVector3D vectorBetweenPoints = new FrameVector3D(beforePoint.getReferenceFrame());
       vectorBetweenPoints.sub(afterPoint, beforePoint);
 
       if (fractionBetweenPoints == 0.0)
@@ -264,12 +264,12 @@ public class ListOfPointsTrajectory
          vectorBetweenPoints.scale(fractionBetweenPoints);
       }
 
-      FramePoint returnPoint = new FramePoint(beforePoint);
+      FramePoint3D returnPoint = new FramePoint3D(beforePoint);
       returnPoint.add(vectorBetweenPoints);
 
       if ((addToInternalRepresentation) && (beforePoint.distance(returnPoint) > 1e-7) && (afterPoint.distance(returnPoint) > 1e-7))
       {
-         ArrayList<FramePoint> newListOfPoints = new ArrayList<FramePoint>();
+         ArrayList<FramePoint3D> newListOfPoints = new ArrayList<FramePoint3D>();
          for (int i = 0; i <= indexBefore; i++)
          {
             newListOfPoints.add(listOfPoints.get(i));
@@ -289,7 +289,7 @@ public class ListOfPointsTrajectory
       return returnPoint;
    }
 
-   public FramePoint getPointOnPathDistanceFromStart(double distanceFromStart)
+   public FramePoint3D getPointOnPathDistanceFromStart(double distanceFromStart)
    {
       double pathLength = this.getPathLength();
       if (pathLength < 1e-12)
@@ -301,7 +301,7 @@ public class ListOfPointsTrajectory
    }
 
 
-   public FramePoint getPointOnPathDistanceFromStartAndAddToInternalList(double distanceFromStart)
+   public FramePoint3D getPointOnPathDistanceFromStartAndAddToInternalList(double distanceFromStart)
    {
       double pathLength = this.getPathLength();
       if (pathLength < 1e-12)
@@ -315,7 +315,7 @@ public class ListOfPointsTrajectory
 
 
 
-   public static ArrayList<FramePoint> expandList(ArrayList<FramePoint> listOfPoints, int numberOfPoints)
+   public static ArrayList<FramePoint3D> expandList(ArrayList<FramePoint3D> listOfPoints, int numberOfPoints)
    {
 //    if (numberOfPoints <= listOfPoints.size())
 //       return new ArrayList<FramePoint>(listOfPoints);
@@ -323,7 +323,7 @@ public class ListOfPointsTrajectory
       ListOfPointsTrajectory listOfPointsTrajectory = new ListOfPointsTrajectory(listOfPoints);
       double percentStepSize = 1.0 / (numberOfPoints - 1.0);
 
-      ArrayList<FramePoint> ret = new ArrayList<FramePoint>();
+      ArrayList<FramePoint3D> ret = new ArrayList<FramePoint3D>();
       for (double alpha = 0.0; alpha <= 1.0; alpha = alpha + percentStepSize)
       {
          ret.add(listOfPointsTrajectory.getPointOnPath(alpha));
@@ -345,12 +345,12 @@ public class ListOfPointsTrajectory
 
    public static void main(String[] args)
    {
-      FramePoint framePoint;
-      ArrayList<FramePoint> list = new ArrayList<FramePoint>();
+      FramePoint3D framePoint;
+      ArrayList<FramePoint3D> list = new ArrayList<FramePoint3D>();
 
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
 
-      framePoint = new FramePoint(referenceFrame, 0.0, 0.0, 0.0);
+      framePoint = new FramePoint3D(referenceFrame, 0.0, 0.0, 0.0);
       list.add(framePoint);
 
 //    framePoint = new FramePoint(LittleDogFrames.getWorldFrame(), 1.0, 0.0, 0.0);
@@ -370,7 +370,7 @@ public class ListOfPointsTrajectory
 
       for (double alpha = 0.0; alpha <= 1.0; alpha = alpha + 0.1)
       {
-         FramePoint testPoint = listOfPointsTrajectory.getPointOnPath(alpha);
+         FramePoint3D testPoint = listOfPointsTrajectory.getPointOnPath(alpha);
          System.out.println("testPoint=" + testPoint);
       }
 

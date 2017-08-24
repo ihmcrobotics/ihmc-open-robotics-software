@@ -31,6 +31,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
@@ -43,7 +44,6 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -112,13 +112,13 @@ public class DRCSimulationTestHelper
    }
 
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
-		   SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
-		   DRCNetworkModuleParameters drcNetworkModuleParameters, boolean automaticallySimulate)
+                                  SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
+                                  DRCNetworkModuleParameters drcNetworkModuleParameters, boolean automaticallySimulate)
    {
-	   this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, drcNetworkModuleParameters, null, null, false,
-			   false, false, automaticallySimulate, null);
+      this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, drcNetworkModuleParameters, null, null, false,
+           false, false, automaticallySimulate, null);
    }
-   
+
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
                                   SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
                                   DRCNetworkModuleParameters drcNetworkModuleParameters)
@@ -138,7 +138,7 @@ public class DRCSimulationTestHelper
            highLevelBehaviorFactoryToAdd, initialSetup, addFootstepMessageGenerator, useHeadingAndVelocityScript, cheatWithGroundHeightAtForFootstep,
            automaticallySpawnSimulation, walkingScriptParameters, true);
    }
-   
+
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
                                   SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
                                   DRCNetworkModuleParameters drcNetworkModuleParameters, HighLevelBehaviorFactory highLevelBehaviorFactoryToAdd,
@@ -268,7 +268,7 @@ public class DRCSimulationTestHelper
    {
       return (FullHumanoidRobotModel) fullRobotModel;
    }
-   
+
    public CommonHumanoidReferenceFrames getReferenceFrames()
    {
       MomentumBasedControllerFactory momentumBasedControllerFactory = avatarSimulation.getMomentumBasedControllerFactory();

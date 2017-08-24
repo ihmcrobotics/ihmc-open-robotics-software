@@ -1,13 +1,16 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * Double-geodesic PD controller with feed forward for a left-invariant system (i.e. in body coordinates)
@@ -21,24 +24,24 @@ public class SE3PIDController
 
    private final AxisAngleOrientationController orientationController;
    private final FrameOrientation desiredOrientation = new FrameOrientation();
-   private final FrameVector desiredAngularVelocity = new FrameVector();
-   private final FrameVector feedForwardAngularAction = new FrameVector();
-   private final FrameVector currentAngularVelocity = new FrameVector();
-   private final FrameVector angularActionFromOrientationController = new FrameVector();
+   private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
+   private final FrameVector3D feedForwardAngularAction = new FrameVector3D();
+   private final FrameVector3D currentAngularVelocity = new FrameVector3D();
+   private final FrameVector3D angularActionFromOrientationController = new FrameVector3D();
 
    private final EuclideanPositionController positionController;
-   private final FramePoint desiredPosition = new FramePoint();
-   private final FrameVector desiredVelocity = new FrameVector();
-   private final FrameVector feedForwardLinearAction = new FrameVector();
-   private final FrameVector currentVelocity = new FrameVector();
-   private final FrameVector actionFromPositionController = new FrameVector();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
+   private final FrameVector3D desiredVelocity = new FrameVector3D();
+   private final FrameVector3D feedForwardLinearAction = new FrameVector3D();
+   private final FrameVector3D currentVelocity = new FrameVector3D();
+   private final FrameVector3D actionFromPositionController = new FrameVector3D();
 
    public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, double dt, YoVariableRegistry registry)
    {
       this(namePrefix, bodyFrame, dt, null, registry);
    }
 
-   public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, double dt, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
+   public SE3PIDController(String namePrefix, ReferenceFrame bodyFrame, double dt, YoPIDSE3Gains gains, YoVariableRegistry registry)
    {
       this.bodyFrame = bodyFrame;
       if (gains != null)
@@ -219,18 +222,18 @@ public class SE3PIDController
       orientationController.setMaxProportionalError(maxProportionalError);
    }
 
-   public void setGains(SE3PIDGainsInterface gains)
+   public void setGains(PIDSE3Gains gains)
    {
       positionController.setGains(gains.getPositionGains());
       orientationController.setGains(gains.getOrientationGains());
    }
 
-   public void setPositionGains(PositionPIDGainsInterface gains)
+   public void setPositionGains(PID3DGains gains)
    {
       positionController.setGains(gains);
    }
 
-   public void setOrientationGains(OrientationPIDGainsInterface gains)
+   public void setOrientationGains(PID3DGains gains)
    {
       orientationController.setGains(gains);
    }

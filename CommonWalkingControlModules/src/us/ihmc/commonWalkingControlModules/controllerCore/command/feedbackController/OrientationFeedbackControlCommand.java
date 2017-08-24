@@ -4,14 +4,15 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyFeedbackContr
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.controllers.OrientationPIDGains;
-import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -33,7 +34,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
  * core allowing the higher-level controller to continuously update the desireds, gains, and weight
  * to use.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  *
  */
@@ -48,7 +49,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    private final Vector3D feedForwardAngularAccelerationInWorld = new Vector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
-   private final OrientationPIDGains gains = new OrientationPIDGains();
+   private final PID3DGains gains = new DefaultPID3DGains();
    /** This is the reference frame in which the angular part of the gains are to be applied. If {@code null}, it is applied in the control frame. */
    private ReferenceFrame angularGainsFrame = null;
 
@@ -99,7 +100,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * The joint path going from the {@code base} to the {@code endEffector} specifies the joints
     * that can be to control the end-effector.
     * </p>
-    * 
+    *
     * @param base the rigid-body located right before the first joint to be used for controlling the
     *           end-effector.
     * @param endEffector the rigid-body to be controlled.
@@ -125,7 +126,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * bending the elbow. This reduces the time needed to escape the singular configuration. It also
     * prevents unfortunate situation where the elbow would try to bend past the joint limit.
     * </p>
-    * 
+    *
     * @param primaryBase
     */
    public void setPrimaryBase(RigidBody primaryBase)
@@ -137,7 +138,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * The control base frame is the reference frame with respect to which the end-effector is to be
     * controlled. More specifically, the end-effector desired velocity is assumed to be with respect
     * to the control base frame.
-    * 
+    *
     * @param controlBaseFrame the new control base frame.
     */
    public void setControlBaseFrame(ReferenceFrame controlBaseFrame)
@@ -150,10 +151,10 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
 
    /**
     * Sets the gains to use during the next control tick.
-    * 
+    *
     * @param gains the new set of gains to use. Not modified.
     */
-   public void setGains(OrientationPIDGainsInterface gains)
+   public void setGains(PID3DGainsReadOnly gains)
    {
       this.gains.set(gains);
    }
@@ -163,7 +164,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * <p>
     * If the reference frame is {@code null}, the gains will be applied in the control frame.
     * </p>
-    * 
+    *
     * @param angularGainsFrame the reference frame to use for the orientation gains.
     */
    public void setGainsFrame(ReferenceFrame angularGainsFrame)
@@ -176,7 +177,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * <p>
     * The desired angular velocity and feed-forward angular acceleration are set to zero.
     * </p>
-    * 
+    *
     * @param desiredOrientation describes the orientation that the
     *           {@code endEffector.getBodyFixedFrame()} should reach. Not modified.
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
@@ -193,7 +194,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
 
    /**
     * Sets the desired data expressed in world frame to be used during the next control tick.
-    * 
+    *
     * @param desiredOrientation describes the orientation that the
     *           {@code endEffector.getBodyFixedFrame()} should reach. Not modified.
     * @param desiredAngularVelocity describes the desired linear velocity of
@@ -205,7 +206,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
+   public void set(FrameOrientation desiredOrientation, FrameVector3D desiredAngularVelocity, FrameVector3D feedForwardAngularAcceleration)
    {
       desiredOrientation.checkReferenceFrameMatch(worldFrame);
       desiredAngularVelocity.checkReferenceFrameMatch(worldFrame);
@@ -219,7 +220,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    /**
     * Change the reference frame of the given data such that it is expressed in
     * {@link ReferenceFrame#getWorldFrame()}. The data will be used for the next control tick.
-    * 
+    *
     * @param desiredOrientation describes the orientation that the
     *           {@code endEffector.getBodyFixedFrame()} should reach. Modified.
     * @param desiredAngularVelocity describes the desired linear velocity of
@@ -227,7 +228,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * @param feedForwardAngularAcceleration describes the desired linear acceleration of
     *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Modified.
     */
-   public void changeFrameAndSet(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
+   public void changeFrameAndSet(FrameOrientation desiredOrientation, FrameVector3D desiredAngularVelocity, FrameVector3D feedForwardAngularAcceleration)
    {
       desiredOrientation.changeFrame(worldFrame);
       desiredAngularVelocity.changeFrame(worldFrame);
@@ -258,7 +259,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
     * selection frame is equal to the control frame.
     * </p>
-    * 
+    *
     * @param selectionMatrix the selection matrix to copy data from. Not modified.
     */
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
@@ -273,7 +274,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * optimization will behave but the ratio between them. A command with a higher weight than other
     * commands value will be treated as more important than the other commands.
     * </p>
-    * 
+    *
     * @param weight the weight value to use for this command.
     */
    public void setWeightForSolver(double weight)
@@ -288,7 +289,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     * optimization will behave but the ratio between them. A command with a higher weight than other
     * commands value will be treated as more important than the other commands.
     * </p>
-    * 
+    *
     * @param angular the weights to use for the angular part of this command. Not modified.
     * @param linear the weight to use for the linear part of this command. Not modified.
     */
@@ -303,8 +304,8 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
    }
 
-   public void getIncludingFrame(FrameOrientation desiredOrientationToPack, FrameVector desiredAngularVelocityToPack,
-                                 FrameVector feedForwardAngularAccelerationToPack)
+   public void getIncludingFrame(FrameOrientation desiredOrientationToPack, FrameVector3D desiredAngularVelocityToPack,
+                                 FrameVector3D feedForwardAngularAccelerationToPack)
    {
       desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
       desiredAngularVelocityToPack.setIncludingFrame(worldFrame, desiredAngularVelocityInWorld);
@@ -340,7 +341,7 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       return ControllerCoreCommandType.ORIENTATION;
    }
 
-   public OrientationPIDGainsInterface getGains()
+   public PID3DGains getGains()
    {
       return gains;
    }

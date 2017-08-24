@@ -1,11 +1,11 @@
 package us.ihmc.robotics.math.filters;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class BetaFilteredYoFramePoint2d extends YoFramePoint2d
 {
@@ -70,7 +70,7 @@ public class BetaFilteredYoFramePoint2d extends YoFramePoint2d
       y.update(point2dUnfiltered.getY());
    }
 
-   public void update(FramePoint2d point2dUnfiltered)
+   public void update(FramePoint2D point2dUnfiltered)
    {
       checkReferenceFrameMatch(point2dUnfiltered);
       x.update(point2dUnfiltered.getX());

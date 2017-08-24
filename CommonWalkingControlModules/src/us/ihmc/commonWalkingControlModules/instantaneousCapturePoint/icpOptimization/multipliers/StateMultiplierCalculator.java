@@ -5,11 +5,11 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.EfficientCubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.EfficientCubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.RecursionMultipliers;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 
 import java.util.ArrayList;
@@ -336,12 +336,12 @@ public class StateMultiplierCalculator
       return stateEndCurrentMultiplier.getVelocityMultiplier();
    }
 
-   private final FramePoint2d tmpPoint = new FramePoint2d();
-   private final FramePoint2d tmpEntry = new FramePoint2d();
-   private final FramePoint2d tmpExit = new FramePoint2d();
+   private final FramePoint2D tmpPoint = new FramePoint2D();
+   private final FramePoint2D tmpEntry = new FramePoint2D();
+   private final FramePoint2D tmpExit = new FramePoint2D();
 
-   public void reconstructICPCornerPoint(FramePoint2d predictedICPCornerPointToPack, FramePoint2d finalICP, ArrayList<FramePoint2d> footstepLocations,
-         ArrayList<FrameVector2d> entryOffsets, ArrayList<FrameVector2d> exitOffsets, int numberOfFootstepsToConsider)
+   public void reconstructICPCornerPoint(FramePoint2D predictedICPCornerPointToPack, FramePoint2D finalICP, ArrayList<FramePoint2D> footstepLocations,
+         ArrayList<FrameVector2D> entryOffsets, ArrayList<FrameVector2D> exitOffsets, int numberOfFootstepsToConsider)
    {
       predictedICPCornerPointToPack.set(finalICP);
       predictedICPCornerPointToPack.scale(getFinalICPRecursionMultiplier());
@@ -366,8 +366,8 @@ public class StateMultiplierCalculator
       }
    }
 
-   public void yoReconstructICPCornerPoint(FramePoint2d predictedICPCornerPointToPack, FramePoint2d finalICP, ArrayList<YoFramePoint2d> footstepLocations,
-         ArrayList<FrameVector2d> entryOffsets, ArrayList<FrameVector2d> exitOffsets, int numberOfFootstepsToConsider)
+   public void yoReconstructICPCornerPoint(FramePoint2D predictedICPCornerPointToPack, FramePoint2D finalICP, ArrayList<YoFramePoint2d> footstepLocations,
+         ArrayList<FrameVector2D> entryOffsets, ArrayList<FrameVector2D> exitOffsets, int numberOfFootstepsToConsider)
    {
       predictedICPCornerPointToPack.set(finalICP);
       predictedICPCornerPointToPack.scale(getFinalICPRecursionMultiplier());
@@ -389,8 +389,8 @@ public class StateMultiplierCalculator
       }
    }
 
-   public void reconstructReferenceICP(FramePoint2d referenceICPToPack, FrameVector2d referenceICPVelocityToPack, FramePoint2d predictedICPCornerPoint,
-         FramePoint2d entryCMP, FramePoint2d exitCMP, FramePoint2d initialICP, FrameVector2d initialICPVelocity)
+   public void reconstructReferenceICP(FramePoint2D referenceICPToPack, FrameVector2D referenceICPVelocityToPack, FramePoint2D predictedICPCornerPoint,
+         FramePoint2D entryCMP, FramePoint2D exitCMP, FramePoint2D initialICP, FrameVector2D initialICPVelocity)
    {
       referenceICPToPack.set(predictedICPCornerPoint);
       referenceICPToPack.scale(getStateEndCurrentMultiplier());

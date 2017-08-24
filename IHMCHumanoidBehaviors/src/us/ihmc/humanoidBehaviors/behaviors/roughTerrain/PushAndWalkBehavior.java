@@ -3,6 +3,10 @@ package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -19,13 +23,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -121,8 +121,8 @@ public class PushAndWalkBehavior extends AbstractBehavior
       if (statusQueue.isNewPacketAvailable())
       {
          CapturabilityBasedStatus latestPacket = statusQueue.getLatestPacket();
-         FramePoint2d desiredCapturePoint = latestPacket.getDesiredCapturePoint();
-         FramePoint2d capturePoint = latestPacket.getCapturePoint();
+         FramePoint2D desiredCapturePoint = latestPacket.getDesiredCapturePoint();
+         FramePoint2D capturePoint = latestPacket.getCapturePoint();
 
          boolean doubleSupport = true;
          for (RobotSide robotSide : RobotSide.values)
@@ -191,14 +191,14 @@ public class PushAndWalkBehavior extends AbstractBehavior
       referenceFrames.updateFrames();
       walking.set(true);
 
-      FrameVector direction = new FrameVector(ReferenceFrame.getWorldFrame());
-      direction.setXY(direction2dInWorld);
+      FrameVector3D direction = new FrameVector3D(ReferenceFrame.getWorldFrame());
+      direction.set(direction2dInWorld);
       RobotSide swingSide = findStepSide(direction);
 
-      FramePoint location = computeSteppingLocation(direction, swingSide);
+      FramePoint3D location = computeSteppingLocation(direction, swingSide);
 
       MovingReferenceFrame stanceSoleFrame = referenceFrames.getSoleFrame(swingSide.getOppositeSide());
-      FrameVector directionStanceFootFrame = new FrameVector(direction);
+      FrameVector3D directionStanceFootFrame = new FrameVector3D(direction);
       directionStanceFootFrame.changeFrame(stanceSoleFrame);
       
       double yawAngleChange = Math.atan(directionStanceFootFrame.getY()/directionStanceFootFrame.getX());
@@ -214,7 +214,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       sendPacketToController(footsteps);
    }
 
-   private RobotSide findStepSide(FrameVector direction)
+   private RobotSide findStepSide(FrameVector3D direction)
    {
       double score = 0.0;
       RobotSide ret = null;
@@ -222,17 +222,17 @@ public class PushAndWalkBehavior extends AbstractBehavior
       // compare the two options:
       for (RobotSide stepSide : RobotSide.values)
       {
-         FramePoint stepLocation = computeSteppingLocation(direction, stepSide);
-         FramePoint stanceLocation = new FramePoint(referenceFrames.getSoleZUpFrame(stepSide.getOppositeSide()));
+         FramePoint3D stepLocation = computeSteppingLocation(direction, stepSide);
+         FramePoint3D stanceLocation = new FramePoint3D(referenceFrames.getSoleZUpFrame(stepSide.getOppositeSide()));
          
          stepLocation.changeFrame(ReferenceFrame.getWorldFrame());
          stanceLocation.changeFrame(ReferenceFrame.getWorldFrame());
 
-         FramePoint midFeetPointAfterStep = new FramePoint();
+         FramePoint3D midFeetPointAfterStep = new FramePoint3D();
          midFeetPointAfterStep.interpolate(stepLocation, stanceLocation, 0.5);
 
          MovingReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
-         FramePoint midFeetLocation = new FramePoint(midFeetFrame);
+         FramePoint3D midFeetLocation = new FramePoint3D(midFeetFrame);
          midFeetLocation.changeFrame(ReferenceFrame.getWorldFrame());
 
          double progress = midFeetLocation.distance(midFeetPointAfterStep);
@@ -246,7 +246,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       return ret;
    }
 
-   private FramePoint computeSteppingLocation(FrameVector direction, RobotSide stepSide)
+   private FramePoint3D computeSteppingLocation(FrameVector3D direction, RobotSide stepSide)
    {
       // reachable region in stance frame
       ConvexPolygon2D reachableRegion = new ConvexPolygon2D();
@@ -258,10 +258,10 @@ public class PushAndWalkBehavior extends AbstractBehavior
       
       MovingReferenceFrame stanceSoleFrame = referenceFrames.getSoleZUpFrame(stepSide.getOppositeSide());
       //MovingReferenceFrame stanceSoleFrame = referenceFrames.getFootFrame(stepSide.getOppositeSide());
-      FrameVector localDirection = new FrameVector(direction);
+      FrameVector3D localDirection = new FrameVector3D(direction);
       localDirection.changeFrame(stanceSoleFrame);
-      FramePoint stanceLocation = new FramePoint(stanceSoleFrame);
-      FramePoint swingLocation = new FramePoint(referenceFrames.getFootFrame(stepSide));
+      FramePoint3D stanceLocation = new FramePoint3D(stanceSoleFrame);
+      FramePoint3D swingLocation = new FramePoint3D(referenceFrames.getFootFrame(stepSide));
       
       //System.out.println(swingLocation.toString());
       swingLocation.changeFrame(stanceSoleFrame);
@@ -287,8 +287,8 @@ public class PushAndWalkBehavior extends AbstractBehavior
     	  index = location2d[0].distance(swingLoc) > location2d[1].distance(swingLoc) ? 0:1;
       }
       
-      FramePoint location = new FramePoint(stanceSoleFrame);
-      location.setXY(location2d[index]);
+      FramePoint3D location = new FramePoint3D(stanceSoleFrame);
+      location.set(location2d[index], 0.0);
       location.changeFrame(ReferenceFrame.getWorldFrame());
 
       return location;

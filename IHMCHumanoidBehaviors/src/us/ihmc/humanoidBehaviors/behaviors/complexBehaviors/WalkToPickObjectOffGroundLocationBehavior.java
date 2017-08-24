@@ -1,5 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToPickObjectOffGroundLocationBehavior.WalkState;
@@ -13,10 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectory
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
@@ -81,10 +81,10 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
    private FramePose2d getoffsetPoint()
    {
 
-      FramePoint2d ballPosition2d = new FramePoint2d(ReferenceFrame.getWorldFrame(), pickUpLocation.getX(), pickUpLocation.getY());
-      FramePoint2d robotPosition = new FramePoint2d(midZupFrame, 0.0, 0.0);
+      FramePoint2D ballPosition2d = new FramePoint2D(ReferenceFrame.getWorldFrame(), pickUpLocation.getX(), pickUpLocation.getY());
+      FramePoint2D robotPosition = new FramePoint2D(midZupFrame, 0.0, 0.0);
       robotPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      FrameVector2d walkingDirection = new FrameVector2d(ReferenceFrame.getWorldFrame());
+      FrameVector2D walkingDirection = new FrameVector2D(ReferenceFrame.getWorldFrame());
       walkingDirection.set(ballPosition2d);
       walkingDirection.sub(robotPosition);
       walkingDirection.normalize();

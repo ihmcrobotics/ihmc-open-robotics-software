@@ -5,13 +5,13 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameLine;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.geometry.FrameLine3D;
 
 public class FramePlane3dTest
 {
@@ -23,11 +23,11 @@ public class FramePlane3dTest
    public void testIsOnOrAbove()
    {
       FramePlane3d plane = new FramePlane3d(worldFrame, new Point3D(), new Vector3D(0.0, 0.0, 1.0));
-      FramePoint q = new FramePoint(worldFrame, 0.0, 0.0, 2.0);
+      FramePoint3D q = new FramePoint3D(worldFrame, 0.0, 0.0, 2.0);
       assertTrue(plane.isOnOrAbove(q));
-      q = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
+      q = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
       assertTrue(plane.isOnOrAbove(q));
-      q = new FramePoint(worldFrame, 0.0, 0.0, -2.0);
+      q = new FramePoint3D(worldFrame, 0.0, 0.0, -2.0);
       assertFalse(plane.isOnOrAbove(q));
    }
 
@@ -36,7 +36,7 @@ public class FramePlane3dTest
    public void testIsOnOrBelow()
    {
       FramePlane3d plane = new FramePlane3d(worldFrame, new Point3D(), new Vector3D(0.0, 0.0, 1.0));
-      FramePoint q = new FramePoint(worldFrame, 0.0, 0.0, -2.0);
+      FramePoint3D q = new FramePoint3D(worldFrame, 0.0, 0.0, -2.0);
       assertTrue(plane.isOnOrBelow(q));
       q.set(0.0, 0.0, 1.0);
       assertFalse(plane.isOnOrBelow(q));
@@ -46,8 +46,8 @@ public class FramePlane3dTest
 	@Test(timeout = 30000)
    public void testOrthogonalProjection()
    {
-      FramePoint point = new FramePoint(worldFrame, 1.0, 2.0, -3.0);
-      FramePoint expectedPoint = new FramePoint(worldFrame, 1.0, 2.0, 0.0);
+      FramePoint3D point = new FramePoint3D(worldFrame, 1.0, 2.0, -3.0);
+      FramePoint3D expectedPoint = new FramePoint3D(worldFrame, 1.0, 2.0, 0.0);
       FramePlane3d plane = new FramePlane3d(worldFrame, new Point3D(), new Vector3D(0.0, 0.0, 1.0));
       assertTrue(expectedPoint.epsilonEquals(plane.orthogonalProjectionCopy(point), 1e-14));
 
@@ -62,7 +62,7 @@ public class FramePlane3dTest
 	@Test(timeout = 30000)
    public void testDistance()
    {
-      FramePoint point = new FramePoint(worldFrame, 1.0, 1.0, 1.0);
+      FramePoint3D point = new FramePoint3D(worldFrame, 1.0, 1.0, 1.0);
       FramePlane3d plane = new FramePlane3d(worldFrame, new Point3D(), new Vector3D(0.0, 0.0, 1.0));
       assertEquals(1.0, plane.distance(point), 1e-14);
 
@@ -80,8 +80,8 @@ public class FramePlane3dTest
       transformation.setRotationYawAndZeroTranslation(2.3);
       FramePlane3d plane = new FramePlane3d(worldFrame, new Point3D(), new Vector3D(0.0, 0.0, 1.0));
       plane.applyTransform(transformation);
-      FrameVector expectedNormal = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
-      FramePoint expectedPoint = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
+      FrameVector3D expectedNormal = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
+      FramePoint3D expectedPoint = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
       assertTrue(plane.epsilonEquals(new FramePlane3d(expectedNormal, expectedPoint), epsilon));
 
       RigidBodyTransform transformation2 = new RigidBodyTransform();
@@ -118,18 +118,18 @@ public class FramePlane3dTest
 	@Test(timeout = 30000)
    public void testIntersectionWithLine()
    {
-	   FrameVector normal = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
-	   FramePoint point = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
+	   FrameVector3D normal = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
+	   FramePoint3D point = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
 	   FramePlane3d plane  = new FramePlane3d(normal, point);
 	   
-	   FramePoint origin = new FramePoint(worldFrame, 0.0, 1.0, -1.0);
-	   FrameVector direction = new FrameVector(worldFrame, 1.0, 0.0, 1.0);
-	   FrameLine line = new FrameLine(origin, direction);
+	   FramePoint3D origin = new FramePoint3D(worldFrame, 0.0, 1.0, -1.0);
+	   FrameVector3D direction = new FrameVector3D(worldFrame, 1.0, 0.0, 1.0);
+	   FrameLine3D line = new FrameLine3D(origin, direction);
 	   
-	   FramePoint pointToPack = new FramePoint(worldFrame);
+	   FramePoint3D pointToPack = new FramePoint3D(worldFrame);
 	   plane.getIntersectionWithLine(pointToPack, line);
 	   
-	   FramePoint expectedIntersection = new FramePoint(worldFrame, 1.0, 1.0, 0.0);
+	   FramePoint3D expectedIntersection = new FramePoint3D(worldFrame, 1.0, 1.0, 0.0);
 	   assertTrue(pointToPack.epsilonEquals(expectedIntersection, epsilon));
    }
 }

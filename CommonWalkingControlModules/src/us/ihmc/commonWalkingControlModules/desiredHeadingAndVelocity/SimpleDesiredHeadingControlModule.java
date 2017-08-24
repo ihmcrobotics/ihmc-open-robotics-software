@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.RateBasedDesiredHeadingControlModule.DesiredHeadingFrame;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
 
 public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlModule
@@ -76,9 +76,9 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
    }
 
    @Override
-   public FrameVector2d getFinalHeadingTarget()
+   public FrameVector2D getFinalHeadingTarget()
    {
-      FrameVector2d finalHeading = new FrameVector2d(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeadingFinal.getDoubleValue()),
+      FrameVector2D finalHeading = new FrameVector2D(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeadingFinal.getDoubleValue()),
             Math.sin(desiredHeadingFinal.getDoubleValue()));
 
       return finalHeading;
@@ -104,7 +104,7 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
    }
 
    @Override
-   public void setFinalHeadingTarget(FrameVector2d finalHeadingTarget)
+   public void setFinalHeadingTarget(FrameVector2D finalHeadingTarget)
    {
       finalHeadingTarget.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       setFinalHeadingTargetAngle(Math.atan2(finalHeadingTarget.getY(), finalHeadingTarget.getX()));
@@ -117,7 +117,7 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
    }
 
    @Override
-   public void getDesiredHeading(FrameVector2d desiredHeadingToPack, double timeFromNow)
+   public void getDesiredHeading(FrameVector2D desiredHeadingToPack, double timeFromNow)
    {
       double heading = predictDesiredHeading(timeFromNow);
       desiredHeadingToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), Math.cos(heading), Math.sin(heading));

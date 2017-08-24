@@ -1,5 +1,8 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -7,12 +10,9 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFra
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
@@ -25,28 +25,28 @@ public class QuadrupedTaskSpaceEstimator
    public static class Estimates
    {
       private final FrameOrientation bodyOrientation = new FrameOrientation();
-      private final FramePoint bodyPosition = new FramePoint();
-      private final FrameVector bodyLinearVelocity = new FrameVector();
-      private final FrameVector bodyAngularVelocity = new FrameVector();
-      private final FramePoint comPosition = new FramePoint();
-      private final FrameVector comVelocity = new FrameVector();
+      private final FramePoint3D bodyPosition = new FramePoint3D();
+      private final FrameVector3D bodyLinearVelocity = new FrameVector3D();
+      private final FrameVector3D bodyAngularVelocity = new FrameVector3D();
+      private final FramePoint3D comPosition = new FramePoint3D();
+      private final FrameVector3D comVelocity = new FrameVector3D();
       private final QuadrantDependentList<FrameOrientation> soleOrientation = new QuadrantDependentList<>();
-      private final QuadrantDependentList<FramePoint> solePosition = new QuadrantDependentList<>();
-      private final QuadrantDependentList<FrameVector> soleAngularVelocity = new QuadrantDependentList<>();
-      private final QuadrantDependentList<FrameVector> soleLinearVelocity = new QuadrantDependentList<>();
-      private final QuadrantDependentList<FrameVector> soleVirtualForce = new QuadrantDependentList<>();
-      private final QuadrantDependentList<FrameVector> soleContactForce = new QuadrantDependentList<>();
+      private final QuadrantDependentList<FramePoint3D> solePosition = new QuadrantDependentList<>();
+      private final QuadrantDependentList<FrameVector3D> soleAngularVelocity = new QuadrantDependentList<>();
+      private final QuadrantDependentList<FrameVector3D> soleLinearVelocity = new QuadrantDependentList<>();
+      private final QuadrantDependentList<FrameVector3D> soleVirtualForce = new QuadrantDependentList<>();
+      private final QuadrantDependentList<FrameVector3D> soleContactForce = new QuadrantDependentList<>();
 
       public Estimates()
       {
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             soleOrientation.set(robotQuadrant, new FrameOrientation());
-            solePosition.set(robotQuadrant, new FramePoint());
-            soleAngularVelocity.set(robotQuadrant, new FrameVector());
-            soleLinearVelocity.set(robotQuadrant, new FrameVector());
-            soleVirtualForce.set(robotQuadrant, new FrameVector());
-            soleContactForce.set(robotQuadrant, new FrameVector());
+            solePosition.set(robotQuadrant, new FramePoint3D());
+            soleAngularVelocity.set(robotQuadrant, new FrameVector3D());
+            soleLinearVelocity.set(robotQuadrant, new FrameVector3D());
+            soleVirtualForce.set(robotQuadrant, new FrameVector3D());
+            soleContactForce.set(robotQuadrant, new FrameVector3D());
          }
       }
 
@@ -74,27 +74,27 @@ public class QuadrupedTaskSpaceEstimator
          return bodyOrientation;
       }
 
-      public FramePoint getBodyPosition()
+      public FramePoint3D getBodyPosition()
       {
          return bodyPosition;
       }
 
-      public FrameVector getBodyLinearVelocity()
+      public FrameVector3D getBodyLinearVelocity()
       {
          return bodyLinearVelocity;
       }
 
-      public FrameVector getBodyAngularVelocity()
+      public FrameVector3D getBodyAngularVelocity()
       {
          return bodyAngularVelocity;
       }
 
-      public FramePoint getComPosition()
+      public FramePoint3D getComPosition()
       {
          return comPosition;
       }
 
-      public FrameVector getComVelocity()
+      public FrameVector3D getComVelocity()
       {
          return comVelocity;
       }
@@ -104,27 +104,27 @@ public class QuadrupedTaskSpaceEstimator
          return soleOrientation.get(robotQuadrant);
       }
 
-      public FramePoint getSolePosition(RobotQuadrant robotQuadrant)
+      public FramePoint3D getSolePosition(RobotQuadrant robotQuadrant)
       {
          return solePosition.get(robotQuadrant);
       }
 
-      public FrameVector getSoleAngularVelocity(RobotQuadrant robotQuadrant)
+      public FrameVector3D getSoleAngularVelocity(RobotQuadrant robotQuadrant)
       {
          return soleAngularVelocity.get(robotQuadrant);
       }
 
-      public FrameVector getSoleLinearVelocity(RobotQuadrant robotQuadrant)
+      public FrameVector3D getSoleLinearVelocity(RobotQuadrant robotQuadrant)
       {
          return soleLinearVelocity.get(robotQuadrant);
       }
 
-      public FrameVector getSoleVirtualForce(RobotQuadrant robotQuadrant)
+      public FrameVector3D getSoleVirtualForce(RobotQuadrant robotQuadrant)
       {
          return soleVirtualForce.get(robotQuadrant);
       }
 
-      public FrameVector getSoleContactForce(RobotQuadrant robotQuadrant)
+      public FrameVector3D getSoleContactForce(RobotQuadrant robotQuadrant)
       {
          return soleContactForce.get(robotQuadrant);
       }
@@ -134,27 +134,27 @@ public class QuadrupedTaskSpaceEstimator
          return soleOrientation;
       }
 
-      public QuadrantDependentList<FramePoint> getSolePosition()
+      public QuadrantDependentList<FramePoint3D> getSolePosition()
       {
          return solePosition;
       }
 
-      public QuadrantDependentList<FrameVector> getSoleAngularVelocity()
+      public QuadrantDependentList<FrameVector3D> getSoleAngularVelocity()
       {
          return soleAngularVelocity;
       }
 
-      public QuadrantDependentList<FrameVector> getSoleLinearVelocity()
+      public QuadrantDependentList<FrameVector3D> getSoleLinearVelocity()
       {
          return soleLinearVelocity;
       }
 
-      public QuadrantDependentList<FrameVector> getSoleVirtualForce()
+      public QuadrantDependentList<FrameVector3D> getSoleVirtualForce()
       {
          return soleVirtualForce;
       }
 
-      public QuadrantDependentList<FrameVector> getSoleContactForce()
+      public QuadrantDependentList<FrameVector3D> getSoleContactForce()
       {
          return soleContactForce;
       }

@@ -6,6 +6,9 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -14,13 +17,10 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -62,7 +62,7 @@ public class LegJointLimitAvoidanceControlModule
    private YoDouble[] upperLimits;
    private YoFramePose originalDesiredYoPose;
    private FramePose originalDesiredPose;
-   private FramePoint adjustedDesiredPosition;
+   private FramePoint3D adjustedDesiredPosition;
    private FrameOrientation adjustedDesiredOrientation;
    private YoFramePose adjustedDesiredPose;
    private RigidBodyTransform desiredTransform;
@@ -120,7 +120,7 @@ public class LegJointLimitAvoidanceControlModule
          originalDesiredYoPose = new YoFramePose(prefix + "originalDesiredYoPose", ReferenceFrame.getWorldFrame(), registry);
          adjustedDesiredPose = new YoFramePose(prefix + "adjustedDesiredPose", ReferenceFrame.getWorldFrame(), registry);
          desiredTransform = new RigidBodyTransform();
-         adjustedDesiredPosition = new FramePoint(ReferenceFrame.getWorldFrame());
+         adjustedDesiredPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
          adjustedDesiredOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
       }
 
@@ -169,8 +169,8 @@ public class LegJointLimitAvoidanceControlModule
       }
    }
 
-   public void correctSwingFootTrajectory(FramePoint desiredPosition, FrameOrientation desiredOrientation, FrameVector desiredLinearVelocityOfOrigin,
-         FrameVector desiredAngularVelocity, FrameVector desiredLinearAccelerationOfOrigin, FrameVector desiredAngularAcceleration)
+   public void correctSwingFootTrajectory(FramePoint3D desiredPosition, FrameOrientation desiredOrientation, FrameVector3D desiredLinearVelocityOfOrigin,
+         FrameVector3D desiredAngularVelocity, FrameVector3D desiredLinearAccelerationOfOrigin, FrameVector3D desiredAngularAcceleration)
 
    {
       // update joint positions in the ikJoints to the current positions
@@ -178,7 +178,7 @@ public class LegJointLimitAvoidanceControlModule
 
       Twist rootJointTist = new Twist();
       robotModel.getRootJoint().getJointTwist(rootJointTist);
-      FrameVector linearRootJointVelocity = new FrameVector();
+      FrameVector3D linearRootJointVelocity = new FrameVector3D();
       rootJointTist.getLinearPart(linearRootJointVelocity);
 
       linearRootJointVelocity.scale(0.004);

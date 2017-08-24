@@ -1,17 +1,17 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class TurningOverheadPath extends OverheadPath
 {
    private final FrameOrientation2d startOrientation;
    private final FrameOrientation2d endOrientation;
    private final double deltaYaw;
-   private final FramePoint2d point;
+   private final FramePoint2D point;
 
    public TurningOverheadPath(FramePose2d startPose, FrameOrientation2d endOrientation)
    {
@@ -19,7 +19,7 @@ public class TurningOverheadPath extends OverheadPath
       this.startOrientation = new FrameOrientation2d();
       startPose.getOrientationIncludingFrame(startOrientation);
       this.endOrientation = new FrameOrientation2d(endOrientation);
-      this.point = new FramePoint2d();
+      this.point = new FramePoint2D();
       startPose.getPositionIncludingFrame(point);
       this.deltaYaw = endOrientation.difference(startOrientation);
    }
@@ -56,7 +56,7 @@ public class TurningOverheadPath extends OverheadPath
    @Override
    public TurningOverheadPath changeFrameCopy(ReferenceFrame desiredFrame)
    {
-      FramePoint2d newStartPoint = new FramePoint2d(point);
+      FramePoint2D newStartPoint = new FramePoint2D(point);
       newStartPoint.changeFrame(desiredFrame);
       FrameOrientation2d newStartOrientation = new FrameOrientation2d(startOrientation);
       newStartOrientation.changeFrame(desiredFrame);

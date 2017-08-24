@@ -1,5 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
@@ -10,8 +12,6 @@ import us.ihmc.robotics.Plane;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariableList;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.FloatingPlanarJointPhysics;
 
 public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
@@ -344,7 +344,7 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
       }
    }
 
-   @Override public void getVelocity(FrameVector linearVelocityToPack)
+   @Override public void getVelocity(FrameVector3D linearVelocityToPack)
    {
       switch (type)
       {
@@ -360,7 +360,7 @@ public class FloatingPlanarJoint extends Joint implements FloatingSCSJoint
       }
    }
 
-   @Override public void getAngularVelocity(FrameVector angularVelocityToPack, ReferenceFrame bodyFrame)
+   @Override public void getAngularVelocity(FrameVector3D angularVelocityToPack, ReferenceFrame bodyFrame)
    {
       switch (type)
       {

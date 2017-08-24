@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
 import java.nio.file.Path;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public interface ScriptEngineUIInterface
 {

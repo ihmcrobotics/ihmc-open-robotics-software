@@ -17,13 +17,14 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class HumanEvaluationLine2dTest
@@ -103,12 +104,12 @@ public class HumanEvaluationLine2dTest
 
          if (randomLine.isPointOnLeftSideOfLine(testPoint))
          {
-            plotter.addFramePoint2d(new FramePoint2d(someFrame, testPoint), Color.blue);
+            plotter.addFramePoint2d(new FramePoint2D(someFrame, testPoint), Color.blue);
          }
 
          if (randomLine.isPointOnRightSideOfLine(testPoint))
          {
-            plotter.addFramePoint2d(new FramePoint2d(someFrame, testPoint), Color.orange);
+            plotter.addFramePoint2d(new FramePoint2D(someFrame, testPoint), Color.orange);
          }
 
          assertFalse("Point neither on the right nor on the left side of the line",
@@ -165,11 +166,11 @@ public class HumanEvaluationLine2dTest
 
          if (line1.isPointInFrontOfLine(testPoint) && line2.isPointInFrontOfLine(testPoint))
          {
-            plotter.addFramePoint2d(new FramePoint2d(someFrame, testPoint), Color.green);
+            plotter.addFramePoint2d(new FramePoint2D(someFrame, testPoint), Color.green);
          }
          else
          {
-            plotter.addFramePoint2d(new FramePoint2d(someFrame, testPoint), Color.red);
+            plotter.addFramePoint2d(new FramePoint2D(someFrame, testPoint), Color.red);
          }
       }
 

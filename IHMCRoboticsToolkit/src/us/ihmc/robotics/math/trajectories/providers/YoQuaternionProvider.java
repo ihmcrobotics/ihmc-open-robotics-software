@@ -1,9 +1,9 @@
 package us.ihmc.robotics.math.trajectories.providers;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
 
 public class YoQuaternionProvider implements OrientationProvider

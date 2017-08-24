@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.simulationConstructionSetTools.whiteBoard.TCPYoWhiteBoard;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.simulationconstructionset.whiteBoard.TCPYoWhiteBoard;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable

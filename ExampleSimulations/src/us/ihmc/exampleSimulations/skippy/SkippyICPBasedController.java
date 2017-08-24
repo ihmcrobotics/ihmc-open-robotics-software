@@ -1,6 +1,9 @@
 package us.ihmc.exampleSimulations.skippy;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -10,11 +13,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 
 public class SkippyICPBasedController extends SimpleRobotController
@@ -34,21 +34,21 @@ public class SkippyICPBasedController extends SimpleRobotController
    private final YoInteger ticksForDesiredForce = new YoInteger("ticksForDesiredForce", registry);
    private final PIDController hipAngleController = new PIDController("hipAngleController", registry);
    private final PIDController shoulderAngleController = new PIDController("shoulderAngleController", registry);
-   private final FrameVector angularMomentum = new FrameVector(worldFrame);
+   private final FrameVector3D angularMomentum = new FrameVector3D(worldFrame);
 
-   private final FramePoint com = new FramePoint(worldFrame);
-   private final FrameVector comVelocity = new FrameVector(worldFrame);
-   private final FramePoint icp = new FramePoint(worldFrame);
-   private final FramePoint footLocation = new FramePoint(worldFrame);
-   private final FramePoint desiredCMP = new FramePoint(worldFrame);
-   private final FrameVector desiredGroundReaction = new FrameVector(worldFrame);
-   private final FrameVector groundReaction = new FrameVector(worldFrame);
-   private final FrameVector worldToHip = new FrameVector(worldFrame);
-   private final FrameVector worldToShoulder = new FrameVector(worldFrame);
-   private final FrameVector hipToFootDirection = new FrameVector(worldFrame);
-   private final FrameVector shoulderToFootDirection = new FrameVector(worldFrame);
-   private final FrameVector hipAxis = new FrameVector(worldFrame);
-   private final FrameVector shoulderAxis = new FrameVector(worldFrame);
+   private final FramePoint3D com = new FramePoint3D(worldFrame);
+   private final FrameVector3D comVelocity = new FrameVector3D(worldFrame);
+   private final FramePoint3D icp = new FramePoint3D(worldFrame);
+   private final FramePoint3D footLocation = new FramePoint3D(worldFrame);
+   private final FramePoint3D desiredCMP = new FramePoint3D(worldFrame);
+   private final FrameVector3D desiredGroundReaction = new FrameVector3D(worldFrame);
+   private final FrameVector3D groundReaction = new FrameVector3D(worldFrame);
+   private final FrameVector3D worldToHip = new FrameVector3D(worldFrame);
+   private final FrameVector3D worldToShoulder = new FrameVector3D(worldFrame);
+   private final FrameVector3D hipToFootDirection = new FrameVector3D(worldFrame);
+   private final FrameVector3D shoulderToFootDirection = new FrameVector3D(worldFrame);
+   private final FrameVector3D hipAxis = new FrameVector3D(worldFrame);
+   private final FrameVector3D shoulderAxis = new FrameVector3D(worldFrame);
 
    private final YoFramePoint comViz = new YoFramePoint("CoM", worldFrame, registry);
    private final YoFramePoint icpViz = new YoFramePoint("ICP", worldFrame, registry);
@@ -192,17 +192,17 @@ public class SkippyICPBasedController extends SimpleRobotController
     * CMP computed from ICP and CMP coupled dynamics according to:
     * CMP = ICP + kCapture * (ICP - foot)
     */
-   private void cmpFromIcpDynamics(FramePoint icp, FramePoint footLocation, FramePoint desiredCMPToPack)
+   private void cmpFromIcpDynamics(FramePoint3D icp, FramePoint3D footLocation, FramePoint3D desiredCMPToPack)
    {
-      FrameVector icpToFoot = new FrameVector();
+      FrameVector3D icpToFoot = new FrameVector3D();
       icpToFoot.sub(icp, footLocation);
       desiredCMPToPack.scaleAdd(kCapture.getDoubleValue(), icpToFoot, icp);
       desiredCMPToPack.setZ(0.0);
    }
 
-   private double computeJointTorque(FrameVector groundReactionForce, FrameVector jointToFoot, FrameVector jointAxis)
+   private double computeJointTorque(FrameVector3D groundReactionForce, FrameVector3D jointToFoot, FrameVector3D jointAxis)
    {
-      FrameVector torque = new FrameVector(worldFrame);
+      FrameVector3D torque = new FrameVector3D(worldFrame);
       torque.cross(jointToFoot, groundReactionForce);
       return -jointAxis.dot(torque);
    }
@@ -241,14 +241,14 @@ public class SkippyICPBasedController extends SimpleRobotController
       return shoulderAngleController.compute(shoulderAngleDifference, 0.0, 0.0, 0.0, dt);
    }
 
-   private double computeAngleDifferenceInPlane(FrameVector vectorA, FrameVector vectorB, FrameVector planeNormal)
+   private double computeAngleDifferenceInPlane(FrameVector3D vectorA, FrameVector3D vectorB, FrameVector3D planeNormal)
    {
-      FrameVector projectedVectorA = new FrameVector();
-      FrameVector projectedVectorB = new FrameVector();
+      FrameVector3D projectedVectorA = new FrameVector3D();
+      FrameVector3D projectedVectorB = new FrameVector3D();
       projectVectorInPlane(vectorA, planeNormal, projectedVectorA);
       projectVectorInPlane(vectorB, planeNormal, projectedVectorB);
 
-      FrameVector crosProduct = new FrameVector();
+      FrameVector3D crosProduct = new FrameVector3D();
       crosProduct.cross(planeNormal, projectedVectorA);
       double sign = Math.signum(crosProduct.dot(projectedVectorB));
 
@@ -258,7 +258,7 @@ public class SkippyICPBasedController extends SimpleRobotController
       return angle;
    }
 
-   private void projectVectorInPlane(FrameVector vectorToProject, FrameVector planeNormal, FrameVector projectionToPack)
+   private void projectVectorInPlane(FrameVector3D vectorToProject, FrameVector3D planeNormal, FrameVector3D projectionToPack)
    {
       double modulus = vectorToProject.dot(planeNormal);
       projectionToPack.set(planeNormal);

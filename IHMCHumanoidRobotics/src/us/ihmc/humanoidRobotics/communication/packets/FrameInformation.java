@@ -3,10 +3,10 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
-import us.ihmc.robotics.geometry.FrameObject;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 
 import java.util.Random;
 
@@ -38,7 +38,7 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
     * </p>
     * It is recommended that this should be the same frame as the {@link #trajectoryReferenceFrameId} to
     * avoid unexpected behavior. Setting this frame to something different then the trajectory execution
-    * frame is equivalent to calling {@link FrameObject#changeFrame(ReferenceFrame)} on all trajectory
+    * frame is equivalent to calling {@link FrameGeometryObject#changeFrame(ReferenceFrame)} on all trajectory
     * data right before it is received by the controller.
     * </p>
     * The data frame is only useful if the user is unable to change the frame the data is expressed in

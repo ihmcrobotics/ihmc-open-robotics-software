@@ -14,11 +14,12 @@ import optiTrack.MocapRigidBody;
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapToPelvisFrameConverter;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -73,8 +74,8 @@ public class MocapToPelvisFrameConverterTest
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      ReferenceFrame initialPelvisFrame = ReferenceFrame.generateRandomReferenceFrame("initialPelvisFrame", random, ReferenceFrame.getWorldFrame());
-      ReferenceFrame mocapFrame = ReferenceFrame.generateRandomReferenceFrame("mocapFrame", random, ReferenceFrame.getWorldFrame());
+      ReferenceFrame initialPelvisFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("initialPelvisFrame", random, ReferenceFrame.getWorldFrame());
+      ReferenceFrame mocapFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("mocapFrame", random, ReferenceFrame.getWorldFrame());
       MocapRigidBody mocapRigidBody = createMocapRigidBody(initialPelvisFrame, mocapFrame);
 
       MocapToPelvisFrameConverter frameConverter = new MocapToPelvisFrameConverter();
@@ -82,7 +83,7 @@ public class MocapToPelvisFrameConverterTest
 
       for (int i = 0; i < 20; i++)
       {
-         ReferenceFrame randomPelvisFrame = ReferenceFrame.generateRandomReferenceFrame("randomPelvisFrame" + i, random, ReferenceFrame.getWorldFrame());
+         ReferenceFrame randomPelvisFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomPelvisFrame" + i, random, ReferenceFrame.getWorldFrame());
          MocapRigidBody randomMocapRigidBody = createMocapRigidBody(randomPelvisFrame, mocapFrame);
          RigidBodyTransform computedPelvisToWorldTransform = new RigidBodyTransform();
          frameConverter.computePelvisToWorldTransform(randomMocapRigidBody, computedPelvisToWorldTransform);
@@ -98,7 +99,7 @@ public class MocapToPelvisFrameConverterTest
       Vector3D pelvisToMarker2Translation = new Vector3D();
       pelvisToMarker2Transform.getTranslation(pelvisToMarker2Translation);
       pelvisToMarker2Translation.negate();
-      FramePoint markerPoint2 = new FramePoint(pelvisFrame, pelvisToMarker2Translation);
+      FramePoint3D markerPoint2 = new FramePoint3D(pelvisFrame, pelvisToMarker2Translation);
       markerPoint2.changeFrame(mocapFrame);
 
       RigidBodyTransform pelvisToMocapTransform = new RigidBodyTransform();
@@ -111,6 +112,6 @@ public class MocapToPelvisFrameConverterTest
       mocapMarkers.add(new MocapMarker(2, new Vector3D(), 0.024f));
       mocapMarkers.add(new MocapMarker(3, new Vector3D(), 0.024f));
       mocapMarkers.add(new MocapMarker(4, new Vector3D(), 0.024f));
-      return new MocapRigidBody(1, markerPoint2.getVectorCopy(), pelvisToMocapRotation, mocapMarkers, false);
+      return new MocapRigidBody(1, new Vector3D(markerPoint2), pelvisToMocapRotation, mocapMarkers, false);
    }
 }

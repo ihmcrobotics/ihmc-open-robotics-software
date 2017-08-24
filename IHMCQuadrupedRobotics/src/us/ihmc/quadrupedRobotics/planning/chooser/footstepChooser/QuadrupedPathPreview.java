@@ -4,18 +4,18 @@ import java.awt.Color;
 
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedPathPreview
@@ -23,7 +23,7 @@ public class QuadrupedPathPreview
    private int iterations = 30;
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
-   private final FramePoint2d circleCenter2d = new FramePoint2d();
+   private final FramePoint2D circleCenter2d = new FramePoint2D();
 
    private final CommonQuadrupedReferenceFrames referenceFrames;
 
@@ -43,9 +43,9 @@ public class QuadrupedPathPreview
    private final YoFrameConvexPolygon2d[] tripleSupportPolygons = new YoFrameConvexPolygon2d[iterations * 2];
    private final YoArtifactPolygon[] tripleSupportArtifactPolygons = new YoArtifactPolygon[iterations * 2];
 
-   private final FramePoint footLocation = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D footLocation = new FramePoint3D(ReferenceFrame.getWorldFrame());
 
-   private final FramePoint desiredPosition = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D desiredPosition = new FramePoint3D(ReferenceFrame.getWorldFrame());
 //   private final QuadrupedSupportPolygon emptyPolygon = new QuadrupedSupportPolygon();
 
    public QuadrupedPathPreview(SwingTargetGenerator swingTargetGenerator, CommonQuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
@@ -90,7 +90,7 @@ public class QuadrupedPathPreview
       parentRegistry.addChild(registry);
    }
 
-   public void update(RobotQuadrant swingLeg, FrameVector desiredBodyVelocity, double yawRate)
+   public void update(RobotQuadrant swingLeg, FrameVector3D desiredBodyVelocity, double yawRate)
    {
       updateFeetLocations();
       updatedSupportPolygon.set(fourFootSupportPolygon);
@@ -117,7 +117,7 @@ public class QuadrupedPathPreview
 
          tempCommonSupportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(swingLeg, inscribedCircleRadius.getDoubleValue(), circleCenter2d);
          YoFramePoint circleCenter = circleCenters[i];
-         circleCenter.setXY(circleCenter2d);
+         circleCenter.set(circleCenter2d, 0.0);
 
          updatedSupportPolygon.setFootstep(swingLeg, desiredPosition);
          swingLeg = swingLeg.getNextRegularGaitSwingQuadrant();
@@ -129,7 +129,7 @@ public class QuadrupedPathPreview
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         FramePoint footstep = supportPolygon.getFootstep(quadrant);
+         FramePoint3D footstep = supportPolygon.getFootstep(quadrant);
          if (footstep != null)
          {
             polygon.addVertex(footstep.getX(), footstep.getY());

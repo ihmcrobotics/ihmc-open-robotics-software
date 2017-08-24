@@ -3,12 +3,12 @@ package us.ihmc.robotics.controllers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameMatrix3D;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Modifies the derivative gain matrix to reduce the amount of derivative action along the main line of action for the feedback controller when there
@@ -18,7 +18,7 @@ public class EuclideanTangentialDampingCalculator
 {
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame bodyFrameTangentToControl;
-   private final FrameVector positionError = new FrameVector();
+   private final FrameVector3D positionError = new FrameVector3D();
 
    private final TangentialDampingGains tangentialDampingGains;
 

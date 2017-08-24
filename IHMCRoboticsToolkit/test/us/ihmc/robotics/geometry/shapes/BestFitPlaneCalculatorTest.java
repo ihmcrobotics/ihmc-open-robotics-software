@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -15,10 +17,8 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.DataGridTools;
 import us.ihmc.robotics.dataStructures.DoubleHashHeightMap;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.HeightMapBestFitPlaneCalculator;
 import us.ihmc.robotics.geometry.InsufficientDataException;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class BestFitPlaneCalculatorTest
 {
@@ -30,7 +30,7 @@ public class BestFitPlaneCalculatorTest
    {
       double gridResolution = 1;
       HeightMapWithPoints map = new DoubleHashHeightMap(gridResolution);
-      FramePoint2d footCenterPoint = new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
+      FramePoint2D footCenterPoint = new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
       DenseMatrix64F matrix = new DenseMatrix64F(7, 7);
       matrix.setData(new double[]{0, 0, 0, 0, 3, 0, 0,
                                   0, 0, 8, 8, 0, 0, 0,
@@ -42,7 +42,7 @@ public class BestFitPlaneCalculatorTest
       );
       DataGridTools.fillMapWithMatrixCentered(map, matrix, gridResolution);
       HeightMapBestFitPlaneCalculator calculator = new HeightMapBestFitPlaneCalculator();
-      Plane3D plane = calculator.calculatePlane(map, footCenterPoint.getPoint(), 2.0, 2.0);
+      Plane3D plane = calculator.calculatePlane(map, footCenterPoint, 2.0, 2.0);
       System.out.println("BestFitPlaneCalculatorTest: calculator.getPointList() = " + calculator.getPointList());
       Point3D point = plane.getPointCopy();
       Vector3D normal = plane.getNormalCopy();

@@ -1,7 +1,7 @@
 package us.ihmc.robotics.trajectories.providers;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 
 /**
  * @author twan
@@ -23,7 +23,7 @@ public class ComposableSE3ConfigurationProvider implements SE3ConfigurationProvi
       orientationProvider.getOrientation(orientationToPack);
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       positionProvider.getPosition(positionToPack);
    }

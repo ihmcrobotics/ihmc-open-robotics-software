@@ -11,20 +11,15 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.euclid.interfaces.Clearable;
-import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
-import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
-import us.ihmc.robotics.controllers.YoAxisAngleOrientationGains;
-import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoSpatialVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -32,8 +27,10 @@ import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoSpatialVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * {@code FeedbackControllerToolbox} is meant to be used only in the
@@ -43,7 +40,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
  * controllers. For instance, when a {@code YoFramePoint} has already been created by a controller,
  * the same object will be given to be next controller needing it.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  *
  */
@@ -61,15 +58,15 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    private final Map<RigidBody, EnumMap<Type, EnumMap<Space, Pair<YoFrameVector, List<YoBoolean>>>>> endEffectorDataVectors = new HashMap<>();
    private final Map<RigidBody, EnumMap<Space, Pair<RateLimitedYoFrameVector, List<YoBoolean>>>> endEffectorRateLimitedDataVectors = new HashMap<>();
 
-   private final Map<RigidBody, YoOrientationPIDGainsInterface> endEffectorOrientationGains = new HashMap<>();
-   private final Map<RigidBody, YoPositionPIDGainsInterface> endEffectorPositionGains = new HashMap<>();
+   private final Map<RigidBody, YoPID3DGains> endEffectorOrientationGains = new HashMap<>();
+   private final Map<RigidBody, YoPID3DGains> endEffectorPositionGains = new HashMap<>();
 
    private final Map<RigidBody, YoSE3OffsetFrame> endEffectorControlFrames = new HashMap<>();
 
    private final EnumMap<Type, Pair<YoFramePoint, List<YoBoolean>>> centerOfMassPositions = new EnumMap<>(Type.class);
    private final EnumMap<Type, EnumMap<Space, Pair<YoFrameVector, List<YoBoolean>>>> centerOfMassDataVectors = new EnumMap<>(Type.class);
    private final EnumMap<Space, Pair<RateLimitedYoFrameVector, List<YoBoolean>>> centerOfMassRateLimitedDataVectors = new EnumMap<>(Space.class);
-   private YoPositionPIDGainsInterface centerOfMassPositionGains;
+   private YoPID3DGains centerOfMassPositionGains;
 
    public FeedbackControllerToolbox(YoVariableRegistry parentRegistry)
    {
@@ -79,7 +76,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    /**
     * Retrieves and returns the {@code YoFramePoint} for the center of mass associated with the
     * given {@code type}, if it does not exist it is created.
-    * 
+    *
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoFramePoint} matching the search criterion.
     */
@@ -107,7 +104,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    /**
     * Retrieves and returns the {@code YoFrameVector} for the center of mass associated with the
     * given {@code type}, and {@code space}, if it does not exist it is created.
-    * 
+    *
     * @param type the type of the data to retrieve.
     * @param space the space of the data to retrieve.
     * @return the unique {@code YoFrameVector} matching the search criteria.
@@ -148,7 +145,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Note: the arguments {@code dt} and {@code maximumRate} are only used if the data does not
     * exist yet.
     * </p>
-    * 
+    *
     * @param space the space of the data to retrieve.
     * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
     * @param dt the duration of a control tick.
@@ -182,14 +179,14 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    /**
     * Retrieves and returns the set of gains {@code YoPositionPIDGainsInterface} for the center of
     * mass, if it does not exist it is created.
-    * 
+    *
     * @return the unique {@code YoPositionPIDGainsInterface} for the center of mass.
     */
-   public YoPositionPIDGainsInterface getCenterOfMassGains()
+   public YoPID3DGains getCenterOfMassGains()
    {
       if (centerOfMassPositionGains == null)
       {
-         centerOfMassPositionGains = new YoEuclideanPositionGains(centerOfMassName, registry);
+         centerOfMassPositionGains = new DefaultYoPID3DGains(centerOfMassName, GainCoupling.NONE, true, registry);
       }
       return centerOfMassPositionGains;
    }
@@ -204,7 +201,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Such that the desired position for the rigid-body 'rightHand' will have the prefix:
     * "rightHandDesiredPosition".
     * </p>
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoFramePoint} matching the search criteria.
@@ -248,7 +245,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Such that the current orientation for the rigid-body 'rightHand' will have the prefix:
     * "rightHandCurrentOrientation".
     * </p>
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoFrameQuaternion} matching the search criteria.
@@ -291,7 +288,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Such that the desired linear velocity for the rigid-body 'rightHand' will have the prefix:
     * "rightHandDesiredLinearVelocity".
     * </p>
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param type the type of the data to retrieve.
     * @param space the space of the data to retrieve.
@@ -347,7 +344,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Such that the rate-limited vector of the desired linear acceleration for the rigid-body
     * 'rightHand' will have the prefix: "rightHandRateLimitedDesiredLinearAcceleration".
     * </p>
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param space the space of the data to retrieve.
     * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
@@ -390,7 +387,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    /**
     * Retrieves and returns the {@code YoFramePoseUsingQuaternions} associated with the given
     * end-effector and {@code type}, if it does not exist it is created.
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoFramePoseUsingQuaternions} matching the search criteria.
@@ -404,7 +401,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Retrieves and returns the {@code YoSpatialVector} for holding the angular and linear
     * velocities of the given end-effector for representing a given data {@code type}. If it does
     * not exist it is created.
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoSpatialVector} matching the search criteria.
@@ -419,7 +416,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Retrieves and returns the {@code YoSpatialVector} for holding the angular and linear
     * accelerations of the given end-effector for representing a given data {@code type}. If it does
     * not exist it is created.
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoSpatialVector} matching the search criteria.
@@ -438,7 +435,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Note: the arguments {@code dt}, {@code maximumLinearRate}, and {@code maximumAngularRate} are
     * only used if the data does not exist yet.
     * </p>
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
     * @param dt the duration of a control tick.
@@ -460,7 +457,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * Note: the arguments {@code dt}, {@code maximumLinearRate}, and {@code maximumAngularRate} are
     * only used if the data does not exist yet.
     * </p>
-    * 
+    *
     * @param endEffector the end-effector to which the returned data is associated.
     * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
     * @param dt the duration of a control tick.
@@ -475,95 +472,62 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    /**
-    * Retrieves and returns the set of gains {@code YoOrientationPIDGainsInterface} associated to
+    * Retrieves and returns the set of orientation gains {@code YoPID3DGains} associated to
     * the given end-effector, if it does not exist it is created.
-    * 
+    *
     * @param endEffector the end-effector to which the gains are associated.
-    * @return the unique {@code YoOrientationPIDGainsInterface} associated with the given
+    * @return the unique {@code YoPID3DGains} associated with the given
     *         end-effector.
     */
-   public YoOrientationPIDGainsInterface getOrientationGains(RigidBody endEffector)
+   public YoPID3DGains getOrientationGains(RigidBody endEffector)
    {
-      YoOrientationPIDGainsInterface gains = endEffectorOrientationGains.get(endEffector);
+      YoPID3DGains gains = endEffectorOrientationGains.get(endEffector);
 
       if (gains == null)
       {
-         gains = new YoAxisAngleOrientationGains(endEffector.getName(), registry);
+         gains = new DefaultYoPID3DGains(endEffector.getName() + "Orientation", GainCoupling.NONE, true, registry);
          endEffectorOrientationGains.put(endEffector, gains);
       }
       return gains;
    }
 
    /**
-    * Retrieves and returns the set of gains {@code YoPositionPIDGainsInterface} associated to the
+    * Retrieves and returns the set of position gains {@code YoPID3DGains} associated to the
     * given end-effector, if it does not exist it is created.
-    * 
+    *
     * @param endEffector the end-effector to which the gains are associated.
-    * @return the unique {@code YoPositionPIDGainsInterface} associated with the given end-effector.
+    * @return the unique {@code YoPID3DGains} associated with the given end-effector.
     */
-   public YoPositionPIDGainsInterface getPositionGains(RigidBody endEffector)
+   public YoPID3DGains getPositionGains(RigidBody endEffector)
    {
-      YoPositionPIDGainsInterface gains = endEffectorPositionGains.get(endEffector);
+      YoPID3DGains gains = endEffectorPositionGains.get(endEffector);
 
       if (gains == null)
       {
-         gains = new YoEuclideanPositionGains(endEffector.getName(), registry);
+         gains = new DefaultYoPID3DGains(endEffector.getName() + "Position", GainCoupling.NONE, true, registry);
          endEffectorPositionGains.put(endEffector, gains);
       }
       return gains;
    }
 
    /**
-    * Retrieves and returns the set of gains {@code YoSE3PIDGainsInterface} associated to the given
+    * Retrieves and returns the set of gains {@code YoPIDSE3Gains} associated to the given
     * end-effector, if it does not exist it is created.
-    * 
+    *
     * @param endEffector the end-effector to which the gains are associated.
-    * @return the unique {@code YoSE3PIDGainsInterface} associated with the given end-effector.
+    * @return the unique {@code YoPIDSE3Gains} associated with the given end-effector.
     */
-   public YoSE3PIDGainsInterface getSE3PIDGains(RigidBody endEffector)
+   public YoPIDSE3Gains getSE3PIDGains(RigidBody endEffector)
    {
-      YoPositionPIDGainsInterface positionGains = getPositionGains(endEffector);
-      YoOrientationPIDGainsInterface orientationGains = getOrientationGains(endEffector);
-
-      return new YoSE3PIDGainsInterface()
-      {
-         @Override
-         public void set(PositionPIDGainsInterface positionGains)
-         {
-            positionGains.set(positionGains);
-         }
-
-         @Override
-         public void set(OrientationPIDGainsInterface orientationGains)
-         {
-            orientationGains.set(orientationGains);
-         }
-
-         @Override
-         public void set(SE3PIDGainsInterface gains)
-         {
-            positionGains.set(gains.getPositionGains());
-            orientationGains.set(gains.getOrientationGains());
-         }
-
-         @Override
-         public YoPositionPIDGainsInterface getPositionGains()
-         {
-            return positionGains;
-         }
-
-         @Override
-         public YoOrientationPIDGainsInterface getOrientationGains()
-         {
-            return orientationGains;
-         }
-      };
+      YoPID3DGains positionGains = getPositionGains(endEffector);
+      YoPID3DGains orientationGains = getOrientationGains(endEffector);
+      return new DefaultYoPIDSE3Gains(positionGains, orientationGains);
    }
 
    /**
     * Retrieves and returns the control frame {@code YoSE3OffsetFrame} associated to the given
     * end-effector, if it does not exist it is created.
-    * 
+    *
     * @param endEffector the end-effector to which the control frame is associated.
     * @return the unique {@code YoSE3OffsetFrame} control frame associated with the given
     *         end-effector.
@@ -600,7 +564,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    @Override
-   public boolean getCenterOfMassPositionData(FramePoint positionDataToPack, Type type)
+   public boolean getCenterOfMassPositionData(FramePoint3D positionDataToPack, Type type)
    {
       Pair<YoFramePoint, List<YoBoolean>> positionData = centerOfMassPositions.get(type);
 
@@ -612,7 +576,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    @Override
-   public boolean getCenterOfMassVectorData(FrameVector vectorDataToPack, Type type, Space space)
+   public boolean getCenterOfMassVectorData(FrameVector3D vectorDataToPack, Type type, Space space)
    {
       EnumMap<Space, Pair<YoFrameVector, List<YoBoolean>>> endEffectorDataTyped = centerOfMassDataVectors.get(type);
 
@@ -629,7 +593,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    @Override
-   public boolean getPositionData(RigidBody endEffector, FramePoint positionDataToPack, Type type)
+   public boolean getPositionData(RigidBody endEffector, FramePoint3D positionDataToPack, Type type)
    {
       EnumMap<Type, Pair<YoFramePoint, List<YoBoolean>>> endEffectorData = endEffectorPositions.get(endEffector);
 
@@ -663,7 +627,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    @Override
-   public boolean getVectorData(RigidBody endEffector, FrameVector vectorDataToPack, Type type, Space space)
+   public boolean getVectorData(RigidBody endEffector, FrameVector3D vectorDataToPack, Type type, Space space)
    {
       EnumMap<Type, EnumMap<Space, Pair<YoFrameVector, List<YoBoolean>>>> endEffectorData = endEffectorDataVectors.get(endEffector);
 

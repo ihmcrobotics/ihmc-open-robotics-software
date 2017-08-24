@@ -13,16 +13,17 @@ import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
 {
    private static final long serialVersionUID = 2505175418803166784L;
 
-   private ArrayList<FramePoint2d> testPoints = new ArrayList<FramePoint2d>();
+   private ArrayList<FramePoint2D> testPoints = new ArrayList<FramePoint2D>();
 
    private FrameConvexPolygon2d polygonToCheckInside = null;
 
@@ -65,7 +66,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
 
    private class FramePointGroup
    {
-      private ArrayList<FramePoint2d> framePoints = new ArrayList<FramePoint2d>();
+      private ArrayList<FramePoint2D> framePoints = new ArrayList<FramePoint2D>();
       private final Color color;
 
       public FramePointGroup(Color color)
@@ -73,20 +74,20 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
          this.color = color;
       }
 
-      public void addFramePoint(FramePoint2d framePoint2d)
+      public void addFramePoint(FramePoint2D framePoint2d)
       {
          framePoints.add(framePoint2d);
       }
 
-      public void addFramePoints(ArrayList<FramePoint2d> framePoints2d)
+      public void addFramePoints(ArrayList<FramePoint2D> framePoints2d)
       {
          framePoints.addAll(framePoints2d);
       }
 
       @SuppressWarnings("unused")
-      public void addFramePoints(FramePoint2d[] framePoints2d)
+      public void addFramePoints(FramePoint2D[] framePoints2d)
       {
-         for (FramePoint2d framePoint : framePoints2d)
+         for (FramePoint2D framePoint : framePoints2d)
          {
             framePoints.add(framePoint);
          }
@@ -192,7 +193,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       frameLineGroup.addFrameLine(frameLine2d);
    }
 
-   public synchronized void addFramePoints2d(ArrayList<FramePoint2d> framePoints, Color color)
+   public synchronized void addFramePoints2d(ArrayList<FramePoint2D> framePoints, Color color)
    {
       FramePointGroup framePointGroup = framePointGroups.get(color);
       if (framePointGroup == null)
@@ -204,7 +205,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       framePointGroup.addFramePoints(framePoints);
    }
 
-   public synchronized void addFramePoint2d(FramePoint2d framePoint, Color color)
+   public synchronized void addFramePoint2d(FramePoint2D framePoint, Color color)
    {
       FramePointGroup framePointGroup = framePointGroups.get(color);
       if (framePointGroup == null)
@@ -353,12 +354,12 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       frameConvexPolygonGroup.addFrameConvexPolygon2ds(frameConvexPolygons);
    }
 
-   public synchronized void addFramePoint2d(FramePoint2d framePoint2d)
+   public synchronized void addFramePoint2d(FramePoint2D framePoint2d)
    {
       this.addFramePoint2d(framePoint2d, Color.black);
    }
 
-   public synchronized void addTestPoint(FramePoint2d testPoint)
+   public synchronized void addTestPoint(FramePoint2D testPoint)
    {
       testPoints.add(testPoint);
    }
@@ -368,7 +369,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       this.polygonToCheckInside = polygon;
    }
 
-   public synchronized void addTestPoints(ArrayList<FramePoint2d> testPoints)
+   public synchronized void addTestPoints(ArrayList<FramePoint2D> testPoints)
    {
       this.testPoints.addAll(testPoints);
       repaint();
@@ -468,17 +469,17 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       }
    }
 
-   private void drawFramePoints(ArrayList<FramePoint2d> framePoints, Graphics graphics)
+   private void drawFramePoints(ArrayList<FramePoint2D> framePoints, Graphics graphics)
    {
-      for (FramePoint2d framePoint : framePoints)
+      for (FramePoint2D framePoint : framePoints)
       {
          this.drawPoint(framePoint, graphics);
       }
    }
 
-   private void drawTestPoints(ArrayList<FramePoint2d> testPoints, FrameConvexPolygon2d polygon, Graphics graphics)
+   private void drawTestPoints(ArrayList<FramePoint2D> testPoints, FrameConvexPolygon2d polygon, Graphics graphics)
    {
-      for (FramePoint2d testPoint : testPoints)
+      for (FramePoint2D testPoint : testPoints)
       {
          boolean isInside = polygon.isPointInside(testPoint);
 
@@ -494,7 +495,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
    }
 
    @SuppressWarnings("unused")
-   private void drawPoint(FramePoint2d testPoint, Color color, Graphics graphics)
+   private void drawPoint(FramePoint2D testPoint, Color color, Graphics graphics)
    {
       int xInt = doubleToInt(testPoint.getX(), xCenter, scale, getWidth());
       int yInt = doubleToInt(testPoint.getY(), yCenter, -scale, getHeight());
@@ -503,7 +504,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       graphics.fillOval(xInt - 2, yInt - 2, 4, 4);
    }
 
-   private void drawInsidePoint(FramePoint2d testPoint, Graphics graphics)
+   private void drawInsidePoint(FramePoint2D testPoint, Graphics graphics)
    {
       int xInt = doubleToInt(testPoint.getX(), xCenter, scale, getWidth());
       int yInt = doubleToInt(testPoint.getY(), yCenter, -scale, getHeight());
@@ -512,7 +513,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       graphics.fillOval(xInt - 2, yInt - 2, 4, 4);
    }
 
-   private void drawOutsidePoint(FramePoint2d testPoint, Graphics graphics)
+   private void drawOutsidePoint(FramePoint2D testPoint, Graphics graphics)
    {
       int xInt = doubleToInt(testPoint.getX(), xCenter, scale, getWidth());
       int yInt = doubleToInt(testPoint.getY(), yCenter, -scale, getHeight());
@@ -567,7 +568,7 @@ public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
       drawLine(points[0].getX(), points[0].getY(), points[1].getX(), points[1].getY(), graphics);
    }
 
-   private void drawPoint(FramePoint2d framePoint2d, Graphics graphics)
+   private void drawPoint(FramePoint2D framePoint2d, Graphics graphics)
    {
       drawPoint(framePoint2d.getX(), framePoint2d.getY(), graphics);
    }

@@ -1,40 +1,42 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DivergentComponentOfMotionController
 {
    public static class Setpoints
    {
-      private final FramePoint dcmPosition = new FramePoint();
-      private final FrameVector dcmVelocity = new FrameVector();
+      private final FramePoint3D dcmPosition = new FramePoint3D();
+      private final FrameVector3D dcmVelocity = new FrameVector3D();
 
-      public void initialize(FramePoint dcmPositionEstimate)
+      public void initialize(FramePoint3D dcmPositionEstimate)
       {
          dcmPosition.setIncludingFrame(dcmPositionEstimate);
          dcmVelocity.setToZero();
       }
 
-      public FramePoint getDcmPosition()
+      public FramePoint3D getDcmPosition()
       {
          return dcmPosition;
       }
 
-      public FrameVector getDcmVelocity()
+      public FrameVector3D getDcmVelocity()
       {
          return dcmVelocity;
       }
@@ -43,10 +45,10 @@ public class DivergentComponentOfMotionController
    private final ReferenceFrame comZUpFrame;
    private final LinearInvertedPendulumModel lipModel;
    private final double controlDT;
-   private final FramePoint vrpPositionSetpoint;
-   private final FramePoint cmpPositionSetpoint;
+   private final FramePoint3D vrpPositionSetpoint;
+   private final FramePoint3D cmpPositionSetpoint;
    private final PIDController[] pidController;
-   private final YoEuclideanPositionGains pidControllerGains;
+   private final YoPID3DGains pidControllerGains;
 
    YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
@@ -71,13 +73,13 @@ public class DivergentComponentOfMotionController
       this.controlDT = controlDT;
       this.lipModel = lipModel;
 
-      vrpPositionSetpoint = new FramePoint();
-      cmpPositionSetpoint = new FramePoint();
+      vrpPositionSetpoint = new FramePoint3D();
+      cmpPositionSetpoint = new FramePoint3D();
       pidController = new PIDController[3];
       pidController[0] = new PIDController("dcmPositionX", registry);
       pidController[1] = new PIDController("dcmPositionY", registry);
       pidController[2] = new PIDController("dcmPositionZ", registry);
-      pidControllerGains = new YoEuclideanPositionGains("dcmPosition", registry);
+      pidControllerGains = new DefaultYoPID3DGains("dcmPosition", GainCoupling.NONE, true, registry);
 
       yoVrpPositionRateLimit = new YoDouble("vrpPositionRateLimit", registry);
       yoVrpPositionRateLimit.set(Double.MAX_VALUE);
@@ -117,7 +119,7 @@ public class DivergentComponentOfMotionController
       yoVrpPositionSetpointZ.reset();
    }
 
-   public YoEuclideanPositionGains getGains()
+   public YoPID3DGains getGains()
    {
       return pidControllerGains;
    }
@@ -127,10 +129,10 @@ public class DivergentComponentOfMotionController
       yoVrpPositionRateLimit.set(vrpPositionRateLimit);
    }
 
-   public void compute(FrameVector comForceCommand, Setpoints setpoints, FramePoint dcmPositionEstimate)
+   public void compute(FrameVector3D comForceCommand, Setpoints setpoints, FramePoint3D dcmPositionEstimate)
    {
-      FramePoint dcmPositionSetpoint = setpoints.getDcmPosition();
-      FrameVector dcmVelocitySetpoint = setpoints.getDcmVelocity();
+      FramePoint3D dcmPositionSetpoint = setpoints.getDcmPosition();
+      FrameVector3D dcmVelocitySetpoint = setpoints.getDcmVelocity();
       ReferenceFrame comForceCommandFrame = comForceCommand.getReferenceFrame();
       ReferenceFrame dcmPositionSetpointFrame = dcmPositionSetpoint.getReferenceFrame();
       ReferenceFrame dcmPositionVelocityFrame = dcmVelocitySetpoint.getReferenceFrame();

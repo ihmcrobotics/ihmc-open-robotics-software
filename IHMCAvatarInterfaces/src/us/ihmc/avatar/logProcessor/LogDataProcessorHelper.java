@@ -13,6 +13,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -21,12 +23,10 @@ import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -172,7 +172,7 @@ public class LogDataProcessorHelper
             }
 
             @Override
-            public void computeAndPackCoP(FramePoint2d copToPack)
+            public void computeAndPackCoP(FramePoint2D copToPack)
             {
                cops.get(robotSide).getFrameTuple2dIncludingFrame(copToPack);
             }
@@ -241,12 +241,12 @@ public class LogDataProcessorHelper
       return ConstraintType.valueOf(footStates.get(robotSide).getStringValue());
    }
 
-   public void getMeasuredCoP(RobotSide robotSide, FramePoint2d copToPack)
+   public void getMeasuredCoP(RobotSide robotSide, FramePoint2D copToPack)
    {
       cops.get(robotSide).getFrameTuple2dIncludingFrame(copToPack);
    }
 
-   public void getDesiredCoP(RobotSide robotSide, FramePoint2d desiredCoPToPack)
+   public void getDesiredCoP(RobotSide robotSide, FramePoint2D desiredCoPToPack)
    {
       desiredCoPs.get(robotSide).getFrameTuple2dIncludingFrame(desiredCoPToPack);
    }

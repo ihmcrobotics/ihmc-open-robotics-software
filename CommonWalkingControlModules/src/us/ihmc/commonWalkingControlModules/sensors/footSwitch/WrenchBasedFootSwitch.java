@@ -4,6 +4,10 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
@@ -14,13 +18,9 @@ import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 
@@ -58,15 +58,15 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final GlitchFilteredYoBoolean toeHitGroundFilter;
 
    private final YoFramePoint2d yoResolvedCoP;
-   private final FramePoint2d resolvedCoP;
-   private final FramePoint resolvedCoP3d = new FramePoint();
+   private final FramePoint2D resolvedCoP;
+   private final FramePoint3D resolvedCoP3d = new FramePoint3D();
    private final CenterOfPressureResolver copResolver = new CenterOfPressureResolver();
    private final ContactablePlaneBody contactablePlaneBody;
    private final double footLength;
    private final double footMinX;
    private final double footMaxX;
-   private final FrameVector footForce = new FrameVector();
-   private final FrameVector footTorque = new FrameVector();
+   private final FrameVector3D footForce = new FrameVector3D();
+   private final FrameVector3D footTorque = new FrameVector3D();
    private final YoFrameVector yoFootForce;
    private final YoFrameVector yoFootTorque;
    private final YoFrameVector yoFootForceInFoot;
@@ -153,7 +153,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       this.contactablePlaneBody = contactablePlaneBody;
 
       yoResolvedCoP = new YoFramePoint2d(namePrefix + "ResolvedCoP", "", contactablePlaneBody.getSoleFrame(), registry);
-      resolvedCoP = new FramePoint2d(contactablePlaneBody.getSoleFrame());
+      resolvedCoP = new FramePoint2D(contactablePlaneBody.getSoleFrame());
 
       this.forceSensorData = forceSensorData;
       this.footSwitchCoPThresholdFraction = new YoDouble(namePrefix + "footSwitchCoPThresholdFraction", registry);
@@ -277,7 +277,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       return pastThresholdFilter.getBooleanValue();
    }
 
-   public void computeAndPackCoP(FramePoint2d copToPack)
+   public void computeAndPackCoP(FramePoint2D copToPack)
    {
       updateCoP();
       copToPack.setIncludingFrame(resolvedCoP);
@@ -299,7 +299,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
          yoResolvedCoP.set(resolvedCoP);
          
          resolvedCoP3d.setToZero(resolvedCoP.getReferenceFrame());
-         resolvedCoP3d.setXY(resolvedCoP);
+         resolvedCoP3d.set(resolvedCoP);
          resolvedCoP3d.changeFrame(ReferenceFrame.getWorldFrame());
       }
    }
@@ -369,27 +369,27 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
    private static double computeLength(ContactablePlaneBody contactablePlaneBody)
    {
-      FrameVector forward = new FrameVector(contactablePlaneBody.getSoleFrame(), 1.0, 0.0, 0.0);
-      List<FramePoint> maxForward = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), forward, 1);
+      FrameVector3D forward = new FrameVector3D(contactablePlaneBody.getSoleFrame(), 1.0, 0.0, 0.0);
+      List<FramePoint3D> maxForward = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), forward, 1);
 
-      FrameVector back = new FrameVector(contactablePlaneBody.getSoleFrame(), -1.0, 0.0, 0.0);
-      List<FramePoint> maxBack = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), back, 1);
+      FrameVector3D back = new FrameVector3D(contactablePlaneBody.getSoleFrame(), -1.0, 0.0, 0.0);
+      List<FramePoint3D> maxBack = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), back, 1);
 
       return maxForward.get(0).getX() - maxBack.get(0).getX();
    }
 
    private static double computeMinX(ContactablePlaneBody contactablePlaneBody)
    {
-      FrameVector back = new FrameVector(contactablePlaneBody.getSoleFrame(), -1.0, 0.0, 0.0);
-      List<FramePoint> maxBack = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), back, 1);
+      FrameVector3D back = new FrameVector3D(contactablePlaneBody.getSoleFrame(), -1.0, 0.0, 0.0);
+      List<FramePoint3D> maxBack = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), back, 1);
 
       return maxBack.get(0).getX();
    }
 
    private static double computeMaxX(ContactablePlaneBody contactablePlaneBody)
    {
-      FrameVector front = new FrameVector(contactablePlaneBody.getSoleFrame(), 1.0, 0.0, 0.0);
-      List<FramePoint> maxFront = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), front, 1);
+      FrameVector3D front = new FrameVector3D(contactablePlaneBody.getSoleFrame(), 1.0, 0.0, 0.0);
+      List<FramePoint3D> maxFront = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), front, 1);
 
       return maxFront.get(0).getX();
    }

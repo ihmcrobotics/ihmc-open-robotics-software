@@ -1,5 +1,8 @@
 package us.ihmc.valkyrie.kinematics.transmissions;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -10,9 +13,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 
@@ -51,29 +51,29 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
    private final RigidBodyTransform topJointTransform3D = new RigidBodyTransform();
    private final RigidBodyTransform bottomJointTransform3D = new RigidBodyTransform();
 
-   private final FramePoint b5InBottomFrame = new FramePoint();   
-   private final FramePoint b6InBottomFrame = new FramePoint();   
+   private final FramePoint3D b5InBottomFrame = new FramePoint3D();   
+   private final FramePoint3D b6InBottomFrame = new FramePoint3D();   
 
-   private final FramePoint b5InTopFrame = new FramePoint();
-   private final FramePoint b6InTopFrame = new FramePoint();
+   private final FramePoint3D b5InTopFrame = new FramePoint3D();
+   private final FramePoint3D b6InTopFrame = new FramePoint3D();
    
-   private final FramePoint b5InSlideFrame = new FramePoint();
-   private final FramePoint b6InSlideFrame = new FramePoint();
+   private final FramePoint3D b5InSlideFrame = new FramePoint3D();
+   private final FramePoint3D b6InSlideFrame = new FramePoint3D();
 
-   private final FramePoint t5InTopFrame = new FramePoint();
-   private final FramePoint t6InTopFrame = new FramePoint();
+   private final FramePoint3D t5InTopFrame = new FramePoint3D();
+   private final FramePoint3D t6InTopFrame = new FramePoint3D();
    
-   private final FramePoint t5InBottomFrame = new FramePoint();
-   private final FramePoint t6InBottomFrame = new FramePoint();
+   private final FramePoint3D t5InBottomFrame = new FramePoint3D();
+   private final FramePoint3D t6InBottomFrame = new FramePoint3D();
 
-   private final FrameVector f5VectorInTopFrame = new FrameVector(topFrame);
-   private final FrameVector f6VectorInTopFrame = new FrameVector(topFrame);
+   private final FrameVector3D f5VectorInTopFrame = new FrameVector3D(topFrame);
+   private final FrameVector3D f6VectorInTopFrame = new FrameVector3D(topFrame);
 
-   private final FrameVector f5VectorInBottomFrame = new FrameVector(bottomFrame);
-   private final FrameVector f6VectorInBottomFrame = new FrameVector(bottomFrame);
+   private final FrameVector3D f5VectorInBottomFrame = new FrameVector3D(bottomFrame);
+   private final FrameVector3D f6VectorInBottomFrame = new FrameVector3D(bottomFrame);
 
-   private final FrameVector tempRVector = new FrameVector();
-   private final FrameVector tempCrossVector = new FrameVector();
+   private final FrameVector3D tempRVector = new FrameVector3D();
+   private final FrameVector3D tempCrossVector = new FrameVector3D();
 
    private boolean visualize = true;
 
@@ -110,7 +110,7 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
       }
       }
       
-      topFrame.updateTranslation(new FrameVector(worldFrame, 0.0, 0.0, 1.0));    // Arbitrary. Just put it in the air. If we wanted to have things align with the real robot, then this should be at the top joint frame.
+      topFrame.updateTranslation(new FrameVector3D(worldFrame, 0.0, 0.0, 1.0));    // Arbitrary. Just put it in the air. If we wanted to have things align with the real robot, then this should be at the top joint frame.
       
       RigidBodyTransform transformFromActuatorSlide5FrameToBoneFrame = new RigidBodyTransform();      
       transformFromActuatorSlide5FrameToBoneFrame.setRotationPitchAndZeroTranslation(-actuatorSlider5PitchRotation);
@@ -123,7 +123,7 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
       actuator5SlideFrame.setTransformAndUpdate(transformFromActuatorSlide5FrameToBoneFrame);
       actuator6SlideFrame.setTransformAndUpdate(transformFromActuatorSlide6FrameToBoneFrame);
       
-      beforeBottomJointFrame.updateTranslation(new FrameVector(afterTopJointFrame, 0.0, 0.0, -heightOfTopAxisAboveBottomAxis));
+      beforeBottomJointFrame.updateTranslation(new FrameVector3D(afterTopJointFrame, 0.0, 0.0, -heightOfTopAxisAboveBottomAxis));
 
       if (yoGraphicsListRegistry == null)
       {
@@ -378,15 +378,15 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
 
       if (visualize)
       {
-         FramePoint t5InWorld = new FramePoint(t5InTopFrame);
-         FramePoint t6InWorld = new FramePoint(t6InTopFrame);
+         FramePoint3D t5InWorld = new FramePoint3D(t5InTopFrame);
+         FramePoint3D t6InWorld = new FramePoint3D(t6InTopFrame);
          t5InWorld.changeFrame(worldFrame);
          t6InWorld.changeFrame(worldFrame);
          t5Viz.setPosition(t5InWorld);
          t6Viz.setPosition(t6InWorld);
 
-         FramePoint b5InWorld = new FramePoint(b5InBottomFrame);
-         FramePoint b6InWorld = new FramePoint(b6InBottomFrame);
+         FramePoint3D b5InWorld = new FramePoint3D(b5InBottomFrame);
+         FramePoint3D b6InWorld = new FramePoint3D(b6InBottomFrame);
          b5InWorld.changeFrame(worldFrame);
          b6InWorld.changeFrame(worldFrame);
          b5Viz.setPosition(b5InWorld);
@@ -403,7 +403,7 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
 
    }
    
-   private void setJacobianElement(YoDouble jacobianElement, FrameVector rCrossFVector, Axis jointAxis)
+   private void setJacobianElement(YoDouble jacobianElement, FrameVector3D rCrossFVector, Axis jointAxis)
    {
       if (jointAxis == Axis.X)
       {

@@ -5,6 +5,8 @@ import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -17,11 +19,9 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -135,7 +135,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       this.trajectoryTime.set(trajectoryTime);
    }
 
-   private final FramePoint desiredPosition = new FramePoint();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameOrientation desiredOrientation = new FrameOrientation();
 
    public void setDesiredHandPose(RobotSide robotSide, FramePose desiredHandPose)
@@ -144,7 +144,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       setDesiredHandPose(robotSide, desiredPosition, desiredOrientation);
    }
 
-   public void setDesiredHandPose(RobotSide robotSide, FramePoint desiredHandPosition, FrameOrientation desiredHandOrientation)
+   public void setDesiredHandPose(RobotSide robotSide, FramePoint3D desiredHandPosition, FrameOrientation desiredHandOrientation)
    {
       yoDesiredHandPositions.get(robotSide).setAndMatchFrame(desiredHandPosition);
       yoDesiredHandOrientations.get(robotSide).setAndMatchFrame(desiredHandOrientation);
@@ -205,7 +205,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       pelvisSelectionMatrix.setSelectionFrame(worldFrame);
    }
 
-   public void setDesiredPelvisHeight(FramePoint pointContainingDesiredHeight)
+   public void setDesiredPelvisHeight(FramePoint3D pointContainingDesiredHeight)
    {
       yoDesiredPelvisPosition.setAndMatchFrame(pointContainingDesiredHeight);
       pelvisSelectionMatrix.clearLinearSelection();

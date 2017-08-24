@@ -8,10 +8,11 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 
 public class PoseReferenceFrameTest
@@ -25,7 +26,7 @@ public class PoseReferenceFrameTest
       PoseReferenceFrame poseFrame0 = new PoseReferenceFrame("poseFrame0", worldFrame);
       PoseReferenceFrame poseFrame00 = new PoseReferenceFrame("poseFrame00", poseFrame0);
       PoseReferenceFrame poseFrame000 = new PoseReferenceFrame("poseFrame000", poseFrame00);
-      FramePoint framePoint = new FramePoint(poseFrame000, 1.0, 2.8, 4.4);
+      FramePoint3D framePoint = new FramePoint3D(poseFrame000, 1.0, 2.8, 4.4);
 
       Random random = new Random(1776L);
 
@@ -34,10 +35,10 @@ public class PoseReferenceFrameTest
       doRandomPoseChangeAndUpdate(poseFrame000, random);
 
       // Make sure that after a pose change of an intermediate frame, that the point before and after is different.
-      FramePoint framePointInWorldOne = new FramePoint(framePoint);
+      FramePoint3D framePointInWorldOne = new FramePoint3D(framePoint);
       framePointInWorldOne.changeFrame(worldFrame);
       doRandomPoseChangeAndUpdate(poseFrame0, random);
-      FramePoint framePointInWorldTwo = new FramePoint(framePoint);
+      FramePoint3D framePointInWorldTwo = new FramePoint3D(framePoint);
       framePointInWorldTwo.changeFrame(worldFrame);
 
       assertFalse(framePointInWorldOne.epsilonEquals(framePointInWorldTwo, 1e-7));
@@ -47,7 +48,7 @@ public class PoseReferenceFrameTest
       poseFrame00.update();
       poseFrame000.update();
       
-      FramePoint framePointInWorldThree = new FramePoint(framePoint);
+      FramePoint3D framePointInWorldThree = new FramePoint3D(framePoint);
       framePointInWorldThree.changeFrame(worldFrame);
 
       assertTrue(framePointInWorldThree.epsilonEquals(framePointInWorldTwo, 1e-7));
@@ -65,18 +66,18 @@ public class PoseReferenceFrameTest
       for (int i=0; i<numberOfFramesInChain; i++)
       {
          PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame" + i, previousFrame);
-         poseFrame.setPositionAndUpdate(new FramePoint(previousFrame, 1.0, 0.0, 0.0));
+         poseFrame.setPositionAndUpdate(new FramePoint3D(previousFrame, 1.0, 0.0, 0.0));
          previousFrame = poseFrame;
       }
       
-      FramePoint finalPosition = new FramePoint(previousFrame);
+      FramePoint3D finalPosition = new FramePoint3D(previousFrame);
       finalPosition.changeFrame(worldFrame);
       
       long startTime = System.currentTimeMillis();
       int numberOfChangeFrames = 1000000;
       for (int i=0; i<numberOfChangeFrames; i++)
       {
-         FramePoint finalPosition2 = new FramePoint(previousFrame);
+         FramePoint3D finalPosition2 = new FramePoint3D(previousFrame);
          finalPosition2.changeFrame(worldFrame);
       }
       long endTime = System.currentTimeMillis();
@@ -85,7 +86,7 @@ public class PoseReferenceFrameTest
       System.out.println("millisPerChangeFrame = " + millisPerChangeFrame);
       
       assertTrue(millisPerChangeFrame < 0.01); //That would still be pretty slow, but allows for hiccups.
-      FramePoint finalPosition3 = new FramePoint(previousFrame);
+      FramePoint3D finalPosition3 = new FramePoint3D(previousFrame);
       finalPosition3.changeFrame(worldFrame);
    }
 
@@ -108,13 +109,13 @@ public class PoseReferenceFrameTest
       PoseReferenceFrame[] referenceFrames = new PoseReferenceFrame[]{poseFrame0, poseFrame00, poseFrame01, poseFrame010, poseFrame000, poseFrame001, poseFrame1, poseFrame10, poseFrame100, poseFrame101};
       
       Point3D position = new Point3D(1.0, 2.2, 3.4);
-      FramePoint framePoint = new FramePoint(poseFrame010, position);
+      FramePoint3D framePoint = new FramePoint3D(poseFrame010, position);
       
       updateAllFrames(referenceFrames);
 
       Random random = new Random(1776L);
 
-      FramePoint newPoint = doRandomChangeFrames(referenceFrames, framePoint, random);
+      FramePoint3D newPoint = doRandomChangeFrames(referenceFrames, framePoint, random);
       newPoint.changeFrame(framePoint.getReferenceFrame());
       
       assertTrue(newPoint.epsilonEquals(framePoint, 1e-7)); 
@@ -123,10 +124,10 @@ public class PoseReferenceFrameTest
       doRandomPoseChangeAndUpdate(poseFrame01, random);
       newPoint = doRandomChangeFrames(referenceFrames, framePoint, random);      
 
-      FramePoint newPointInWorldOne = new FramePoint(newPoint);
+      FramePoint3D newPointInWorldOne = new FramePoint3D(newPoint);
       newPointInWorldOne.changeFrame(worldFrame);
       updateAllFrames(referenceFrames);
-      FramePoint newPointInWorldTwo = new FramePoint(newPoint);
+      FramePoint3D newPointInWorldTwo = new FramePoint3D(newPoint);
       newPointInWorldTwo.changeFrame(worldFrame);
 
       assertTrue(newPointInWorldOne.epsilonEquals(newPointInWorldTwo, 1e-7));
@@ -148,13 +149,13 @@ public class PoseReferenceFrameTest
       poseReferenceFrame.setPoseAndUpdate(framePose);
    }
    
-   private FramePoint doRandomChangeFrames(PoseReferenceFrame[] referenceFrames, FramePoint framePoint, Random random)
+   private FramePoint3D doRandomChangeFrames(PoseReferenceFrame[] referenceFrames, FramePoint3D framePoint, Random random)
    {
       for (int i=0; i<10; i++)
       {
          int index = random.nextInt(referenceFrames.length);
          PoseReferenceFrame desiredFrame = referenceFrames[index];
-         framePoint = new FramePoint(framePoint);
+         framePoint = new FramePoint3D(framePoint);
          framePoint.changeFrame(desiredFrame);
       }
       

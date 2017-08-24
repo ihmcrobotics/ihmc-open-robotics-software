@@ -1,10 +1,10 @@
 package us.ihmc.humanoidRobotics.frames;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.screwTheory.MovingMidFootZUpGroundFrame;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -27,7 +27,7 @@ public class MovingWalkingReferenceFrame extends MovingReferenceFrame
    private final MovingReferenceFrame pelvisFrame;
    private final MovingMidFootZUpGroundFrame midFootZUpGroundFrame;
 
-   private final FramePoint pelvisPosition = new FramePoint();
+   private final FramePoint3D pelvisPosition = new FramePoint3D();
    private final FramePose pose = new FramePose();
 
    public MovingWalkingReferenceFrame(String name, MovingReferenceFrame pelvisFrame, MovingMidFootZUpGroundFrame midFootZUpGroundFrame)
@@ -53,9 +53,9 @@ public class MovingWalkingReferenceFrame extends MovingReferenceFrame
       pose.getPose(transformToParent);
    }
 
-   private final FrameVector linearPelvisVelocity = new FrameVector();
-   private final FrameVector linearVelocity = new FrameVector();
-   private final FrameVector angularVelocity = new FrameVector();
+   private final FrameVector3D linearPelvisVelocity = new FrameVector3D();
+   private final FrameVector3D linearVelocity = new FrameVector3D();
+   private final FrameVector3D angularVelocity = new FrameVector3D();
    private final Twist twistOfPelvisRelativeToMidFootFrame = new Twist();
    private final Vector3D offset = new Vector3D();
    private final Vector3D linearVelocityOffset = new Vector3D();

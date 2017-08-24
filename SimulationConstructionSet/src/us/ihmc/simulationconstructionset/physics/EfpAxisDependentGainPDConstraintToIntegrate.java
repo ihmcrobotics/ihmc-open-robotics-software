@@ -2,15 +2,15 @@ package us.ihmc.simulationconstructionset.physics;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 
@@ -42,15 +42,15 @@ public class EfpAxisDependentGainPDConstraintToIntegrate implements FunctionToIn
 
    // Temporary variables:
    // private final Transform3D stiffnessFrameToTuple
-   private final FramePoint connectionAPosition = new FramePoint(worldFrame);
-   private final FramePoint connectionBPosition = new FramePoint(worldFrame);
-   private final FrameVector connectionPositionError;
-   private final FrameVector connectionAVelocity = new FrameVector(worldFrame);
-   private final FrameVector connectionBVelocity = new FrameVector(worldFrame);
-   private final FrameVector connectionVelocityError;
+   private final FramePoint3D connectionAPosition = new FramePoint3D(worldFrame);
+   private final FramePoint3D connectionBPosition = new FramePoint3D(worldFrame);
+   private final FrameVector3D connectionPositionError;
+   private final FrameVector3D connectionAVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3D connectionBVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3D connectionVelocityError;
    private final Vector3D springForce = new Vector3D();
    private final Vector3D damperForce = new Vector3D();
-   private final FrameVector totalForce = new FrameVector(worldFrame);
+   private final FrameVector3D totalForce = new FrameVector3D(worldFrame);
    private final RotationMatrix stiffnessFrameToWorldFrameRotation = new RotationMatrix();
    private final Matrix3D stiffnessGainMatrix = new Matrix3D();
    private final Matrix3D dampingGainMatrix = new Matrix3D();
@@ -83,8 +83,8 @@ public class EfpAxisDependentGainPDConstraintToIntegrate implements FunctionToIn
 
       parentRegistry.addChild(registry);
 
-      connectionPositionError = new FrameVector(worldFrame);
-      connectionVelocityError = new FrameVector(worldFrame);
+      connectionPositionError = new FrameVector3D(worldFrame);
+      connectionVelocityError = new FrameVector3D(worldFrame);
 
       this.stiffnessFrame = stiffnessFrame;
    }

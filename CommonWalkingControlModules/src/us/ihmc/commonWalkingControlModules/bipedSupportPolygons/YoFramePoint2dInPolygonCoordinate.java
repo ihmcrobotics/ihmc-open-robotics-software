@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.Point2dInConvexPolygon2d;
 
 /**
@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.Point2dInConvexPolygon2d;
 public class YoFramePoint2dInPolygonCoordinate
 {
    private YoDouble eccentricity, angle;
-   private FramePoint2d framePoint2d;
+   private FramePoint2D framePoint2d;
    private Point2dInConvexPolygon2d point2dInConvexPolygon2d; //this will be using
 
    public YoFramePoint2dInPolygonCoordinate(String namePrefix, YoVariableRegistry registry)
@@ -30,7 +30,7 @@ public class YoFramePoint2dInPolygonCoordinate
       point2dInConvexPolygon2d = null;
    }
 
-   public FramePoint2d getCurrentPoint()
+   public FramePoint2D getCurrentPoint()
    {
       point2dInConvexPolygon2d.setAngle(angle.getDoubleValue());
       point2dInConvexPolygon2d.setEccentricity(eccentricity.getDoubleValue());
@@ -38,11 +38,11 @@ public class YoFramePoint2dInPolygonCoordinate
       return framePoint2d;
    }
 
-   public void updatePointAndPolygon(FrameConvexPolygon2d polygon, FramePoint2d pointInAnyFrame)
+   public void updatePointAndPolygon(FrameConvexPolygon2d polygon, FramePoint2D pointInAnyFrame)
    {
-      FramePoint2d temp = new FramePoint2d(pointInAnyFrame);
+      FramePoint2D temp = new FramePoint2D(pointInAnyFrame);
       temp.changeFrame(polygon.getReferenceFrame());
-      updatePointAndPolygon(polygon, temp.getPoint());
+      updatePointAndPolygon(polygon, temp);
    }
 
    /**
@@ -52,7 +52,7 @@ public class YoFramePoint2dInPolygonCoordinate
    public void updatePointAndPolygon(FrameConvexPolygon2d polygon, Point2D pointInPolygonFrame)
    {
       //copy external point back to polygon frame
-      framePoint2d = new FramePoint2d(polygon.getReferenceFrame(), pointInPolygonFrame);
+      framePoint2d = new FramePoint2D(polygon.getReferenceFrame(), pointInPolygonFrame);
 
       //update polygon class
       point2dInConvexPolygon2d = new Point2dInConvexPolygon2d(polygon.getConvexPolygon2d(), framePoint2d.getX(), framePoint2d.getY());

@@ -3,8 +3,8 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.MatrixDimensionException;
 
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 /**
  * The {@code SelectionMatrix6D} provides a simple way to define for a given application what are
@@ -441,7 +441,7 @@ public class SelectionMatrix6D
     * @param vectorToBeModified the vector on which the angular part of this selection matrix to be
     *           applied. Modified.
     */
-   public void applyAngularSelection(FrameVector vectorToBeModified)
+   public void applyAngularSelection(FrameVector3D vectorToBeModified)
    {
       angularPart.applySelection(vectorToBeModified);
    }
@@ -455,7 +455,7 @@ public class SelectionMatrix6D
     * @param vectorToBeModified the vector on which the linear part of this selection matrix to be
     *           applied. Modified.
     */
-   public void applyLinearSelection(FrameVector vectorToBeModified)
+   public void applyLinearSelection(FrameVector3D vectorToBeModified)
    {
       linearPart.applySelection(vectorToBeModified);
    }

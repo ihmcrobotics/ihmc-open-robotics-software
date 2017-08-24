@@ -1,8 +1,9 @@
 package us.ihmc.robotics.referenceFrames;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
 
 public class Pose2dReferenceFrame extends ReferenceFrame
@@ -29,7 +30,7 @@ public class Pose2dReferenceFrame extends ReferenceFrame
       originPose.getPose(transformToParent);
    }
 
-   public void setPositionAndUpdate(FramePoint2d framePoint)
+   public void setPositionAndUpdate(FramePoint2D framePoint)
    {
       framePoint.checkReferenceFrameMatch(parentFrame);
       originPose.setPosition(framePoint);
@@ -49,7 +50,7 @@ public class Pose2dReferenceFrame extends ReferenceFrame
       this.update();
    }
 
-   public void setPoseAndUpdate(FramePoint2d position, FrameOrientation2d orientation)
+   public void setPoseAndUpdate(FramePoint2D position, FrameOrientation2d orientation)
    {
       position.changeFrame(originPose.getReferenceFrame());
       originPose.setPosition(position);

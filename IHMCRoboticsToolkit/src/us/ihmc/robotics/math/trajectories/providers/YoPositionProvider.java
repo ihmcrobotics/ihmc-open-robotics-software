@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories.providers;
 
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 
@@ -14,12 +14,12 @@ public class YoPositionProvider implements PositionProvider
       this.framePoint = yoFramePoint;
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       framePoint.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void set(FramePoint framePoint)
+   public void set(FramePoint3D framePoint)
    {
       this.framePoint.set(framePoint);
    }

@@ -1,12 +1,12 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 
 public class ConstantPositionTrajectoryGenerator implements PositionTrajectoryGenerator
@@ -35,7 +35,7 @@ public class ConstantPositionTrajectoryGenerator implements PositionTrajectoryGe
    public void initialize()
    {
       time.set(0.0);
-      FramePoint positionToPack = new FramePoint();
+      FramePoint3D positionToPack = new FramePoint3D();
       positionProvider.getPosition(positionToPack);
       positionToPack.changeFrame(position.getReferenceFrame());
       position.set(positionToPack);
@@ -51,22 +51,22 @@ public class ConstantPositionTrajectoryGenerator implements PositionTrajectoryGe
       return time.getDoubleValue() > finalTime.getDoubleValue();
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       position.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       velocityToPack.setToZero(position.getReferenceFrame());
    }
 
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       accelerationToPack.setToZero(position.getReferenceFrame());
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

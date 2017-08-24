@@ -4,15 +4,15 @@ import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTraj
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGeneratorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointListInterface;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -113,13 +113,13 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       numberOfWaypoints.increment();
    }
 
-   public void appendWaypoint(double timeAtWaypoint, FrameOrientation orientation, FrameVector angularVelocity)
+   public void appendWaypoint(double timeAtWaypoint, FrameOrientation orientation, FrameVector3D angularVelocity)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(timeAtWaypoint, orientation, angularVelocity);
    }
 
-   private void appendWaypointUnsafe(double timeAtWaypoint, FrameOrientation orientation, FrameVector angularVelocity)
+   private void appendWaypointUnsafe(double timeAtWaypoint, FrameOrientation orientation, FrameVector3D angularVelocity)
    {
       waypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint, orientation, angularVelocity);
       numberOfWaypoints.increment();
@@ -162,7 +162,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
          appendWaypointUnsafe(timeAtWaypoints[i], orientations[i], angularVelocities[i]);
    }
 
-   public void appendWaypoints(double[] timeAtWaypoints, FrameOrientation[] orientations, FrameVector[] angularVelocities)
+   public void appendWaypoints(double[] timeAtWaypoints, FrameOrientation[] orientations, FrameVector3D[] angularVelocities)
    {
       if (timeAtWaypoints.length != orientations.length || orientations.length != angularVelocities.length)
          throw new RuntimeException("Arguments are inconsistent.");
@@ -300,19 +300,19 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
    }
 
    @Override
-   public void getAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       subTrajectory.getAngularVelocity(angularVelocityToPack);
    }
 
    @Override
-   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
    {
       subTrajectory.getAngularAcceleration(angularAccelerationToPack);
    }
 
    @Override
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       subTrajectory.getAngularData(orientationToPack, angularVelocityToPack, angularAccelerationToPack);
    }

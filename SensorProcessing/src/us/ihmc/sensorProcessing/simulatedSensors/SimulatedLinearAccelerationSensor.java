@@ -1,12 +1,12 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 
@@ -16,9 +16,9 @@ public class SimulatedLinearAccelerationSensor extends SimulatedSensor<Vector3D>
    private final RigidBody rigidBody;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final FramePoint imuFramePoint = new FramePoint(worldFrame);
+   private final FramePoint3D imuFramePoint = new FramePoint3D(worldFrame);
 
-   private final FrameVector linearAccelerationFrameVector = new FrameVector(worldFrame);
+   private final FrameVector3D linearAccelerationFrameVector = new FrameVector3D(worldFrame);
    private final Vector3D linearAcceleration = new Vector3D();
    private final YoFrameVector yoFrameVectorPerfect, yoFrameVectorNoisy;
 
@@ -26,7 +26,7 @@ public class SimulatedLinearAccelerationSensor extends SimulatedSensor<Vector3D>
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private final ControlFlowOutputPort<Vector3D> linearAccelerationOutputPort = createOutputPort("linearAccelerationOutputPort");
-   private final FrameVector gravitationalAcceleration;
+   private final FrameVector3D gravitationalAcceleration;
 
    public SimulatedLinearAccelerationSensor(String name, RigidBody rigidBody, ReferenceFrame measurementFrame,
            SpatialAccelerationCalculator spatialAccelerationCalculator, Vector3D gravitationalAcceleration, YoVariableRegistry registry)
@@ -34,7 +34,7 @@ public class SimulatedLinearAccelerationSensor extends SimulatedSensor<Vector3D>
       this.rigidBody = rigidBody;
       this.measurementFrame = measurementFrame;
       this.spatialAccelerationCalculator = spatialAccelerationCalculator;
-      this.gravitationalAcceleration = new FrameVector(ReferenceFrame.getWorldFrame(), gravitationalAcceleration);
+      this.gravitationalAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame(), gravitationalAcceleration);
       
       this.yoFrameVectorPerfect = new YoFrameVector(name + "Perfect", measurementFrame, registry);
       this.yoFrameVectorNoisy = new YoFrameVector(name + "Noisy", measurementFrame, registry);

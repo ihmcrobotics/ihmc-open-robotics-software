@@ -2,6 +2,9 @@ package us.ihmc.atlas.StepAdjustmentVisualizers;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -16,7 +19,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -44,9 +46,9 @@ public class SpeedUpExampleGraphic
    private final YoFramePoint2d currentICP;
    private final YoFramePoint2d projectedICP;
 
-   private final FramePoint2d desiredICP2d = new FramePoint2d();
-   private final FramePoint2d finalICP2d = new FramePoint2d();
-   private final FramePoint2d referenceCMP = new FramePoint2d();
+   private final FramePoint2D desiredICP2d = new FramePoint2D();
+   private final FramePoint2D finalICP2d = new FramePoint2D();
+   private final FramePoint2D referenceCMP = new FramePoint2D();
 
    private static final double forwardCMPOffset = 0.075;
    private static final double backwardCMPOffset = 0.02;
@@ -77,17 +79,17 @@ public class SpeedUpExampleGraphic
       YoFrameConvexPolygon2d stepFootPolygonViz = new YoFrameConvexPolygon2d("stepFootPolygon", "", worldFrame, 4, registry);
 
       FrameConvexPolygon2d stanceFootPolygon = new FrameConvexPolygon2d();
-      stanceFootPolygon.addVertex(new FramePoint2d(worldFrame, 0.11, 0.0425));
-      stanceFootPolygon.addVertex(new FramePoint2d(worldFrame, 0.11, -0.0425));
-      stanceFootPolygon.addVertex(new FramePoint2d(worldFrame, -0.11, -0.055));
-      stanceFootPolygon.addVertex(new FramePoint2d(worldFrame, -0.11, 0.055));
+      stanceFootPolygon.addVertex(new FramePoint2D(worldFrame, 0.11, 0.0425));
+      stanceFootPolygon.addVertex(new FramePoint2D(worldFrame, 0.11, -0.0425));
+      stanceFootPolygon.addVertex(new FramePoint2D(worldFrame, -0.11, -0.055));
+      stanceFootPolygon.addVertex(new FramePoint2D(worldFrame, -0.11, 0.055));
       stanceFootPolygon.update();
 
       FrameConvexPolygon2d stepFootPolygon = new FrameConvexPolygon2d();
-      stepFootPolygon.addVertex(new FramePoint2d(worldFrame, 0.11 + stepLength, 0.0425 + stepWidth));
-      stepFootPolygon.addVertex(new FramePoint2d(worldFrame, 0.11 + stepLength, -0.0425 + stepWidth));
-      stepFootPolygon.addVertex(new FramePoint2d(worldFrame, -0.11 + stepLength, -0.055 + stepWidth));
-      stepFootPolygon.addVertex(new FramePoint2d(worldFrame, -0.11 + stepLength, 0.055 + stepWidth));
+      stepFootPolygon.addVertex(new FramePoint2D(worldFrame, 0.11 + stepLength, 0.0425 + stepWidth));
+      stepFootPolygon.addVertex(new FramePoint2D(worldFrame, 0.11 + stepLength, -0.0425 + stepWidth));
+      stepFootPolygon.addVertex(new FramePoint2D(worldFrame, -0.11 + stepLength, -0.055 + stepWidth));
+      stepFootPolygon.addVertex(new FramePoint2D(worldFrame, -0.11 + stepLength, 0.055 + stepWidth));
       stepFootPolygon.update();
 
       stanceFootPolygonViz.setFrameConvexPolygon2d(stanceFootPolygon);
@@ -102,7 +104,7 @@ public class SpeedUpExampleGraphic
 
 
 
-      FramePoint2d heelStrikeCMP = new FramePoint2d(worldFrame, stepLength - backwardCMPOffset, stepWidth);
+      FramePoint2D heelStrikeCMP = new FramePoint2D(worldFrame, stepLength - backwardCMPOffset, stepWidth);
       stanceCMP.set(forwardCMPOffset, 0);
       stanceCMP.getFrameTuple2d(referenceCMP);
 
@@ -165,9 +167,9 @@ public class SpeedUpExampleGraphic
 
       timeInSegment.set(currentTime.getDoubleValue() - initialTime);
 
-      FramePoint2d firstKnot = new FramePoint2d();
+      FramePoint2D firstKnot = new FramePoint2D();
 
-      FrameVector2d xAxis = new FrameVector2d(worldFrame);
+      FrameVector2D xAxis = new FrameVector2D(worldFrame);
       endICP.getFrameTuple2d(finalICP2d);
       desiredICP.getFrameTuple2d(desiredICP2d);
       xAxis.set(finalICP2d);
@@ -175,9 +177,9 @@ public class SpeedUpExampleGraphic
       actionFrame.setXAxis(xAxis);
       actionFrame.update();
 
-      FramePoint2d secondKnot = new FramePoint2d(actionFrame);
-      FramePoint2d thirdKnot = new FramePoint2d(actionFrame);
-      FramePoint2d fourthKnot = new FramePoint2d(actionFrame);
+      FramePoint2D secondKnot = new FramePoint2D(actionFrame);
+      FramePoint2D thirdKnot = new FramePoint2D(actionFrame);
+      FramePoint2D fourthKnot = new FramePoint2D(actionFrame);
       secondKnot.set(0.2, 0.1);
       thirdKnot.set(0.2, -0.05);
       fourthKnot.set(0.0, -0.15);
@@ -221,9 +223,9 @@ public class SpeedUpExampleGraphic
 
    private final FrameLine2d desiredICPToFinalICPLine = new FrameLine2d();
    private final FrameLineSegment2d desiredICPToFinalICPLineSegment = new FrameLineSegment2d();
-   private final FramePoint2d actualICP2d = new FramePoint2d();
+   private final FramePoint2D actualICP2d = new FramePoint2D();
 
-   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint2d actualCapturePointPosition)
+   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint2D actualCapturePointPosition)
    {
       stanceCMP.getFrameTuple2dIncludingFrame(referenceCMP);
       desiredICP.getFrameTuple2dIncludingFrame(desiredICP2d);
@@ -287,7 +289,7 @@ public class SpeedUpExampleGraphic
    private static class Vector2dZUpFrame extends ReferenceFrame
    {
       private static final long serialVersionUID = -1810366869361449743L;
-      private final FrameVector2d xAxis;
+      private final FrameVector2D xAxis;
       private final Vector3D x = new Vector3D();
       private final Vector3D y = new Vector3D();
       private final Vector3D z = new Vector3D();
@@ -296,10 +298,10 @@ public class SpeedUpExampleGraphic
       public Vector2dZUpFrame(String string, ReferenceFrame parentFrame)
       {
          super(string, parentFrame);
-         xAxis = new FrameVector2d(parentFrame);
+         xAxis = new FrameVector2D(parentFrame);
       }
 
-      public void setXAxis(FrameVector2d xAxis)
+      public void setXAxis(FrameVector2D xAxis)
       {
          this.xAxis.setIncludingFrame(xAxis);
          this.xAxis.changeFrame(parentFrame);

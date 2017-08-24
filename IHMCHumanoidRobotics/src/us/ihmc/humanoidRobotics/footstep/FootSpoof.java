@@ -5,17 +5,17 @@ import java.util.List;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -32,8 +32,8 @@ public class FootSpoof implements ContactablePlaneBody
    private final RigidBody foot;
    private final PoseReferenceFrame shinFrame;
    private final ReferenceFrame soleFrame;
-   private final List<FramePoint> contactPoints = new ArrayList<FramePoint>();
-   private final List<FramePoint2d> contactPoints2d = new ArrayList<FramePoint2d>();
+   private final List<FramePoint3D> contactPoints = new ArrayList<FramePoint3D>();
+   private final List<FramePoint2D> contactPoints2d = new ArrayList<FramePoint2D>();
    private final double coefficientOfFriction;
    private final int totalNumberOfContactPoints;
 
@@ -59,9 +59,9 @@ public class FootSpoof implements ContactablePlaneBody
 
       for (Point2D contactPointInSoleFrame : contactPoints2dInSoleFrame)
       {
-         FramePoint point = new FramePoint(soleFrame, contactPointInSoleFrame.getX(), contactPointInSoleFrame.getY(), 0.0);
+         FramePoint3D point = new FramePoint3D(soleFrame, contactPointInSoleFrame.getX(), contactPointInSoleFrame.getY(), 0.0);
          contactPoints.add(point);
-         contactPoints2d.add(point.toFramePoint2d());
+         contactPoints2d.add(new FramePoint2D(point));
       }
 
       totalNumberOfContactPoints = contactPoints.size();
@@ -83,25 +83,25 @@ public class FootSpoof implements ContactablePlaneBody
       this.ankle = ScrewTools.addRevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3D(0.0, 1.0, 0.0));
       this.foot = ScrewTools.addRigidBody(name, ankle, new Matrix3D(), 1.0, new RigidBodyTransform());
       soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
-      FramePoint point1 = new FramePoint(soleFrame, new Point3D(footForward, footHalfWidth, 0.0));
-      FramePoint point2 = new FramePoint(soleFrame, new Point3D(footForward, -footHalfWidth, 0.0));
-      FramePoint point3 = new FramePoint(soleFrame, new Point3D(-footBack, -footHalfWidth, 0.0));
-      FramePoint point4 = new FramePoint(soleFrame, new Point3D(-footBack, footHalfWidth, 0.0));
+      FramePoint3D point1 = new FramePoint3D(soleFrame, new Point3D(footForward, footHalfWidth, 0.0));
+      FramePoint3D point2 = new FramePoint3D(soleFrame, new Point3D(footForward, -footHalfWidth, 0.0));
+      FramePoint3D point3 = new FramePoint3D(soleFrame, new Point3D(-footBack, -footHalfWidth, 0.0));
+      FramePoint3D point4 = new FramePoint3D(soleFrame, new Point3D(-footBack, footHalfWidth, 0.0));
       contactPoints.add(point1);
       contactPoints.add(point2);
       contactPoints.add(point3);
       contactPoints.add(point4);
-      contactPoints2d.add(point1.toFramePoint2d());
-      contactPoints2d.add(point2.toFramePoint2d());
-      contactPoints2d.add(point3.toFramePoint2d());
-      contactPoints2d.add(point4.toFramePoint2d());
+      contactPoints2d.add(new FramePoint2D(point1));
+      contactPoints2d.add(new FramePoint2D(point2));
+      contactPoints2d.add(new FramePoint2D(point3));
+      contactPoints2d.add(new FramePoint2D(point4));
 
       totalNumberOfContactPoints = contactPoints.size();
 
       this.coefficientOfFriction = coefficientOfFriction;
    }
 
-   public void setPose(FramePoint position, FrameOrientation orientation)
+   public void setPose(FramePoint3D position, FrameOrientation orientation)
    {
       shinFrame.setPoseAndUpdate(position, orientation);
    }
@@ -111,7 +111,7 @@ public class FootSpoof implements ContactablePlaneBody
       shinFrame.translateAndUpdate(x, y, z);
    }
 
-   public void setSoleFrame(FramePoint position, FrameOrientation orientation)
+   public void setSoleFrame(FramePoint3D position, FrameOrientation orientation)
    {
       position.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       orientation.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
@@ -142,12 +142,12 @@ public class FootSpoof implements ContactablePlaneBody
       return foot;
    }
 
-   public List<FramePoint> getContactPointsCopy()
+   public List<FramePoint3D> getContactPointsCopy()
    {
-      List<FramePoint> ret = new ArrayList<>();
+      List<FramePoint3D> ret = new ArrayList<>();
       for (int i = 0; i < contactPoints.size(); i++)
       {
-         ret.add(new FramePoint(contactPoints.get(i)));
+         ret.add(new FramePoint3D(contactPoints.get(i)));
       }
       return ret;
    }
@@ -167,7 +167,7 @@ public class FootSpoof implements ContactablePlaneBody
       return soleFrame;
    }
 
-   public List<FramePoint2d> getContactPoints2d()
+   public List<FramePoint2D> getContactPoints2d()
    {
       return contactPoints2d;
    }

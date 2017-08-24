@@ -1,17 +1,17 @@
 package us.ihmc.footstepPlanning.scoring;
 
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.BipedalStepCostCalculator;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalculator
 {
@@ -37,7 +37,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
    private final YoFrameVector idealToCandidateVector;
    private final YoFrameOrientation idealToCandidateOrientation;
 
-   private final FrameVector tempFrameVectorForDot;
+   private final FrameVector3D tempFrameVectorForDot;
 
    public BipedalStepAdjustmentCostCalculator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsRegistry)
    {
@@ -64,7 +64,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       idealToCandidateVector = new YoFrameVector(prefix + "IdealToCandidateVector", ReferenceFrame.getWorldFrame(), parentRegistry);
       idealToCandidateOrientation = new YoFrameOrientation(prefix + "IdealToCandidateOrientation", ReferenceFrame.getWorldFrame(), parentRegistry);
 
-      tempFrameVectorForDot = new FrameVector();
+      tempFrameVectorForDot = new FrameVector3D();
 
       setDefaultValues();
    }
@@ -139,7 +139,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
 
    private double dot3dVectorWith2dVector(YoFrameVector vector3d, YoFrameVector2d vector2d)
    {
-      tempFrameVectorForDot.setXYIncludingFrame(vector2d.getFrameTuple2d());
+      tempFrameVectorForDot.setIncludingFrame(vector2d.getFrameTuple2d(), 0.0);
       return vector3d.dot(tempFrameVectorForDot);
    }
 
@@ -153,7 +153,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
    private void setVectorFromPoseToPose(YoFrameVector frameVectorToPack, FramePose fromPose, FramePose toPose)
    {
       frameVectorToPack.set(toPose.getFramePointCopy());
-      FrameVector frameTuple = frameVectorToPack.getFrameTuple();
+      FrameVector3D frameTuple = frameVectorToPack.getFrameTuple();
       frameTuple.sub(fromPose.getFramePointCopy());
       frameVectorToPack.setWithoutChecks(frameTuple);
    }
@@ -166,8 +166,8 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
       }
       else
       {
-         FrameVector2d frameTuple2d = vectorToPack.getFrameTuple2d();
-         frameTuple2d.setByProjectionOntoXYPlane(toPose.getFramePointCopy());
+         FrameVector2D frameTuple2d = vectorToPack.getFrameTuple2d();
+         frameTuple2d.set(toPose.getFramePointCopy());
          fromPose.checkReferenceFrameMatch(vectorToPack);
          frameTuple2d.sub(fromPose.getX(), fromPose.getY());
          frameTuple2d.normalize();
