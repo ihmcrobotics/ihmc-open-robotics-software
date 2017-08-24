@@ -25,7 +25,11 @@
  * depthFromWorkspaceDirectory = 1 (default)
  * includeBuildsFromWorkspace = true (default)
  * excludeFromCompositeBuild = false (default)
- * org.gradle.workers.max = 200
+ *
+ * Optional properties:
+ *
+ * disableSettingsGeneration = false (optionally disable auto-write this file)
+ * useLegacySourceSets = false (does not work yet)
  */
 
 buildscript {
@@ -35,7 +39,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.5.6"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.5.7"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
