@@ -225,7 +225,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       CreateNewGraphWindowCommandExecutor, CreateNewViewportWindowCommandExecutor, CropBufferCommandExecutor, CutBufferCommandExecutor, ExportSnapshotCommandExecutor,
       GotoInPointCommandExecutor, GotoOutPointCommandExecutor, NextCameraKeyCommandExecutor, PackBufferCommandExecutor, PreviousCameraKeyCommandExecutor,
       RemoveCameraKeyCommandExecutor, SetInPointCommandExecutor, SetOutPointCommandExecutor, StepBackwardCommandExecutor, StepForwardCommandExecutor,
-      ToggleCameraKeyModeCommandExecutor, ToggleKeyPointModeCommandExecutor, GUIEnablerAndDisabler, WriteDataCommandExecutor, TimeHolder,
+      ToggleCameraKeyModeCommandExecutor, ToggleKeyPointModeCommandExecutor, GUIEnablerAndDisabler, WriteDataCommandExecutor, TimeHolder, ParameterRootNamespaceHolder,
       DataBufferCommandsExecutor, TickAndUpdatable
 {
    private static final boolean TESTING_LOAD_STUFF = false;
@@ -294,6 +294,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    private final YoGraphicMenuManager yoGraphicMenuManager;
 
+   private NameSpace parameterRootPath = null;
+   
    public static SimulationConstructionSet generateSimulationFromDataFile(File chosenFile)
    {
       // / get file stuff
@@ -4512,5 +4514,24 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void initializeCollisionDetectionAndHandling(DefaultCollisionVisualizer collisionVisualizer, CollisionHandler collisionHandler)
    {
       mySimulation.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+   }
+
+   @Override
+   public NameSpace getParameterRootPath()
+   {
+      return parameterRootPath;
+   }
+   
+   /**
+    * Sets the parameter root path.
+    * 
+    * Only the parameters in the child registries of the parameter root path get
+    * exported. The parameter root path is not included in the exported path.
+    * 
+    * @param registry
+    */
+   public void setParameterRootPath(YoVariableRegistry registry)
+   {
+      this.parameterRootPath = registry.getNameSpace();
    }
 }
