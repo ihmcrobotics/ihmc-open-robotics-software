@@ -6,12 +6,15 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.*;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -22,14 +25,14 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
 
    private final SideDependentList<List<YoContactPoint>> contactPoints = new SideDependentList<>();
 
-   private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
+   private final FramePoint2D toeOffContactPoint2d = new FramePoint2D();
    private final FrameLineSegment2d toeOffContactLine2d = new FrameLineSegment2d();
 
-   private final FramePoint exitCMP = new FramePoint();
-   private final FramePoint2d exitCMP2d = new FramePoint2d();
-   private final FrameVector2d exitCMPRayDirection2d = new FrameVector2d();
+   private final FramePoint3D exitCMP = new FramePoint3D();
+   private final FramePoint2D exitCMP2d = new FramePoint2D();
+   private final FrameVector2D exitCMPRayDirection2d = new FrameVector2D();
 
-   private final FramePoint2d tmpPoint2d = new FramePoint2d();
+   private final FramePoint2D tmpPoint2d = new FramePoint2D();
    private final FrameLine2d rayThroughExitCMP = new FrameLine2d();
 
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
@@ -40,7 +43,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    private final YoBoolean hasComputedToeOffContactPoint;
    private final YoBoolean hasComputedToeOffContactLine;
 
-   private final FramePoint2d[] intersectionWithRay = new FramePoint2d[] {new FramePoint2d(), new FramePoint2d()};
+   private final FramePoint2D[] intersectionWithRay = new FramePoint2D[] {new FramePoint2D(), new FramePoint2D()};
 
    public CentroidProjectionToeOffCalculator(SideDependentList<YoPlaneContactState> contactStates, SideDependentList<? extends ContactablePlaneBody> feet,
                                              ToeOffParameters toeOffParameters, YoVariableRegistry parentRegistry)
@@ -77,23 +80,23 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    }
 
    @Override
-   public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg)
+   public void setExitCMP(FramePoint3D exitCMP, RobotSide trailingLeg)
    {
       ReferenceFrame soleFrame = soleFrames.get(trailingLeg);
       this.exitCMP.setIncludingFrame(exitCMP);
       this.exitCMP.changeFrame(soleFrame);
       exitCMP2d.setToZero(soleFrame);
-      exitCMP2d.setByProjectionOntoXYPlaneIncludingFrame(this.exitCMP);
+      exitCMP2d.setIncludingFrame(this.exitCMP);
    }
 
    @Override
-   public void computeToeOffContactPoint(FramePoint2d desiredCMP, RobotSide trailingLeg)
+   public void computeToeOffContactPoint(FramePoint2D desiredCMP, RobotSide trailingLeg)
    {
       ReferenceFrame soleFrame = soleFrames.get(trailingLeg);
 
       computeFootPolygon(trailingLeg);
 
-      FramePoint2d rayOrigin;
+      FramePoint2D rayOrigin;
       if (!exitCMP2d.containsNaN() && footPolygon.isPointInside(exitCMP2d))
          rayOrigin = exitCMP2d;
       else
@@ -125,7 +128,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    }
 
    @Override
-   public void getToeOffContactPoint(FramePoint2d contactPointToPack, RobotSide trailingLeg)
+   public void getToeOffContactPoint(FramePoint2D contactPointToPack, RobotSide trailingLeg)
    {
       if (!hasComputedToeOffContactPoint.getBooleanValue())
          computeToeOffContactPoint(null, trailingLeg);
@@ -134,7 +137,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    }
 
    @Override
-   public void computeToeOffContactLine(FramePoint2d desiredCMP, RobotSide trailingLeg)
+   public void computeToeOffContactLine(FramePoint2D desiredCMP, RobotSide trailingLeg)
    {
       computeFootPolygon(trailingLeg);
 

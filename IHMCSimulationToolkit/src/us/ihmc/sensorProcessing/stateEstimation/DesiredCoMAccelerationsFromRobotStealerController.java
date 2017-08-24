@@ -1,13 +1,13 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.CenterOfMassAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
@@ -91,18 +91,18 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
 
    private void updateGroundTruth()
    {
-      FramePoint com = new FramePoint();
+      FramePoint3D com = new FramePoint3D();
       perfectCenterOfMassCalculator.compute();
       perfectCenterOfMassCalculator.getCenterOfMass(com);
       perfectCoM.set(com);
 
-      FrameVector comd = new FrameVector();
+      FrameVector3D comd = new FrameVector3D();
       perfectCenterOfMassJacobian.compute();
       perfectCenterOfMassJacobian.getCenterOfMassVelocity(comd);
       comd.changeFrame(ReferenceFrame.getWorldFrame());
       perfectCoMd.set(comd);
 
-      FrameVector comdd = new FrameVector();
+      FrameVector3D comdd = new FrameVector3D();
       perfectCenterOfMassAccelerationCalculator.getCoMAcceleration(comdd);
       comdd.changeFrame(ReferenceFrame.getWorldFrame());
       perfectCoMdd.set(comdd);
@@ -112,7 +112,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
    private class CenterOfMassAccelerationFromFullRobotModelStealer implements Runnable
    {
       private final CenterOfMassAccelerationCalculator centerOfMassAccelerationCalculator;
-      private final FrameVector comAccelerationFrameVector = new FrameVector(ReferenceFrame.getWorldFrame());
+      private final FrameVector3D comAccelerationFrameVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
       private final Vector3D comAcceleration = new Vector3D();
 
       private final GaussianVectorCorruptor signalCorruptor = new GaussianVectorCorruptor(123412L, getClass().getSimpleName() + "Corruptor", registry);
@@ -150,7 +150,7 @@ public class DesiredCoMAccelerationsFromRobotStealerController implements RobotC
       // TODO: This should probably just have a Vector3d port rather than a FrameVector port. Since we don't
       // know the frame that the user will want it in. It should be implied to be a body frame.
       // Or that frame should be passed in somehow.
-      private final FrameVector desiredAngularAccelerationFrameVector = new FrameVector((ReferenceFrame) null);
+      private final FrameVector3D desiredAngularAccelerationFrameVector = new FrameVector3D((ReferenceFrame) null);
       private final Vector3D desiredAngularAcceleration = new Vector3D();
 
       private final GaussianVectorCorruptor signalCorruptor = new GaussianVectorCorruptor(123412L, getClass().getSimpleName() + "Corruptor", registry);

@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -13,7 +14,6 @@ import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -72,7 +72,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
       
       // Hand
-      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPosition());
+      FramePoint3D desiredHandFramePoint = new FramePoint3D(midFeetFrame, desiredHandPose.getPosition());
       FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
       
       FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);
@@ -98,7 +98,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
       
       // Hand
-      FramePoint desiredHandFramePoint = new FramePoint(midFeetFrame, desiredHandPose.getPosition());
+      FramePoint3D desiredHandFramePoint = new FramePoint3D(midFeetFrame, desiredHandPose.getPosition());
       FrameOrientation desiredHandFrameOrientation = new FrameOrientation(midFeetFrame, desiredHandPose.getOrientation());
       
       FramePose desiredHandFramePose = new FramePose(desiredHandFramePoint, desiredHandFrameOrientation);

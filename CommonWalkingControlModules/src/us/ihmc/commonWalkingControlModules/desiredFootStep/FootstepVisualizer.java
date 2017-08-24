@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -12,11 +14,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepVisualizer
@@ -51,9 +51,9 @@ public class FootstepVisualizer
       yoGraphicsListRegistry.registerYoGraphic(graphicListName, poseViz);
       yoGraphicsListRegistry.registerYoGraphic(graphicListName, footholdViz);
 
-      List<FramePoint2d> contactPoints2d = contactableFoot.getContactPoints2d();
+      List<FramePoint2D> contactPoints2d = contactableFoot.getContactPoints2d();
       for (int i = 0; i < contactPoints2d.size(); i++)
-         defaultContactPointsInSoleFrame.add(contactPoints2d.get(i).getPointCopy());
+         defaultContactPointsInSoleFrame.add(new Point2D(contactPoints2d.get(i)));
    }
 
    public void update(Footstep footstep)

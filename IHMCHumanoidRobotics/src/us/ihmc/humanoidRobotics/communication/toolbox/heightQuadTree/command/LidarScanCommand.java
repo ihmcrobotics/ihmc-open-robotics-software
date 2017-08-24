@@ -2,13 +2,13 @@ package us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.LidarScanMessage;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMessage>
 {
@@ -69,7 +69,7 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
       pointToPack.set(scan.get(index));
    }
 
-   public void getFramePoint(int index, FramePoint framePointToPack)
+   public void getFramePoint(int index, FramePoint3D framePointToPack)
    {
       framePointToPack.setIncludingFrame(pointCloudFrame, scan.get(index));
    }

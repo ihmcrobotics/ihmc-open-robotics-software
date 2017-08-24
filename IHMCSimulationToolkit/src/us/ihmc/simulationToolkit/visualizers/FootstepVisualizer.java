@@ -3,6 +3,9 @@ package us.ihmc.simulationToolkit.visualizers;
 import java.awt.Color;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -17,17 +20,14 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.AtlasFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.ConvexHullFootstepSnapper;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapper;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnapper;
+import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -130,7 +130,7 @@ public class FootstepVisualizer
 
       nullRobot.setTime(nullRobot.getTime() + scs.getDT());
 
-      FramePoint solePositon = new FramePoint(footstep.getSoleReferenceFrame());
+      FramePoint3D solePositon = new FramePoint3D(footstep.getSoleReferenceFrame());
       solePositon.changeFrame(worldFrame);
 
       updateFocus(solePositon);
@@ -158,7 +158,7 @@ public class FootstepVisualizer
    }
    
 
-   private void updateFocus(FramePoint point)
+   private void updateFocus(FramePoint3D point)
    {
       double x = point.getX();
       double y = point.getY();
@@ -311,12 +311,12 @@ public class FootstepVisualizer
       }
 
       new FramePose2d(worldFrame, new Point2D(0.0, 0.0), 0);
-      FramePoint2d endPoint = new FramePoint2d(worldFrame, 3.0, 0.0);
+      FramePoint2D endPoint = new FramePoint2D(worldFrame, 3.0, 0.0);
 
       SimplePathParameters pathType = new SimplePathParameters(0.5, 0.2, 0.0, Math.PI / 6, Math.PI / 12, 0.3);
       
-      FootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
-      FootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
+      QuadTreeFootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
+      QuadTreeFootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
       
 //      FootstepSnapper footstepSnapper = new SimpleFootstepSnapper();
 

@@ -2,6 +2,7 @@ package us.ihmc.avatar.testTools;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -12,7 +13,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -92,9 +92,9 @@ public class ScriptedFootstepGenerator
    {
       double footForward, footBack, footWidth;
 
-      footForward = walkingControllerParameters.getFootForwardOffset();
-      footBack = walkingControllerParameters.getFootBackwardOffset();
-      footWidth = walkingControllerParameters.getFootWidth();
+      footForward = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
+      footBack = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
+      footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
 
       SideDependentList<ContactablePlaneBody> bipedFeet = new SideDependentList<ContactablePlaneBody>();
 

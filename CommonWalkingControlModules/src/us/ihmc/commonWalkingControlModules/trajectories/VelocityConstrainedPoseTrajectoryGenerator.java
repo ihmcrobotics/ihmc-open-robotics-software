@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -21,9 +24,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -32,7 +33,6 @@ import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
@@ -63,8 +63,8 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    private final YoFrameOrientation currentOrientationForViz;
 
    private final FrameOrientation tempCurrentOrientation;
-   private final FrameVector tempCurrentAngularVelocity;
-   private final FrameVector tempCurrentAngularAcceleration;
+   private final FrameVector3D tempCurrentAngularVelocity;
+   private final FrameVector3D tempCurrentAngularAcceleration;
    private final AxisAngle tempAxisAngle;
    private final Vector3D tempVector;
    double vectorLength;
@@ -72,14 +72,14 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    private final double FDdt = 5e-6;
    private Quaternion quatFD1, quatFD3, quatFDDelta;
    private double deltaAngle, omegaFD;
-   private FrameVector omegaVectorDF;
+   private FrameVector3D omegaVectorDF;
 
-   private final FramePoint tempPosition;
+   private final FramePoint3D tempPosition;
    private final FrameOrientation tempOrientation;
    private final FrameOrientation copyOfInitialOrientation;
    private final FrameOrientation copyOfFinalOrientation;
-   private final FrameVector copyOfInitialAngularVelocity;
-   private final FrameVector copyOfFinalAngularVelocity;
+   private final FrameVector3D copyOfInitialAngularVelocity;
+   private final FrameVector3D copyOfFinalAngularVelocity;
 
    private final YoPolynomial xPolynomial, yPolynomial, zPolynomial;
    private final YoPolynomial xRotPolynomial, yRotPolynomial, zRotPolynomial;
@@ -99,7 +99,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    private final boolean visualize;
    private final YoGraphicsList yoGraphicsList;
    private final BagOfBalls bagOfBalls;
-   private final FramePoint ballPosition = new FramePoint();
+   private final FramePoint3D ballPosition = new FramePoint3D();
    private final int numberOfBalls = 50;
 
    /** Use a YoBoolean to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
@@ -131,7 +131,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       quatFD1 = new Quaternion();
       quatFD3 = new Quaternion();
       quatFDDelta = new Quaternion();
-      omegaVectorDF = new FrameVector();
+      omegaVectorDF = new FrameVector3D();
 
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
@@ -157,17 +157,17 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       currentOrientationForViz = new YoFrameOrientation(namePrefix + "CurrentOrientationForViz", worldFrame, registry);
 
       tempCurrentOrientation = new FrameOrientation();
-      tempCurrentAngularVelocity = new FrameVector();
-      tempCurrentAngularAcceleration = new FrameVector();
+      tempCurrentAngularVelocity = new FrameVector3D();
+      tempCurrentAngularAcceleration = new FrameVector3D();
       tempAxisAngle = new AxisAngle();
       tempVector = new Vector3D();
 
-      tempPosition = new FramePoint();
+      tempPosition = new FramePoint3D();
       tempOrientation = new FrameOrientation(trajectoryFrame);
       copyOfInitialOrientation = new FrameOrientation(trajectoryFrame);
       copyOfFinalOrientation = new FrameOrientation(trajectoryFrame);
-      copyOfInitialAngularVelocity = new FrameVector(trajectoryFrame);
-      copyOfFinalAngularVelocity = new FrameVector(trajectoryFrame);
+      copyOfInitialAngularVelocity = new FrameVector3D(trajectoryFrame);
+      copyOfFinalAngularVelocity = new FrameVector3D(trajectoryFrame);
 
       currentTime = new YoDouble(namePrefix + "Time", registry);
       trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
@@ -338,7 +338,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       trajectoryTime.set(newTrajectoryTime);
    }
 
-   public void setInitialPoseWithInitialVelocity(FramePose initialPose, FrameVector initialVelocity, FrameVector initialAngularVelocity)
+   public void setInitialPoseWithInitialVelocity(FramePose initialPose, FrameVector3D initialVelocity, FrameVector3D initialAngularVelocity)
    {
       initialPose.getPoseIncludingFrame(tempPosition, tempOrientation);
       this.initialPosition.set(tempPosition);
@@ -359,8 +359,8 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       this.initialAngularVelocity.setToZero();
    }
 
-   public void setInitialPoseWithInitialVelocity(FramePoint initialPosition, FrameVector initialVelocity, FrameOrientation initialOrientation,
-         FrameVector initialAngularVelocity)
+   public void setInitialPoseWithInitialVelocity(FramePoint3D initialPosition, FrameVector3D initialVelocity, FrameOrientation initialOrientation,
+         FrameVector3D initialAngularVelocity)
    {
       this.initialPosition.set(initialPosition);
       this.initialVelocity.set(initialVelocity);
@@ -368,7 +368,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       this.initialAngularVelocity.set(initialAngularVelocity);
    }
 
-   public void setInitialPoseWithoutInitialVelocity(FramePoint initialPosition, FrameOrientation initialOrientation)
+   public void setInitialPoseWithoutInitialVelocity(FramePoint3D initialPosition, FrameOrientation initialOrientation)
    {
       this.initialPosition.set(initialPosition);
       this.initialVelocity.setToZero();
@@ -401,7 +401,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       setFinalPoseWithoutFinalVelocity(tempPosition, tempOrientation);
    }
 
-   public void setFinalPoseWithoutFinalVelocity(FramePoint finalPosition, FrameOrientation finalOrientation)
+   public void setFinalPoseWithoutFinalVelocity(FramePoint3D finalPosition, FrameOrientation finalOrientation)
    {
       this.finalPosition.set(finalPosition);
       this.finalOrientation.set(finalOrientation);
@@ -636,17 +636,17 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       showViz.set(false);
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       currentPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
@@ -656,24 +656,24 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   public void getAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       currentAngularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);
    }
 
-   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
    {
       currentAngularAcceleration.getFrameTupleIncludingFrame(angularAccelerationToPack);
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);
       getAcceleration(accelerationToPack);
    }
 
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

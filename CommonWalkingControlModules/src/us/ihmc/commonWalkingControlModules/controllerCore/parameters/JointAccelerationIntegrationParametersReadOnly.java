@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
  * double step integration off of the desired joint acceleration to first compute the desired joint
  * velocity and finally the desired joint position.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  *
  */
@@ -42,7 +42,7 @@ public interface JointAccelerationIntegrationParametersReadOnly
     * following default value can be used as starting point for tuning a joint: &alpha;<sub>P</sub>
     * = {@link JointAccelerationIntegrationCalculator#DEFAULT_ALPHA_POSITION}.
     * </p>
-    * 
+    *
     * @return alphaPosition the leak ratio &alpha;<sub>P</sup> used to compute the desired position.
     */
    double getAlphaPosition();
@@ -66,7 +66,7 @@ public interface JointAccelerationIntegrationParametersReadOnly
     * performing. The following default value can be used as starting point for tuning a joint:
     * &alpha;<sub>V</sub> = {@link JointAccelerationIntegrationCalculator#DEFAULT_ALPHA_VELOCITY}.
     * </p>
-    * 
+    *
     * @return alphaVelocity the leak ratio &alpha;<sub>V</sup> used to compute the desired velocity.
     */
    double getAlphaVelocity();
@@ -81,7 +81,7 @@ public interface JointAccelerationIntegrationParametersReadOnly
     * changed once heavy testing has been performed on the robot knowing that the effects of this
     * parameter may show up only under specific circumstances.
     * </p>
-    * 
+    *
     * @return maxPositionError limits the gap between the desired joint position and the actual
     *         joint position.
     */
@@ -96,7 +96,7 @@ public interface JointAccelerationIntegrationParametersReadOnly
     * It can be increased once the acceleration integration is proven to be working properly on a
     * specific robot to allow the joint to reach higher velocities.
     * </p>
-    * 
+    *
     * @return maxVelocity limits the maximum value of the desired joint velocity.
     */
    double getMaxVelocity();

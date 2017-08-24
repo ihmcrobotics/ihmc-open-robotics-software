@@ -14,47 +14,41 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.plotting.PlotterShowHideMenu;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
-import us.ihmc.tools.factories.FactoryTools;
-import us.ihmc.tools.factories.OptionalFactoryField;
-import us.ihmc.tools.factories.RequiredFactoryField;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class SimulationOverheadPlotterFactory
 {
    private static final boolean TRACK_YAW = false;
 
-   private final RequiredFactoryField<SimulationConstructionSet> simulationConstructionSet = new RequiredFactoryField<>("simulationConstructionSet");
-   private final RequiredFactoryField<List<YoGraphicsListRegistry>> yoGraphicsListRegistries = new RequiredFactoryField<>("simulationConstructionSet");
-   {
-      yoGraphicsListRegistries.set(new ArrayList<>());
-   }
+   private SimulationConstructionSet simulationConstructionSet;
+   private List<YoGraphicsListRegistry> yoGraphicsListRegistries = new ArrayList<>();
 
-   private final OptionalFactoryField<Boolean> createInSeperateWindow = new OptionalFactoryField<>("createInSeperateWindow");
-   private final OptionalFactoryField<Boolean> showOnStart = new OptionalFactoryField<>("showOnStart");
-   private final OptionalFactoryField<String> variableNameToTrack = new OptionalFactoryField<>("variableNameToTrack");
+   private boolean createInSeperateWindow = false;
+   private boolean showOnStart = true;
+   private String variableNameToTrack = null;
 
    public SimulationOverheadPlotter createOverheadPlotter()
    {
-      FactoryTools.checkAllFactoryFieldsAreSet(this);
-
-      createInSeperateWindow.setDefaultValue(false);
-      showOnStart.setDefaultValue(true);
+      if(simulationConstructionSet == null)
+      {
+         throw new RuntimeException("SimulationConstructionSet not set");
+      }
 
       SimulationOverheadPlotter simulationOverheadPlotter = new SimulationOverheadPlotter();
       simulationOverheadPlotter.setDrawHistory(false);
       simulationOverheadPlotter.setXVariableToTrack(null);
       simulationOverheadPlotter.setYVariableToTrack(null);
-      simulationConstructionSet.get().attachPlaybackListener(simulationOverheadPlotter);
+      simulationConstructionSet.attachPlaybackListener(simulationOverheadPlotter);
 
       JPanel plotterPanel = simulationOverheadPlotter.getJPanel();
       JPanel plotterKeyJPanel = simulationOverheadPlotter.getJPanelKey();
       JScrollPane scrollPane = new JScrollPane(plotterKeyJPanel);
       String plotterName = "Plotter";
       
-      if (createInSeperateWindow.get())
+      if (createInSeperateWindow)
       {
          JFrame overheadWindow = new JFrame(plotterName);
          overheadWindow.setSize(new Dimension(1000, 1000));
@@ -66,20 +60,20 @@ public class SimulationOverheadPlotterFactory
 
          splitPane.setResizeWeight(1.0);
 
-         for (int i = 0; i < yoGraphicsListRegistries.get().size(); i++)
+         for (int i = 0; i < yoGraphicsListRegistries.size(); i++)
          {
-            YoGraphicsListRegistry yoGraphicsListRegistry = yoGraphicsListRegistries.get().get(i);
+            YoGraphicsListRegistry yoGraphicsListRegistry = yoGraphicsListRegistries.get(i);
             yoGraphicsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
             ArrayList<ArtifactList> buffer = new ArrayList<>();
             yoGraphicsListRegistry.getRegisteredArtifactLists(buffer);
 
-            if (variableNameToTrack.hasValue() && !variableNameToTrack.get().isEmpty())
+            if (variableNameToTrack != null && !variableNameToTrack.isEmpty())
             {
                for (ArtifactList artifactList : buffer)
                {
                   for (Artifact artifact : artifactList.getArtifacts())
                   {
-                     if (artifact.getID().equals(variableNameToTrack.get()))
+                     if (artifact.getID().equals(variableNameToTrack))
                      {
                         simulationOverheadPlotter.setXVariableToTrack(((YoArtifactPosition) artifact).getYoX());
                         simulationOverheadPlotter.setYVariableToTrack(((YoArtifactPosition) artifact).getYoY());
@@ -89,43 +83,43 @@ public class SimulationOverheadPlotterFactory
             }
          }
 
-         overheadWindow.setVisible(showOnStart.get());
+         overheadWindow.setVisible(showOnStart);
       }
       else
       {
-         simulationConstructionSet.get().addExtraJpanel(plotterPanel, plotterName, showOnStart.get());
+         simulationConstructionSet.addExtraJpanel(plotterPanel, plotterName, showOnStart);
 
-         simulationConstructionSet.get().addExtraJpanel(scrollPane, "Plotter Legend", false);
+         simulationConstructionSet.addExtraJpanel(scrollPane, "Plotter Legend", false);
 
          JScrollPane menuScrollPanel = new JScrollPane(simulationOverheadPlotter.getMenuPanel());
          menuScrollPanel.getVerticalScrollBar().setUnitIncrement(16);
-         simulationConstructionSet.get().addExtraJpanel(menuScrollPanel, PlotterShowHideMenu.getPanelName(), false);
+         simulationConstructionSet.addExtraJpanel(menuScrollPanel, PlotterShowHideMenu.getPanelName(), false);
 
-         for (int i = 0; i < yoGraphicsListRegistries.get().size(); i++)
+         for (int i = 0; i < yoGraphicsListRegistries.size(); i++)
          {
-            YoGraphicsListRegistry yoGraphicsListRegistry = yoGraphicsListRegistries.get().get(i);
+            YoGraphicsListRegistry yoGraphicsListRegistry = yoGraphicsListRegistries.get(i);
             if (yoGraphicsListRegistry == null)
                continue;
 
             yoGraphicsListRegistry.addArtifactListsToPlotter(simulationOverheadPlotter.getPlotter());
          }
 
-         if (variableNameToTrack.hasValue() && !variableNameToTrack.get().isEmpty())
+         if (variableNameToTrack != null && !variableNameToTrack.isEmpty())
          {
             YoVariable<?> trackingVariable;
-            if ((trackingVariable = simulationConstructionSet.get().getVariable(variableNameToTrack.get() + "X")) != null
+            if ((trackingVariable = simulationConstructionSet.getVariable(variableNameToTrack + "X")) != null
                   && trackingVariable instanceof YoDouble)
             {
                simulationOverheadPlotter.setXVariableToTrack((YoDouble) trackingVariable);
             }
-            if ((trackingVariable = simulationConstructionSet.get().getVariable(variableNameToTrack.get() + "Y")) != null
+            if ((trackingVariable = simulationConstructionSet.getVariable(variableNameToTrack + "Y")) != null
                   && trackingVariable instanceof YoDouble)
             {
                simulationOverheadPlotter.setYVariableToTrack((YoDouble) trackingVariable);
             }
             if (TRACK_YAW)
             {
-               if ((trackingVariable = simulationConstructionSet.get().getVariable(variableNameToTrack.get() + "Yaw")) != null
+               if ((trackingVariable = simulationConstructionSet.getVariable(variableNameToTrack + "Yaw")) != null
                      && trackingVariable instanceof YoDouble)
                {
                   simulationOverheadPlotter.setYawVariableToTrack((YoDouble) trackingVariable);
@@ -134,32 +128,31 @@ public class SimulationOverheadPlotterFactory
          }
       }
 
-      FactoryTools.disposeFactory(this);
       return simulationOverheadPlotter;
    }
 
    public void setSimulationConstructionSet(SimulationConstructionSet simulationConstructionSet)
    {
-      this.simulationConstructionSet.set(simulationConstructionSet);
+      this.simulationConstructionSet = simulationConstructionSet;
    }
 
    public void addYoGraphicsListRegistries(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.yoGraphicsListRegistries.get().add(yoGraphicsListRegistry);
+      this.yoGraphicsListRegistries.add(yoGraphicsListRegistry);
    }
 
    public void setCreateInSeperateWindow(boolean createInSeperateWindow)
    {
-      this.createInSeperateWindow.set(createInSeperateWindow);
+      this.createInSeperateWindow = createInSeperateWindow;
    }
    
    public void setShowOnStart(boolean showOnStart)
    {
-      this.showOnStart.set(showOnStart);
+      this.showOnStart = showOnStart;
    }
 
    public void setVariableNameToTrack(String variableNameToTrack)
    {
-      this.variableNameToTrack.set(variableNameToTrack);
+      this.variableNameToTrack = variableNameToTrack;
    }
 }

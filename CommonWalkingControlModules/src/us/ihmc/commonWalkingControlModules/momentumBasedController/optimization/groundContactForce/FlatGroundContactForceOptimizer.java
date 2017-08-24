@@ -8,6 +8,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -15,11 +18,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -39,7 +39,7 @@ public class FlatGroundContactForceOptimizer
    private final YoInteger vectorsPerContact = new YoInteger("VectorsPerContact", registry);
    private final YoDouble regWeight = new YoDouble("RegWeight", registry);
 
-   private final List<List<FrameVector>> forceVectors = new ArrayList<>();
+   private final List<List<FrameVector3D>> forceVectors = new ArrayList<>();
    private final List<List<YoFrameVector>> yoGRFVectors = new ArrayList<>();
 
    private final List<YoFramePoint> yoContactPoints = new ArrayList<>();
@@ -68,7 +68,7 @@ public class FlatGroundContactForceOptimizer
          YoFramePoint yoContactPoint = new YoFramePoint("ContactPointPosition" + n, ReferenceFrame.getWorldFrame(), registry);
          yoContactPoints.add(yoContactPoint);
 
-         List<FrameVector> forceVectors = new ArrayList<>();
+         List<FrameVector3D> forceVectors = new ArrayList<>();
          List<YoFrameVector> yoForceVectors = new ArrayList<>();
          List<YoFrameVector> yoGRFVectors = new ArrayList<>();
 
@@ -77,7 +77,7 @@ public class FlatGroundContactForceOptimizer
             double angle = 2.0 * Math.PI * i / vectorsPerContact;
             double x = Math.sin(angle) * friction;
             double y = Math.cos(angle) * friction;
-            FrameVector vector = new FrameVector(ReferenceFrame.getWorldFrame(), x, y, 1.0);
+            FrameVector3D vector = new FrameVector3D(ReferenceFrame.getWorldFrame(), x, y, 1.0);
             vector.normalize();
             forceVectors.add(vector);
             YoFrameVector yoVector = new YoFrameVector("ForceVector" + i + "Contact" + n, ReferenceFrame.getWorldFrame(), registry);
@@ -143,9 +143,9 @@ public class FlatGroundContactForceOptimizer
    private final Vector3D unitTorque = new Vector3D();
    private final Vector3D unitForce = new Vector3D();
 
-   private final FrameVector contactForce = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector resultForce = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector resultTorque = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D contactForce = new FrameVector3D(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D resultForce = new FrameVector3D(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D resultTorque = new FrameVector3D(ReferenceFrame.getWorldFrame());
    private final Vector3D forceVector = new Vector3D();
    private final Vector3D torqueVector = new Vector3D();
 
@@ -155,11 +155,11 @@ public class FlatGroundContactForceOptimizer
     * can be used to compute the ground reaction forces and return the wrenches exerted by the groups of contact points. The contact frames are
     * the point at which this wrench is assumed to be located.
     */
-   public List<Wrench> compute(List<List<FramePoint>> contactPlanes, List<ReferenceFrame> contactFrames, FramePoint centerOfMass, FrameVector force,
-                               FrameVector torque, WeightMatrix6D weights)
+   public List<Wrench> compute(List<List<FramePoint3D>> contactPlanes, List<ReferenceFrame> contactFrames, FramePoint3D centerOfMass, FrameVector3D force,
+                               FrameVector3D torque, WeightMatrix6D weights)
    {
-      List<FramePoint> contactPoints = new ArrayList<>();
-      List<FrameVector> contactForces = new ArrayList<>();
+      List<FramePoint3D> contactPoints = new ArrayList<>();
+      List<FrameVector3D> contactForces = new ArrayList<>();
 
       contactPlanes.stream().forEachOrdered(points -> contactPoints.addAll(points));
 
@@ -176,14 +176,14 @@ public class FlatGroundContactForceOptimizer
          resultForce.setToZero();
          resultTorque.setToZero();
          ReferenceFrame planeFrame = contactFrames.get(planeIdx);
-         FramePoint planeCenter = new FramePoint(planeFrame);
+         FramePoint3D planeCenter = new FramePoint3D(planeFrame);
          planeCenter.changeFrame(ReferenceFrame.getWorldFrame());
 
          int contactPointsInPlane = contactPlanes.get(planeIdx).size();
          for (int pointIdx = 0; pointIdx < contactPointsInPlane; pointIdx++)
          {
             int index = pointIdx + indexOffset;
-            FrameVector contactForce = contactForces.get(index);
+            FrameVector3D contactForce = contactForces.get(index);
             offset.sub(planeCenter.getPoint(), contactPoints.get(index).getPoint());
             torqueVector.cross(forceVector, offset);
             resultForce.add(contactForce);
@@ -201,7 +201,7 @@ public class FlatGroundContactForceOptimizer
    /**
     * Method computes the ground reaction forces at the contact points that will best achieve the specified momentum rate.
     */
-   public boolean compute(List<FramePoint> contactPoints, FramePoint centerOfMass, FrameVector force, FrameVector torque, WeightMatrix6D weights)
+   public boolean compute(List<FramePoint3D> contactPoints, FramePoint3D centerOfMass, FrameVector3D force, FrameVector3D torque, WeightMatrix6D weights)
    {
       return compute(contactPoints, centerOfMass, force, torque, weights, null);
    }
@@ -210,8 +210,8 @@ public class FlatGroundContactForceOptimizer
     * Method computes the ground reaction forces at the contact points that will best achieve the specified momentum rate. This method also
     * packs the forces at the contact points if contactForcesToPack is not null. In that case the method will generate garbage.
     */
-   public boolean compute(List<FramePoint> contactPoints, FramePoint centerOfMass, FrameVector force, FrameVector torque, WeightMatrix6D weights,
-                          List<FrameVector> contactForcesToPack)
+   public boolean compute(List<FramePoint3D> contactPoints, FramePoint3D centerOfMass, FrameVector3D force, FrameVector3D torque, WeightMatrix6D weights,
+                          List<FrameVector3D> contactForcesToPack)
    {
       for (int contactIdx = 0; contactIdx < contactPoints.size(); contactIdx++)
       {
@@ -332,7 +332,7 @@ public class FlatGroundContactForceOptimizer
 
          if (contactForcesToPack != null)
          {
-            contactForcesToPack.add(new FrameVector(contactForce));
+            contactForcesToPack.add(new FrameVector3D(contactForce));
          }
       }
 
@@ -341,7 +341,7 @@ public class FlatGroundContactForceOptimizer
       return true;
    }
 
-   public void getAchievedMomentumRate(FrameVector angularMomentumRateToPack, FrameVector linearMomentumRateToPack)
+   public void getAchievedMomentumRate(FrameVector3D angularMomentumRateToPack, FrameVector3D linearMomentumRateToPack)
    {
       yoAchievedTorque.getFrameTuple(angularMomentumRateToPack);
       yoAchievedForce.getFrameTuple(linearMomentumRateToPack);

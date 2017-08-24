@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.dynamicReachability;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 import static org.junit.Assert.*;
@@ -36,12 +36,12 @@ public class TimeAdjustmentSolverTest
 
       //FrameVector currentInitialTransferGradient = new FrameVector(worldFrame, -0.0005, -0.0005, 0.0);
       //FrameVector currentEndTransferGradient = new FrameVector(worldFrame, -0.0005, -0.0005, 0.0);
-      FrameVector currentInitialTransferGradient = new FrameVector(worldFrame, -0.0005, -0.0005, 0.0);
-      FrameVector currentEndTransferGradient = new FrameVector(worldFrame, -0.0005, -0.0005, 0.0);
-      FrameVector currentInitialSwingGradient = new FrameVector(worldFrame, -0.01, -0.01, 0.0);
-      FrameVector currentEndSwingGradient = new FrameVector(worldFrame, 0.015, 0.015, 0.0);
-      FrameVector nextInitialTransferGradient = new FrameVector(worldFrame, -0.1, -0.1, 0.0);
-      FrameVector nextEndTransferGradient = new FrameVector(worldFrame, -0.005, -0.005, 0.0);
+      FrameVector3D currentInitialTransferGradient = new FrameVector3D(worldFrame, -0.0005, -0.0005, 0.0);
+      FrameVector3D currentEndTransferGradient = new FrameVector3D(worldFrame, -0.0005, -0.0005, 0.0);
+      FrameVector3D currentInitialSwingGradient = new FrameVector3D(worldFrame, -0.01, -0.01, 0.0);
+      FrameVector3D currentEndSwingGradient = new FrameVector3D(worldFrame, 0.015, 0.015, 0.0);
+      FrameVector3D nextInitialTransferGradient = new FrameVector3D(worldFrame, -0.1, -0.1, 0.0);
+      FrameVector3D nextEndTransferGradient = new FrameVector3D(worldFrame, -0.005, -0.005, 0.0);
 
       double currentTransferDuration = 1.0;
       double currentTransferAlpha = 0.5;
@@ -159,12 +159,12 @@ public class TimeAdjustmentSolverTest
       solver.setNumberOfFootstepsRegistered(2);
       solver.reshape();
 
-      FrameVector currentInitialTransferGradient = new FrameVector(worldFrame, -0.0005, -0.0005, 0.0);
-      FrameVector currentEndTransferGradient = new FrameVector(worldFrame, -0.0005, -0.0005, 0.0);
-      FrameVector currentInitialSwingGradient = new FrameVector(worldFrame, -0.01, -0.01, 0.0);
-      FrameVector currentEndSwingGradient = new FrameVector(worldFrame, 0.015, 0.015, 0.0);
-      FrameVector nextInitialTransferGradient = new FrameVector(worldFrame, -0.1, -0.1, 0.0);
-      FrameVector nextEndTransferGradient = new FrameVector(worldFrame, -0.005, -0.005, 0.0);
+      FrameVector3D currentInitialTransferGradient = new FrameVector3D(worldFrame, -0.0005, -0.0005, 0.0);
+      FrameVector3D currentEndTransferGradient = new FrameVector3D(worldFrame, -0.0005, -0.0005, 0.0);
+      FrameVector3D currentInitialSwingGradient = new FrameVector3D(worldFrame, -0.01, -0.01, 0.0);
+      FrameVector3D currentEndSwingGradient = new FrameVector3D(worldFrame, 0.015, 0.015, 0.0);
+      FrameVector3D nextInitialTransferGradient = new FrameVector3D(worldFrame, -0.1, -0.1, 0.0);
+      FrameVector3D nextEndTransferGradient = new FrameVector3D(worldFrame, -0.005, -0.005, 0.0);
 
       double currentTransferDuration = 1.0;
       double currentTransferAlpha = 0.5;
@@ -292,12 +292,12 @@ public class TimeAdjustmentSolverTest
       solver.setNumberOfFootstepsRegistered(2);
       solver.reshape();
 
-      FrameVector currentInitialTransferGradient = new FrameVector(worldFrame, -0.0005, -0.0005, 0.0);
-      FrameVector currentEndTransferGradient = new FrameVector(worldFrame, -0.0005, -0.0005, 0.0);
-      FrameVector currentInitialSwingGradient = new FrameVector(worldFrame, -0.01, -0.01, 0.0);
-      FrameVector currentEndSwingGradient = new FrameVector(worldFrame, 0.015, 0.015, 0.0);
-      FrameVector nextInitialTransferGradient = new FrameVector(worldFrame, -0.1, -0.1, 0.0);
-      FrameVector nextEndTransferGradient = new FrameVector(worldFrame, -0.005, -0.005, 0.0);
+      FrameVector3D currentInitialTransferGradient = new FrameVector3D(worldFrame, -0.0005, -0.0005, 0.0);
+      FrameVector3D currentEndTransferGradient = new FrameVector3D(worldFrame, -0.0005, -0.0005, 0.0);
+      FrameVector3D currentInitialSwingGradient = new FrameVector3D(worldFrame, -0.01, -0.01, 0.0);
+      FrameVector3D currentEndSwingGradient = new FrameVector3D(worldFrame, 0.015, 0.015, 0.0);
+      FrameVector3D nextInitialTransferGradient = new FrameVector3D(worldFrame, -0.1, -0.1, 0.0);
+      FrameVector3D nextEndTransferGradient = new FrameVector3D(worldFrame, -0.005, -0.005, 0.0);
 
       double currentTransferDuration = 1.0;
       double currentTransferAlpha = 0.5;
@@ -430,15 +430,15 @@ public class TimeAdjustmentSolverTest
       solver.setNumberOfFootstepsRegistered(2);
       solver.reshape();
 
-      FrameVector currentInitialTransferGradient = new FrameVector(worldFrame, -0.0005, -0.0005, 0.0);
-      FrameVector currentEndTransferGradient = new FrameVector(worldFrame, -0.0005, -0.0005, 0.0);
-      FrameVector currentInitialSwingGradient = new FrameVector(worldFrame, -0.01, -0.01, 0.0);
-      FrameVector currentEndSwingGradient = new FrameVector(worldFrame, 0.015, 0.015, 0.0);
-      FrameVector nextInitialTransferGradient = new FrameVector(worldFrame, -0.1, -0.1, 0.0);
-      FrameVector nextEndTransferGradient = new FrameVector(worldFrame, -0.005, -0.005, 0.0);
+      FrameVector3D currentInitialTransferGradient = new FrameVector3D(worldFrame, -0.0005, -0.0005, 0.0);
+      FrameVector3D currentEndTransferGradient = new FrameVector3D(worldFrame, -0.0005, -0.0005, 0.0);
+      FrameVector3D currentInitialSwingGradient = new FrameVector3D(worldFrame, -0.01, -0.01, 0.0);
+      FrameVector3D currentEndSwingGradient = new FrameVector3D(worldFrame, 0.015, 0.015, 0.0);
+      FrameVector3D nextInitialTransferGradient = new FrameVector3D(worldFrame, -0.1, -0.1, 0.0);
+      FrameVector3D nextEndTransferGradient = new FrameVector3D(worldFrame, -0.005, -0.005, 0.0);
 
-      FrameVector higherTransferGradient = new FrameVector(worldFrame, -0.0001, -0.0001, 0.0);
-      FrameVector higherSwingGradient = new FrameVector(worldFrame, -0.0001, -0.0001, 0.0);
+      FrameVector3D higherTransferGradient = new FrameVector3D(worldFrame, -0.0001, -0.0001, 0.0);
+      FrameVector3D higherSwingGradient = new FrameVector3D(worldFrame, -0.0001, -0.0001, 0.0);
 
       double currentTransferDuration = 1.0;
       double currentTransferAlpha = 0.5;

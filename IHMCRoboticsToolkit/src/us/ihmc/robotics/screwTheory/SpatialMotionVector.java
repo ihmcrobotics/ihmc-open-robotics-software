@@ -3,14 +3,14 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.interfaces.Clearable;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class SpatialMotionVector implements Clearable
 {
@@ -68,7 +68,7 @@ public abstract class SpatialMotionVector implements Clearable
     * @throws ReferenceFrameMismatchException if the linear and angular parts are not expressed in
     *            the same reference frame.
     */
-   public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector linearPart, FrameVector angularPart)
+   public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector3D linearPart, FrameVector3D angularPart)
    {
       linearPart.checkReferenceFrameMatch(angularPart);
 
@@ -158,7 +158,7 @@ public abstract class SpatialMotionVector implements Clearable
    /**
     * Sets the angular velocity part of the spatial motion vector
     */
-   public void setAngularPart(FrameVector newAngularVelocity)
+   public void setAngularPart(FrameVector3D newAngularVelocity)
    {
       expressedInFrame.checkReferenceFrameMatch(newAngularVelocity.getReferenceFrame());
       angularPart.set(newAngularVelocity.getVector());
@@ -231,7 +231,7 @@ public abstract class SpatialMotionVector implements Clearable
    /**
     * Sets the linear velocity part of the spatial motion vector
     */
-   public void setLinearPart(FrameVector newLinearVelocity)
+   public void setLinearPart(FrameVector3D newLinearVelocity)
    {
       expressedInFrame.checkReferenceFrameMatch(newLinearVelocity.getReferenceFrame());
       linearPart.set(newLinearVelocity.getVector());
@@ -303,7 +303,7 @@ public abstract class SpatialMotionVector implements Clearable
    /**
     * Sets this spatial motion vector based
     */
-   public void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, FrameVector linearPart, FrameVector angularPart)
+   public void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, FrameVector3D linearPart, FrameVector3D angularPart)
    {
       linearPart.checkReferenceFrameMatch(expressedInFrame);
       angularPart.checkReferenceFrameMatch(expressedInFrame);
@@ -516,7 +516,7 @@ public abstract class SpatialMotionVector implements Clearable
    /**
     * Packs an existing FrameVector with the angular velocity part
     */
-   public void getAngularPart(FrameVector vectorToPack)
+   public void getAngularPart(FrameVector3D vectorToPack)
    {
       vectorToPack.setIncludingFrame(expressedInFrame, this.angularPart);
    }
@@ -524,7 +524,7 @@ public abstract class SpatialMotionVector implements Clearable
    /**
     * Packs an existing FrameVector with the linear velocity part
     */
-   public void getLinearPart(FrameVector vectorToPack)
+   public void getLinearPart(FrameVector3D vectorToPack)
    {
       vectorToPack.setIncludingFrame(expressedInFrame, this.linearPart);
    }

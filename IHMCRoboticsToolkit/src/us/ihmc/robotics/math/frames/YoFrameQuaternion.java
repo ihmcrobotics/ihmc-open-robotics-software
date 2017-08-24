@@ -1,9 +1,6 @@
 package us.ihmc.robotics.math.frames;
 
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQsName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQxName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQyName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQzName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.*;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,23 +9,23 @@ import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 // Note: You should only make these once at the initialization of a controller. You shouldn't make
 // any on the fly since they contain YoVariables.
-public class YoFrameQuaternion extends AbstractReferenceFrameHolder implements Clearable
+public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
 {
    private final String namePrefix;
    private final String nameSuffix;
@@ -202,7 +199,7 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder implements C
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@code this.referenceFrame}.
     */
-   public void setRotationVector(FrameVector rotationVector)
+   public void setRotationVector(FrameVector3D rotationVector)
    {
       frameOrientation.setToZero(getReferenceFrame());
       frameOrientation.setRotationVector(rotationVector);
@@ -292,7 +289,7 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder implements C
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@code this.referenceFrame}.
     */
-   public void getRotationVector(FrameVector frameRotationVectorToPack)
+   public void getRotationVector(FrameVector3D frameRotationVectorToPack)
    {
       getFrameOrientation().getRotationVector(frameRotationVectorToPack);
    }
@@ -309,7 +306,7 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder implements C
     * @param frameRotationVectorToPack the vector in which the rotation vector and the reference
     *           frame it is expressed in are stored. Modified.
     */
-   public void getRotationVectorIncludingFrame(FrameVector frameRotationVectorToPack)
+   public void getRotationVectorIncludingFrame(FrameVector3D frameRotationVectorToPack)
    {
       getFrameOrientation().getRotationVectorIncludingFrame(frameRotationVectorToPack);
    }

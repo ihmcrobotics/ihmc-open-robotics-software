@@ -4,25 +4,28 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class UserDesiredFootstepDataMessageGenerator
 {
@@ -56,7 +59,7 @@ public class UserDesiredFootstepDataMessageGenerator
 
    private final YoBoolean sendSteps = new YoBoolean(namePrefix + "Send", registry);
 
-   private List<FramePoint2d> contactFramePoints;
+   private List<FramePoint2D> contactFramePoints;
    private RecyclingArrayList<Point2D> contactPoints = new RecyclingArrayList<Point2D>(4, Point2D.class);
    private Point2D contactPoint;
 
@@ -71,8 +74,8 @@ public class UserDesiredFootstepDataMessageGenerator
    private ReferenceFrame newStepReferenceFrame;
    private PoseReferenceFrame previousPoseFrame;
 
-   private FrameVector desiredOffset;
-   private FramePoint desiredPosition;
+   private FrameVector3D desiredOffset;
+   private FramePoint3D desiredPosition;
    private FrameOrientation desiredOrientation;
 
    private final FootstepDataCommand desiredFootstepCommand = new FootstepDataCommand();
@@ -87,13 +90,14 @@ public class UserDesiredFootstepDataMessageGenerator
       swingFoot = bipedFeet.get(swingSide);
 
       ReferenceFrame stanceFootFrame = bipedFeet.get(swingSide.getOppositeSide()).getSoleFrame();
-      desiredOffset = new FrameVector(stanceFootFrame);
-      desiredPosition = new FramePoint(stanceFootFrame);
+      desiredOffset = new FrameVector3D(stanceFootFrame);
+      desiredPosition = new FramePoint3D(stanceFootFrame);
       desiredOrientation = new FrameOrientation(stanceFootFrame);
 
       firstStepSide.set(supportSide);
-      minimumWidth.set(walkingControllerParameters.getMinStepWidth());
-      stepWidth.set((walkingControllerParameters.getMaxStepWidth() + walkingControllerParameters.getMinStepWidth()) / 2);
+      minimumWidth.set(walkingControllerParameters.getSteppingParameters().getMinStepWidth());
+      stepWidth.set((walkingControllerParameters.getSteppingParameters().getMaxStepWidth()
+            + walkingControllerParameters.getSteppingParameters().getMinStepWidth()) / 2);
       swingHeight.set(0.0);
 
       swingTime.set(walkingControllerParameters.getDefaultSwingTime());
@@ -219,9 +223,9 @@ public class UserDesiredFootstepDataMessageGenerator
       // set contact points
       contactFramePoints = swingFoot.getContactPoints2d();
       contactPoints.clear();
-      for (FramePoint2d contactFramePoint : contactFramePoints)
+      for (FramePoint2D contactFramePoint : contactFramePoints)
       {
-         contactPoint = contactFramePoint.getPointCopy();
+         contactPoint = new Point2D(contactFramePoint);
 
          if (contactFramePoint.getX() > 0.0)
             contactPoint.setX(contactPoint.getX() * stepToePercentage.getDoubleValue());

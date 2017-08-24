@@ -3,18 +3,18 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.DeadzoneYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.Wrench;
 
@@ -41,10 +41,10 @@ public class HandCompliantControlHelper
    /** This is the desired torque that the external environment should apply on the hand */
    private final YoFrameVector desiredTorque;
 
-   private final FrameVector totalLinearCorrection = new FrameVector();
-   private final FrameVector totalAngularCorrection = new FrameVector();
-   private final FrameVector linearCorrection = new FrameVector();
-   private final FrameVector angularCorrection = new FrameVector();
+   private final FrameVector3D totalLinearCorrection = new FrameVector3D();
+   private final FrameVector3D totalAngularCorrection = new FrameVector3D();
+   private final FrameVector3D linearCorrection = new FrameVector3D();
+   private final FrameVector3D angularCorrection = new FrameVector3D();
 
    private final YoDouble linearGain;
    private final YoDouble angularGain;
@@ -59,10 +59,10 @@ public class HandCompliantControlHelper
 
    private ReferenceFrame controlFrame;
    private final Wrench measuredWrench = new Wrench();
-   private final FrameVector measuredForce = new FrameVector();
-   private final FrameVector measuredTorque = new FrameVector();
-   private final FrameVector errorForce = new FrameVector();
-   private final FrameVector errorTorque = new FrameVector();
+   private final FrameVector3D measuredForce = new FrameVector3D();
+   private final FrameVector3D measuredTorque = new FrameVector3D();
+   private final FrameVector3D errorForce = new FrameVector3D();
+   private final FrameVector3D errorTorque = new FrameVector3D();
 
    private final RobotSide robotSide;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -136,7 +136,7 @@ public class HandCompliantControlHelper
       torqueDeadzoneSize.set(0.5);
    }
 
-   public void doCompliantControl(FramePoint desiredPosition, FrameOrientation desiredOrientation)
+   public void doCompliantControl(FramePoint3D desiredPosition, FrameOrientation desiredOrientation)
    {
       updateWristMeasuredWrench(measuredForce, measuredTorque);
 
@@ -158,8 +158,8 @@ public class HandCompliantControlHelper
       errorTorque.setIncludingFrame(controlFrame, desiredTorque.getX(), desiredTorque.getY(), desiredTorque.getZ());
       errorTorque.sub(measuredTorque);
 
-      linearCorrection.scale(linearGain.getDoubleValue(), errorForce);
-      angularCorrection.scale(angularGain.getDoubleValue(), errorTorque);
+      linearCorrection.setAndScale(linearGain.getDoubleValue(), errorForce);
+      angularCorrection.setAndScale(angularGain.getDoubleValue(), errorTorque);
 
       clipToVectorMagnitude(compliantControlMaxLinearCorrectionPerTick.getDoubleValue(), linearCorrection);
       clipToVectorMagnitude(compliantControlMaxAngularCorrectionPerTick.getDoubleValue(), angularCorrection);
@@ -210,10 +210,10 @@ public class HandCompliantControlHelper
    private final RotationMatrix angularDisplacementAsMatrix = new RotationMatrix();
    private final RotationMatrix correctedRotationMatrix = new RotationMatrix();
 
-   private final FrameVector tempForceVector = new FrameVector();
-   private final FrameVector tempTorqueVector = new FrameVector();
+   private final FrameVector3D tempForceVector = new FrameVector3D();
+   private final FrameVector3D tempTorqueVector = new FrameVector3D();
 
-   private void updateWristMeasuredWrench(FrameVector measuredForceToPack, FrameVector measuredTorqueToPack)
+   private void updateWristMeasuredWrench(FrameVector3D measuredForceToPack, FrameVector3D measuredTorqueToPack)
    {
       controllerToolbox.getWristMeasuredWrenchHandWeightCancelled(measuredWrench, robotSide);
 
@@ -237,7 +237,7 @@ public class HandCompliantControlHelper
       measuredWrench.getAngularPartIncludingFrame(measuredTorqueToPack);
    }
 
-   private void clipToVectorMagnitude(double maximumMagnitude, FrameVector frameVectorToClip)
+   private void clipToVectorMagnitude(double maximumMagnitude, FrameVector3D frameVectorToClip)
    {
       double magnitude = frameVectorToClip.length();
       if (magnitude > maximumMagnitude)
@@ -257,7 +257,7 @@ public class HandCompliantControlHelper
       yoCompliantControlAngularDisplacement.setToZero();
    }
 
-   public void progressivelyCancelOutCorrection(FramePoint desiredPosition, FrameOrientation desiredOrientation)
+   public void progressivelyCancelOutCorrection(FramePoint3D desiredPosition, FrameOrientation desiredOrientation)
    {
       yoCompliantControlLinearDisplacement.scale(compliantControlResetLeakRatio.getDoubleValue());
       yoCompliantControlAngularDisplacement.scale(compliantControlResetLeakRatio.getDoubleValue());
@@ -271,7 +271,7 @@ public class HandCompliantControlHelper
       applyCorrection(desiredPosition, desiredOrientation);
    }
 
-   private void applyCorrection(FramePoint desiredPosition, FrameOrientation desiredOrientation)
+   private void applyCorrection(FramePoint3D desiredPosition, FrameOrientation desiredOrientation)
    {
       ReferenceFrame originalFrame = desiredPosition.getReferenceFrame();
       desiredPosition.changeFrame(controlFrame);

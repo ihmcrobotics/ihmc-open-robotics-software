@@ -5,10 +5,10 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.SymmetricQRAlgorithmDecomposition_D64GCFree;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Algorithm designed based on this <a href="http://www.acsu.buffalo.edu/~johnc/ave_quat07.pdf"> paper</a>.

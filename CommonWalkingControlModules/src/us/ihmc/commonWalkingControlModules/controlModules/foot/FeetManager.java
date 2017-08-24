@@ -17,17 +17,19 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -58,7 +60,7 @@ public class FeetManager
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   private final FramePoint tempSolePosition = new FramePoint();
+   private final FramePoint3D tempSolePosition = new FramePoint3D();
    private final YoDouble blindFootstepsHeightOffset = new YoDouble("blindFootstepsHeightOffset", registry);
 
    public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
@@ -89,15 +91,23 @@ public class FeetManager
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       soleZUpFrames = referenceFrames.getSoleZUpFrames();
 
-      YoSE3PIDGainsInterface swingFootControlGains = walkingControllerParameters.createSwingFootControlGains(registry);
-      YoSE3PIDGainsInterface holdPositionFootControlGains = walkingControllerParameters.createHoldPositionFootControlGains(registry);
-      YoSE3PIDGainsInterface toeOffFootControlGains = walkingControllerParameters.createToeOffFootControlGains(registry);
+      PIDSE3Gains swingGains = walkingControllerParameters.getSwingFootControlGains();
+      YoPIDSE3Gains swingFootControlGains = new DefaultYoPIDSE3Gains("SwingFoot", swingGains, registry);
+      PIDSE3Gains holdGains = walkingControllerParameters.getHoldPositionFootControlGains();
+      YoPIDSE3Gains holdPositionFootControlGains = new DefaultYoPIDSE3Gains("HoldFoot", holdGains, registry);
+      PIDSE3Gains toeGains = walkingControllerParameters.getToeOffFootControlGains();
+      YoPIDSE3Gains toeOffFootControlGains = new DefaultYoPIDSE3Gains("ToeOffFoot", toeGains, registry);
 
-      walkingControllerParameters.getOrCreateExplorationParameters(registry);
+      ExplorationParameters explorationParameters = null;
+      if (walkingControllerParameters.createFootholdExplorationTools())
+      {
+         explorationParameters = new ExplorationParameters(registry);
+      }
+
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, toeOffCalculator, walkingControllerParameters, swingFootControlGains,
-               holdPositionFootControlGains, toeOffFootControlGains, controllerToolbox, registry);
+               holdPositionFootControlGains, toeOffFootControlGains, controllerToolbox, explorationParameters, registry);
 
          footControlModules.put(robotSide, footControlModule);
       }
@@ -196,7 +206,7 @@ public class FeetManager
       }
    }
 
-   public void correctCoMHeight(FrameVector2d desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
+   public void correctCoMHeight(FrameVector2D desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -253,7 +263,7 @@ public class FeetManager
       }
    }
 
-   private final FrameVector footNormalContactVector = new FrameVector(worldFrame, 0.0, 0.0, 1.0);
+   private final FrameVector3D footNormalContactVector = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
 
    public void setOnToesContactState(RobotSide robotSide)
    {
@@ -351,8 +361,8 @@ public class FeetManager
     * @param desiredICP current desired ICP from the reference trajectory.
     * @param currentICP current ICP based on the robot state.
     */
-   public void updateToeOffStatusSingleSupport(Footstep nextFootstep, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredCoP,
-         FramePoint2d desiredICP, FramePoint2d currentICP)
+   public void updateToeOffStatusSingleSupport(Footstep nextFootstep, FramePoint3D exitCMP, FramePoint2D desiredECMP, FramePoint2D desiredCoP,
+         FramePoint2D desiredICP, FramePoint2D currentICP)
    {
       toeOffManager.submitNextFootstep(nextFootstep);
       toeOffManager.updateToeOffStatusSingleSupport(exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP);
@@ -382,16 +392,16 @@ public class FeetManager
     * @param desiredICP current desired ICP from the reference trajectory.
     * @param currentICP current ICP based on the robot state.
     */
-   public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredCoP,
-         FramePoint2d desiredICP, FramePoint2d currentICP)
+   public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg, FramePoint3D exitCMP, FramePoint2D desiredECMP, FramePoint2D desiredCoP,
+         FramePoint2D desiredICP, FramePoint2D currentICP)
    {
       toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP);
    }
 
    /**
     * Returns whether or not the current robot state is ok toe-off using a point toe contact.
-    * The checks for this are called in either {@link #updateToeOffStatusDoubleSupport(RobotSide, FramePoint, FramePoint2d, FramePoint2d, FramePoint2d, FramePoint2d)} or
-    * {@link #updateToeOffStatusSingleSupport(Footstep, FramePoint, FramePoint2d, FramePoint2d, FramePoint2d, FramePoint2d)}, based on the walking state.
+    * The checks for this are called in either {@link #updateToeOffStatusDoubleSupport(RobotSide, FramePoint3D, FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)} or
+    * {@link #updateToeOffStatusSingleSupport(Footstep, FramePoint3D, FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)}, based on the walking state.
     * Calls {@link ToeOffManager#doPointToeOff}.
     */
    public boolean okForPointToeOff()
@@ -401,8 +411,8 @@ public class FeetManager
 
    /**
     * Returns whether or not the current robot state is ok toe-off using a line toe contact.
-    * The checks for this are called in either {@link #updateToeOffStatusDoubleSupport(RobotSide, FramePoint, FramePoint2d, FramePoint2d, FramePoint2d, FramePoint2d)} or
-    * {@link #updateToeOffStatusSingleSupport(Footstep, FramePoint, FramePoint2d, FramePoint2d, FramePoint2d, FramePoint2d)}, based on the walking state.
+    * The checks for this are called in either {@link #updateToeOffStatusDoubleSupport(RobotSide, FramePoint3D, FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)} or
+    * {@link #updateToeOffStatusSingleSupport(Footstep, FramePoint3D, FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)}, based on the walking state.
     * Calls {@link ToeOffManager#doLineToeOff}.
     */
    public boolean okForLineToeOff()
@@ -417,7 +427,7 @@ public class FeetManager
     * @param exitCMP exit CMP from the ICP plan in the stance foot
     * @param desiredCMP current desired CMP location
     */
-   public void requestPointToeOff(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredCMP)
+   public void requestPointToeOff(RobotSide trailingLeg, FramePoint3D exitCMP, FramePoint2D desiredCMP)
    {
       toeOffCalculator.setExitCMP(exitCMP, trailingLeg);
       toeOffCalculator.computeToeOffContactPoint(desiredCMP, trailingLeg);
@@ -433,7 +443,7 @@ public class FeetManager
     * @param exitCMP exit CMP from the ICP plan in the stance foot
     * @param desiredCMP current desired CMP location
     */
-   public void requestLineToeOff(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredCMP)
+   public void requestLineToeOff(RobotSide trailingLeg, FramePoint3D exitCMP, FramePoint2D desiredCMP)
    {
       toeOffCalculator.setExitCMP(exitCMP, trailingLeg);
       toeOffCalculator.computeToeOffContactLine(desiredCMP, trailingLeg);

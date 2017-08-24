@@ -15,6 +15,7 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -23,7 +24,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectory
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -104,7 +104,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       double swingTime = 0.8;
       double transferTime = 0.15;
 
-      ArrayList<FramePoint> stepLocations = world.getStepLocations();
+      ArrayList<FramePoint3D> stepLocations = world.getStepLocations();
       for (int i = 0; i < stepLocations.size(); i++)
       {
          if (i == stepLocations.size()-2)
@@ -116,7 +116,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
-         Point3D position = stepLocations.get(i).getPointCopy();
+         Point3D position = new Point3D(stepLocations.get(i));
          RobotSide robotSide = position.getY() > 0.0 ? RobotSide.LEFT : RobotSide.RIGHT;
          footstepData.setLocation(position);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
@@ -175,7 +175,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       double swingTime = 0.8;
       double transferTime = 0.15;
 
-      ArrayList<FramePoint> stepLocations = world.getStepLocations();
+      ArrayList<FramePoint3D> stepLocations = world.getStepLocations();
       for (int i = 0; i < stepLocations.size(); i++)
       {
          if (i == stepLocations.size()-2)
@@ -187,7 +187,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
-         Point3D position = stepLocations.get(i).getPointCopy();
+         Point3D position = new Point3D(stepLocations.get(i));
          RobotSide robotSide = position.getY() > 0.0 ? RobotSide.LEFT : RobotSide.RIGHT;
          footstepData.setLocation(position);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));

@@ -19,26 +19,20 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.exampleSimulations.controllerCore.ControllerCoreModeChangedListener;
 import us.ihmc.exampleSimulations.controllerCore.RobotArmControllerCoreOptimizationSettings;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -47,6 +41,10 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class FixedBaseRobotArmController implements RobotController
 {
@@ -80,8 +78,8 @@ public class FixedBaseRobotArmController implements RobotController
    private final WholeBodyControllerCore controllerCore;
 
    private final YoDouble handWeight = new YoDouble("handWeight", registry);
-   private final YoSymmetricSE3PIDGains handPositionGains = new YoSymmetricSE3PIDGains("handPosition", registry);
-   private final YoSymmetricSE3PIDGains handOrientationGains = new YoSymmetricSE3PIDGains("handOrientation", registry);
+   private final SymmetricYoPIDSE3Gains handPositionGains = new SymmetricYoPIDSE3Gains("handPosition", registry);
+   private final SymmetricYoPIDSE3Gains handOrientationGains = new SymmetricYoPIDSE3Gains("handOrientation", registry);
    private final YoFramePoint handTargetPosition = new YoFramePoint("handTarget", worldFrame, registry);
 
    private final YoFrameOrientation handTargetOrientation = new YoFrameOrientation("handTarget", worldFrame, registry);
@@ -165,15 +163,13 @@ public class FixedBaseRobotArmController implements RobotController
 
       handWeight.set(1.0);
 
-      handPositionGains.setProportionalGain(100.0);
-      handPositionGains.setDampingRatio(1.0);
-      handPositionGains.createDerivativeGainUpdater(true);
+      handPositionGains.setProportionalGains(100.0);
+      handPositionGains.setDampingRatios(1.0);
 
-      handOrientationGains.setProportionalGain(100.0);
-      handOrientationGains.setDampingRatio(1.0);
-      handOrientationGains.createDerivativeGainUpdater(true);
+      handOrientationGains.setProportionalGains(100.0);
+      handOrientationGains.setDampingRatios(1.0);
 
-      FramePoint initialPosition = new FramePoint(robotArm.getHandControlFrame());
+      FramePoint3D initialPosition = new FramePoint3D(robotArm.getHandControlFrame());
       initialPosition.changeFrame(worldFrame);
       FrameOrientation initialOrientation = new FrameOrientation(robotArm.getHandControlFrame());
       initialOrientation.changeFrame(worldFrame);
@@ -195,12 +191,12 @@ public class FixedBaseRobotArmController implements RobotController
       trajectory.showVisualization();
    }
 
-   private final FramePoint position = new FramePoint();
-   private final FrameVector linearVelocity = new FrameVector();
-   private final FrameVector linearAcceleration = new FrameVector();
+   private final FramePoint3D position = new FramePoint3D();
+   private final FrameVector3D linearVelocity = new FrameVector3D();
+   private final FrameVector3D linearAcceleration = new FrameVector3D();
    private final FrameOrientation orientation = new FrameOrientation();
-   private final FrameVector angularVelocity = new FrameVector();
-   private final FrameVector angularAcceleration = new FrameVector();
+   private final FrameVector3D angularVelocity = new FrameVector3D();
+   private final FrameVector3D angularAcceleration = new FrameVector3D();
 
    @Override
    public void doControl()
@@ -274,8 +270,8 @@ public class FixedBaseRobotArmController implements RobotController
 
       handSpatialCommand.setControlFrameFixedInEndEffector(controlFramePose);
       handSpatialCommand.setWeightForSolver(handWeight.getDoubleValue());
-      handSpatialCommand.setGains((PositionPIDGainsInterface) handPositionGains);
-      handSpatialCommand.setGains((OrientationPIDGainsInterface) handOrientationGains);
+      handSpatialCommand.setPositionGains(handPositionGains);
+      handSpatialCommand.setOrientationGains(handOrientationGains);
       handSpatialCommand.setSelectionMatrix(computeSpatialSelectionMatrix());
       handSpatialCommand.set(position, linearVelocity, linearAcceleration);
       handSpatialCommand.set(orientation, angularVelocity, angularAcceleration);
@@ -285,12 +281,12 @@ public class FixedBaseRobotArmController implements RobotController
    {
       if (goToTarget.getBooleanValue())
       {
-         FramePoint initialPosition = new FramePoint(robotArm.getHandControlFrame());
+         FramePoint3D initialPosition = new FramePoint3D(robotArm.getHandControlFrame());
          initialPosition.changeFrame(worldFrame);
          FrameOrientation initialOrientation = new FrameOrientation(robotArm.getHandControlFrame());
          initialOrientation.changeFrame(worldFrame);
          trajectory.setInitialPose(initialPosition, initialOrientation);
-         FramePoint finalPosition = new FramePoint();
+         FramePoint3D finalPosition = new FramePoint3D();
          FrameOrientation finalOrientation = new FrameOrientation();
          handTargetPosition.getFrameTupleIncludingFrame(finalPosition);
          handTargetOrientation.getFrameOrientationIncludingFrame(finalOrientation);

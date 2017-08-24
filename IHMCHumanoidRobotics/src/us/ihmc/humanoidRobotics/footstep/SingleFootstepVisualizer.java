@@ -5,6 +5,9 @@ import java.util.List;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -15,13 +18,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -91,11 +91,11 @@ public class SingleFootstepVisualizer
       {
          predictedContactPoints = new ArrayList<Point2D>();
 
-         List<FramePoint2d> contactPointsFromContactablePlaneBody = bipedFoot.getContactPoints2d();
+         List<FramePoint2D> contactPointsFromContactablePlaneBody = bipedFoot.getContactPoints2d();
          for (int i=0; i<contactPointsFromContactablePlaneBody.size(); i++)
          {
-            FramePoint2d point = contactPointsFromContactablePlaneBody.get(i);
-            predictedContactPoints.add(point.getPointCopy());
+            FramePoint2D point = contactPointsFromContactablePlaneBody.get(i);
+            predictedContactPoints.add(new Point2D(point));
          }
       }
       
@@ -110,7 +110,7 @@ public class SingleFootstepVisualizer
       {
          Point2D contactPoint = predictedContactPoints.get(i);
          
-         FramePoint pointInWorld = new FramePoint(soleReferenceFrame, contactPoint.getX(), contactPoint.getY(), 0.0);
+         FramePoint3D pointInWorld = new FramePoint3D(soleReferenceFrame, contactPoint.getX(), contactPoint.getY(), 0.0);
          pointInWorld.changeFrame(ReferenceFrame.getWorldFrame());
          
          yoContactPoints[i].set(pointInWorld.getPoint());

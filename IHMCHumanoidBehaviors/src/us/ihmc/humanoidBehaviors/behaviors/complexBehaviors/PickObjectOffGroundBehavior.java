@@ -1,6 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
@@ -17,8 +19,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.Body
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
 
@@ -65,7 +65,7 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Picking Up The Ball");
             sendPacket(p1);
-            FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), grabLocation.getX(),
+            FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), grabLocation.getX(),
                   grabLocation.getY(),
                   grabLocation.getZ() + objectRadius + 0.25);
             atlasPrimitiveActions.wholeBodyBehavior.setSolutionQualityThreshold(2.01);
@@ -82,7 +82,7 @@ public class PickObjectOffGroundBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), grabLocation.getX(),
+            FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), grabLocation.getX(),
                   grabLocation.getY(),
                   grabLocation.getZ() + objectRadius);
             atlasPrimitiveActions.wholeBodyBehavior.setSolutionQualityThreshold(2.01);

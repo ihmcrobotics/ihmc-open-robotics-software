@@ -1,13 +1,13 @@
 package us.ihmc.exampleSimulations.beetle.referenceFrames;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSextant;
@@ -25,11 +25,11 @@ public class HexapodReferenceFrames implements ReferenceFrames
    private final FullRobotModel fullRobotModel;
    private final ZUpFrame bodyZUpFrame;
    private final PoseReferenceFrame centerOfMassFrameWithBodyZUpOrientation;
-   private final FramePoint centerOfMassPosition = new FramePoint();
+   private final FramePoint3D centerOfMassPosition = new FramePoint3D();
    private final FrameOrientation bodyOrientation = new FrameOrientation();
 
-   private final FramePoint centroid = new FramePoint();
-   private final FramePoint currentFoot = new FramePoint();
+   private final FramePoint3D centroid = new FramePoint3D();
+   private final FramePoint3D currentFoot = new FramePoint3D();
 
    public HexapodReferenceFrames(FullRobotModel fullRobotModel, SegmentDependentList<RobotSextant, Vector3D> offsetsFromJointBeforeFootToSole)
    {

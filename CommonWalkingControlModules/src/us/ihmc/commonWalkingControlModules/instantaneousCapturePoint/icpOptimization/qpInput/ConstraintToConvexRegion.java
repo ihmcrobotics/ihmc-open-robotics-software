@@ -4,12 +4,12 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Class that represents constraining a variable to lie in a convex region. This constraint has the form<br>
@@ -69,11 +69,11 @@ public class ConstraintToConvexRegion
     *
     * @param vertex vertex to add.
     */
-   public void addVertex(FramePoint2d vertex)
+   public void addVertex(FramePoint2D vertex)
    {
       vertex.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      convexPolygon.addVertex(vertex.getPoint());
+      convexPolygon.addVertex(vertex);
    }
 
    public void addPolygon(FrameConvexPolygon2d polygon)
@@ -86,7 +86,7 @@ public class ConstraintToConvexRegion
     *
     * @param vertex vertex to add.
     */
-   public void addVertex(FramePoint vertex)
+   public void addVertex(FramePoint3D vertex)
    {
       vertex.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
@@ -95,8 +95,8 @@ public class ConstraintToConvexRegion
 
    /**
     * Sets the polygon for the convex constraint to use. Should be called after
-    * all the vertices have been added using {@link #addVertex(FramePoint)} or
-    * {@link #addVertex(FramePoint2d)}.
+    * all the vertices have been added using {@link #addVertex(FramePoint3D)} or
+    * {@link #addVertex(FramePoint2D)}.
     */
    public void setPolygon()
    {

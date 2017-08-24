@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class SphericalLinearResolutionProviderTest
 {
@@ -18,7 +18,7 @@ public class SphericalLinearResolutionProviderTest
    {
       double minRes = 0.05;
       double maxRes = 0.5;
-      SphericalLinearResolutionProvider resolutionProvider = new SphericalLinearResolutionProvider(new FramePoint(ReferenceFrame.getWorldFrame(),0.0,0.0,0.0),
+      SphericalLinearResolutionProvider resolutionProvider = new SphericalLinearResolutionProvider(new FramePoint3D(ReferenceFrame.getWorldFrame(),0.0,0.0,0.0),
                                                                 new OneDimensionalBounds(1.0, 10.0), minRes, maxRes);
       double[] ds = {0.0, 0.0, 0.0};
       assertEquals(minRes, resolutionProvider.getResolution(ds), eps);

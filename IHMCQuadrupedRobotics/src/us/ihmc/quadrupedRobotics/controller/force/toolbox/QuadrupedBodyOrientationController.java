@@ -1,21 +1,23 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
-import us.ihmc.robotics.controllers.YoAxisAngleOrientationGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedBodyOrientationController
 {
    public static class Setpoints
    {
       private final FrameOrientation bodyOrientation = new FrameOrientation();
-      private final FrameVector bodyAngularVelocity = new FrameVector();
-      private final FrameVector comTorqueFeedforward = new FrameVector();
+      private final FrameVector3D bodyAngularVelocity = new FrameVector3D();
+      private final FrameVector3D comTorqueFeedforward = new FrameVector3D();
 
       public void initialize(QuadrupedTaskSpaceEstimator.Estimates estimates)
       {
@@ -30,12 +32,12 @@ public class QuadrupedBodyOrientationController
          return bodyOrientation;
       }
 
-      public FrameVector getBodyAngularVelocity()
+      public FrameVector3D getBodyAngularVelocity()
       {
          return bodyAngularVelocity;
       }
 
-      public FrameVector getComTorqueFeedforward()
+      public FrameVector3D getComTorqueFeedforward()
       {
          return comTorqueFeedforward;
       }
@@ -43,7 +45,7 @@ public class QuadrupedBodyOrientationController
 
    private final ReferenceFrame bodyFrame;
    private final AxisAngleOrientationController bodyOrientationController;
-   private final YoAxisAngleOrientationGains bodyOrientationControllerGains;
+   private final DefaultYoPID3DGains bodyOrientationControllerGains;
    private final YoFrameOrientation yoBodyOrientationSetpoint;
    private final YoFrameVector yoBodyAngularVelocitySetpoint;
    private final YoFrameVector yoComTorqueFeedforwardSetpoint;
@@ -52,7 +54,7 @@ public class QuadrupedBodyOrientationController
    {
       this.bodyFrame = bodyFrame;
       bodyOrientationController = new AxisAngleOrientationController("bodyOrientation", bodyFrame, controlDT, registry);
-      bodyOrientationControllerGains = new YoAxisAngleOrientationGains("bodyOrientation", registry);
+      bodyOrientationControllerGains = new DefaultYoPID3DGains("bodyOrientation", GainCoupling.NONE, true, registry);
       yoBodyOrientationSetpoint = new YoFrameOrientation("bodyOrientationSetpoint", ReferenceFrame.getWorldFrame(), registry);
       yoBodyAngularVelocitySetpoint = new YoFrameVector("bodyAngularVelocitySetpoint", ReferenceFrame.getWorldFrame(), registry);
       yoComTorqueFeedforwardSetpoint = new YoFrameVector("comTorqueFeedforwardSetpoint", ReferenceFrame.getWorldFrame(), registry);
@@ -63,7 +65,7 @@ public class QuadrupedBodyOrientationController
       return bodyFrame;
    }
 
-   public YoAxisAngleOrientationGains getGains()
+   public YoPID3DGains getGains()
    {
       return bodyOrientationControllerGains;
    }
@@ -74,12 +76,12 @@ public class QuadrupedBodyOrientationController
       bodyOrientationController.resetIntegrator();
    }
 
-   public void compute(FrameVector comTorqueCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
+   public void compute(FrameVector3D comTorqueCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimator.Estimates estimates)
    {
       FrameOrientation bodyOrientationSetpoint = setpoints.getBodyOrientation();
-      FrameVector bodyAngularVelocitySetpoint = setpoints.getBodyAngularVelocity();
-      FrameVector bodyAngularVelocityEstimate = estimates.getBodyAngularVelocity();
-      FrameVector comTorqueFeedforwardSetpoint = setpoints.getComTorqueFeedforward();
+      FrameVector3D bodyAngularVelocitySetpoint = setpoints.getBodyAngularVelocity();
+      FrameVector3D bodyAngularVelocityEstimate = estimates.getBodyAngularVelocity();
+      FrameVector3D comTorqueFeedforwardSetpoint = setpoints.getComTorqueFeedforward();
 
       ReferenceFrame bodyOrientationSetpointFrame = bodyOrientationSetpoint.getReferenceFrame();
       ReferenceFrame bodyAngularVelocitySetpointFrame = bodyAngularVelocitySetpoint.getReferenceFrame();

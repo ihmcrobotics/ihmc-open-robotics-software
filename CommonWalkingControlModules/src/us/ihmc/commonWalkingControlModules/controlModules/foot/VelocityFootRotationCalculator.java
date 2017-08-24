@@ -2,6 +2,10 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.awt.Color;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
@@ -15,9 +19,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d.IntersectionResult;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
@@ -26,7 +27,6 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
 
 /**
@@ -100,17 +100,17 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
 
    private final YoBoolean hasBeenInitialized;
 
-   private final FrameVector angularVelocity = new FrameVector();
-   private final FrameVector2d angularVelocity2d = new FrameVector2d();
+   private final FrameVector3D angularVelocity = new FrameVector3D();
+   private final FrameVector2D angularVelocity2d = new FrameVector2D();
 
-   private final FrameVector2d footAngularVelocityUnitVector = new FrameVector2d();
+   private final FrameVector2D footAngularVelocityUnitVector = new FrameVector2D();
 
-   private final FramePoint2d centerOfRotation = new FramePoint2d();
+   private final FramePoint2D centerOfRotation = new FramePoint2D();
    private final FrameLine2d lineOfRotationInSoleFrame = new FrameLine2d();
    private final FrameLine2d lineOfRotationInWorldFrame = new FrameLine2d();
    private final FrameLineSegment2d lineSegmentOfRotation = new FrameLineSegment2d();
 
-   private final FrameVector pointingBackwardVector = new FrameVector();
+   private final FrameVector3D pointingBackwardVector = new FrameVector3D();
 
    private final ContactablePlaneBody rotatingBody;
 
@@ -205,7 +205,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
 
    @SuppressWarnings("unused")
    @Override
-   public void compute(FramePoint2d desiredCoP, FramePoint2d centerOfPressure)
+   public void compute(FramePoint2D desiredCoP, FramePoint2D centerOfPressure)
    {
       footPolygonInWorldFrame.setIncludingFrameAndUpdate(footPolygonInSoleFrame);
       footPolygonInWorldFrame.changeFrameAndProjectToXYPlane(worldFrame);

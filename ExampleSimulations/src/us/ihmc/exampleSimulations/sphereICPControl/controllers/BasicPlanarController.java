@@ -1,12 +1,12 @@
 package us.ihmc.exampleSimulations.sphereICPControl.controllers;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -28,8 +28,8 @@ public class BasicPlanarController
 
    private final ReferenceFrame centerOfMassFrame;
 
-   private final FramePoint centerOfMass = new FramePoint();
-   private final FrameVector centerOfMassVelocity = new FrameVector();
+   private final FramePoint3D centerOfMass = new FramePoint3D();
+   private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
 
    private final YoDouble yoDesiredX = new YoDouble("desiredX", registry);
    private final YoDouble yoDesiredY = new YoDouble("desiredY", registry);

@@ -1,13 +1,13 @@
 package us.ihmc.robotics.math.filters;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class RateLimitedYoFrameOrientation extends YoFrameOrientation
 {
@@ -18,7 +18,7 @@ public class RateLimitedYoFrameOrientation extends YoFrameOrientation
    private final YoBoolean hasBeenCalled;
    private final double dt;
 
-   private final FrameVector differenceVector = new FrameVector();
+   private final FrameVector3D differenceVector = new FrameVector3D();
 
    public RateLimitedYoFrameOrientation(String namePrefix, String nameSuffix, YoVariableRegistry registry, YoDouble maxRate, double dt,
                                    YoFrameOrientation rawOrientation)
@@ -118,7 +118,7 @@ public class RateLimitedYoFrameOrientation extends YoFrameOrientation
       differenceVector.set(yawUnfiltered, pitchUnfiltered, rollUnfiltered);
       differenceVector.sub(getYaw().getDoubleValue(), getPitch().getDoubleValue(), getRoll().getDoubleValue());
 
-      limited.set(differenceVector.limitLength(maxRateVariable.getDoubleValue() * dt));
+      limited.set(differenceVector.clipToMaxLength(maxRateVariable.getDoubleValue() * dt));
       add(differenceVector.getX(), differenceVector.getY(), differenceVector.getZ());
    }
 }

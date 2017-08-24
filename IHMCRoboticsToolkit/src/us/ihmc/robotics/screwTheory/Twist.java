@@ -4,16 +4,16 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class Twist extends SpatialMotionVector
 {
@@ -55,7 +55,7 @@ public class Twist extends SpatialMotionVector
     * @param angularPart angular part of the spatial motion vector expressed in the {@code expressedInFrame} to use.
     * @throws ReferenceFrameMismatchException if the linear and angular parts are not expressed in the same reference frame.
     */
-   public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector linearVelocity, FrameVector angularVelocity)
+   public Twist(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector3D linearVelocity, FrameVector3D angularVelocity)
    {
       super(bodyFrame, baseFrame, linearVelocity, angularVelocity);
    }
@@ -139,7 +139,7 @@ public class Twist extends SpatialMotionVector
     * Packs the angular velocity of the body frame with respect to the base frame, expressed in the base frame.
     * The vector is computed by simply rotating the angular velocity part of this twist to base frame.
     */
-   public void getAngularVelocityInBaseFrame(FrameVector vectorToPack)
+   public void getAngularVelocityInBaseFrame(FrameVector3D vectorToPack)
    {
       vectorToPack.setToZero(baseFrame);
       getAngularVelocityInBaseFrame(vectorToPack.getVector());
@@ -177,7 +177,7 @@ public class Twist extends SpatialMotionVector
    /**
     * Packs a version of the linear velocity, rotated to the base frame.
     */
-   public void getBodyOriginLinearPartInBaseFrame(FrameVector linearVelocityAtBodyOriginToPack)
+   public void getBodyOriginLinearPartInBaseFrame(FrameVector3D linearVelocityAtBodyOriginToPack)
    {
       linearVelocityAtBodyOriginToPack.setToZero(baseFrame);
       getBodyOriginLinearPartInBaseFrame(linearVelocityAtBodyOriginToPack.getVector());
@@ -187,7 +187,7 @@ public class Twist extends SpatialMotionVector
     * Packs the linear velocity of a point that is fixed in bodyFrame,
     * with respect to baseFrame. The resulting vector is expressed in {@code this.getExpressedInFrame()}.
     */
-   public void getLinearVelocityOfPointFixedInBodyFrame(FrameVector linearVelocityToPack, FramePoint pointFixedInBodyFrame)
+   public void getLinearVelocityOfPointFixedInBodyFrame(FrameVector3D linearVelocityToPack, FramePoint3D pointFixedInBodyFrame)
    {
       pointFixedInBodyFrame.checkReferenceFrameMatch(expressedInFrame);
       pointFixedInBodyFrame.get(freeVector);
@@ -201,12 +201,12 @@ public class Twist extends SpatialMotionVector
     * Packs the linear velocity of a 2D point that is fixed in bodyFrame,
     * with respect to baseFrame. The resulting vector is expressed in {@code this.getExpressedInFrame()}.
     */
-   public void getLineaVelocityOfPoint2dFixedInBodyFrame(FrameVector linearVelocityToPack, FramePoint2d point2dFixedInBodyFrame)
+   public void getLineaVelocityOfPoint2dFixedInBodyFrame(FrameVector3D linearVelocityToPack, FramePoint2D point2dFixedInBodyFrame)
    {
       baseFrame.checkReferenceFrameMatch(expressedInFrame);
       point2dFixedInBodyFrame.checkReferenceFrameMatch(baseFrame);
 
-      point2dFixedInBodyFrame.get(freeVector);
+      freeVector.set(point2dFixedInBodyFrame, 0.0);
 
       linearVelocityToPack.setToZero(expressedInFrame);
       linearVelocityToPack.cross(angularPart, freeVector);

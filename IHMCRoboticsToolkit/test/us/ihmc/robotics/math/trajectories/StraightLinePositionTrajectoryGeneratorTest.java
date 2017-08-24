@@ -11,10 +11,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
@@ -31,7 +31,7 @@ public class StraightLinePositionTrajectoryGeneratorTest
    private StraightLinePositionTrajectoryGenerator generator;
    private PositionProvider initialPositionProvider;
    private PositionProvider finalPositionProvider;
-   private FramePoint position;
+   private FramePoint3D position;
    private YoVariableRegistry parentRegistry;
 
    private double xValue = Math.random();
@@ -44,7 +44,7 @@ public class StraightLinePositionTrajectoryGeneratorTest
    {
       parentRegistry = new YoVariableRegistry("parentRegistryTEST");
       referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
-      position = new FramePoint(referenceFrame, xValue, yValue, zValue);
+      position = new FramePoint3D(referenceFrame, xValue, yValue, zValue);
       initialPositionProvider = new ConstantPositionProvider(position);
       finalPositionProvider = new ConstantPositionProvider(position);
       trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
@@ -107,7 +107,7 @@ public class StraightLinePositionTrajectoryGeneratorTest
    public void testGet()
    {
       generator = new StraightLinePositionTrajectoryGenerator(namePrefix, referenceFrame, trajectoryTimeProvider, initialPositionProvider, finalPositionProvider, parentRegistry);
-      FramePoint positionToPack = new FramePoint();
+      FramePoint3D positionToPack = new FramePoint3D();
 
       generator.getPosition(positionToPack);
 
@@ -119,7 +119,7 @@ public class StraightLinePositionTrajectoryGeneratorTest
    public void testPackVelocity()
    {
       generator = new StraightLinePositionTrajectoryGenerator(namePrefix, referenceFrame, trajectoryTimeProvider, initialPositionProvider, finalPositionProvider, parentRegistry);
-      FrameVector velocityToPack = new FrameVector(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
+      FrameVector3D velocityToPack = new FrameVector3D(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
 
       assertFalse(referenceFrame.equals(velocityToPack.getReferenceFrame()));
 
@@ -136,7 +136,7 @@ public class StraightLinePositionTrajectoryGeneratorTest
    public void testPackAcceleration()
    {
       generator = new StraightLinePositionTrajectoryGenerator(namePrefix, referenceFrame, trajectoryTimeProvider, initialPositionProvider, finalPositionProvider, parentRegistry);
-      FrameVector accelerationToPack = new FrameVector(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
+      FrameVector3D accelerationToPack = new FrameVector3D(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
 
       assertFalse(referenceFrame.equals(accelerationToPack.getReferenceFrame()));
 
@@ -152,7 +152,7 @@ public class StraightLinePositionTrajectoryGeneratorTest
 	@Test(timeout = 30000)
    public void testPackLinearData()
    {
-      FramePoint positionToPack = new FramePoint(referenceFrame);
+      FramePoint3D positionToPack = new FramePoint3D(referenceFrame);
       positionToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       generator = new StraightLinePositionTrajectoryGenerator(namePrefix, referenceFrame, trajectoryTimeProvider, initialPositionProvider, finalPositionProvider, parentRegistry);
@@ -164,8 +164,8 @@ public class StraightLinePositionTrajectoryGeneratorTest
 
       assertEquals(referenceFrame, positionToPack.getReferenceFrame());
 
-      FrameVector velocityToPack = new FrameVector(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
-      FrameVector accelerationToPack = new FrameVector(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
+      FrameVector3D velocityToPack = new FrameVector3D(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
+      FrameVector3D accelerationToPack = new FrameVector3D(ReferenceFrame.getWorldFrame(), 10.0, 10.0, 10.0);
 
       assertFalse(referenceFrame.equals(velocityToPack.getReferenceFrame()));
       assertTrue(ReferenceFrame.getWorldFrame().equals(velocityToPack.getReferenceFrame()));

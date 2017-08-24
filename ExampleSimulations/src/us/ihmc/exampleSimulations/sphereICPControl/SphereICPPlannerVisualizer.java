@@ -1,6 +1,13 @@
 package us.ihmc.exampleSimulations.sphereICPControl;
 
+import java.awt.Color;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import com.thoughtworks.xstream.io.StreamException;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
@@ -8,6 +15,10 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -28,10 +39,18 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.*;
-import us.ihmc.robotics.math.frames.*;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.FrameLine2d;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -43,12 +62,6 @@ import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFact
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.awt.*;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 public class SphereICPPlannerVisualizer
 {
@@ -157,8 +170,8 @@ public class SphereICPPlannerVisualizer
 
       Graphics3DObject footstepGraphics = new Graphics3DObject();
       List<Point2D> contactPoints = new ArrayList<Point2D>();
-      for (FramePoint2d point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
-         contactPoints.add(point.getPointCopy());
+      for (FramePoint2D point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
+         contactPoints.add(new Point2D(point));
       footstepGraphics.addExtrudedPolygon(contactPoints, 0.02, YoAppearance.Color(Color.blue));
       yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("nextFootstep", footstepGraphics, yoNextFootstepPose, 1.0));
       yoGraphicsListRegistry.registerYoGraphic("upcomingFootsteps", new YoGraphicShape("nextNextFootstep", footstepGraphics, yoNextNextFootstepPose, 1.0));
@@ -376,7 +389,7 @@ public class SphereICPPlannerVisualizer
    }
 
    private int counter = 0;
-   private final FrameVector2d tempVector2d = new FrameVector2d();
+   private final FrameVector2D tempVector2d = new FrameVector2D();
 
    private void simulateOneTick()
    {
@@ -437,14 +450,14 @@ public class SphereICPPlannerVisualizer
    private void generateRandomPredictedContactPoints(Footstep footstep)
    {
       FrameConvexPolygon2d randomSupportPolygon = new FrameConvexPolygon2d(contactableFeet.get(footstep.getRobotSide()).getContactPoints2d());
-      List<FramePoint2d> randomPredictedContactPointList = new ArrayList<>();
+      List<FramePoint2D> randomPredictedContactPointList = new ArrayList<>();
 
       double minX = 0.5 * randomSupportPolygon.getMinX();
       double minY = 0.5 * randomSupportPolygon.getMinY();
       double maxX = 0.5 * randomSupportPolygon.getMaxX();
       double maxY = 0.5 * randomSupportPolygon.getMaxY();
-      FramePoint2d randomLineOrigin = FramePoint2d.generateRandomFramePoint2d(random, randomSupportPolygon.getReferenceFrame(), minX, minY, maxX, maxY);
-      FrameVector2d randomLineVector = FrameVector2d.generateRandomFrameVector2d(random, randomSupportPolygon.getReferenceFrame());
+      FramePoint2D randomLineOrigin = EuclidFrameRandomTools.generateRandomFramePoint2D(random, randomSupportPolygon.getReferenceFrame(), minX, maxX, minY, maxY);
+      FrameVector2D randomLineVector = EuclidFrameRandomTools.generateRandomFrameVector2D(random, randomSupportPolygon.getReferenceFrame());
       FrameLine2d randomLine = new FrameLine2d(randomLineOrigin, randomLineVector);
 
       ConvexPolygonTools.cutPolygonWithLine(randomLine, randomSupportPolygon, RobotSide.generateRandomRobotSide(random));
@@ -452,7 +465,7 @@ public class SphereICPPlannerVisualizer
 
       while (randomSupportPolygon.getNumberOfVertices() < 4)
       {
-         FramePoint2d duplicate = FramePoint2d.generateRandomFramePoint2d(random, randomSupportPolygon.getReferenceFrame(), 1.0e-3, 1.0e-3, 1.0e-3, 1.0e-3);
+         FramePoint2D duplicate = EuclidFrameRandomTools.generateRandomFramePoint2D(random, randomSupportPolygon.getReferenceFrame(), 1.0e-3, 1.0e-3, 1.0e-3, 1.0e-3);
          duplicate.add(randomSupportPolygon.getFrameVertexCopy(0));
          randomSupportPolygon.addVertex(duplicate);
          randomSupportPolygon.update();
@@ -636,7 +649,7 @@ public class SphereICPPlannerVisualizer
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
          RigidBody foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         List<FramePoint2d> contactFramePoints = contactableFoot.getContactPoints2d();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
          yoPlaneContactState.setFullyConstrained();

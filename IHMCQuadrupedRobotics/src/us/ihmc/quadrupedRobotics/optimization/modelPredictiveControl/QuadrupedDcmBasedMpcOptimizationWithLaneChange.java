@@ -5,6 +5,9 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -15,11 +18,8 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantC
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -28,7 +28,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final FramePoint currentDcmEstimate;
+   private final FramePoint3D currentDcmEstimate;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
    private final QuadrupedTimedContactSequence timedContactSequence;
@@ -64,7 +64,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
    {
       this.linearInvertedPendulumModel = dcmPositionEstimator.getLinearInvertedPendulumModel();
       this.dcmPositionEstimator = dcmPositionEstimator;
-      this.currentDcmEstimate = new FramePoint();
+      this.currentDcmEstimate = new FramePoint3D();
       this.timedContactSequence = new QuadrupedTimedContactSequence(0, 2 * maxPreviewSteps + 4);
       this.piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(timedContactSequence.capacity());
 
@@ -85,9 +85,9 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
    }
 
    @Override
-   public void compute(FrameVector stepAdjustmentVector, FramePoint cmpPositionSetpoint, PreallocatedList<QuadrupedTimedStep> queuedSteps,
-         QuadrantDependentList<FramePoint> currentSolePosition, QuadrantDependentList<ContactState> currentContactState, FramePoint currentComPosition,
-         FrameVector currentComVelocity, double currentTime, QuadrupedMpcOptimizationWithLaneChangeSettings settings)
+   public void compute(FrameVector3D stepAdjustmentVector, FramePoint3D cmpPositionSetpoint, PreallocatedList<QuadrupedTimedStep> queuedSteps,
+         QuadrantDependentList<FramePoint3D> currentSolePosition, QuadrantDependentList<ContactState> currentContactState, FramePoint3D currentComPosition,
+         FrameVector3D currentComVelocity, double currentTime, QuadrupedMpcOptimizationWithLaneChangeSettings settings)
    {
       // Compute step adjustment and contact pressure by solving the following QP:
       // min_u u'Au
@@ -171,7 +171,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       }
       for (Direction direction : Direction.values2D())
       {
-         stepAdjustmentVector.set(direction, u.get(rowOffset++, 0));
+         stepAdjustmentVector.setElement(direction.ordinal(), u.get(rowOffset++, 0));
       }
 
       // Update logging variables
@@ -210,7 +210,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       CommonOps.scale(-2, b, b);
    }
 
-   private void initializeEqualityConstraints(QuadrantDependentList<ContactState> currentContactState, QuadrantDependentList<FramePoint> currentSolePosition)
+   private void initializeEqualityConstraints(QuadrantDependentList<ContactState> currentContactState, QuadrantDependentList<FramePoint3D> currentSolePosition)
    {
       // Initialize equality constraints. (Aeq u = beq)
       x0.reshape(2 * numberOfIntervals, 1);                    // center of pressure offset
@@ -232,7 +232,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
             if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
             {
                currentSolePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-               B.set(rowOffset, columnOffset, currentSolePosition.get(robotQuadrant).get(direction));
+               B.set(rowOffset, columnOffset, currentSolePosition.get(robotQuadrant).getElement(direction.getIndex()));
                columnOffset++;
             }
          }
@@ -240,7 +240,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
          for (int i = 0; i < numberOfIntervals; i++)
          {
             piecewiseConstantCopTrajectory.getCopPositionAtStartOfInterval(i).changeFrame(ReferenceFrame.getWorldFrame());
-            x0.set(i * 2 + rowOffset, 0, piecewiseConstantCopTrajectory.getCopPositionAtStartOfInterval(i).get(direction));
+            x0.set(i * 2 + rowOffset, 0, piecewiseConstantCopTrajectory.getCopPositionAtStartOfInterval(i).getElement(direction.getIndex()));
             B.set(i * 2 + rowOffset, numberOfContacts + rowOffset, piecewiseConstantCopTrajectory.getNormalizedPressureContributedByQueuedSteps(i));
          }
          x0.set(rowOffset, 0, 0);
@@ -260,7 +260,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
 
          double previewTime =
                piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(numberOfIntervals - 1) - piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(0);
-         y0.set(rowOffset, 0, Math.exp(naturalFrequency * previewTime) * currentDcmEstimate.get(direction));
+         y0.set(rowOffset, 0, Math.exp(naturalFrequency * previewTime) * currentDcmEstimate.getElement(direction.getIndex()));
          rowOffset++;
       }
 
@@ -327,7 +327,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       }
    }
 
-   private void addPointWithScaleFactor(FramePoint point, FramePoint pointToAdd, double scaleFactor)
+   private void addPointWithScaleFactor(FramePoint3D point, FramePoint3D pointToAdd, double scaleFactor)
    {
       point.checkReferenceFrameMatch(pointToAdd);
       point.add(scaleFactor * pointToAdd.getX(), scaleFactor * pointToAdd.getY(), scaleFactor * pointToAdd.getZ());

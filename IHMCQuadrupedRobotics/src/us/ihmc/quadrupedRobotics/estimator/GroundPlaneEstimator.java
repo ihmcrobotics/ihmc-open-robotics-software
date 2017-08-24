@@ -6,16 +6,16 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import java.util.ArrayList;
@@ -108,7 +108,7 @@ public class GroundPlaneEstimator
    /**
     * @param point : ground plane point in World Frame
     */
-   public void getPlanePoint(FramePoint point)
+   public void getPlanePoint(FramePoint3D point)
    {
       point.changeFrame(ReferenceFrame.getWorldFrame());
       groundPlane.getPoint(point.getPoint());
@@ -117,7 +117,7 @@ public class GroundPlaneEstimator
    /**
     * @param normal : ground plane normal in World Frame
     */
-   public void getPlaneNormal(FrameVector normal)
+   public void getPlaneNormal(FrameVector3D normal)
    {
       normal.changeFrame(ReferenceFrame.getWorldFrame());
       groundPlane.getNormal(normal.getVector());
@@ -126,7 +126,7 @@ public class GroundPlaneEstimator
    /**
     * @param point : point to be vertically projected onto ground plane
     */
-   public void projectZ(FramePoint point)
+   public void projectZ(FramePoint3D point)
    {
       point.changeFrame(ReferenceFrame.getWorldFrame());
       point.setZ(groundPlane.getZOnPlane(point.getX(), point.getY()));
@@ -143,7 +143,7 @@ public class GroundPlaneEstimator
    /**
     * @param point : point to be orthogonally projected onto ground plane
     */
-   public void projectOrthogonal(FramePoint point)
+   public void projectOrthogonal(FramePoint3D point)
    {
       point.changeFrame(ReferenceFrame.getWorldFrame());
       groundPlane.orthogonalProjection(point.getPoint());
@@ -191,7 +191,7 @@ public class GroundPlaneEstimator
     * Set the list of ground contact points and compute the ground plane.
     * @param contactPoints : list of ground contact points
     */
-   public void compute(List<FramePoint> contactPoints)
+   public void compute(List<FramePoint3D> contactPoints)
    {
       int nPoints = Math.min(contactPoints.size(), MAX_GROUND_PLANE_POINTS);
       groundPlanePoints.clear();
@@ -207,7 +207,7 @@ public class GroundPlaneEstimator
     * Set the list of ground contact points and compute the ground plane.
     * @param contactPoints : quadrant dependent list of contact points
     */
-   public void compute(QuadrantDependentList<FramePoint> contactPoints)
+   public void compute(QuadrantDependentList<FramePoint3D> contactPoints)
    {
       groundPlanePoints.clear();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)

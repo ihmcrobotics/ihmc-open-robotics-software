@@ -1,13 +1,12 @@
 package us.ihmc.steppr.parameters;
 
-import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class BonoPhysicalProperties implements DRCRobotPhysicalProperties
+public class BonoPhysicalProperties
 {
    /* Original Ankle
    public static final double ankleHeight = 2.0 * 0.0254;
@@ -24,7 +23,7 @@ public class BonoPhysicalProperties implements DRCRobotPhysicalProperties
    public static final double legLength = 1.01 * (thighLength + shinLength);
    public static final double pelvisToFoot = 0.887;
    */
-   
+
    /* Spring Ankle */
    public static final double ankleHeight = 3.0 * 0.0254;
    public static final double shiftFootForward = 0.001;
@@ -39,7 +38,7 @@ public class BonoPhysicalProperties implements DRCRobotPhysicalProperties
    public static final double shinLength = 0.42164-0.6*0.0254;
    public static final double legLength = 1.01 * (thighLength + shinLength);
    public static final double pelvisToFoot = 0.869;
-   
+
 
    public static final SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms = new SideDependentList<RigidBodyTransform>();
    static
@@ -49,12 +48,6 @@ public class BonoPhysicalProperties implements DRCRobotPhysicalProperties
          RigidBodyTransform soleToAnkleFrame = TransformTools.yawPitchDegreesTransform(new Vector3D(footLength / 2.0 - footBack, 0.0, -ankleHeight), 0.0, Math.toDegrees(0.0 * 0.18704));
          soleToAnkleFrameTransforms.put(robotSide, soleToAnkleFrame);
       }
-   }
-
-   @Override
-   public double getAnkleHeight()
-   {
-      return ankleHeight;
    }
 
    public static RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide side)

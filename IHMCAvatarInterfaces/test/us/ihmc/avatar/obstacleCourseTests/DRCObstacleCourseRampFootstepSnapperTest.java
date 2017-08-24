@@ -18,6 +18,8 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -27,18 +29,16 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.BasicFootstepMask;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.GenericFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -191,7 +191,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          footstepSnapper.snapFootstep(footstep, heightMap);
 
          RobotSide robotSide = footstep.getRobotSide();
-         FramePoint position = new FramePoint();
+         FramePoint3D position = new FramePoint3D();
          FrameOrientation orientation = new FrameOrientation();
          footstep.getPose(position, orientation);
          FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, position.getPoint(), orientation.getQuaternion());
@@ -237,7 +237,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
 
    private SimpleFootstepSnapper createSimpleFootstepSnapper()
    {
-      FootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
+      QuadTreeFootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
       BasicFootstepMask footstepMask = new BasicFootstepMask(snappingParameters.getCollisionPolygon(), 0.0);
 
       SimpleFootstepSnapper footstepSnapper = new SimpleFootstepSnapper();

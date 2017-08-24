@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.util.HashMap;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
 import us.ihmc.robotModels.FullRobotModel;
@@ -27,7 +29,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -38,7 +39,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
@@ -102,8 +102,8 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    private final QuadrantDependentList<YoFramePoint> desiredFeetLocations = new QuadrantDependentList<YoFramePoint>();
 
    private final QuadrantDependentList<YoFrameVector> desiredFeetPositionsInLegAttachmentFrame = new QuadrantDependentList<YoFrameVector>();
-   private final FramePoint desiredFootPosition = new FramePoint(worldFrame);
-   private final FramePoint desiredFootPositionInLegAttachmentFrame = new FramePoint();
+   private final FramePoint3D desiredFootPosition = new FramePoint3D(worldFrame);
+   private final FramePoint3D desiredFootPositionInLegAttachmentFrame = new FramePoint3D();
 
    public QuadrupedPositionBasedCenterOfMassVerificationController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, YoVariableRegistry parentRegistry)
    {
@@ -152,7 +152,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
 
          YoFramePoint desiredFootLocation = new YoFramePoint(prefix + "desiredFootPosition", ReferenceFrame.getWorldFrame(), registry);
 
-         FramePoint footPosition = new FramePoint(legAttachmentFrame);
+         FramePoint3D footPosition = new FramePoint3D(legAttachmentFrame);
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
          footPosition.setZ(0.0);
 
@@ -266,7 +266,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       return null;
    }
 
-   private final FramePoint currentFootLocation = new FramePoint();
+   private final FramePoint3D currentFootLocation = new FramePoint3D();
 
    /**
     * update actual feet locations and the four foot polygon, using the desired locations
@@ -409,8 +409,8 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       private final ReferenceFrame trotLineFrame;
       private final ReferenceFrame initialCenterOfMassReferenceFrame;
 
-      private final FramePoint initialCenterOfMass;
-      private final FramePoint workingFramePoint = new FramePoint();
+      private final FramePoint3D initialCenterOfMass;
+      private final FramePoint3D workingFramePoint = new FramePoint3D();
 
       public CenterOfMassIncrementVariableHolder(TrotPair trotPair, ReferenceFrame trotLineFrame, ReferenceFrame initialCenterOfMassReferenceFrame)
       {
@@ -418,7 +418,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          String name = trotPair.getFrameName();
          this.trotLineFrame = trotLineFrame;
          this.initialCenterOfMassReferenceFrame = initialCenterOfMassReferenceFrame;
-         initialCenterOfMass = new FramePoint(initialCenterOfMassReferenceFrame);
+         initialCenterOfMass = new FramePoint3D(initialCenterOfMassReferenceFrame);
 
          alpha = new YoDouble(name + "desiredCenterOfMassIncrementAlpha", registry);
          alpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.5, dt));
@@ -442,7 +442,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          filteredDesiredCenterOfMassSmallIncrementY.update();
       }
 
-      public void getPosition(FramePoint framePointToPack)
+      public void getPosition(FramePoint3D framePointToPack)
       {
 //         double x = desiredCenterOfMassLargeIncrementX.getDoubleValue() + desiredCenterOfMassSmallIncrementX.getDoubleValue();
 //         double y = desiredCenterOfMassLargeIncrementY.getDoubleValue() + desiredCenterOfMassSmallIncrementY.getDoubleValue();
@@ -454,7 +454,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          framePointToPack.add(x, y, 0.0);
       }
 
-      public void setPosition(FramePoint newPosition, boolean reset)
+      public void setPosition(FramePoint3D newPosition, boolean reset)
       {
          newPosition.changeFrame(trotLineFrame);
 
@@ -491,9 +491,9 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       private final ReferenceFrame rootFrame = referenceFrames.getRootJointFrame();
       private final YoFramePoint rootJointToCenterOfTrotLines = new YoFramePoint("rootJointToCenterOfTrotLines", rootFrame, registry);
       private final YoFramePoint estimatedBodyCenterOfMassPosition = new YoFramePoint("estimatedBodyCenterOfMassPosition", rootFrame, registry);
-      private final FramePoint centerOfTrotLinesFramePoint = new FramePoint();
-      private final FramePoint shiftedCenterOfMass = new FramePoint();
-      private final FramePoint intialCenterOfMass = new FramePoint();
+      private final FramePoint3D centerOfTrotLinesFramePoint = new FramePoint3D();
+      private final FramePoint3D shiftedCenterOfMass = new FramePoint3D();
+      private final FramePoint3D intialCenterOfMass = new FramePoint3D();
       private final TranslationReferenceFrame intialCenterOfMassReferenceFrame = new TranslationReferenceFrame("intialCenterOfMassReferenceFrame", worldFrame);
       private final HashMap<TrotPair, CenterOfMassIncrementVariableHolder> incrementHolders = new HashMap<>();
       private final double totalMass;

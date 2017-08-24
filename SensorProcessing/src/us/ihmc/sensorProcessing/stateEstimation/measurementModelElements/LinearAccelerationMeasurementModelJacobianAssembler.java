@@ -3,10 +3,10 @@ package us.ihmc.sensorProcessing.stateEstimation.measurementModelElements;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
@@ -31,7 +31,7 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
 
    private final Vector3D omega = new Vector3D();
    private final Vector3D v = new Vector3D();
-   private final FramePoint p = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D p = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final Vector3D omegad = new Vector3D();
 
    private final Twist twistOfMeasurementLink = new Twist();

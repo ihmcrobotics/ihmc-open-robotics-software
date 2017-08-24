@@ -1,12 +1,12 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
@@ -33,12 +33,12 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
    private final Vector3D finalConstraintVelocityOffset = new Vector3D();
    private final Vector3D finalConstraintAccelerationOffset = new Vector3D();
 
-   private final FramePoint position = new FramePoint();
-   private final FrameVector velocity = new FrameVector();
-   private final FrameVector acceleration = new FrameVector();
-   private final FramePoint tempPosition = new FramePoint();
-   private final FrameVector tempVelocity = new FrameVector();
-   private final FrameVector tempAcceleration = new FrameVector();
+   private final FramePoint3D position = new FramePoint3D();
+   private final FrameVector3D velocity = new FrameVector3D();
+   private final FrameVector3D acceleration = new FrameVector3D();
+   private final FramePoint3D tempPosition = new FramePoint3D();
+   private final FrameVector3D tempVelocity = new FrameVector3D();
+   private final FrameVector3D tempAcceleration = new FrameVector3D();
 
    public BlendedPositionTrajectoryGenerator(String prefix, PositionTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
          YoVariableRegistry parentRegistry)
@@ -91,28 +91,28 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
       }
    }
 
-   public void blendInitialConstraint(FramePoint initialPosition, double initialTime, double blendDuration)
+   public void blendInitialConstraint(FramePoint3D initialPosition, double initialTime, double blendDuration)
    {
       clearInitialConstraint();
       computeInitialConstraintError(initialPosition, initialTime);
       computeInitialConstraintPolynomial(initialTime, blendDuration);
    }
 
-   public void blendInitialConstraint(FramePoint initialPosition, FrameVector initialVelocity, double initialTime, double blendDuration)
+   public void blendInitialConstraint(FramePoint3D initialPosition, FrameVector3D initialVelocity, double initialTime, double blendDuration)
    {
       clearInitialConstraint();
       computeInitialConstraintError(initialPosition, initialVelocity, initialTime);
       computeInitialConstraintPolynomial(initialTime, blendDuration);
    }
 
-   public void blendFinalConstraint(FramePoint finalPosition, double finalTime, double blendDuration)
+   public void blendFinalConstraint(FramePoint3D finalPosition, double finalTime, double blendDuration)
    {
       clearFinalConstraint();
       computeFinalConstraintError(finalPosition, finalTime);
       computeFinalConstraintPolynomial(finalTime, blendDuration);
    }
 
-   public void blendFinalConstraint(FramePoint finalPosition, FrameVector finalVelocity, double finalTime, double blendDuration)
+   public void blendFinalConstraint(FramePoint3D finalPosition, FrameVector3D finalVelocity, double finalTime, double blendDuration)
    {
       clearFinalConstraint();
       computeFinalConstraintError(finalPosition, finalVelocity, finalTime);
@@ -120,19 +120,19 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
    }
 
    @Override
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       positionToPack.setIncludingFrame(position);
    }
 
    @Override
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       velocityToPack.setIncludingFrame(velocity);
    }
 
    @Override
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       accelerationToPack.setIncludingFrame(acceleration);
    }
@@ -184,7 +184,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
       return trajectory.isDone();
    }
 
-   private void computeInitialConstraintError(FramePoint initialPosition, double initialTime)
+   private void computeInitialConstraintError(FramePoint3D initialPosition, double initialTime)
    {
       trajectory.compute(initialTime);
       trajectoryFrame.checkReferenceFrameMatch(initialPosition.getReferenceFrame());
@@ -195,7 +195,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
       initialConstraintPositionError.sub(tempPosition.getPoint());
    }
 
-   private void computeInitialConstraintError(FramePoint initialPosition, FrameVector initialVelocity, double initialTime)
+   private void computeInitialConstraintError(FramePoint3D initialPosition, FrameVector3D initialVelocity, double initialTime)
    {
       computeInitialConstraintError(initialPosition, initialTime);
       trajectoryFrame.checkReferenceFrameMatch(initialVelocity.getReferenceFrame());
@@ -206,7 +206,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
       initialConstraintVelocityError.sub(tempVelocity.getVector());
    }
 
-   private void computeFinalConstraintError(FramePoint finalPosition, double finalTime)
+   private void computeFinalConstraintError(FramePoint3D finalPosition, double finalTime)
    {
       trajectory.compute(finalTime);
       trajectoryFrame.checkReferenceFrameMatch(finalPosition.getReferenceFrame());
@@ -217,7 +217,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
       finalConstraintPositionError.sub(tempPosition.getPoint());
    }
 
-   private void computeFinalConstraintError(FramePoint finalPosition, FrameVector finalVelocity, double finalTime)
+   private void computeFinalConstraintError(FramePoint3D finalPosition, FrameVector3D finalVelocity, double finalTime)
    {
       computeFinalConstraintError(finalPosition, finalTime);
       trajectoryFrame.checkReferenceFrameMatch(finalVelocity.getReferenceFrame());

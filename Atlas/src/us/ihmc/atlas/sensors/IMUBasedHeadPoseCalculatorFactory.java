@@ -8,14 +8,14 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.HeadPosePacket.MeasurementStatus;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RawIMUPacket;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -127,7 +127,7 @@ class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_r
 			
 			if (checkMeasurementStability(rawAcceleration)) {
 				Vector3D gravityInducedAcceleration = new Vector3D(0.0, 0.0, +9.82);
-				FrameVector accel = new FrameVector(headIMUFrameWhenLevel,rawAcceleration);
+				FrameVector3D accel = new FrameVector3D(headIMUFrameWhenLevel,rawAcceleration);
 				accel.changeFrame(ReferenceFrame.getWorldFrame());
 				double[] eulerAngles = EulerAnglesFromVectors(accel.getVector(), gravityInducedAcceleration);
 				headPosePacket.setEulerAngles(eulerAngles);

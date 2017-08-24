@@ -49,7 +49,6 @@ public class RecyclingArrayList<T> implements List<T>
       this.builder = builder;
 
       fillElementDataIfNeeded();
-      clear();
    }
 
    /**

@@ -7,10 +7,11 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -56,13 +57,13 @@ public class CenterOfMassReferenceFrameTest
 
       CenterOfMassCalculator comCalculator = new CenterOfMassCalculator(elevator, elevator.getBodyFixedFrame());
       comCalculator.compute();
-      FramePoint centerOfMass = new FramePoint(elevator.getBodyFixedFrame());
+      FramePoint3D centerOfMass = new FramePoint3D(elevator.getBodyFixedFrame());
       comCalculator.getCenterOfMass(centerOfMass);
 
-      FramePoint centerOfMassFromFrame = new FramePoint(centerOfMassReferenceFrame);
+      FramePoint3D centerOfMassFromFrame = new FramePoint3D(centerOfMassReferenceFrame);
       centerOfMassFromFrame.changeFrame(elevator.getBodyFixedFrame());
 
-      EuclidCoreTestTools.assertTuple3DEquals(centerOfMass.getVectorCopy(), centerOfMassFromFrame.getVectorCopy(), 1e-12);
+      EuclidCoreTestTools.assertTuple3DEquals(centerOfMass, centerOfMassFromFrame, 1e-12);
 
       RotationMatrix rotation = new RotationMatrix();
       RigidBodyTransform transform = centerOfMassReferenceFrame.getTransformToDesiredFrame(elevator.getBodyFixedFrame());
