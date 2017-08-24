@@ -30,6 +30,7 @@ import us.ihmc.robotDataLogger.YoVariableDefinition;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.EnumParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
@@ -104,6 +105,9 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
       addJointStates(handshake);
       addGraphicObjects(handshake);
 
+      DefaultParameterReader parameterReader = new DefaultParameterReader();
+      parameterReader.readParametersInRegistry(regs.get(0));
+      
       this.numberOfVariables = handshake.getVariables().size();
       this.numberOfJointStateVariables = getNumberOfJointStateVariables(handshake);
       this.stateVariables = 1 + numberOfVariables + numberOfJointStateVariables;
@@ -190,7 +194,6 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
             {
                throw new RuntimeException("Last variable index in the registry is not the parameter just added.");
             }
-            
             variableList.add(newVariable);
             
          }
