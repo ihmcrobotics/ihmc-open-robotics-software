@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.Random;
@@ -21,21 +22,22 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.controllers.SE3PIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public final class SpatialFeedbackControllerTest
 {
@@ -57,12 +59,12 @@ public final class SpatialFeedbackControllerTest
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBody elevator = randomFloatingChain.getElevator();
       RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
-      FramePoint bodyFixedPointToControl = FramePoint.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
+      FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.generateRandomFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
 
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);
       joints.get(0).getPredecessor().updateFramesRecursively();
-      FramePoint desiredPosition = new FramePoint();
+      FramePoint3D desiredPosition = new FramePoint3D();
       desiredPosition.setIncludingFrame(bodyFixedPointToControl);
       desiredPosition.changeFrame(worldFrame);
       FrameOrientation desiredOrientation = new FrameOrientation();
@@ -76,7 +78,7 @@ public final class SpatialFeedbackControllerTest
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      
+
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null,
                                                                             null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
@@ -85,13 +87,13 @@ public final class SpatialFeedbackControllerTest
 
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
       spatialFeedbackControlCommand.set(elevator, endEffector);
-      SE3PIDGains gains = new SE3PIDGains();
-      gains.setPositionGains(100.0, 50.0);
-      gains.setOrientationGains(100.0, 50.0);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
+      gains.getPositionGains().setProportialAndDerivativeGains(100.0, 50.0);
+      gains.getOrientationGains().setProportialAndDerivativeGains(100.0, 50.0);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
-      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector(worldFrame), new FrameVector(worldFrame));
-      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector(worldFrame), new FrameVector(worldFrame));
+      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
       spatialFeedbackController.setEnabled(true);
 
@@ -103,12 +105,12 @@ public final class SpatialFeedbackControllerTest
       DenseMatrix64F jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
 
-      FramePoint currentPosition = new FramePoint();
+      FramePoint3D currentPosition = new FramePoint3D();
       FrameOrientation currentOrientation = new FrameOrientation();
       FrameOrientation differenceOrientation = new FrameOrientation();
-      
-      FrameVector positionError = new FrameVector();
-      FrameVector rotationError = new FrameVector();
+
+      FrameVector3D positionError = new FrameVector3D();
+      FrameVector3D rotationError = new FrameVector3D();
 
       double previousErrorMagnitude = Double.POSITIVE_INFINITY;
       double errorMagnitude = previousErrorMagnitude;
@@ -132,7 +134,7 @@ public final class SpatialFeedbackControllerTest
          currentPosition.setIncludingFrame(bodyFixedPointToControl);
          currentPosition.changeFrame(worldFrame);
          positionError.sub(desiredPosition, currentPosition);
-         
+
          currentOrientation.setToZero(bodyFixedPointToControl.getReferenceFrame());
          currentOrientation.changeFrame(worldFrame);
 
@@ -163,12 +165,12 @@ public final class SpatialFeedbackControllerTest
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBody elevator = randomFloatingChain.getElevator();
       RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
-      FramePoint bodyFixedPointToControl = FramePoint.generateRandomFramePoint(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
+      FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.generateRandomFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
 
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);
       joints.get(0).getPredecessor().updateFramesRecursively();
-      FramePoint desiredPosition = new FramePoint();
+      FramePoint3D desiredPosition = new FramePoint3D();
       desiredPosition.setIncludingFrame(bodyFixedPointToControl);
       desiredPosition.changeFrame(worldFrame);
       FrameOrientation desiredOrientation = new FrameOrientation();
@@ -190,13 +192,13 @@ public final class SpatialFeedbackControllerTest
 
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
       spatialFeedbackControlCommand.set(elevator, endEffector);
-      SE3PIDGains gains = new SE3PIDGains();
-      gains.setPositionGains(100.0, 50.0);
-      gains.setOrientationGains(100.0, 50.0);
+      DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
+      gains.getPositionGains().setProportialAndDerivativeGains(100.0, 50.0);
+      gains.getOrientationGains().setProportialAndDerivativeGains(100.0, 50.0);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
-      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector(worldFrame), new FrameVector(worldFrame));
-      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector(worldFrame), new FrameVector(worldFrame));
+      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
       spatialFeedbackController.setEnabled(true);
 
@@ -226,12 +228,12 @@ public final class SpatialFeedbackControllerTest
 
       DenseMatrix64F tempJtW = new DenseMatrix64F(numberOfDoFs, 6);
 
-      FramePoint currentPosition = new FramePoint();
+      FramePoint3D currentPosition = new FramePoint3D();
       FrameOrientation currentOrientation = new FrameOrientation();
       FrameOrientation differenceOrientation = new FrameOrientation();
-      
-      FrameVector positionError = new FrameVector();
-      FrameVector rotationError = new FrameVector();
+
+      FrameVector3D positionError = new FrameVector3D();
+      FrameVector3D rotationError = new FrameVector3D();
 
       double previousErrorMagnitude = Double.POSITIVE_INFINITY;
       double errorMagnitude = previousErrorMagnitude;
@@ -272,7 +274,7 @@ public final class SpatialFeedbackControllerTest
          currentPosition.setIncludingFrame(bodyFixedPointToControl);
          currentPosition.changeFrame(worldFrame);
          positionError.sub(desiredPosition, currentPosition);
-         
+
          currentOrientation.setToZero(bodyFixedPointToControl.getReferenceFrame());
          currentOrientation.changeFrame(worldFrame);
 

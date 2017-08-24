@@ -1,7 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 
 /**
  * @author twan
@@ -12,11 +12,11 @@ public class PointJacobianConvectiveTermCalculator
    private final Twist twist = new Twist();
    private final SpatialAccelerationVector convectiveTerm = new SpatialAccelerationVector();
    private final ConvectiveTermCalculator convectiveTermCalculator = new ConvectiveTermCalculator();
-   private final FramePoint bodyFixedPoint = new FramePoint();
+   private final FramePoint3D bodyFixedPoint = new FramePoint3D();
 //   private final FrameVector bodyFixedPointVelocity = new FrameVector();
 //   private final FrameVector tempVector = new FrameVector();
 
-   public void compute(PointJacobian pointJacobian, FrameVector pPointVelocity)
+   public void compute(PointJacobian pointJacobian, FrameVector3D pPointVelocity)
    {
       GeometricJacobian jacobian = pointJacobian.getGeometricJacobian();
       bodyFixedPoint.setIncludingFrame(pointJacobian.getPoint());

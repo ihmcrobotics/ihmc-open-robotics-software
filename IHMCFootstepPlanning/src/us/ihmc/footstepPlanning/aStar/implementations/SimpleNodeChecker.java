@@ -15,6 +15,7 @@ public class SimpleNodeChecker implements FootstepNodeChecker
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previosNode)
    {
+      /** In case of flat ground walking */
       if (planarRegions == null)
          return true;
 

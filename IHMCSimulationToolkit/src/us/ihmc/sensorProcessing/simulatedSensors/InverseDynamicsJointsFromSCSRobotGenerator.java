@@ -5,10 +5,10 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -139,11 +139,11 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
 
    private final SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector();
    
-   private final FrameVector linearVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector angularVelocity = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D linearVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D angularVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
      
-   private final FrameVector originAcceleration = new FrameVector();
-   private final FrameVector angularAcceleration = new FrameVector();
+   private final FrameVector3D originAcceleration = new FrameVector3D();
+   private final FrameVector3D angularAcceleration = new FrameVector3D();
    
    private final RigidBodyTransform positionAndRotation = new RigidBodyTransform();
 

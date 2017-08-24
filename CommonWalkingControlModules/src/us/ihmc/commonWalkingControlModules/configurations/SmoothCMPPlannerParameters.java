@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
@@ -39,14 +38,13 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
     */
    private final EnumMap<CoPPointName, Double> stepLengthToCoPOffsetFactor = new EnumMap<>(CoPPointName.class);
    /**
-    * Ordered list of transition time to a particular CoP point from the previous CoP point
-    */
-   private final EnumMap<CoPPointName, Double> segmentTime = new EnumMap<>(CoPPointName.class);
-   /**
     * Ordered list of CoP points to plan for each footstep. End CoP must be at the end of the list 
     */
    private final CoPPointName[] copPointsToPlan = {CoPPointName.HEEL_COP, CoPPointName.BALL_COP, CoPPointName.TOE_COP};
 
+   /**
+    * Last transfer is planned till the endCoP in the transferCoPPointsToPlan
+    */
    private final CoPPointName[] swingCopPointsToPlan = {CoPPointName.BALL_COP, CoPPointName.TOE_COP};
    private final CoPPointName[] transferCoPPointsToPlan = {CoPPointName.MIDFEET_COP, CoPPointName.HEEL_COP};
 
@@ -61,7 +59,7 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
    private final CoPPointName entryCoPName = CoPPointName.HEEL_COP;
    /** Indicate the last CoP for the swing phase. Typically everything for this point should be determined from the final values otherwise computation is not possible */
    private final CoPPointName exitCoPName = CoPPointName.TOE_COP;
-   
+
    public SmoothCMPPlannerParameters()
    {
       this(1.0);
@@ -74,7 +72,7 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
       copOffsetFrameNames.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
       copOffsetFrameNames.put(CoPPointName.BALL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
       copOffsetFrameNames.put(CoPPointName.TOE_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
-      copOffsetFrameNames.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.FINAL_DOUBLE_SUPPORT_POLYGON);
+      copOffsetFrameNames.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.INITIAL_DOUBLE_SUPPORT_POLYGON);
 
       stepLengthOffsetPolygon.put(CoPPointName.MIDFEET_COP, CoPSupportPolygonNames.NULL);
       stepLengthOffsetPolygon.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.INITIAL_SWING_POLYGON);
@@ -104,11 +102,6 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
       copOffsetBoundsInFootFrame.put(CoPPointName.HEEL_COP, new Vector2D(-0.04, 0.03));
       copOffsetBoundsInFootFrame.put(CoPPointName.BALL_COP, new Vector2D(0.0, 0.055));
       copOffsetBoundsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.08));
-
-      segmentTime.put(CoPPointName.MIDFEET_COP, 0.05);
-      segmentTime.put(CoPPointName.HEEL_COP, 0.8);
-      segmentTime.put(CoPPointName.BALL_COP, 0.2);
-      segmentTime.put(CoPPointName.TOE_COP, 0.05);
    }
 
    @Override
@@ -255,7 +248,7 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
       return copOffsetBoundsInFootFrame;
    }
 
-   @Override
+   @Override @Deprecated
    /**
     * <p>
     * {@inheritDoc}
@@ -267,15 +260,7 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
     */
    public List<Vector2D> getCoPOffsets()
    {
-      Vector2D tempVec;
-      for (int i = 0; i < copPointsToPlan.length; i++)
-      {
-         //tempVec = copOffsets[i]; // fixme
-         tempVec = new Vector2D();
-         tempVec.scale(modelScale);
-         copOffsetsFootFrame.add(tempVec);
-      }
-      return copOffsetsFootFrame;
+      throw new RuntimeException("Usage of deprecated function");
    }
 
    public EnumMap<CoPPointName, Vector2D> getCopOffsetsInFootFrame()
@@ -356,7 +341,7 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
    @Override
    public double getStepHeightThresholdForExitCoPOnToesWhenSteppingDown()
    {
-      return 0;
+      return modelScale * 0.05;
    }
 
    @Override
@@ -398,11 +383,6 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
    public EnumMap<CoPPointName, Double> getStepLengthToCoPOffsetFactors()
    {
       return stepLengthToCoPOffsetFactor;
-   }
-
-   public EnumMap<CoPPointName, Double> getSegmentTimes()
-   {
-      return segmentTime;
    }
 
    public CoPSplineType getOrderOfCoPInterpolation()

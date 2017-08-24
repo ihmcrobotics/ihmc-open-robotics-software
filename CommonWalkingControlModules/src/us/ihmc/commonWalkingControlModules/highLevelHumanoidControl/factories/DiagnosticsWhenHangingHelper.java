@@ -4,11 +4,11 @@ import java.util.ArrayList;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpPreserveYReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -29,11 +29,11 @@ public class DiagnosticsWhenHangingHelper
    private final YoFramePoint belowJointCoMInZUpFrame;
    private final YoFrameVector yoJointAxis, yoJointToCenterOfMass, yoForceVector;
 
-   private final FramePoint centerOfMassPosition;
-   private final FrameVector jointAxis = new FrameVector();
-   private final FrameVector jointToCenterOfMass = new FrameVector();
-   private FrameVector forceVector = new FrameVector();
-   private FrameVector rCrossFVector = new FrameVector();
+   private final FramePoint3D centerOfMassPosition;
+   private final FrameVector3D jointAxis = new FrameVector3D();
+   private final FrameVector3D jointToCenterOfMass = new FrameVector3D();
+   private FrameVector3D forceVector = new FrameVector3D();
+   private FrameVector3D rCrossFVector = new FrameVector3D();
 
    private final YoDouble totalMass;
    private final YoDouble estimatedTorque, torqueOffset, appliedTorque;
@@ -53,7 +53,7 @@ public class DiagnosticsWhenHangingHelper
       centerOfMassCalculator = createCenterOfMassCalculatorInJointZUpFrame(parentJoint, preserveY, isSpineJoint, topLegJointsIfSpine);
 
       belowJointCoMInZUpFrame = new YoFramePoint(parentJoint.getName() + "CoMInZUpFrame", centerOfMassCalculator.getDesiredFrame(), registry);
-      centerOfMassPosition = new FramePoint(centerOfMassCalculator.getDesiredFrame());
+      centerOfMassPosition = new FramePoint3D(centerOfMassCalculator.getDesiredFrame());
 
       yoJointAxis = new YoFrameVector(parentJoint.getName() + "JointAxis", ReferenceFrame.getWorldFrame(), registry);
       yoJointToCenterOfMass = new YoFrameVector(parentJoint.getName() + "JointToCoM", ReferenceFrame.getWorldFrame(), registry);
@@ -151,8 +151,8 @@ public class DiagnosticsWhenHangingHelper
       return appliedTorque;
    }
 
-   private final FrameVector jointAxisInWorld = new FrameVector();
-   private final FrameVector jointToCenterOfMassInWorld = new FrameVector(jointToCenterOfMass);
+   private final FrameVector3D jointAxisInWorld = new FrameVector3D();
+   private final FrameVector3D jointToCenterOfMassInWorld = new FrameVector3D(jointToCenterOfMass);
 
    public void update()
    {
@@ -181,7 +181,7 @@ public class DiagnosticsWhenHangingHelper
       forceVector.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -9.81 * totalMass.getDoubleValue());
       forceVector.changeFrame(jointAxis.getReferenceFrame());
 
-      FrameVector forceVectorInWorld = new FrameVector(forceVector);
+      FrameVector3D forceVectorInWorld = new FrameVector3D(forceVector);
       forceVectorInWorld.changeFrame(ReferenceFrame.getWorldFrame());
       yoForceVector.set(forceVectorInWorld);
 

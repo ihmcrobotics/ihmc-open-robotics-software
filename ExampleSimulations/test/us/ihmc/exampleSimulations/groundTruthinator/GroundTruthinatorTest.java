@@ -9,12 +9,12 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class GroundTruthinatorTest
 {
@@ -30,7 +30,7 @@ public class GroundTruthinatorTest
       GroundTruthinator groundTruthinator = createdExtendedObject12GroundTruthinator(sensorCoord, attachCoord);
       FramePose objectPose = new FramePose(worldFrame);
 
-      FramePoint position = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
+      FramePoint3D position = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
       FrameOrientation orientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0, 1.0);
       objectPose.setPose(position, orientation);
 
@@ -56,7 +56,7 @@ public class GroundTruthinatorTest
       groundTruthinator.estimateObjectPose(estimatedPose, precision);
       assertTrue(objectPose.epsilonEquals(estimatedPose, epsilon));
 
-      position = new FramePoint(worldFrame, 0.1, 0.0, 0.0);
+      position = new FramePoint3D(worldFrame, 0.1, 0.0, 0.0);
       orientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0, 1.0);
       objectPose.setPose(position, orientation);
 
@@ -73,7 +73,7 @@ public class GroundTruthinatorTest
       Random random = new Random(1886L);
       for (int i=0; i<numberOfTests; i++)
       {
-         position = new FramePoint(worldFrame, RandomGeometry.nextPoint3D(random, -0.2, 0.2));
+         position = new FramePoint3D(worldFrame, RandomGeometry.nextPoint3D(random, -0.2, 0.2));
          orientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0, 1.0);
          objectPose.setPose(position, orientation);
 
@@ -100,7 +100,7 @@ public class GroundTruthinatorTest
       GroundTruthinator groundTruthinator = createdExtendedObject12GroundTruthinator(sensorCoord, attachCoord);
       FramePose objectPose = new FramePose(worldFrame);
 
-      FramePoint position = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
+      FramePoint3D position = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
       FrameOrientation orientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0, 1.0);
       objectPose.setPose(position, orientation);
 
@@ -126,7 +126,7 @@ public class GroundTruthinatorTest
       groundTruthinator.estimateObjectPose(estimatedPose, precision);
       assertTrue(objectPose.epsilonEquals(estimatedPose, epsilon));
 
-      position = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
+      position = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
       orientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0, 1.0);
       orientation.setYawPitchRoll(Math.PI/2.0, 0.0, 0.0);
       objectPose.setPose(position, orientation);
@@ -144,7 +144,7 @@ public class GroundTruthinatorTest
       Random random = new Random(1886L);
       for (int i=0; i<numberOfTests; i++)
       {
-         position = new FramePoint(worldFrame, RandomGeometry.nextPoint3D(random, -0.2, 0.2));
+         position = new FramePoint3D(worldFrame, RandomGeometry.nextPoint3D(random, -0.2, 0.2));
          orientation = new FrameOrientation(worldFrame, 0.0, 0.0, 0.0, 1.0);
          objectPose.setPose(position, orientation);
 

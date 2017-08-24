@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.corruptors;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -162,14 +162,14 @@ public class FullRobotModelCorruptor
       massVariable.addVariableChangedListener(massVariableChangedListener);
       variableChangedListeners.add(massVariableChangedListener);
 
-      FramePoint originalCoMOffset = new FramePoint();
+      FramePoint3D originalCoMOffset = new FramePoint3D();
       rigidBody.getCoMOffset(originalCoMOffset);
       final YoFramePoint rigidBodyCoMOffset = new YoFramePoint(name + "CoMOffset", rigidBody.getParentJoint().getFrameAfterJoint(), registry);
       rigidBodyCoMOffset.setAndMatchFrame(originalCoMOffset);
 
       VariableChangedListener rigidBodyCoMOffsetChangedListener = new VariableChangedListener()
       {
-         private final FramePoint tempFramePoint = new FramePoint();
+         private final FramePoint3D tempFramePoint = new FramePoint3D();
 
          @Override
          public void variableChanged(YoVariable<?> v)

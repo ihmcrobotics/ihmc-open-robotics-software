@@ -3,14 +3,14 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.CompositeOverheadPath;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPath;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -207,7 +207,7 @@ public abstract class AbstractSimpleParametersFootstepGenerator extends Abstract
          planningPose = ((CompositeOverheadPath) path).getPoseAtS(pathSParameter,subPathIndex);
       else
          planningPose = path.getPoseAtS(pathSParameter);
-      FramePoint2d footstepPosition2d = new FramePoint2d();
+      FramePoint2D footstepPosition2d = new FramePoint2D();
       planningPose.getPositionIncludingFrame(footstepPosition2d);
       double footHeading = planningPose.getYaw();
       footstepPosition2d = offsetFootstepFromPath(currentFootstepSide, footstepPosition2d, footHeading, stepWidth / 2);

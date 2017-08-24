@@ -8,22 +8,22 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.FrameLine2d;
+import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class PartialFootholdControlModule
 {
@@ -87,7 +87,7 @@ public class PartialFootholdControlModule
    private final int footCornerPoints;
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
-   private final FramePoint2d capturePoint = new FramePoint2d();
+   private final FramePoint2D capturePoint = new FramePoint2D();
    private RobotSide robotSide;
 
    /**
@@ -98,10 +98,11 @@ public class PartialFootholdControlModule
    private final YoBoolean unsafeAreaAboveThreshold;
 
    private final YoBoolean expectingLineContact;
-   private final FramePoint2d dummyDesiredCop = new FramePoint2d();
+   private final FramePoint2D dummyDesiredCop = new FramePoint2D();
 
    public PartialFootholdControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox,
-         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                       WalkingControllerParameters walkingControllerParameters, ExplorationParameters explorationParameters,
+                                       YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       ContactableFoot contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       String namePrefix = contactableFoot.getRigidBody().getName();
@@ -121,7 +122,6 @@ public class PartialFootholdControlModule
 
       registry = new YoVariableRegistry(namePrefix + name);
       parentRegistry.addChild(registry);
-      ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
 
       footholdState = new YoEnum<>(namePrefix + "PartialFootHoldState", registry, PartialFootholdState.class, true);
       yoUnsafePolygon = new YoFrameConvexPolygon2d(namePrefix + "UnsafeFootPolygon", "", worldFrame, 10, registry);
@@ -145,7 +145,8 @@ public class PartialFootholdControlModule
          yoGraphicsListRegistry.registerArtifact(listName, yoShrunkPolygon);
       }
 
-      footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix, soleFrame, 40, 20, walkingControllerParameters, yoGraphicsListRegistry, registry);
+      footCoPOccupancyGrid = new FootCoPOccupancyGrid(namePrefix, soleFrame, 40, 20, walkingControllerParameters, explorationParameters, yoGraphicsListRegistry,
+                                                      registry);
 
       shrinkMaxLimit = explorationParameters.getShrinkMaxLimit();
       thresholdForCoPRegionOccupancy = explorationParameters.getThresholdForCoPRegionOccupancy();
@@ -183,7 +184,7 @@ public class PartialFootholdControlModule
       unsafeAreaAboveThreshold = new YoBoolean(namePrefix + "UnsafeAreaAboveThreshold", registry);
    }
 
-   public void compute(FramePoint2d desiredCenterOfPressure, FramePoint2d centerOfPressure)
+   public void compute(FramePoint2D desiredCenterOfPressure, FramePoint2D centerOfPressure)
    {
       footCoPOccupancyGrid.update();
 
@@ -248,7 +249,7 @@ public class PartialFootholdControlModule
 
    }
 
-   public void getShrunkPolygonCentroid(FramePoint2d centroidToPack)
+   public void getShrunkPolygonCentroid(FramePoint2D centroidToPack)
    {
       shrunkFootPolygon.getCentroid(centroidToPack);
    }
@@ -263,7 +264,7 @@ public class PartialFootholdControlModule
       unsafeArea.set(0.0);
    }
 
-   private void computeShrunkFoothold(FramePoint2d desiredCenterOfPressure)
+   private void computeShrunkFoothold(FramePoint2D desiredCenterOfPressure)
    {
       boolean wasCoPInThatRegion = false;
       if (useCoPOccupancyGrid.getBooleanValue()) {
@@ -295,7 +296,7 @@ public class PartialFootholdControlModule
       }
    }
 
-   private final FramePoint tempPosition = new FramePoint();
+   private final FramePoint3D tempPosition = new FramePoint3D();
 
    public boolean applyShrunkPolygon(YoPlaneContactState contactStateToModify)
    {
@@ -417,7 +418,7 @@ public class PartialFootholdControlModule
       backupFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
    }
 
-   public void projectOntoShrunkenPolygon(FramePoint2d pointToProject)
+   public void projectOntoShrunkenPolygon(FramePoint2D pointToProject)
    {
       shrunkFootPolygon.orthogonalProjection(pointToProject);
    }

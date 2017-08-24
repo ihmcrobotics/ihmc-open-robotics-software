@@ -7,11 +7,11 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
@@ -152,7 +152,7 @@ public class SensorAndEstimatorAssembler
       return stateEstimator;
    }
 
-   public void initializeEstimatorToActual(FramePoint initialCoMPosition, FrameOrientation initialEstimationLinkOrientation)
+   public void initializeEstimatorToActual(FramePoint3D initialCoMPosition, FrameOrientation initialEstimationLinkOrientation)
    {
       stateEstimator.setEstimatedCoMPosition(initialCoMPosition);
       if (!assumePerfectIMU)

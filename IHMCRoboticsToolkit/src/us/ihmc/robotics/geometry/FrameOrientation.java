@@ -7,6 +7,10 @@ import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -15,9 +19,8 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quaternion>
+public class FrameOrientation extends FrameGeometryObject<FrameOrientation, Quaternion>
 {
    private final Quaternion quaternion;
 
@@ -102,12 +105,6 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
       quaternion.set(axisAngle4d);
    }
 
-   @Override
-   public void set(Quaternion quaternion)
-   {
-      this.quaternion.set(quaternion);
-   }
-
    public void set(QuaternionReadOnly quaternion)
    {
       this.quaternion.set(quaternion);
@@ -145,20 +142,6 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
    public void appendRollRotation(double rollToAppend)
    {
       quaternion.appendRollRotation(rollToAppend);
-   }
-
-   @Override
-   public void set(FrameOrientation orientation)
-   {
-      referenceFrame.checkReferenceFrameMatch(orientation.referenceFrame);
-      quaternion.set(orientation.quaternion);
-   }
-
-   @Override
-   public void setIncludingFrame(ReferenceFrame referenceFrame, Quaternion quaternion)
-   {
-      this.referenceFrame = referenceFrame;
-      set(quaternion);
    }
 
    public void setIncludingFrame(ReferenceFrame referenceFrame, QuaternionReadOnly quaternion)
@@ -200,19 +183,6 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
    {
       this.referenceFrame = referenceFrame;
       setYawPitchRoll(yaw, pitch, roll);
-   }
-
-   @Override
-   public void setIncludingFrame(FrameOrientation orientation)
-   {
-      referenceFrame = orientation.referenceFrame;
-      quaternion.set(orientation.quaternion);
-   }
-
-   @Override
-   public boolean containsNaN()
-   {
-      return quaternion.containsNaN();
    }
 
    public void getQuaternion(QuaternionBasics quaternionToPack)
@@ -339,7 +309,7 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@code this.referenceFrame}.
     */
-   public void setRotationVector(FrameVector rotationVector)
+   public void setRotationVector(FrameVector3D rotationVector)
    {
       checkReferenceFrameMatch(rotationVector);
       quaternion.set(rotationVector.getVector());
@@ -469,7 +439,7 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@code this.referenceFrame}.
     */
-   public void getRotationVector(FrameVector frameRotationVectorToPack)
+   public void getRotationVector(FrameVector3D frameRotationVectorToPack)
    {
       checkReferenceFrameMatch(frameRotationVectorToPack);
       quaternion.get(frameRotationVectorToPack.getVector());
@@ -503,19 +473,10 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
     * @param frameRotationVectorToPack the vector in which the rotation vector and the reference
     *           frame it is expressed in are stored. Modified.
     */
-   public void getRotationVectorIncludingFrame(FrameVector frameRotationVectorToPack)
+   public void getRotationVectorIncludingFrame(FrameVector3D frameRotationVectorToPack)
    {
       frameRotationVectorToPack.setToZero(getReferenceFrame());
       quaternion.get(frameRotationVectorToPack.getVector());
-   }
-
-   @Override
-   public boolean epsilonEquals(FrameOrientation frameOrientation, double epsilon)
-   {
-      boolean referenceFramesMatch = referenceFrame == frameOrientation.referenceFrame;
-      boolean quaternionsAreEqual = RotationTools.quaternionEpsilonEquals(quaternion, frameOrientation.quaternion, epsilon);
-
-      return referenceFramesMatch && quaternionsAreEqual;
    }
 
    public boolean epsilonEquals(QuaternionReadOnly quaternion, double epsilon)
@@ -531,17 +492,6 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
    public double normSquared()
    {
       return quaternion.normSquared();
-   }
-
-   @Override
-   public String toString()
-   {
-      String stringToReturn = "";
-
-      stringToReturn = stringToReturn + toStringAsYawPitchRoll() + "\n";
-      stringToReturn = stringToReturn + toStringAsQuaternion();
-
-      return stringToReturn;
    }
 
    public String toStringAsYawPitchRoll()

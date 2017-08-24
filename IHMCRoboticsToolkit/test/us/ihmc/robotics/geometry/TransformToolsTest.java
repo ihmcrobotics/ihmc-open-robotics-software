@@ -11,12 +11,13 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.testing.JUnitTools;
 
 public class TransformToolsTest
@@ -80,7 +81,7 @@ public class TransformToolsTest
 
       // System.out.println("a2Origin after transform" + a2Origin);
 
-      FramePoint a2OriginFramePoint = new FramePoint(a2);
+      FramePoint3D a2OriginFramePoint = new FramePoint3D(a2);
 
       a2OriginFramePoint.changeFrame(a1);
 
@@ -113,7 +114,7 @@ public class TransformToolsTest
 
       // System.out.println("a2Origin after transform" + a2Origin);
 
-      FramePoint a2OriginFramePoint = new FramePoint(a2);
+      FramePoint3D a2OriginFramePoint = new FramePoint3D(a2);
 
       a2OriginFramePoint.changeFrame(a1);
 

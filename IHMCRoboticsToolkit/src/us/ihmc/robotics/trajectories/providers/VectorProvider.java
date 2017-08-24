@@ -1,8 +1,8 @@
 package us.ihmc.robotics.trajectories.providers;
 
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 
 public interface VectorProvider
 {
-   public abstract void get(FrameVector frameVectorToPack);
+   public abstract void get(FrameVector3D frameVectorToPack);
 }

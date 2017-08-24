@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class RateBasedDesiredHeadingControlModule implements DesiredHeadingControlModule
 {
@@ -41,7 +41,7 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
    }
 
    @Override
-   public FrameVector2d getFinalHeadingTarget()
+   public FrameVector2D getFinalHeadingTarget()
    {
       throw new RuntimeException("Don't use this. It should be removed from the interface");
    }
@@ -67,7 +67,7 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
    }
 
    @Override
-   public void setFinalHeadingTarget(FrameVector2d finalHeadingTarget)
+   public void setFinalHeadingTarget(FrameVector2D finalHeadingTarget)
    {
       finalHeadingTarget.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       setFinalHeadingTargetAngle(Math.atan2(finalHeadingTarget.getY(), finalHeadingTarget.getX()));
@@ -80,7 +80,7 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
    }
 
    @Override
-   public void getDesiredHeading(FrameVector2d desiredHeadingToPack, double timeFromNow)
+   public void getDesiredHeading(FrameVector2D desiredHeadingToPack, double timeFromNow)
    {
       double heading = predictHeading(timeFromNow);
       desiredHeadingToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), Math.cos(heading), Math.sin(heading));

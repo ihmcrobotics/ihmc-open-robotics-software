@@ -5,7 +5,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class MovingReferenceFrameTest
 {

@@ -1,13 +1,13 @@
 package us.ihmc.sensorProcessing;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.sensors.ProcessedIMUSensorsWriteOnlyInterface;
 import us.ihmc.sensorProcessing.sensors.ProcessedIMUSensorsReadOnlyInterface;
 
@@ -62,7 +62,7 @@ public class ProcessedSensorsReadWrite implements ProcessedIMUSensorsReadOnlyInt
       p_roll.set(rotationMatrix.getRoll());
    }
 
-   public void setAcceleration(FrameVector accelerationInWorld, int imuIndex)
+   public void setAcceleration(FrameVector3D accelerationInWorld, int imuIndex)
    {
       pdd_world.set(accelerationInWorld);
    }
@@ -83,12 +83,12 @@ public class ProcessedSensorsReadWrite implements ProcessedIMUSensorsReadOnlyInt
                         p_qs.getDoubleValue());
    }
 
-   public FrameVector getAcceleration(int imuIndex)
+   public FrameVector3D getAcceleration(int imuIndex)
    {
       return pdd_world.getFrameVectorCopy();
    }
 
-   public FrameVector getAngularVelocity(int imuIndex)
+   public FrameVector3D getAngularVelocity(int imuIndex)
    {
       return pd_w.getFrameVectorCopy();
    }
@@ -108,7 +108,7 @@ public class ProcessedSensorsReadWrite implements ProcessedIMUSensorsReadOnlyInt
       return p_roll.getDoubleValue();
    }
 
-   public FrameVector getAngularAcceleration(int imuIndex)
+   public FrameVector3D getAngularAcceleration(int imuIndex)
    {
       throw new RuntimeException("Not implemented");
    }

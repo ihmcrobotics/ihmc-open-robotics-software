@@ -6,6 +6,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.Axis;
 
@@ -16,7 +17,7 @@ public class PlanarRegionsListGenerator
    private final RigidBodyTransformGenerator transformGenerator = new RigidBodyTransformGenerator();
 
    private int id = 0;
-   
+
    public void addCubeReferencedAtCenter(double lengthX, double widthY, double heightZ)
    {
       RigidBodyTransformGenerator transformGeneratorTwo = new RigidBodyTransformGenerator(transformGenerator);
@@ -54,7 +55,7 @@ public class PlanarRegionsListGenerator
       addCubeReferencedAtCenter(lengthX, widthY, heightZ);
       translate(0.0, 0.0, -heightZ / 2.0);
    }
-   
+
    public void addCubeReferencedAtBottomNegativeXEdgeCenter(double lengthX, double widthY, double heightZ)
    {
       translate(-lengthX / 2.0, 0.0, heightZ / 2.0);
@@ -106,7 +107,7 @@ public class PlanarRegionsListGenerator
       transformGenerator.translate(x, y, z);
    }
 
-   public void translate(Vector3D translationVector)
+   public void translate(Tuple3DReadOnly translationVector)
    {
       transformGenerator.translate(translationVector);
    }

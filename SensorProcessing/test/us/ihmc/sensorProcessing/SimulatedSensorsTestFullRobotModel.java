@@ -3,10 +3,10 @@ package us.ihmc.sensorProcessing;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.AbstractInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -51,18 +51,18 @@ public class SimulatedSensorsTestFullRobotModel
       ReferenceFrame elevatorFrame = rootJoint.getFrameBeforeJoint();
       ReferenceFrame imuFrame = rootJoint.getFrameAfterJoint();
 
-      FrameVector linearVelocity = robot.getBodyVelocity();
+      FrameVector3D linearVelocity = robot.getBodyVelocity();
       linearVelocity.changeFrame(imuFrame);
 
-      FrameVector angularVelocity = robot.getBodyAngularVelocityInBodyFrame(imuFrame);
+      FrameVector3D angularVelocity = robot.getBodyAngularVelocityInBodyFrame(imuFrame);
       angularVelocity.changeFrame(imuFrame);
 
       Twist bodyTwist = new Twist(imuFrame, elevatorFrame, imuFrame, linearVelocity.getVector(), angularVelocity.getVector());
       rootJoint.setJointTwist(bodyTwist);
 
       // Update Body Acceleration
-      FrameVector linearAccelerationOfOrigin = robot.getBodyAcceleration();
-      FrameVector angularAcceleration = robot.getBodyAngularAccelerationInBodyFrame(imuFrame);
+      FrameVector3D linearAccelerationOfOrigin = robot.getBodyAcceleration();
+      FrameVector3D angularAcceleration = robot.getBodyAngularAccelerationInBodyFrame(imuFrame);
       SpatialAccelerationVector accelerationOfChestWithRespectToWorld = new SpatialAccelerationVector(imuFrame, elevatorFrame, imuFrame);
       accelerationOfChestWithRespectToWorld.setBasedOnOriginAcceleration(angularAcceleration, linearAccelerationOfOrigin, bodyTwist);
       rootJoint.setAcceleration(accelerationOfChestWithRespectToWorld);

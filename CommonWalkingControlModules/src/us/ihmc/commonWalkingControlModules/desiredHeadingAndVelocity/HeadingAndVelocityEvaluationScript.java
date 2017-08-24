@@ -1,14 +1,14 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /*
 * TODO: wave cruise, change heading walking straight, turn while facing same direction not working properly
@@ -35,7 +35,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
    private final YoDouble lastSwitchTime = new YoDouble("lastSwitchTime", registry);
    private final YoDouble eventDuration = new YoDouble("eventDuration", registry);
 
-   private final FrameVector2d desiredVelocityDirection = new FrameVector2d(ReferenceFrame.getWorldFrame());
+   private final FrameVector2D desiredVelocityDirection = new FrameVector2D(ReferenceFrame.getWorldFrame());
 
    private final YoDouble initialDesiredHeadingAngle = new YoDouble("initialDesiredHeadingAngle",
          "Temporary variable to hold the initial heading for doing s curves", registry);
@@ -57,7 +57,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
          parameters = new HeadingAndVelocityEvaluationScriptParameters();
       }
       
-      desiredVelocityControlModule.setDesiredVelocity(new FrameVector2d(ReferenceFrame.getWorldFrame(), 0.01, 0.0));
+      desiredVelocityControlModule.setDesiredVelocity(new FrameVector2D(ReferenceFrame.getWorldFrame(), 0.01, 0.0));
 
       //    desiredVelocityControlModule.setVelocityAlwaysFacesHeading(false);
       //    
@@ -99,7 +99,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       return maxHeadingDot.getDoubleValue();
    }
 
-   private final FrameVector2d desiredHeading = new FrameVector2d();
+   private final FrameVector2D desiredHeading = new FrameVector2D();
 
    public void update(double time)
    {
@@ -396,12 +396,12 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       desiredVelocityMagnitude.set(newVelocity);
    }
 
-   private void updateDesiredVelocityUnitVector(FrameVector2d desiredVelocityDirection)
+   private void updateDesiredVelocityUnitVector(FrameVector2D desiredVelocityDirection)
    {
       this.desiredVelocityDirection.set(desiredVelocityDirection);
    }
 
-   private final FrameVector2d desiredVelocity = new FrameVector2d();
+   private final FrameVector2D desiredVelocity = new FrameVector2D();
 
    private void updateDesiredVelocityVector()
    {

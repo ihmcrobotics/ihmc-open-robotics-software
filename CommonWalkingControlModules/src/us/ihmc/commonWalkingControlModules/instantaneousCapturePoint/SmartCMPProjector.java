@@ -3,6 +3,9 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
@@ -12,11 +15,8 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SmartCMPProjector extends CMPProjector
 {
@@ -24,11 +24,11 @@ public class SmartCMPProjector extends CMPProjector
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    // local points so changing their frame will not modify the objects passed in
-   private final FramePoint2d desiredCMP = new FramePoint2d();
-   private final FramePoint2d projectedCMP = new FramePoint2d();
+   private final FramePoint2D desiredCMP = new FramePoint2D();
+   private final FramePoint2D projectedCMP = new FramePoint2D();
    private final FrameConvexPolygon2d projectionArea = new FrameConvexPolygon2d();
-   private final FramePoint2d capturePoint = new FramePoint2d();
-   private final FramePoint2d finalCapturePoint = new FramePoint2d();
+   private final FramePoint2D capturePoint = new FramePoint2D();
+   private final FramePoint2D finalCapturePoint = new FramePoint2D();
 
    // visualization
    private final YoFramePoint2d yoDesiredCMP = new YoFramePoint2d("DesiredCMP", worldFrame, registry);
@@ -41,14 +41,14 @@ public class SmartCMPProjector extends CMPProjector
    // temporary variables to avoid garbage generation
    private final BoundingBox2D tempBoundingBox = new BoundingBox2D();
    private final FrameLine2d icpToCMPLine = new FrameLine2d();
-   private final FramePoint2d intersection1 = new FramePoint2d();
-   private final FramePoint2d intersection2 = new FramePoint2d();
-   private final FramePoint2d vertex = new FramePoint2d();
-   private final FrameVector2d icpToCMPVector = new FrameVector2d();
-   private final FrameVector2d icpToCandidateVector = new FrameVector2d();
+   private final FramePoint2D intersection1 = new FramePoint2D();
+   private final FramePoint2D intersection2 = new FramePoint2D();
+   private final FramePoint2D vertex = new FramePoint2D();
+   private final FrameVector2D icpToCMPVector = new FrameVector2D();
+   private final FrameVector2D icpToCandidateVector = new FrameVector2D();
    private final FrameLine2d finalICPToICPLine = new FrameLine2d();
-   private final FrameVector2d finalICPToICPVector = new FrameVector2d();
-   private final FramePoint2d centroid = new FramePoint2d();
+   private final FrameVector2D finalICPToICPVector = new FrameVector2D();
+   private final FramePoint2D centroid = new FramePoint2D();
 
    // for debugging and to check what method was used
    public enum ProjectionMethod {
@@ -83,7 +83,7 @@ public class SmartCMPProjector extends CMPProjector
       }
    }
 
-   public void projectCMP(FramePoint2d desiredCMP, FrameConvexPolygon2d projectionArea, FramePoint2d capturePoint, FramePoint2d finalCapturePoint)
+   public void projectCMP(FramePoint2D desiredCMP, FrameConvexPolygon2d projectionArea, FramePoint2D capturePoint, FramePoint2D finalCapturePoint)
    {
       // store arguments in local variables and change the frames to match the projection area
       this.projectionArea.setIncludingFrameAndUpdate(projectionArea);
@@ -156,7 +156,7 @@ public class SmartCMPProjector extends CMPProjector
       icpToCMPLine.setIncludingFrame(capturePoint, desiredCMP);
       if (projectionArea.intersectionWithRay(icpToCMPLine, intersection1, intersection2) > 0)
       {
-         FramePoint2d candidate = closestPoint(desiredCMP, intersection1, intersection2);
+         FramePoint2D candidate = closestPoint(desiredCMP, intersection1, intersection2);
          icpToCMPVector.setToZero(projectionArea.getReferenceFrame());
          icpToCMPVector.sub(desiredCMP, capturePoint);
          icpToCandidateVector.setToZero(projectionArea.getReferenceFrame());
@@ -184,7 +184,7 @@ public class SmartCMPProjector extends CMPProjector
          finalICPToICPLine.setIncludingFrame(finalCapturePoint, capturePoint);
          if (projectionArea.intersectionWithRay(finalICPToICPLine, intersection1, intersection2) > 0)
          {
-            FramePoint2d candidate = closestPoint(capturePoint, intersection1, intersection2);
+            FramePoint2D candidate = closestPoint(capturePoint, intersection1, intersection2);
             finalICPToICPVector.setToZero(projectionArea.getReferenceFrame());
             finalICPToICPVector.sub(capturePoint, finalCapturePoint);
             icpToCandidateVector.setToZero(projectionArea.getReferenceFrame());
@@ -235,7 +235,7 @@ public class SmartCMPProjector extends CMPProjector
       activeProjection.set(ProjectionMethod.ORTHOGONAL_PROJECTION);
    }
 
-   private FramePoint2d closestPoint(FramePoint2d point, FramePoint2d candidate1, FramePoint2d candidate2)
+   private FramePoint2D closestPoint(FramePoint2D point, FramePoint2D candidate1, FramePoint2D candidate2)
    {
       if (candidate1.containsNaN() && candidate2.containsNaN())
          return null;
@@ -260,8 +260,8 @@ public class SmartCMPProjector extends CMPProjector
    }
 
    @Override
-   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d finalDesiredCapturePoint,
-         FramePoint2d desiredCMP)
+   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2D capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2D finalDesiredCapturePoint,
+         FramePoint2D desiredCMP)
    {
       projectCMP(desiredCMP, supportPolygon, capturePoint, finalDesiredCapturePoint);
    }

@@ -2,11 +2,11 @@ package us.ihmc.robotics.lists;
 
 import java.util.List;
 
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameTuple;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 
-public class FrameTupleArrayList<T extends FrameTuple<?, ?>> extends RecyclingArrayList<T>
+public class FrameTupleArrayList<T extends FrameTuple3D<?, ?>> extends RecyclingArrayList<T>
 {
    private FrameTupleArrayList(Class<T> clazz)
    {
@@ -18,7 +18,7 @@ public class FrameTupleArrayList<T extends FrameTuple<?, ?>> extends RecyclingAr
       super(initialSize, clazz);
    }
 
-   public void setOrCreate(int i, FrameTuple<?, ?> frameTuple)
+   public void setOrCreate(int i, FrameTuple3D<?, ?> frameTuple)
    {
       if (i >= size)
       {
@@ -28,12 +28,12 @@ public class FrameTupleArrayList<T extends FrameTuple<?, ?>> extends RecyclingAr
       unsafeGet(i).setIncludingFrame(frameTuple);
    }
 
-   public void set(int i, FrameTuple<?, ?> frameTuple)
+   public void set(int i, FrameTuple3D<?, ?> frameTuple)
    {
       get(i).setIncludingFrame(frameTuple);
    }
 
-   private void unsafeSet(int i, FrameTuple<?, ?> frameTuple)
+   private void unsafeSet(int i, FrameTuple3D<?, ?> frameTuple)
    {
       unsafeGet(i).setIncludingFrame(frameTuple);
    }
@@ -49,7 +49,7 @@ public class FrameTupleArrayList<T extends FrameTuple<?, ?>> extends RecyclingAr
       }
    }
 
-   public void copyFromListAndTrimSize(List<? extends FrameTuple<?, ?>> otherList)
+   public void copyFromListAndTrimSize(List<? extends FrameTuple3D<?, ?>> otherList)
    {
       ensureCapacity(otherList.size());
       size = otherList.size();
@@ -60,23 +60,23 @@ public class FrameTupleArrayList<T extends FrameTuple<?, ?>> extends RecyclingAr
       }
    }
 
-   public static FrameTupleArrayList<FramePoint> createFramePointArrayList()
+   public static FrameTupleArrayList<FramePoint3D> createFramePointArrayList()
    {
-      return new FrameTupleArrayList<>(FramePoint.class);
+      return new FrameTupleArrayList<>(FramePoint3D.class);
    }
 
-   public static FrameTupleArrayList<FrameVector> createFrameVectorArrayList()
+   public static FrameTupleArrayList<FrameVector3D> createFrameVectorArrayList()
    {
-      return new FrameTupleArrayList<>(FrameVector.class);
+      return new FrameTupleArrayList<>(FrameVector3D.class);
    }
 
-   public static FrameTupleArrayList<FramePoint> createFramePointArrayList(int initialSize)
+   public static FrameTupleArrayList<FramePoint3D> createFramePointArrayList(int initialSize)
    {
-      return new FrameTupleArrayList<>(initialSize, FramePoint.class);
+      return new FrameTupleArrayList<>(initialSize, FramePoint3D.class);
    }
 
-   public static FrameTupleArrayList<FrameVector> createFrameVectorArrayList(int initialSize)
+   public static FrameTupleArrayList<FrameVector3D> createFrameVectorArrayList(int initialSize)
    {
-      return new FrameTupleArrayList<>(initialSize, FrameVector.class);
+      return new FrameTupleArrayList<>(initialSize, FrameVector3D.class);
    }
 }

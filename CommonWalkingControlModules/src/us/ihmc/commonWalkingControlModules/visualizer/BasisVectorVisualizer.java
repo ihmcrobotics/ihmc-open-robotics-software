@@ -4,17 +4,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class BasisVectorVisualizer
 {
@@ -25,9 +25,9 @@ public class BasisVectorVisualizer
    private final Map<Integer, YoFramePoint> pointOfBases = new LinkedHashMap<>();
    private final Map<Integer, YoGraphicVector> basisVisualizers = new LinkedHashMap<>();
 
-   private final FrameVector tempVector = new FrameVector();
-   private final FramePoint tempPoint = new FramePoint();
-   private final FrameVector tempBasisVector = new FrameVector();
+   private final FrameVector3D tempVector = new FrameVector3D();
+   private final FramePoint3D tempPoint = new FramePoint3D();
+   private final FrameVector3D tempBasisVector = new FrameVector3D();
 
    private final int rhoSize;
 
@@ -62,11 +62,11 @@ public class BasisVectorVisualizer
       parentRegistry.addChild(registry);
    }
 
-   public void visualize(List<FrameVector> basisVectors, List<FramePoint> contactPoints)
+   public void visualize(List<FrameVector3D> basisVectors, List<FramePoint3D> contactPoints)
    {
       for (int i = 0; i < rhoSize; i++)
       {
-         FrameVector basisVector = basisVectors.get(i);
+         FrameVector3D basisVector = basisVectors.get(i);
          tempBasisVector.changeFrame(basisVector.getReferenceFrame());
          tempBasisVector.set(basisVector);
          tempBasisVector.changeFrame(ReferenceFrame.getWorldFrame());
@@ -77,7 +77,7 @@ public class BasisVectorVisualizer
          tempVector.changeFrame(ReferenceFrame.getWorldFrame());
          yoBasisVector.set(tempVector);
 
-         FramePoint contactPoint = contactPoints.get(i);
+         FramePoint3D contactPoint = contactPoints.get(i);
          YoFramePoint pointOfBasis = pointOfBases.get(i);
          tempPoint.setToZero(contactPoint.getReferenceFrame());
          tempPoint.set(contactPoint);

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -18,11 +19,10 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepListBehavior extends AbstractBehavior
 {
@@ -74,7 +74,7 @@ public class FootstepListBehavior extends AbstractBehavior
       for (int i = 0; i < footsteps.size(); i++)
       {
          Footstep footstep = footsteps.get(i);
-         FramePoint position = new FramePoint();
+         FramePoint3D position = new FramePoint3D();
          FrameOrientation orientation = new FrameOrientation();
          footstep.getPose(position, orientation);
 
@@ -305,8 +305,8 @@ public class FootstepListBehavior extends AbstractBehavior
       for (double stepLength : getFootstepLengths(footStepList, fullRobotModel, walkingControllerParameters))
       {
          if (DEBUG)
-            PrintTools.debug(this, "step length : " + stepLength + " max step length : " + walkingControllerParameters.getMaxStepLength());
-         if (stepLength > walkingControllerParameters.getMaxStepLength())
+            PrintTools.debug(this, "step length : " + stepLength + " max step length : " + walkingControllerParameters.getSteppingParameters().getMaxStepLength());
+         if (stepLength > walkingControllerParameters.getSteppingParameters().getMaxStepLength())
          {
             return true;
          }

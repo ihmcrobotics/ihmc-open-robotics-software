@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ICPOptimizationControllerHelper
 {
@@ -17,7 +17,7 @@ public class ICPOptimizationControllerHelper
    private static final Matrix3D matrix = new Matrix3D();
    private static final Matrix3D matrixTransformed = new Matrix3D();
 
-   public static void transformFeedbackGains(FrameVector2d feedbackGainsToPack, FrameVector2d desiredICPVelocity, YoDouble parallelGain, YoDouble orthogonalGain)
+   public static void transformFromDynamicsFrame(FrameVector2D feedbackGainsToPack, FrameVector2D desiredICPVelocity, YoDouble parallelGain, YoDouble orthogonalGain)
    {
       double epsilonZeroICPVelocity = 1e-5;
 
@@ -54,7 +54,7 @@ public class ICPOptimizationControllerHelper
    private static final RotationMatrix rotation = new RotationMatrix();
    private static final RotationMatrix rotationTranspose = new RotationMatrix();
 
-   public static void transformWeightsToWorldFrame(FrameVector2d weightsToPack, YoDouble xWeight, YoDouble yWeight, ReferenceFrame frame)
+   public static void transformToWorldFrame(FrameVector2D weightsToPack, YoDouble xWeight, YoDouble yWeight, ReferenceFrame frame)
    {
       RigidBodyTransform transformToWorldFrame = frame.getTransformToWorldFrame();
 
@@ -80,7 +80,7 @@ public class ICPOptimizationControllerHelper
    private static class Vector2dZUpFrame extends ReferenceFrame
    {
       private static final long serialVersionUID = -1810366869361449743L;
-      private final FrameVector2d xAxis;
+      private final FrameVector2D xAxis;
       private final Vector3D x = new Vector3D();
       private final Vector3D y = new Vector3D();
       private final Vector3D z = new Vector3D();
@@ -89,10 +89,10 @@ public class ICPOptimizationControllerHelper
       public Vector2dZUpFrame(String string, ReferenceFrame parentFrame)
       {
          super(string, parentFrame);
-         xAxis = new FrameVector2d(parentFrame);
+         xAxis = new FrameVector2D(parentFrame);
       }
 
-      public void setXAxis(FrameVector2d xAxis)
+      public void setXAxis(FrameVector2D xAxis)
       {
          this.xAxis.setIncludingFrame(xAxis);
          this.xAxis.changeFrame(parentFrame);

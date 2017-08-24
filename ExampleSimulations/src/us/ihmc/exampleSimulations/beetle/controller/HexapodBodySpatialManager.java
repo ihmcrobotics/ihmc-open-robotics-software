@@ -1,6 +1,9 @@
 package us.ihmc.exampleSimulations.beetle.controller;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.beetle.parameters.HexapodControllerParameters;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
@@ -9,13 +12,10 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**
@@ -30,12 +30,12 @@ public class HexapodBodySpatialManager
    private final SpatialFeedbackControlCommand spatialFeedbackCommand = new SpatialFeedbackControlCommand();
    private final double controllerDt;
    private final RigidBody body;
-   private final FramePoint desiredPosition = new FramePoint();
-   private final FrameVector desiredLinearVelocity = new FrameVector();
-   private final FrameVector feedForwardLinearAcceleration = new FrameVector();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
+   private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
+   private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
    private final FrameOrientation desiredOrientation = new FrameOrientation();
-   private final FrameVector desiredAngularVelocity = new FrameVector();
-   private final FrameVector feedForwardAngularAcceleration = new FrameVector();
+   private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
+   private final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
    private final YoFrameOrientation yoDesiredBodyOrientation;
    private final YoFrameVector yoDesiredBodyLinearVelocity;
    private final YoFrameVector yoDesiredBodyAngularVelocity;
@@ -152,12 +152,12 @@ public class HexapodBodySpatialManager
       return controlledBodies;
    }
 
-   public void getDesiredLinearVelocity(FrameVector desiredLinearVelocityToPack)
+   public void getDesiredLinearVelocity(FrameVector3D desiredLinearVelocityToPack)
    {
       yoDesiredBodyLinearVelocity.getFrameTupleIncludingFrame(desiredLinearVelocityToPack);
    }
 
-   public void getDesiredAngularVelocity(FrameVector desiredAngularVelocityToPack)
+   public void getDesiredAngularVelocity(FrameVector3D desiredAngularVelocityToPack)
    {
       yoDesiredBodyAngularVelocity.getFrameTupleIncludingFrame(desiredAngularVelocityToPack);
       desiredAngularVelocityToPack.changeFrame(ReferenceFrame.getWorldFrame());

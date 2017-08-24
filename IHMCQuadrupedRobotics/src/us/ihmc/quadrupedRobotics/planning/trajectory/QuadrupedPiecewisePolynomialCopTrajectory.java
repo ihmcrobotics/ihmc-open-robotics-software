@@ -1,6 +1,9 @@
 package us.ihmc.quadrupedRobotics.planning.trajectory;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
+
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactPhase;
@@ -11,10 +14,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.*;
 
 import java.util.ArrayList;
@@ -46,9 +47,9 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
 
    private final YoBoolean trajectoryInitialized;
    private final TimeInterval trajectoryTimeInterval;
-   private final FramePoint copPositionAtCurrentTime;
+   private final FramePoint3D copPositionAtCurrentTime;
    private final YoFramePoint yoCopPositionAtCurrentTime;
-   private final QuadrantDependentList<FramePoint> solePositionAtCurrentTime;
+   private final QuadrantDependentList<FramePoint3D> solePositionAtCurrentTime;
    private final QuadrantDependentList<ContactState> contactStateAtCurrentTime;
    private final QuadrantDependentList<MutableDouble> contactPressureAtCurrentTime;
    private final EndDependentList<YoInteger> numberOfContactPhasesPerEnd;
@@ -62,14 +63,14 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
       int maximumNumberOfTrajectorySegments = 3 * maximumNumberOfContactPhases;
       trajectoryInitialized = new YoBoolean("copTrajectoryInitialized", registry);
       trajectoryTimeInterval = new TimeInterval();
-      copPositionAtCurrentTime = new FramePoint();
+      copPositionAtCurrentTime = new FramePoint3D();
       yoCopPositionAtCurrentTime = new YoFramePoint("copPositionAtCurrentTime", ReferenceFrame.getWorldFrame(), registry);
       solePositionAtCurrentTime = new QuadrantDependentList<>();
       contactStateAtCurrentTime = new QuadrantDependentList<>();
       contactPressureAtCurrentTime = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         solePositionAtCurrentTime.set(robotQuadrant, new FramePoint());
+         solePositionAtCurrentTime.set(robotQuadrant, new FramePoint3D());
          contactStateAtCurrentTime.set(robotQuadrant, ContactState.IN_CONTACT);
          contactPressureAtCurrentTime.set(robotQuadrant, new MutableDouble(0.25));
       }
@@ -299,7 +300,7 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
       yoCopPositionAtCurrentTime.setAndMatchFrame(copPositionAtCurrentTime);
    }
 
-   public void getPosition(FramePoint copPositionAtCurrentTime)
+   public void getPosition(FramePoint3D copPositionAtCurrentTime)
    {
       copPositionAtCurrentTime.setIncludingFrame(yoCopPositionAtCurrentTime.getFrameTuple());
    }

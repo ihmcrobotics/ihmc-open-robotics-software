@@ -10,10 +10,10 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
 
@@ -29,9 +29,9 @@ public class ContactPointWrenchMatrixCalculator
    private final Map<RigidBody, Wrench> wrenches = new LinkedHashMap<RigidBody, Wrench>();
 
    // intermediate result storage:
-   private final ArrayList<FrameVector> normalizedSupportVectors = new ArrayList<FrameVector>(4);
-   private final FramePoint tempContactPoint = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final FrameVector tempVector = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final ArrayList<FrameVector3D> normalizedSupportVectors = new ArrayList<FrameVector3D>(4);
+   private final FramePoint3D tempContactPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D tempVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
    private final DenseMatrix64F qBlock = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F rhoBlock = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F wrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
@@ -43,7 +43,7 @@ public class ContactPointWrenchMatrixCalculator
 
       for (int i = 0; i < nSupportVectorsPerContactPoint; i++)
       {
-         normalizedSupportVectors.add(new FrameVector(ReferenceFrame.getWorldFrame()));
+         normalizedSupportVectors.add(new FrameVector3D(ReferenceFrame.getWorldFrame()));
       }
       q = new DenseMatrix64F(Wrench.SIZE, nColumns);
       rhoMin = new DenseMatrix64F(nColumns, 1);
@@ -74,16 +74,16 @@ public class ContactPointWrenchMatrixCalculator
       int column = 0;
       for (PlaneContactState contactState : contactStates)
       {
-         List<FramePoint2d> contactPoints2d = contactState.getContactFramePoints2dInContactCopy();
+         List<FramePoint2D> contactPoints2d = contactState.getContactFramePoints2dInContactCopy();
          WrenchDistributorTools.getSupportVectors(normalizedSupportVectors, contactState.getCoefficientOfFriction(), contactState.getPlaneFrame()); // TODO: use normal
 
-         for (FramePoint2d contactPoint2d : contactPoints2d)
+         for (FramePoint2D contactPoint2d : contactPoints2d)
          {
             // torque part of A
             tempContactPoint.setIncludingFrame(contactPoint2d.getReferenceFrame(), contactPoint2d.getX(), contactPoint2d.getY(), 0.0);
             tempContactPoint.changeFrame(centerOfMassFrame);
 
-            for (FrameVector supportVector : normalizedSupportVectors)
+            for (FrameVector3D supportVector : normalizedSupportVectors)
             {
                supportVector.changeFrame(centerOfMassFrame);
                supportVector.getVector().get(3, column, q);

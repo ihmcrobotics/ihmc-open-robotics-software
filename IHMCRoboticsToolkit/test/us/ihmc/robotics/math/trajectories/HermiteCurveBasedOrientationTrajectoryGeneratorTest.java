@@ -7,13 +7,14 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
@@ -32,15 +33,15 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       double endIntegrationTime = 2.0;
 
       FrameOrientation currentOrientation = new FrameOrientation();
-      FrameVector currentAngularVelocity = new FrameVector();
-      FrameVector currentAngularAcceleration = new FrameVector();
+      FrameVector3D currentAngularVelocity = new FrameVector3D();
+      FrameVector3D currentAngularAcceleration = new FrameVector3D();
 
       FrameOrientation orientationFromIntegration = new FrameOrientation();
       Vector3D angularVelocityVector = new Vector3D();
       Quaternion quaternionFromIntegration = new Quaternion();
       Quaternion integratedAngularVelocity = new Quaternion();
 
-      FrameVector angularVelocityFromIntegration = new FrameVector();
+      FrameVector3D angularVelocityFromIntegration = new FrameVector3D();
       Vector3D integratedAngularAcceleration = new Vector3D();
 
       HermiteCurveBasedOrientationTrajectoryGenerator traj = new HermiteCurveBasedOrientationTrajectoryGenerator("traj", worldFrame,
@@ -50,9 +51,9 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       for (int i = 0; i < 5; i++)
       {
          FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         FrameVector initialAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameVector3D initialAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
          FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         FrameVector finalAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameVector3D finalAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
 
          traj.setInitialConditions(initialOrientation, initialAngularVelocity);
          traj.setFinalConditions(finalOrientation, finalAngularVelocity);
@@ -97,19 +98,19 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       for (int i = 0; i < 10000; i++)
       {
          FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         FrameVector initialAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -5.0, 5, -5, 5, -5, 5);
+         FrameVector3D initialAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame, -5.0, 5, -5, 5, -5, 5);
          FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         FrameVector finalAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -5, 5, -5, 5, -5, 5);
+         FrameVector3D finalAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame, -5, 5, -5, 5, -5, 5);
 
-         FrameVector zeroAngularAcceleration = new FrameVector();
+         FrameVector3D zeroAngularAcceleration = new FrameVector3D();
 
          traj.setInitialConditions(initialOrientation, initialAngularVelocity);
          traj.setFinalConditions(finalOrientation, finalAngularVelocity);
          traj.initialize();
 
          FrameOrientation currentOrientation = new FrameOrientation();
-         FrameVector currentAngularVelocity = new FrameVector();
-         FrameVector currentAngularAcceleration = new FrameVector();
+         FrameVector3D currentAngularVelocity = new FrameVector3D();
+         FrameVector3D currentAngularAcceleration = new FrameVector3D();
 
          double dt = 1.0e-8;
          traj.compute(0.0 + dt);
@@ -127,7 +128,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          {
             if (!goodInitialVelocity)
             {
-               FrameVector error = new FrameVector();
+               FrameVector3D error = new FrameVector3D();
                error.sub(initialAngularVelocity, currentAngularVelocity);
                System.out.println("Bad initial velocity, error: " + error);
                printLimitConditions(initialOrientation, initialAngularVelocity, finalOrientation, finalAngularVelocity);
@@ -135,7 +136,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
 
             if (!goodInitialAngularAcceleration)
             {
-               FrameVector error = new FrameVector();
+               FrameVector3D error = new FrameVector3D();
                error.sub(zeroAngularAcceleration, currentAngularAcceleration);
                System.out.println("Bad initial acceleration, error: " + error);
                printLimitConditions(initialOrientation, zeroAngularAcceleration, finalOrientation, zeroAngularAcceleration);
@@ -147,7 +148,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          traj.compute(trajectoryTime - dt);
          traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
-         boolean goodFinalOrientation = finalOrientation.epsilonEquals(currentOrientation, orientationEpsilon);
+         boolean goodFinalOrientation = finalOrientation.epsilonEquals(currentOrientation.getGeometryObject(), orientationEpsilon);
          boolean goodFinalAngularVelocity = finalAngularVelocity.epsilonEquals(currentAngularVelocity, velocityEpsilon);
          boolean goodFinalAngularAcceleration = zeroAngularAcceleration.epsilonEquals(currentAngularAcceleration, accelerationEpsilon);
 
@@ -155,7 +156,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          {
             if (!goodFinalAngularVelocity)
             {
-               FrameVector error = new FrameVector();
+               FrameVector3D error = new FrameVector3D();
                error.sub(finalAngularVelocity, currentAngularVelocity);
                System.out.println("Bad final velocity, error: " + error);
                System.out.println("final X angular velocity " + currentAngularVelocity.getX());
@@ -203,25 +204,25 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       for (int i = 0; i < 100; i++)
       {
          FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         FrameVector initialAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame);
+         FrameVector3D initialAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame);
          FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         FrameVector finalAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame);
+         FrameVector3D finalAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame);
 
          traj.setInitialConditions(initialOrientation, initialAngularVelocity);
          traj.setFinalConditions(finalOrientation, finalAngularVelocity);
          traj.initialize();
 
          FrameOrientation currentOrientation = new FrameOrientation();
-         FrameVector currentAngularVelocity = new FrameVector();
-         FrameVector currentAngularAcceleration = new FrameVector();
+         FrameVector3D currentAngularVelocity = new FrameVector3D();
+         FrameVector3D currentAngularAcceleration = new FrameVector3D();
 
          Quaternion currentQuaternion = new Quaternion();
          Quaternion previousQuaternion = new Quaternion();
          Vector3D delta = new Vector3D();
 
          FrameOrientation previousOrientation = new FrameOrientation();
-         FrameVector previousAngularVelocity = new FrameVector();
-         FrameVector previousAngularAcceleration = new FrameVector();
+         FrameVector3D previousAngularVelocity = new FrameVector3D();
+         FrameVector3D previousAngularAcceleration = new FrameVector3D();
 
          double maxVelocity = 2.0;
          double maxAcceleration = 1.0;
@@ -310,25 +311,25 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       for (int i = 0; i < 1000; i++)
       {
          FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         FrameVector initialAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameVector3D initialAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
          FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-         FrameVector finalAngularVelocity = FrameVector.generateRandomFrameVector(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameVector3D finalAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
 
          traj.setInitialConditions(initialOrientation, initialAngularVelocity);
          traj.setFinalConditions(finalOrientation, finalAngularVelocity);
          traj.initialize();
 
          FrameOrientation currentOrientation = new FrameOrientation();
-         FrameVector currentAngularVelocity = new FrameVector();
-         FrameVector currentAngularAcceleration = new FrameVector();
+         FrameVector3D currentAngularVelocity = new FrameVector3D();
+         FrameVector3D currentAngularAcceleration = new FrameVector3D();
 
          Quaternion currentQuaternion = new Quaternion();
          Quaternion previousQuaternion = new Quaternion();
          Vector3D delta = new Vector3D();
 
          FrameOrientation previousOrientation = new FrameOrientation();
-         FrameVector previousAngularVelocity = new FrameVector();
-         FrameVector previousAngularAcceleration = new FrameVector();
+         FrameVector3D previousAngularVelocity = new FrameVector3D();
+         FrameVector3D previousAngularAcceleration = new FrameVector3D();
 
          double maxVelocity = 20.0;
          double maxAcceleration = 50.0;
@@ -403,8 +404,8 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       }
    }
 
-   private void printLimitConditions(FrameOrientation initialOrientation, FrameVector initialAngularVelocity, FrameOrientation finalOrientation,
-                                     FrameVector finalAngularVelocity)
+   private void printLimitConditions(FrameOrientation initialOrientation, FrameVector3D initialAngularVelocity, FrameOrientation finalOrientation,
+                                     FrameVector3D finalAngularVelocity)
    {
       System.out.println("FrameOrientation initialOrientation" + toStringFrameOrientationForVizualizer(initialOrientation));
       System.out.println("FrameVector initialAngularVelocity" + toStringFrameVectorForVizualizer(initialAngularVelocity));
@@ -421,7 +422,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       return " = new FrameOrientation(worldFrame, " + qx + ", " + qy + ", " + qz + ", " + qs + ");";
    }
 
-   private String toStringFrameVectorForVizualizer(FrameVector frameVector)
+   private String toStringFrameVectorForVizualizer(FrameVector3D frameVector)
    {
       double x = frameVector.getX();
       double y = frameVector.getY();

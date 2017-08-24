@@ -4,20 +4,19 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
-import us.ihmc.robotics.controllers.SE3PIDGains;
-import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -39,7 +38,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
  * All the data contained in this command is expressed in world to ensure that the feedback
  * controller can properly interpret it.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  *
  */
@@ -59,7 +58,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    private final Vector3D feedForwardAngularAccelerationInWorld = new Vector3D();
 
    /** The 3D gains used in the PD controller for the next control tick. */
-   private final SE3PIDGains gains = new SE3PIDGains();
+   private final DefaultPIDSE3Gains gains = new DefaultPIDSE3Gains();
    /** This is the reference frame in which the angular part of the gains are to be applied. If {@code null}, it is applied in the control frame. */
    private ReferenceFrame angularGainsFrame = null;
    /** This is the reference frame in which the linear part of the gains are to be applied. If {@code null}, it is applied in the control frame. */
@@ -120,7 +119,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * The joint path going from the {@code base} to the {@code endEffector} specifies the joints
     * that can be used to control the end-effector.
     * </p>
-    * 
+    *
     * @param base the rigid-body located right before the first joint to be used for controlling the
     *           end-effector.
     * @param endEffector the rigid-body to be controlled.
@@ -146,7 +145,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * bending the elbow. This reduces the time needed to escape the singular configuration. It also
     * prevents unfortunate situation where the elbow would try to bend past the joint limit.
     * </p>
-    * 
+    *
     * @param primaryBase
     */
    public void setPrimaryBase(RigidBody primaryBase)
@@ -158,7 +157,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * The control base frame is the reference frame with respect to which the end-effector is to be
     * controlled. More specifically, the end-effector desired velocity is assumed to be with respect
     * to the control base frame.
-    * 
+    *
     * @param controlBaseFrame the new control base frame.
     */
    public void setControlBaseFrame(ReferenceFrame controlBaseFrame)
@@ -220,32 +219,32 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
 
    /**
     * Sets the gains for both the position and orientation to use during the next control tick.
-    * 
+    *
     * @param gains the new set of gains to use. Not modified.
     */
-   public void setGains(SE3PIDGainsInterface gains)
+   public void setGains(PIDSE3Gains gains)
    {
       this.gains.set(gains);
    }
 
    /**
     * Sets only the orientation gains to use during the next control tick.
-    * 
+    *
     * @param orientationGains the new set of orientation gains to use. Not modified.
     */
-   public void setGains(OrientationPIDGainsInterface orientationGains)
+   public void setOrientationGains(PID3DGains orientationGains)
    {
-      this.gains.set(orientationGains);
+      this.gains.setOrientationGains(orientationGains);
    }
 
    /**
     * Sets only the position gains to use during the next control tick.
-    * 
+    *
     * @param positionGains the new set of position gains to use. Not modified.
     */
-   public void setGains(PositionPIDGainsInterface positionGains)
+   public void setPositionGains(PID3DGains positionGains)
    {
-      this.gains.set(positionGains);
+      this.gains.setPositionGains(positionGains);
    }
 
    /**
@@ -253,7 +252,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * <p>
     * If a reference frame is {@code null}, the corresponding gains will be applied in the control frame.
     * </p>
-    * 
+    *
     * @param angularGainsFrame the reference frame to use for the orientation gains.
     * @param linearGainsFrame the reference frame to use for the position gains.
     */
@@ -272,7 +271,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * The desired linear/angular velocity and feed-forward linear/angular acceleration are set to
     * zero.
     * </p>
-    * 
+    *
     * @param desiredPose describes the pose that the {@code controlFrame} should reach. It does NOT
     *           describe the desired pose of {@code endEffector.getBodyFixedFrame()}. Not modified.
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
@@ -298,14 +297,14 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * <p>
     * The desired linear velocity and feed-forward linear acceleration are set to zero.
     * </p>
-    * 
+    *
     * @param desiredPosition describes the position that the {@code controlFrame} should reach. It
     *           does NOT describe the desired position of {@code endEffector.getBodyFixedFrame()}.
     *           Not modified.
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FramePoint desiredPosition)
+   public void set(FramePoint3D desiredPosition)
    {
       desiredPosition.checkReferenceFrameMatch(worldFrame);
 
@@ -319,7 +318,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * <p>
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
-    * 
+    *
     * @param desiredPosition describes the position that the {@code controlFrame} should reach. It
     *           does NOT describe the desired position of {@code endEffector.getBodyFixedFrame()}.
     *           Not modified.
@@ -334,7 +333,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FramePoint desiredPosition, FrameVector desiredLinearVelocity, FrameVector feedForwardLinearAcceleration)
+   public void set(FramePoint3D desiredPosition, FrameVector3D desiredLinearVelocity, FrameVector3D feedForwardLinearAcceleration)
    {
       desiredPosition.checkReferenceFrameMatch(worldFrame);
       desiredLinearVelocity.checkReferenceFrameMatch(worldFrame);
@@ -353,7 +352,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * <p>
     * The desired angular velocity and feed-forward angular acceleration are set to zero.
     * </p>
-    * 
+    *
     * @param desiredOrientation describes the orientation that the {@code controlFrame} should
     *           reach. It does NOT describe the desired orientation of
     *           {@code endEffector.getBodyFixedFrame()}. Not modified.
@@ -374,7 +373,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * <p>
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
-    * 
+    *
     * @param desiredOrientation describes the orientation that the {@code controlFrame} should
     *           reach. It does NOT describe the desired orientation of
     *           {@code endEffector.getBodyFixedFrame()}. Not modified.
@@ -388,7 +387,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
+   public void set(FrameOrientation desiredOrientation, FrameVector3D desiredAngularVelocity, FrameVector3D feedForwardAngularAcceleration)
    {
       desiredOrientation.checkReferenceFrameMatch(worldFrame);
       desiredAngularVelocity.checkReferenceFrameMatch(worldFrame);
@@ -405,7 +404,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * <p>
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
-    * 
+    *
     * @param desiredPosition describes the position that the {@code controlFrame} should reach. It
     *           does NOT describe the desired position of {@code endEffector.getBodyFixedFrame()}.
     *           Modified.
@@ -418,7 +417,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *           the desired linear acceleration of {@code endEffector.getBodyFixedFrame()}'s origin.
     *           Modified.
     */
-   public void changeFrameAndSet(FramePoint desiredPosition, FrameVector desiredLinearVelocity, FrameVector feedForwardLinearAcceleration)
+   public void changeFrameAndSet(FramePoint3D desiredPosition, FrameVector3D desiredLinearVelocity, FrameVector3D feedForwardLinearAcceleration)
    {
       desiredPosition.changeFrame(worldFrame);
       desiredLinearVelocity.changeFrame(worldFrame);
@@ -435,7 +434,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * <p>
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
-    * 
+    *
     * @param desiredOrientation describes the orientation that the {@code controlFrame} should
     *           reach. It does NOT describe the desired orientation of
     *           {@code endEffector.getBodyFixedFrame()}. Modified.
@@ -446,7 +445,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *           {@code controlFrame} with respect to the {@code base}. It is equivalent to the
     *           desired angular acceleration of {@code endEffector.getBodyFixedFrame()}. Modified.
     */
-   public void changeFrameAndSet(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
+   public void changeFrameAndSet(FrameOrientation desiredOrientation, FrameVector3D desiredAngularVelocity, FrameVector3D feedForwardAngularAcceleration)
    {
       desiredOrientation.changeFrame(worldFrame);
       desiredAngularVelocity.changeFrame(worldFrame);
@@ -476,12 +475,12 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * feedback controller for this end-effector will do its best to bring the {@code controlFrame}
     * to the given desired position and orientation.
     * </p>
-    * 
+    *
     * @param position the position of the {@code controlFrame}'s origin. Not modified.
     * @throws ReferenceFrameMismatchException if any of the {@code position} is not expressed in
     *            {@code endEffector.getBodyFixedFrame()}.
     */
-   public void setControlFrameFixedInEndEffector(FramePoint position)
+   public void setControlFrameFixedInEndEffector(FramePoint3D position)
    {
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       position.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
@@ -497,13 +496,13 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * feedback controller for this end-effector will do its best to bring the {@code controlFrame}
     * to the given desired position and orientation.
     * </p>
-    * 
+    *
     * @param position the position of the {@code controlFrame}'s origin. Not modified.
     * @param orientation the orientation of the {@code controlFrame}. Not modified.
     * @throws ReferenceFrameMismatchException if any of the two arguments is not expressed in
     *            {@code endEffector.getBodyFixedFrame()}.
     */
-   public void setControlFrameFixedInEndEffector(FramePoint position, FrameOrientation orientation)
+   public void setControlFrameFixedInEndEffector(FramePoint3D position, FrameOrientation orientation)
    {
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       position.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
@@ -521,11 +520,11 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * feedback controller for this end-effector will do its best to bring the {@code controlFrame}
     * to the given desired position and orientation.
     * </p>
-    * 
+    *
     * @param position the position of the {@code controlFrame}'s origin. Modified.
     * @param orientation the orientation of the {@code controlFrame}. Modified.
     */
-   public void changeFrameAndSetControlFrameFixedInEndEffector(FramePoint position, FrameOrientation orientation)
+   public void changeFrameAndSetControlFrameFixedInEndEffector(FramePoint3D position, FrameOrientation orientation)
    {
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       position.changeFrame(endEffector.getBodyFixedFrame());
@@ -542,7 +541,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * feedback controller for this end-effector will do its best to bring the {@code controlFrame}
     * to the given desired position and orientation.
     * </p>
-    * 
+    *
     * @param pose the pose of the {@code controlFrame}. Not modified.
     * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@code endEffector.getBodyFixedFrame()}.
@@ -562,7 +561,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * feedback controller for this end-effector will do its best to bring the {@code controlFrame}
     * to the given desired position and orientation.
     * </p>
-    * 
+    *
     * @param pose the of the {@code controlFrame}. Modified.
     */
    public void changeFrameAndSetControlFrameFixedInEndEffector(FramePose pose)
@@ -594,7 +593,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
     * selection frame is equal to the control frame.
     * </p>
-    * 
+    *
     * @param selectionMatrix the selection matrix to copy data from. Not modified.
     */
    public void setSelectionMatrix(SelectionMatrix6D selectionMatrix)
@@ -609,7 +608,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * optimization will behave but the ratio between them. A command with a higher weight than other
     * commands value will be treated as more important than the other commands.
     * </p>
-    * 
+    *
     * @param weight the weight value to use for this command.
     */
    public void setWeightForSolver(double weight)
@@ -624,7 +623,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * optimization will behave but the ratio between them. A command with a higher weight than other
     * commands value will be treated as more important than the other commands.
     * </p>
-    * 
+    *
     * @param weightMatrix weight matrix holding the weights to use for each component of the desired
     *           acceleration. Not modified.
     */
@@ -640,7 +639,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * optimization will behave but the ratio between them. A command with a higher weight than other
     * commands value will be treated as more important than the other commands.
     * </p>
-    * 
+    *
     * @param angular the weights to use for the angular part of this command. Not modified.
     * @param linear the weights to use for the linear part of this command. Not modified.
     */
@@ -649,28 +648,28 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       spatialAccelerationCommand.setWeights(angular, linear);
    }
 
-   public void getIncludingFrame(FramePoint desiredPositionToPack, FrameOrientation desiredOrientationToPack)
+   public void getIncludingFrame(FramePoint3D desiredPositionToPack, FrameOrientation desiredOrientationToPack)
    {
       desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
       desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
    }
 
-   public void getIncludingFrame(FramePoint desiredPositionToPack, FrameVector desiredLinearVelocityToPack, FrameVector feedForwardLinearAccelerationToPack)
+   public void getIncludingFrame(FramePoint3D desiredPositionToPack, FrameVector3D desiredLinearVelocityToPack, FrameVector3D feedForwardLinearAccelerationToPack)
    {
       desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
       desiredLinearVelocityToPack.setIncludingFrame(worldFrame, desiredLinearVelocityInWorld);
       feedForwardLinearAccelerationToPack.setIncludingFrame(worldFrame, feedForwardLinearAccelerationInWorld);
    }
 
-   public void getIncludingFrame(FrameOrientation desiredOrientationToPack, FrameVector desiredAngularVelocityToPack,
-                                 FrameVector feedForwardAngularAccelerationToPack)
+   public void getIncludingFrame(FrameOrientation desiredOrientationToPack, FrameVector3D desiredAngularVelocityToPack,
+                                 FrameVector3D feedForwardAngularAccelerationToPack)
    {
       desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
       desiredAngularVelocityToPack.setIncludingFrame(worldFrame, desiredAngularVelocityInWorld);
       feedForwardAngularAccelerationToPack.setIncludingFrame(worldFrame, feedForwardAngularAccelerationInWorld);
    }
 
-   public void getControlFramePoseIncludingFrame(FramePoint position, FrameOrientation orientation)
+   public void getControlFramePoseIncludingFrame(FramePoint3D position, FrameOrientation orientation)
    {
       RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
       position.setIncludingFrame(endEffector.getBodyFixedFrame(), controlFrameOriginInEndEffectorFrame);
@@ -700,7 +699,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       return spatialAccelerationCommand;
    }
 
-   public SE3PIDGainsInterface getGains()
+   public PIDSE3Gains getGains()
    {
       return gains;
    }

@@ -8,15 +8,15 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -49,7 +49,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    private final ZUpFrame supportPolygonCentroidZUpFrame;
 
    private final QuadrantDependentList<ReferenceFrame> legAttachementFrames = new QuadrantDependentList<ReferenceFrame>();
-   private final QuadrantDependentList<FramePoint> legAttachementPoints= new QuadrantDependentList<FramePoint>();
+   private final QuadrantDependentList<FramePoint3D> legAttachementPoints= new QuadrantDependentList<FramePoint3D>();
 
    private final SideDependentList<ReferenceFrame> sideDependentMidFeetZUpFrames = new SideDependentList<ReferenceFrame>();
 
@@ -59,11 +59,11 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    private final FramePose centerOfMassPose;
    private final PoseReferenceFrame centerOfFourHipsFrame;
    private final FramePose centerOfFourHipsFramePose;
-   private final FramePoint centerOfFourHipsFramePoint = new FramePoint();
+   private final FramePoint3D centerOfFourHipsFramePoint = new FramePoint3D();
 
    private final PoseReferenceFrame centerOfFourFeetFrameWithBodyRotation;
    private final FramePose centerOfFourFeetFramePose;
-   private final FramePoint centerOfFourFeetFramePoint = new FramePoint();
+   private final FramePoint3D centerOfFourFeetFramePoint = new FramePoint3D();
 
    private QuadrupedSupportPolygon supportPolygonForCentroids = new QuadrupedSupportPolygon();
 
@@ -108,7 +108,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
 
          soleFrames.set(robotQuadrant, soleFrame);
 
-         FramePoint legAttachmentPoint = new FramePoint();
+         FramePoint3D legAttachmentPoint = new FramePoint3D();
          legAttachementPoints.set(robotQuadrant, legAttachmentPoint);
       }
 
@@ -129,7 +129,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
          QuadrupedJointName hipPitchJointName = QuadrupedJointName.getName(robotQuadrant, LegJointName.HIP_PITCH);
          ReferenceFrame frameBeforeHipPitch = framesBeforeLegJoint.get(hipPitchJointName);
 
-         FramePoint xyOffsetFromRollToPitch = new FramePoint(frameBeforeHipPitch);
+         FramePoint3D xyOffsetFromRollToPitch = new FramePoint3D(frameBeforeHipPitch);
          xyOffsetFromRollToPitch.changeFrame(frameBeforeHipRoll);
 
          TranslationReferenceFrame legAttachmentFrame = new TranslationReferenceFrame(robotQuadrant.getCamelCaseNameForStartOfExpression() + "LegAttachementFrame", frameBeforeHipRoll);
@@ -176,7 +176,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
 
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         FramePoint legAttachmentPoint = legAttachementPoints.get(quadrant);
+         FramePoint3D legAttachmentPoint = legAttachementPoints.get(quadrant);
          legAttachmentPoint.setToZero(legAttachementFrames.get(quadrant));
          legAttachmentPoint.changeFrame(bodyFrame);
          centerOfFourHipsFramePoint.add(legAttachmentPoint);
@@ -257,7 +257,7 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
       supportPolygonCentroidZUpFrame.update();
    }
 
-   private final FramePoint soleFramePointTemp = new FramePoint();
+   private final FramePoint3D soleFramePointTemp = new FramePoint3D();
    private void updateSupportPolygon(RobotQuadrant swingFoot, QuadrupedSupportPolygon supportPolygon)
    {
       supportPolygon.clear();

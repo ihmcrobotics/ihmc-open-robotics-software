@@ -10,14 +10,14 @@ import org.junit.Test;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.shapes.FrameSphere3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SphereWithConvexPolygonIntersectorTest
 {
@@ -33,7 +33,7 @@ public class SphereWithConvexPolygonIntersectorTest
       FrameConvexPolygon2d polygon;
       PoseReferenceFrame frame;
       PoseReferenceFrame frame2;
-      FramePoint closestPointOnPolygon;
+      FramePoint3D closestPointOnPolygon;
 
       sphere = new FrameSphere3d(WORLD, 5.0, 3.0, 1.0, 2.0);
       vertices = new ArrayList<>();

@@ -1,8 +1,8 @@
 package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 
 public class PointPositionDataObject
@@ -12,7 +12,7 @@ public class PointPositionDataObject
    protected final Point3D measurementPointInBodyFrame = new Point3D();
    protected final Point3D positionOfMeasurementPointInWorldFrame = new Point3D();
 
-   public void set(FramePoint measurementPointInBodyFrame, FramePoint positionOfMeasurementPointInWorldFrame, boolean isPointPositionValid)
+   public void set(FramePoint3D measurementPointInBodyFrame, FramePoint3D positionOfMeasurementPointInWorldFrame, boolean isPointPositionValid)
    {
       bodyFixedReferenceFrameName = measurementPointInBodyFrame.getReferenceFrame().getName();
       this.isPointPositionValid = isPointPositionValid;

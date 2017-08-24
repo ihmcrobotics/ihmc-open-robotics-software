@@ -2,14 +2,13 @@ package us.ihmc.commonWalkingControlModules.configurations;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -17,25 +16,19 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.controllers.PDGains;
+import us.ihmc.robotics.controllers.PIDGains;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public abstract class WalkingControllerParameters implements SteppingParameters
+public abstract class WalkingControllerParameters
 {
-   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   
    private final LegConfigurationParameters legConfigurationParameters;
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
    private final DynamicReachabilityParameters dynamicReachabilityParameters;
@@ -67,7 +60,9 @@ public abstract class WalkingControllerParameters implements SteppingParameters
    }
 
    /**
-    * Returns a map from joint name to joint acceleration integration parameters.
+    * Returns a list with triples of joint acceleration integration parameters and the names of the joints
+    * that the parameter will be used for. The triple also contains the name of the joint set for the specific
+    * parameters. The name will be used to create YoVariables in the controller.
     * <p>
     * Note that this method is only called if
     * {@link #enableJointAccelerationIntegrationForAllJoints()} returns {@code true}.
@@ -76,26 +71,15 @@ public abstract class WalkingControllerParameters implements SteppingParameters
     * This method is called by the controller to know the set of joints for which specific
     * parameters are to be used. If a joint is not added to this map, the default parameters will be used.
     * </p>
-    * Example a robot for which we want to provide specific parameters for the elbow joints only:</br>
-    * {@code Map<String, JointAccelerationIntegrationParametersReadOnly> jointParameters = new HashMap<>();}</br>
-    * {@code JointAccelerationIntegrationParametersReadOnly elbowParameters = new YoJointAccelerationIntegrationParameters("elbow", 0.999, 0.95, 0.1, 0.1, registry);}</br>
-    * {@code jointParameters.put("leftElbow", elbowParameters);}</br>
-    * {@code jointParameters.put("rightElbow", elbowParameters);}</br>
-    * {@code return jointParameters;}</br>
-    * </p>
-    * @param registry the controller registry allowing to create {@code YoVariable}s for the
-    *           parameters.
-    * @return the map from the names of the joints with their specific parameters to use.
-    *
-    * TODO: remove registry
+    * @return list containing acceleration integration parameters and the corresponding joints
     */
-   public Map<String, JointAccelerationIntegrationParametersReadOnly> getJointAccelerationIntegrationParameters(YoVariableRegistry registry)
+   public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParameters()
    {
       return null;
    }
 
    /**
-    * Returns the value of sqrt(g / z0) which corrsponds to omega0 in the Linear Inverted Pendulum
+    * Returns the value of sqrt(g / z0) which corresponds to omega0 in the Linear Inverted Pendulum
     * Model that the ICP is based on. Note, that this value is a tuning parameter for each robot and
     * is not computed from the actual CoM height.
     *
@@ -115,23 +99,16 @@ public abstract class WalkingControllerParameters implements SteppingParameters
    }
 
    /**
-    * Method will set robot specific parameters in the provided {@link #ToeSlippingDetector}.
-    * Note that this method is only called if {@link #enableToeOffSlippingDetection()} returns {@code true}.
+    * Method returns robot specific parameters for the {@link #ToeSlippingDetector}.
+    * <p>
+    * Must be overwritten if {@link #enableToeOffSlippingDetection()} returns {@code true}.
     * </p>
-    * Override this method to configure the parameters as follows:
-    * </p>
-    * {@code double forceMagnitudeThreshold = 25.0;}</br>
-    * {@code double velocityThreshold = 0.4;}</br>
-    * {@code double double slippageDistanceThreshold = 0.04;}</br>
-    * {@code double filterBreakFrequency = 10.0;}</br>
-    * {@code toeSlippingDetectorToConfigure.configure(forceMagnitudeThreshold, velocityThreshold, slippageDistanceThreshold, filterBreakFrequency);}
-    * </p>
-    * @param toeSlippingDetectorToConfigure (modified)
+    * @return the parameters for slip detection during toe off.
     * @see ToeSlippingDetector#configure(double, double, double, double)
     */
-   public void configureToeSlippingDetector(ToeSlippingDetector toeSlippingDetectorToConfigure)
+   public ToeSlippingDetectorParameters getToeSlippingDetectorParameters()
    {
-      throw new RuntimeException("Override this method if using the " + ToeSlippingDetector.class.getSimpleName());
+      return null;
    }
 
    /**
@@ -163,11 +140,22 @@ public abstract class WalkingControllerParameters implements SteppingParameters
    /**
     * Specifies whether the controller will abort any arm trajectories when close to loosing its balance. This is
     * determined by the ICP tracking error.
-    * TODO: extract threshold.
     *
-    * @return whether the robot will abort arm trajectories when the ICP error is above a threshold
+    * @return whether the robot will abort arm trajectories when the ICP error is large
     */
    public abstract boolean allowAutomaticManipulationAbort();
+
+   /**
+    * Determines the threshold for the ICP tracking error that will cause the robot do abort manipulation if
+    * {@link #allowAutomaticManipulationAbort()} is returning {@code true}.
+    *
+    * @return the threshold on the ICP error that will trigger manipulation abort
+    * @see #allowAutomaticManipulationAbort()
+    */
+   public double getICPErrorThresholdForManipulationAbort()
+   {
+      return 0.04;
+   }
 
    /**
     * Determines whether to use the ICP Optimization controller or a standard ICP proportional controller (new feature to be tested with Atlas)
@@ -179,76 +167,81 @@ public abstract class WalkingControllerParameters implements SteppingParameters
    /**
     * The desired position of the CMP is computed based on a feedback control law on the ICP. This method returns
     * the gains used in this controller.
-    *
-    * TODO: remove registry
     */
-   public abstract ICPControlGains createICPControlGains(YoVariableRegistry registry);
+   public abstract ICPControlGains createICPControlGains();
 
    /**
     * This method returns the gains used in the controller to regulate the center of mass height.
-    *
-    * TODO: remove registry
     */
-   public abstract YoPDGains createCoMHeightControlGains(YoVariableRegistry registry);
+   public abstract PDGains getCoMHeightControlGains();
 
    /**
-    * The map returned contains all controller gains for tracking jointspace trajectories. The key of
-    * the map is the joint name as defined in the robot joint map. If a joint is not contained in the
-    * map, jointspace control is not supported for that joint.
+    * Returns a list with pairs of joint control gains and the names of the joints that the gain will
+    * be used for. The names of the joints are defined in the robots joint map. If a joint is not
+    * contained in one of the pairs, jointspace control is not supported for that joint.
     *
-    * @param registry used to create the gains the first time this function is called during a run
-    * @return map containing jointspace PID gains by joint name
-    *
-    * TODO: remove registry
+    * @return list containing jointspace PID gains and the corresponding joints
     */
-   public Map<String, YoPIDGains> getOrCreateJointSpaceControlGains(YoVariableRegistry registry)
+   public List<ImmutablePair<PIDGains, List<String>>> getJointSpaceControlGains()
    {
-      return new HashMap<String, YoPIDGains>();
+      return new ArrayList<>();
    }
 
    /**
-    * The map returned contains all controller gains for tracking taskspace orientation trajectories
-    * (or the orientation part of a pose trajectory) for a rigid body. The key of the map is the rigid
-    * body name as defined in the robot joint map. If a joint is not contained in the map, taskspace
-    * orientation or pose control is not supported for that rigid body.
+    * Returns a list of triples containing taskspace orientation control gains.
+    * <p>
+    * Each triple contains gains for one body group:</br>
+    *  - The name of the body group that the gain is used for (e.g. Hands).</br>
+    *  - The gains for the body group.</br>
+    *  - The names of all rigid bodies in the body group.
+    * </p>
+    * If a body is not contained in the list, taskspace orientation or pose control is not
+    * supported for that rigid body. These gains will be used by the controller for tracking
+    * taskspace orientation trajectories (or the orientation part of a pose trajectory) for a
+    * rigid body.
     *
-    * @param registry used to create the gains the first time this function is called during a run
-    * @return map containing taskspace orientation PID gains by rigid body name
-    *
-    * TODO: remove registry
+    * @return list containing orientation PID gains and the corresponding rigid bodies
     */
-   public Map<String, YoOrientationPIDGainsInterface> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
+   public List<ImmutableTriple<String, PID3DGains, List<String>>> getTaskspaceOrientationControlGains()
    {
-      return new HashMap<String, YoOrientationPIDGainsInterface>();
+      return new ArrayList<>();
    }
 
    /**
-    * The map returned contains all controller gains for tracking taskspace position trajectories
-    * (or the position part of a pose trajectory) for a rigid body. The key of the map is the rigid
-    * body name as defined in the robot joint map. If a joint is not contained in the map, taskspace
-    * position or pose control is not supported for that rigid body.
+    * Returns a list of triples containing taskspace position control gains.
+    * <p>
+    * Each triple contains gains for one body group:</br>
+    *  - The name of the body group that the gain is used for (e.g. Hands).</br>
+    *  - The gains for the body group.</br>
+    *  - The names of all rigid bodies in the body group.
+    * </p>
+    * If a body is not contained in the list, taskspace position or pose control is not
+    * supported for that rigid body. These gains will be used by the controller for tracking
+    * taskspace position trajectories (or the position part of a pose trajectory) for a
+    * rigid body.
     *
-    * @param registry used to create the gains the first time this function is called during a run
-    * @return map containing taskspace position PID gains by rigid body name
-    *
-    * TODO: remove registry
+    * @return list containing orientation PID gains and the corresponding rigid bodies
     */
-   public Map<String, YoPositionPIDGainsInterface> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
+   public List<ImmutableTriple<String, PID3DGains, List<String>>> getTaskspacePositionControlGains()
    {
-      return new HashMap<String, YoPositionPIDGainsInterface>();
+      return new ArrayList<>();
    }
 
    /**
-    * Returns the default control mode for a rigid body. The modes are defined in {@link RigidBodyControlMode}
-    * and by default the mode should be {@link RigidBodyControlMode#JOINTSPACE}. In some cases (e.g. the chest)
-    * it makes more sense to use the default mode {@link RigidBodyControlMode#TASKSPACE}.
+    * Returns a map with default control modes for each rigid body.
+    * <p>
+    * The key of the map is the rigid body name as defined in the joint map. Possible
+    * control modes are defined in {@link RigidBodyControlMode}. By default (if a body
+    * is not contained in the map) {@link RigidBodyControlMode#JOINTSPACE} will be used
+    * for the body. In some cases (e.g. the chest) it makes more sense to use the default
+    * mode {@link RigidBodyControlMode#TASKSPACE}.
+    * </p>
     *
-    * @param bodyName is the name of the {@link RigidBody}
     * @return the default control mode of the body
     */
-   public RigidBodyControlMode getDefaultControlModeForRigidBody(String bodyName)
+   public Map<String, RigidBodyControlMode> getDefaultControlModesForRigidBodies()
    {
-      return RigidBodyControlMode.JOINTSPACE;
+      return new HashMap<>();
    }
 
    /**
@@ -305,27 +298,21 @@ public abstract class WalkingControllerParameters implements SteppingParameters
 
    /**
     * Returns the gains used for the foot pose when in swing.
-    *
-    * TODO: remove registry
     */
-   public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);
+   public abstract PIDSE3Gains getSwingFootControlGains();
 
    /**
     * Returns the gains used for the foot when in support. Note that these gains are only used when the foot
     * is not loaded or close to tipping. Of that is not the case the foot pose when in support is not controlled
     * using a feedback controller.
-    *
-    * TODO: remove registry
     */
-   public abstract YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry);
+   public abstract PIDSE3Gains getHoldPositionFootControlGains();
 
    /**
     * Returns the gains used for the foot when in the toe off state. Note that some parts of the foot orientation
     * will not use these gains. The foot pitch for example is usually not controlled explicitly during tow off.
-    *
-    * TODO: remove registry
     */
-   public abstract YoSE3PIDGainsInterface createToeOffFootControlGains(YoVariableRegistry registry);
+   public abstract PIDSE3Gains getToeOffFootControlGains();
 
    /**
     * Specifies if the arm controller should be switching
@@ -567,14 +554,11 @@ public abstract class WalkingControllerParameters implements SteppingParameters
    }
 
    /**
-    * Get the parameters for foothold exploration. The parameters should be created the first time this
-    * method is called.
-    *
-    * TODO: remove registry
+    * Determines whether the classes and variables for foothold exploration are created.
     */
-   public ExplorationParameters getOrCreateExplorationParameters(YoVariableRegistry registry)
+   public boolean createFootholdExplorationTools()
    {
-      return null;
+      return false;
    }
 
    /**
@@ -623,21 +607,22 @@ public abstract class WalkingControllerParameters implements SteppingParameters
    }
 
    /**
-    * Returns a list of joint that should use the more restrictive joint limit enforcement in the QP
+    * Returns a list of joint that should use the more restrictive joint limit enforcement
+    * in the QP. If the list is not empty the method {@link #getJointLimitParametersForJointsWithRestictiveLimits()}
+    * must be overwritten to define the limit parameters.
     */
-   public String[] getJointsWithRestrictiveLimits(JointLimitParameters jointLimitParametersToPack)
+   public String[] getJointsWithRestrictiveLimits()
    {
       return new String[0];
    }
 
-   @Override
    /**
-    * Returns the minimum swing height from the stance foot for this robot. It is also the default swing height
-    * used in the controller unless a different value is specified.
+    * Returns parameters for joint limits that will be used with the joints defined in
+    * {@link #getJointsWithRestrictiveLimits()}.
     */
-   public double getMinSwingHeightFromStanceFoot()
+   public JointLimitParameters getJointLimitParametersForJointsWithRestictiveLimits()
    {
-      return 0.1;
+      return null;
    }
 
    /**
@@ -737,113 +722,38 @@ public abstract class WalkingControllerParameters implements SteppingParameters
     */
    public abstract SwingTrajectoryParameters getSwingTrajectoryParameters();
 
-   // remove: unused
-   public abstract SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame();
+   public ICPOptimizationParameters getICPOptimizationParameters()
+   {
+      return null;
+   }
 
-   // remove: unused
-   public abstract String[] getDefaultChestOrientationControlJointNames();
+   /**
+    * Get the maximum leg length for the singularity avoidance control module.
+    */
+   public abstract double getMaximumLegLengthForSingularityAvoidance();
 
-   // move to UI specific parameters
-   public abstract double getAnkleHeight();
-
-   // replace: just add shin and thigh length from the physical parameters in a default method instead of forcing an implementation for each robot
-   public abstract double getLegLength();
-
-   // move to CoM height parameters
+   /**
+    * Parameter for the CoM height trajectory generation.
+    */
    public abstract double minimumHeightAboveAnkle();
 
-   // move to CoM height parameters
+   /**
+    * Parameter for the CoM height trajectory generation.
+    */
    public abstract double nominalHeightAboveAnkle();
 
-   // move to CoM height parameters
+   /**
+    * Parameter for the CoM height trajectory generation.
+    */
    public abstract double maximumHeightAboveAnkle();
 
-   // move to CoM height parameters
+   /**
+    * Parameter for the CoM height trajectory generation.
+    */
    public abstract double defaultOffsetHeightAboveAnkle();
 
-   // move to UI specific parameters
-   public abstract double pelvisToAnkleThresholdForWalking();
-
-   // remove: unused
-   public abstract double getTimeToGetPreparedForLocomotion();
-
-   // remove: unused (was only used in dead code that needs to go away)
-   public abstract boolean getCoMHeightDriftCompensation();
-
-   // remove: unused
-   public abstract YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry);
-
-   // remove from interface and nuke chest manager
-   public abstract YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry);
-
-   // remove: unused
-   public abstract boolean allowShrinkingSingleSupportFootPolygon();
-
-   // move to slider board specific parameters
-   public abstract boolean controlHeadAndHandsWithSliders();
-
-   // remove: unused
-   public abstract YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry);
-
-   // remove from interface and use getOrCreateTaskspaceOrientationControlGains instead
-   public abstract YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry);
-
-   // remove: unused
-   public abstract YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry);
-
-   // remove: unused
-   public abstract double getSwingHeightMaxForPushRecoveryTrajectory();
-
-   // move to UI specific parameters
-   public abstract double getSpineYawLimit();
-
-   // move to UI specific parameters
-   public abstract double getSpinePitchUpperLimit();
-
-   // move to UI specific parameters
-   public abstract double getSpinePitchLowerLimit();
-
-   // move to UI specific parameters
-   public abstract double getSpineRollLimit();
-
-   // move to UI specific parameters
-   public abstract boolean isSpinePitchReversed();
-
-   // remove: unused
-   public abstract double getFoot_start_toetaper_from_back();
-
-   // move to UI specific parameters
-   public abstract double getSideLengthOfBoundingBoxForFootstepHeight();
-
-   // move to slider board specific parameters
-   public abstract LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits();
-
-   // move to slider board specific parameters
-   public abstract SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits();
-
-   // remove: unused
-   public abstract boolean doFancyOnToesControl();
-
-   // remove: unused
-   public boolean useSupportState()
-   {
-      return false;
-   }
-
-   // move to UI specific parameters
-   public double getDefaultTrajectoryTime()
-   {
-      return 3.0;
-   }
-
-   // remove: exo specific
-   public abstract void useInverseDynamicsControlCore();
-
-   // remove: exo specific
-   public abstract void useVirtualModelControlCore();
-
-   public YoVariableRegistry getRegistry()
-   {
-      return registry;
-   }
+   /**
+    * Returns parameters related to stepping such as maximum step length etc.
+    */
+   public abstract SteppingParameters getSteppingParameters();
 }

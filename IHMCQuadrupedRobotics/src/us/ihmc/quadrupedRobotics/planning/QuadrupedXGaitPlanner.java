@@ -2,12 +2,12 @@ package us.ihmc.quadrupedRobotics.planning;
 
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
@@ -16,9 +16,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class QuadrupedXGaitPlanner
 {
-   private final FramePoint goalPosition;
-   private final FramePoint goalPositionAdjustment;
-   private final QuadrantDependentList<FramePoint> xGaitRectangle;
+   private final FramePoint3D goalPosition;
+   private final FramePoint3D goalPositionAdjustment;
+   private final QuadrantDependentList<FramePoint3D> xGaitRectangle;
    private final FramePose xGaitRectanglePose;
    private final FramePose xGaitRectanglePoseAtSoS;
    private final PoseReferenceFrame xGaitRectangleFrame;
@@ -27,15 +27,15 @@ public class QuadrupedXGaitPlanner
 
    public QuadrupedXGaitPlanner()
    {
-      goalPosition = new FramePoint();
-      goalPositionAdjustment = new FramePoint();
+      goalPosition = new FramePoint3D();
+      goalPositionAdjustment = new FramePoint3D();
       xGaitRectangle = new QuadrantDependentList<>();
       xGaitRectanglePose = new FramePose(worldFrame);
       xGaitRectanglePoseAtSoS = new FramePose(worldFrame);
       xGaitRectangleFrame = new PoseReferenceFrame("xGaitRectangleFrame", worldFrame);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         xGaitRectangle.set(robotQuadrant, new FramePoint(xGaitRectangleFrame));
+         xGaitRectangle.set(robotQuadrant, new FramePoint3D(xGaitRectangleFrame));
       }
       pastSteps = new EndDependentList<>();
       pastSteps.put(RobotEnd.FRONT, new QuadrupedTimedStep());
@@ -43,7 +43,7 @@ public class QuadrupedXGaitPlanner
    }
 
    public void computeInitialPlan(List<? extends QuadrupedTimedStep> plannedSteps, Vector3D planarVelocity, RobotQuadrant initialStepQuadrant,
-         FramePoint supportCentroidAtSoS, double timeAtSoS, double yawAtSoS, QuadrupedXGaitSettings xGaitSettings)
+         FramePoint3D supportCentroidAtSoS, double timeAtSoS, double yawAtSoS, QuadrupedXGaitSettings xGaitSettings)
    {
       // initialize nominal support rectangle
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -183,7 +183,7 @@ public class QuadrupedXGaitPlanner
          goalPositionAdjustment.changeFrame(worldFrame);
 
          // compute step goal adjustment
-         FramePoint nominalGoalPosition = xGaitRectangle.get(stepQuadrant);
+         FramePoint3D nominalGoalPosition = xGaitRectangle.get(stepQuadrant);
          nominalGoalPosition.changeFrame(worldFrame);
          latestStep.getGoalPosition(goalPositionAdjustment);
          goalPositionAdjustment.changeFrame(worldFrame);

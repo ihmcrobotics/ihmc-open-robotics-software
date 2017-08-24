@@ -1,9 +1,10 @@
 package us.ihmc.robotics.referenceFrames;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
 
 public class XYPlaneFrom3PointsFrame extends ReferenceFrame
 {
@@ -11,9 +12,9 @@ public class XYPlaneFrom3PointsFrame extends ReferenceFrame
 
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
 
-   private final FramePoint p1 = new FramePoint(world);
-   private final FramePoint p2 = new FramePoint(world);
-   private final FramePoint p3 = new FramePoint(world);
+   private final FramePoint3D p1 = new FramePoint3D(world);
+   private final FramePoint3D p2 = new FramePoint3D(world);
+   private final FramePoint3D p3 = new FramePoint3D(world);
 
    private final RotationMatrix rotation = new RotationMatrix();
    private final Vector3D eX = new Vector3D();
@@ -25,7 +26,7 @@ public class XYPlaneFrom3PointsFrame extends ReferenceFrame
       super(name, parentFrame, false, true);
    }
 
-   public void setPoints(FramePoint p1, FramePoint p2, FramePoint p3)
+   public void setPoints(FramePoint3D p1, FramePoint3D p2, FramePoint3D p3)
    {
       this.p1.setIncludingFrame(p1);
       this.p2.setIncludingFrame(p2);

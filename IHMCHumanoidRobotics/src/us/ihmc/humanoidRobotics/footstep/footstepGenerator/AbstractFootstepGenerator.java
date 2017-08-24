@@ -2,6 +2,10 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -12,20 +16,16 @@ import us.ihmc.humanoidRobotics.footstep.FootstepUtils;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPath;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.AtlasFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.ConvexHullFootstepSnapper;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapper;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnapper;
+import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -53,8 +53,8 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
 //   protected final FootstepSnapper footstepSnapper = new SimpleFootstepSnapper();
 
    //TODO: Fix so not specific to Atlas...
-   private final FootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
-   private final FootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
+   private final QuadTreeFootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
+   private final QuadTreeFootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
 
    private SideDependentList<Footstep> priorStanceFeet;
    boolean priorStanceFeetSpecified = false;
@@ -109,7 +109,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
          }
          else
          {
-            FramePoint soleFrameInWorldPoint = new FramePoint(soleFrame);
+            FramePoint3D soleFrameInWorldPoint = new FramePoint3D(soleFrame);
             soleFrameInWorldPoint.changeFrame(WORLD_FRAME);
             footstep = footstepSnapper.generateFootstepWithoutHeightMap(solePose, foot, soleFrame, currentFootstepSide, soleFrameInWorldPoint.getZ(), new Vector3D(0.0, 0.0, 1.0));
             if (VERBOSE_ERROR_PRINTS)
@@ -227,17 +227,17 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
    {
       FramePose2d endPose = getPath().getPoseAtS(1);
       Point3D endPoint = new Point3D(endPose.getX(), endPose.getY(), 0.0);
-      RobotSide closestSideToEnd = FootstepUtils.getFrontFootRobotSideFromFootsteps(lastFootsteps, new FramePoint(ReferenceFrame.getWorldFrame(), endPoint));
+      RobotSide closestSideToEnd = FootstepUtils.getFrontFootRobotSideFromFootsteps(lastFootsteps, new FramePoint3D(ReferenceFrame.getWorldFrame(), endPoint));
 
       return closestSideToEnd;
    }
 
-   protected FramePoint2d offsetFootstepFromPath(RobotSide currentFootstepSide, FramePoint2d footstepPosition2d, double footHeading, double offsetAmount)
+   protected FramePoint2D offsetFootstepFromPath(RobotSide currentFootstepSide, FramePoint2D footstepPosition2d, double footHeading, double offsetAmount)
    {
       double sideWaysHeading = footHeading + Math.PI / 2.0;
-      FrameVector2d offsetVector = new FrameVector2d(WORLD_FRAME, Math.cos(sideWaysHeading), Math.sin(sideWaysHeading));
+      FrameVector2D offsetVector = new FrameVector2D(WORLD_FRAME, Math.cos(sideWaysHeading), Math.sin(sideWaysHeading));
       offsetVector.scale(currentFootstepSide.negateIfRightSide(offsetAmount));
-      FramePoint2d footstepPosition = new FramePoint2d(footstepPosition2d);
+      FramePoint2D footstepPosition = new FramePoint2D(footstepPosition2d);
       footstepPosition.changeFrame(WORLD_FRAME);
       footstepPosition.add(offsetVector);
 

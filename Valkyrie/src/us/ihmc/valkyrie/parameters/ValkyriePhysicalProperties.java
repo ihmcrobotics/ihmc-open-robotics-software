@@ -1,12 +1,11 @@
 package us.ihmc.valkyrie.parameters;
 
-import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class ValkyriePhysicalProperties implements DRCRobotPhysicalProperties
+public class ValkyriePhysicalProperties
 {
    public static final double footsizeReduction = 0.01;
 
@@ -41,12 +40,6 @@ public class ValkyriePhysicalProperties implements DRCRobotPhysicalProperties
          controlFrameToWristTransform.setTranslation(0.0, robotSide.negateIfRightSide(0.10), 0.0);
          handControlFrameToWristTransforms.put(robotSide, controlFrameToWristTransform);
       }
-   }
-
-   @Override
-   public double getAnkleHeight()
-   {
-      return ankleHeight;
    }
 
    public static RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide side)

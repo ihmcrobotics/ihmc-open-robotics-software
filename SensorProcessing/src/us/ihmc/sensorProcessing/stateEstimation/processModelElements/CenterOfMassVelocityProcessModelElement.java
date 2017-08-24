@@ -6,25 +6,25 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
 
 public class CenterOfMassVelocityProcessModelElement extends AbstractProcessModelElement
 {
    private static final int SIZE = 3;
-   private final ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort;
-   private final ControlFlowInputPort<FrameVector> centerOfMassAccelerationPort;
+   private final ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort;
+   private final ControlFlowInputPort<FrameVector3D> centerOfMassAccelerationPort;
 
    // temp stuff
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final FrameVector centerOfMassVelocity = new FrameVector(worldFrame);
-   private final FrameVector centerOfMassVelocityDelta = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D centerOfMassVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3D centerOfMassVelocityDelta = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
-   public CenterOfMassVelocityProcessModelElement(ControlFlowOutputPort<FrameVector> centerOfMassVelocityPort,
-           ControlFlowInputPort<FrameVector> centerOfMassAccelerationPort, String name, YoVariableRegistry registry)
+   public CenterOfMassVelocityProcessModelElement(ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort,
+           ControlFlowInputPort<FrameVector3D> centerOfMassAccelerationPort, String name, YoVariableRegistry registry)
    {
       super(centerOfMassVelocityPort, TimeDomain.CONTINUOUS, false, SIZE, name, registry);
       this.centerOfMassVelocityPort = centerOfMassVelocityPort;
@@ -64,7 +64,7 @@ public class CenterOfMassVelocityProcessModelElement extends AbstractProcessMode
       updateCenterOfMassVelocity(centerOfMassVelocityDelta);
    }
 
-   private void updateCenterOfMassVelocity(FrameVector centerOfMassVelocityDelta)
+   private void updateCenterOfMassVelocity(FrameVector3D centerOfMassVelocityDelta)
    {
       centerOfMassVelocity.set(centerOfMassVelocityPort.getData());
       centerOfMassVelocity.add(centerOfMassVelocityDelta);

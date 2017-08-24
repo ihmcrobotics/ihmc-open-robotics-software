@@ -1,16 +1,16 @@
 package us.ihmc.quadrupedRobotics.estimator.sensorProcessing.sensorProcessors;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class FootSwitchUpdaterBasedOnOtherFeet implements FootSwitchUpdater
 { 
    private static final double EPSILON = 1e-5;
-   private QuadrantDependentList<FramePoint> footPositions = new QuadrantDependentList<FramePoint>();
+   private QuadrantDependentList<FramePoint3D> footPositions = new QuadrantDependentList<FramePoint3D>();
    
-   public FootSwitchUpdaterBasedOnOtherFeet(QuadrantDependentList<FramePoint> footPositions)
+   public FootSwitchUpdaterBasedOnOtherFeet(QuadrantDependentList<FramePoint3D> footPositions)
    {
       this.footPositions = footPositions;
    }

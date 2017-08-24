@@ -1,13 +1,13 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class CenterOfMassAccelerationCalculator
 {
-   private final FramePoint comLocation = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final FrameVector linkLinearMomentumDot = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D comLocation = new FramePoint3D(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D linkLinearMomentumDot = new FrameVector3D(ReferenceFrame.getWorldFrame());
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
    private final RigidBody[] rigidBodies;
    private final RigidBody base;
@@ -24,7 +24,7 @@ public class CenterOfMassAccelerationCalculator
       this.base = base;
    }
    
-   public void getCoMAcceleration(FrameVector comAccelerationToPack)
+   public void getCoMAcceleration(FrameVector3D comAccelerationToPack)
    {
       boolean firstIteration = true;
       double totalMass = 0.0;

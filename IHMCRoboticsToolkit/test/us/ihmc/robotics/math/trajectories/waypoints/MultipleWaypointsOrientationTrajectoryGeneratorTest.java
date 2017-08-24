@@ -6,12 +6,12 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
@@ -44,7 +44,7 @@ public class MultipleWaypointsOrientationTrajectoryGeneratorTest
       
       
       FrameOrientation waypointOrientation = new FrameOrientation();
-      FrameVector waypointAngularVelocity = new FrameVector();
+      FrameVector3D waypointAngularVelocity = new FrameVector3D();
       
       for (int i = 0; i < numberOfWaypoints; i++)
       {
@@ -59,12 +59,12 @@ public class MultipleWaypointsOrientationTrajectoryGeneratorTest
 
 
       FrameOrientation orientationToPackMultiple = new FrameOrientation(worldFrame);
-      FrameVector angularVelocityToPackMultiple = new FrameVector(worldFrame);
-      FrameVector angularAccelerationToPackMultiple = new FrameVector(worldFrame);
+      FrameVector3D angularVelocityToPackMultiple = new FrameVector3D(worldFrame);
+      FrameVector3D angularAccelerationToPackMultiple = new FrameVector3D(worldFrame);
 
       FrameOrientation orientationToPackSimple = new FrameOrientation(worldFrame);
-      FrameVector angularVelocityToPackSimple = new FrameVector(worldFrame);
-      FrameVector angularAccelerationToPackSimple = new FrameVector(worldFrame);
+      FrameVector3D angularVelocityToPackSimple = new FrameVector3D(worldFrame);
+      FrameVector3D angularAccelerationToPackSimple = new FrameVector3D(worldFrame);
       
       for (double t = 0.0; t <= trajectoryTime; t += dt)
       {

@@ -1,8 +1,8 @@
 package us.ihmc.communication.packets;
 
 import us.ihmc.communication.ros.generators.RosExportedField;
-import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
