@@ -7,7 +7,6 @@ import java.awt.Graphics;
 import java.util.HashMap;
 
 import javax.swing.Icon;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTree;

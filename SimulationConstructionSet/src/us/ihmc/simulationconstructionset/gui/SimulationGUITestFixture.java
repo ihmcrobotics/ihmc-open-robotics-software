@@ -362,7 +362,7 @@ public class SimulationGUITestFixture
 
    public void selectSearchTab()
    {
-      JTabbedPaneFixture combinedVarPanelTabbedPane = focusedWindow.tabbedPane("CombinedVarPanel");
+      JTabbedPaneFixture combinedVarPanelTabbedPane = focusedWindow.panel("CombinedVarPanel").tabbedPane();
       combinedVarPanelTabbedPane.selectTab("Search");
    }
 

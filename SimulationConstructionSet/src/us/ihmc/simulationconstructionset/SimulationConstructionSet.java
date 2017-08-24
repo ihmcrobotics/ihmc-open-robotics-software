@@ -94,7 +94,6 @@ import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.image.ImageCallback;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.yoVariables.dataBuffer.DataBufferCommandsExecutor;
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 import us.ihmc.yoVariables.dataBuffer.GotoInPointCommandExecutor;
@@ -226,7 +225,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       CreateNewGraphWindowCommandExecutor, CreateNewViewportWindowCommandExecutor, CropBufferCommandExecutor, CutBufferCommandExecutor, ExportSnapshotCommandExecutor,
       GotoInPointCommandExecutor, GotoOutPointCommandExecutor, NextCameraKeyCommandExecutor, PackBufferCommandExecutor, PreviousCameraKeyCommandExecutor,
       RemoveCameraKeyCommandExecutor, SetInPointCommandExecutor, SetOutPointCommandExecutor, StepBackwardCommandExecutor, StepForwardCommandExecutor,
-      ToggleCameraKeyModeCommandExecutor, ToggleKeyPointModeCommandExecutor, GUIEnablerAndDisabler, WriteDataCommandExecutor, TimeHolder,
+      ToggleCameraKeyModeCommandExecutor, ToggleKeyPointModeCommandExecutor, GUIEnablerAndDisabler, WriteDataCommandExecutor, TimeHolder, ParameterRootNamespaceHolder,
       DataBufferCommandsExecutor, TickAndUpdatable
 {
    private static final boolean TESTING_LOAD_STUFF = false;
@@ -295,6 +294,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    private final YoGraphicMenuManager yoGraphicMenuManager;
 
+   private NameSpace parameterRootPath = null;
+   
    public static SimulationConstructionSet generateSimulationFromDataFile(File chosenFile)
    {
       // / get file stuff
@@ -425,21 +426,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       this.simulationSynchronizer = mySimulation.getSimulationSynchronizer();
 
       ArrayList<YoVariable<?>> originalRootVariables = rootRegistry.getAllVariablesIncludingDescendants();
-      try
-      {
-         for (YoVariable<?> yoVariable : originalRootVariables)
-         {
-            System.out.println("Original Variable: " + yoVariable);
-         }
 
-         this.myDataBuffer.addVariables(originalRootVariables);
-      }
-      catch (RepeatDataBufferEntryException e)
+      
+      for (YoVariable<?> yoVariable : originalRootVariables)
       {
-         e.printStackTrace();
-
-         throw new RuntimeException("Repeat Data Buffer Exception " + e);
+         System.out.println("Original Variable: " + yoVariable);
       }
+
+      this.myDataBuffer.addVariables(originalRootVariables);
 
       setupVarGroup("all", new String[0], new String[] { ".*" });
 
@@ -527,14 +521,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
             // + registeredYoVariable);
 
             // Make sure RCS still works with all of this!
-            try
-            {
-               myDataBuffer.addVariable(registeredYoVariable);
-            }
-            catch (RepeatDataBufferEntryException exception)
-            {
-               System.err.println("Already added to the dataBuffer. Not going to add it again!");
-            }
+            myDataBuffer.addVariable(registeredYoVariable);
          }
 
          @Override
@@ -549,14 +536,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
             // System.err.println("Adding a child YoVariableRegistry to the SCS root Registry after the SCS has been started! yoVariableRegistryWasAdded: "
             // + addedRegistry);
 
-            try
-            {
-               myDataBuffer.addVariables(addedRegistry.getAllVariablesIncludingDescendants());
-            }
-            catch (RepeatDataBufferEntryException exception)
-            {
-               System.err.println("Already added to the dataBuffer. Not going to add it again!");
-            }
+            myDataBuffer.addVariables(addedRegistry.getAllVariablesIncludingDescendants());
 
             if (myGUI != null)
             {
@@ -3815,18 +3795,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       this.addVariablesToGUI(varList);
 
-      try
-      {
-         mySimulation.addVarList(varList);
-      }
-      catch (RepeatDataBufferEntryException ex)
-      {
-         ex.printStackTrace();
-         System.err.println("Exception in SimulationConstructionSet.addVarList(). VarList has one or more YoVariable repeats including " + ex + ".");
-         System.err.println("This could be due to having YoVariables with the same name, or due to trying to add a VarList that has been already added,");
-         System.err.println("or from having a YoVariable in multiple VarLists. Therefore the VarList was not added. VarList name = " + varList.getName()
-               + "\nVarList = \n" + varList + "\n");
-      }
+      mySimulation.addVarList(varList);
    }
 
    /**
@@ -4545,5 +4514,24 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void initializeCollisionDetectionAndHandling(DefaultCollisionVisualizer collisionVisualizer, CollisionHandler collisionHandler)
    {
       mySimulation.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+   }
+
+   @Override
+   public NameSpace getParameterRootPath()
+   {
+      return parameterRootPath;
+   }
+   
+   /**
+    * Sets the parameter root path.
+    * 
+    * Only the parameters in the child registries of the parameter root path get
+    * exported. The parameter root path is not included in the exported path.
+    * 
+    * @param registry
+    */
+   public void setParameterRootPath(YoVariableRegistry registry)
+   {
+      this.parameterRootPath = registry.getNameSpace();
    }
 }

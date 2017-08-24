@@ -20,5 +20,9 @@ public interface AllDialogConstructorsHolder
    public abstract LoadGraphGroupDialogConstructor getLoadGraphGroupDialogConstructor();
    public abstract SaveRobotConfigurationDialogConstructor getSaveRobotConfigurationDialogConstructor();
    public abstract ExportSimulationTo3DMaxDialogConstructor getExportSimulationTo3DMaxDialogConstructor();
+   public abstract LoadParametersConstructor getLoadParametersConstructor();
+   public abstract SaveParametersConstructor getSaveParametersConstructor();
+   
+   
    public abstract void closeAndDispose();
 }
