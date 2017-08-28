@@ -18,7 +18,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWh
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
-import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeVisualizer;
@@ -480,12 +479,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
        * result
        */
       kinematicsSolver.solve();
-      boolean ikResult = kinematicsSolver.getIKResult();
-      boolean colResult = isCollisionFree();
-      boolean result = false;
-
-      if (ikResult && colResult)
-         result = true;
+      boolean result = kinematicsSolver.getResult();
 
       node.setConfigurationJoints(kinematicsSolver.getFullRobotModelCopy());
 
@@ -494,20 +488,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       cntKinematicSolver.set(kinematicsSolver.getCntForUpdateInternal());
 
       return result;
-   }
-
-   /**
-    * get collision result
-    */
-   private boolean isCollisionFree()
-   {
-      // TODO move collision check inside solver
-      RobotCollisionModel robotCollisionModel = new RobotCollisionModel(kinematicsSolver.getDesiredFullRobotModel());
-
-      robotCollisionModel.update();
-      boolean isCollisionFree = robotCollisionModel.getCollisionResult();
-
-      return isCollisionFree;
    }
 
    /**
@@ -545,7 +525,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
     */
    private void updateYoVariables()
    {
-      isGoodkinematicSolution.set(kinematicsSolver.getIKResult());
+      isGoodkinematicSolution.set(kinematicsSolver.getResult());
       solutionQuality.set(kinematicsSolver.getSolution().getSolutionQuality());
       endeffectorFrame.setVisible(true);
       endeffectorFrame.update();
