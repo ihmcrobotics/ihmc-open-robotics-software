@@ -3,27 +3,24 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.AtlasKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.NodeData;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public abstract class CTTaskNode
 {
    private NodeData nodeData;
    private NodeData normalizedNodeData;
+   
    private ArrayList<CTTaskNode> childNodes;
    private CTTaskNode parentNode;
 
    protected boolean validity = true;
 
-   protected OneDoFJoint[] configurationJoints; // TODO switch to double[] or HashMap<String, Double>
-   protected Vector3D configurationTranslation;
-   protected Quaternion configurationRotation;
+//   protected OneDoFJoint[] configurationJoints; // TODO switch to double[] or HashMap<String, Double>
+//   protected Vector3D configurationTranslation;
+//   protected Quaternion configurationRotation;
    
    protected AtlasKinematicsConfiguration configuration;
    
@@ -43,9 +40,9 @@ public abstract class CTTaskNode
       this.childNodes = node.childNodes;
       this.parentNode = node.parentNode;
       this.normalizedNodeData = node.normalizedNodeData;
-      this.configurationJoints = node.configurationJoints;
-      this.configurationTranslation = node.configurationTranslation;
-      this.configurationRotation = node.configurationRotation;
+//      this.configurationJoints = node.configurationJoints;
+//      this.configurationTranslation = node.configurationTranslation;
+//      this.configurationRotation = node.configurationRotation;
       
       this.configuration = node.configuration;
    }
@@ -56,6 +53,8 @@ public abstract class CTTaskNode
       this.nodeData.q = rootData;
       this.childNodes = new ArrayList<CTTaskNode>();
       this.normalizedNodeData = new NodeData(rootData.length);
+      
+      this.configuration = new AtlasKinematicsConfiguration();
    }
 
    public CTTaskNode(int dimensionOfData)
@@ -63,6 +62,8 @@ public abstract class CTTaskNode
       this.nodeData = new NodeData(dimensionOfData);
       this.childNodes = new ArrayList<CTTaskNode>();
       this.normalizedNodeData = new NodeData(dimensionOfData);
+      
+      this.configuration = new AtlasKinematicsConfiguration();
    }
 
    public final int getDimensionOfNodeData()
@@ -218,34 +219,44 @@ public abstract class CTTaskNode
       nodeCopy.nodeData = new NodeData(this.nodeData);
       nodeCopy.normalizedNodeData = new NodeData(this.normalizedNodeData);
 
-      nodeCopy.configurationJoints = this.configurationJoints;
-      nodeCopy.configurationTranslation = this.configurationTranslation;
-      nodeCopy.configurationRotation = this.configurationRotation;
+//      nodeCopy.configurationJoints = this.configurationJoints;
+//      nodeCopy.configurationTranslation = this.configurationTranslation;
+//      nodeCopy.configurationRotation = this.configurationRotation;
 
+      
+      nodeCopy.configuration = this.configuration;
+      
       return nodeCopy;
    }
 
    public final void setConfigurationJoints(FullHumanoidRobotModel robot)
    {
-      this.configurationJoints = FullRobotModelUtils.getAllJointsExcludingHands(robot);
-      this.configurationTranslation = new Vector3D(robot.getRootJoint().getTranslationForReading());
-      this.configurationRotation = new Quaternion(robot.getRootJoint().getRotationForReading());
+//      this.configurationJoints = FullRobotModelUtils.getAllJointsExcludingHands(robot);
+//      this.configurationTranslation = new Vector3D(robot.getRootJoint().getTranslationForReading());
+//      this.configurationRotation = new Quaternion(robot.getRootJoint().getRotationForReading());
+      
+      this.configuration.putAtlasConfigurationData(robot);
+   }
+   
+   public AtlasKinematicsConfiguration getConfiguration()
+   {
+      return configuration;
    }
 
-   public OneDoFJoint[] getOneDoFJoints()
-   {
-      return configurationJoints;
-   }
-
-   public Vector3D getRootTranslation()
-   {
-      return configurationTranslation;
-   }
-
-   public Quaternion getRootRotation()
-   {
-      return configurationRotation;
-   }
+//   public OneDoFJoint[] getOneDoFJoints()
+//   {
+//      return configurationJoints;
+//   }
+//
+//   public Vector3D getRootTranslation()
+//   {
+//      return configurationTranslation;
+//   }
+//
+//   public Quaternion getRootRotation()
+//   {
+//      return configurationRotation;
+//   }
 
    public void setValidity(boolean value)
    {

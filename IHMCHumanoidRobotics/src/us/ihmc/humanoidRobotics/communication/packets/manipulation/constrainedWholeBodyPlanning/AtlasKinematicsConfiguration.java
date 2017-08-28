@@ -3,11 +3,13 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedW
 import java.util.HashMap;
 import java.util.Set;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
@@ -80,14 +82,10 @@ public class AtlasKinematicsConfiguration
    
    public void putAtlasConfigurationData(FullHumanoidRobotModel fullRobotModel)
    {
-      putJointConfiguration(fullRobotModel.getOneDoFJoints());
+      putJointConfiguration(FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
+//      putJointConfiguration(fullRobotModel.getOneDoFJoints());
       putRootTranslation(fullRobotModel.getRootJoint().getTranslationForReading());
       putRootOrientation(fullRobotModel.getRootJoint().getRotationForReading());
-   }
-
-   public void putAtlasConfigurationData(RobotConfigurationData robotConfigurationData)
-   {
-
    }
 
    public void putJointConfiguration(OneDoFJoint[] oneDoFJoints)

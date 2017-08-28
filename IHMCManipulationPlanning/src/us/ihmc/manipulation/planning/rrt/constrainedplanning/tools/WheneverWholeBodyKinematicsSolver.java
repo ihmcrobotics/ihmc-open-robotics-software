@@ -258,13 +258,13 @@ public class WheneverWholeBodyKinematicsSolver
       cntForUpdateInternal = 0;
       solutionQualityOld.setToNaN();
 
-      AtlasKinematicsConfiguration robotConfigurationData = latestRobotConfigurationReference.get();
-
-      if (robotConfigurationData == null)
+      AtlasKinematicsConfiguration robotConfiguration = latestRobotConfigurationReference.get();
+      
+      if (robotConfiguration == null)
          return false;
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
-      wholeBodyFunctions.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints);
+      wholeBodyFunctions.setRobotStateFromRobotConfigurationData(robotConfiguration, rootJoint, oneDoFJoints);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -496,12 +496,8 @@ public class WheneverWholeBodyKinematicsSolver
    }
    
    public void updateRobotConfigurationData(CTTaskNode node)
-   {
-      OneDoFJoint[] joints = node.getOneDoFJoints();
-      Vector3D translation = node.getRootTranslation();
-      Quaternion rotation = node.getRootRotation();
-      
-      updateRobotConfigurationData(joints, translation, rotation);
+   {  
+      updateRobotConfigurationData(node.getConfiguration());
    }
 
    public void updateRobotConfigurationData(OneDoFJoint[] joints, Tuple3DReadOnly translation, Tuple4DReadOnly rotation)
