@@ -32,6 +32,7 @@ import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.AtlasKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -146,6 +147,8 @@ public class WheneverWholeBodyKinematicsSolver
    private static double handWeight = 50.0;
    private static double chestWeight = 10.0;
    private static double pelvisWeight = 10.0;
+
+   protected RobotCollisionModel robotCollisionModel;
 
    public WheneverWholeBodyKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
@@ -343,9 +346,12 @@ public class WheneverWholeBodyKinematicsSolver
       cntForUpdateInternal++;
    }
 
-   public boolean getIKResult()
+   public boolean getResult()
    {
-      return isSolved;
+      if (isCollisionFree())
+         return isSolved;
+      else
+         return false;
    }
 
    public boolean solve()
@@ -376,12 +382,32 @@ public class WheneverWholeBodyKinematicsSolver
             if (DEBUG)
                PrintTools.info("cntForUpdateInternal " + " TRUE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
 
-            return isSolved;
+            return true;
          }
       }
       PrintTools.info("cntForUpdateInternal " + " FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
 
       return false;
+   }
+
+   /**
+    * this method should be overrode in inherit class to add environment collision shape.
+    * @example
+    * SimpleCollisionShapeFactory collisionShapeFactory = getRobotCollisionModel().getCollisionShapeFactory(); // this is collisionShapeFactor of robotCollisionModel
+    * CollisionModelBox collisionModel;
+      collisionModel = new CollisionModelBox( box constructor);
+      collisionModel.getCollisionShape().setCollisionGroup(0b11111111101111);
+      collisionModel.getCollisionShape().setCollisionMask(0b11111111111111);
+    */
+
+   private boolean isCollisionFree()
+   {
+      robotCollisionModel = new RobotCollisionModel(getDesiredFullRobotModel());
+
+      robotCollisionModel.update();
+      boolean isCollisionFree = robotCollisionModel.getCollisionResult();
+
+      return isCollisionFree;
    }
 
    public int getCntForUpdateInternal()

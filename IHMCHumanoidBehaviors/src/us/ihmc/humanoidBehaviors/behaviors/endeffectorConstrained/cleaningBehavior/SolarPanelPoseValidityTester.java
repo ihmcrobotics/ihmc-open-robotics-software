@@ -15,6 +15,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShapeFactory;
 
 public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
 {
@@ -130,7 +131,8 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
    public void addEnvironmentCollisionModel()
    {
       CollisionModelBox solarPanelCollisionModel;
-      solarPanelCollisionModel = new CollisionModelBox(getRobotCollisionModel().getCollisionShapeFactory(), solarPanel.getRigidBodyTransform(),
+      SimpleCollisionShapeFactory collisionShapeFactory = getRobotCollisionModel().getCollisionShapeFactory();
+      solarPanelCollisionModel = new CollisionModelBox(collisionShapeFactory, solarPanel.getRigidBodyTransform(),
                                                        solarPanel.getSizeU(), solarPanel.getSizeV(), solarPanel.getSizeW());
       solarPanelCollisionModel.getCollisionShape().setCollisionGroup(0b11111111101111);
       solarPanelCollisionModel.getCollisionShape().setCollisionMask(0b11111111111111);
