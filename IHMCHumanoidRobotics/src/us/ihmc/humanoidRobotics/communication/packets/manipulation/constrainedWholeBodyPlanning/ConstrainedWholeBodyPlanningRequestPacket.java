@@ -13,10 +13,12 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
 
    public int numberOfFindInitialGuess;
 
-   public OneDoFJoint[] initialOneDoFJoints; // TODO look at RobotConfigurationData
-
-   public Vector3D initialTranslationOfRootJoint;
-   public Quaternion initialRotationOfRootJoint;
+//   public OneDoFJoint[] initialOneDoFJoints; // TODO look at RobotConfigurationData
+//
+//   public Vector3D initialTranslationOfRootJoint;
+//   public Quaternion initialRotationOfRootJoint;
+          
+   public AtlasKinematicsConfiguration initialConfiguration;
 
    /*
     * ConstrainedEndEffectorTrajectory cannot be imported in
@@ -31,16 +33,22 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
 
    public void setInitialRobotConfigration(FullHumanoidRobotModel fullRobotModel)
    {
-      initialOneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
-      initialTranslationOfRootJoint = new Vector3D(fullRobotModel.getRootJoint().getTranslationForReading());
-      initialRotationOfRootJoint = new Quaternion(fullRobotModel.getRootJoint().getRotationForReading());
+//      initialOneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
+//      initialTranslationOfRootJoint = new Vector3D(fullRobotModel.getRootJoint().getTranslationForReading());
+//      initialRotationOfRootJoint = new Quaternion(fullRobotModel.getRootJoint().getRotationForReading());
+      
+      initialConfiguration = new AtlasKinematicsConfiguration();
+      
+      initialConfiguration.putJointConfiguration(FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
+      initialConfiguration.putRootTranslation(fullRobotModel.getRootJoint().getTranslationForReading());      
+      initialConfiguration.putRootOrientation(fullRobotModel.getRootJoint().getRotationForReading());
    }
 
    public void setNumberOfExpanding(int value)
    {
       this.numberOfExpanding = value;
    }
-   
+
    public void setNumberOfFindInitialGuess(int value)
    {
       this.numberOfFindInitialGuess = value;

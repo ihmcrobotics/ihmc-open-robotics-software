@@ -31,6 +31,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.AtlasKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
@@ -209,6 +210,8 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       
    }
 
+   
+   
    @Test
    public void testForToolbox() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -267,9 +270,8 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory = endeffectorTrajectory;
       packet.setNumberOfFindInitialGuess(100);
       packet.setNumberOfExpanding(500);
-
       packet.setInitialRobotConfigration(sdfFullRobotModel);
-
+      
       packet.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
 
       toolboxCommunicator.send(packet);
@@ -489,6 +491,31 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
       scs.addStaticLinkGraphics(getXYZAxis(pose3D));
 
+      System.out.println("End");
+   }
+   
+//   @Test
+   public void testForAtlasKinematicsConfiguration() throws SimulationExceededMaximumTimeException, IOException
+   {
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+      drcBehaviorTestHelper.getControllerFullRobotModel().updateFrames();
+
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      sdfFullRobotModel.updateFrames();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
+      referenceFrames.updateFrames();
+
+      AtlasKinematicsConfiguration configuration = new AtlasKinematicsConfiguration();
+      
+      configuration.putJointConfiguration(sdfFullRobotModel.getOneDoFJoints());
+      configuration.putRootTranslation(sdfFullRobotModel.getRootJoint().getTranslationForReading());      
+      configuration.putRootOrientation(sdfFullRobotModel.getRootJoint().getRotationForReading());
+      
+      configuration.print();
+      
       System.out.println("End");
    }
 

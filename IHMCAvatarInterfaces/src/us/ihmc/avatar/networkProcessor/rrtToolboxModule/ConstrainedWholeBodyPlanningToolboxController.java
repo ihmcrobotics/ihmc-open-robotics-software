@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.AtlasKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
@@ -84,9 +85,11 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    private CTTaskNode visualizedNode;
 
-   private OneDoFJoint[] initialOneDoFJoints;
-   private Vector3D initialTranslationOfRootJoint;
-   private Quaternion initialRotationOfRootJoint;
+   private AtlasKinematicsConfiguration initialConfiguration;
+   
+//   private OneDoFJoint[] initialOneDoFJoints;
+//   private Vector3D initialTranslationOfRootJoint;
+//   private Quaternion initialRotationOfRootJoint;
 
    private FullHumanoidRobotModel visualizedFullRobotModel;
 
@@ -367,16 +370,15 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       numberOfExpanding = request.numberOfExpanding;
       numberOfInitialGuess = request.numberOfFindInitialGuess;
 
-      initialOneDoFJoints = request.initialOneDoFJoints;
-      initialTranslationOfRootJoint = request.initialTranslationOfRootJoint;
-      initialRotationOfRootJoint = request.initialRotationOfRootJoint;
-
+      initialConfiguration = request.initialConfiguration;
+      
       /*
        * initialize kinematicsSolver.
        */
       kinematicsSolver = new WheneverWholeBodyKinematicsSolver(drcRobotModelFactory);
 
-      kinematicsSolver.updateRobotConfigurationData(initialOneDoFJoints, initialTranslationOfRootJoint, initialRotationOfRootJoint);
+//      kinematicsSolver.updateRobotConfigurationData(initialOneDoFJoints, initialTranslationOfRootJoint, initialRotationOfRootJoint);
+      kinematicsSolver.updateRobotConfigurationData(initialConfiguration);
 
       kinematicsSolver.initialize();
       kinematicsSolver.holdCurrentTrajectoryMessages();
@@ -438,15 +440,14 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    {
       if (node.getParentNode() != null)
       {
-         // PrintTools.warn("this node has parent node.");
          // TODO change from OneDoFJoint[] to double[]
          kinematicsSolver.updateRobotConfigurationData(node.getParentNode().getOneDoFJoints(), node.getParentNode().getRootTranslation(),
                                                        node.getParentNode().getRootRotation());
       }
       else
       {
-         // PrintTools.warn("parentNode is required.");
-         kinematicsSolver.updateRobotConfigurationData(initialOneDoFJoints, initialTranslationOfRootJoint, initialRotationOfRootJoint);
+//         kinematicsSolver.updateRobotConfigurationData(initialOneDoFJoints, initialTranslationOfRootJoint, initialRotationOfRootJoint);
+         kinematicsSolver.updateRobotConfigurationData(initialConfiguration);
       }
 
       kinematicsSolver.initialize();
