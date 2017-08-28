@@ -20,9 +20,16 @@ public abstract class CTTaskNode
 
    protected boolean validity = true;
 
-   protected OneDoFJoint[] configurationJoints;
+   protected OneDoFJoint[] configurationJoints; // TODO switch to double[] or HashMap<String, Double>
    protected Vector3D configurationTranslation;
    protected Quaternion configurationRotation;
+   
+   
+   
+   
+   
+   
+   
 
    public CTTaskNode()
    {
