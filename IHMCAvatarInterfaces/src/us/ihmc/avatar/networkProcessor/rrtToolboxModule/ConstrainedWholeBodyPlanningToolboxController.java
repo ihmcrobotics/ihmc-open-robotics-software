@@ -291,7 +291,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          tree.connectNewNode(false);
       }
 
-      visualizedNode = tree.getNewNode().createNodeCopy();
+      visualizedNode = tree.getNewNode().createNodeCopy();      
       visualizedNode.setValidity(tree.getNewNode().getValidity());
 
       /*
@@ -348,7 +348,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          PrintTools.info("" + bestScoreInitialGuess);
          for (int i = 0; i < rootNode.getDimensionOfNodeData(); i++)
             PrintTools.info("" + i + " " + rootNode.getNodeData(i));
-
+         
          tree = new CTTaskNodeTree(rootNode);
          tree.setTaskRegion(taskRegion);
       }
@@ -441,12 +441,10 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       if (node.getParentNode() != null)
       {
          // TODO change from OneDoFJoint[] to double[]
-         kinematicsSolver.updateRobotConfigurationData(node.getParentNode().getOneDoFJoints(), node.getParentNode().getRootTranslation(),
-                                                       node.getParentNode().getRootRotation());
+         kinematicsSolver.updateRobotConfigurationData(node.getParentNode().getConfiguration());
       }
       else
       {
-//         kinematicsSolver.updateRobotConfigurationData(initialOneDoFJoints, initialTranslationOfRootJoint, initialRotationOfRootJoint);
          kinematicsSolver.updateRobotConfigurationData(initialConfiguration);
       }
 
@@ -496,7 +494,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       if (ikResult && colResult)
          result = true;
-
+      
       node.setConfigurationJoints(kinematicsSolver.getFullRobotModelCopy());
 
       node.setValidity(result);
