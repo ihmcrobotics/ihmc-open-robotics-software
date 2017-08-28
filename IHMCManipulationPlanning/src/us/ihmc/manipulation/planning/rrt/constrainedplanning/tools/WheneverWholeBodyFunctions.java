@@ -67,14 +67,14 @@ public class WheneverWholeBodyFunctions
       desiredRootJoint.getPredecessor().updateFramesRecursively();
 
    }
-   
+
    public void setRobotStateFromRobotConfigurationData(AtlasKinematicsConfiguration robotConfigurationData, FloatingInverseDynamicsJoint desiredRootJoint,
                                                        OneDoFJoint[] oneDoFJoints)
-   {      
+   {
       robotConfigurationData.getOneDoFJoints(oneDoFJoints);
-    
+
       desiredRootJoint.setPosition(robotConfigurationData.rootTranslation);
-      
+
       desiredRootJoint.setRotation(robotConfigurationData.rootOrientation);
       desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
 
