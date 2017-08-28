@@ -223,7 +223,11 @@ public class FootControlModule
 
    public void doControl()
    {
-      legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      {
+         legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
+      }
+
       footControlHelper.update();
 
       if (resetFootPolygon.getBooleanValue())
@@ -284,26 +288,40 @@ public class FootControlModule
 
    public void updateLegSingularityModule()
    {
-      legSingularityAndKneeCollapseAvoidanceControlModule.update();
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      {
+         legSingularityAndKneeCollapseAvoidanceControlModule.update();
+      }
    }
 
    public void correctCoMHeightTrajectoryForSingularityAvoidance(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,
-         double zCurrent, ReferenceFrame pelvisZUpFrame)
+                                                                 double zCurrent, ReferenceFrame pelvisZUpFrame)
    {
-      legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,
-            pelvisZUpFrame, getCurrentConstraintType());
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      {
+         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,
+                                                                                                               pelvisZUpFrame, getCurrentConstraintType());
+      }
    }
 
    public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
-         ReferenceFrame pelvisZUpFrame, double footLoadPercentage)
+                                                              ReferenceFrame pelvisZUpFrame, double footLoadPercentage)
    {
-      legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForCollapseAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,
-            pelvisZUpFrame, footLoadPercentage, getCurrentConstraintType());
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      {
+         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForCollapseAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,
+                                                                                                            pelvisZUpFrame, footLoadPercentage,
+                                                                                                            getCurrentConstraintType());
+      }
    }
 
    public void correctCoMHeightTrajectoryForUnreachableFootStep(CoMHeightTimeDerivativesData comHeightDataToCorrect)
    {
-      legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect, getCurrentConstraintType());
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      {
+         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect,
+                                                                                                              getCurrentConstraintType());
+      }
    }
 
    public void setFootstep(Footstep footstep, double swingTime)
@@ -318,7 +336,10 @@ public class FootControlModule
 
    public void resetHeightCorrectionParametersForSingularityAvoidance()
    {
-      legSingularityAndKneeCollapseAvoidanceControlModule.resetHeightCorrectionParameters();
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      {
+         legSingularityAndKneeCollapseAvoidanceControlModule.resetHeightCorrectionParameters();
+      }
    }
 
    /**
