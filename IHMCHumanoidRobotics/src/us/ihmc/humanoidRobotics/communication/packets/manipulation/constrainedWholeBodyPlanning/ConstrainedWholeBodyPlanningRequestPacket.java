@@ -13,7 +13,7 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
 
    public int numberOfFindInitialGuess;
 
-   public OneDoFJoint[] initialOneDoFJoints;
+   public OneDoFJoint[] initialOneDoFJoints; // TODO look at RobotConfigurationData
 
    public Vector3D initialTranslationOfRootJoint;
    public Quaternion initialRotationOfRootJoint;

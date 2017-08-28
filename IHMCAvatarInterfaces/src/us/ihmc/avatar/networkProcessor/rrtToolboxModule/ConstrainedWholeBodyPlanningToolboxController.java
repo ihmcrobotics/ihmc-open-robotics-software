@@ -439,6 +439,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       if (node.getParentNode() != null)
       {
          // PrintTools.warn("this node has parent node.");
+         // TODO change from OneDoFJoint[] to double[]
          kinematicsSolver.updateRobotConfigurationData(node.getParentNode().getOneDoFJoints(), node.getParentNode().getRootTranslation(),
                                                        node.getParentNode().getRootRotation());
       }
@@ -509,6 +510,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
     */
    private boolean isCollisionFree()
    {
+      // TODO move collision check inside solver
       RobotCollisionModel robotCollisionModel = new RobotCollisionModel(kinematicsSolver.getDesiredFullRobotModel());
 
       robotCollisionModel.update();

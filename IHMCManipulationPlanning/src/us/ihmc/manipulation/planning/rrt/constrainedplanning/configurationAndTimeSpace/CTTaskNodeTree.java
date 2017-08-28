@@ -204,7 +204,7 @@ public class CTTaskNodeTree
       return nodeNew.getNormalizedNodeData(0) - nodeOld.getNormalizedNodeData(0);
    }
 
-   private double getMatric(CTTaskNode nodeOne, CTTaskNode nodeTwo)
+   private double getMetric(CTTaskNode nodeOne, CTTaskNode nodeTwo)
    {
       double normalizedtimeGap = getNormalizedTimeGap(nodeOne, nodeTwo);
       double normalizedTaskDisplacement = getNormalizedTaskDisplacement(nodeOne, nodeTwo);
@@ -268,7 +268,7 @@ public class CTTaskNodeTree
       for (int i = 0; i < wholeNodes.size(); i++)
       {
          curNode = this.wholeNodes.get(i);
-         curMatric = getMatric(curNode, randomNode);
+         curMatric = getMetric(curNode, randomNode);
          if (curMatric < optMatric)
          {
             optMatric = curMatric;
