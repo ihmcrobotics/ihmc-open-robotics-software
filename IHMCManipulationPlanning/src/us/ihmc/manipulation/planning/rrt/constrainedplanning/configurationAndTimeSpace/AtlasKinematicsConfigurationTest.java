@@ -1,5 +1,7 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.AtlasKinematicsConfiguration;
+
 public class AtlasKinematicsConfigurationTest
 {
    public static void main(String[] args)
@@ -16,14 +18,20 @@ public class AtlasKinematicsConfigurationTest
       
       System.out.println(configurationOne.jointConfiguration.get("l_arm_shz"));
       
-      AtlasKinematicsConfiguration configurationTwo = new AtlasKinematicsConfiguration(configurationOne);
+      AtlasKinematicsConfiguration configurationTwo = new AtlasKinematicsConfiguration();
+      
+      configurationTwo.putAtlasConfigurationData(configurationOne);
       
       System.out.println(configurationTwo.jointConfiguration.get("l_arm_shz"));
       
       AtlasKinematicsConfiguration configurationThree = new AtlasKinematicsConfiguration();
       
-      configurationThree.putOtherAtlasKinematicsConfiguration(configurationTwo);
+      configurationThree.putAtlasConfigurationData(configurationTwo);
       
       System.out.println(configurationThree.jointConfiguration.get("l_arm_shz"));
+      
+      
+      
+      configurationThree.print();
    }
 }

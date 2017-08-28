@@ -34,7 +34,7 @@ public class TaskNode3D extends TaskNode
 
       if (getParentNode() != null)
       {
-         nodeTester.updateRobotConfigurationDataJointsOnly(getParentNode().getOneDoFJoints());
+//         nodeTester.updateRobotConfigurationDataJointsOnly(getParentNode().getOneDoFJoints());
          for (int i = 0; i < getParentNode().getOneDoFJoints().length; i++)
          {
             double jointPosition = getParentNode().getOneDoFJoints()[i].getQ();

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.AtlasKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.NodeData;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -24,7 +25,7 @@ public abstract class CTTaskNode
    protected Vector3D configurationTranslation;
    protected Quaternion configurationRotation;
    
-   
+   protected AtlasKinematicsConfiguration configuration;
    
    
    
@@ -45,6 +46,8 @@ public abstract class CTTaskNode
       this.configurationJoints = node.configurationJoints;
       this.configurationTranslation = node.configurationTranslation;
       this.configurationRotation = node.configurationRotation;
+      
+      this.configuration = node.configuration;
    }
 
    public CTTaskNode(double[] rootData)

@@ -27,9 +27,12 @@ import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.AtlasKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -119,7 +122,10 @@ public class WheneverWholeBodyKinematicsSolver
    private final List<RigidBody> listOfControllableRigidBodies = new ArrayList<>();
    private final Map<RigidBody, YoGraphicCoordinateSystem> desiredCoodinateSystems = new HashMap<>();
    private final Map<RigidBody, YoGraphicCoordinateSystem> currentCoodinateSystems = new HashMap<>();
-   private final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
+//   private final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
+   
+   private final AtomicReference<AtlasKinematicsConfiguration> latestRobotConfigurationReference = new AtomicReference<>(null);
+   
    private final Map<String, FeedbackControlCommand<?>> userFeedbackCommands = new HashMap<>();
    private final YoInteger numberOfActiveCommands = new YoInteger("numberOfActiveCommands", registry);
 
@@ -252,7 +258,7 @@ public class WheneverWholeBodyKinematicsSolver
       cntForUpdateInternal = 0;
       solutionQualityOld.setToNaN();
 
-      RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
+      AtlasKinematicsConfiguration robotConfigurationData = latestRobotConfigurationReference.get();
 
       if (robotConfigurationData == null)
          return false;
@@ -262,9 +268,8 @@ public class WheneverWholeBodyKinematicsSolver
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         double jointPosition = oneDoFJoints[i].getQ();
          if (DEBUG)
-            System.out.println(oneDoFJoints[i].getName() + " " + jointPosition);
+            System.out.println(oneDoFJoints[i].getName() + " " + oneDoFJoints[i].getQ());
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -499,50 +504,24 @@ public class WheneverWholeBodyKinematicsSolver
       updateRobotConfigurationData(joints, translation, rotation);
    }
 
-   public void updateRobotConfigurationData(OneDoFJoint[] joints, Vector3D translation, Quaternion rotation)
-   {
-      ForceSensorDefinition[] forceSensorDefinitions;
-      IMUDefinition[] imuDefinitions;
-
-      imuDefinitions = desiredFullRobotModel.getIMUDefinitions();
-      forceSensorDefinitions = desiredFullRobotModel.getForceSensorDefinitions();
-
-      RobotConfigurationData currentRobotConfigurationData = new RobotConfigurationData(joints, forceSensorDefinitions, null, imuDefinitions);
-
-      currentRobotConfigurationData.setRootOrientation(new Quaternion(rotation));
-      currentRobotConfigurationData.setRootTranslation(new Vector3D(translation));
-
-      currentRobotConfigurationData.setJointState(joints);
-
-      updateRobotConfigurationData(currentRobotConfigurationData);
+   public void updateRobotConfigurationData(OneDoFJoint[] joints, Tuple3DReadOnly translation, Tuple4DReadOnly rotation)
+   {      
+      AtlasKinematicsConfiguration atlasConfiguration = new AtlasKinematicsConfiguration();
+      atlasConfiguration.putJointConfiguration(joints);
+      atlasConfiguration.putRootTranslation(translation);
+      atlasConfiguration.putRootOrientation(rotation);
+      
+      updateRobotConfigurationData(atlasConfiguration);
    }
 
    public void updateRobotConfigurationData(OneDoFJoint[] joints, FloatingInverseDynamicsJoint rootJoint)
    {
-      ForceSensorDefinition[] forceSensorDefinitions;
-      IMUDefinition[] imuDefinitions;
-
-      imuDefinitions = desiredFullRobotModel.getIMUDefinitions();
-      forceSensorDefinitions = desiredFullRobotModel.getForceSensorDefinitions();
-
-      RobotConfigurationData currentRobotConfigurationData = new RobotConfigurationData(joints, forceSensorDefinitions, null, imuDefinitions);
-
-      currentRobotConfigurationData.setRootOrientation(new Quaternion(rootJoint.getRotationForReading()));
-      currentRobotConfigurationData.setRootTranslation(new Vector3D(rootJoint.getTranslationForReading()));
-
-      currentRobotConfigurationData.setJointState(joints);
-
-      updateRobotConfigurationData(currentRobotConfigurationData);
+      updateRobotConfigurationData(joints, rootJoint.getTranslationForReading(), rootJoint.getRotationForReading());
    }
-
-   public void updateRobotConfigurationDataJointsOnly(OneDoFJoint[] joints)
+   
+   public void updateRobotConfigurationData(AtlasKinematicsConfiguration atlasConfiguration)
    {
-      latestRobotConfigurationDataReference.get().setJointState(joints);
-   }
-
-   private void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
-   {
-      latestRobotConfigurationDataReference.set(newConfigurationData);
+      latestRobotConfigurationReference.set(atlasConfiguration);
    }
 
    public FullHumanoidRobotModel getDesiredFullRobotModel()
