@@ -208,7 +208,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       return lowLevelJointData.getControlMode();
    }
 
-   @Override
    public double getDesiredJointTorque(OneDoFJoint joint)
    {
       YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
@@ -217,7 +216,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       return lowLevelJointData.getDesiredTorque();
    }
 
-   @Override
    public double getDesiredJointPosition(OneDoFJoint joint)
    {
       YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
@@ -226,7 +224,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       return lowLevelJointData.getDesiredPosition();
    }
 
-   @Override
    public double getDesiredJointVelocity(OneDoFJoint joint)
    {
       YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
@@ -235,7 +232,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       return lowLevelJointData.getDesiredVelocity();
    }
 
-   @Override
    public double getDesiredJointAcceleration(OneDoFJoint joint)
    {
       YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
@@ -244,7 +240,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       return lowLevelJointData.getDesiredAcceleration();
    }
 
-   @Override
    public double getDesiredJointCurrent(OneDoFJoint joint)
    {
       YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
@@ -253,7 +248,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       return lowLevelJointData.getDesiredCurrent();
    }
 
-   @Override
    public boolean pollResetJointIntegrators(OneDoFJoint joint)
    {
       YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
@@ -262,7 +256,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       return lowLevelJointData.pollResetIntegratorsRequest();
    }
 
-   @Override
    public boolean peekResetJointIntegrators(OneDoFJoint joint)
    {
       YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
@@ -277,7 +270,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       return lowLevelJointDataMap.containsKey(joint.getName());
    }
 
-   @Override
    public boolean hasControlModeForJoint(OneDoFJoint joint)
    {
       YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
@@ -287,7 +279,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
          return lowLevelJointData.hasControlMode();
    }
 
-   @Override
    public boolean hasDesiredTorqueForJoint(OneDoFJoint joint)
    {
       YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
@@ -297,7 +288,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
          return lowLevelJointData.hasDesiredTorque();
    }
 
-   @Override
    public boolean hasDesiredPositionForJoint(OneDoFJoint joint)
    {
       YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
@@ -307,7 +297,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
          return lowLevelJointData.hasDesiredPosition();
    }
 
-   @Override
    public boolean hasDesiredVelocityForJoint(OneDoFJoint joint)
    {
       YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
@@ -317,7 +306,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
          return lowLevelJointData.hasDesiredVelocity();
    }
 
-   @Override
    public boolean hasDesiredAcceleration(OneDoFJoint joint)
    {
       YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
@@ -327,7 +315,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
          return lowLevelJointData.hasDesiredAcceleration();
    }
 
-   @Override
    public boolean hasDesiredCurrentForJoint(OneDoFJoint joint)
    {
       YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
