@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedW
 import java.util.HashMap;
 import java.util.Set;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -11,7 +10,6 @@ import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class AtlasKinematicsConfiguration
 {
@@ -19,8 +17,6 @@ public class AtlasKinematicsConfiguration
     * see OneDoFJoint names without fingers.
     */
    public final HashMap<String, Double> jointConfiguration;
-
-   //   public final HashMap<String, Double> rootConfiguration;
 
    public Vector3D rootTranslation;
    public Quaternion rootOrientation;
@@ -79,18 +75,17 @@ public class AtlasKinematicsConfiguration
       this.rootTranslation.set(other.rootTranslation);
       this.rootOrientation.set(other.rootOrientation);
    }
-   
+
    public void putAtlasConfigurationData(FullHumanoidRobotModel fullRobotModel)
    {
       putJointConfiguration(FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
-//      putJointConfiguration(fullRobotModel.getOneDoFJoints());
       putRootTranslation(fullRobotModel.getRootJoint().getTranslationForReading());
       putRootOrientation(fullRobotModel.getRootJoint().getRotationForReading());
    }
 
    public void putJointConfiguration(OneDoFJoint[] oneDoFJoints)
    {
-      for(int i=0;i<oneDoFJoints.length;i++)
+      for (int i = 0; i < oneDoFJoints.length; i++)
          jointConfiguration.put(oneDoFJoints[i].getName(), oneDoFJoints[i].getQ());
    }
 
@@ -103,7 +98,7 @@ public class AtlasKinematicsConfiguration
    {
       this.rootOrientation.set(rootOrientation);
    }
-   
+
    public void getOneDoFJoints(OneDoFJoint[] oneDoFJoints)
    {
       for (int i = 0; i < oneDoFJoints.length; i++)

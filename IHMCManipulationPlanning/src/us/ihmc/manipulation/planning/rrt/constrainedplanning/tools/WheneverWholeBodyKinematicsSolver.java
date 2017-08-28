@@ -26,11 +26,9 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.AtlasKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -55,10 +53,7 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -120,12 +115,9 @@ public class WheneverWholeBodyKinematicsSolver
 
    private final EnumMap<LegJointName, YoDouble> legJointLimitReductionFactors = new EnumMap<>(LegJointName.class);
    private final List<RigidBody> listOfControllableRigidBodies = new ArrayList<>();
-   private final Map<RigidBody, YoGraphicCoordinateSystem> desiredCoodinateSystems = new HashMap<>();
-   private final Map<RigidBody, YoGraphicCoordinateSystem> currentCoodinateSystems = new HashMap<>();
-//   private final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
-   
+
    private final AtomicReference<AtlasKinematicsConfiguration> latestRobotConfigurationReference = new AtomicReference<>(null);
-   
+
    private final Map<String, FeedbackControlCommand<?>> userFeedbackCommands = new HashMap<>();
    private final YoInteger numberOfActiveCommands = new YoInteger("numberOfActiveCommands", registry);
 
@@ -259,7 +251,7 @@ public class WheneverWholeBodyKinematicsSolver
       solutionQualityOld.setToNaN();
 
       AtlasKinematicsConfiguration robotConfiguration = latestRobotConfigurationReference.get();
-      
+
       if (robotConfiguration == null)
          return false;
 
@@ -494,19 +486,19 @@ public class WheneverWholeBodyKinematicsSolver
       privilegedConfigurationCommand.setDefaultMaxVelocity(privilegedMaxVelocity.getDoubleValue());
       privilegedConfigurationCommandReference.set(privilegedConfigurationCommand);
    }
-   
+
    public void updateRobotConfigurationData(CTTaskNode node)
-   {  
+   {
       updateRobotConfigurationData(node.getConfiguration());
    }
 
    public void updateRobotConfigurationData(OneDoFJoint[] joints, Tuple3DReadOnly translation, Tuple4DReadOnly rotation)
-   {      
+   {
       AtlasKinematicsConfiguration atlasConfiguration = new AtlasKinematicsConfiguration();
       atlasConfiguration.putJointConfiguration(joints);
       atlasConfiguration.putRootTranslation(translation);
       atlasConfiguration.putRootOrientation(rotation);
-      
+
       updateRobotConfigurationData(atlasConfiguration);
    }
 
@@ -514,7 +506,7 @@ public class WheneverWholeBodyKinematicsSolver
    {
       updateRobotConfigurationData(joints, rootJoint.getTranslationForReading(), rootJoint.getRotationForReading());
    }
-   
+
    public void updateRobotConfigurationData(AtlasKinematicsConfiguration atlasConfiguration)
    {
       latestRobotConfigurationReference.set(atlasConfiguration);
@@ -815,16 +807,15 @@ public class WheneverWholeBodyKinematicsSolver
       upperValue = upperValue / limitSize;
       lowerValue = lowerValue / limitSize;
 
-      double base = 100.0;      
-      
-//      double diffUpper = Math.abs((upperValue - aJointValue) * (upperValue - aJointValue) * (upperValue - aJointValue) * (upperValue - aJointValue));
-//      double diffLower = Math.abs((aJointValue - lowerValue) * (aJointValue - lowerValue) * (aJointValue - lowerValue) * (aJointValue - lowerValue));
-      
-      double diffUpper = Math.pow(base, Math.abs((upperValue - aJointValue)*(upperValue - aJointValue)));
-      double diffLower = Math.pow(base, Math.abs((aJointValue - lowerValue)*(aJointValue - lowerValue)));
-      
-      
-      jointLimitScore = (diffUpper > diffLower)? diffUpper : diffLower;
+      double base = 100.0;
+
+      //      double diffUpper = Math.abs((upperValue - aJointValue) * (upperValue - aJointValue) * (upperValue - aJointValue) * (upperValue - aJointValue));
+      //      double diffLower = Math.abs((aJointValue - lowerValue) * (aJointValue - lowerValue) * (aJointValue - lowerValue) * (aJointValue - lowerValue));
+
+      double diffUpper = Math.pow(base, Math.abs((upperValue - aJointValue) * (upperValue - aJointValue)));
+      double diffLower = Math.pow(base, Math.abs((aJointValue - lowerValue) * (aJointValue - lowerValue)));
+
+      jointLimitScore = (diffUpper > diffLower) ? diffUpper : diffLower;
 
       if (DEBUG)
          PrintTools.info("" + jointName + " " + jointLimitScore + " " + aJointValue + " " + upperValue + " " + lowerValue);
