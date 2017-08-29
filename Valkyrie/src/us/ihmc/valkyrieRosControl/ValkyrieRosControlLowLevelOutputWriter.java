@@ -30,17 +30,24 @@ public class ValkyrieRosControlLowLevelOutputWriter implements LowLevelOutputWri
    }
 
    @Override
-   public void write()
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public void writeBefore(long timestamp)
    {
       // TODO Auto-generated method stub
       
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public void writeAfter()
    {
       // TODO Auto-generated method stub
-      return null;
+      
    }
 
 }

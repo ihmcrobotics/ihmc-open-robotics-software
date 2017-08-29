@@ -30,15 +30,31 @@ public interface LowLevelOutputWriter
    /**
     * Called the first time the outputwriter runs.
     * 
-    * This function is called in a realtime context. The data from the controller is valid. 
+    * This function is called in a realtime context.
+    * The data from the controller is valid and this function gets called before writeBefore() ever gets called.
     * 
     */
    void initialize();
    
+   
    /**
-    * Write controller data to the output structures.
+    * Write function that gets called before the estimator has ran.
+    * 
+    * All joint data is from the previous estimator tick. 
+    * initialize() has been called once when this function is called.
+    * 
+    * @param timestamp Timestamp the estimator tick started
     */
-   void write();
+   void writeBefore(long timestamp);
+   
+   /**
+    * Write function that gets called after the estimator has ran. 
+    * 
+    * All joint data has been updated to the latest measured values.
+    * initialize() has been called once when this function is called.
+    * 
+    */
+   void writeAfter();
    
    /**
     * Get the yoVariableRegistry for this output writer
