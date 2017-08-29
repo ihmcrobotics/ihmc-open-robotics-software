@@ -67,8 +67,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
 
-   private final YoBoolean isGoodkinematicSolution = new YoBoolean("isGoodkinematicSolution", registry);
-
    private final YoDouble jointlimitScore = new YoDouble("jointlimitScore", registry);
 
    private double bestScoreInitialGuess = 0;
@@ -525,7 +523,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
     */
    private void updateYoVariables()
    {
-      isGoodkinematicSolution.set(kinematicsSolver.getResult());
       solutionQuality.set(kinematicsSolver.getSolution().getSolutionQuality());
       endeffectorFrame.setVisible(true);
       endeffectorFrame.update();
