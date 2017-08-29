@@ -28,6 +28,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -88,9 +90,9 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    private CTTreeVisualizer treeVisualizer;
 
-   private final YoFramePose endeffectorPose;
+   private final SideDependentList<YoFramePose> endeffectorPose = new SideDependentList<>();
 
-   private final YoGraphicCoordinateSystem endeffectorFrame;
+   private final SideDependentList<YoGraphicCoordinateSystem> endeffectorFrame = new SideDependentList<>();
 
    /*
     * Configuration and Time space Tree
@@ -139,11 +141,18 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       this.treeStateVisualizer = new TreeStateVisualizer("TreeStateVisualizer", "VisualizerGraphicsList", yoGraphicsRegistry, registry);
       this.state = CWBToolboxState.DO_NOTHING;
 
-      this.endeffectorPose = new YoFramePose("endeffectorPose", ReferenceFrame.getWorldFrame(), registry);
-      this.endeffectorFrame = new YoGraphicCoordinateSystem("endeffectorPoseFrame", this.endeffectorPose, 0.25);
-      this.endeffectorFrame.setVisible(true);
+      
+      
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         this.endeffectorPose.put(robotSide, new YoFramePose("" + robotSide + "endeffectorPose", ReferenceFrame.getWorldFrame(), registry));
+         
+         this.endeffectorFrame.put(robotSide, new YoGraphicCoordinateSystem("" + robotSide + "endeffectorPoseFrame", this.endeffectorPose.get(robotSide), 0.25));
+         this.endeffectorFrame.get(robotSide).setVisible(true);
+         yoGraphicsRegistry.registerYoGraphic("" + robotSide + "endeffectorPoseViz", this.endeffectorFrame.get(robotSide));
+      }
 
-      yoGraphicsRegistry.registerYoGraphic("endeffectorPoseViz", this.endeffectorFrame);
+      
 
       state = CWBToolboxState.FIND_INITIAL_GUESS;
    }
@@ -302,7 +311,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
     */
    private void findInitialGuess()
    {
-      GenericTaskNode initialGuessNode = new GenericTaskNode();
+      CTTaskNode initialGuessNode = new CTTaskNode(rootNode);
 
       tree.setRandomNormalizedNodeData(initialGuessNode, true);
       initialGuessNode.setNormalizedNodeData(0, 0);
@@ -452,7 +461,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
        * frame.
        */
       Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(node.getNodeData(0), configurationSpace);
-      setEndEffectorPose(desiredPose);
+      setEndEffectorPose(RobotSide.LEFT, desiredPose);
 
       /*
        * for kinematics solver, append offset
@@ -523,16 +532,20 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private void updateYoVariables()
    {
       solutionQuality.set(kinematicsSolver.getSolution().getSolutionQuality());
-      endeffectorFrame.setVisible(true);
-      endeffectorFrame.update();
+      
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         endeffectorFrame.get(robotSide).setVisible(true);
+         endeffectorFrame.get(robotSide).update();   
+      }
    }
 
    /**
     * update end effector pose
     */
-   private void setEndEffectorPose(Pose3D desiredPose)
+   private void setEndEffectorPose(RobotSide robotSide, Pose3D desiredPose)
    {
-      endeffectorPose.setPosition(desiredPose.getPosition());
-      endeffectorPose.setOrientation(desiredPose.getOrientation());
+      endeffectorPose.get(robotSide).setPosition(desiredPose.getPosition());
+      endeffectorPose.get(robotSide).setOrientation(desiredPose.getOrientation());
    }
 }
