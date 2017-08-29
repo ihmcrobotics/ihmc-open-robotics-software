@@ -5,7 +5,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.5.10"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.6.0"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
@@ -25,13 +25,13 @@ testSuites {
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
 }
 
 testDependencies {
    compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
    compile group: 'junit', name: 'junit', version: '4.11'
    compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: dependencyMode
-   compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: groupDependencyVersion
 }

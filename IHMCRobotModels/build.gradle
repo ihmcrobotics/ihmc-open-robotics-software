@@ -5,7 +5,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.5.10"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.6.0"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
@@ -29,10 +29,10 @@ mainDependencies {
    compile group: 'com.google.guava', name: 'guava', version: '18.0'
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
-   compile group: "us.ihmc", name: "ihmc-java-extensions", version: dependencyMode
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
-   compile group: "us.ihmc", name: "ihmc-robot-description", version: dependencyMode
-   compile group: "us.ihmc", name: "ihmc-graphics-description", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
 }
 
 testDependencies {
