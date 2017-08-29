@@ -210,7 +210,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
    }
 
-      @Test
+   @Test
    public void testForToolbox() throws SimulationExceededMaximumTimeException, IOException
    {
       if (visulaizerOn)
@@ -261,13 +261,13 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
        * constrained end effector trajectory.
        */
       System.out.println("Send packet " + drcBehaviorTestHelper.getYoTime());
-      ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0, RobotSide.LEFT);
+      ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
 
       ConstrainedWholeBodyPlanningRequestPacket packet = new ConstrainedWholeBodyPlanningRequestPacket();
 
       ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory = endeffectorTrajectory;
       packet.setNumberOfFindInitialGuess(60);
-      packet.setNumberOfExpanding(400);
+      packet.setNumberOfExpanding(600);
       packet.setInitialRobotConfigration(sdfFullRobotModel);
 
       packet.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
@@ -278,6 +278,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10.0);
 
       System.out.println("End");
+
    }
 
    //      @Test
@@ -371,7 +372,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       /*
        * constrained end effector trajectory (WorldFrame).
        */
-      DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0, RobotSide.LEFT);
+      DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
 
       /*
        * solver.
@@ -387,9 +388,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       kinematicsSolver.initialize();
       kinematicsSolver.holdCurrentTrajectoryMessages();
 
-      //      Point3D desiredPoint = new Point3D(0.5, 0.35, 1.8);
       Point3D desiredPoint = new Point3D(0.5, 0.35, 1.5);
-      //      Point3D desiredPoint = new Point3D(0.5, 0.35, 1.0);
       Quaternion desiredOrientation = new Quaternion();
       Pose3D desiredPose = new Pose3D(desiredPoint, desiredOrientation);
 
@@ -422,17 +421,17 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
        * constrained end effector trajectory
        */
 
-      DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0, RobotSide.LEFT);
+      DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
 
-//      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(0.0, new ConfigurationSpace())));
-//
-//      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(3.0, new ConfigurationSpace())));
-//
-//      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(6.0, new ConfigurationSpace())));
-//
-//      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(9.0, new ConfigurationSpace())));
-//
-//      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(10.0, new ConfigurationSpace())));
+      //      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(0.0, new ConfigurationSpace())));
+      //
+      //      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(3.0, new ConfigurationSpace())));
+      //
+      //      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(6.0, new ConfigurationSpace())));
+      //
+      //      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(9.0, new ConfigurationSpace())));
+      //
+      //      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(10.0, new ConfigurationSpace())));
 
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       System.out.println("End");

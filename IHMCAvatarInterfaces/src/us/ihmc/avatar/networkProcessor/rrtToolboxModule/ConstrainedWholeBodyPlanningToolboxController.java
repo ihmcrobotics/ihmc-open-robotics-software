@@ -141,18 +141,15 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       this.treeStateVisualizer = new TreeStateVisualizer("TreeStateVisualizer", "VisualizerGraphicsList", yoGraphicsRegistry, registry);
       this.state = CWBToolboxState.DO_NOTHING;
 
-      
-      
-      for(RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : RobotSide.values)
       {
          this.endeffectorPose.put(robotSide, new YoFramePose("" + robotSide + "endeffectorPose", ReferenceFrame.getWorldFrame(), registry));
-         
-         this.endeffectorFrame.put(robotSide, new YoGraphicCoordinateSystem("" + robotSide + "endeffectorPoseFrame", this.endeffectorPose.get(robotSide), 0.25));
+
+         this.endeffectorFrame.put(robotSide,
+                                   new YoGraphicCoordinateSystem("" + robotSide + "endeffectorPoseFrame", this.endeffectorPose.get(robotSide), 0.25));
          this.endeffectorFrame.get(robotSide).setVisible(true);
          yoGraphicsRegistry.registerYoGraphic("" + robotSide + "endeffectorPoseViz", this.endeffectorFrame.get(robotSide));
       }
-
-      
 
       state = CWBToolboxState.FIND_INITIAL_GUESS;
    }
@@ -437,7 +434,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private boolean updateValidity(CTTaskNode node)
    {
       if (node.getParentNode() != null)
-      {      
+      {
          kinematicsSolver.updateRobotConfigurationData(node.getParentNode().getConfiguration());
       }
       else
@@ -450,25 +447,29 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       kinematicsSolver.holdCurrentTrajectoryMessages();
 
       /*
-       * set whole body tasks.
+       * set whole body tasks. pose from 'constrainedEndEffectorTrajectory' is
+       * considered as being in MidZUpframe. for kinematics solver, append
+       * offset
        */
-      ConfigurationSpace configurationSpace = new ConfigurationSpace();
-      configurationSpace.setTranslation(node.getNodeData(5), node.getNodeData(6), node.getNodeData(7));
-      configurationSpace.setRotation(node.getNodeData(8), node.getNodeData(9), node.getNodeData(10));
+      SideDependentList<ConfigurationSpace> configurationSpaces = new SideDependentList<>();
 
-      /*
-       * pose from 'constrainedEndEffectorTrajectory' is considered as in MidZUp
-       * frame.
-       */
-      Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(node.getNodeData(0), RobotSide.LEFT, configurationSpace);
-      setEndEffectorPose(RobotSide.LEFT, desiredPose);
+      configurationSpaces.put(RobotSide.LEFT, new ConfigurationSpace());
+      configurationSpaces.get(RobotSide.LEFT).setTranslation(node.getNodeData(5), node.getNodeData(6), node.getNodeData(7));
+      configurationSpaces.get(RobotSide.LEFT).setRotation(node.getNodeData(8), node.getNodeData(9), node.getNodeData(10));
 
-      /*
-       * for kinematics solver, append offset
-       */
-      desiredPose.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);
+      configurationSpaces.put(RobotSide.RIGHT, new ConfigurationSpace());
+      configurationSpaces.get(RobotSide.RIGHT).setTranslation(node.getNodeData(11), node.getNodeData(12), node.getNodeData(13));
+      configurationSpaces.get(RobotSide.RIGHT).setRotation(node.getNodeData(14), node.getNodeData(15), node.getNodeData(16));
 
-      kinematicsSolver.setDesiredHandPose(RobotSide.LEFT, desiredPose);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(node.getNodeData(0), robotSide, configurationSpaces.get(robotSide));
+         setEndEffectorPose(robotSide, desiredPose);
+
+         desiredPose.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);
+
+         kinematicsSolver.setDesiredHandPose(robotSide, desiredPose);
+      }
 
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(node.getNodeData(2));
@@ -532,11 +533,11 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private void updateYoVariables()
    {
       solutionQuality.set(kinematicsSolver.getSolution().getSolutionQuality());
-      
-      for(RobotSide robotSide : RobotSide.values)
+
+      for (RobotSide robotSide : RobotSide.values)
       {
          endeffectorFrame.get(robotSide).setVisible(true);
-         endeffectorFrame.get(robotSide).update();   
+         endeffectorFrame.get(robotSide).update();
       }
    }
 
