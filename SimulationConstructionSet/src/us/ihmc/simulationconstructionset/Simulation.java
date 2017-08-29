@@ -5,15 +5,7 @@ import java.util.ArrayList;
 
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
-import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.listener.RewoundListener;
-import us.ihmc.yoVariables.registry.NameSpace;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer.RepeatDataBufferEntryException;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.simulationconstructionset.physics.CollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
@@ -26,6 +18,13 @@ import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisio
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.listener.RewoundListener;
+import us.ihmc.yoVariables.registry.NameSpace;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariableList;
 
 public class Simulation implements YoVariableHolder, Serializable // Runnable,
 {
@@ -290,17 +289,8 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
 
    private void addVariablesFromARobot(Robot robot)
    {
-      try
-      {
-         myDataBuffer.addVariables(robot.getAllVariables());
-         myCombinedVarList.addVariables(robot.getAllVariables());
-      }
-      catch (RepeatDataBufferEntryException ex)
-      {
-         System.err.println("Found repeat YoVariable in the robot Variables");
-         ex.printStackTrace();
-         System.exit(-1);
-      }
+      myDataBuffer.addVariables(robot.getAllVariables());
+      myCombinedVarList.addVariables(robot.getAllVariables());
    }
 
    public DataBuffer getDataBuffer()
@@ -461,7 +451,7 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
       return this.myGraphics;
    }
 
-   public void addVarList(YoVariableList newVarList) throws RepeatDataBufferEntryException
+   public void addVarList(YoVariableList newVarList)
    {
       myCombinedVarList.addVariables(newVarList);
       myDataBuffer.addVariables(newVarList.getVariables());

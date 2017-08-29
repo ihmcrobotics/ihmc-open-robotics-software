@@ -46,7 +46,11 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
    private YoGraphicsPropertiesDialogGenerator yoGraphicsPropertiesDialogConstructor;
    private ResizeViewportDialogGenerator resizeViewportDialogConstructor;
    
+   private LoadParametersGenerator loadParametersGenerator;
+   private SaveParametersGenerator saveParametersGenerator;
+   
    private AboutDialogGenerator aboutDialogConstructor;
+   
 
    public StandardAllDialogConstructorsGenerator(SimulationConstructionSet sim, Robot[] robots, DataBuffer myDataBuffer,
          StandardSimulationGUI myGUI, 
@@ -93,6 +97,9 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
       this.yoGraphicsPropertiesDialogConstructor = new YoGraphicsPropertiesDialogGenerator(sim, parentContainer, frame);
       this.resizeViewportDialogConstructor = new ResizeViewportDialogGenerator(frame, viewportSelector);
 
+      this.loadParametersGenerator = new LoadParametersGenerator(sim);
+      this.saveParametersGenerator = new SaveParametersGenerator(sim);
+      
       this.aboutDialogConstructor = new AboutDialogGenerator(frame);
    }
    
@@ -320,8 +327,30 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
          exportGraphsToFileConstructor = null;
       }
       
-      
+      if (loadParametersGenerator != null)
+      {
+         loadParametersGenerator.closeAndDispose();
+         loadParametersGenerator = null;
+      }
+
+      if (saveParametersGenerator != null)
+      {
+         saveParametersGenerator.closeAndDispose();
+         saveParametersGenerator = null;
+      }
   
+   }
+
+   @Override
+   public LoadParametersConstructor getLoadParametersConstructor()
+   {
+      return loadParametersGenerator;
+   }
+
+   @Override
+   public SaveParametersConstructor getSaveParametersConstructor()
+   {
+      return saveParametersGenerator;
    }
 
 }
