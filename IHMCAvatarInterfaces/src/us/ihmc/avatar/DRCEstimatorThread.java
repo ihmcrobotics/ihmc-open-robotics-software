@@ -258,6 +258,21 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          startClockTime.set(currentClockTime);
 
          controllerDataValid.set(threadDataSynchronizer.receiveControllerDataForEstimator());
+         
+         if(outputWriter != null)
+         {
+            if(controllerDataValid.getBooleanValue())
+            {
+               if(!outputWriterInitialized.getBooleanValue())
+               {
+                  outputWriter.initialize();
+                  outputWriterInitialized.set(false);
+               }
+
+               outputWriter.writeBefore(currentClockTime);
+            }
+         }
+         
          sensorReader.read();
 
          estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
@@ -311,12 +326,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          {
             if(controllerDataValid.getBooleanValue())
             {
-               if(!outputWriterInitialized.getBooleanValue())
-               {
-                  outputWriter.initialize();
-                  outputWriterInitialized.set(false);
-               }
-               outputWriter.write();
+               outputWriter.writeAfter();
             }
          }
          
