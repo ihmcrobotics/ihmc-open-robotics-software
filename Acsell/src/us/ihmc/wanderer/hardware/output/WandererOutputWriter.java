@@ -31,9 +31,9 @@ import us.ihmc.wanderer.hardware.configuration.WandererNetworkParameters;
 import us.ihmc.wanderer.hardware.configuration.WandererRightAnkleSpringProperties;
 import us.ihmc.wanderer.hardware.configuration.WandererRightHipXSpringProperties;
 import us.ihmc.wanderer.hardware.controllers.WandererStandPrep;
-import us.ihmc.wholeBodyController.DRCOutputWriter;
+import us.ihmc.wholeBodyController.DRCOutputProcessor;
 
-public class WandererOutputWriter implements DRCOutputWriter, ControllerStateChangedListener,  ControllerFailureListener
+public class WandererOutputWriter implements DRCOutputProcessor, ControllerStateChangedListener,  ControllerFailureListener
 {
    boolean USE_LEFT_HIP_X_SPRING = true;
    boolean USE_RIGHT_HIP_X_SPRING = true;
@@ -170,7 +170,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    }
 
    @Override
-   public void writeAfterController(long timestamp)
+   public void processAfterController(long timestamp)
    {
       if (!outputEnabled)
       {

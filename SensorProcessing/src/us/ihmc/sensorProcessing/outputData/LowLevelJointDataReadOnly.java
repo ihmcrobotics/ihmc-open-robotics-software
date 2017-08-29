@@ -16,5 +16,9 @@ public interface LowLevelJointDataReadOnly
    public abstract double getDesiredCurrent();
    public abstract boolean pollResetIntegratorsRequest();
    public abstract boolean peekResetIntegratorsRequest();
-
+   
+   boolean hasKp();
+   boolean hasKd();
+   double getKp();
+   double getKd();
 }

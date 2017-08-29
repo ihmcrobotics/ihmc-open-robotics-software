@@ -13,11 +13,12 @@ import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.outputData.LowLevelOutputWriter;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.wholeBodyController.DRCOutputWriter;
+import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
 import us.ihmc.wholeBodyController.UIParameters;
@@ -62,17 +63,31 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    /**
+    * Override this method to create a custom output processor to be used with this robot.
+    * <p>
+    * <b> This output writer is meant to be used in simulation only.
+    * </p>
+    * @param humanoidFloatingRootJointRobot Optional handle to the robot to allow directly writing to the joints.
+    *
+    * @return the custom output processor.
+    */
+   public default DRCOutputProcessor getCustomSimulationOutputProcessor(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
+   {
+      return null;
+   }
+   
+   /**
     * Override this method to create a custom output writer to be used with this robot.
     * <p>
     * <b> This output writer is meant to be used in simulation only.
     * </p>
+    * @param LowLevelOutputWriter The outputWriter to use. If null is returned, no output writer is used.
     *
-    * @param parentOutputWriter the default output writer that should be wrapped in the custom output writer.
     * @return the custom output writer.
     */
-   public default DRCOutputWriter getCustomSimulationOutputWriter(DRCOutputWriter parentOutputWriter)
+   public default LowLevelOutputWriter getCustomSimulationOutputWriter(LowLevelOutputWriter outputWriter)
    {
-      return null;
+      return outputWriter;
    }
 
    /**

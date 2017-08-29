@@ -20,7 +20,9 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    private double qd;
    private double qdd;
    private double tauMeasured;
+   @Deprecated
    private double qddDesired;
+   @Deprecated
    private double tau;
 
    private double effortLimitLower = Double.NEGATIVE_INFINITY;
@@ -35,19 +37,28 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    /*
     * VRC HACKS
     */
+   @Deprecated
    private boolean integrateDesiredAccelerations = true; // Hack even more...
+   @Deprecated
    private boolean resetDesiredAccelerationIntegrator = false; // Hack even more more...
 
+   @Deprecated
    private boolean resetIntegrator = false;
 
+   @Deprecated
    private double qDesired;
+   @Deprecated
    private double qdDesired;
+   @Deprecated
    private double kp;
+   @Deprecated
    private double kd;
 
-
+   @Deprecated
    private boolean isUnderPositionControl = false;
+
    private boolean enabled = true;
+   @Deprecated
    private boolean useFeedBackForceControl = true;
 
    /**
@@ -215,21 +226,25 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.qdd = qdd;
    }
 
+   @Deprecated
    public double getQddDesired()
    {
       return qddDesired;
    }
 
+   @Deprecated
    public void setQddDesired(double qddDesired)
    {
       this.qddDesired = qddDesired;
    }
 
+   @Deprecated
    public double getTau()
    {
       return tau;
    }
 
+   @Deprecated
    public void setTau(double tau)
    {
       this.tau = tau;
@@ -374,16 +389,19 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       return effortLimitUpper;
    }
 
+   @Deprecated
    public boolean getIntegrateDesiredAccelerations()
    {
       return integrateDesiredAccelerations;
    }
 
+   @Deprecated
    public void setIntegrateDesiredAccelerations(boolean integrateDesiredAccelerations)
    {
       this.integrateDesiredAccelerations = integrateDesiredAccelerations;
    }
 
+   @Deprecated
    public boolean getResetDesiredAccelerationIntegrator()
    {
       boolean ret = resetDesiredAccelerationIntegrator;
@@ -391,11 +409,13 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       return ret;
    }
 
+   @Deprecated
    public void resetDesiredAccelerationIntegrator()
    {
       resetDesiredAccelerationIntegrator = true;
    }
 
+   @Deprecated
    public boolean getResetIntegrator()
    {
       boolean ret = resetIntegrator;
@@ -403,26 +423,31 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       return ret;
    }
 
+   @Deprecated
    public void resetIntegrator()
    {
       resetIntegrator = true;
    }
 
+   @Deprecated
    public double getqDesired()
    {
       return qDesired;
    }
 
+   @Deprecated
    public double getQdDesired()
    {
       return qdDesired;
    }
 
+   @Deprecated
    public double getKp()
    {
       return kp;
    }
 
+   @Deprecated
    public double getKd()
    {
       return kd;
@@ -434,21 +459,25 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
     * VRC HACKS
     */
 
+   @Deprecated
    public void setqDesired(double qDesired)
    {
       this.qDesired = qDesired;
    }
 
+   @Deprecated
    public void setQdDesired(double qdDesired)
    {
       this.qdDesired = qdDesired;
    }
 
+   @Deprecated
    public void setKp(double kp)
    {
       this.kp = kp;
    }
 
+   @Deprecated
    public void setKd(double kd)
    {
       this.kd = kd;
@@ -474,11 +503,13 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
 
    // DRC Hack
 
+   @Deprecated
    public boolean isUnderPositionControl()
    {
       return isUnderPositionControl;
    }
 
+   @Deprecated
    public void setUnderPositionControl(boolean val)
    {
       isUnderPositionControl = val;
@@ -514,11 +545,13 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.isOnline = isOnline;
    }
 
+   @Deprecated
    public boolean isUseFeedBackForceControl()
    {
       return useFeedBackForceControl;
    }
 
+   @Deprecated
    public void setUseFeedBackForceControl(boolean useFeedBackForceControl)
    {
       this.useFeedBackForceControl = useFeedBackForceControl;
