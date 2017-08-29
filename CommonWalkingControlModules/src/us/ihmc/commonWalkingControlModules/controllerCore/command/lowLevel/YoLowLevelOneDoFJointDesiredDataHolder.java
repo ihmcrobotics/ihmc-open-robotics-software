@@ -9,6 +9,9 @@ import java.util.Map;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.tools.string.StringTools;
 
 public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJointDesiredDataHolderReadOnly

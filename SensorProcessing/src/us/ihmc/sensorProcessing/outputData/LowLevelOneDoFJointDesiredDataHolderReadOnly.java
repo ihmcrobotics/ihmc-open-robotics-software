@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
+package us.ihmc.sensorProcessing.outputData;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
