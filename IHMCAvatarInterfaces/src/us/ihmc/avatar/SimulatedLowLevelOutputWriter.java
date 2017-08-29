@@ -16,11 +16,13 @@ public class SimulatedLowLevelOutputWriter implements LowLevelOutputWriter
 {
 
    protected final FloatingRootJointRobot robot;
+   protected final boolean writeBeforeEstimatorTick;
    protected final PairList<OneDegreeOfFreedomJoint, LowLevelJointDataReadOnly> revoluteJoints = new PairList<OneDegreeOfFreedomJoint, LowLevelJointDataReadOnly>();
 
-   public SimulatedLowLevelOutputWriter(FloatingRootJointRobot robot)
+   public SimulatedLowLevelOutputWriter(FloatingRootJointRobot robot, boolean writeBeforeEstimatorTick)
    {
       this.robot = robot;
+      this.writeBeforeEstimatorTick = writeBeforeEstimatorTick;
 
    }
 
@@ -46,19 +48,16 @@ public class SimulatedLowLevelOutputWriter implements LowLevelOutputWriter
    @Override
    public void setForceSensorDataHolder(ForceSensorDataHolderReadOnly forceSensorDataHolderForEstimator)
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void initialize()
    {
-      // TODO Auto-generated method stub
 
    }
-
-   @Override
-   public void write()
+   
+   protected void write()
    {
       for (int i = 0; i < revoluteJoints.size(); i++)
       {
@@ -90,9 +89,27 @@ public class SimulatedLowLevelOutputWriter implements LowLevelOutputWriter
    }
 
    @Override
+   public void writeBefore(long timestamp)
+   {
+      if(writeBeforeEstimatorTick)
+      {
+         write();
+      }
+   }
+
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return null;
+   }
+
+   @Override
+   public void writeAfter()
+   {  
+      if(!writeBeforeEstimatorTick)
+      {
+         write();
+      }
    }
 
 }

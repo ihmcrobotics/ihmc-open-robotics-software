@@ -164,7 +164,7 @@ public class AvatarSimulationFactory
    
    private void setupSimulationOutputWriter()
    {
-      simulationOutputWriter = robotModel.get().getCustomSimulationOutputWriter(new SimulatedLowLevelOutputWriter(humanoidFloatingRootJointRobot));
+      simulationOutputWriter = robotModel.get().getCustomSimulationOutputWriter(new SimulatedLowLevelOutputWriter(humanoidFloatingRootJointRobot, true));
       
    }
 
