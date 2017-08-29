@@ -5,10 +5,9 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer.RepeatDataBufferEntryException;
 
 public class GraphTester
 {
@@ -19,16 +18,8 @@ public class GraphTester
 
    public GraphTester()
    {
-      try
-      {
-         buffer.addVariable(xPlot);
-         buffer.addVariable(yPlot);
-      }
-      catch (RepeatDataBufferEntryException e)
-      {
-         e.printStackTrace();
-      }
-
+      buffer.addVariable(xPlot);
+      buffer.addVariable(yPlot);
 
       setUpGraph();
    }

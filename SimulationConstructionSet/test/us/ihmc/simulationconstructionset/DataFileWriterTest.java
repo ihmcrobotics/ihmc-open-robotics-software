@@ -1,6 +1,8 @@
 package us.ihmc.simulationconstructionset;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -22,9 +24,11 @@ import org.junit.rules.ExpectedException;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer.RepeatDataBufferEntryException;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariableList;
 
 public class DataFileWriterTest
 {
@@ -35,7 +39,7 @@ public class DataFileWriterTest
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.7)
 	@Test(timeout=300000)
-   public void testDataFileWriterAndReader() throws IOException, RepeatDataBufferEntryException
+   public void testDataFileWriterAndReader() throws IOException
    {
       int numDataPoints = 10000;
 
@@ -321,7 +325,7 @@ public class DataFileWriterTest
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
-   public void testWritingAndReadingADataFileWithLotsOfVariables() throws IOException, RepeatDataBufferEntryException
+   public void testWritingAndReadingADataFileWithLotsOfVariables() throws IOException
    {
       File fileOne = new File(TEST_DIRECTORY + "fileOne.data.gz");
 
@@ -359,7 +363,7 @@ public class DataFileWriterTest
       YoVariableList newVarList = new YoVariableList("newVarList");
       YoVariableRegistry registry = new YoVariableRegistry("rootRegistry");
 
-      DataBuffer newDataBuffer = new DataBuffer();
+      DataBuffer newDataBuffer = new DataBuffer(16384);
       dataFileReader.readData(newVarList, registry, newDataBuffer);
 
       assertEquals(originalVarList.size(), newVarList.size());

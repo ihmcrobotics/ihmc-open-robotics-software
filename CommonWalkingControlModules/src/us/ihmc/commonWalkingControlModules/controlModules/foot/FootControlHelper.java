@@ -67,8 +67,16 @@ public class FootControlHelper
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
-      legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
-            walkingControllerParameters, controllerToolbox, registry);
+      if (walkingControllerParameters.enableLegSingularityAndKneeCollapseAvoidanceModule())
+      {
+         legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
+                                                                                                                       walkingControllerParameters,
+                                                                                                                       controllerToolbox, registry);
+      }
+      else
+      {
+         legSingularityAndKneeCollapseAvoidanceControlModule = null;
+      }
 
       if (walkingControllerParameters.enableToeOffSlippingDetection())
       {
