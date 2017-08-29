@@ -67,9 +67,4 @@ public class GenericTaskNode extends CTTaskNode
       setNodeData(10, eeConfigurationSpace.getRotationYaw());
    }
 
-   @Override
-   public CTTaskNode createNode()
-   {
-      return new GenericTaskNode();
-   }
 }

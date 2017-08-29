@@ -322,7 +322,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          bestScoreInitialGuess = scoreInitialGuess;
 
          rootNode = visualizedNode.createNodeCopy();
-         rootNode = new GenericTaskNode(visualizedNode);
       }
 
       /*
@@ -429,7 +428,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private boolean updateValidity(CTTaskNode node)
    {
       if (node.getParentNode() != null)
-      {
+      {      
          kinematicsSolver.updateRobotConfigurationData(node.getParentNode().getConfiguration());
       }
       else

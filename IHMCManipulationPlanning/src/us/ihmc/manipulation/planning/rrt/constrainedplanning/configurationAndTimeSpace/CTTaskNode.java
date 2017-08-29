@@ -8,7 +8,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWh
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.NodeData;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
-public abstract class CTTaskNode
+public class CTTaskNode
 {
    private NodeData nodeData;
    private NodeData normalizedNodeData;
@@ -20,19 +20,9 @@ public abstract class CTTaskNode
 
    protected AtlasKinematicsConfiguration configuration;
 
-   public CTTaskNode()
-   {
-
-   }
-
    public CTTaskNode(CTTaskNode node)
    {
-      this.nodeData = node.nodeData;
-      this.childNodes = node.childNodes;
-      this.parentNode = node.parentNode;
-      this.normalizedNodeData = node.normalizedNodeData;
-
-      this.configuration = node.configuration;
+      this(node.getDimensionOfNodeData());
    }
 
    public CTTaskNode(double[] rootData)
@@ -202,12 +192,12 @@ public abstract class CTTaskNode
     */
    public final CTTaskNode createNodeCopy()
    {
-      CTTaskNode nodeCopy = createNode();
+      CTTaskNode nodeCopy = new CTTaskNode(this);
 
       nodeCopy.nodeData = new NodeData(this.nodeData);
       nodeCopy.normalizedNodeData = new NodeData(this.normalizedNodeData);
       nodeCopy.configuration = this.configuration;
-
+      
       return nodeCopy;
    }
 
@@ -231,5 +221,9 @@ public abstract class CTTaskNode
       return validity;
    }
 
-   public abstract CTTaskNode createNode();
+   public CTTaskNode createNode()
+   {
+      return new CTTaskNode(this);
+   }
+   
 }
