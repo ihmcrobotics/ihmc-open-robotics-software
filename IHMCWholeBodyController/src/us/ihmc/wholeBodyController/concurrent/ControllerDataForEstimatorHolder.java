@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.IntermediateDesiredJointDataHolder;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.humanoidRobotics.model.IntermediateDesiredJointDataHolder;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 
 public class ControllerDataForEstimatorHolder
 {
@@ -32,8 +32,8 @@ public class ControllerDataForEstimatorHolder
 
    public ControllerDataForEstimatorHolder(CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder,
          CenterOfPressureDataHolder controllerCenterOfPressureDataHolder, RobotMotionStatusHolder estimatorRobotMotionStatusHolder,
-         RobotMotionStatusHolder controllerRobotMotionStatusHolder, DesiredJointDataHolder estimatorJointDataHolder,
-         DesiredJointDataHolder controllerJointDataHolder)
+         RobotMotionStatusHolder controllerRobotMotionStatusHolder, LowLevelOneDoFJointDesiredDataHolderList estimatorJointDataHolder,
+         LowLevelOneDoFJointDesiredDataHolderList controllerJointDataHolder)
    {      
       this.controllerFeet = new ArrayList<>(controllerCenterOfPressureDataHolder.getRigidBodies());
       this.estimatorFeet = new ArrayList<>(estimatorCenterOfPressureDataHolder.getRigidBodies());
@@ -88,12 +88,12 @@ public class ControllerDataForEstimatorHolder
       private final RobotMotionStatusHolder estimatorRobotMotionStatusHolder;
       private final RobotMotionStatusHolder controllerRobotMotionStatusHolder;
 
-      private final DesiredJointDataHolder estimatorDesiredJointDataHolder;
-      private final DesiredJointDataHolder controllerDesiredJointDataHolder;
+      private final LowLevelOneDoFJointDesiredDataHolderList estimatorDesiredJointDataHolder;
+      private final LowLevelOneDoFJointDesiredDataHolderList controllerDesiredJointDataHolder;
 
       public Builder(CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder, CenterOfPressureDataHolder controllerCenterOfPressureDataHolder,
             RobotMotionStatusHolder estimatorRobotMotionStatusHolder, RobotMotionStatusHolder controllerRobotMotionStatusHolder,
-            DesiredJointDataHolder estimatorDesiredJointDataHolder, DesiredJointDataHolder controllerDesiredJointDataHolder)
+            LowLevelOneDoFJointDesiredDataHolderList estimatorDesiredJointDataHolder, LowLevelOneDoFJointDesiredDataHolderList controllerDesiredJointDataHolder)
       {
          this.estimatorCenterOfPressureDataHolder = estimatorCenterOfPressureDataHolder;
          this.controllerCenterOfPressureDataHolder = controllerCenterOfPressureDataHolder;
