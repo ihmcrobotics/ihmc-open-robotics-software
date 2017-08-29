@@ -199,7 +199,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       return lowLevelJointDataMap.get(joint.getName());
    }
 
-   @Override
    public LowLevelJointControlMode getJointControlMode(OneDoFJoint joint)
    {
       YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());

@@ -4,8 +4,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public interface LowLevelOneDoFJointDesiredDataHolderReadOnly
 {
-   public abstract LowLevelJointControlMode getJointControlMode(OneDoFJoint joint);
-
    public abstract boolean hasDataForJoint(OneDoFJoint joint);
 
 
