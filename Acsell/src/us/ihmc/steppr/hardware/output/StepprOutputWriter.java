@@ -32,9 +32,9 @@ import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.steppr.hardware.configuration.StepprRightAnkleSpringProperties;
 import us.ihmc.steppr.hardware.configuration.StepprRightHipXSpringProperties;
 import us.ihmc.steppr.hardware.controllers.StepprStandPrep;
-import us.ihmc.wholeBodyController.DRCOutputWriter;
+import us.ihmc.wholeBodyController.DRCOutputProcessor;
 
-public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChangedListener,  ControllerFailureListener
+public class StepprOutputWriter implements DRCOutputProcessor, ControllerStateChangedListener,  ControllerFailureListener
 {
    boolean USE_LEFT_HIP_X_SPRING = true;
    boolean USE_RIGHT_HIP_X_SPRING = true;
@@ -170,7 +170,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    }
 
    @Override
-   public void writeAfterController(long timestamp)
+   public void processAfterController(long timestamp)
    {
       if (!outputEnabled)
       {

@@ -48,6 +48,7 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.LowLevelOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
@@ -90,6 +91,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final YoLong estimatorTime = new YoLong("estimatorTime", estimatorRegistry);
    private final YoLong estimatorTick = new YoLong("estimatorTick", estimatorRegistry);
    private final YoBoolean firstTick = new YoBoolean("firstTick", estimatorRegistry);
+   private final YoBoolean outputWriterInitialized = new YoBoolean("outputWriterInitialized", estimatorRegistry);
+   private final YoBoolean controllerDataValid = new YoBoolean("controllerDataValid", estimatorRegistry);
 
    private final YoLong startClockTime = new YoLong("startTime", estimatorRegistry);
    private final ExecutionTimer estimatorTimer = new ExecutionTimer("estimatorTimer", 10.0, estimatorRegistry);
@@ -106,10 +109,12 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
    private final ReferenceFrame rootFrame;
+   
+   private final LowLevelOutputWriter outputWriter;
 
    public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, RobotContactPointParameters contactPointParameters,
          StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer,
-         PeriodicThreadScheduler poseCommunicatorScheduler, HumanoidGlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity)
+         PeriodicThreadScheduler poseCommunicatorScheduler, HumanoidGlobalDataProducer dataProducer, LowLevelOutputWriter outputWriter, RobotVisualizer robotVisualizer, double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.robotVisualizer = robotVisualizer;
@@ -201,9 +206,25 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          poseCommunicator = null;
       }
+      
 
       firstTick.set(true);
+      outputWriterInitialized.set(false);
+      controllerDataValid.set(false);
+      
       estimatorRegistry.addChild(estimatorController.getYoVariableRegistry());
+      
+      this.outputWriter = outputWriter;
+      if(this.outputWriter != null)
+      {
+         this.outputWriter.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
+         this.outputWriter.setLowLevelOneDoFJointDesiredDataHolderList(estimatorDesiredJointDataHolder);
+         if(this.outputWriter.getYoVariableRegistry() != null)
+         {
+            estimatorRegistry.addChild(this.outputWriter.getYoVariableRegistry());            
+         }
+         
+      }
 
       if (robotVisualizer != null)
       {
@@ -236,7 +257,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          actualEstimatorDT.set(currentClockTime - startClockTime.getLongValue());
          startClockTime.set(currentClockTime);
 
-         threadDataSynchronizer.receiveControllerDataForEstimator();
+         controllerDataValid.set(threadDataSynchronizer.receiveControllerDataForEstimator());
          sensorReader.read();
 
          estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
@@ -286,6 +307,20 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    {
       try
       {
+         if(outputWriter != null)
+         {
+            if(controllerDataValid.getBooleanValue())
+            {
+               if(!outputWriterInitialized.getBooleanValue())
+               {
+                  outputWriter.initialize();
+                  outputWriterInitialized.set(false);
+               }
+               outputWriter.write();
+            }
+         }
+         
+         
          long startTimestamp = estimatorTime.getLongValue();
          threadDataSynchronizer.publishEstimatorState(startTimestamp, estimatorTick.getLongValue(), startClockTime.getLongValue());
          if (robotVisualizer != null)
