@@ -11,6 +11,10 @@ public interface LowLevelOneDoFJointDesiredDataHolderReadOnly
 
    public abstract LowLevelJointDataReadOnly getLowLevelJointData(OneDoFJoint joint);
 
+   public abstract LowLevelJointDataReadOnly getLowLevelJointData(int index);
+
    public abstract int getNumberOfJointsWithLowLevelData();
+   
+   
 
 }

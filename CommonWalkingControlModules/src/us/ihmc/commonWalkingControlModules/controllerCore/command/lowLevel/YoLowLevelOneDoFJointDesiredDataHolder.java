@@ -340,4 +340,10 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
    {
       return jointsWithDesiredData.size();
    }
+
+   @Override
+   public LowLevelJointDataReadOnly getLowLevelJointData(int index)
+   {
+      return getLowLevelJointData(getOneDoFJoint(index));
+   }
 }
