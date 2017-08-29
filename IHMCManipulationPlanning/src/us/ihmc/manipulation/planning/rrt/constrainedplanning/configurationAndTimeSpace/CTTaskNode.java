@@ -198,6 +198,8 @@ public class CTTaskNode
       nodeCopy.normalizedNodeData = new NodeData(this.normalizedNodeData);
       nodeCopy.configuration = this.configuration;
       
+      nodeCopy.parentNode = this.parentNode;
+      
       return nodeCopy;
    }
 
