@@ -13,23 +13,20 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
-{   
-   private RobotSide drawingSide;
-   
-   public DrawingTrajectory(double trajectoryTime, RobotSide robotSide)
+{
+   public DrawingTrajectory(double trajectoryTime)
    {
       super(trajectoryTime);
-      drawingSide = robotSide;
    }
 
    @Override
    public SideDependentList<SelectionMatrix6D> defineControllableSelectionMatrices()
    {
       SideDependentList<SelectionMatrix6D> selectionMatrices = new SideDependentList<>();
-      
-      for(RobotSide robotSide : RobotSide.values)
+
+      for (RobotSide robotSide : RobotSide.values)
          selectionMatrices.put(robotSide, new SelectionMatrix6D());
-      
+
       selectionMatrices.get(RobotSide.LEFT).selectLinearX(false);
       selectionMatrices.get(RobotSide.LEFT).selectLinearY(false);
       selectionMatrices.get(RobotSide.LEFT).selectLinearZ(false);
@@ -37,7 +34,7 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
       selectionMatrices.get(RobotSide.LEFT).selectAngularX(false);
       selectionMatrices.get(RobotSide.LEFT).selectAngularY(false);
       selectionMatrices.get(RobotSide.LEFT).selectAngularZ(true);
-      
+
       selectionMatrices.get(RobotSide.RIGHT).selectLinearX(false);
       selectionMatrices.get(RobotSide.RIGHT).selectLinearY(false);
       selectionMatrices.get(RobotSide.RIGHT).selectLinearZ(false);
@@ -46,7 +43,6 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
       selectionMatrices.get(RobotSide.RIGHT).selectAngularY(false);
       selectionMatrices.get(RobotSide.RIGHT).selectAngularZ(false);
 
-      
       return selectionMatrices;
    }
 
@@ -54,24 +50,21 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
    public SideDependentList<ConfigurationBuildOrder> defineConfigurationBuildOrders()
    {
       SideDependentList<ConfigurationBuildOrder> configurationBuildOrders = new SideDependentList<>();
-      
-      for(RobotSide robotSide : RobotSide.values)
-         configurationBuildOrders.put(robotSide, new ConfigurationBuildOrder(ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z,
-                                                                      ConfigurationSpaceName.ROLL, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.YAW));
-      
+
+      for (RobotSide robotSide : RobotSide.values)
+         configurationBuildOrders.put(robotSide,
+                                      new ConfigurationBuildOrder(ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z,
+                                                                  ConfigurationSpaceName.ROLL, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.YAW));
+
       return configurationBuildOrders;
    }
 
    @Override
    protected SideDependentList<ConfigurationSpace> getConfigurationSpace(double time)
    {
-      double convertable;
-      if(drawingSide == RobotSide.RIGHT)
-         convertable = -1;
-      else
-         convertable = 1;
-      
+      double convertable = 1;
       double arcRadius = 0.35;
+
       /*
        * Draw Circle in clockwise.
        */
@@ -83,22 +76,23 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
       RigidBodyTransform arcCenterRigidBodyController = new RigidBodyTransform(arcCenterOrientation, arcCenterPoint);
 
       arcCenterRigidBodyController.appendYawRotation(-arcAngle);
-      arcCenterRigidBodyController.appendTranslation(0, arcRadius*convertable, 0);
+      arcCenterRigidBodyController.appendTranslation(0, arcRadius * convertable, 0);
       arcCenterRigidBodyController.appendYawRotation(arcAngle);
 
-      
       SideDependentList<ConfigurationSpace> configurationSpaces = new SideDependentList<>();
-      
-      if(drawingSide == RobotSide.RIGHT)
-         configurationSpaces.put(RobotSide.LEFT, new ConfigurationSpace());
-      else
-         configurationSpaces.put(RobotSide.RIGHT, new ConfigurationSpace());
-      
-      ConfigurationSpace configurationSpace = new ConfigurationSpace();
-      configurationSpace.setTranslation(arcCenterRigidBodyController.getTranslationVector());
-      configurationSpace.setRotation(0, -0.5 * Math.PI, 0);
-      
-      configurationSpaces.put(drawingSide, configurationSpace);
+
+      ConfigurationSpace holdingConfiguration = new ConfigurationSpace();
+
+      holdingConfiguration.setTranslation(-0.2, -0.5, 0.65);
+      holdingConfiguration.setRotation(0.5 * Math.PI, 0.0, -0.5 * Math.PI);
+
+      configurationSpaces.put(RobotSide.RIGHT, holdingConfiguration);
+
+      ConfigurationSpace drawingConfigurationSpace = new ConfigurationSpace();
+      drawingConfigurationSpace.setTranslation(arcCenterRigidBodyController.getTranslationVector());
+      drawingConfigurationSpace.setRotation(0, -0.5 * Math.PI, 0);
+
+      configurationSpaces.put(RobotSide.LEFT, drawingConfigurationSpace);
 
       return configurationSpaces;
    }
@@ -107,26 +101,28 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
    public TaskRegion defineTaskRegion()
    {
       TaskRegion taskNodeRegion = new TaskRegion(GenericTaskNode.nodeDimension);
-      
+
       taskNodeRegion.setRandomRegion(0, 0.0, trajectoryTime);
+
       taskNodeRegion.setRandomRegion(1, 0.75, 0.90);
-      taskNodeRegion.setRandomRegion(2, -25.0 / 180 * Math.PI, 25.0 / 180 * Math.PI);
-      taskNodeRegion.setRandomRegion(3, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
+      taskNodeRegion.setRandomRegion(2, -20.0 / 180 * Math.PI, 5.0 / 180 * Math.PI);
+      taskNodeRegion.setRandomRegion(3, -10.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
       taskNodeRegion.setRandomRegion(4, -3.0 / 180 * Math.PI, 3.0 / 180 * Math.PI);
+
       taskNodeRegion.setRandomRegion(5, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(6, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(7, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(8, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(9, 0.0, 0.0);
-      taskNodeRegion.setRandomRegion(10, -180.0/180*Math.PI, 0.0/180*Math.PI);
-      
+      taskNodeRegion.setRandomRegion(10, -150.0 / 180 * Math.PI, -40.0 / 180 * Math.PI);
+
       taskNodeRegion.setRandomRegion(11, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(12, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(13, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(14, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(15, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(16, 0.0, 0.0);
-      
+
       return taskNodeRegion;
    }
 
