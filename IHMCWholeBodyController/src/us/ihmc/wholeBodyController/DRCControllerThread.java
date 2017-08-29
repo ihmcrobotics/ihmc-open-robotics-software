@@ -3,7 +3,7 @@ package us.ihmc.wholeBodyController;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.AbstractMomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
@@ -103,8 +103,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
    public DRCControllerThread(WholeBodyControllerParameters robotModel, DRCRobotSensorInformation sensorInformation,
-         MomentumBasedControllerFactory controllerFactory, ThreadDataSynchronizerInterface threadDataSynchronizer, DRCOutputWriter outputWriter,
-         GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity, double estimatorDT)
+                              AbstractMomentumBasedControllerFactory controllerFactory, ThreadDataSynchronizerInterface threadDataSynchronizer, DRCOutputWriter outputWriter,
+                              GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity, double estimatorDT)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.outputWriter = outputWriter;
@@ -186,7 +186,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       return arrayOfJointsToIgnore;
    }
 
-   private void createControllerRobotMotionStatusUpdater(MomentumBasedControllerFactory controllerFactory,
+   private void createControllerRobotMotionStatusUpdater(AbstractMomentumBasedControllerFactory controllerFactory,
          final RobotMotionStatusHolder controllerRobotMotionStatusHolder)
    {
       RobotMotionStatusChangedListener controllerRobotMotionStatusUpdater = new RobotMotionStatusChangedListener()
@@ -207,11 +207,11 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    }
 
    private ModularRobotController createMomentumBasedController(FullHumanoidRobotModel controllerModel,
-         MomentumBasedControllerFactory controllerFactory, YoDouble yoTime, double controlDT, double gravity,
-         ForceSensorDataHolderReadOnly forceSensorDataHolderForController, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
-         ContactSensorHolder contactSensorHolder,
-         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
-         InverseDynamicsJoint... jointsToIgnore)
+                                                                AbstractMomentumBasedControllerFactory controllerFactory, YoDouble yoTime, double controlDT, double gravity,
+                                                                ForceSensorDataHolderReadOnly forceSensorDataHolderForController, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
+                                                                ContactSensorHolder contactSensorHolder,
+                                                                CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
+                                                                InverseDynamicsJoint... jointsToIgnore)
    {
       if (CREATE_COM_CALIBRATION_TOOL)
       {

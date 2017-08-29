@@ -20,6 +20,7 @@ import us.ihmc.avatar.obstacleCourseTests.ForceSensorHysteresisCreator;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.AbstractMomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -255,7 +256,7 @@ public class DRCSimulationTestHelper
 
    public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
    {
-      MomentumBasedControllerFactory controllerFactory = avatarSimulation.getMomentumBasedControllerFactory();
+      AbstractMomentumBasedControllerFactory controllerFactory = avatarSimulation.getMomentumBasedControllerFactory();
       controllerFactory.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
 
@@ -271,7 +272,7 @@ public class DRCSimulationTestHelper
 
    public CommonHumanoidReferenceFrames getReferenceFrames()
    {
-      MomentumBasedControllerFactory momentumBasedControllerFactory = avatarSimulation.getMomentumBasedControllerFactory();
+      AbstractMomentumBasedControllerFactory momentumBasedControllerFactory = avatarSimulation.getMomentumBasedControllerFactory();
       HighLevelHumanoidControllerToolbox highLevelHumanoidControllerToolbox = momentumBasedControllerFactory.getHighLevelHumanoidControllerToolbox();
       return highLevelHumanoidControllerToolbox.getReferenceFrames();
    }

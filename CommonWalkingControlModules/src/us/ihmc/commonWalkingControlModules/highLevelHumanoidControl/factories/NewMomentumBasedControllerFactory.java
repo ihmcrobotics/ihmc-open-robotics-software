@@ -50,7 +50,6 @@ import us.ihmc.robotics.sensors.*;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
-import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -61,7 +60,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class NewMomentumBasedControllerFactory implements CloseableAndDisposable
+public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedControllerFactory
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -539,11 +538,6 @@ public class NewMomentumBasedControllerFactory implements CloseableAndDisposable
       highLevelControllerStateMachine.setFallbackControllerForFailure(fallbackController);
    }
 
-   public NewHighLevelStates getCurrentHighLevelState()
-   {
-      return highLevelControllerStateMachine.getCurrentHighLevelState();
-   }
-
    public CommandInputManager getCommandInputManager()
    {
       return commandInputManager;
@@ -570,5 +564,10 @@ public class NewMomentumBasedControllerFactory implements CloseableAndDisposable
    public void warmupWalkingController(int iterations)
    {
       highLevelControllerStateMachine.warmup(iterations, walkingState);
+   }
+
+   public HighLevelState getCurrentHighLevelState()
+   {
+      return null;
    }
 }
