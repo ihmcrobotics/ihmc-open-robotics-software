@@ -14,6 +14,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.sensors.DRCSimulatedIMUPublisher;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.AbstractMomentumBasedControllerFactory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -66,7 +67,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class AvatarSimulationFactory
 {
    private final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
-   private final RequiredFactoryField<MomentumBasedControllerFactory> momentumBasedControllerFactory = new RequiredFactoryField<>("momentumBasedControllerFactory");
+   private final RequiredFactoryField<AbstractMomentumBasedControllerFactory> momentumBasedControllerFactory = new RequiredFactoryField<>("momentumBasedControllerFactory");
    private final RequiredFactoryField<CommonAvatarEnvironmentInterface> commonAvatarEnvironment = new RequiredFactoryField<>("commonAvatarEnvironmentInterface");
    private final RequiredFactoryField<DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new RequiredFactoryField<>("robotInitialSetup");
    private final RequiredFactoryField<DRCSCSInitialSetup> scsInitialSetup = new RequiredFactoryField<>("scsInitialSetup");
@@ -447,6 +448,11 @@ public class AvatarSimulationFactory
    }
 
    public void setMomentumBasedControllerFactory(MomentumBasedControllerFactory momentumBasedControllerFactory)
+   {
+      this.momentumBasedControllerFactory.set(momentumBasedControllerFactory);
+   }
+
+   public void setMomentumBasedControllerFactory(AbstractMomentumBasedControllerFactory momentumBasedControllerFactory)
    {
       this.momentumBasedControllerFactory.set(momentumBasedControllerFactory);
    }
