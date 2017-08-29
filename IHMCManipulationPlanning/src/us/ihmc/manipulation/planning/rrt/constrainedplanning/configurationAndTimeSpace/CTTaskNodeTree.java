@@ -91,19 +91,21 @@ public class CTTaskNodeTree
    {
       Random randomManager = new Random();
 
-      double exceedIntentionalRatio = 0.7;
+      double exceedIntentionalTimeRatio = 1.0;
+      double exceedIntentionalRatio = 0.5;
 
       if (isUniform)
          exceedIntentionalRatio = 0.0;
       else
          exceedIntentionalRatio = 1.0;
 
-      double value = randomManager.nextDouble() * (1.0 + exceedIntentionalRatio);
+      double value;
 
       if (index == 0)
-         ;
+         value = randomManager.nextDouble() * (1.0 + exceedIntentionalTimeRatio);
       else
       {
+         value = randomManager.nextDouble() * (1.0 + exceedIntentionalRatio);
          value = value - 0.5 * exceedIntentionalRatio;
 
          if (value >= 1)
