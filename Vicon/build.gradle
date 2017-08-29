@@ -5,7 +5,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.5.10"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.6.0"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
@@ -27,9 +27,9 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
-   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: dependencyMode
-   compile group: "us.ihmc", name: "ihmc-java-extensions", version: dependencyMode
-   compile group: "us.ihmc", name: "ihmc-communication", version: dependencyMode
-   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: dependencyMode
-   compile group: "us.ihmc", name: "simulation-construction-set", version: dependencyMode
+   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
 }
