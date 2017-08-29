@@ -21,7 +21,6 @@ public class SquareFittingFactory
    private boolean DEBUG = false;
    private PlanarRegion planarRegion;
    private ArrayList<Point3D32> vertices = new ArrayList<Point3D32>();
-   private SolarPanel solarPanel;
 
    private Vector3D normalVector;
    private RotationMatrix squareRotationMatrix;
@@ -317,7 +316,6 @@ public class SquareFittingFactory
       System.out.println(solarPanelPose);
       System.out.println(squareSizeX);
       System.out.println(squareSizeY);
-      solarPanel = new SolarPanel(solarPanelPose, squareSizeX, squareSizeY);
    }
 
    private Vector3D getPrincipalAxisX(RotationMatrix rotationMatrix)
@@ -384,11 +382,6 @@ public class SquareFittingFactory
             / (Math.sqrt(planeA * planeA + planeB * planeB + planeC * planeC));
 
       return distance;
-   }
-
-   public SolarPanel getSolarPanel()
-   {
-      return solarPanel;
    }
 
 }
