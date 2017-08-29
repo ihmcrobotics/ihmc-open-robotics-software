@@ -482,6 +482,13 @@ public class SimpleICPOptimizationQPSolver
       this.previousFootstepLocation.set(1, 0, previousFootstepLocation.getY());
    }
 
+   public void resetFeedbackRegularization(FramePoint2D previousFeedbackDeltaSolution)
+   {
+      previousFeedbackDeltaSolution.changeFrame(worldFrame);
+      this.previousFeedbackDeltaSolution.set(0, 0, previousFeedbackDeltaSolution.getX());
+      this.previousFeedbackDeltaSolution.set(1, 0, previousFeedbackDeltaSolution.getY());
+   }
+
 
 
 
