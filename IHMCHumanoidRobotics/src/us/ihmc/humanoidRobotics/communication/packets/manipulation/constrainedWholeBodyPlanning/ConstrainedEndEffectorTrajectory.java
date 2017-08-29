@@ -1,10 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedConfigurationSpace
@@ -13,18 +13,16 @@ public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedCon
     * TaskRegion = new TaskRegion(GenericTaskNode.nodeDimension);
     */
    protected TaskRegion taskNodeRegion;
-   protected ConfigurationBuildOrder configurationBuildOrder;
-   protected SelectionMatrix6D controllableSelectionMatrix;
+   protected SideDependentList<ConfigurationBuildOrder> configurationBuildOrders;
+   protected SideDependentList<SelectionMatrix6D> controllableSelectionMatrices;
    protected double trajectoryTime;
-   protected RobotSide robotSide;
 
    public ConstrainedEndEffectorTrajectory(double trajectoryTime)
    {
       this.trajectoryTime = trajectoryTime;
 
-      this.robotSide = defineRobotSide();
-      this.controllableSelectionMatrix = defineControllableSelectionMatrix();
-      this.configurationBuildOrder = defineConfigurationBuildOrder();
+      this.controllableSelectionMatrices = defineControllableSelectionMatrices();
+      this.configurationBuildOrders = defineConfigurationBuildOrders();
       this.taskNodeRegion = defineTaskRegion();
    }
 
@@ -38,33 +36,18 @@ public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedCon
       return this.trajectoryTime;
    }
 
-   public RobotSide getRobotSide()
+   public Pose3D getEndEffectorPose(double time, RobotSide robotSide, ConfigurationSpace controllableConfigurationSpace)
    {
-      if (robotSide == null)
-         PrintTools.warn("RobotSide of the end effector should be defined.");
-      return this.robotSide;
-   }
+      ConfigurationSpace constrainedConfigurationSpace = getConfigurationSpace(time).get(robotSide);
 
-   public RobotSide getAnotherRobotSide()
-   {
-      if (getRobotSide() == RobotSide.RIGHT)
-         return RobotSide.LEFT;
-      else
-         return RobotSide.RIGHT;
-   }
-
-   public Pose3D getEndEffectorPose(double time, ConfigurationSpace controllableConfigurationSpace)
-   {
-      ConfigurationSpace constrainedConfigurationSpace = getConfigurationSpace(time);
-
-      ConfigurationSpace finalConfigurationSpace = constrainedConfigurationSpace.overrideConfigurationSpaceCopy(controllableSelectionMatrix,
+      ConfigurationSpace finalConfigurationSpace = constrainedConfigurationSpace.overrideConfigurationSpaceCopy(controllableSelectionMatrices.get(robotSide),
                                                                                                                 controllableConfigurationSpace);
       
       Point3D translation;
       Quaternion orientation;
       Pose3D pose3D;
-      translation = new Point3D(finalConfigurationSpace.createRigidBodyTransform(configurationBuildOrder).getTranslationVector());
-      orientation = new Quaternion(finalConfigurationSpace.createRigidBodyTransform(configurationBuildOrder).getRotationMatrix());
+      translation = new Point3D(finalConfigurationSpace.createRigidBodyTransform(configurationBuildOrders.get(robotSide)).getTranslationVector());
+      orientation = new Quaternion(finalConfigurationSpace.createRigidBodyTransform(configurationBuildOrders.get(robotSide)).getRotationMatrix());
       pose3D = new Pose3D(translation, orientation);
 
       return pose3D;
@@ -75,8 +58,5 @@ public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedCon
       return this.taskNodeRegion;
    }
 
-   protected abstract RobotSide defineRobotSide();
-
-   protected abstract ConfigurationSpace getConfigurationSpace(double time);
-
+   protected abstract SideDependentList<ConfigurationSpace> getConfigurationSpace(double time);
 }

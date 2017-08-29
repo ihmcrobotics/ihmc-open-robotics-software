@@ -203,16 +203,14 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
       setupCWBPlanningToolboxModule();
    }
-   
-//   @Test
+
+   //   @Test
    public void testForBehavior() throws SimulationExceededMaximumTimeException, IOException
    {
-      
+
    }
 
-   
-   
-   @Test
+      @Test
    public void testForToolbox() throws SimulationExceededMaximumTimeException, IOException
    {
       if (visulaizerOn)
@@ -271,14 +269,14 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       packet.setNumberOfFindInitialGuess(60);
       packet.setNumberOfExpanding(400);
       packet.setInitialRobotConfigration(sdfFullRobotModel);
-      
+
       packet.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
 
       toolboxCommunicator.send(packet);
       System.out.println("Send packet done" + drcBehaviorTestHelper.getYoTime());
 
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10.0);
-      
+
       System.out.println("End");
    }
 
@@ -409,7 +407,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("End");
    }
 
-   //   @Test
+   @Test
    public void testForConstrainedTrajectory() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -426,21 +424,21 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
       DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0, RobotSide.LEFT);
 
-      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(0.0, new ConfigurationSpace())));
-
-      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(3.0, new ConfigurationSpace())));
-
-      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(6.0, new ConfigurationSpace())));
-
-      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(9.0, new ConfigurationSpace())));
-
-      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(10.0, new ConfigurationSpace())));
+//      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(0.0, new ConfigurationSpace())));
+//
+//      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(3.0, new ConfigurationSpace())));
+//
+//      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(6.0, new ConfigurationSpace())));
+//
+//      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(9.0, new ConfigurationSpace())));
+//
+//      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(10.0, new ConfigurationSpace())));
 
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       System.out.println("End");
    }
 
-   //   @Test
+   // @Test
    public void testForConfigurationSpace() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -493,8 +491,8 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
       System.out.println("End");
    }
-   
-//   @Test
+
+   // @Test
    public void testForAtlasKinematicsConfiguration() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -509,17 +507,17 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       referenceFrames.updateFrames();
 
       AtlasKinematicsConfiguration configuration = new AtlasKinematicsConfiguration();
-      
+
       configuration.putJointConfiguration(sdfFullRobotModel.getOneDoFJoints());
-      configuration.putRootTranslation(sdfFullRobotModel.getRootJoint().getTranslationForReading());      
+      configuration.putRootTranslation(sdfFullRobotModel.getRootJoint().getTranslationForReading());
       configuration.putRootOrientation(sdfFullRobotModel.getRootJoint().getRotationForReading());
-      
+
       configuration.print();
-      
+
       System.out.println("End");
    }
 
-   //   @Test
+   // @Test
    public void testForToolboxMessage() throws SimulationExceededMaximumTimeException, IOException
    {
       ThreadTools.sleep(10000);

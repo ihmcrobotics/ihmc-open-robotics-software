@@ -3,58 +3,70 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder.ConfigurationSpaceName;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
 {   
+   private RobotSide drawingSide;
+   
    public DrawingTrajectory(double trajectoryTime, RobotSide robotSide)
    {
       super(trajectoryTime);
-      this.robotSide = robotSide;
+      drawingSide = robotSide;
    }
 
    @Override
-   public SelectionMatrix6D defineControllableSelectionMatrix()
+   public SideDependentList<SelectionMatrix6D> defineControllableSelectionMatrices()
    {
-      SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
-      selectionMatrix6D.selectLinearX(false);
-      selectionMatrix6D.selectLinearY(false);
-      selectionMatrix6D.selectLinearZ(false);
+      SideDependentList<SelectionMatrix6D> selectionMatrices = new SideDependentList<>();
+      
+      for(RobotSide robotSide : RobotSide.values)
+         selectionMatrices.put(robotSide, new SelectionMatrix6D());
+      
+      selectionMatrices.get(RobotSide.LEFT).selectLinearX(false);
+      selectionMatrices.get(RobotSide.LEFT).selectLinearY(false);
+      selectionMatrices.get(RobotSide.LEFT).selectLinearZ(false);
 
-      selectionMatrix6D.selectAngularX(false);
-      selectionMatrix6D.selectAngularY(false);
-      selectionMatrix6D.selectAngularZ(true);
+      selectionMatrices.get(RobotSide.LEFT).selectAngularX(false);
+      selectionMatrices.get(RobotSide.LEFT).selectAngularY(false);
+      selectionMatrices.get(RobotSide.LEFT).selectAngularZ(true);
+      
+      selectionMatrices.get(RobotSide.RIGHT).selectLinearX(false);
+      selectionMatrices.get(RobotSide.RIGHT).selectLinearY(false);
+      selectionMatrices.get(RobotSide.RIGHT).selectLinearZ(false);
 
-      return selectionMatrix6D;
+      selectionMatrices.get(RobotSide.RIGHT).selectAngularX(false);
+      selectionMatrices.get(RobotSide.RIGHT).selectAngularY(false);
+      selectionMatrices.get(RobotSide.RIGHT).selectAngularZ(false);
+
+      
+      return selectionMatrices;
    }
 
    @Override
-   public ConfigurationBuildOrder defineConfigurationBuildOrder()
+   public SideDependentList<ConfigurationBuildOrder> defineConfigurationBuildOrders()
    {
-      ConfigurationBuildOrder configurationBuildOrder;
-      configurationBuildOrder = new ConfigurationBuildOrder(ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z,
-                                                            ConfigurationSpaceName.ROLL, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.YAW);
-
-      return configurationBuildOrder;
+      SideDependentList<ConfigurationBuildOrder> configurationBuildOrders = new SideDependentList<>();
+      
+      for(RobotSide robotSide : RobotSide.values)
+         configurationBuildOrders.put(robotSide, new ConfigurationBuildOrder(ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z,
+                                                                      ConfigurationSpaceName.ROLL, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.YAW));
+      
+      return configurationBuildOrders;
    }
 
    @Override
-   protected RobotSide defineRobotSide()
-   {
-      return robotSide;
-   }
-
-   @Override
-   protected ConfigurationSpace getConfigurationSpace(double time)
+   protected SideDependentList<ConfigurationSpace> getConfigurationSpace(double time)
    {
       double convertable;
-      if(robotSide == RobotSide.RIGHT)
+      if(drawingSide == RobotSide.RIGHT)
          convertable = -1;
       else
          convertable = 1;
@@ -74,11 +86,21 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
       arcCenterRigidBodyController.appendTranslation(0, arcRadius*convertable, 0);
       arcCenterRigidBodyController.appendYawRotation(arcAngle);
 
+      
+      SideDependentList<ConfigurationSpace> configurationSpaces = new SideDependentList<>();
+      
+      if(drawingSide == RobotSide.RIGHT)
+         configurationSpaces.put(RobotSide.LEFT, new ConfigurationSpace());
+      else
+         configurationSpaces.put(RobotSide.RIGHT, new ConfigurationSpace());
+      
       ConfigurationSpace configurationSpace = new ConfigurationSpace();
       configurationSpace.setTranslation(arcCenterRigidBodyController.getTranslationVector());
       configurationSpace.setRotation(0, -0.5 * Math.PI, 0);
+      
+      configurationSpaces.put(drawingSide, configurationSpace);
 
-      return configurationSpace;
+      return configurationSpaces;
    }
 
    @Override

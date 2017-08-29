@@ -1,12 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning;
 
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public interface ConstrainedConfigurationSpace
 {
-   abstract SelectionMatrix6D defineControllableSelectionMatrix();
+   abstract SideDependentList<SelectionMatrix6D> defineControllableSelectionMatrices();
 
-   abstract ConfigurationBuildOrder defineConfigurationBuildOrder();
+   abstract SideDependentList<ConfigurationBuildOrder> defineConfigurationBuildOrders();
    
    abstract TaskRegion defineTaskRegion();
 }
