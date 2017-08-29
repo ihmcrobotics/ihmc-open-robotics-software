@@ -452,4 +452,10 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
    {
       return jointsWithDesiredData.size();
    }
+
+   @Override
+   public LowLevelJointDataReadOnly getLowLevelJointData(int index)
+   {
+      return getLowLevelJointData(getOneDoFJoint(index));
+   }
 }
