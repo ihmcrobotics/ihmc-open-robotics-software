@@ -38,7 +38,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.6.0"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.6.1"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
    }
 }
