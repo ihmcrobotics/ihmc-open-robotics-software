@@ -2,7 +2,7 @@ package us.ihmc.tools.inputDevices.ghostMouse;
 
 import java.awt.event.InputEvent;
 
-import us.ihmc.tools.inputDevices.mouse.MouseButton;
+import us.ihmc.graphicsDescription.input.mouse.MouseButton;
 
 
 public class GhostMouseButtonReleasedPlaybackEvent implements GhostMousePlaybackEvent

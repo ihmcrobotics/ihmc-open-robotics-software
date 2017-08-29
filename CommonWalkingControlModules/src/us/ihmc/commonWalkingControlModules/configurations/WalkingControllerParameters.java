@@ -756,4 +756,12 @@ public abstract class WalkingControllerParameters
     * Returns parameters related to stepping such as maximum step length etc.
     */
    public abstract SteppingParameters getSteppingParameters();
+
+   /**
+    * If this return {@code false} the leg singularity avoidance module will not be created.
+    */
+   public boolean enableLegSingularityAndKneeCollapseAvoidanceModule()
+   {
+      return true;
+   }
 }
