@@ -11,7 +11,7 @@ public class SphereController implements RobotController
 {
    private enum SphereControllerEnum {BASIC, ICP, NEW_ICP, ICP_OPTIMIZATION}
 
-   private static final SphereControllerEnum controllerType = SphereControllerEnum.ICP;
+   private static final SphereControllerEnum controllerType = SphereControllerEnum.NEW_ICP;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("SphereController");
 
