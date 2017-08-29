@@ -3,7 +3,6 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 import java.awt.Color;
 import java.util.ArrayList;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.artifact.CircleArtifact;
 import us.ihmc.graphicsDescription.plotting.artifact.LineArtifact;
@@ -55,11 +54,11 @@ public class CTNodeVisualizer
       {
          if (newNode.getParentNode() != null)
          {
-            PrintTools.info("parent");
             CTTaskNode parentNode = newNode.getParentNode();
             LineArtifact lineArtifact = new LineArtifact(prefix + "_line",
                                                          new Point2D(parentNode.getNormalizedNodeData(0), parentNode.getNormalizedNodeData(configurationIndex)),
                                                          new Point2D(newNode.getNormalizedNodeData(0), newNode.getNormalizedNodeData(configurationIndex)));
+
             lineArtifact.setColor(Color.blue);
             plotter.addArtifact(lineArtifact);
          }
