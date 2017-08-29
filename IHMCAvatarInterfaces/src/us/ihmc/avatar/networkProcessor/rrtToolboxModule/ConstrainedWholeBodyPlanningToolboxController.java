@@ -320,7 +320,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       visualizedNode = initialGuessNode;
 
       updateValidity(visualizedNode);
-      double scoreInitialGuess = kinematicsSolver.getArmJointLimitScore(constrainedEndEffectorTrajectory.getRobotSide());
+      double scoreInitialGuess = kinematicsSolver.getArmJointLimitScore();
       if (!visualizedNode.getValidity())
          scoreInitialGuess = 0.0;
 
@@ -460,7 +460,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
        * pose from 'constrainedEndEffectorTrajectory' is considered as in MidZUp
        * frame.
        */
-      Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(node.getNodeData(0), configurationSpace);
+      Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(node.getNodeData(0), RobotSide.LEFT, configurationSpace);
       setEndEffectorPose(RobotSide.LEFT, desiredPose);
 
       /*
@@ -468,7 +468,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
        */
       desiredPose.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);
 
-      kinematicsSolver.setDesiredHandPose(constrainedEndEffectorTrajectory.getRobotSide(), desiredPose);
+      kinematicsSolver.setDesiredHandPose(RobotSide.LEFT, desiredPose);
 
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(node.getNodeData(2));

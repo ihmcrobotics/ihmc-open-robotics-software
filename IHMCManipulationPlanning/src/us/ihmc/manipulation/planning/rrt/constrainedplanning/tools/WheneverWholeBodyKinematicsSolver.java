@@ -794,14 +794,24 @@ public class WheneverWholeBodyKinematicsSolver
 
       userFeedbackCommands.put(desiredFullRobotModel.getChest().getName(), feedbackControlCommand);
    }
-
-   public double getArmJointLimitScore(RobotSide robotSide)
+   
+   public double getArmJointLimitScore()
    {
       double jointLimitScore = 0;
 
       jointLimitScore = jointLimitScore + getJointLimitScore("back_bkz");
       jointLimitScore = jointLimitScore + getJointLimitScore("back_bky");
       jointLimitScore = jointLimitScore + getJointLimitScore("back_bkx");
+      jointLimitScore = jointLimitScore + getArmJointLimitScore(RobotSide.LEFT);
+      jointLimitScore = jointLimitScore + getArmJointLimitScore(RobotSide.RIGHT);
+
+      return jointLimitScore;
+   }   
+
+   private double getArmJointLimitScore(RobotSide robotSide)
+   {
+      double jointLimitScore = 0;
+
       jointLimitScore = jointLimitScore + getArmJointLimitScore(robotSide, ArmJointName.SHOULDER_YAW);
       jointLimitScore = jointLimitScore + getArmJointLimitScore(robotSide, ArmJointName.SHOULDER_ROLL);
       jointLimitScore = jointLimitScore + getArmJointLimitScore(robotSide, ArmJointName.ELBOW_PITCH);
