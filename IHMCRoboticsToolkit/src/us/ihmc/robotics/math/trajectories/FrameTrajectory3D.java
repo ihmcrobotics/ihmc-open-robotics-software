@@ -624,10 +624,15 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
       positionToPack.setToZero(referenceFrame);
       super.getStartPoint(positionToPack.getPoint());
    }
-
+   
    public void getEndPoint(FramePoint3D positionToPack)
    {
       positionToPack.setToZero(referenceFrame);
       super.getEndPoint(positionToPack.getPoint());
+   }
+   
+   public boolean isValidTrajectory()
+   {
+      return super.isValidTrajectory();
    }
 }

@@ -33,7 +33,8 @@ import us.ihmc.yoVariables.variable.YoVariable;
  */
 public class FootstepAngularMomentumPredictor implements AngularMomentumTrajectoryGeneratorInterface
 {
-   private static final boolean DEBUG = true;
+   // Shit ton of YoVariables shall be created if thou sets this flag to true
+   private static final boolean DEBUG = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector3D zeroVector = new FrameVector3D();
@@ -41,7 +42,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private final int maxNumberOfTrajectoryCoefficients = 7;
    private final int numberOfSwingSegments = 1;
    private final int numberOfTransferSegments = 2;
-   private final int maxNumberOfFootstepsToConsider = 10;
+   private final int maxNumberOfFootstepsToConsider = 4;
    private final TrajectoryMathTools trajMathTools;
 
    private final YoBoolean computePredictedAngularMomentum;
@@ -149,7 +150,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       this.swingLegMass = new YoDouble(fullPrefix + "SwingFootMass", registry);
       this.supportLegMass = new YoDouble(fullPrefix + "SupportFootMass", registry);
       this.comHeight = new YoDouble(fullPrefix + "CoMHeight", registry);
-      
+
       this.swingFootMaxHeight = new YoDouble(fullPrefix + "SwingFootMaxHeight", registry);
       this.swingAngularMomentumTrajectories = new ArrayList<>(maxNumberOfFootstepsToConsider);
       this.transferAngularMomentumTrajectories = new ArrayList<>(maxNumberOfFootstepsToConsider + 1);
@@ -192,34 +193,22 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
          if (DEBUG)
          {
             TrajectoryDebug swingCoMTrajectory = new TrajectoryDebug("SwingCoMTrajDebug" + i, numberOfSwingSegments, maxNumberOfTrajectoryCoefficients,
-                                                                     registry)
-            {
-            };
+                                                                     registry);
             swingCoMTrajectories.add(swingCoMTrajectory);
             TrajectoryDebug transferCoMTrajectory = new TrajectoryDebug("TransferCoMTrajDebug" + i, numberOfTransferSegments, maxNumberOfTrajectoryCoefficients,
-                                                                        registry)
-            {
-            };
+                                                                        registry);
             transferCoMTrajectories.add(transferCoMTrajectory);
             TrajectoryDebug swingSwingFootTrajectory = new TrajectoryDebug("SwingSwFootTrajDebug" + i, numberOfSwingSegments, maxNumberOfTrajectoryCoefficients,
-                                                                           registry)
-            {
-            };
+                                                                           registry);
             swingSwingFootTrajectories.add(swingSwingFootTrajectory);
             TrajectoryDebug transferSwingFootTrajectory = new TrajectoryDebug("TransferSwFootTrajDebug" + i, numberOfTransferSegments,
-                                                                              maxNumberOfTrajectoryCoefficients, registry)
-            {
-            };
+                                                                              maxNumberOfTrajectoryCoefficients, registry);
             transferSwingFootTrajectories.add(transferSwingFootTrajectory);
             TrajectoryDebug swingSupportFootTrajectory = new TrajectoryDebug("SwingSpFootTrajDebug" + i, numberOfSwingSegments,
-                                                                             maxNumberOfTrajectoryCoefficients, registry)
-            {
-            };
+                                                                             maxNumberOfTrajectoryCoefficients, registry);
             swingSupportFootTrajectories.add(swingSupportFootTrajectory);
             TrajectoryDebug transferSupportFootTrajectory = new TrajectoryDebug("TransferSpFootTrajDebug" + i, numberOfTransferSegments,
-                                                                                maxNumberOfTrajectoryCoefficients, registry)
-            {
-            };
+                                                                                maxNumberOfTrajectoryCoefficients, registry);
             transferSupportFootTrajectories.add(transferSupportFootTrajectory);
          }
       }
@@ -234,19 +223,13 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       if (DEBUG)
       {
          TrajectoryDebug transferCoMTrajectory = new TrajectoryDebug("TransferCoMTrajDebug" + maxNumberOfFootstepsToConsider, numberOfTransferSegments,
-                                                                     maxNumberOfTrajectoryCoefficients, registry)
-         {
-         };
+                                                                     maxNumberOfTrajectoryCoefficients, registry);
          transferCoMTrajectories.add(transferCoMTrajectory);
          TrajectoryDebug transferSwingFootTrajectory = new TrajectoryDebug("TransferSwFootTrajDebug" + maxNumberOfFootstepsToConsider, numberOfTransferSegments,
-                                                                           maxNumberOfTrajectoryCoefficients, registry)
-         {
-         };
+                                                                           maxNumberOfTrajectoryCoefficients, registry);
          transferSwingFootTrajectories.add(transferSwingFootTrajectory);
          TrajectoryDebug transferSupportFootTrajectory = new TrajectoryDebug("TransferSpFootTrajDebug" + maxNumberOfFootstepsToConsider,
-                                                                             numberOfTransferSegments, maxNumberOfTrajectoryCoefficients, registry)
-         {
-         };
+                                                                             numberOfTransferSegments, maxNumberOfTrajectoryCoefficients, registry);
          transferSupportFootTrajectories.add(transferSupportFootTrajectory);
       }
 
@@ -280,6 +263,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       {
          comTrajDebug = null;
          swingTrajDebug = null;
+         supportTrajDebug = null;
          anguMomTrajDebug = null;
          comPosDebug = null;
          comVelDebug = null;
@@ -478,15 +462,31 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
          upcomingCoPsInFootsteps.get(footstepIndex).get(CoPPlanningTools.getCoPPointIndex(upcomingCoPsInFootsteps.get(footstepIndex).getCoPPointList(),
                                                                                           trajectoryFinalApproachReference))
                                 .getPosition(previousFinalReferenceCoP);
-         transferAngularMomentumTrajectories.get(footstepIndex).set(previousEstimatedTransferTrajectory);
-         previousFirstTransferEndTime = previousEstimatedTransferTrajectory.getFinalTime();
+
+         // This is only in case someone does some weird stuff with the state machine as in the JIT warmup. It will lead to a jump in the planner
+         if (previousEstimatedTransferTrajectory.isValidTrajectory())
+         {
+            transferAngularMomentumTrajectories.get(footstepIndex).set(previousEstimatedTransferTrajectory);
+            previousFirstTransferEndTime = previousEstimatedTransferTrajectory.getFinalTime();
+         }
+         else
+         {
+            previousFirstTransferEndTime = upcomingCoPsInFootsteps.get(footstepIndex + 1)
+                                                                  .get(CoPPlanningTools.getCoPPointIndex(upcomingCoPsInFootsteps.get(footstepIndex + 1)
+                                                                                                                                .getCoPPointList(),
+                                                                                                         endCoPName))
+                                                                  .getTime();
+            previousEstimatedTransferTrajectory.setConstant(0.0, previousFirstTransferEndTime, previousFinalReferenceCoP);
+            transferAngularMomentumTrajectories.get(footstepIndex).set(previousEstimatedTransferTrajectory);
+         }
+
          if (DEBUG)
          {
             transferCoMTrajectories.get(footstepIndex).set(comTrajDebug);
             transferSwingFootTrajectories.get(footstepIndex).set(swingTrajDebug);
             transferSupportFootTrajectories.get(footstepIndex).set(supportTrajDebug);
          }
-         
+
       }
       computeAngularMomentumApproximationForUpcomingFootsteps(footstepIndex);
    }
@@ -504,9 +504,12 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       currentFootstepTime += additionalInitialSwingTime;
       computeAngularMomentumApproximationForFootstep(footstepIndex);
       previousEstimatedTransferTrajectory.set(transferAngularMomentumTrajectories.get(footstepIndex + 1).getSegment(0));
-      comTrajDebug.set(transferCoMTrajectories.get(footstepIndex + 1).getSegment(0));
-      swingTrajDebug.set(transferSwingFootTrajectories.get(footstepIndex + 1).getSegment(0));
-      supportTrajDebug.set(transferSupportFootTrajectories.get(footstepIndex + 1).getSegment(0));
+      if(DEBUG)
+      {
+         comTrajDebug.set(transferCoMTrajectories.get(footstepIndex + 1).getSegment(0));
+         swingTrajDebug.set(transferSwingFootTrajectories.get(footstepIndex + 1).getSegment(0));
+         supportTrajDebug.set(transferSupportFootTrajectories.get(footstepIndex + 1).getSegment(0));
+      }
       footstepIndex++;
       computeAngularMomentumApproximationForUpcomingFootsteps(footstepIndex);
    }
@@ -571,7 +574,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       calculateAngularMomentumTrajectory();
       transferAngularMomentumTrajectories.get(footstepIndex + 1).set(estimatedAngularMomentumTrajectory);
    }
-   
+
    private void calculateAngularMomentumTrajectory()
    {
       trajMathTools.subtract(swingFootTrajectory, swingFootTrajectory, segmentCoMTrajectory);
@@ -590,21 +593,21 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private void setSupportFootTrajectoryForSwing(int footstepIndex)
    {
       setSupportFootTrajectory(footstepIndex, 0.0, currentSwingSegmentDuration);
-      if(DEBUG)
+      if (DEBUG)
          swingSupportFootTrajectories.get(footstepIndex).set(supportFootTrajectory);
    }
 
    private void setSupportFootTrajectoryForFirstTransfer(int footstepIndex)
    {
       setSupportFootTrajectory(footstepIndex, 0.0, currentFirstTransferSegmentDuration);
-      if(DEBUG)
+      if (DEBUG)
          transferSupportFootTrajectories.get(footstepIndex + 1).set(supportFootTrajectory);
    }
 
    private void setSupportFootTrajectoryForSecondTransfer(int footstepIndex, double segmentStartTime)
    {
       setSupportFootTrajectory(footstepIndex, segmentStartTime, segmentStartTime + currentSecondTransferSegmentDuration);
-      if(DEBUG)
+      if (DEBUG)
          transferSupportFootTrajectories.get(footstepIndex).set(supportFootTrajectory);
    }
 
@@ -626,7 +629,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       if (DEBUG)
          swingSwingFootTrajectories.get(footstepIndex).set(swingFootTrajectory);
    }
-   
+
    private void updateSwingLiftTrajectory()
    {
       swingLiftTrajectory.setQuadraticUsingIntermediatePoint(0, currentSwingSegmentDuration / 2.0, currentSwingSegmentDuration, 0.0,
@@ -791,7 +794,6 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       }
    }
 
-   
    FramePoint3D tempFramePointForSwFootPosDebug = new FramePoint3D();
    FrameVector3D tempFramePointForSwFootVelDebug = new FrameVector3D();
    FrameVector3D tempFramePointForSwFootAccDebug = new FrameVector3D();

@@ -7,8 +7,6 @@ import org.ejml.interfaces.linsol.LinearSolver;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * Simple trajectory class. Does not use the {@code Polynomial} class since its weird
@@ -18,22 +16,24 @@ public class Trajectory
 {
    private final int maximumNumberOfCoefficients;
    private final double[] coefficients;
+   private final double[] coefficientsCopy;
    private final DenseMatrix64F constraintMatrix;
    private final DenseMatrix64F constraintVector;
    private final DenseMatrix64F coefficientVector;
    private final LinearSolver<DenseMatrix64F> solver;
-   
+
    private double tInitial;
    private double tFinal;
    private int numberOfCoefficients;
    private double f, df, ddf;
    private final double[] xPowers;
    private final DenseMatrix64F xPowersDerivativeVector;
-   
+
    public Trajectory(int maxNumberOfCoefficients)
    {
       this.maximumNumberOfCoefficients = maxNumberOfCoefficients;
       this.coefficients = new double[maxNumberOfCoefficients];
+      this.coefficientsCopy = new double[maxNumberOfCoefficients];
       this.constraintMatrix = new DenseMatrix64F(maxNumberOfCoefficients, maxNumberOfCoefficients);
       this.constraintVector = new DenseMatrix64F(maxNumberOfCoefficients, 1);
       this.coefficientVector = new DenseMatrix64F(maxNumberOfCoefficients, 1);
@@ -42,41 +42,41 @@ public class Trajectory
       this.xPowers = new double[maxNumberOfCoefficients];
       reset();
    }
-   
-   public Trajectory(double xInitial, double xFinal, double[] coefficents)
+
+   public Trajectory(double tInitial, double tFinal, double[] coefficents)
    {
       this(coefficents.length);
       this.numberOfCoefficients = coefficents.length;
-      setTime(xInitial, xFinal);
-      for(int i = 0; i < maximumNumberOfCoefficients; i++)
+      setTime(tInitial, tFinal);
+      for (int i = 0; i < maximumNumberOfCoefficients; i++)
          this.coefficients[i] = coefficents[i];
    }
-   
+
    public void reset()
    {
       numberOfCoefficients = 0;
       tInitial = Double.NaN;
       tFinal = Double.NaN;
-      for(int i = 0; i < maximumNumberOfCoefficients; i++)
+      for (int i = 0; i < maximumNumberOfCoefficients; i++)
       {
-         xPowers[i] = Double.NaN;
-         xPowersDerivativeVector.set(i, 0, Double.NaN);
+         //xPowers[i] = Double.NaN;
          coefficients[i] = Double.NaN;
       }
+      //xPowersDerivativeVector.zero();
    }
-   
+
    public void compute(double x)
    {
       setXPowers(xPowers, x);
       ddf = df = f = 0.0;
-      for(int i = 0; i < numberOfCoefficients; i++)
+      for (int i = 0; i < numberOfCoefficients; i++)
          f += coefficients[i] * xPowers[i];
-      for(int i = 1; i < numberOfCoefficients; i++)
+      for (int i = 1; i < numberOfCoefficients; i++)
          df += coefficients[i] * (i) * xPowers[i - 1];
-      for(int i = 2; i < numberOfCoefficients; i++)
+      for (int i = 2; i < numberOfCoefficients; i++)
          ddf += coefficients[i] * (i - 1) * (i) * xPowers[i - 2];
    }
-   
+
    public void setXPowers(double[] xPowers, double x)
    {
       xPowers[0] = 1.0;
@@ -88,11 +88,11 @@ public class Trajectory
    {
       double val = 0.0;
       setXPowers(xPowers, x);
-      for(int i = derivativeOrder; i < numberOfCoefficients; i++)
+      for (int i = derivativeOrder; i < numberOfCoefficients; i++)
          val += coefficients[i] * getCoefficientMultiplierForDerivative(derivativeOrder, i) * xPowers[i - derivativeOrder];
       return val;
    }
-   
+
    /**
     * Returns the order-th derivative of the xPowers vector at value x (Note: does NOT return the Trajectories order-th derivative at x)
     * @param order
@@ -111,61 +111,68 @@ public class Trajectory
    public void getDerivative(Trajectory trajectory, int order)
    {
       trajectory.reshape(numberOfCoefficients - 1);
-      for(int i = 1; i < numberOfCoefficients; i++)
+      for (int i = 1; i < numberOfCoefficients; i++)
          trajectory.setDirectlyFast(i - 1, getCoefficient(i) * (i));
    }
 
-   public double getCoefficientMultiplierForDerivative(int order, int exponent)
+   public int getCoefficientMultiplierForDerivative(int order, int exponent)
    {
-      double coeff = 1;
+      int coeff = 1;
       for (int i = exponent; i > exponent - order; i--)
          coeff *= i;
       return coeff;
    }
-   
+
    public double getPosition()
    {
       return f;
    }
 
-   public double getDFx()
+   public double getVelocity()
    {
       return df;
    }
 
-   public double getDDFx()
+   public double getAcceleration()
    {
       return ddf;
    }
 
    public double getCoefficient(int i)
    {
-      return coefficients[i];
+      setCoefficientsCopy();
+      return coefficientsCopy[i];
    }
 
    public DenseMatrix64F getCoefficientsVector()
    {
       return coefficientVector;
    }
-   
+
    public double[] getCoefficients()
    {
-      return coefficients;
+      setCoefficientsCopy();
+      return coefficientsCopy;
    }
 
    public void set(Trajectory other)
    {
       reset();
+      this.tInitial = other.tInitial;
+      this.tFinal = other.tFinal;
       reshape(other.getNumberOfCoefficients());
-      for (int i = 0; i < other.getNumberOfCoefficients(); i++)
-         coefficients[i] = other.getCoefficient(i);
+      int index = 0;
+      for (; index < other.getNumberOfCoefficients(); index++)
+         coefficients[index] = other.getCoefficient(index);
+      for (; index < maximumNumberOfCoefficients; index++)
+         coefficients[index] = Double.NaN;
    }
 
    public void setZero()
    {
       setConstant(tInitial, tFinal, 0.0);
    }
-   
+
    public void setConstant(double t0, double tFinal, double z)
    {
       reshape(1);
@@ -276,7 +283,7 @@ public class Trajectory
    {
       setQuintic(t0, tFinal, z0, zd0, 0.0, zFinal, zdFinal, 0.0);
    }
-   
+
    public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,
                                       double zdf, double zddf)
    {
@@ -624,19 +631,21 @@ public class Trajectory
    public void setDirectly(DenseMatrix64F coefficients)
    {
       reshape(coefficients.getNumRows());
-      for (int i = 0; i < numberOfCoefficients; i++)
-      {
-         this.coefficients[i] = coefficients.get(i, 0);
-      }
+      int index = 0;
+      for (; index < numberOfCoefficients; index++)
+         this.coefficients[index] = coefficients.get(index, 0);
+      for (; index < maximumNumberOfCoefficients; index++)
+         this.coefficients[index] = Double.NaN;
    }
-   
+
    public void setDirectly(double[] coefficients)
    {
       reshape(coefficients.length);
-      for (int i = 0; i < numberOfCoefficients; i++)
-      {
-         this.coefficients[i] = coefficients[i];
-      }
+      int index = 0;
+      for (; index < numberOfCoefficients; index++)
+         this.coefficients[index] = coefficients[index];
+      for (; index < maximumNumberOfCoefficients; index++)
+         this.coefficients[index] = Double.NaN;
    }
 
    public void setDirectly(int power, double coefficient)
@@ -657,7 +666,7 @@ public class Trajectory
       }
       coefficients[power] = coefficient;
    }
-   
+
    public void setTime(double t0, double tFinal)
    {
       setInitialTime(t0);
@@ -683,12 +692,12 @@ public class Trajectory
    {
       return this.tInitial;
    }
-   
+
    public boolean timeIntervalContains(double timeToCheck, double EPSILON)
    {
       return MathTools.intervalContains(timeToCheck, getInitialTime(), getFinalTime(), EPSILON);
    }
-   
+
    public boolean timeIntervalContains(double timeToCheck)
    {
       return MathTools.intervalContains(timeToCheck, getInitialTime(), getFinalTime(), Epsilons.ONE_MILLIONTH);
@@ -779,12 +788,19 @@ public class Trajectory
 
    private void setCoefficientVariables()
    {
-      for (int row = 0; row < numberOfCoefficients; row++)
-      {
+      int row = 0;
+      for (; row < numberOfCoefficients; row++)
          coefficients[row] = coefficientVector.get(row, 0);
-      }
+      for (; row < maximumNumberOfCoefficients; row++)
+         coefficients[row] = Double.NaN;
    }
-
+   
+   private void setCoefficientsCopy()
+   {
+      for (int row = 0; row < numberOfCoefficients; row++)
+         coefficientsCopy[row] = coefficients[row];
+   }
+   
    public void reshape(int numberOfCoefficientsRequired)
    {
       if (numberOfCoefficientsRequired > maximumNumberOfCoefficients)
@@ -811,7 +827,14 @@ public class Trajectory
             inString += "+";
          inString += coefficients[i] + " x^" + i;
       }
-      return inString;
+      return inString + " TInitial: " + tInitial + " TFinal: " + tFinal;
    }
 
+   public boolean isValidTrajectory()
+   {
+      boolean retVal = (getInitialTime() < getFinalTime()) && Double.isFinite(getInitialTime()) && Double.isFinite(getFinalTime());
+      for (int i = 0; retVal && i < numberOfCoefficients; i++)
+         retVal &= Double.isFinite(coefficients[i]);
+      return retVal;
+   }
 }

@@ -152,11 +152,11 @@ public class TrajectoryMathTools
    {
       int numberOfCoeffsToSet = trajectory1.getNumberOfCoefficients() + trajectory2.getNumberOfCoefficients() - 1;
 
-      fft.setCoefficients(trajectory1.getCoefficients());
+      fft.setCoefficients(trajectory1.getCoefficients(), trajectory1.getNumberOfCoefficients());
       tempComplexReference = fft.getForwardTransform();
       ComplexNumber.copyComplexArray(tempComplex1, tempComplexReference);
 
-      fft.setCoefficients(trajectory2.getCoefficients());
+      fft.setCoefficients(trajectory2.getCoefficients(), trajectory2.getNumberOfCoefficients());
       tempComplexReference = fft.getForwardTransform();
       ComplexNumber.copyComplexArray(tempComplex2, tempComplexReference);
 
@@ -253,7 +253,7 @@ public class TrajectoryMathTools
       multiply(tempTraj1, traj1Y, traj2Z);
       multiply(tempTraj2, traj1Z, traj2Y);
       subtract(tempTraj3.xTrajectory, tempTraj1, tempTraj2);
-
+      
       multiply(tempTraj1, traj1X, traj2Z);
       multiply(tempTraj2, traj1Z, traj2X);
       subtract(tempTraj3.yTrajectory, tempTraj2, tempTraj1);
@@ -261,6 +261,7 @@ public class TrajectoryMathTools
       multiply(tempTraj1, traj1X, traj2Y);
       multiply(tempTraj2, traj1Y, traj2X);
       subtract(tempTraj3.zTrajectory, tempTraj1, tempTraj2);
+
       xTrajectoryToPack.set(tempTraj3.xTrajectory);
       yTrajectoryToPack.set(tempTraj3.yTrajectory);
       zTrajectoryToPack.set(tempTraj3.zTrajectory);

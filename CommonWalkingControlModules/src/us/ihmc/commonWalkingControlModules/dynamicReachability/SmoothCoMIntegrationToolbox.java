@@ -120,7 +120,7 @@ public class SmoothCoMIntegrationToolbox
                              icpPositionDesiredFinal, comPositionDesiredInitial, comQuantityDesired);
    }
    
-   public double calculateCoMQuantityFromCorrespondingCMPPolynomial1D(double omega0, double time, int comDerivativeOrder, YoTrajectory cmpPolynomial, double icpPositionDesiredFinal, double comPositionDesiredInitial)
+   public double calculateCoMQuantityFromCorrespondingCMPPolynomial1D(double omega0, double time, int comDerivativeOrder, Trajectory cmpPolynomial, double icpPositionDesiredFinal, double comPositionDesiredInitial)
    {      
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
    
@@ -340,7 +340,7 @@ public class SmoothCoMIntegrationToolbox
    }
    
    public void calculateGeneralizedGammaCoMPrimeOnCMPSegment1D(double omega0, double time, DenseMatrix64F generalizedGammaCoMPrime, 
-                                                                      int gammaCoMDerivativeOrder, YoTrajectory cmpPolynomial)
+                                                                      int gammaCoMDerivativeOrder, Trajectory cmpPolynomial)
    {      
       double timeSegmentInitial = cmpPolynomial.getInitialTime();
       double ddGamaPrimeValue = Math.pow(-1.0, gammaCoMDerivativeOrder) * Math.pow(omega0, gammaCoMDerivativeOrder) * Math.exp(omega0 * (timeSegmentInitial - time));
@@ -369,7 +369,7 @@ public class SmoothCoMIntegrationToolbox
    }
    
    public void calculateGeneralizedDeltaCoMPrimeOnCMPSegment1D(double omega0, double time, DenseMatrix64F generalizedDeltaCoMPrime, 
-                                                                      int deltaCoMDerivativeOrder, YoTrajectory cmpPolynomial)
+                                                                      int deltaCoMDerivativeOrder, Trajectory cmpPolynomial)
    {                  
       double timeSegmentInitial = cmpPolynomial.getInitialTime();
       double timeSegmentTotal = cmpPolynomial.getFinalTime();
