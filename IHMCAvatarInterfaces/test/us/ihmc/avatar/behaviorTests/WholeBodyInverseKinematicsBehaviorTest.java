@@ -639,7 +639,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       double currentPelvisYaw = currentPelvisOrientation.getYaw();
       double currentPelvisPitch = currentPelvisOrientation.getPitch();
 
-      double angleEpsilon = Math.toRadians(1);
+      double angleEpsilon = Math.toRadians(1.5);
 
       assertEquals("Expected: " + desiredPelvisOrientation.getRoll() + " Received: " + currentPelvisRoll, desiredPelvisOrientation.getRoll(), currentPelvisRoll, angleEpsilon);
       assertEquals("Expected: " + initialPelvisYaw + " Received: " + currentPelvisYaw, initialPelvisYaw, currentPelvisYaw, angleEpsilon);
