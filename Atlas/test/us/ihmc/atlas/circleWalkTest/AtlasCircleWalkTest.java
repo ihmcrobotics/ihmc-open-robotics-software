@@ -53,7 +53,7 @@ public class AtlasCircleWalkTest extends HumanoidCircleWalkTest{
 	@Override
 	protected boolean keepSCSUp()
 	{
-	   return true;
+	   return false;
 	}
 	
 	@Override
