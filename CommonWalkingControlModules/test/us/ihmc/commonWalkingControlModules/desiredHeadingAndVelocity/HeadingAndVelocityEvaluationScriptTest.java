@@ -10,17 +10,17 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScript.HeadingAndVelocityEvaluationEvent;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.MemoryTools;
@@ -83,10 +83,10 @@ public class HeadingAndVelocityEvaluationScriptTest
 
       int numberOfTicksToTest = 1200;
 
-      ArrayList<FrameVector2d> desiredHeadings = new ArrayList<FrameVector2d>();
-      ArrayList<FrameVector2d> desiredVelocities = new ArrayList<FrameVector2d>();
+      ArrayList<FrameVector2D> desiredHeadings = new ArrayList<FrameVector2D>();
+      ArrayList<FrameVector2D> desiredVelocities = new ArrayList<FrameVector2D>();
 
-      FrameVector2d desiredVelocity = new FrameVector2d();
+      FrameVector2D desiredVelocity = new FrameVector2D();
 
       for (int i = 0; i < numberOfTicksToTest; i++)
       {
@@ -94,7 +94,7 @@ public class HeadingAndVelocityEvaluationScriptTest
 
          desiredHeadingControlModule.updateDesiredHeadingFrame();
 
-         FrameVector2d desiredHeading = new FrameVector2d();
+         FrameVector2D desiredHeading = new FrameVector2D();
 
          desiredHeadingControlModule.getDesiredHeading(desiredHeading, 0.0);
          desiredVelocityControlModule.getDesiredVelocity(desiredVelocity);
@@ -111,7 +111,7 @@ public class HeadingAndVelocityEvaluationScriptTest
 
          position.add(desiredVelocity.getX() * controlDT, desiredVelocity.getY() * controlDT, 0.0);
 
-         FramePoint location = new FramePoint(ReferenceFrame.getWorldFrame());
+         FramePoint3D location = new FramePoint3D(ReferenceFrame.getWorldFrame());
          location.set(position.getX(), position.getY(), 0.0);
 
          bagOfBalls.setBall(location);
@@ -159,17 +159,17 @@ public class HeadingAndVelocityEvaluationScriptTest
          sleepForever();
    }
 
-   private double[] findMaxChange(ArrayList<FrameVector2d> frameVectors)
+   private double[] findMaxChange(ArrayList<FrameVector2D> frameVectors)
    {
       double[] ret = new double[] {0.0, 0.0};
 
-      FrameVector2d difference = new FrameVector2d(frameVectors.get(0).getReferenceFrame());
+      FrameVector2D difference = new FrameVector2D(frameVectors.get(0).getReferenceFrame());
 
-      FrameVector2d previousVector = frameVectors.get(0);
+      FrameVector2D previousVector = frameVectors.get(0);
 
       for (int i = 1; i < frameVectors.size(); i++)
       {
-         FrameVector2d nextVector = frameVectors.get(i);
+         FrameVector2D nextVector = frameVectors.get(i);
 
          difference.set(nextVector);
          difference.sub(previousVector);

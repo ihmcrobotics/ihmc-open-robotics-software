@@ -1,11 +1,11 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.geometry.FramePoint;
 
 public interface BodyPositionEstimator
 {
-   public abstract void getBodyPosition(FramePoint bodyPositionToPack);
+   public abstract void getBodyPosition(FramePoint3D bodyPositionToPack);
    
    public abstract void getCovariance(Tuple3DBasics covarianceToPack);
 

@@ -8,30 +8,30 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SphericalJoint extends AbstractInverseDynamicsJoint
 {
    private final Quaternion jointRotation = new Quaternion();
-   private final FrameVector jointAngularVelocity;
-   private final FrameVector jointAngularAcceleration;
-   private final FrameVector jointAngularAccelerationDesired;
-   private FrameVector jointTorque;
+   private final FrameVector3D jointAngularVelocity;
+   private final FrameVector3D jointAngularAcceleration;
+   private final FrameVector3D jointAngularAccelerationDesired;
+   private FrameVector3D jointTorque;
 
    private List<Twist> unitTwists;
 
    public SphericalJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent)
    {
       super(name, predecessor, transformToParent);
-      this.jointAngularVelocity = new FrameVector(afterJointFrame);
-      this.jointAngularAcceleration = new FrameVector(afterJointFrame);
-      this.jointAngularAccelerationDesired = new FrameVector(afterJointFrame);
+      this.jointAngularVelocity = new FrameVector3D(afterJointFrame);
+      this.jointAngularAcceleration = new FrameVector3D(afterJointFrame);
+      this.jointAngularAccelerationDesired = new FrameVector3D(afterJointFrame);
    }
 
    @Override
@@ -98,7 +98,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
       setMotionSubspace();
 
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();
-      this.jointTorque = new FrameVector(successorFrame);
+      this.jointTorque = new FrameVector3D(successorFrame);
    }
 
    @Override
@@ -150,22 +150,22 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
       this.jointRotation.set(jointRotation);
    }
 
-   public void setJointAngularVelocity(FrameVector jointAngularVelocity)
+   public void setJointAngularVelocity(FrameVector3D jointAngularVelocity)
    {
       this.jointAngularVelocity.set(jointAngularVelocity);
    }
 
-   public void setAcceleration(FrameVector jointAngularAcceleration)
+   public void setAcceleration(FrameVector3D jointAngularAcceleration)
    {
       this.jointAngularAcceleration.set(jointAngularAcceleration);
    }
 
-   public void setDesiredAcceleration(FrameVector jointAngularAccelerationDesired)
+   public void setDesiredAcceleration(FrameVector3D jointAngularAccelerationDesired)
    {
       this.jointAngularAccelerationDesired.set(jointAngularAccelerationDesired);
    }
 
-   public void setJointTorque(FrameVector jointTorque)
+   public void setJointTorque(FrameVector3D jointTorque)
    {
       this.jointTorque.set(jointTorque);
    }
@@ -185,7 +185,7 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
       jointRotation.getYawPitchRoll(yawPitchRollToPack);
    }
 
-   public void getJointTorque(FrameVector jointTorqueToPack)
+   public void getJointTorque(FrameVector3D jointTorqueToPack)
    {
       jointTorqueToPack.setIncludingFrame(jointTorque);
    }

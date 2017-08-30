@@ -388,4 +388,50 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
    {      
    }
 
+
+   @Override
+   public LoadParametersConstructor getLoadParametersConstructor()
+   {
+      return new LoadParametersConstructor()
+      {
+         
+         @Override
+         public void constructDialog()
+         {
+            // TODO Auto-generated method stub
+            
+         }
+         
+         @Override
+         public void closeAndDispose()
+         {
+            // TODO Auto-generated method stub
+            
+         }
+      };
+   }
+
+
+   @Override
+   public SaveParametersConstructor getSaveParametersConstructor()
+   {
+      return new SaveParametersConstructor()
+      {
+         
+         @Override
+         public void constructDialog()
+         {
+            // TODO Auto-generated method stub
+            
+         }
+         
+         @Override
+         public void closeAndDispose()
+         {
+            // TODO Auto-generated method stub
+            
+         }
+      };
+   }
+
 }

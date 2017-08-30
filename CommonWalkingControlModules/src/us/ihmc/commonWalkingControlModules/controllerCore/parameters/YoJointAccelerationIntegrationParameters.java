@@ -17,7 +17,7 @@ public class YoJointAccelerationIntegrationParameters implements JointAccelerati
     * The parameters are initialized with the default values of
     * {@link JointAccelerationIntegrationCalculator}.
     * </p>
-    * 
+    *
     * @param namePrefix the {@code String} to be prepended to each {@code YoVariable} of this class.
     * @param registry the registry to which the {@code YoVariable}s of this class are registered to.
     */
@@ -36,7 +36,7 @@ public class YoJointAccelerationIntegrationParameters implements JointAccelerati
     * <p>
     * The parameters are initialized to the given values.
     * </p>
-    * 
+    *
     * @param namePrefix the {@code String} to be prepended to each {@code YoVariable} of this class.
     * @param alphaPosition the leak ratio used to compute the desired position, see {@link #getAlphaPosition()}.
     * @param alphaVelocity the leak ratio used to compute the desired velocity, see {@link #getAlphaVelocity()}.
@@ -109,7 +109,7 @@ public class YoJointAccelerationIntegrationParameters implements JointAccelerati
     * undesirable effect disappear. If not specified otherwise, &alpha;<sub>P</sup> =
     * {@link JointAccelerationIntegrationCalculator#DEFAUTL_ALPHA_POSITION}.
     * </p>
-    * 
+    *
     * @param alphaPosition the leak ratio &alpha;<sub>P</sup> used to compute the desired position.
     * @param alphaVelocity the leak ratio &alpha;<sub>V</sup> used to compute the desired velocity.
     */
@@ -141,7 +141,7 @@ public class YoJointAccelerationIntegrationParameters implements JointAccelerati
     * {@code maxPositionError} =
     * {@link JointAccelerationIntegrationCalculator#DEFAULT_MAX_POSITION_ERROR}.
     * </p>
-    * 
+    *
     * @param maxPositionError limits the gap between the desired joint position and the actual joint
     *           position.
     * @param maxVelocity limits the maximum value of the desired joint velocity.
@@ -150,6 +150,20 @@ public class YoJointAccelerationIntegrationParameters implements JointAccelerati
    {
       this.maxPositionError.set(maxPositionError);
       this.maxVelocity.set(maxVelocity);
+   }
+
+   /**
+    * Will set the parameters contained in this object to match the parameters in the provided
+    * {@link JointAccelerationIntegrationParameters}.
+    * <p>
+    * @param other {@link JointAccelerationIntegrationParametersReadOnly} to copy into this.
+    * @see #setAlphas(double, double)
+    * @see #setMaxima(double, double)
+    */
+   public void set(JointAccelerationIntegrationParametersReadOnly other)
+   {
+      setAlphas(other.getAlphaPosition(), other.getAlphaVelocity());
+      setMaxima(other.getMaxPositionError(), other.getMaxVelocity());
    }
 
    /** {@inheritDoc} */

@@ -5,17 +5,17 @@ import java.util.EnumMap;
 import org.apache.commons.lang3.StringUtils;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * This multi waypoint trajectory generator helper will generate velocities at intermediate way points of a trajectory which will result in a smooth path trough
@@ -198,7 +198,7 @@ public class EuclideanTrajectoryPointCalculator
       }
    }
 
-   private final FrameVector computedLinearVelocity = new FrameVector();
+   private final FrameVector3D computedLinearVelocity = new FrameVector3D();
 
    public void computeTrajectoryPointVelocities(boolean startAndFinishWithZeroVelocity)
    {
@@ -257,35 +257,35 @@ public class EuclideanTrajectoryPointCalculator
       }
    }
 
-   private final FramePoint tempFramePoint = new FramePoint();
-   private final FrameVector tempFrameVector = new FrameVector();
+   private final FramePoint3D tempFramePoint = new FramePoint3D();
+   private final FrameVector3D tempFrameVector = new FrameVector3D();
 
    private void compute2ndTrajectoryPointVelocityWithVelocityConstraint(EuclideanTrajectoryPointInterface<?> firstTrajectoryPoint,
          EuclideanTrajectoryPointInterface<?> secondTrajectoryPoint, EuclideanTrajectoryPointInterface<?> thirdTrajectoryPoint,
-         FrameVector linearVelocityToPack)
+         FrameVector3D linearVelocityToPack)
    {
       for (Direction direction : Direction.values)
       {
          firstTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          firstTrajectoryPoint.getLinearVelocity(tempFrameVector.getVector());
          double t0 = firstTrajectoryPoint.getTime();
-         double z0 = tempFramePoint.get(direction);
-         double zd0 = tempFrameVector.get(direction);
+         double z0 = tempFramePoint.getElement(direction.ordinal());
+         double zd0 = tempFrameVector.getElement(direction.ordinal());
 
          secondTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          double tIntermediate = secondTrajectoryPoint.getTime();
-         double zIntermediate = tempFramePoint.get(direction);
+         double zIntermediate = tempFramePoint.getElement(direction.ordinal());
 
          thirdTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          thirdTrajectoryPoint.getLinearVelocity(tempFrameVector.getVector());
          double tf = thirdTrajectoryPoint.getTime();
-         double zf = tempFramePoint.get(direction);
-         double zdf = tempFrameVector.get(direction);
+         double zf = tempFramePoint.getElement(direction.ordinal());
+         double zdf = tempFrameVector.getElement(direction.ordinal());
 
          YoPolynomial polynomial = polynomials.get(direction);
          polynomial.setQuarticUsingWayPoint(t0, tIntermediate, tf, z0, zd0, zIntermediate, zf, zdf);
          polynomial.compute(tIntermediate);
-         linearVelocityToPack.set(direction, polynomial.getVelocity());
+         linearVelocityToPack.setElement(direction.ordinal(), polynomial.getVelocity());
       }
    }
 
@@ -296,23 +296,23 @@ public class EuclideanTrajectoryPointCalculator
 
    private void computeTrajectoryPointVelocity(EuclideanTrajectoryPointInterface<?> firstTrajectoryPoint,
          EuclideanTrajectoryPointInterface<?> secondTrajectoryPoint, EuclideanTrajectoryPointInterface<?> thirdTrajectoryPoint,
-         TrajectoryPoint trajectoryPointToComputeVelocityOf, FrameVector linearVelocityToPack)
+         TrajectoryPoint trajectoryPointToComputeVelocityOf, FrameVector3D linearVelocityToPack)
    {
       for (Direction direction : Direction.values)
       {
          firstTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          firstTrajectoryPoint.getLinearVelocity(tempFrameVector.getVector());
          double t0 = firstTrajectoryPoint.getTime();
-         double z0 = tempFramePoint.get(direction);
+         double z0 = tempFramePoint.getElement(direction.ordinal());
 
          secondTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          double tIntermediate = secondTrajectoryPoint.getTime();
-         double zIntermediate = tempFramePoint.get(direction);
+         double zIntermediate = tempFramePoint.getElement(direction.ordinal());
 
          thirdTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          thirdTrajectoryPoint.getLinearVelocity(tempFrameVector.getVector());
          double tf = thirdTrajectoryPoint.getTime();
-         double zf = tempFramePoint.get(direction);
+         double zf = tempFramePoint.getElement(direction.ordinal());
 
          YoPolynomial polynomial = polynomials.get(direction);
          polynomial.setQuadraticUsingIntermediatePoint(t0, tIntermediate, tf, z0, zIntermediate, zf);
@@ -330,7 +330,7 @@ public class EuclideanTrajectoryPointCalculator
             break;
          }
 
-         linearVelocityToPack.set(direction, polynomial.getVelocity());
+         linearVelocityToPack.setElement(direction.ordinal(), polynomial.getVelocity());
       }
    }
 

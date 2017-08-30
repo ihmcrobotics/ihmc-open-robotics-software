@@ -2,11 +2,11 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameTuple;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.frames.YoFrameTuple;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class DeadzoneYoFrameVector extends YoFrameVector implements ProcessingYoVariable
 {
@@ -61,7 +61,7 @@ public class DeadzoneYoFrameVector extends YoFrameVector implements ProcessingYo
       z.update();
    }
 
-   public void update(FrameTuple<?, ?> frameTuple)
+   public void update(FrameTuple3D<?, ?> frameTuple)
    {
       checkReferenceFrameMatch(frameTuple);
 

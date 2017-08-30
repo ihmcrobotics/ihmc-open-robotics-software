@@ -1,5 +1,8 @@
 package us.ihmc.quadrupedRobotics.controller.forceDevelopment;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
@@ -25,9 +28,6 @@ import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineS
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -55,14 +55,14 @@ public class QuadrupedTimedStepController
    private final QuadrantDependentList<QuadrupedSolePositionController> solePositionController;
    private final QuadrantDependentList<QuadrupedSolePositionController.Setpoints> solePositionControllerSetpoints;
    private final PreallocatedList<QuadrupedTimedStep> stepSequence;
-   private final QuadrantDependentList<FramePoint> solePositionEstimate;
-   private final QuadrantDependentList<FrameVector> soleForceCommand;
+   private final QuadrantDependentList<FramePoint3D> solePositionEstimate;
+   private final QuadrantDependentList<FrameVector3D> soleForceCommand;
    private final QuadrantDependentList<ContactState> contactState;
    private final QuadrupedContactForceLimits contactForceLimits;
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
 
    // graphics
-   private final FramePoint stepSequenceVisualizationPosition;
+   private final FramePoint3D stepSequenceVisualizationPosition;
    private final QuadrantDependentList<BagOfBalls> stepSequenceVisualization;
    private static final QuadrantDependentList<AppearanceDefinition> stepSequenceAppearance = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Blue(),
          YoAppearance.RGBColor(1, 0.5, 0.0), YoAppearance.RGBColor(0.0, 0.5, 1.0));
@@ -98,8 +98,8 @@ public class QuadrupedTimedStepController
       soleForceCommand = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         solePositionEstimate.set(robotQuadrant, new FramePoint());
-         soleForceCommand.set(robotQuadrant, new FrameVector());
+         solePositionEstimate.set(robotQuadrant, new FramePoint3D());
+         soleForceCommand.set(robotQuadrant, new FrameVector3D());
          contactState.set(robotQuadrant, ContactState.IN_CONTACT);
       }
       contactForceLimits = new QuadrupedContactForceLimits();
@@ -122,7 +122,7 @@ public class QuadrupedTimedStepController
 
       // graphics
       stepSequenceVisualization = new QuadrantDependentList<>();
-      stepSequenceVisualizationPosition = new FramePoint();
+      stepSequenceVisualizationPosition = new FramePoint3D();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          AppearanceDefinition appearance = stepSequenceAppearance.get(robotQuadrant);
@@ -227,7 +227,7 @@ public class QuadrupedTimedStepController
    }
 
    public void compute(QuadrantDependentList<ContactState> contactState, QuadrupedContactForceLimits contactForceLimits,
-         QuadrantDependentList<FrameVector> soleForceCommand, QuadrupedTaskSpaceEstimator.Estimates taskSpaceEsimates)
+         QuadrantDependentList<FrameVector3D> soleForceCommand, QuadrupedTaskSpaceEstimator.Estimates taskSpaceEsimates)
    {
       // copy inputs
       this.taskSpaceEstimates.set(taskSpaceEsimates);
@@ -324,13 +324,13 @@ public class QuadrupedTimedStepController
    {
       private RobotQuadrant robotQuadrant;
       private final ThreeDoFSwingFootTrajectory swingTrajectory;
-      private final FramePoint goalPosition;
+      private final FramePoint3D goalPosition;
       private final GlitchFilteredYoBoolean touchdownTrigger;
 
       public SwingState(RobotQuadrant robotQuadrant)
       {
          this.robotQuadrant = robotQuadrant;
-         this.goalPosition = new FramePoint();
+         this.goalPosition = new FramePoint3D();
          this.swingTrajectory = new ThreeDoFSwingFootTrajectory(this.robotQuadrant.getPascalCaseName(), registry);
          this.touchdownTrigger = new GlitchFilteredYoBoolean(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
                touchdownTriggerWindowParameter.get());
@@ -346,7 +346,7 @@ public class QuadrupedTimedStepController
          timedStep.getGoalPosition(goalPosition);
          goalPosition.changeFrame(ReferenceFrame.getWorldFrame());
          goalPosition.add(0.0, 0.0, stepGoalOffsetZParameter.get());
-         FramePoint solePosition = solePositionEstimate.get(robotQuadrant);
+         FramePoint3D solePosition = solePositionEstimate.get(robotQuadrant);
          solePosition.changeFrame(goalPosition.getReferenceFrame());
          swingTrajectory.initializeTrajectory(solePosition, goalPosition, groundClearance, timeInterval);
 
@@ -382,7 +382,7 @@ public class QuadrupedTimedStepController
          swingTrajectory.getPosition(solePositionControllerSetpoints.get(robotQuadrant).getSolePosition());
 
          // detect early touch-down
-         FrameVector soleForceEstimate = taskSpaceEstimates.getSoleVirtualForce(robotQuadrant);
+         FrameVector3D soleForceEstimate = taskSpaceEstimates.getSoleVirtualForce(robotQuadrant);
          soleForceEstimate.changeFrame(ReferenceFrame.getWorldFrame());
          double pressureEstimate = -soleForceEstimate.getZ();
          double relativeTimeInSwing = currentTime - timedStep.getTimeInterval().getStartTime();

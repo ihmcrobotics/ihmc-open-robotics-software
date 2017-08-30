@@ -3,6 +3,11 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 import com.jme3.math.Quaternion;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToInteractableObjectBehavior.WalkToObjectState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
@@ -12,19 +17,14 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 
 public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkToObjectState>
 {
 
-   protected FramePoint walkToPoint1;
-   protected FramePoint walkToPoint2;
+   protected FramePoint3D walkToPoint1;
+   protected FramePoint3D walkToPoint2;
    ResetRobotBehavior reset;
    private boolean succeded = true;
 
@@ -82,10 +82,10 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
             TextToSpeechPacket p1 = new TextToSpeechPacket("Walking To Point One");
             sendPacket(p1);
             walkToPoint1.changeFrame(ReferenceFrame.getWorldFrame());
-            FramePoint walkPosition2d = new FramePoint(ReferenceFrame.getWorldFrame(), walkToPoint1.getX(), walkToPoint1.getY(), 0);
-            FramePoint robotPosition = new FramePoint(midZupFrame, 0.0, 0.0, 0.0);
+            FramePoint3D walkPosition2d = new FramePoint3D(ReferenceFrame.getWorldFrame(), walkToPoint1.getX(), walkToPoint1.getY(), 0);
+            FramePoint3D robotPosition = new FramePoint3D(midZupFrame, 0.0, 0.0, 0.0);
             robotPosition.changeFrame(ReferenceFrame.getWorldFrame());
-            FrameVector walkingDirection = new FrameVector(ReferenceFrame.getWorldFrame());
+            FrameVector3D walkingDirection = new FrameVector3D(ReferenceFrame.getWorldFrame());
             walkingDirection.set(walkPosition2d);
             walkingDirection.sub(robotPosition);
             walkingDirection.normalize();
@@ -110,10 +110,10 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
             sendPacket(p1);
 
             walkToPoint2.changeFrame(ReferenceFrame.getWorldFrame());
-            FramePoint2d walkPosition2d = new FramePoint2d(ReferenceFrame.getWorldFrame(), walkToPoint2.getX(), walkToPoint2.getY());
-            FramePoint2d robotPosition = new FramePoint2d(midZupFrame, 0.0, 0.0);
+            FramePoint2D walkPosition2d = new FramePoint2D(ReferenceFrame.getWorldFrame(), walkToPoint2.getX(), walkToPoint2.getY());
+            FramePoint2D robotPosition = new FramePoint2D(midZupFrame, 0.0, 0.0);
             robotPosition.changeFrame(ReferenceFrame.getWorldFrame());
-            FrameVector2d walkingDirection = new FrameVector2d(ReferenceFrame.getWorldFrame());
+            FrameVector2D walkingDirection = new FrameVector2D(ReferenceFrame.getWorldFrame());
             walkingDirection.set(walkPosition2d);
             walkingDirection.sub(robotPosition);
             walkingDirection.normalize();
@@ -181,7 +181,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
       statemachine.setStartState(WalkToObjectState.GET_READY_TO_WALK);
    }
 
-   public void setWalkPoints(FramePoint walkToPoint1, FramePoint walkToPoint2)
+   public void setWalkPoints(FramePoint3D walkToPoint1, FramePoint3D walkToPoint2)
    {
       this.walkToPoint1 = walkToPoint1;
       this.walkToPoint2 = walkToPoint2;

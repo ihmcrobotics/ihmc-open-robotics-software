@@ -4,13 +4,13 @@ import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneContactStateCommand>
@@ -20,8 +20,8 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    private long id = -1L;
    private double coefficientOfFriction = Double.NaN;
    private final int initialSize = 8;
-   private final FrameTupleArrayList<FramePoint> contactPoints = FrameTupleArrayList.createFramePointArrayList(initialSize);
-   private final FrameVector contactNormal = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
+   private final FrameTupleArrayList<FramePoint3D> contactPoints = FrameTupleArrayList.createFramePointArrayList(initialSize);
+   private final FrameVector3D contactNormal = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
 
    private boolean useHighCoPDamping = false;
 
@@ -54,19 +54,19 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       maxContactPointNormalForces.clear();
    }
 
-   public void addPointInContact(FramePoint newPointInContact)
+   public void addPointInContact(FramePoint3D newPointInContact)
    {
       contactPoints.add().setIncludingFrame(newPointInContact);
       maxContactPointNormalForces.add().setValue(Double.POSITIVE_INFINITY);
    }
 
-   public void addPointInContact(FramePoint2d newPointInContact)
+   public void addPointInContact(FramePoint2D newPointInContact)
    {
-      contactPoints.add().setXYIncludingFrame(newPointInContact);
+      contactPoints.add().setIncludingFrame(newPointInContact, 0.0);
       maxContactPointNormalForces.add().setValue(Double.POSITIVE_INFINITY);
    }
 
-   public void setPointsInContact(List<FramePoint> newPointsInContact)
+   public void setPointsInContact(List<FramePoint3D> newPointsInContact)
    {
       contactPoints.copyFromListAndTrimSize(newPointsInContact);
 
@@ -80,7 +80,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       clearContactPoints();
       for (int i = 0; i < newPointsInContact.size(); i++)
       {
-         contactPoints.add().setXYIncludingFrame(contactFrame, newPointsInContact.get(i));
+         contactPoints.add().setIncludingFrame(contactFrame, newPointsInContact.get(i), 0.0);
          maxContactPointNormalForces.add().setValue(Double.POSITIVE_INFINITY);
       }
    }
@@ -91,7 +91,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       maxContactPointNormalForces.get(contactPointIndex).setValue(maxNormalForce);
    }
 
-   public void setContactNormal(FrameVector contactNormal)
+   public void setContactNormal(FrameVector3D contactNormal)
    {
       this.contactNormal.setIncludingFrame(contactNormal);
    }
@@ -131,12 +131,12 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       return rigidBodyName;
    }
 
-   public void getContactPoint(int index, FramePoint contactPointToPack)
+   public void getContactPoint(int index, FramePoint3D contactPointToPack)
    {
       contactPointToPack.setIncludingFrame(contactPoints.get(index));
    }
 
-   public void getContactNormal(FrameVector contactNormalToPack)
+   public void getContactNormal(FrameVector3D contactNormalToPack)
    {
       contactNormalToPack.setIncludingFrame(contactNormal);
    }

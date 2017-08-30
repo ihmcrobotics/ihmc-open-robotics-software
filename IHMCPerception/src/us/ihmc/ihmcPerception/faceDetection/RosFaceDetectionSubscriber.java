@@ -4,16 +4,15 @@ import people_msgs.PositionMeasurement;
 import people_msgs.PositionMeasurementArray;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.DetectedFacesPacket;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
-
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 
 public class RosFaceDetectionSubscriber extends AbstractRosTopicSubscriber<PositionMeasurementArray>
 {
-   private final FramePoint framePoint = new FramePoint();
+   private final FramePoint3D framePoint = new FramePoint3D();
 
    private final PacketCommunicator packetCommunicator;
    private final ReferenceFrame cameraFrame;
@@ -43,7 +42,7 @@ public class RosFaceDetectionSubscriber extends AbstractRosTopicSubscriber<Posit
 
          framePoint.setIncludingFrame(cameraFrame, person.getPos().getX(), person.getPos().getY(), person.getPos().getZ());
          framePoint.changeFrame(ReferenceFrame.getWorldFrame());
-         positions[i] = framePoint.getPointCopy();
+         positions[i] = new Point3D(framePoint);
       }
 
       DetectedFacesPacket detectedFaces = new DetectedFacesPacket(ids, positions);

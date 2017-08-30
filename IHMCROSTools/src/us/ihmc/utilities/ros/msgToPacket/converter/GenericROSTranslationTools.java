@@ -1,43 +1,35 @@
 package us.ihmc.utilities.ros.msgToPacket.converter;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import geometry_msgs.Point;
+import geometry_msgs.Transform;
+import geometry_msgs.Vector3;
+import ihmc_msgs.Point2dRosMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
-
-import geometry_msgs.Quaternion;
-import geometry_msgs.Vector3;
-import ihmc_msgs.Point2dRosMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.*;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DBasics;
+import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
+
+import java.lang.reflect.*;
+import java.util.*;
 
 public class GenericROSTranslationTools
 {
@@ -50,6 +42,7 @@ public class GenericROSTranslationTools
    private static Set<Class<?>> inputTopics;
 
    private static final HashMap<Class<?>, String> javaClassToRosMessageTypeMap = new HashMap<>();
+   private static CustomFieldConversions customFieldConversions = CustomFieldConversions.getInstance();
 
    /* Initialize the class to message type map */
    static
@@ -85,10 +78,28 @@ public class GenericROSTranslationTools
       javaClassToRosMessageTypeMap.put(Quaternion.class, "geometry_msgs/Quaternion");
       javaClassToRosMessageTypeMap.put(Quaternion32.class, "geometry_msgs/Quaternion");
 
-      javaClassToRosMessageTypeMap.put(Point3D.class, "geometry_msgs/Vector3");
-      javaClassToRosMessageTypeMap.put(Point3D32.class, "geometry_msgs/Vector3");
+      javaClassToRosMessageTypeMap.put(Point3D.class, "geometry_msgs/Point");
+      javaClassToRosMessageTypeMap.put(Point3D32.class, "geometry_msgs/Point");
       javaClassToRosMessageTypeMap.put(Vector3D.class, "geometry_msgs/Vector3");
       javaClassToRosMessageTypeMap.put(Vector3D32.class, "geometry_msgs/Vector3");
+
+      javaClassToRosMessageTypeMap.put(QuaternionBasedTransform.class, "geometry_msgs/Transform");
+
+      // QuaternionBasedTransform <-> Transform
+      customFieldConversions.registerIHMCPacketFieldConverter(QuaternionBasedTransform.class, GenericROSTranslationTools::convertQuaternionBasedTransformToTransform);
+      customFieldConversions.registerROSMessageFieldConverter(Transform.class, GenericROSTranslationTools::convertTransformToQuaternionBasedTransform);
+
+      // Point3D <-> Point
+      customFieldConversions.registerIHMCPacketFieldConverter(Point3D.class, GenericROSTranslationTools::convertPoint3D);
+      customFieldConversions.registerROSMessageFieldConverter(Point.class, GenericROSTranslationTools::convertPoint);
+
+      // Vector3D <-> Vector3
+      customFieldConversions.registerIHMCPacketFieldConverter(Vector3D.class, GenericROSTranslationTools::convertVector3D);
+      customFieldConversions.registerROSMessageFieldConverter(Vector3.class, GenericROSTranslationTools::convertVector3);
+
+      // Quaternion <-> ROS Quaternion
+      customFieldConversions.registerIHMCPacketFieldConverter(Quaternion.class, GenericROSTranslationTools::convertTuple4d);
+      customFieldConversions.registerROSMessageFieldConverter(geometry_msgs.Quaternion.class, GenericROSTranslationTools::convertQuaternion);
    }
 
    public static MessageFactory getMessageFactory()
@@ -104,7 +115,16 @@ public class GenericROSTranslationTools
    public static Message convertIHMCMessageToRosMessage(Packet<?> ihmcMessage)
          throws IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException
    {
-      Class<? extends Packet> ihmcMessageClass = ihmcMessage.getClass();
+      return convertJavaObjectToRosMessage(ihmcMessage);
+   }
+
+   private static Message convertJavaObjectToRosMessage(Object ihmcObject)
+         throws InvocationTargetException, NoSuchMethodException, ClassNotFoundException, IllegalAccessException
+   {
+      if(!ihmcObject.getClass().isAnnotationPresent(RosMessagePacket.class))
+         throw new IllegalArgumentException("Class " + ihmcObject.getClass().getSimpleName() + " must contain RosMessagePacket class annotation to be converted.");
+
+      Class<?> ihmcMessageClass = ihmcObject.getClass();
       String rosMessageClassNameFromIHMCMessage = getRosMessageClassNameFromIHMCMessage(ihmcMessageClass.getSimpleName());
       RosMessagePacket rosAnnotation = ihmcMessageClass.getAnnotation(RosMessagePacket.class);
 
@@ -119,7 +139,7 @@ public class GenericROSTranslationTools
          }
       }
 
-      convertIHMCMessageFieldsToROSFields(ihmcMessage, message, fields);
+      convertIHMCMessageFieldsToROSFields(ihmcObject, message, fields);
 
       return message;
    }
@@ -169,9 +189,11 @@ public class GenericROSTranslationTools
             {
                setEnumFromByte(rosMessage, ihmcMessage, rosGetter, ihmcField, (Class<? extends Enum>) ihmcMessageFieldType);
             }
-            else if(ihmcMessageFieldType.getCanonicalName().contains("javax.vecmath"))
+            else if(customFieldConversions.containsConverterFor(rosGetter.getReturnType()))
             {
-               setVecmathFieldFromRosGeometryMessage(rosMessage, ihmcMessage, rosGetter, ihmcField, ihmcMessageFieldType);
+               Message rosMessageField = (Message) rosGetter.invoke(rosMessage);
+               Object ihmcPacketField = customFieldConversions.convert(rosMessageField);
+               ihmcField.set(ihmcMessage, ihmcPacketField);
             }
             else
             {
@@ -183,31 +205,6 @@ public class GenericROSTranslationTools
       }
 
       return null;
-   }
-
-   private static void setVecmathFieldFromRosGeometryMessage(Message rosMessage, Packet<?> ihmcMessage, Method rosGetter, Field ihmcField,
-         Class<?> ihmcMessageFieldType) throws IllegalAccessException, InvocationTargetException, InstantiationException
-   {
-      if(ihmcMessageFieldType.equals(Point2D.class))
-      {
-         Point2D point2d = convertPoint2DRos((Point2dRosMessage) rosGetter.invoke(rosMessage));
-         ihmcField.set(ihmcMessage, point2d);
-      }
-      else
-      {
-         if(rosGetter.getReturnType().equals(Quaternion.class))
-         {
-            Tuple4DBasics newTuple = (Tuple4DBasics) ihmcField.getType().newInstance();
-            newTuple.set(convertQuaternion((Quaternion) rosGetter.invoke(rosMessage)));
-            ihmcField.set(ihmcMessage, newTuple);
-         }
-         else if(rosGetter.getReturnType().equals(Vector3.class))
-         {
-            Tuple3DBasics newTuple = (Tuple3DBasics) ihmcField.getType().newInstance();
-            newTuple.set(convertVector3((Vector3) rosGetter.invoke(rosMessage)));
-            ihmcField.set(ihmcMessage, newTuple);
-         }
-      }
    }
 
    private static void setEnumFromByte(Message rosMessage, Packet<?> ihmcMessage, Method rosGetter, Field ihmcField, Class<? extends Enum> fieldType)
@@ -376,14 +373,28 @@ public class GenericROSTranslationTools
       return inputTopicsForPackage;
    }
 
-   private static void convertIHMCMessageFieldsToROSFields(Packet<?> ihmcMessage, Message message, ArrayList<Field> fields)
+   private static void convertIHMCMessageFieldsToROSFields(Object ihmcMessage, Message message, ArrayList<Field> fields)
          throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException
    {
       for (Field field : fields)
       {
-         if (field.getType().getCanonicalName().contains("javax.vecmath"))
+         if (field.getType().isAnnotationPresent(RosMessagePacket.class))
          {
-            convertVecmathField(ihmcMessage, message, field);
+            Message rosMessageField = convertJavaObjectToRosMessage(field.get(ihmcMessage));
+            String rosSetterForField = getRosSetterNameForField(field);
+            Method setterMethod = message.getClass().getMethod(rosSetterForField, rosMessageField.getClass().getInterfaces()[0]);
+            setterMethod.setAccessible(true);
+            setterMethod.invoke(message, rosMessageField);
+         }
+         else if (customFieldConversions.containsConverterFor(field.getType()))
+         {
+            Object fieldVariableToConvert = field.get(ihmcMessage);
+            Message rosMessageField = customFieldConversions.convert(fieldVariableToConvert);
+
+            String rosSetterForField = getRosSetterNameForField(field);
+            Method setterMethod = message.getClass().getMethod(rosSetterForField, rosMessageField.getClass().getInterfaces()[0]);
+            setterMethod.setAccessible(true);
+            setterMethod.invoke(message, rosMessageField);
          }
          else if (field.getType().isArray() && !field.getType().getComponentType().isPrimitive())
          {
@@ -400,21 +411,6 @@ public class GenericROSTranslationTools
       }
    }
 
-   private static void convertVecmathField(Packet<?> ihmcMessage, Message message, Field field)
-         throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, ClassNotFoundException
-   {
-      if (field.getType().equals(Point2D.class))
-      {
-         Point2D point = (Point2D) field.get(ihmcMessage);
-         setPoint2dField(message, field, point);
-      }
-      else
-      {
-         Object vecmathObject = field.get(ihmcMessage);
-         setVecmathField(message, field, vecmathObject);
-      }
-   }
-
    private static void setPoint2dField(Message message, Field field, Point2D value)
          throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
    {
@@ -425,32 +421,13 @@ public class GenericROSTranslationTools
       setterMethod.invoke(message, convertPoint2d(value));
    }
 
-   private static void setVecmathField(Message message, Field field, Object value)
-         throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException
-   {
-      String setterName = getRosSetterNameForField(field);
-      String rosTypeForJavaType = getRosTypeForJavaType(field, field.getType());
-
-      assert rosTypeForJavaType != null;
-      Method setterMethod = message.getClass().getMethod(setterName, Class.forName(rosTypeForJavaType.replace("/", ".")));
-      setterMethod.setAccessible(true);
-
-      Class<?> vecmathClass = field.getType();
-      Class<?> genericVecmathClass = (Class<?>) vecmathClass.getGenericSuperclass();
-      String genericVecmathClassName = genericVecmathClass.getSimpleName();
-      Method converterMethod = GenericROSTranslationTools.class.getMethod("convert" + genericVecmathClassName, genericVecmathClass);
-      converterMethod.setAccessible(true);
-
-      setterMethod.invoke(message, converterMethod.invoke(null, value));
-   }
-
    private static void setField(Message message, Field field, Object value) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
    {
       Method rosSetterForField = getRosSetterForField(message.getClass(), field);
       rosSetterForField.invoke(message, value);
    }
 
-   private static void setByteFromEnum(Packet<?> ihmcMessage, Message message, Field field)
+   private static void setByteFromEnum(Object ihmcMessage, Message message, Field field)
          throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
    {
       Method rosSetterForField = getRosSetterForField(message.getClass(), field);
@@ -461,7 +438,7 @@ public class GenericROSTranslationTools
       }
    }
 
-   private static void setListFromArray(Packet<?> ihmcMessage, Message message, Field field)
+   private static void setListFromArray(Object ihmcMessage, Message message, Field field)
          throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
    {
       Object[] fieldAsArray = (Object[]) field.get(ihmcMessage);
@@ -542,23 +519,31 @@ public class GenericROSTranslationTools
       return point;
    }
 
-   public static Tuple3DBasics convertVector3(Vector3 vector3)
+   public static Vector3DBasics convertVector3(Vector3 vector3)
    {
       if(vector3 == null)
-         return new Point3D(Double.NaN, Double.NaN, Double.NaN);
+         return new Vector3D(Double.NaN, Double.NaN, Double.NaN);
 
-      Point3D point = new Point3D(vector3.getX(), vector3.getY(), vector3.getZ());
+      Vector3D vector = new Vector3D(vector3.getX(), vector3.getY(), vector3.getZ());
 
-      return point;
+      return vector;
    }
 
-   public static Tuple4DBasics convertQuaternion(Quaternion quaternion)
+   public static Point3DBasics convertPoint(Point point)
+   {
+      if(point == null)
+         return new Point3D(Double.NaN, Double.NaN, Double.NaN);
+
+      return new Point3D(point.getX(), point.getY(), point.getZ());
+   }
+
+   public static Tuple4DBasics convertQuaternion(geometry_msgs.Quaternion quaternion)
    {
       if(quaternion == null)
          return null;
 //         return new Quat4d(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
 
-      us.ihmc.euclid.tuple4D.Quaternion quat = new us.ihmc.euclid.tuple4D.Quaternion(quaternion.getX(), quaternion.getY(), quaternion.getZ(), quaternion.getW());
+      Quaternion quat = new Quaternion(quaternion.getX(), quaternion.getY(), quaternion.getZ(), quaternion.getW());
 
       return quat;
    }
@@ -566,7 +551,7 @@ public class GenericROSTranslationTools
    /*
     * Do not delete, used by reflection!
     */
-   public static Vector3 convertTuple3d(Tuple3DBasics tuple)
+   public static Vector3 convertVector3D(Vector3DReadOnly tuple)
    {
       Vector3 vector3 = messageFactory.newFromType("geometry_msgs/Vector3");
       if(tuple == null)
@@ -586,58 +571,33 @@ public class GenericROSTranslationTools
    }
 
    /*
-    * Do not delete, used by reflection!
-    */
-   public static Vector3 convertTuple3f(Tuple3DBasics tuple)
+   * Do not delete, used by reflection!
+   */
+   public static Point convertPoint3D(Point3DReadOnly point)
    {
-      Vector3 vector3 = messageFactory.newFromType("geometry_msgs/Vector3");
-
-      if(tuple == null)
+      Point rosPoint = messageFactory.newFromType("geometry_msgs/Point");
+      if(point == null)
       {
-         vector3.setX(Double.NaN);
-         vector3.setY(Double.NaN);
-         vector3.setZ(Double.NaN);
+         rosPoint.setX(Double.NaN);
+         rosPoint.setY(Double.NaN);
+         rosPoint.setZ(Double.NaN);
       }
       else
       {
-         vector3.setX(tuple.getX());
-         vector3.setY(tuple.getY());
-         vector3.setZ(tuple.getZ());
+         rosPoint.setX(point.getX());
+         rosPoint.setY(point.getY());
+         rosPoint.setZ(point.getZ());
       }
 
-      return vector3;
+      return rosPoint;
    }
 
    /*
     * Do not delete, used by reflection!
     */
-   public static Quaternion convertTuple4d(Tuple4DBasics tuple)
+   public static geometry_msgs.Quaternion convertTuple4d(Tuple4DReadOnly tuple)
    {
-      Quaternion quaternion = messageFactory.newFromType("geometry_msgs/Quaternion");
-      if(tuple == null)
-      {
-         quaternion.setX(Double.NaN);
-         quaternion.setY(Double.NaN);
-         quaternion.setZ(Double.NaN);
-         quaternion.setW(Double.NaN);
-      }
-      else
-      {
-         quaternion.setX(tuple.getX());
-         quaternion.setY(tuple.getY());
-         quaternion.setZ(tuple.getZ());
-         quaternion.setW(tuple.getS());
-      }
-
-      return quaternion;
-   }
-
-   /*
-    * Do not delete, used by reflection!
-    */
-   public static Quaternion convertTuple4f(Tuple4DBasics tuple)
-   {
-      Quaternion quaternion = messageFactory.newFromType("geometry_msgs/Quaternion");
+      geometry_msgs.Quaternion quaternion = messageFactory.newFromType("geometry_msgs/Quaternion");
       if(tuple == null)
       {
          quaternion.setX(Double.NaN);
@@ -778,5 +738,30 @@ public class GenericROSTranslationTools
 
       messageName = StringUtils.replace(messageName, "Message", "RosMessage");
       return messageName;
+   }
+
+   private static Transform convertQuaternionBasedTransformToTransform(QuaternionBasedTransform quaternionBasedTransform)
+   {
+      Transform message = messageFactory.newFromType("geometry_msgs/Transform");
+
+      if(quaternionBasedTransform == null)
+      {
+         quaternionBasedTransform = new QuaternionBasedTransform((QuaternionReadOnly) null, null);
+      }
+
+      message.setTranslation(convertVector3D(quaternionBasedTransform.getTranslationVector()));
+      message.setRotation(convertTuple4d(quaternionBasedTransform.getQuaternion()));
+
+      return message;
+   }
+
+   private static QuaternionBasedTransform convertTransformToQuaternionBasedTransform(Transform transform)
+   {
+      QuaternionBasedTransform quaternionBasedTransform = new QuaternionBasedTransform();
+
+      quaternionBasedTransform.setTranslation(convertVector3(transform.getTranslation()));
+      quaternionBasedTransform.setRotation(new Quaternion(convertQuaternion(transform.getRotation())));
+
+      return quaternionBasedTransform;
    }
 }

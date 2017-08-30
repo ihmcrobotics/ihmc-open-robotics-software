@@ -3,25 +3,25 @@ package us.ihmc.sensorProcessing.stateEstimation.processModelElements;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
 
 public class BiasProcessModelElement extends AbstractProcessModelElement
 {
    private static final int SIZE = 3;
-   private final ControlFlowOutputPort<FrameVector> biasPort;
-   private final FrameVector bias;
-   private final FrameVector biasDelta;
+   private final ControlFlowOutputPort<FrameVector3D> biasPort;
+   private final FrameVector3D bias;
+   private final FrameVector3D biasDelta;
 
-   public BiasProcessModelElement(ControlFlowOutputPort<FrameVector> statePort, ReferenceFrame frame, String name, YoVariableRegistry registry)
+   public BiasProcessModelElement(ControlFlowOutputPort<FrameVector3D> statePort, ReferenceFrame frame, String name, YoVariableRegistry registry)
    {
       super(statePort, TimeDomain.CONTINUOUS, false, SIZE, name, registry);
       this.biasPort = statePort;
-      this.bias = new FrameVector(frame);
-      this.biasDelta = new FrameVector(frame);
+      this.bias = new FrameVector3D(frame);
+      this.biasDelta = new FrameVector3D(frame);
    }
 
    public void computeMatrixBlocks()
@@ -40,7 +40,7 @@ public class BiasProcessModelElement extends AbstractProcessModelElement
       updateBias(biasDelta);
    }
 
-   private void updateBias(FrameVector biasDelta)
+   private void updateBias(FrameVector3D biasDelta)
    {
       bias.set(biasPort.getData());
       bias.add(biasDelta);

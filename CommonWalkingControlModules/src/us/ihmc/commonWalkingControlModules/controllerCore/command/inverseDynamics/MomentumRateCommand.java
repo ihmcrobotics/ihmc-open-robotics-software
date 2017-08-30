@@ -8,12 +8,12 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Momentum;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -120,7 +120,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * @throws ReferenceFrameMismatchException if {@code angularMomentumRateOfChange} or
     *            {@code linearMomentumRateOfChange} is not expressed in world frame.
     */
-   public void setMomentumRate(FrameVector angularMomentumRateOfChange, FrameVector linearMomentumRateOfChange)
+   public void setMomentumRate(FrameVector3D angularMomentumRateOfChange, FrameVector3D linearMomentumRateOfChange)
    {
       angularMomentumRateOfChange.checkReferenceFrameMatch(worldFrame);
       linearMomentumRateOfChange.checkReferenceFrameMatch(worldFrame);
@@ -142,7 +142,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * @throws ReferenceFrameMismatchException if {@code angularMomentumRateOfChange} is not
     *            expressed in world frame.
     */
-   public void setAngularMomentumRate(FrameVector angularMomentumRateOfChange)
+   public void setAngularMomentumRate(FrameVector3D angularMomentumRateOfChange)
    {
       angularMomentumRateOfChange.checkReferenceFrameMatch(worldFrame);
 
@@ -159,7 +159,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * @throws ReferenceFrameMismatchException if {@code linearMomentumRateOfChange} is not expressed
     *            in world frame.
     */
-   public void setLinearMomentumRate(FrameVector linearMomentumRateOfChange)
+   public void setLinearMomentumRate(FrameVector3D linearMomentumRateOfChange)
    {
       linearMomentumRateOfChange.checkReferenceFrameMatch(worldFrame);
 
@@ -176,7 +176,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * @throws ReferenceFrameMismatchException if {@code linearMomentumRateOfChange} is not expressed
     *            in world frame.
     */
-   public void setLinearMomentumXYRate(FrameVector2d linearMomentumRateOfChange)
+   public void setLinearMomentumXYRate(FrameVector2D linearMomentumRateOfChange)
    {
       linearMomentumRateOfChange.checkReferenceFrameMatch(worldFrame);
 
@@ -559,7 +559,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * @param linearPartToPack frame vector to pack the desired rate of change of linear momentum.
     *           Modified.
     */
-   public void getMomentumRate(FrameVector angularPartToPack, FrameVector linearPartToPack)
+   public void getMomentumRate(FrameVector3D angularPartToPack, FrameVector3D linearPartToPack)
    {
       angularPartToPack.setIncludingFrame(worldFrame, 0, momentumRateOfChange);
       linearPartToPack.setIncludingFrame(worldFrame, 3, momentumRateOfChange);

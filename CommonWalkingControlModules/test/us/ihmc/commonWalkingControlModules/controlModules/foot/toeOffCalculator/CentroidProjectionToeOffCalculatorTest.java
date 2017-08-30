@@ -1,38 +1,35 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.controllers.PDGains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class CentroidProjectionToeOffCalculatorTest
 {
@@ -73,7 +70,7 @@ public class CentroidProjectionToeOffCalculatorTest
 
          RigidBody foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         List<FramePoint2d> contactFramePoints = contactableFoot.getContactPoints2d();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, parentRegistry);
          yoPlaneContactState.setFullyConstrained();
@@ -111,7 +108,7 @@ public class CentroidProjectionToeOffCalculatorTest
    public void testSetExitCMP()
    {
       RobotSide trailingSide = RobotSide.LEFT;
-      FramePoint exitCMP = new FramePoint();
+      FramePoint3D exitCMP = new FramePoint3D();
       exitCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
       exitCMP.setX(0.05);
 
@@ -127,8 +124,8 @@ public class CentroidProjectionToeOffCalculatorTest
       RobotSide trailingSide = RobotSide.LEFT;
 
 
-      FramePoint exitCMP = new FramePoint();
-      FramePoint2d desiredCMP = new FramePoint2d();
+      FramePoint3D exitCMP = new FramePoint3D();
+      FramePoint2D desiredCMP = new FramePoint2D();
 
       exitCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
       desiredCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
@@ -147,9 +144,9 @@ public class CentroidProjectionToeOffCalculatorTest
    {
       RobotSide trailingSide = RobotSide.LEFT;
 
-      FramePoint exitCMP = new FramePoint();
-      FramePoint2d desiredCMP = new FramePoint2d();
-      FramePoint2d toeOffPoint = new FramePoint2d();
+      FramePoint3D exitCMP = new FramePoint3D();
+      FramePoint2D desiredCMP = new FramePoint2D();
+      FramePoint2D toeOffPoint = new FramePoint2D();
 
       exitCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
       desiredCMP.setToZero(contactableFeet.get(trailingSide).getSoleFrame());
@@ -169,31 +166,13 @@ public class CentroidProjectionToeOffCalculatorTest
       return new WalkingControllerParameters()
       {
          @Override
-         public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
-         {
-            return null;
-         }
-
-         @Override
-         public String[] getDefaultChestOrientationControlJointNames()
-         {
-            return new String[0];
-         }
-
-         @Override
          public double getOmega0()
          {
             return 0;
          }
 
          @Override
-         public double getAnkleHeight()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getLegLength()
+         public double getMaximumLegLengthForSingularityAvoidance()
          {
             return 0;
          }
@@ -220,24 +199,6 @@ public class CentroidProjectionToeOffCalculatorTest
          public double defaultOffsetHeightAboveAnkle()
          {
             return 0;
-         }
-
-         @Override
-         public double pelvisToAnkleThresholdForWalking()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getTimeToGetPreparedForLocomotion()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean allowShrinkingSingleSupportFootPolygon()
-         {
-            return false;
          }
 
          @Override
@@ -271,85 +232,37 @@ public class CentroidProjectionToeOffCalculatorTest
          }
 
          @Override
-         public ICPControlGains createICPControlGains(YoVariableRegistry registry)
+         public ICPControlGains createICPControlGains()
          {
             return null;
          }
 
          @Override
-         public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
+         public PDGains getCoMHeightControlGains()
          {
             return null;
          }
 
          @Override
-         public YoOrientationPIDGainsInterface createPelvisOrientationControlGains(YoVariableRegistry registry)
+         public PIDSE3Gains getSwingFootControlGains()
          {
             return null;
          }
 
          @Override
-         public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
+         public PIDSE3Gains getHoldPositionFootControlGains()
          {
             return null;
          }
 
          @Override
-         public boolean getCoMHeightDriftCompensation()
-         {
-            return false;
-         }
-
-         @Override
-         public YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry)
+         public PIDSE3Gains getToeOffFootControlGains()
          {
             return null;
-         }
-
-         @Override
-         public YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public YoSE3PIDGainsInterface createToeOffFootControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public YoSE3PIDGainsInterface createEdgeTouchdownFootControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public double getSwingHeightMaxForPushRecoveryTrajectory()
-         {
-            return 0;
          }
 
          @Override
          public boolean doPrepareManipulationForLocomotion()
-         {
-            return false;
-         }
-
-         @Override
-         public boolean controlHeadAndHandsWithSliders()
          {
             return false;
          }
@@ -367,48 +280,6 @@ public class CentroidProjectionToeOffCalculatorTest
          }
 
          @Override
-         public double getSpineYawLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSpinePitchUpperLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSpinePitchLowerLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSpineRollLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public boolean isSpinePitchReversed()
-         {
-            return false;
-         }
-
-         @Override
-         public double getFoot_start_toetaper_from_back()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getSideLengthOfBoundingBoxForFootstepHeight()
-         {
-            return 0;
-         }
-
-         @Override
          public double getContactThresholdForce()
          {
             return 0;
@@ -418,18 +289,6 @@ public class CentroidProjectionToeOffCalculatorTest
          public double getSecondContactThresholdForceIgnoringCoP()
          {
             return 0;
-         }
-
-         @Override
-         public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
-         {
-            return null;
-         }
-
-         @Override
-         public SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
-         {
-            return null;
          }
 
          @Override
@@ -454,12 +313,6 @@ public class CentroidProjectionToeOffCalculatorTest
          public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
          {
             return null;
-         }
-
-         @Override
-         public boolean doFancyOnToesControl()
-         {
-            return false;
          }
 
          @Override
@@ -493,18 +346,6 @@ public class CentroidProjectionToeOffCalculatorTest
          }
 
          @Override
-         public void useInverseDynamicsControlCore()
-         {
-
-         }
-
-         @Override
-         public void useVirtualModelControlCore()
-         {
-
-         }
-
-         @Override
          public double getHighCoPDampingDurationToPreventFootShakies()
          {
             return 0;
@@ -512,198 +353,6 @@ public class CentroidProjectionToeOffCalculatorTest
 
          @Override
          public double getCoPErrorThresholdForHighCoPDamping()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getFootForwardOffset()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getFootBackwardOffset()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getFootWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getToeWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getFootLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getActualFootWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getActualFootLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getFootstepArea()
-         {
-            return 0;
-         }
-
-         @Override
-         public String[] getDefaultHeadOrientationControlJointNames()
-         {
-            return new String[0];
-         }
-
-         @Override
-         public YoOrientationPIDGainsInterface createHeadOrientationControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public YoPIDGains createHeadJointspaceControlGains(YoVariableRegistry registry)
-         {
-            return null;
-         }
-
-         @Override
-         public double[] getInitialHeadYawPitchRoll()
-         {
-            return new double[0];
-         }
-
-         @Override
-         public boolean isNeckPositionControlled()
-         {
-            return false;
-         }
-
-         @Override
-         public double getNeckPitchUpperLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getNeckPitchLowerLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getHeadYawLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getHeadRollLimit()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getTrajectoryTimeHeadOrientation()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxStepLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDefaultStepLength()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxStepWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMinStepWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getInPlaceWidth()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDesiredStepForward()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getStepPitch()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxStepUp()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxStepDown()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxSwingHeightFromStanceFoot()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxAngleTurnOutwards()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMaxAngleTurnInwards()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getMinAreaPercentForValidFootstep()
-         {
-            return 0;
-         }
-
-         @Override
-         public double getDangerAreaPercentForValidFootstep()
          {
             return 0;
          }
@@ -806,6 +455,17 @@ public class CentroidProjectionToeOffCalculatorTest
             };
          }
 
+         @Override
+         public ICPOptimizationParameters getICPOptimizationParameters()
+         {
+            return null;
+         }
+
+         @Override
+         public SteppingParameters getSteppingParameters()
+         {
+            return null;
+         }
       };
    }
 

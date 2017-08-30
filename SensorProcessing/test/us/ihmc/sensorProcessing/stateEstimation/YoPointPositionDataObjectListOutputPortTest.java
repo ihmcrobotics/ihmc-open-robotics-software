@@ -11,12 +11,12 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 
@@ -72,8 +72,8 @@ public class YoPointPositionDataObjectListOutputPortTest
          PointPositionDataObject pointPositionDataObject = new PointPositionDataObject();
          int referenceFrameIndex = random.nextInt(frames.size());
          ReferenceFrame frame = frames.get(referenceFrameIndex);
-         FramePoint measurementPointInBodyFrame = new FramePoint(frame, RandomGeometry.nextVector3D(random));
-         FramePoint measurementPointInWorldFrame = new FramePoint(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random));
+         FramePoint3D measurementPointInBodyFrame = new FramePoint3D(frame, RandomGeometry.nextVector3D(random));
+         FramePoint3D measurementPointInWorldFrame = new FramePoint3D(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random));
          boolean isPointPositionValid = true;
          pointPositionDataObject.set(measurementPointInBodyFrame, measurementPointInWorldFrame, isPointPositionValid);
 

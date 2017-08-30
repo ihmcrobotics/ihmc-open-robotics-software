@@ -40,7 +40,10 @@ import georegression.struct.se.Se3_F64;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -48,12 +51,10 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoVariables.dataBuffer.IndexChangedListener;
@@ -167,8 +168,8 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    protected void updateYoGraphics(int index)
    {
       /*put yo-variablized objects here */
-      FramePoint leftEE = new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), 0, 0.13, 0);
-      FramePoint rightEE = new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), 0, -0.13, 0);
+      FramePoint3D leftEE = new FramePoint3D(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), 0, 0.13, 0);
+      FramePoint3D rightEE = new FramePoint3D(fullRobotModel.getEndEffectorFrame(RobotSide.RIGHT, LimbName.ARM), 0, -0.13, 0);
 
       leftEE.changeFrame(CalibUtil.world);
       rightEE.changeFrame(CalibUtil.world);
@@ -185,8 +186,8 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    private void scsAlignCameraToRobotCamera()
    {
       //Camera Pos(behind the eye 10cm), Fix(Eye farme origin)
-      FramePoint cameraPos = new FramePoint(cameraFrame, -0.01, 0, 0);
-      FramePoint cameraFix = new FramePoint(cameraFrame);
+      FramePoint3D cameraPos = new FramePoint3D(cameraFrame, -0.01, 0, 0);
+      FramePoint3D cameraFix = new FramePoint3D(cameraFrame);
 
       cameraPos.changeFrame(CalibUtil.world);
       cameraFix.changeFrame(CalibUtil.world);
@@ -233,7 +234,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
       double magicNumber = USE_LEFT_ARM ? 0.13 : -0.13;
 
-      FramePoint activeArmEEtoCamera = new FramePoint(fullRobotModel.getEndEffectorFrame(activeSide, LimbName.ARM), 0, magicNumber, 0); // todo look at this later
+      FramePoint3D activeArmEEtoCamera = new FramePoint3D(fullRobotModel.getEndEffectorFrame(activeSide, LimbName.ARM), 0, magicNumber, 0); // todo look at this later
       activeArmEEtoCamera.changeFrame(cameraImageFrame);
       Point3D activeArmEEinImageFrame = activeArmEEtoCamera.getPoint();
 
@@ -492,7 +493,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    {
 	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
 	  
-	  DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, DRCRobotModel.RobotTarget.REAL_ROBOT, true);
+	  DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RobotTarget.REAL_ROBOT, true);
 	  
       AtlasHeadLoopKinematicCalibrator calib = new AtlasHeadLoopKinematicCalibrator(robotModel);
       calib.loadData("data/armCalibratoin20131209/calibration_right");

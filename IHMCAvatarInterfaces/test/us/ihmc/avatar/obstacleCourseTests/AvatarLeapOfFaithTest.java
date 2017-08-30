@@ -1,21 +1,24 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
+import static org.junit.Assert.*;
+
+import java.util.ArrayList;
+import java.util.Random;
+
 import org.junit.After;
 import org.junit.Before;
-import org.ojalgo.random.RandomNumber;
+
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.SmallStepDownEnvironment;
@@ -24,11 +27,6 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.util.ArrayList;
-import java.util.Random;
-
-import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 {
@@ -94,14 +92,14 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       {
          // step forward
          RobotSide robotSide = RobotSide.LEFT;
-         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) *  stepLength, 0.0, -stepNumber * stepDownHeight);
+         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) *  stepLength, 0.0, -stepNumber * stepDownHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
          message.add(footstepData);
          executionDuration += transferTime + swingTime;
 
          // step in place
          robotSide = robotSide.getOppositeSide();
-         stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) * stepLength, 0.0, -(stepNumber + 1) * stepDownHeight);
+         stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) * stepLength, 0.0, -(stepNumber + 1) * stepDownHeight);
          footstepData = createFootstepDataMessage(robotSide, stepLocation);
          message.add(footstepData);
          executionDuration += transferTime + swingTime;
@@ -112,7 +110,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       for (int stepNumber = 0; stepNumber < numberOfClosingSteps; stepNumber++)
       {
          // step forward
-         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1 + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
+         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1 + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
          message.add(footstepData);
          executionDuration += transferTime + swingTime;
@@ -121,7 +119,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       }
 
       // step forward
-      FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (numberOfClosingSteps + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
+      FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (numberOfClosingSteps + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
       FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
       message.add(footstepData);
       executionDuration += transferTime + swingTime;
@@ -167,7 +165,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       for (int stepNumber = 0; stepNumber < numberOfStepsDown; stepNumber++)
       {
          // step forward
-         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) *  stepLength, 0.0, -stepNumber * stepDownHeight);
+         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) *  stepLength, 0.0, -stepNumber * stepDownHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
          message.add(footstepData);
          executionDuration += transferTime + swingTime;
@@ -179,7 +177,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       for (int stepNumber = 0; stepNumber < numberOfClosingSteps; stepNumber++)
       {
          // step forward
-         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1 + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
+         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1 + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
          message.add(footstepData);
          executionDuration += transferTime + swingTime;
@@ -188,7 +186,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       }
 
       // step forward
-      FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (numberOfClosingSteps + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
+      FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (numberOfClosingSteps + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
       FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
       message.add(footstepData);
       executionDuration += transferTime + swingTime;
@@ -234,7 +232,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       for (int stepNumber = 0; stepNumber < numberOfStepsDown; stepNumber++)
       {
          // step forward
-         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) *  stepLength, 0.0, -stepNumber * stepDownHeight);
+         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) *  stepLength, 0.0, -stepNumber * stepDownHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
          message.add(footstepData);
          executionDuration += transferTime + swingTime;
@@ -246,7 +244,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       for (int stepNumber = 0; stepNumber < numberOfClosingSteps; stepNumber++)
       {
          // step forward
-         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1 + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
+         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1 + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
          message.add(footstepData);
          executionDuration += transferTime + swingTime;
@@ -255,7 +253,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       }
 
       // step forward
-      FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (numberOfClosingSteps + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
+      FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (numberOfClosingSteps + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
       FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
       message.add(footstepData);
       executionDuration += transferTime + swingTime;
@@ -302,7 +300,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       for (int stepNumber = 0; stepNumber < numberOfStepsDown; stepNumber++)
       {
          // step forward
-         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) *  stepLength, 0.0, -stepNumber * stepDownHeight + RandomNumbers.nextDouble(random, 0.6 * stepDownHeight));
+         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1) *  stepLength, 0.0, -stepNumber * stepDownHeight + RandomNumbers.nextDouble(random, 0.6 * stepDownHeight));
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
          message.add(footstepData);
          executionDuration += transferTime + swingTime;
@@ -314,7 +312,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       for (int stepNumber = 0; stepNumber < numberOfClosingSteps; stepNumber++)
       {
          // step forward
-         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1 + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
+         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (stepNumber + 1 + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
          message.add(footstepData);
          executionDuration += transferTime + swingTime;
@@ -323,7 +321,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       }
 
       // step square
-      FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), (numberOfClosingSteps + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
+      FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), (numberOfClosingSteps + numberOfStepsDown) *  stepLength, 0.0, -numberOfStepsDown * stepDownHeight);
       FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
       message.add(footstepData);
       executionDuration += transferTime + swingTime;
@@ -403,7 +401,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
          double stepLength = stepLengths.get(stepNumber);
          distanceTraveled += stepLength;
 
-         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, 0.0);
+         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, 0.0);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
          message.add(footstepData);
 
@@ -416,7 +414,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       {
          // step forward
          distanceTraveled += endingStepLength;
-         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * endingStepLength, 0.0, 0.0);
+         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * endingStepLength, 0.0, 0.0);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
          message.add(footstepData);
          executionDuration += transferTime + swingTime;
@@ -425,7 +423,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       }
 
       // step forward
-      FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * endingStepLength, 0.0, 0.0);
+      FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * endingStepLength, 0.0, 0.0);
       FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
       message.add(footstepData);
       executionDuration += transferTime + swingTime;
@@ -504,7 +502,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
          // step forward
          distanceTraveled += stepLength;
 
-         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, stepHeight);
+         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, stepHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
          message.add(footstepData);
 
@@ -519,7 +517,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       {
          // step forward
          distanceTraveled += stepLength;
-         FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, stepHeight);
+         FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, stepHeight);
          FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
          message.add(footstepData);
          executionDuration += transferTime + swingTime;
@@ -528,7 +526,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       }
 
       // step forward
-      FramePoint stepLocation = new FramePoint(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, stepHeight);
+      FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide), distanceTraveled - 0.5 * stepLength, 0.0, stepHeight);
       FootstepDataMessage footstepData = createFootstepDataMessage(robotSide, stepLocation);
       message.add(footstepData);
       executionDuration += transferTime + swingTime;
@@ -543,14 +541,14 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
    }
 
 
-   private FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, FramePoint placeToStep)
+   private FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, FramePoint3D placeToStep)
    {
       FootstepDataMessage footstepData = new FootstepDataMessage();
 
-      FramePoint placeToStepInWorld = new FramePoint(placeToStep);
+      FramePoint3D placeToStepInWorld = new FramePoint3D(placeToStep);
       placeToStepInWorld.changeFrame(worldFrame);
 
-      footstepData.setLocation(placeToStepInWorld.getPointCopy());
+      footstepData.setLocation(placeToStepInWorld);
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(robotSide);
 

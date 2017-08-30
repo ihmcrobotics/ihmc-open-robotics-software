@@ -4,10 +4,10 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class GeneralizedRigidBodyInertia
 {
@@ -107,20 +107,20 @@ public abstract class GeneralizedRigidBodyInertia
       return mass;
    }
 
-   public FramePoint getCenterOfMassOffset()
+   public FramePoint3D getCenterOfMassOffset()
    {
-      FramePoint centerOfMassOffset = new FramePoint();
+      FramePoint3D centerOfMassOffset = new FramePoint3D();
       getCenterOfMassOffset(centerOfMassOffset);
       return centerOfMassOffset;
    }
 
-   public void getCenterOfMassOffset(FramePoint centerOfMassOffsetToPack)
+   public void getCenterOfMassOffset(FramePoint3D centerOfMassOffsetToPack)
    {
       centerOfMassOffsetToPack.setIncludingFrame(expressedInframe, crossPart);
       centerOfMassOffsetToPack.scale(-1.0 / mass); // comOffset = -1/m * c
    }
 
-   public void setCenterOfMassOffset(FramePoint centerOfMassOffset)
+   public void setCenterOfMassOffset(FramePoint3D centerOfMassOffset)
    {
       expressedInframe.checkReferenceFrameMatch(centerOfMassOffset);
       centerOfMassOffset.get(crossPart);

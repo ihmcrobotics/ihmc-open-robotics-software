@@ -2,29 +2,29 @@ package us.ihmc.wholeBodyController;
 
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.robotController.OutputProcessor;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 
-public interface WholeBodyControllerParameters extends FullHumanoidRobotModelFactory
+public interface WholeBodyControllerParameters
 {
-	public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters();
+   public double getControllerDT();
 
-	public ICPOptimizationParameters getICPOptimizationParameters();
+   /**
+    * Returns the parameters used to create Footstep Plans.
+    */
+   default public QuadTreeFootstepPlanningParameters getQuadTreeFootstepPlanningParameters()
+   {
+      return null;
+   }
+
+   public StateEstimatorParameters getStateEstimatorParameters();
+
+   public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters();
 
 	public WalkingControllerParameters getWalkingControllerParameters();
 
 	public RobotContactPointParameters getContactPointParameters();
 
-	public double getControllerDT();
-
-	public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel);
-
-	public DefaultArmConfigurations getDefaultArmConfigurations();
-	
    public DRCRobotSensorInformation getSensorInformation();
-	
 }

@@ -7,6 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -20,12 +23,9 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -122,15 +122,15 @@ public class PelvisLinearStateUpdater
    private boolean initializeToActual = false;
 
    // Temporary variables
-   private final FramePoint rootJointPosition = new FramePoint(worldFrame);
-   private final FrameVector rootJointVelocity = new FrameVector(worldFrame);
-   private final FramePoint centerOfMassPosition = new FramePoint(worldFrame);
-   private final FrameVector centerOfMassVelocityUsingPelvisIMUAndKinematics = new FrameVector(worldFrame);
+   private final FramePoint3D rootJointPosition = new FramePoint3D(worldFrame);
+   private final FrameVector3D rootJointVelocity = new FrameVector3D(worldFrame);
+   private final FramePoint3D centerOfMassPosition = new FramePoint3D(worldFrame);
+   private final FrameVector3D centerOfMassVelocityUsingPelvisIMUAndKinematics = new FrameVector3D(worldFrame);
    private final Vector3D tempRootJointTranslation = new Vector3D();
-   private final FrameVector tempFrameVector = new FrameVector();
-   private final FramePoint tempCenterOfMassPosition = new FramePoint();
-   private final FramePoint footPositionInWorld = new FramePoint();
-   private final FrameVector tempVelocity = new FrameVector();
+   private final FrameVector3D tempFrameVector = new FrameVector3D();
+   private final FramePoint3D tempCenterOfMassPosition = new FramePoint3D();
+   private final FramePoint3D footPositionInWorld = new FramePoint3D();
+   private final FrameVector3D tempVelocity = new FrameVector3D();
 
    private final double gravitationalAcceleration;
    
@@ -515,11 +515,11 @@ public class PelvisLinearStateUpdater
       return numberOfEndEffectorsTrusted;
    }
 
-   private final FrameVector pelvisVelocityIMUPart = new FrameVector();
-   private final FramePoint pelvisPositionIMUPart = new FramePoint();
+   private final FrameVector3D pelvisVelocityIMUPart = new FrameVector3D();
+   private final FramePoint3D pelvisPositionIMUPart = new FramePoint3D();
 
-   private final FrameVector pelvisVelocityKinPart = new FrameVector();
-   private final FramePoint pelvisPositionKinPart = new FramePoint();
+   private final FrameVector3D pelvisVelocityKinPart = new FrameVector3D();
+   private final FramePoint3D pelvisPositionKinPart = new FramePoint3D();
 
    private void computeLinearStateFromMergingMeasurements()
    {
@@ -556,8 +556,8 @@ public class PelvisLinearStateUpdater
       yoRootJointPosition.set(rootJointPosition);
    }
 
-   private final FrameVector comVelocityGRFPart = new FrameVector();
-   private final FrameVector comVelocityPelvisAndKinPart = new FrameVector();
+   private final FrameVector3D comVelocityGRFPart = new FrameVector3D();
+   private final FrameVector3D comVelocityPelvisAndKinPart = new FrameVector3D();
 
    private void updateCoMState()
    {
@@ -608,8 +608,8 @@ public class PelvisLinearStateUpdater
    }
 
 
-   private final FrameVector tempCoMAcceleration = new FrameVector(ReferenceFrame.getWorldFrame());
-   private final FrameVector tempFootForce = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D tempCoMAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D tempFootForce = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
    private void computeTotalGroundReactionForce()
    {
@@ -653,29 +653,29 @@ public class PelvisLinearStateUpdater
       yoCenterOfMassPosition.set(initialCoMPosition);
    }
 
-   public void initializeCoMPositionToActual(FramePoint initialCoMPosition)
+   public void initializeCoMPositionToActual(FramePoint3D initialCoMPosition)
    {
       initializeToActual = true;
       centerOfMassPosition.set(initialCoMPosition);
       yoCenterOfMassPosition.set(initialCoMPosition);
    }
 
-   public void getEstimatedPelvisPosition(FramePoint pelvisPositionToPack)
+   public void getEstimatedPelvisPosition(FramePoint3D pelvisPositionToPack)
    {
       yoRootJointPosition.getFrameTupleIncludingFrame(pelvisPositionToPack);
    }
 
-   public void getEstimatedPelvisLinearVelocity(FrameVector pelvisLinearVelocityToPack)
+   public void getEstimatedPelvisLinearVelocity(FrameVector3D pelvisLinearVelocityToPack)
    {
       yoRootJointVelocity.getFrameTupleIncludingFrame(pelvisLinearVelocityToPack);
    }
 
-   public void getEstimatedCoMPosition(FramePoint comPositionToPack)
+   public void getEstimatedCoMPosition(FramePoint3D comPositionToPack)
    {
       yoCenterOfMassPosition.getFrameTupleIncludingFrame(comPositionToPack);
    }
 
-   public void getEstimatedCoMVelocity(FrameVector comVelocityToPack)
+   public void getEstimatedCoMVelocity(FrameVector3D comVelocityToPack)
    {
       yoCenterOfMassVelocity.getFrameTupleIncludingFrame(comVelocityToPack);
    }

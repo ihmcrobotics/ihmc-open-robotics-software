@@ -2,13 +2,13 @@ package us.ihmc.robotics.math.filters;
 
 
 
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class AccelerationLimitedYoFrameVector2d extends YoFrameVector2d
 {
@@ -69,7 +69,7 @@ public class AccelerationLimitedYoFrameVector2d extends YoFrameVector2d
       y.update(vector2dUnfiltered.getY());
    }
 
-   public void update(FrameVector2d vector2dUnfiltered)
+   public void update(FrameVector2D vector2dUnfiltered)
    {
       x.update(vector2dUnfiltered.getX());
       y.update(vector2dUnfiltered.getY());

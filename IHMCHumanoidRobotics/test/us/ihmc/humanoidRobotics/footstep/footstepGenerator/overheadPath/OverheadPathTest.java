@@ -7,12 +7,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.MemoryTools;
 
 public class OverheadPathTest
@@ -37,7 +37,7 @@ public class OverheadPathTest
    public void turningOverheadPath_UsageTest()
    {
       double eps = 1e-15;
-      FramePoint2d startPosition = new FramePoint2d(WORLD_FRAME, 1.0, 2.0);
+      FramePoint2D startPosition = new FramePoint2D(WORLD_FRAME, 1.0, 2.0);
       double startYaw = Math.PI / 4;
       FrameOrientation2d startOrientation = new FrameOrientation2d(WORLD_FRAME, startYaw);
       double endYaw = Math.PI * 3 / 4;
@@ -67,7 +67,7 @@ public class OverheadPathTest
    public void turningOverheadPath_PassingPiTest()
    {
       double eps = 1e-15;
-      FramePoint2d startPosition = new FramePoint2d(WORLD_FRAME, 1.0, 2.0);
+      FramePoint2D startPosition = new FramePoint2D(WORLD_FRAME, 1.0, 2.0);
       double startYaw = 3 * Math.PI / 4;
       FrameOrientation2d startOrientation = new FrameOrientation2d(WORLD_FRAME, startYaw);
       double endYaw = -startYaw;
@@ -105,8 +105,8 @@ public class OverheadPathTest
       final double y2 = 9.0;
       final double yaw = Math.PI / 4;
 
-      FramePoint2d startPosition = new FramePoint2d(WORLD_FRAME, x1, y1);
-      FramePoint2d endPosition = new FramePoint2d(WORLD_FRAME, x2, y2);
+      FramePoint2D startPosition = new FramePoint2D(WORLD_FRAME, x1, y1);
+      FramePoint2D endPosition = new FramePoint2D(WORLD_FRAME, x2, y2);
       FrameOrientation2d orientation = new FrameOrientation2d(WORLD_FRAME, yaw);
       FramePose2d startPose = new FramePose2d(startPosition, orientation);
       StraightLineOverheadPath straightPath = new StraightLineOverheadPath(startPose, endPosition);
@@ -145,8 +145,8 @@ public class OverheadPathTest
       final double y2 = 9.0;
       final double startYaw = Math.PI / 4;
 
-      FramePoint2d startPosition = new FramePoint2d(WORLD_FRAME, x1, y1);
-      FramePoint2d endPosition = new FramePoint2d(WORLD_FRAME, x2, y2);
+      FramePoint2D startPosition = new FramePoint2D(WORLD_FRAME, x1, y1);
+      FramePoint2D endPosition = new FramePoint2D(WORLD_FRAME, x2, y2);
       FrameOrientation2d orientation = new FrameOrientation2d(WORLD_FRAME, startYaw);
       FramePose2d startPose = new FramePose2d(startPosition, orientation);
 
@@ -212,8 +212,8 @@ public class OverheadPathTest
       final double startYaw = Math.PI / 4;
       final double endYaw = -Math.PI / 8;    // This value chosen just for "simple" test to avoid the crossing pi logic (which should be handled by the turning path/crossing pi test above)
 
-      FramePoint2d startPosition = new FramePoint2d(WORLD_FRAME, x1, y1);
-      FramePoint2d endPosition = new FramePoint2d(WORLD_FRAME, x2, y2);
+      FramePoint2D startPosition = new FramePoint2D(WORLD_FRAME, x1, y1);
+      FramePoint2D endPosition = new FramePoint2D(WORLD_FRAME, x2, y2);
       FrameOrientation2d startOrientation = new FrameOrientation2d(WORLD_FRAME, startYaw);
       FrameOrientation2d endOrientation = new FrameOrientation2d(WORLD_FRAME, endYaw);
       FramePose2d startPose = new FramePose2d(startPosition, startOrientation);
@@ -275,8 +275,8 @@ public class OverheadPathTest
       final double y2 = y1;
       final double startYaw = Math.toRadians(30);    // 30 to 45 in place was the first case found that did something (obviously) wrong for the footstep generators...
 
-      FramePoint2d startPosition = new FramePoint2d(WORLD_FRAME, x1, y1);
-      FramePoint2d endPosition = new FramePoint2d(WORLD_FRAME, x2, y2);
+      FramePoint2D startPosition = new FramePoint2D(WORLD_FRAME, x1, y1);
+      FramePoint2D endPosition = new FramePoint2D(WORLD_FRAME, x2, y2);
       FrameOrientation2d startOrientation = new FrameOrientation2d(WORLD_FRAME, startYaw);
       FramePose2d startPose = new FramePose2d(startPosition, startOrientation);
       for (double endYaw = 0; endYaw < 2 * Math.PI; endYaw += Math.PI / 8)
@@ -368,7 +368,7 @@ public class OverheadPathTest
 
       FramePose2d startPose = new FramePose2d(WORLD_FRAME);
       Point2D position = new Point2D(1.0, 0.0);
-      FramePoint2d endPosition = new FramePoint2d(WORLD_FRAME, position);
+      FramePoint2D endPosition = new FramePoint2D(WORLD_FRAME, position);
       StraightLineOverheadPath p = new StraightLineOverheadPath(startPose, endPosition);
       
       

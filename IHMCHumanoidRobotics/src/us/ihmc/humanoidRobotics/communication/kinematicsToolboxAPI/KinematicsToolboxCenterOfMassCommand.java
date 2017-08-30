@@ -4,13 +4,13 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.KinematicsToolboxCenterOfMassMessage;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsToolboxCenterOfMassCommand, KinematicsToolboxCenterOfMassMessage>
 {
-   private final FramePoint desiredPosition = new FramePoint();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
    private final DenseMatrix64F weightVector = new DenseMatrix64F(3, 1);
 
@@ -53,7 +53,7 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
       return selectionMatrix;
    }
 
-   public FramePoint getDesiredPosition()
+   public FramePoint3D getDesiredPosition()
    {
       return desiredPosition;
    }

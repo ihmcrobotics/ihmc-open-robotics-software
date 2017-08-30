@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class CapturabilityBasedStatusSubscriber implements PacketConsumer<CapturabilityBasedStatus>
 {
-   private final AtomicReference<FramePoint2d> capturePointReference = new AtomicReference<FramePoint2d>(null);
-   private final AtomicReference<FramePoint2d> desiredCapturePointReference = new AtomicReference<FramePoint2d>(null);
+   private final AtomicReference<FramePoint2D> capturePointReference = new AtomicReference<FramePoint2D>(null);
+   private final AtomicReference<FramePoint2D> desiredCapturePointReference = new AtomicReference<FramePoint2D>(null);
    private final SideDependentList<AtomicReference<FrameConvexPolygon2d>> footSupportPolygonReferences = new SideDependentList<>();
    private final AtomicReference<Boolean> doubleSupportReference = new AtomicReference<Boolean>(null);
 
@@ -30,12 +30,12 @@ public class CapturabilityBasedStatusSubscriber implements PacketConsumer<Captur
       listOfListener.add(listener);
    }
 
-   public FramePoint2d getCapturePoint()
+   public FramePoint2D getCapturePoint()
    {
       return capturePointReference.getAndSet(null);
    }
 
-   public FramePoint2d getDesiredCapturePoint()
+   public FramePoint2D getDesiredCapturePoint()
    {
       return desiredCapturePointReference.getAndSet(null);
    }

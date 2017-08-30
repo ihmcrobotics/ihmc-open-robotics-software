@@ -1,9 +1,9 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalProvider;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -11,7 +11,7 @@ public class QuadrupedTimedContactPhase implements TimeIntervalProvider
 {
    private final TimeInterval timeInterval;
    private final QuadrantDependentList<ContactState> contactState;
-   private final QuadrantDependentList<FramePoint> solePosition;
+   private final QuadrantDependentList<FramePoint3D> solePosition;
 
    public QuadrupedTimedContactPhase()
    {
@@ -21,7 +21,7 @@ public class QuadrupedTimedContactPhase implements TimeIntervalProvider
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          contactState.set(robotQuadrant, ContactState.IN_CONTACT);
-         solePosition.set(robotQuadrant, new FramePoint());
+         solePosition.set(robotQuadrant, new FramePoint3D());
       }
    }
 
@@ -43,7 +43,7 @@ public class QuadrupedTimedContactPhase implements TimeIntervalProvider
       return contactState;
    }
 
-   public QuadrantDependentList<FramePoint> getSolePosition()
+   public QuadrantDependentList<FramePoint3D> getSolePosition()
    {
       return solePosition;
    }
@@ -61,7 +61,7 @@ public class QuadrupedTimedContactPhase implements TimeIntervalProvider
       }
    }
 
-   public void setSolePosition(QuadrantDependentList<FramePoint> solePosition)
+   public void setSolePosition(QuadrantDependentList<FramePoint3D> solePosition)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {

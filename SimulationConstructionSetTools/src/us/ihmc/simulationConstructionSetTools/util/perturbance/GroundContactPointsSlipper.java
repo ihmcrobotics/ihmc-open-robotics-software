@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -135,7 +135,7 @@ public class GroundContactPointsSlipper implements RobotController
    
    private void applyTranslationalSlip(double percentOfDelta) 
    {
-      FrameVector slipDelta = slipAmount.getFrameVectorCopy();
+      FrameVector3D slipDelta = slipAmount.getFrameVectorCopy();
       slipDelta.scale(percentOfDelta);
       slipAmount.sub(slipDelta);
 
@@ -150,7 +150,7 @@ public class GroundContactPointsSlipper implements RobotController
          if (touchedDown)
          {
             groundContactPointToSlip.getTouchdownLocation(touchdownLocation);
-            touchdownLocation.add(slipDelta.getVectorCopy());
+            touchdownLocation.add(slipDelta);
             groundContactPointToSlip.setTouchdownLocation(touchdownLocation);
          }
       }

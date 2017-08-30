@@ -14,16 +14,16 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.testing.JUnitTools;
 
 public class TwistTest extends SpatialMotionVectorTest
@@ -416,17 +416,17 @@ public class TwistTest extends SpatialMotionVectorTest
       Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Twist twist1 = new Twist(frameB, frameA, frameB, linearVelocity1, angularVelocity1);
 
-      FrameVector expectedFrameVector = new FrameVector(ReferenceFrame.getWorldFrame());
+      FrameVector3D expectedFrameVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
       Vector3D expected = expectedFrameVector.getVector();
       twist1.getBodyOriginLinearPartInBaseFrame(expectedFrameVector);
 
-      FrameVector actual = new FrameVector(ReferenceFrame.getWorldFrame());
+      FrameVector3D actual = new FrameVector3D(ReferenceFrame.getWorldFrame());
       twist1.changeFrame(twist1.getBaseFrame());
-      FramePoint bodyFrameOrigin = new FramePoint(twist1.getBodyFrame());
+      FramePoint3D bodyFrameOrigin = new FramePoint3D(twist1.getBodyFrame());
       bodyFrameOrigin.changeFrame(twist1.getBaseFrame());
       twist1.getLinearVelocityOfPointFixedInBodyFrame(actual, bodyFrameOrigin);
 
-      EuclidCoreTestTools.assertTuple3DEquals(expected, actual.getVectorCopy(), 1e-6);
+      EuclidCoreTestTools.assertTuple3DEquals(expected, actual, 1e-6);
    }
 
    /**
@@ -449,9 +449,9 @@ public class TwistTest extends SpatialMotionVectorTest
 
          Twist twist = new Twist(bodyFrame, baseFrame, bodyFrame, linearVelocity, angularVelocity);
 
-         FramePoint pointFixedInBodyFrame = new FramePoint(bodyFrame, EuclidCoreRandomTools.generateRandomPoint3D(random, 1.0));
-         FrameVector bodyFixedPointLinearVelocityInBody = new FrameVector();
-         FrameVector bodyFixedPointLinearVelocityInBase = new FrameVector();
+         FramePoint3D pointFixedInBodyFrame = new FramePoint3D(bodyFrame, EuclidCoreRandomTools.generateRandomPoint3D(random, 1.0));
+         FrameVector3D bodyFixedPointLinearVelocityInBody = new FrameVector3D();
+         FrameVector3D bodyFixedPointLinearVelocityInBase = new FrameVector3D();
 
          // Compute the linear velocity while in bodyFrame
          pointFixedInBodyFrame.changeFrame(bodyFrame);
@@ -479,7 +479,7 @@ public class TwistTest extends SpatialMotionVectorTest
 
       Vector3D angularVelocityInBaseFrame = new Vector3D();
       twist.getAngularVelocityInBaseFrame(angularVelocityInBaseFrame);
-      FrameVector bodyOriginLinearPart = new FrameVector();
+      FrameVector3D bodyOriginLinearPart = new FrameVector3D();
       twist.getBodyOriginLinearPartInBaseFrame(bodyOriginLinearPart);
       assertEquals(twist.getBaseFrame(), bodyOriginLinearPart.getReferenceFrame());
 
@@ -527,13 +527,13 @@ public class TwistTest extends SpatialMotionVectorTest
       Twist twist = new Twist(frameB, frameA, frameB, angularVelocityMagnitude, linearVelocityMagnitude, axisOfRotation, offset);
       twist.changeFrame(frameA);
 
-      FrameVector offsetAlongAxis = new FrameVector(frameB, axisOfRotation);
+      FrameVector3D offsetAlongAxis = new FrameVector3D(frameB, axisOfRotation);
       offsetAlongAxis.scale(random.nextDouble());
-      FramePoint pointThatShouldBeStationary = new FramePoint(frameB, offset);
+      FramePoint3D pointThatShouldBeStationary = new FramePoint3D(frameB, offset);
       pointThatShouldBeStationary.add(offsetAlongAxis);
       pointThatShouldBeStationary.changeFrame(frameA);
 
-      FrameVector velocityOfStationaryPoint = new FrameVector(frameB);
+      FrameVector3D velocityOfStationaryPoint = new FrameVector3D(frameB);
       twist.getLinearVelocityOfPointFixedInBodyFrame(velocityOfStationaryPoint, pointThatShouldBeStationary);
 
       double delta = 1e-15;

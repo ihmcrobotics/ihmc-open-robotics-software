@@ -3,18 +3,18 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import java.util.Arrays;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -25,20 +25,20 @@ public class Handstep
    private final RigidBody endEffector;
    private final RobotSide robotSide;
    private final PoseReferenceFrame poseReferenceFrame;
-   private final FrameVector surfaceNormal;
+   private final FrameVector3D surfaceNormal;
    private double swingTrajectoryTime;
 
-   public Handstep(RobotSide robotSide, RigidBody endEffector, FramePose framePose, FrameVector surfaceNormal, double swingTrajectoryTime)
+   public Handstep(RobotSide robotSide, RigidBody endEffector, FramePose framePose, FrameVector3D surfaceNormal, double swingTrajectoryTime)
    {
       this(robotSide, endEffector, new PoseReferenceFrame("Handstep" + counter, framePose), surfaceNormal, swingTrajectoryTime);
    }
 
-   public Handstep(RobotSide robotSide, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector surfaceNormal, double swingTrajectoryTime)
+   public Handstep(RobotSide robotSide, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector3D surfaceNormal, double swingTrajectoryTime)
    {
       this(createAutomaticID(endEffector), robotSide, endEffector, poseReferenceFrame, surfaceNormal, swingTrajectoryTime);
    }
 
-   public Handstep(String id, RobotSide robotSide, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector surfaceNormal,
+   public Handstep(String id, RobotSide robotSide, RigidBody endEffector, PoseReferenceFrame poseReferenceFrame, FrameVector3D surfaceNormal,
          double swingTrajectoryTime)
    {
       poseReferenceFrame.getParent().checkIsWorldFrame();
@@ -96,17 +96,17 @@ public class Handstep
       poseReferenceFrame.setPoseAndUpdate(newHandstepPose);
    }
 
-   public void setPose(FramePoint newPosition, FrameOrientation newOrientation)
+   public void setPose(FramePoint3D newPosition, FrameOrientation newOrientation)
    {
       poseReferenceFrame.setPoseAndUpdate(newPosition, newOrientation);
    }
 
-   public void setPositionChangeOnlyXY(FramePoint2d position2d)
+   public void setPositionChangeOnlyXY(FramePoint2D position2d)
    {
       poseReferenceFrame.setXYFromPosition2dAndUpdate(position2d);
    }
 
-   public void setSurfaceNormal(FrameVector surfaceNormal)
+   public void setSurfaceNormal(FrameVector3D surfaceNormal)
    {
       this.surfaceNormal.set(surfaceNormal);
    }
@@ -161,7 +161,7 @@ public class Handstep
       poseReferenceFrame.getPose(transformToPack);
    }
 
-   public void getPose(FramePoint positionToPack, FrameOrientation orientationToPack)
+   public void getPose(FramePoint3D positionToPack, FrameOrientation orientationToPack)
    {
       poseReferenceFrame.getPoseIncludingFrame(positionToPack, orientationToPack);
    }
@@ -176,7 +176,7 @@ public class Handstep
       poseReferenceFrameToPackAndUpdate.setPoseAndUpdate(poseReferenceFrame);
    }
 
-   public void getSurfaceNormal(FrameVector surfaceNormalToPack)
+   public void getSurfaceNormal(FrameVector3D surfaceNormalToPack)
    {
       surfaceNormalToPack.setIncludingFrame(surfaceNormal);
    }
@@ -196,7 +196,7 @@ public class Handstep
       poseReferenceFrame.getPosition(pointToPack);
    }
 
-   public void getPositionIncludingFrame(FramePoint framePointToPack)
+   public void getPositionIncludingFrame(FramePoint3D framePointToPack)
    {
       poseReferenceFrame.getPositionIncludingFrame(framePointToPack);
    }
@@ -221,7 +221,7 @@ public class Handstep
       poseReferenceFrame.getPose2dIncludingFrame(framePose2dToPack);
    }
 
-   public void getPosition2d(FramePoint2d framePoint2dToPack)
+   public void getPosition2d(FramePoint2D framePoint2dToPack)
    {
       poseReferenceFrame.getPosition2dIncludingFrame(framePoint2dToPack);
    }

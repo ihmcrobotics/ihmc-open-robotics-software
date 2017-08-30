@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -15,14 +18,11 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 
@@ -103,7 +103,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       this.mass = mass;
    }
 
-   private FramePoint spinnerHandleCenter = null;
+   private FramePoint3D spinnerHandleCenter = null;
 
    public void addSpinnerHandle(double percentOfSteeringWheelRadius)
    {
@@ -133,7 +133,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
 
       steeringWheelLink.setLinkGraphics(steeringWheelLinkGraphics);
 
-      spinnerHandleCenter = new FramePoint(steeringWheelFrame, xHandle, yHandle, handleLength / 2.0);
+      spinnerHandleCenter = new FramePoint3D(steeringWheelFrame, xHandle, yHandle, handleLength / 2.0);
    }
    
    public void addCrossBar()
@@ -261,7 +261,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       super.updateAllGroundContactPointVelocities();
    }
 
-   private final FramePoint pointToCheck = new FramePoint();
+   private final FramePoint3D pointToCheck = new FramePoint3D();
 
    @Override
    public boolean isPointOnOrInside(Point3D pointInWorldToCheck)
@@ -288,7 +288,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    @Override
    public void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
-      FramePoint pointToCheck = new FramePoint(worldFrame, pointInWorldToCheck);
+      FramePoint3D pointToCheck = new FramePoint3D(worldFrame, pointInWorldToCheck);
       pointToCheck.changeFrame(steeringWheelFrame);
 
       if (steeringWheelTorus.checkIfInside(pointToCheck.getPoint(), intersectionToPack, normalToPack))
@@ -327,19 +327,19 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       return steeringWheelFrame;
    }
 
-   public FramePoint getSpinnerHandleCenter()
+   public FramePoint3D getSpinnerHandleCenter()
    {
-      return new FramePoint(spinnerHandleCenter);
+      return new FramePoint3D(spinnerHandleCenter);
    }
 
-   public FrameVector getSteeringWheelAxis()
+   public FrameVector3D getSteeringWheelAxis()
    {
-      return new FrameVector(steeringWheelFrame, 0.0, 0.0, 1.0);
+      return new FrameVector3D(steeringWheelFrame, 0.0, 0.0, 1.0);
    }
 
-   public FramePoint getSteeringWheelCenter()
+   public FramePoint3D getSteeringWheelCenter()
    {
-      return new FramePoint(steeringWheelFrame, 0.0, 0.0, 0.0);
+      return new FramePoint3D(steeringWheelFrame, 0.0, 0.0, 0.0);
    }
 
    public double getNumberOfPossibleTurns()

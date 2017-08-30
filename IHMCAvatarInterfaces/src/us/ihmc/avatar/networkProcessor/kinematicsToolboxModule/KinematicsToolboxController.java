@@ -29,6 +29,8 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.KinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -40,19 +42,12 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBased
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
-import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -61,6 +56,10 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * {@code KinematicsToolboxController} is used as a whole-body inverse kinematics solver.
@@ -68,7 +67,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
  * The interaction with this solver is achieved over the network using message that define the API,
  * see {@link KinematicsToolboxModule}.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  *
  */
@@ -113,7 +112,7 @@ public class KinematicsToolboxController extends ToolboxController
    private final CommonHumanoidReferenceFrames referenceFrames;
 
    /** The same set of gains is used for controlling any part of the desired robot body. */
-   private final YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("genericGains", registry);
+   private final SymmetricYoPIDSE3Gains gains = new SymmetricYoPIDSE3Gains("genericGains", registry);
    /**
     * The controller core command is the single object used to pass the desired inputs to the
     * controller core.
@@ -309,7 +308,7 @@ public class KinematicsToolboxController extends ToolboxController
       inverseKinematicsSolution = new KinematicsToolboxOutputStatus(oneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
 
-      gains.setProportionalGain(800.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      gains.setProportionalGains(800.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
 
       footWeight.set(200.0);
       momentumWeight.set(1.0);
@@ -331,7 +330,7 @@ public class KinematicsToolboxController extends ToolboxController
    /**
     * This is where the end-effectors needing a visualization are registered, if you need more, add
     * it there.
-    * 
+    *
     * @param yoGraphicsListRegistry the main registry of this module, it is used to register the
     *           different graphics that are to be displayed in {@code SCSVisualizer}.
     */
@@ -359,7 +358,7 @@ public class KinematicsToolboxController extends ToolboxController
     * <p>
     * Simply creates a graphic coordinate system visualizable in {@code SCSVisualizer}.
     * </p>
-    * 
+    *
     * @param endEffector used to create a name prefix required for creating a
     *           {@link YoGraphicCoordinateSystem}.
     * @param type used to create a name prefix required for creating a
@@ -375,7 +374,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    /**
     * Creating the controller core which is the main piece of this solver.
-    * 
+    *
     * @return the controller core that will run for the desired robot
     *         {@link #desiredFullRobotModel}.
     */
@@ -383,7 +382,8 @@ public class KinematicsToolboxController extends ToolboxController
    {
       InverseDynamicsJoint[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(desiredFullRobotModel);
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, null,
+      KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
                                                                             null, registry);
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       toolbox.setupForInverseKinematicsSolver();
@@ -432,7 +432,7 @@ public class KinematicsToolboxController extends ToolboxController
    /**
     * Convenience method to create the template necessary for the controller core to create all the
     * necessary feedback controllers.
-    * 
+    *
     * @return the template for the controller core.
     */
    private FeedbackControlCommandList createControllerCoreTemplate()
@@ -461,7 +461,7 @@ public class KinematicsToolboxController extends ToolboxController
     * from the walking controller. It also initializes the information needed to hold the center of
     * mass and support foot/feet in place.
     * </p>
-    * 
+    *
     * @return {@code true} if this controller is good to go and solve a new problem. It needs to
     *         have received at least once a robot configuration from the controller, otherwise this
     *         will fail and prevent the user from using this toolbox.
@@ -572,7 +572,7 @@ public class KinematicsToolboxController extends ToolboxController
     * Checking if there is any new command available, in which case they polled from the
     * {@link #commandInputManager} and processed to update the state of the current optimization
     * run.
-    * 
+    *
     * @return the new list of feedback control command to be executed for this control tick.
     */
    private FeedbackControlCommandList consumeCommands()
@@ -630,7 +630,7 @@ public class KinematicsToolboxController extends ToolboxController
     * Also note that if a user command has been received for a support foot, the command for this
     * foot is not created.
     * </p>
-    * 
+    *
     * @return the commands for holding the support foot/feet in place.
     */
    private FeedbackControlCommand<?> createHoldSupportFootCommands()
@@ -656,7 +656,7 @@ public class KinematicsToolboxController extends ToolboxController
 
          SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
          feedbackControlCommand.set(rootBody, foot);
-         feedbackControlCommand.setGains((SE3PIDGainsInterface) gains);
+         feedbackControlCommand.setGains(gains);
          feedbackControlCommand.setWeightForSolver(footWeight.getDoubleValue());
          feedbackControlCommand.set(poseToHold);
          inputs.addCommand(feedbackControlCommand);
@@ -672,7 +672,7 @@ public class KinematicsToolboxController extends ToolboxController
     * Also note that if a user command has been received for the center of mass, this methods
     * returns {@code null}.
     * </p>
-    * 
+    *
     * @return the commands for holding the center of mass x and y coordinates in place.
     */
    private FeedbackControlCommand<?> createHoldCenterOfMassXYCommand()
@@ -687,7 +687,7 @@ public class KinematicsToolboxController extends ToolboxController
          return null;
       }
 
-      FramePoint positionToHold = new FramePoint();
+      FramePoint3D positionToHold = new FramePoint3D();
       initialCenterOfMassPosition.getFrameTupleIncludingFrame(positionToHold);
 
       CenterOfMassFeedbackControlCommand feedbackControlCommand = new CenterOfMassFeedbackControlCommand();
@@ -701,7 +701,7 @@ public class KinematicsToolboxController extends ToolboxController
    /**
     * Creates and sets up the {@code JointLimitReductionCommand} from the map
     * {@link #legJointLimitReductionFactors}.
-    * 
+    *
     * @return the command for reducing the allowed range of motion of the leg joints.
     */
    private JointLimitReductionCommand createJointLimitReductionCommand()
@@ -726,7 +726,7 @@ public class KinematicsToolboxController extends ToolboxController
    private void updateVisualization()
    {
       boolean hasData;
-      FramePoint position = new FramePoint();
+      FramePoint3D position = new FramePoint3D();
       FrameOrientation orientation = new FrameOrientation();
 
       for (RigidBody endEffector : desiredCoodinateSystems.keySet())

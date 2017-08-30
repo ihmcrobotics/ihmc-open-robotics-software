@@ -1,15 +1,15 @@
 package us.ihmc.robotics.screwTheory;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class RevoluteJoint extends OneDoFJoint
 {
-   private final FrameVector jointAxis;
+   private final FrameVector3D jointAxis;
    private final AxisAngle axisAngle = new AxisAngle();
 
    public RevoluteJoint(String name, RigidBody predecessor, Vector3DReadOnly jointAxis)
@@ -20,7 +20,7 @@ public class RevoluteJoint extends OneDoFJoint
    public RevoluteJoint(String name, RigidBody predecessor, RigidBodyTransform transformToParent, Vector3DReadOnly jointAxis)
    {
       super(name, predecessor, transformToParent);
-      this.jointAxis = new FrameVector(beforeJointFrame, jointAxis);
+      this.jointAxis = new FrameVector3D(beforeJointFrame, jointAxis);
       this.unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, new Vector3D(), jointAxis);
    }
 
@@ -65,13 +65,13 @@ public class RevoluteJoint extends OneDoFJoint
    }
 
    @Override
-   public FrameVector getJointAxis()
+   public FrameVector3D getJointAxis()
    {
-      return new FrameVector(jointAxis);
+      return new FrameVector3D(jointAxis);
    }
 
    @Override
-   public void getJointAxis(FrameVector axisToPack)
+   public void getJointAxis(FrameVector3D axisToPack)
    {
       axisToPack.setIncludingFrame(jointAxis);
    }

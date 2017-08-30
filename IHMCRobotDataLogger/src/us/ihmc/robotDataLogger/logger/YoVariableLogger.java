@@ -13,7 +13,7 @@ import us.ihmc.robotDataLogger.rtps.DataConsumerParticipant;
 
 public class YoVariableLogger
 {
-   public static final int timeout = 5000;
+   public static final int timeout = 10000;
 
    private final YoVariableClient client;
 

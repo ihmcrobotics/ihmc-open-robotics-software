@@ -1,28 +1,28 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SmartCMPProjectorTwo extends CMPProjector
 {
    private final YoBoolean cmpProjectedAlongRay, cmpProjectedToPushTowardFinalDesiredICP, cmpProjectedToVertex;
    private final FrameLine2d icpToCMPLine = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2D(), new Point2D(1.0, 0.0));
-   private final FrameVector2d finalDesiredICPToICPDirection = new FrameVector2d(ReferenceFrame.getWorldFrame());
+   private final FrameVector2D finalDesiredICPToICPDirection = new FrameVector2D(ReferenceFrame.getWorldFrame());
    private final FrameLine2d rayFromICPAwayFromFinalDesiredICP = new FrameLine2d(ReferenceFrame.getWorldFrame(), new Point2D(), new Point2D(1.0, 0.0));
-   private final FramePoint2d finalDesiredICPLocation = new FramePoint2d();
+   private final FramePoint2D finalDesiredICPLocation = new FramePoint2D();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final BoundingBox2D tempBoundingBox = new BoundingBox2D();
-   private final FramePoint2d intersection1 = new FramePoint2d();
-   private final FramePoint2d intersection2 = new FramePoint2d();
+   private final FramePoint2D intersection1 = new FramePoint2D();
+   private final FramePoint2D intersection2 = new FramePoint2D();
    private final YoBoolean cmpWasProjected = new YoBoolean("CmpWasProjected", registry);
 
    public SmartCMPProjectorTwo(YoVariableRegistry parentRegistry)
@@ -44,8 +44,8 @@ public class SmartCMPProjectorTwo extends CMPProjector
     * Therefore we try to direct the ICP towards the final desired ICP location (almost equivalent to the next footstep location).
     */
    @Override
-   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2d finalDesiredCapturePoint,
-         FramePoint2d desiredCMP)
+   public void projectCMPIntoSupportPolygonIfOutside(FramePoint2D capturePoint, FrameConvexPolygon2d supportPolygon, FramePoint2D finalDesiredCapturePoint,
+         FramePoint2D desiredCMP)
    {
       ReferenceFrame returnFrame = desiredCMP.getReferenceFrame();
 
@@ -62,8 +62,8 @@ public class SmartCMPProjectorTwo extends CMPProjector
       capturePoint.changeFrame(returnFrame);
    }
 
-   private void projectCMPIntoSupportPolygonIfOutsideLocal(FramePoint2d capturePoint, FrameConvexPolygon2d supportPolygon,
-         FramePoint2d finalDesiredCapturePoint, FramePoint2d desiredCMP)
+   private void projectCMPIntoSupportPolygonIfOutsideLocal(FramePoint2D capturePoint, FrameConvexPolygon2d supportPolygon,
+         FramePoint2D finalDesiredCapturePoint, FramePoint2D desiredCMP)
    {
       cmpProjectedAlongRay.set(false);
       cmpProjectedToPushTowardFinalDesiredICP.set(false);
@@ -106,12 +106,12 @@ public class SmartCMPProjectorTwo extends CMPProjector
          finalDesiredICPToICPDirection.sub(finalDesiredICPLocation);
          rayFromICPAwayFromFinalDesiredICP.setIncludingFrame(capturePoint, finalDesiredICPToICPDirection);
 
-         FramePoint2d[] finalDesiredICPToICPIntersections = supportPolygon.intersectionWith(rayFromICPAwayFromFinalDesiredICP);
+         FramePoint2D[] finalDesiredICPToICPIntersections = supportPolygon.intersectionWith(rayFromICPAwayFromFinalDesiredICP);
 
          if (finalDesiredICPToICPIntersections != null && finalDesiredICPToICPIntersections.length > 1)
          {
             cmpProjectedToPushTowardFinalDesiredICP.set(true);
-            FramePoint2d closestIntersection = findClosestIntersection(capturePoint, finalDesiredICPToICPIntersections);
+            FramePoint2D closestIntersection = findClosestIntersection(capturePoint, finalDesiredICPToICPIntersections);
             desiredCMP.set(closestIntersection);
             return;
          }
@@ -126,11 +126,11 @@ public class SmartCMPProjectorTwo extends CMPProjector
       supportPolygon.orthogonalProjection(desiredCMP);
    }
 
-   private FramePoint2d findClosestIntersection(FramePoint2d closestToPoint, FramePoint2d... potentialIntersections)
+   private FramePoint2D findClosestIntersection(FramePoint2D closestToPoint, FramePoint2D... potentialIntersections)
    {
-      FramePoint2d closestIntersection = null;
+      FramePoint2D closestIntersection = null;
       double closestDistanceSquared = Double.POSITIVE_INFINITY;
-      for (FramePoint2d framePoint2d : potentialIntersections)
+      for (FramePoint2D framePoint2d : potentialIntersections)
       {
          double distanceSquared = framePoint2d.distanceSquared(closestToPoint);
          if (distanceSquared < closestDistanceSquared)

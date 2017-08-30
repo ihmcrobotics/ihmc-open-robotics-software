@@ -3,13 +3,13 @@ package us.ihmc.humanoidBehaviors.utilities;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 
 public class TaskSpaceStiffnessCalculator
@@ -68,7 +68,7 @@ public class TaskSpaceStiffnessCalculator
       return yoForceAlongDirectionOfMotion.getDoubleValue();
    }
    
-   public FrameVector getForceRateOfChange()
+   public FrameVector3D getForceRateOfChange()
    {
       return yoForcePointForceRateOfChange.getFrameTuple();
    }
@@ -90,9 +90,9 @@ public class TaskSpaceStiffnessCalculator
 
    private boolean updateHasBeenCalled = false;
 
-   private final FrameVector directionOfMotion = new FrameVector();
+   private final FrameVector3D directionOfMotion = new FrameVector3D();
 
-   public void update(FramePoint forcePointPosition, FrameVector force)
+   public void update(FramePoint3D forcePointPosition, FrameVector3D force)
    {
       yoForcePointPosition.set(forcePointPosition);
 
@@ -143,7 +143,7 @@ public class TaskSpaceStiffnessCalculator
       }
    }
 
-   private final FrameVector temp = new FrameVector();
+   private final FrameVector3D temp = new FrameVector3D();
 
    private void doYoVectorCrossProduct(YoFrameVector v1, YoFrameVector v2, YoFrameVector vecToPack)
    {

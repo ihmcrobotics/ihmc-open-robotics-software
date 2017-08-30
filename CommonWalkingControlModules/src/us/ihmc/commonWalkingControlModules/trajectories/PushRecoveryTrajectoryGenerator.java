@@ -1,17 +1,17 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
@@ -52,9 +52,9 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
    private final PositionTrajectoryGenerator nominalTrajectoryGenerator;
    private final DoubleProvider swingTimeProvider;
 
-   private FramePoint nominalTrajectoryPosition = new FramePoint();
-   private FrameVector nominalTrajectoryVelocity = new FrameVector();
-   private FrameVector nominalTrajectoryAcceleration = new FrameVector();
+   private FramePoint3D nominalTrajectoryPosition = new FramePoint3D();
+   private FrameVector3D nominalTrajectoryVelocity = new FrameVector3D();
+   private FrameVector3D nominalTrajectoryAcceleration = new FrameVector3D();
 
    public PushRecoveryTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider swingTimeProvider,
          DoubleProvider swingTimeRemainingProvider, PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider,
@@ -92,8 +92,8 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       this.bagOfBalls = new BagOfBalls(numberOfBallsInBag, 0.01, namePrefix + "SwingTrajectoryBagOfBalls", registry, yoGraphicsListRegistry);
    }
 
-   private final FrameVector tempVector = new FrameVector();
-   private final FramePoint tempPosition = new FramePoint();
+   private final FrameVector3D tempVector = new FrameVector3D();
+   private final FramePoint3D tempPosition = new FramePoint3D();
 
    public void initialize()
    {
@@ -183,17 +183,17 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       desiredPosition.setZ(nominalTrajectoryPosition.getZ());
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       desiredPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
@@ -204,7 +204,7 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       return timeIntoStep.getDoubleValue() >= swingTime.getDoubleValue();
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

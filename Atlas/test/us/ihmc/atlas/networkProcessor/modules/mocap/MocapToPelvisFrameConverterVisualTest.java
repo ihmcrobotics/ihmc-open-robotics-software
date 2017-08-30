@@ -13,14 +13,14 @@ import us.ihmc.avatar.networkProcessor.modules.mocap.MocapToPelvisFrameConverter
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -80,7 +80,7 @@ public class MocapToPelvisFrameConverterVisualTest
       Vector3D pelvisToMarker2Translation = new Vector3D();
       pelvisToMarker2Transform.getTranslation(pelvisToMarker2Translation);
       pelvisToMarker2Translation.negate();
-      FramePoint markerPoint2 = new FramePoint(pelvisFrame, pelvisToMarker2Translation);
+      FramePoint3D markerPoint2 = new FramePoint3D(pelvisFrame, pelvisToMarker2Translation);
 
       markerPoint2.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -90,7 +90,7 @@ public class MocapToPelvisFrameConverterVisualTest
       mocapAndPelvisGraphics.addModelFile(modelDirectory + "pelvis.obj");
       mocapAndPelvisGraphics.identity();
 
-      mocapAndPelvisGraphics.translate(markerPoint2.getPointCopy());
+      mocapAndPelvisGraphics.translate(markerPoint2);
       mocapAndPelvisGraphics.addSphere(0.005, YoAppearance.White());
       mocapAndPelvisGraphics.identity();
 
@@ -108,7 +108,7 @@ public class MocapToPelvisFrameConverterVisualTest
       mocapMarkers.add(new MocapMarker(3, new Vector3D(), 0.024f));
       mocapMarkers.add(new MocapMarker(4, new Vector3D(), 0.024f));
       markerPoint2.changeFrame(mocapFrame);
-      MocapRigidBody markerRigidBody = new MocapRigidBody(1, markerPoint2.getVectorCopy(), pelvisToMocapRotation, mocapMarkers, false);
+      MocapRigidBody markerRigidBody = new MocapRigidBody(1, new Vector3D(markerPoint2), pelvisToMocapRotation, mocapMarkers, false);
 
       MocapToPelvisFrameConverter frameConverter = new MocapToPelvisFrameConverter();
       frameConverter.initialize(pelvisFrame, markerRigidBody);

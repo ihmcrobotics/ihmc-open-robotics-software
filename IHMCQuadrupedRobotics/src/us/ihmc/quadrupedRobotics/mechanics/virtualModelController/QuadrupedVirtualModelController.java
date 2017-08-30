@@ -6,6 +6,9 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
@@ -13,12 +16,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.kinematics.JointLimit;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -36,10 +36,10 @@ public class QuadrupedVirtualModelController
    private final ReferenceFrame worldFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrame;
 
-   private final QuadrantDependentList<FrameVector> soleVirtualForce;
-   private final QuadrantDependentList<FrameVector> soleContactForce;
-   private final QuadrantDependentList<FramePoint> solePosition;
-   private final QuadrantDependentList<FrameVector[]> jointTorques;
+   private final QuadrantDependentList<FrameVector3D> soleVirtualForce;
+   private final QuadrantDependentList<FrameVector3D> soleContactForce;
+   private final QuadrantDependentList<FramePoint3D> solePosition;
+   private final QuadrantDependentList<FrameVector3D[]> jointTorques;
    private final QuadrantDependentList<YoFrameVector> yoSoleVirtualForce;
    private final QuadrantDependentList<YoFrameVector> yoSoleContactForce;
    private final QuadrantDependentList<YoFramePoint> yoSolePosition;
@@ -62,7 +62,7 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<YoFramePoint[]> yoJointTorqueGraphicPositions;
    private final QuadrantDependentList<YoBoolean> yoJointTorqueGraphicsVisible;
    private final QuadrantDependentList<YoGraphicVector[]> yoJointTorqueGraphics;
-   private final FrameVector jointAxisTempVector = new FrameVector();
+   private final FrameVector3D jointAxisTempVector = new FrameVector3D();
 
    public QuadrupedVirtualModelController(FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, double controlDT,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
@@ -83,13 +83,13 @@ public class QuadrupedVirtualModelController
       jointTorques = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         solePosition.set(robotQuadrant, new FramePoint(worldFrame));
-         soleVirtualForce.set(robotQuadrant, new FrameVector(worldFrame));
-         soleContactForce.set(robotQuadrant, new FrameVector(worldFrame));
-         jointTorques.set(robotQuadrant, new FrameVector[legJointNames.length]);
+         solePosition.set(robotQuadrant, new FramePoint3D(worldFrame));
+         soleVirtualForce.set(robotQuadrant, new FrameVector3D(worldFrame));
+         soleContactForce.set(robotQuadrant, new FrameVector3D(worldFrame));
+         jointTorques.set(robotQuadrant, new FrameVector3D[legJointNames.length]);
          for (int i = 0; i < legJointNames.length; i++)
          {
-            jointTorques.get(robotQuadrant)[i] = new FrameVector(worldFrame);
+            jointTorques.get(robotQuadrant)[i] = new FrameVector3D(worldFrame);
          }
       }
 
@@ -182,7 +182,7 @@ public class QuadrupedVirtualModelController
       }
    }
 
-   public void setSoleVirtualForce(RobotQuadrant robotQuadrant, FrameVector virtualForce)
+   public void setSoleVirtualForce(RobotQuadrant robotQuadrant, FrameVector3D virtualForce)
    {
       soleVirtualForce.get(robotQuadrant).setIncludingFrame(virtualForce);
 
@@ -191,7 +191,7 @@ public class QuadrupedVirtualModelController
       soleContactForce.get(robotQuadrant).scale(-1.0);
    }
 
-   public void setSoleContactForce(RobotQuadrant robotQuadrant, FrameVector contactForce)
+   public void setSoleContactForce(RobotQuadrant robotQuadrant, FrameVector3D contactForce)
    {
       soleContactForce.get(robotQuadrant).setIncludingFrame(contactForce);
 

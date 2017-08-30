@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
-import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 
 public interface ICPPlannerWithTimeFreezerInterface extends ICPPlannerInterface
 {
-   void compute(FramePoint2d currentCapturePointPosition, double time);
+   void compute(FramePoint2D currentCapturePointPosition, double time);
 
    boolean getIsTimeBeingFrozen();
 

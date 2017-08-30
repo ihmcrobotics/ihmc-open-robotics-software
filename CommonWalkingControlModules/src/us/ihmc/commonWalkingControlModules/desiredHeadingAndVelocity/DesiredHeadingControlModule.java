@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public interface DesiredHeadingControlModule
 {  
@@ -13,15 +13,15 @@ public interface DesiredHeadingControlModule
 
    public abstract double getDesiredHeadingAngle();
    
-   public abstract void getDesiredHeading(FrameVector2d desiredHeadingToPack, double timeFromNow);
+   public abstract void getDesiredHeading(FrameVector2D desiredHeadingToPack, double timeFromNow);
 
    public abstract double getFinalHeadingTargetAngle();
    
-   public abstract FrameVector2d getFinalHeadingTarget();
+   public abstract FrameVector2D getFinalHeadingTarget();
 
    public abstract void setFinalHeadingTargetAngle(double finalHeadingTargetAngle);
    
-   public abstract void setFinalHeadingTarget(FrameVector2d finalHeadingTarget);
+   public abstract void setFinalHeadingTarget(FrameVector2D finalHeadingTarget);
 
    public abstract void resetHeadingAngle(double newHeading);
 }

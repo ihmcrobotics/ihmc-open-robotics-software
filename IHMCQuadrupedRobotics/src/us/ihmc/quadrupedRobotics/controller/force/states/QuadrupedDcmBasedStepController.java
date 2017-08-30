@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -21,11 +23,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -78,7 +78,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final LinearInvertedPendulumModel lipModel;
 
    // feedback controllers
-   private final FramePoint dcmPositionEstimate;
+   private final FramePoint3D dcmPositionEstimate;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final DivergentComponentOfMotionController.Setpoints dcmPositionControllerSetpoints;
    private final DivergentComponentOfMotionController dcmPositionController;
@@ -103,13 +103,13 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    private final QuadrupedPiecewiseConstantCopTrajectory piecewiseConstanceCopTrajectory;
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
    private final ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory;
-   private final FramePoint dcmPositionWaypoint;
+   private final FramePoint3D dcmPositionWaypoint;
    private final YoFrameVector instantaneousStepAdjustment;
    private final YoFrameVector accumulatedStepAdjustment;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
    private final FrameOrientation bodyOrientationReference;
    private final OrientationFrame bodyOrientationReferenceFrame;
-   private final FramePoint stepGoalPosition;
+   private final FramePoint3D stepGoalPosition;
    private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
 
    // inputs
@@ -137,7 +137,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       lipModel = controllerToolbox.getLinearInvertedPendulumModel();
 
       // feedback controllers
-      dcmPositionEstimate = new FramePoint();
+      dcmPositionEstimate = new FramePoint3D();
       dcmPositionEstimator = controllerToolbox.getDcmPositionEstimator();
       dcmPositionControllerSetpoints = new DivergentComponentOfMotionController.Setpoints();
       dcmPositionController = controllerToolbox.getDcmPositionController();
@@ -165,14 +165,14 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       piecewiseConstanceCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(timedContactSequence.capacity());
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, postureProvider.getComPositionInput().getZ());
       dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
-      dcmPositionWaypoint = new FramePoint();
+      dcmPositionWaypoint = new FramePoint3D();
       instantaneousStepAdjustment = new YoFrameVector("instantaneousStepAdjustment", worldFrame, registry);
       accumulatedStepAdjustment = new YoFrameVector("accumulatedStepAdjustment", worldFrame, registry);
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
             maximumStepStrideParameter.get());
       bodyOrientationReference = new FrameOrientation();
       bodyOrientationReferenceFrame = new OrientationFrame(bodyOrientationReference);
-      stepGoalPosition = new FramePoint();
+      stepGoalPosition = new FramePoint3D();
       stepSequence = new YoPreallocatedList<>("stepSequence", registry, MAXIMUM_STEP_QUEUE_SIZE,
             new YoPreallocatedList.DefaultElementFactory<YoQuadrupedTimedStep>()
             {
@@ -298,7 +298,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    {
       // compute piecewise constant center of pressure plan
       double currentTime = robotTimestamp.getDoubleValue();
-      QuadrantDependentList<FramePoint> currentSolePosition = taskSpaceEstimates.getSolePosition();
+      QuadrantDependentList<FramePoint3D> currentSolePosition = taskSpaceEstimates.getSolePosition();
       QuadrantDependentList<ContactState> currentContactState = taskSpaceControllerSettings.getContactState();
       timedContactSequence.update(stepSequence, currentSolePosition, currentContactState, currentTime);
       piecewiseConstanceCopTrajectory.initializeTrajectory(timedContactSequence);
@@ -368,7 +368,7 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
       if (robotTimestamp.getDoubleValue() > dcmTransitionTrajectory.getEndTime())
       {
          // compute step adjustment for ongoing steps (proportional to dcm tracking error)
-         FramePoint dcmPositionSetpoint = dcmPositionControllerSetpoints.getDcmPosition();
+         FramePoint3D dcmPositionSetpoint = dcmPositionControllerSetpoints.getDcmPosition();
          dcmPositionSetpoint.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
          dcmPositionEstimate.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
          instantaneousStepAdjustment.set(dcmPositionEstimate);

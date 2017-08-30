@@ -1,9 +1,9 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 
 /**
  * {@code MovingMidFrame} represents a the average of two given reference frames.
@@ -43,13 +43,13 @@ public class MovingMidFrame extends MovingReferenceFrame
       pose.getPose(transformToParent);
    }
 
-   private final FrameVector linearVelocity = new FrameVector();
-   private final FrameVector linearVelocityOne = new FrameVector();
-   private final FrameVector linearVelocityTwo = new FrameVector();
+   private final FrameVector3D linearVelocity = new FrameVector3D();
+   private final FrameVector3D linearVelocityOne = new FrameVector3D();
+   private final FrameVector3D linearVelocityTwo = new FrameVector3D();
 
-   private final FrameVector angularVelocity = new FrameVector();
-   private final FrameVector angularVelocityOne = new FrameVector();
-   private final FrameVector angularVelocityTwo = new FrameVector();
+   private final FrameVector3D angularVelocity = new FrameVector3D();
+   private final FrameVector3D angularVelocityOne = new FrameVector3D();
+   private final FrameVector3D angularVelocityTwo = new FrameVector3D();
 
    private final Quaternion difference = new Quaternion();
    private final Quaternion quaternionFuture = new Quaternion();

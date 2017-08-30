@@ -3,12 +3,12 @@ package us.ihmc.quadrupedRobotics.planning;
 import java.util.Comparator;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedRobotics.util.ArraySorter;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -48,7 +48,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
    private final QuadrupedStepTransition[] stepTransition;
    private final QuadrupedTimedStep[] transitionStep;
    private final QuadrantDependentList<ContactState> contactState;
-   private final QuadrantDependentList<FramePoint> solePosition;
+   private final QuadrantDependentList<FramePoint3D> solePosition;
 
    public QuadrupedTimedContactSequence(int pastContactPhaseCapacity, int futureContactPhaseCapacity)
    {
@@ -71,7 +71,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          contactState.set(robotQuadrant, ContactState.IN_CONTACT);
-         solePosition.set(robotQuadrant, new FramePoint());
+         solePosition.set(robotQuadrant, new FramePoint3D());
       }
    }
 
@@ -87,7 +87,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
     * @param currentContactState current sole contact state (input)
     * @param currentTime current time (input)
     */
-   public void update(List<? extends QuadrupedTimedStep> stepSequence, QuadrantDependentList<FramePoint> currentSolePosition,
+   public void update(List<? extends QuadrupedTimedStep> stepSequence, QuadrantDependentList<FramePoint3D> currentSolePosition,
          QuadrantDependentList<ContactState> currentContactState, double currentTime)
    {
       // initialize contact state and sole positions
@@ -174,7 +174,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
          case TOUCH_DOWN:
             contactState.set(stepTransition[i].robotQuadrant, ContactState.IN_CONTACT);
             solePosition.get(stepTransition[i].robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-            solePosition.get(stepTransition[i].robotQuadrant).setPoint(stepTransition[i].solePosition);
+            solePosition.get(stepTransition[i].robotQuadrant).set(stepTransition[i].solePosition);
             break;
          }
          if ((i + 1 == numberOfStepTransitions) || (stepTransition[i].time != stepTransition[i + 1].time))
@@ -200,7 +200,7 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
       return true;
    }
 
-   private QuadrupedTimedContactPhase createNewContactPhase(double startTime, QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint> solePosition)
+   private QuadrupedTimedContactPhase createNewContactPhase(double startTime, QuadrantDependentList<ContactState> contactState, QuadrantDependentList<FramePoint3D> solePosition)
    {
       if (super.add())
       {

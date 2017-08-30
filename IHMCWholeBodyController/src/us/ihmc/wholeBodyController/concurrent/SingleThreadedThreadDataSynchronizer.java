@@ -3,11 +3,10 @@ package us.ihmc.wholeBodyController.concurrent;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
@@ -18,7 +17,8 @@ import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchronizerInterface
 {
@@ -43,33 +43,33 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    private final YoLong timestamp;
    private final YoLong estimatorClockStartTime;
    private final YoLong estimatorTick;
-   
+
    private final FullRobotModelRootJointRewinder fullRobotModelRewinder;
-   
+
    /**
-    * SingleThreadedThreadDataSynchronizer is an alternative to ThreadDataSynchronizer when you want to run on a single thread and have 
+    * SingleThreadedThreadDataSynchronizer is an alternative to ThreadDataSynchronizer when you want to run on a single thread and have
     * deterministic rewindable execution. The FullRobotModels and other objects are just shared between the estimator and the controller.
     * @param wholeBodyControlParameters
     * @param registry
     */
-   public SingleThreadedThreadDataSynchronizer(SimulationConstructionSet scs, WholeBodyControllerParameters wholeBodyControlParameters, YoVariableRegistry registry)
+   public SingleThreadedThreadDataSynchronizer(SimulationConstructionSet scs, FullHumanoidRobotModelFactory robotModelFactory, YoVariableRegistry registry)
    {
       timestamp = new YoLong(getClass().getSimpleName() + "Timestamp", registry);
       estimatorClockStartTime = new YoLong(getClass().getSimpleName() + "EstimatorClockStartTime", registry);
       estimatorTick = new YoLong(getClass().getSimpleName() + "EstimatorTick", registry);
-      
-      estimatorFullRobotModel = wholeBodyControlParameters.createFullRobotModel();
+
+      estimatorFullRobotModel = robotModelFactory.createFullRobotModel();
       estimatorForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));
       estimatorCenterOfMassDataHolder = new CenterOfMassDataHolder();
       estimatorRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(estimatorFullRobotModel);
       estimatorContactSensorHolder = new ContactSensorHolder(Arrays.asList(estimatorFullRobotModel.getContactSensorDefinitions()));
       estimatorRobotMotionStatusHolder = new RobotMotionStatusHolder();
       estimatorDesiredJointDataHolder = new DesiredJointDataHolder(estimatorFullRobotModel.getOneDoFJoints());
-      
+
       LinkedHashMap<RigidBody, ReferenceFrame> soleFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
-      for(RobotSide robotSide : RobotSide.values)  
+      for(RobotSide robotSide : RobotSide.values)
       {
-         soleFrames.put(estimatorFullRobotModel.getFoot(robotSide), estimatorFullRobotModel.getSoleFrame(robotSide));         
+         soleFrames.put(estimatorFullRobotModel.getFoot(robotSide), estimatorFullRobotModel.getSoleFrame(robotSide));
       }
       estimatorCenterOfPressureDataHolder = new CenterOfPressureDataHolder(soleFrames);
 
@@ -81,7 +81,7 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
       controllerRobotMotionStatusHolder = estimatorRobotMotionStatusHolder;
       controllerContactSensorHolder = estimatorContactSensorHolder;
       controllerDesiredJointDataHolder = estimatorDesiredJointDataHolder;
-      
+
       this.fullRobotModelRewinder = new FullRobotModelRootJointRewinder(estimatorFullRobotModel, registry);
       if(scs != null)
       {
@@ -100,8 +100,8 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    {
       this.timestamp.set(timestamp);
       this.estimatorTick.set(estimatorTick);
-      this.estimatorClockStartTime.set(estimatorClockStartTime); 
-      
+      this.estimatorClockStartTime.set(estimatorClockStartTime);
+
       // Record full robot model here for rewindability.
       fullRobotModelRewinder.recordCurrentState();
    }
@@ -198,7 +198,7 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
 
    @Override
    public void publishControllerData()
-   {      
+   {
       controllerDesiredJointDataHolder.updateFromModel();
    }
 

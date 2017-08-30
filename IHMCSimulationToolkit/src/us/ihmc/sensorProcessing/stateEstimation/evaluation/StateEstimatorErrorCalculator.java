@@ -1,6 +1,9 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -8,12 +11,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -89,13 +89,13 @@ public class StateEstimatorErrorCalculator
       orientationError.set(Math.abs(errorAngle));
    }
 
-   private final FrameVector estimatedAngularVelocityFrameVector = new FrameVector(ReferenceFrame.getWorldFrame());
+   private final FrameVector3D estimatedAngularVelocityFrameVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
    
    private void computeAngularVelocityError()
    {
       orientationEstimator.getEstimatedAngularVelocity(estimatedAngularVelocityFrameVector);
       
-      Vector3D estimatedAngularVelocity = estimatedAngularVelocityFrameVector.getVectorCopy();
+      Vector3D estimatedAngularVelocity = new Vector3D(estimatedAngularVelocityFrameVector);
       Vector3D actualAngularVelocity = new Vector3D();
       estimationJoint.physics.getAngularVelocityInBody(actualAngularVelocity);
 
@@ -105,7 +105,7 @@ public class StateEstimatorErrorCalculator
       angularVelocityError.set(actualAngularVelocity.length());
    }
 
-   private final FramePoint estimatedCoMPosition = new FramePoint();
+   private final FramePoint3D estimatedCoMPosition = new FramePoint3D();
    
    private void computeCoMPositionError()
    {
@@ -118,7 +118,7 @@ public class StateEstimatorErrorCalculator
       
       Vector3D comError = new Vector3D();
       orientationEstimator.getEstimatedCoMPosition(estimatedCoMPosition);
-      comError.set(estimatedCoMPosition.getPointCopy());
+      comError.set(estimatedCoMPosition);
       comError.sub(comPoint);
 
       comZPositionError.set(comError.getZ());
@@ -127,7 +127,7 @@ public class StateEstimatorErrorCalculator
       comXYPositionError.set(comError.length());
    }
 
-   private final FrameVector estimatedCoMVelocityFrameVector = new FrameVector();
+   private final FrameVector3D estimatedCoMVelocityFrameVector = new FrameVector3D();
 
    private void computeCoMVelocityError()
    {
@@ -140,7 +140,7 @@ public class StateEstimatorErrorCalculator
       perfectCoMVelocity.set(linearVelocity);
       
       orientationEstimator.getEstimatedCoMVelocity(estimatedCoMVelocityFrameVector);
-      Vector3D estimatedCoMVelocity = estimatedCoMVelocityFrameVector.getVectorCopy();
+      Vector3D estimatedCoMVelocity = new Vector3D(estimatedCoMVelocityFrameVector);
 
       estimatedCoMVelocity.sub(linearVelocity);
       comVelocityError.set(estimatedCoMVelocity.length());
@@ -165,7 +165,7 @@ public class StateEstimatorErrorCalculator
 	   }
    }
 
-   private final FramePoint estimatedPelvisPosition = new FramePoint();
+   private final FramePoint3D estimatedPelvisPosition = new FramePoint3D();
    
    private void computePelvisPositionError()
    {
@@ -185,7 +185,7 @@ public class StateEstimatorErrorCalculator
       pelvisXYPositionError.set(positionError.length());
    }
 
-   private final FrameVector estimatedPelvisVelocityFrameVector = new FrameVector();
+   private final FrameVector3D estimatedPelvisVelocityFrameVector = new FrameVector3D();
 
    private void computePelvisVelocityError()
    {

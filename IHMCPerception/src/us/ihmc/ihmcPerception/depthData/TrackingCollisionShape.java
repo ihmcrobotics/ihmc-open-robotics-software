@@ -3,10 +3,10 @@ package us.ihmc.ihmcPerception.depthData;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class TrackingCollisionShape
 {

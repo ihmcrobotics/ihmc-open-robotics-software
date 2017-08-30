@@ -4,28 +4,28 @@ import org.apache.commons.lang3.StringUtils;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.interfaces.Clearable;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameTuple2D;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
-import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameTuple;
-import us.ihmc.robotics.geometry.FrameTuple2d;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly since they contain YoVariables.
-public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends AbstractReferenceFrameHolder implements Clearable
+public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> implements ReferenceFrameHolder, Clearable
 {
    private final String namePrefix;
    private final String nameSuffix;
@@ -118,14 +118,14 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       return point3d;
    }
 
-   public final void getFrameTuple(FrameTuple<?, ?> frameTuple)
+   public final void getFrameTuple(FrameTuple3D<?, ?> frameTuple)
    {
       frameTuple.set(getFrameTuple());
    }
 
-   public final void getFrameTuple2d(FrameTuple2d<?, ?> frameTuple2d)
+   public final void getFrameTuple2d(FrameTuple2D<?, ?> frameTuple2d)
    {
-      frameTuple2d.setByProjectionOntoXYPlane(getFrameTuple());
+      frameTuple2d.set(getFrameTuple());
    }
 
    public final T getFrameTuple()
@@ -134,32 +134,32 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       return frameTuple;
    }
 
-   public final FrameVector getFrameVectorCopy()
+   public final FrameVector3D getFrameVectorCopy()
    {
-      return new FrameVector(getFrameTuple());
+      return new FrameVector3D(getFrameTuple());
    }
 
-   public final FramePoint getFramePointCopy()
+   public final FramePoint3D getFramePointCopy()
    {
-      return new FramePoint(getFrameTuple());
+      return new FramePoint3D(getFrameTuple());
    }
 
-   public final FrameVector2d getFrameVector2dCopy()
+   public final FrameVector2D getFrameVector2dCopy()
    {
-      return new FrameVector2d(getReferenceFrame(), getX(), getY());
+      return new FrameVector2D(getReferenceFrame(), getX(), getY());
    }
 
-   public final FramePoint2d getFramePoint2dCopy()
+   public final FramePoint2D getFramePoint2dCopy()
    {
-      return new FramePoint2d(getReferenceFrame(), getX(), getY());
+      return new FramePoint2D(getReferenceFrame(), getX(), getY());
    }
 
-   public final void getFrameTupleIncludingFrame(FrameTuple<?, ?> frameTuple)
+   public final void getFrameTupleIncludingFrame(FrameTuple3D<?, ?> frameTuple)
    {
       frameTuple.setIncludingFrame(getReferenceFrame(), getX(), getY(), getZ());
    }
 
-   public final void getFrameTuple2dIncludingFrame(FrameTuple2d<?, ?> frameTuple2d)
+   public final void getFrameTuple2dIncludingFrame(FrameTuple2D<?, ?> frameTuple2d)
    {
       putYoValuesIntoFrameTuple();
       frameTuple2d.setIncludingFrame(getReferenceFrame(), getX(), getY());
@@ -299,7 +299,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
     * @deprecated the user should simply use {@link #set(Tuple3DBasics)} instead.
     */
    @Deprecated
-   public final void setWithoutChecks(FrameTuple<?, ?> frameTuple)
+   public final void setWithoutChecks(FrameTuple3D<?, ?> frameTuple)
    {
       x.set(frameTuple.getX());
       y.set(frameTuple.getY());
@@ -312,12 +312,12 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       set(x, y, z);
    }
 
-   public final void setAndMatchFrame(FrameTuple<?, ?> frameTuple)
+   public final void setAndMatchFrame(FrameTuple3D<?, ?> frameTuple)
    {
       setAndMatchFrame(frameTuple, true);
    }
 
-   public final void setAndMatchFrame(FrameTuple<?, ?> frameTuple, boolean notifyListeners)
+   public final void setAndMatchFrame(FrameTuple3D<?, ?> frameTuple, boolean notifyListeners)
    {
       this.frameTuple.setIncludingFrame(frameTuple);
       this.frameTuple.changeFrame(getReferenceFrame());
@@ -354,12 +354,12 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       setFromReferenceFrame(referenceFrame, true);
    }
 
-   public final void set(FrameTuple<?, ?> frameTuple)
+   public final void set(FrameTuple3D<?, ?> frameTuple)
    {
       set(frameTuple, true);
    }
 
-   public final void set(FrameTuple<?, ?> frameTuple, boolean notifyListeners)
+   public final void set(FrameTuple3D<?, ?> frameTuple, boolean notifyListeners)
    {
       this.frameTuple.setToZero(getReferenceFrame());
       this.frameTuple.set(frameTuple);
@@ -371,21 +371,42 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       set(yoFrameTuple.getFrameTuple());
    }
 
-   public final void setXY(Tuple2DReadOnly tuple2d)
+   public final void set(Tuple2DReadOnly tuple2d)
    {
       this.frameTuple.setToZero(getReferenceFrame());
-      this.frameTuple.setXY(tuple2d);
+      this.frameTuple.set(tuple2d);
       getYoValuesFromFrameTuple();
    }
 
-   public final void setXY(FrameTuple2d<?, ?> frameTuple2d)
+   public final void set(Tuple2DReadOnly tuple2d, double z)
    {
       this.frameTuple.setToZero(getReferenceFrame());
-      this.frameTuple.setXY(frameTuple2d);
+      this.frameTuple.set(tuple2d, z);
       getYoValuesFromFrameTuple();
    }
 
-   public final void setXY(YoFrameTuple2d<?, ?> yoFrameTuple2d)
+   public final void set(FrameTuple2D<?, ?> frameTuple2d)
+   {
+      this.frameTuple.setToZero(getReferenceFrame());
+      this.frameTuple.set(frameTuple2d);
+      getYoValuesFromFrameTuple();
+   }
+
+   public final void set(FrameTuple2D<?, ?> frameTuple2d, double z)
+   {
+      this.frameTuple.setToZero(getReferenceFrame());
+      this.frameTuple.set(frameTuple2d, z);
+      getYoValuesFromFrameTuple();
+   }
+
+   public final void set(YoFrameTuple2d<?, ?> yoFrameTuple2d)
+   {
+      this.frameTuple.setToZero(getReferenceFrame());
+      yoFrameTuple2d.getFrameTupleIncludingFrame(frameTuple);
+      getYoValuesFromFrameTuple();
+   }
+
+   public final void set(YoFrameTuple2d<?, ?> yoFrameTuple2d, double z)
    {
       this.frameTuple.setToZero(getReferenceFrame());
       yoFrameTuple2d.getFrameTupleIncludingFrame(frameTuple);
@@ -413,7 +434,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       getYoValuesFromFrameTuple();
    }
 
-   public final void add(FrameTuple<?, ?> frameTuple)
+   public final void add(FrameTuple3D<?, ?> frameTuple)
    {
       putYoValuesIntoFrameTuple();
       this.frameTuple.add(frameTuple);
@@ -434,7 +455,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       getYoValuesFromFrameTuple();
    }
 
-   public final void add(FrameTuple<?, ?> frameTuple1, FrameTuple<?, ?> frameTuple2)
+   public final void add(FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
    {
       frameTuple.setToZero(getReferenceFrame());
       frameTuple.add(frameTuple1, frameTuple2);
@@ -455,7 +476,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       getYoValuesFromFrameTuple();
    }
 
-   public final void sub(FrameTuple<?, ?> frameTuple)
+   public final void sub(FrameTuple3D<?, ?> frameTuple)
    {
       putYoValuesIntoFrameTuple();
       this.frameTuple.sub(frameTuple);
@@ -475,7 +496,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       getYoValuesFromFrameTuple();
    }
 
-   public final void sub(FrameTuple<?, ?> frameTuple1, FrameTuple<?, ?> frameTuple2)
+   public final void sub(FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
    {
       frameTuple.setToZero(getReferenceFrame());
       frameTuple.sub(frameTuple1, frameTuple2);
@@ -494,7 +515,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       getYoValuesFromFrameTuple();
    }
 
-   public final void scaleAdd(double scaleFactor, FrameTuple<?, ?> frameTuple)
+   public final void scaleAdd(double scaleFactor, FrameTuple3D<?, ?> frameTuple)
    {
       putYoValuesIntoFrameTuple();
       this.frameTuple.scaleAdd(scaleFactor, frameTuple);
@@ -515,7 +536,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
     * @param frameTuple2 FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void scaleAdd(double scaleFactor, FrameTuple<?, ?> frameTuple1, FrameTuple<?, ?> frameTuple2)
+   public final void scaleAdd(double scaleFactor, FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
    {
       frameTuple.setToZero(getReferenceFrame());
       frameTuple.scaleAdd(scaleFactor, frameTuple1, frameTuple2);
@@ -545,7 +566,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
     * @param frameTuple2 FrameTuple<?, ?>
     * @throws ReferenceFrameMismatchException
     */
-   public final void scaleSub(double scaleFactor, FrameTuple<?, ?> frameTuple1, FrameTuple<?, ?> frameTuple2)
+   public final void scaleSub(double scaleFactor, FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2)
    {
       frameTuple.setToZero(getReferenceFrame());
       frameTuple.scaleSub(scaleFactor, frameTuple1, frameTuple2);
@@ -567,36 +588,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
    }
 
    /**
-    * Sets the value of this yoFrameTuple to the scalar multiplication of yoFrameTuple1 minus yoFrameTuple2 (this = scaleFactor * ( yoFrameTuple1 - yoFrameTuple2 ) ).
-    *
-    * @param scaleFactor double
-    * @param frameTuple1 the first YoFrameTuple<?, ?>
-    * @param frameTuple2 the second YoFrameTuple<?, ?>
-    * @throws ReferenceFrameMismatchException
-    */
-   public final void subAndScale(double scaleFactor, FrameTuple<?, ?> frameTuple1, FrameTuple<?, ?> frameTuple2)
-   {
-      putYoValuesIntoFrameTuple();
-      frameTuple.subAndScale(scaleFactor, frameTuple1, frameTuple2);
-      getYoValuesFromFrameTuple();
-   }
-
-   /**
-    * Sets the value of this yoFrameTuple to the scalar multiplication of yoFrameTuple1 minus yoFrameTuple2 (this = scaleFactor * ( yoFrameTuple1 - yoFrameTuple2 ) ).
-    *
-    * @param scaleFactor double
-    * @param yoFrameTuple1 the first YoFrameTuple<?, ?>
-    * @param yoFrameTuple2 the second YoFrameTuple<?, ?>
-    * @throws ReferenceFrameMismatchException
-    */
-   public final void subAndScale(double scaleFactor, YoFrameTuple<?, ?> yoFrameTuple1, YoFrameTuple<?, ?> yoFrameTuple2)
-   {
-      putYoValuesIntoFrameTuple();
-      frameTuple.subAndScale(scaleFactor, yoFrameTuple1.getFrameTuple(), yoFrameTuple2.getFrameTuple());
-      getYoValuesFromFrameTuple();
-   }
-
-   /**
     * Negates the value of this YoFrameTuple in place.
     */
    public final void negate()
@@ -611,7 +602,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
     *  @param alpha  the alpha interpolation parameter
     * @throws ReferenceFrameMismatchException
     */
-   public final void interpolate(FrameTuple<?, ?> frameTuple1, FrameTuple<?, ?> frameTuple2, double alpha)
+   public final void interpolate(FrameTuple3D<?, ?> frameTuple1, FrameTuple3D<?, ?> frameTuple2, double alpha)
    {
       checkReferenceFrameMatch(frameTuple1);
       checkReferenceFrameMatch(frameTuple2);
@@ -640,22 +631,10 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       return this.frameTuple.epsilonEquals(frameTuple.getFrameTuple(), threshold);
    }
 
-   public final boolean epsilonEquals(FrameTuple<?, ?> frameTuple, double threshold)
+   public final boolean epsilonEquals(FrameTuple3D<?, ?> frameTuple, double threshold)
    {
       putYoValuesIntoFrameTuple();
       return this.frameTuple.epsilonEquals(frameTuple, threshold);
-   }
-
-   public final boolean epsilonEquals(FrameTuple2d<?, ?> frameTuple2d, double threshold)
-   {
-      putYoValuesIntoFrameTuple();
-      return this.frameTuple.epsilonEquals(frameTuple2d, threshold);
-   }
-
-   public final void checkForNaN()
-   {
-      putYoValuesIntoFrameTuple();
-      frameTuple.checkForNaN();
    }
 
    @Override
@@ -688,13 +667,6 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
    {
       putYoValuesIntoFrameTuple();
       frameTuple.applyTransform(transform);
-      getYoValuesFromFrameTuple();
-   }
-
-   public final void set(Direction direction, double value)
-   {
-      putYoValuesIntoFrameTuple();
-      frameTuple.set(direction, value);
       getYoValuesFromFrameTuple();
    }
 

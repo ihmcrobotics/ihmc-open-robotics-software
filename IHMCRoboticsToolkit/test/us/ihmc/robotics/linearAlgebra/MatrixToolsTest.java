@@ -21,10 +21,11 @@ import georegression.struct.se.Se3_F64;
 import georegression.transform.se.SePointOps_F64;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MatrixToolsTest
 {
@@ -254,7 +255,7 @@ public class MatrixToolsTest
       {
          int numRows = RandomNumbers.nextInt(random, 3, 100);
          DenseMatrix64F matrixToTest = RandomMatrices.createRandom(numRows, 1, 1.0, 100.0, random);
-         FramePoint framePointToInsert = FramePoint.generateRandomFramePoint(random, ReferenceFrame.getWorldFrame(), 100.0, 100.0, 100.0);
+         FramePoint3D framePointToInsert = EuclidFrameRandomTools.generateRandomFramePoint3D(random, ReferenceFrame.getWorldFrame(), 100.0, 100.0, 100.0);
          int startRowToInsertFrameTuple = RandomNumbers.nextInt(random, 0, numRows - 3);
          MatrixTools.insertFrameTupleIntoEJMLVector(framePointToInsert, matrixToTest, startRowToInsertFrameTuple);
 
@@ -273,7 +274,7 @@ public class MatrixToolsTest
       {
          int numRows = RandomNumbers.nextInt(random, 3, 100);
          DenseMatrix64F matrixToExtractFrom = RandomMatrices.createRandom(numRows, 1, 1.0, 100.0, random);
-         FramePoint framePointToTest = new FramePoint(null, -1.0, -1.0, -1.0);
+         FramePoint3D framePointToTest = new FramePoint3D(null, -1.0, -1.0, -1.0);
          int startRowToExtractFrameTuple = RandomNumbers.nextInt(random, 0, numRows - 3);
          MatrixTools.extractFrameTupleFromEJMLVector(framePointToTest, matrixToExtractFrom, ReferenceFrame.getWorldFrame(), startRowToExtractFrameTuple);
 

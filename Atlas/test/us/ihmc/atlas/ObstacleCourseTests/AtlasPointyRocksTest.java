@@ -8,22 +8,21 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.HumanoidPointyRocksTest;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
 {
-   private final DRCRobotModel robotModel = new TestModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
+   private final DRCRobotModel robotModel = new TestModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 45.9, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 230000)
    /** {@inheritDoc} */
@@ -32,6 +31,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
       super.testWalkingForwardWithHalfFootContactChangesStopBetweenSteps();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 74.3, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 370000)
    /** {@inheritDoc} */
@@ -40,6 +40,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
       super.testStandingWithGCPointsChangingOnTheFly();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 69.2, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 350000)
    /** {@inheritDoc} */
@@ -48,6 +49,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
       super.testWalkingForwardWithHalfFootContactChangesContinuousSteps();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 45.9, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 230000)
    /** {@inheritDoc} */
@@ -56,6 +58,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
       super.testWalkingForwardWithPartialFootholdsAndStopBetweenSteps();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 92.2, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 460000)
    /** {@inheritDoc} */
@@ -64,6 +67,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
       super.testTakingStepsWithActualAndPredictedFootPolygonsChanging();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 36.2, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 180000)
    /** {@inheritDoc} */
@@ -72,6 +76,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
       super.testSidePushDuringSwing();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 77.5, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 390000)
    /** {@inheritDoc} */
@@ -80,6 +85,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
       super.testStandingAndStepsInPlaceWithHalfFootContactsChanges();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 58.3, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 290000)
    /** {@inheritDoc} */
@@ -88,6 +94,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
       super.testWalkingWithLinePredictedSupportPolygonButFullActualPolygon();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 45.9, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 230000)
    /** {@inheritDoc} */
@@ -96,6 +103,7 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
       super.testHoldPositionByStandingOnOneLegAndGettingPushedSideways();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 45.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 300000)
    /** {@inheritDoc} */
@@ -144,21 +152,16 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
 
    private class TestWalkingParameters extends AtlasWalkingControllerParameters
    {
-      private ExplorationParameters explorationParameters = null;
-
       public TestWalkingParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
       {
          super(target, jointMap, contactPointParameters);
       }
 
       @Override
-      public ExplorationParameters getOrCreateExplorationParameters(YoVariableRegistry registry)
+      public boolean createFootholdExplorationTools()
       {
-         if (explorationParameters == null)
-            explorationParameters = new ExplorationParameters(registry);
-         return explorationParameters;
+         return true;
       }
-
    }
 
 }
