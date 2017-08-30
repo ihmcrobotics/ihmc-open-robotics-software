@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import us.ihmc.avatar.DRCSimulationOutputWriter;
+import us.ihmc.avatar.DRCSimulationOutputWriterForControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -122,7 +122,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       automatedDiagnosticAnalysisController.setRobotIsAlive(startWithRobotAlive);
       automatedDiagnosticConfiguration = new AutomatedDiagnosticConfiguration(diagnosticControllerToolbox, automatedDiagnosticAnalysisController);
 
-      outputWriter = new DRCSimulationOutputWriter(simulatedRobot);
+      outputWriter = new DRCSimulationOutputWriterForControllerThread(simulatedRobot);
       outputWriter.setFullRobotModel(fullRobotModel, null);
 
       int simulationTicksPerControlTick = (int) (robotModel.getEstimatorDT() / robotModel.getSimulateDT());

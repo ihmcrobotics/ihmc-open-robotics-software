@@ -141,7 +141,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
-      DRCSimulationOutputWriter outputWriter = new DRCSimulationOutputWriter(sdfRobot);
+      DRCSimulationOutputWriterForControllerThread outputWriter = new DRCSimulationOutputWriterForControllerThread(sdfRobot);
       HumanoidGlobalDataProducer globalDataProducer = new HumanoidGlobalDataProducer(controllerCommunicatorServer);
 
       AbstractThreadedRobotController robotController = createController(robotModel, controllerCommunicatorServer, globalDataProducer, outputWriter, sdfRobot);
@@ -239,7 +239,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
-      DRCSimulationOutputWriter outputWriter = new DRCSimulationOutputWriter(sdfRobot);
+      DRCSimulationOutputWriterForControllerThread outputWriter = new DRCSimulationOutputWriterForControllerThread(sdfRobot);
       HumanoidGlobalDataProducer globalDataProducer = new HumanoidGlobalDataProducer(packetCommunicatorServer);
 
       AbstractThreadedRobotController robotController = createController(robotModel, packetCommunicatorServer, globalDataProducer, outputWriter, sdfRobot);
@@ -299,7 +299,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
    }
 
    private AbstractThreadedRobotController createController(DRCRobotModel robotModel, PacketCommunicator packetCommunicator,
-         HumanoidGlobalDataProducer dataProducer, DRCSimulationOutputWriter outputWriter, FloatingRootJointRobot sdfRobot)
+         HumanoidGlobalDataProducer dataProducer, DRCSimulationOutputWriterForControllerThread outputWriter, FloatingRootJointRobot sdfRobot)
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
       double gravity = -9.7925;
