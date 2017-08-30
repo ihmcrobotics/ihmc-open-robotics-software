@@ -20,9 +20,8 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    private double qd;
    private double qdd;
    private double tauMeasured;
-   @Deprecated
    private double qddDesired;
-   @Deprecated
+   
    private double tau;
 
    private double effortLimitLower = Double.NEGATIVE_INFINITY;
@@ -45,9 +44,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    @Deprecated
    private boolean resetIntegrator = false;
 
-   @Deprecated
    private double qDesired;
-   @Deprecated
    private double qdDesired;
    @Deprecated
    private double kp;
@@ -226,25 +223,25 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.qdd = qdd;
    }
 
-   @Deprecated
+   
    public double getQddDesired()
    {
       return qddDesired;
    }
 
-   @Deprecated
+  
    public void setQddDesired(double qddDesired)
    {
       this.qddDesired = qddDesired;
    }
 
-   @Deprecated
+   
    public double getTau()
    {
       return tau;
    }
 
-   @Deprecated
+   
    public void setTau(double tau)
    {
       this.tau = tau;
@@ -429,13 +426,13 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       resetIntegrator = true;
    }
 
-   @Deprecated
+   
    public double getqDesired()
    {
       return qDesired;
    }
 
-   @Deprecated
+   
    public double getQdDesired()
    {
       return qdDesired;
