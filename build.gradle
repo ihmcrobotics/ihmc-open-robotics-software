@@ -1,54 +1,12 @@
-import us.ihmc.commons.exception.DefaultExceptionHandler
-import us.ihmc.commons.nio.FileTools
-
-import java.nio.file.Files
-
 buildscript {
    repositories {
-      maven { url = "https://repo.gradle.org/gradle/libs-releases-local" }
       maven { url "https://plugins.gradle.org/m2/" }
       mavenLocal()
       jcenter()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.6.4"
-      classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.6.5"
       classpath 'us.ihmc:ihmc-commons:0.11.2'
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
-
-task generateSettingsManually {
-   doLast {
-      project.projectDir.list().each { childDir ->
-         if (new File(project.projectDir, childDir + "/build.gradle").exists())
-         {
-            settings.writeSettingsFileToProject(new File(project.projectDir, childDir))
-         }
-      }
-   }
-}
-
-task deleteTests {
-   doLast {
-      project.projectDir.list().each { childDir ->
-         if (new File(project.projectDir, childDir + "/build.gradle").exists())
-         {
-            ihmc.deleteTestsFromProject(new File(project.projectDir, childDir), "test")
-            ihmc.deleteTestsFromProject(new File(project.projectDir, childDir), "visualizers")
-         }
-      }
-   }
-}
-
-task copyTests {
-   doLast {
-      project.projectDir.list().each { childDir ->
-         if (new File(project.projectDir, childDir + "/build.gradle").exists())
-         {
-            ihmc.copyTestsForProject(new File(project.projectDir, childDir), "test")
-            ihmc.copyTestsForProject(new File(project.projectDir, childDir), "visualizers")
-         }
-      }
-   }
-}
