@@ -1,7 +1,5 @@
 package us.ihmc.atlas.highLevelHumanoidControl.highLevelStates;
 
-import gnu.trove.list.TDoubleList;
-import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.ros.AtlasOrderedJointMap;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandPrepSetpoints;

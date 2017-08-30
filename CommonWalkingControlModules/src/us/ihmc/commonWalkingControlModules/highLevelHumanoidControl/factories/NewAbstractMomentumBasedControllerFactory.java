@@ -45,6 +45,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.robotics.sensors.*;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -365,12 +366,32 @@ public abstract class NewAbstractMomentumBasedControllerFactory extends Abstract
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the NewStandPrepControllerState ////////////////////////////////////////////////////////////
       NewStandPrepControllerState standPrepControllerState = createStandPrepControllerState(controllerToolbox, standPrepSetpoints);
+      highLevelControllerStates.add(standPrepControllerState);
+      ArrayList<StateTransition<NewHighLevelControllerStates>> standPrepTransitions = new ArrayList<>();
+      standPrepTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
+      standPrepTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, fallbackControllerState));
+      standPrepTransitions.add(StateMachineTools.buildFinishedStateTransition(standPrepControllerState, NewHighLevelControllerStates.STAND_READY_STATE));
+      highLevelControllerTransitions.put(standPrepControllerState, standPrepTransitions);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the StandReadyController ///////////////////////////////////////////////////////////
+      NewStandReadyControllerState standReadyControllerState = createStandReadyControllerState(controllerToolbox, standPrepSetpoints);
+      highLevelControllerStates.add(standReadyControllerState);
+      ArrayList<StateTransition<NewHighLevelControllerStates>> standReadyTransitions = new ArrayList<>();
+      standReadyTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
+      standReadyTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, fallbackControllerState));
+      standReadyTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.STAND_TRANSITION_STATE));
+      highLevelControllerTransitions.put(standReadyControllerState, standReadyTransitions);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
-      // Setup the WalkingTransitionController ////////////////////////////////////////////////////
+      // Setup the StandTransitionController //////////////////////////////////////////////////////
+      NewStandTransitionControllerState standTransitionControllerState = createStandTransitionControllerState(standReadyControllerState, walkingState, controllerToolbox);
+      highLevelControllerStates.add(standTransitionControllerState);
+      ArrayList<StateTransition<NewHighLevelControllerStates>> standTransitionTransitions = new ArrayList<>();
+      standTransitionTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
+      standTransitionTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, fallbackControllerState));
+      standTransitionTransitions.add(StateMachineTools.buildFinishedStateTransition(standTransitionControllerState, NewHighLevelControllerStates.WALKING_STATE));
+      highLevelControllerTransitions.put(standTransitionControllerState, standTransitionTransitions);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the FreezeController ///////////////////////////////////////////////////////////////
@@ -608,6 +629,12 @@ public abstract class NewAbstractMomentumBasedControllerFactory extends Abstract
    public abstract NewDoNothingControllerState createDoNothingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox);
 
    public abstract NewStandPrepControllerState createStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepSetpoints standPrepSetpoints);
+
+   public abstract NewStandReadyControllerState createStandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepSetpoints standPrepSetpoints);
+
+   public abstract NewStandTransitionControllerState createStandTransitionControllerState(NewStandReadyControllerState standReadyControllerState,
+                                                                                          NewWalkingControllerState walkingControllerState,
+                                                                                          HighLevelHumanoidControllerToolbox controllerToolbox);
 
    public abstract NewWalkingControllerState createWalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                                                           HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,

@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLeve
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
@@ -12,11 +11,15 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.HashMap;
 
 public class NewStandPrepControllerState extends NewHighLevelControllerState
 {
+   private static final double TIME_TO_SPLINE_TO_STAND_POSE = 4.0;
+   private static final double MINIMUM_TIME_DONE_WITH_STAND_PREP = 1.0;
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.OFF);
@@ -26,13 +29,22 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
    private final StandPrepSetpoints standPrepSetpoints;
 
-   private static final double TIME_TO_SPLINE_TO_STAND_POSE = 4.0;
+   private final YoDouble timeToPrepareForStanding = new YoDouble("timeToPrepareForStanding", registry);
+   private final YoDouble minimumTimeDoneWithStandPrep = new YoDouble("minimumTimeDoneWithStandPrep", registry);
 
    public NewStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepSetpoints standPrepSetpoints)
+   {
+      this(controllerToolbox, standPrepSetpoints, TIME_TO_SPLINE_TO_STAND_POSE, MINIMUM_TIME_DONE_WITH_STAND_PREP);
+   }
+
+   public NewStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepSetpoints standPrepSetpoints,
+                                      double timeToPrepareForStanding, double minimumTimeDoneWithStandPrep)
    {
       super(NewHighLevelControllerStates.STAND_PREP_STATE);
 
       this.standPrepSetpoints = standPrepSetpoints;
+      this.timeToPrepareForStanding.set(timeToPrepareForStanding);
+      this.minimumTimeDoneWithStandPrep.set(minimumTimeDoneWithStandPrep);
 
       controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
 
@@ -65,30 +77,26 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
          double currentAngle = joint.getQ();
          double currentVelocity = joint.getQd();
 
-         trajectory.setCubic(0.0, TIME_TO_SPLINE_TO_STAND_POSE, currentAngle, currentVelocity, desiredAngle, desiredVelocity);
+         trajectory.setCubic(0.0, timeToPrepareForStanding.getDoubleValue(), currentAngle, currentVelocity, desiredAngle, desiredVelocity);
       }
    }
 
    @Override
    public void doAction()
    {
-      double timeInTrajectory = MathTools.clamp(getTimeInCurrentState(), 0.0, TIME_TO_SPLINE_TO_STAND_POSE);
-      boolean doneWithTrajectory = timeInTrajectory >= TIME_TO_SPLINE_TO_STAND_POSE;
+      double timeInTrajectory = MathTools.clamp(getTimeInCurrentState(), 0.0, timeToPrepareForStanding.getDoubleValue());
 
-      if (!doneWithTrajectory)
+      for (int jointIndex = 0; jointIndex < controlledJoints.length; jointIndex++)
       {
-         for (int jointIndex = 0; jointIndex < controlledJoints.length; jointIndex++)
-         {
-            OneDoFJoint joint = controlledJoints[jointIndex];
-            YoPolynomial trajectory = trajectoriesStandPose.get(joint);
-            trajectory.compute(timeInTrajectory);
+         OneDoFJoint joint = controlledJoints[jointIndex];
+         YoPolynomial trajectory = trajectoriesStandPose.get(joint);
+         trajectory.compute(timeInTrajectory);
 
-            double qDesired = trajectory.getPosition();
-            double qdDesired = trajectory.getVelocity();
+         double qDesired = trajectory.getPosition();
+         double qdDesired = trajectory.getVelocity();
 
-            lowLevelOneDoFJointDesiredDataHolder.setDesiredJointPosition(joint, qDesired);
-            lowLevelOneDoFJointDesiredDataHolder.setDesiredJointVelocity(joint, qdDesired);
-         }
+         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointPosition(joint, qDesired);
+         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointVelocity(joint, qdDesired);
       }
 
       controllerCoreCommand.completeLowLevelJointData(lowLevelOneDoFJointDesiredDataHolder);
@@ -99,6 +107,12 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
    {
       // Do nothing
 
+   }
+
+   @Override
+   public boolean isDone()
+   {
+      return getTimeInCurrentState() > (timeToPrepareForStanding.getDoubleValue() + minimumTimeDoneWithStandPrep.getDoubleValue());
    }
 
    @Override
