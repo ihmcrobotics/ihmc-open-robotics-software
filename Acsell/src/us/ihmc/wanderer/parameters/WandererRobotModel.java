@@ -5,7 +5,7 @@ import java.io.InputStream;
 import com.jme3.math.Transform;
 
 import us.ihmc.acsell.network.AcsellSensorSuiteManager;
-import us.ihmc.avatar.DRCSimulationOutputWriter;
+import us.ihmc.avatar.DRCSimulationOutputWriterForControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
@@ -277,7 +277,7 @@ public class WandererRobotModel implements DRCRobotModel
    @Override
    public DRCOutputProcessor getCustomSimulationOutputProcessor(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
    {
-      return new DRCSimulationOutputWriter(humanoidFloatingRootJointRobot);
+      return new DRCSimulationOutputWriterForControllerThread(humanoidFloatingRootJointRobot);
    }
    
    @Override
