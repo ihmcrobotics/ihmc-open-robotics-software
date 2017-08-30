@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelStates;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 
 import java.util.Random;
 
@@ -14,20 +14,20 @@ import java.util.Random;
 public class NewHighLevelControllerStateMessage extends Packet<NewHighLevelControllerStateMessage>
 {
    @RosExportedField(documentation = "The enum value of the current high level state of the robot.")
-   public NewHighLevelStates highLevelState;
+   public NewHighLevelControllerStates highLevelState;
 
    public NewHighLevelControllerStateMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public NewHighLevelControllerStateMessage(NewHighLevelStates highLevelState)
+   public NewHighLevelControllerStateMessage(NewHighLevelControllerStates highLevelState)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.highLevelState = highLevelState;
    }
 
-   public NewHighLevelStates getHighLevelState()
+   public NewHighLevelControllerStates getHighLevelState()
    {
       return highLevelState;
    }
@@ -51,11 +51,11 @@ public class NewHighLevelControllerStateMessage extends Packet<NewHighLevelContr
    public NewHighLevelControllerStateMessage(Random random)
    {
       double value = random.nextInt(3);
-      NewHighLevelStates highLevelState = NewHighLevelStates.WALKING_STATE;
+      NewHighLevelControllerStates highLevelState = NewHighLevelControllerStates.WALKING_STATE;
       if (value == 1)
-         highLevelState = NewHighLevelStates.DO_NOTHING_STATE;
+         highLevelState = NewHighLevelControllerStates.DO_NOTHING_STATE;
       else if (value == 2)
-         highLevelState = NewHighLevelStates.DIAGNOSTICS;
+         highLevelState = NewHighLevelControllerStates.DIAGNOSTICS;
 
       this.highLevelState = highLevelState;
    }
