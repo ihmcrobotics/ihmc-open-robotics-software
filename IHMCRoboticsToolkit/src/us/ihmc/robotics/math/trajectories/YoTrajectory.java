@@ -210,16 +210,10 @@ public class YoTrajectory extends Trajectory
                                                         zdIntermediate1);
    }
    
-   public void setPentic(double t0, double tFinal, double z0, double zd0, double zdd0, double zFinal, double zdFinal, double zddFinal)
+   public void setQuinticWithZeroTerminalAcceleration(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
    {
       setTime(t0, tFinal);
-      polynomial.setPentic(t0, tFinal, z0, zd0, zdd0, zFinal, zdFinal, zddFinal);
-   }
-   
-   public void setPenticWithZeroTerminalAcceleration(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
-   {
-      setTime(t0, tFinal);
-      polynomial.setPenticWithZeroTerminalAcceleration(t0, tFinal, z0, zd0, zFinal, zdFinal);
+      polynomial.setQuinticWithZeroTerminalAcceleration(t0, tFinal, z0, zd0, zFinal, zdFinal);
    }
    
    public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,

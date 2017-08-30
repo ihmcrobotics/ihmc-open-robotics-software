@@ -619,7 +619,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    {
       upcomingCoPsInFootsteps.get(footstepIndex).getSupportFootLocation(tempFramePoint1);
       upcomingCoPsInFootsteps.get(footstepIndex + 1).getSwingFootLocation(tempFramePoint2);
-      swingFootTrajectory.setPenticWithZeroTerminalAcceleration(0.0, currentSwingSegmentDuration, tempFramePoint1, zeroVector, tempFramePoint2, zeroVector);
+      swingFootTrajectory.setQuinticWithZeroTerminalAcceleration(0.0, currentSwingSegmentDuration, tempFramePoint1, zeroVector, tempFramePoint2, zeroVector);
       updateSwingLiftTrajectory();
       trajMathTools.getDerivative(swingFootVelocity, swingFootTrajectory);
 
@@ -658,7 +658,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private void setCoMTrajectoryForSwing(int footstepIndex)
    {
       getCoMEstimationWaypoints(footstepIndex);
-      segmentCoMTrajectory.setPenticWithZeroTerminalAcceleration(-currentSecondTransferSegmentDuration,
+      segmentCoMTrajectory.setQuinticWithZeroTerminalAcceleration(-currentSecondTransferSegmentDuration,
                                                                  -currentSecondTransferSegmentDuration + currentFootstepTime, tempFramePoint1, tempFrameVector1,
                                                                  tempFramePoint2, tempFrameVector2);
       segmentCoMTrajectory.setTime(0.0, currentSwingSegmentDuration);
@@ -671,7 +671,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private void setCoMTrajectoryForFirstTransfer(int footstepIndex)
    {
       getCoMEstimationWaypoints(footstepIndex);
-      segmentCoMTrajectory.setPenticWithZeroTerminalAcceleration(-(currentSecondTransferSegmentDuration + currentSwingSegmentDuration),
+      segmentCoMTrajectory.setQuinticWithZeroTerminalAcceleration(-(currentSecondTransferSegmentDuration + currentSwingSegmentDuration),
                                                                  currentFirstTransferSegmentDuration, tempFramePoint1, tempFrameVector1, tempFramePoint2,
                                                                  tempFrameVector2);
       segmentCoMTrajectory.setTime(0.0, currentFirstTransferSegmentDuration);
@@ -684,7 +684,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private void setCoMTrajectoryForSecondTransfer(int footstepIndex, double startTime)
    {
       getCoMEstimationWaypoints(footstepIndex);
-      segmentCoMTrajectory.setPenticWithZeroTerminalAcceleration(startTime, startTime + currentFootstepTime, tempFramePoint1, tempFrameVector1, tempFramePoint2,
+      segmentCoMTrajectory.setQuinticWithZeroTerminalAcceleration(startTime, startTime + currentFootstepTime, tempFramePoint1, tempFrameVector1, tempFramePoint2,
                                                                  tempFrameVector2);
       segmentCoMTrajectory.setTime(startTime, startTime + currentSecondTransferSegmentDuration);
       trajMathTools.getDerivative(segmentCoMVelocity, segmentCoMTrajectory);

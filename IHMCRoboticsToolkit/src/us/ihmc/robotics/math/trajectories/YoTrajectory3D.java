@@ -638,19 +638,11 @@ public class YoTrajectory3D
 
    }
 
-   public void setPentic(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Vector3DReadOnly zdd0, Point3DReadOnly zFinal,
-                         Vector3DReadOnly zdFinal, Vector3DReadOnly zddFinal)
-   {
-      for (int index = 0; index < 3; index++)
-         getYoTrajectory(index).setPentic(t0, tFinal, z0.getElement(index), zd0.getElement(index), zdd0.getElement(index), zFinal.getElement(index),
-                                          zdFinal.getElement(index), zddFinal.getElement(index));
-   }
-
-   public void setPenticWithZeroTerminalAcceleration(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Point3DReadOnly zFinal,
+   public void setQuinticWithZeroTerminalAcceleration(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Point3DReadOnly zFinal,
                                                      Vector3DReadOnly zdFinal)
    {
       for (int index = 0; index < 3; index++)
-         getYoTrajectory(index).setPenticWithZeroTerminalAcceleration(t0, tFinal, z0.getElement(index), zd0.getElement(index), zFinal.getElement(index),
+         getYoTrajectory(index).setQuinticWithZeroTerminalAcceleration(t0, tFinal, z0.getElement(index), zd0.getElement(index), zFinal.getElement(index),
                                                                       zdFinal.getElement(index));
    }
 
