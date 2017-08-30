@@ -7,11 +7,7 @@ import java.util.ArrayList;
 
 import us.ihmc.simulationconstructionset.commands.AllCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandListener;
-import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
-import us.ihmc.simulationconstructionset.gui.GUIConfigurationSaveAndLoad;
-import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
-import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
-import us.ihmc.simulationconstructionset.gui.ViewportWindow;
+import us.ihmc.simulationconstructionset.gui.*;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandListener;
 
@@ -139,6 +135,36 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
          return standardSimulationGUI.getViewportWindow(windowName);
 
       return null;
+   }
+
+
+   @Override
+   public ParameterSliderWindow createNewParameterSliderWindow()
+   {
+      return createNewParameterSliderWindow(null);
+   }
+
+   @Override
+   public ParameterSliderWindow createNewParameterSliderWindow(String viewportName)
+   {
+      return createNewParameterSliderWindow(viewportName, 0, false);
+   }
+
+   @Override
+   public ParameterSliderWindow createNewParameterSliderWindow(String viewportName, int screenID, boolean maximizeWindow)
+   {
+      if (standardSimulationGUI != null)
+         return standardSimulationGUI.createNewParameterSliderWindow("", 1, false);
+      else
+         return null;
+
+   }
+
+   @Override
+   public ParameterSliderWindow getParameterSliderWindow(String windowName)
+   {
+      throw new RuntimeException("method not implemented");
+
    }
 
    @Override
@@ -497,5 +523,4 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
       viewportSelectorCommandListenersToRegister = null;
       toggleKeyPointModeCommandListenersToRegister = null;
    }
-
 }
