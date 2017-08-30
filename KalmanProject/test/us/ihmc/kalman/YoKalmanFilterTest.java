@@ -12,11 +12,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.listener.YoVariableRegistryChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer.RepeatDataBufferEntryException;
 
 public class YoKalmanFilterTest
 {
@@ -124,7 +123,7 @@ public class YoKalmanFilterTest
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
-   public void testRewindability() throws RepeatDataBufferEntryException
+   public void testRewindability()
    {
       int nTicks = 2;
       DenseMatrix64F[] Fs = new DenseMatrix64F[nTicks + 1];
@@ -540,26 +539,12 @@ public class YoKalmanFilterTest
 
       public void yoVariableWasRegistered(YoVariableRegistry registry, YoVariable registeredYoVariable)
       {
-         try
-         {
-            dataBuffer.addVariable(registeredYoVariable);
-         }
-         catch (RepeatDataBufferEntryException e)
-         {
-            e.printStackTrace();
-         }
+         dataBuffer.addVariable(registeredYoVariable);
       }
 
       public void yoVariableRegistryWasAdded(YoVariableRegistry addedYoVariableRegistry)
       {
-         try
-         {
-            dataBuffer.addVariables(addedYoVariableRegistry.getAllVariablesIncludingDescendants());
-         }
-         catch (RepeatDataBufferEntryException e)
-         {
-            e.printStackTrace();
-         }
+         dataBuffer.addVariables(addedYoVariableRegistry.getAllVariablesIncludingDescendants());
       }
 
       public void yoVariableRegistryWasCleared(YoVariableRegistry clearedYoVariableRegistry)

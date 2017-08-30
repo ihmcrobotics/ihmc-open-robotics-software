@@ -15,14 +15,14 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.input.keyboard.KeyListener;
+import us.ihmc.graphicsDescription.input.mouse.Mouse3DListener;
+import us.ihmc.graphicsDescription.input.mouse.MouseButton;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.tools.inputDevices.keyboard.Key;
-import us.ihmc.tools.inputDevices.keyboard.KeyListener;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.tools.inputDevices.mouse.MouseButton;
-import us.ihmc.tools.inputDevices.mouse.MouseListener;
-import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
+import us.ihmc.graphicsDescription.input.mouse.MouseListener;
 
 public class ClassicCameraController implements TrackingDollyCameraController, KeyListener, MouseListener, Mouse3DListener, SelectedListener
 {

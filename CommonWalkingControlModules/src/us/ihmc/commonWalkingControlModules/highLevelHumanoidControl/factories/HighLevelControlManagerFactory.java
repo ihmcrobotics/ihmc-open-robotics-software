@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModi
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -56,6 +57,10 @@ public class HighLevelControlManagerFactory
    private ICPAngularMomentumModifierParameters angularMomentumModifierParameters;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
+   private final Map<String, YoPIDGains> jointGainMap = new HashMap<>();
+   private final Map<String, YoPID3DGains> taskspaceOrientationGainMap = new HashMap<>();
+   private final Map<String, YoPID3DGains> taskspacePositionGainMap = new HashMap<>();
+
    public HighLevelControlManagerFactory(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
@@ -72,6 +77,10 @@ public class HighLevelControlManagerFactory
       this.walkingControllerParameters = walkingControllerParameters;
       momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       angularMomentumModifierParameters = walkingControllerParameters.getICPAngularMomentumModifierParameters();
+
+      ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, registry);
+      ParameterTools.extractGainMap("Orientation", walkingControllerParameters.getTaskspaceOrientationControlGains(), taskspaceOrientationGainMap, registry);
+      ParameterTools.extractGainMap("Position", walkingControllerParameters.getTaskspacePositionControlGains(), taskspacePositionGainMap, registry);
    }
 
    public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
@@ -137,9 +146,8 @@ public class HighLevelControlManagerFactory
          return null;
 
       // Gains
-      Map<String, YoPIDGains> jointspaceGains = walkingControllerParameters.getOrCreateJointSpaceControlGains(registry);
-      YoPID3DGains taskspaceOrientationGains = walkingControllerParameters.getOrCreateTaskspaceOrientationControlGains(registry).get(bodyName);
-      YoPID3DGains taskspacePositionGains = walkingControllerParameters.getOrCreateTaskspacePositionControlGains(registry).get(bodyName);
+      YoPID3DGains taskspaceOrientationGains = taskspaceOrientationGainMap.get(bodyName);
+      YoPID3DGains taskspacePositionGains = taskspacePositionGainMap.get(bodyName);
 
       // Weights
       TObjectDoubleHashMap<String> jointspaceWeights = momentumOptimizationSettings.getJointspaceWeights();
@@ -156,11 +164,11 @@ public class HighLevelControlManagerFactory
 
       ContactablePlaneBody contactableBody = controllerToolbox.getContactableBody(bodyToControl);
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      RigidBodyControlMode defaultControlModeForRigidBody = walkingControllerParameters.getDefaultControlModeForRigidBody(bodyName);
+      RigidBodyControlMode defaultControlModeForRigidBody = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, homePose, positionControlledJoints,
             integrationSettings, trajectoryFrames, controlFrame, baseFrame, contactableBody, yoTime, graphicsListRegistry, registry);
-      manager.setGains(jointspaceGains, taskspaceOrientationGains, taskspacePositionGains);
+      manager.setGains(jointGainMap, taskspaceOrientationGains, taskspacePositionGains);
       manager.setWeights(jointspaceWeights, taskspaceAngularWeight, taskspaceLinearWeight, userModeWeights);
       manager.setDefaultControlMode(defaultControlModeForRigidBody);
 
@@ -224,7 +232,7 @@ public class HighLevelControlManagerFactory
          return null;
 
       String pelvisName = controllerToolbox.getFullRobotModel().getPelvis().getName();
-      YoPID3DGains pelvisGains = walkingControllerParameters.getOrCreateTaskspaceOrientationControlGains(registry).get(pelvisName);
+      YoPID3DGains pelvisGains = taskspaceOrientationGainMap.get(pelvisName);
       PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
       LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
       Vector3D pelvisAngularWeight = momentumOptimizationSettings.getPelvisAngularWeight();
@@ -315,5 +323,4 @@ public class HighLevelControlManagerFactory
 
       return ret;
    }
-
 }
