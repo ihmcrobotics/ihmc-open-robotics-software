@@ -63,9 +63,9 @@ public class FootCoPOccupancyGrid
    private final YoDouble decayRate;
    private final YoBoolean resetGridToEmpty;
 
-   public FootCoPOccupancyGrid(String namePrefix, ReferenceFrame soleFrame, int nLengthSubdivisions,
-         int nWidthSubdivisions, WalkingControllerParameters walkingControllerParameters,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public FootCoPOccupancyGrid(String namePrefix, ReferenceFrame soleFrame, int nLengthSubdivisions, int nWidthSubdivisions,
+                               WalkingControllerParameters walkingControllerParameters, ExplorationParameters explorationParameters,
+                               YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
       this.footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
@@ -87,7 +87,6 @@ public class FootCoPOccupancyGrid
       this.nWidthSubdivisions = new YoInteger(namePrefix + "NWidthSubdivisions", registry);
       this.nWidthSubdivisions.set(nWidthSubdivisions);
 
-      ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
       if (explorationParameters != null)
       {
          thresholdForCellActivation = explorationParameters.getCopGridThresholdForOccupancy();

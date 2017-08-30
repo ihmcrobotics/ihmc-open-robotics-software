@@ -12,6 +12,7 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
 
+import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.yoVariables.registry.NameSpace;
@@ -19,8 +20,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableList;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer.RepeatDataBufferEntryException;
-import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 
 public class DataFileReader
 {
@@ -397,23 +396,16 @@ public class DataFileReader
 
       if (newEntry == null)
       {
-         try
+         if (nPoints != -1)
          {
-            if (nPoints != -1)
-            {
-               newEntry = dataBuffer.addVariable(newVariable, nPoints);
-            }
-            else
-            {
-               newEntry = dataBuffer.addVariable(newVariable, dataBuffer.getBufferSize());
-            }
+            newEntry = dataBuffer.addVariable(newVariable, nPoints);
+         }
+         else
+         {
+            newEntry = dataBuffer.addVariable(newVariable, dataBuffer.getBufferSize());
+         }
 
 //            newEntry = dataBuffer.getEntry(varName);
-         }
-         catch (RepeatDataBufferEntryException ex)
-         {
-            throw new IOException("Repeat Variable in file: " + newVariable.getName());
-         }
       }
 
       return newEntry;

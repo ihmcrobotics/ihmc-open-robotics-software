@@ -58,7 +58,6 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
-	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
     testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
 
@@ -72,6 +71,7 @@ dependencies {
     compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
     
 	compile ihmc.getProjectDependency(":IHMCJavaExtensions")
+	compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
     compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
 }
 

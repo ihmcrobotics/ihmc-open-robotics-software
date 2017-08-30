@@ -9,6 +9,9 @@ import com.jme3.math.Vector3f;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.input.keyboard.KeyListener;
+import us.ihmc.graphicsDescription.input.mouse.Mouse3DListener;
+import us.ihmc.graphicsDescription.input.mouse.MouseListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.ContextManager;
 import us.ihmc.jMonkeyEngineToolkit.GPULidarListener;
@@ -19,9 +22,6 @@ import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer.RenderType;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.JMEGPULidar;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.tools.inputDevices.keyboard.KeyListener;
-import us.ihmc.tools.inputDevices.mouse.MouseListener;
-import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
 
 /*
 * Pass-through class to avoid having to import JME on all projects

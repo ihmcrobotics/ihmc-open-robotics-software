@@ -18,6 +18,13 @@ import com.jme3.scene.Node;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.graphicsDescription.input.keyboard.KeyListenerHolder;
+import us.ihmc.graphicsDescription.input.keyboard.ModifierKeyHolder;
+import us.ihmc.graphicsDescription.input.mouse.Mouse3DInterface;
+import us.ihmc.graphicsDescription.input.mouse.Mouse3DListener;
+import us.ihmc.graphicsDescription.input.mouse.Mouse3DListenerHolder;
+import us.ihmc.graphicsDescription.input.mouse.MouseButton;
+import us.ihmc.graphicsDescription.input.mouse.MouseListenerHolder;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.input.SelectedListenerHolder;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMECamera;
@@ -26,13 +33,6 @@ import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.tools.inputDevices.keyboard.Key;
-import us.ihmc.tools.inputDevices.keyboard.KeyListenerHolder;
-import us.ihmc.tools.inputDevices.keyboard.ModifierKeyHolder;
-import us.ihmc.tools.inputDevices.mouse.MouseButton;
-import us.ihmc.tools.inputDevices.mouse.MouseListenerHolder;
-import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DJoystick;
-import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
-import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListenerHolder;
 
 public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DListener
 {
@@ -42,7 +42,7 @@ public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DL
    private final KeyListenerHolder keyListenerHolder;
    private final MouseListenerHolder mouseListenerHolder;
    private final Mouse3DListenerHolder mouse3DListenerHolder;
-   private final Mouse3DJoystick mouse3DJoystick;
+   private final Mouse3DInterface mouse3DJoystick;
    private final BiMap<JMEGraphics3DNode, Graphics3DNode> jmeGraphicsNodes;
    private final Node rootNode;
    private final JMECamera jmeCamera;
@@ -237,7 +237,10 @@ public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DL
       inputManager.addListener(this, new String[] { "MouseLeft", "MouseRight", "MouseUp", "MouseDown" });
       inputManager.addListener(this, new String[] { "LeftMouseClick", "MiddleMouseClick", "RightMouseClick" });
 
-      mouse3DJoystick.addMouse3DListener(this);
+      if(mouse3DJoystick != null)
+      {
+         mouse3DJoystick.addMouse3DListener(this);
+      }
    }
 
    public void reset()
