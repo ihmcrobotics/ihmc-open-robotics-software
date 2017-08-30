@@ -1,13 +1,20 @@
-rootProject.name = hyphenatedName
-
-println 'Evaluating ' + pascalCasedName + ' settings.gradle'
-
-if (startParameter.searchUpwards && includeBuildsFromWorkspace == "true")
-{
-   settingsDir.list().each { childDir ->
-      if (new File(settingsDir, childDir + "/build.gradle").exists())
-      {
-         includeBuild childDir
-      }
+buildscript {
+   repositories {
+      maven { url "https://plugins.gradle.org/m2/" }
+      mavenLocal()
    }
+   dependencies {
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.6.5"
+   }
+}
+
+import us.ihmc.build.IHMCSettingsConfigurator
+
+def ihmcSettingsConfigurator = new IHMCSettingsConfigurator(settings, logger, ext)
+ihmcSettingsConfigurator.configureProjectName(hyphenatedName) // rootProject.name = hyphenatedName
+ihmcSettingsConfigurator.configureAsGroupOfProjects() // isProjectGroup = true
+
+if (Boolean.valueOf(includeBuildsFromWorkspace))
+{
+   ihmcSettingsConfigurator.includeAllChildProjects() // Include all children with build.gradles
 }
