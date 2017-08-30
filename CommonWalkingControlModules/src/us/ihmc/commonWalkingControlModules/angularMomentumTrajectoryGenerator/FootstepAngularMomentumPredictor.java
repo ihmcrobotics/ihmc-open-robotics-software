@@ -432,14 +432,15 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       {
          // Set all segments of one transfer angular momentum trajectories to zero as this is only a transfer trajectory 
          double segmentStartTime = 0.0;
-         upcomingCoPsInFootsteps.get(footstepIndex).get(0).getPosition(tempFramePoint1);
+         //upcomingCoPsInFootsteps.get(footstepIndex).get(0).getPosition(tempFramePoint1);
+         tempFramePoint1.setToZero();
          for (int i = 0; i < upcomingCoPsInFootsteps.get(footstepIndex + 1).getCoPPointList().size(); i++)
          {
             upcomingCoPsInFootsteps.get(footstepIndex + 1).get(i).getPosition(tempFramePoint2);
             transferAngularMomentumTrajectories.get(footstepIndex).set(segmentStartTime,
                                                                        segmentStartTime + upcomingCoPsInFootsteps.get(footstepIndex + 1).get(i).getTime(),
-                                                                       tempFramePoint1, tempFramePoint2);
-            tempFramePoint1.setIncludingFrame(tempFramePoint2);
+                                                                       tempFramePoint1, tempFramePoint1);
+            //tempFramePoint1.setIncludingFrame(tempFramePoint2);
             segmentStartTime += upcomingCoPsInFootsteps.get(footstepIndex + 1).get(i).getTime();
          }
          return;
