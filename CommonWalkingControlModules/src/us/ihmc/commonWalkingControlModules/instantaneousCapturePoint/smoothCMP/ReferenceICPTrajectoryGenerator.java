@@ -184,8 +184,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          cmpTrajectories.add(transferCMPTrajectory.getSegment(cmpSegment));
          totalNumberOfCMPSegments.increment();
       }
-
-      
       numberOfSegmentsTransfer0 = transferCMPTrajectories.get(0).getNumberOfSegments();
       
       initialize();
@@ -491,6 +489,16 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    public List<FramePoint3D> getICPPositionDesiredFinalList()
    {
       return icpDesiredFinalPositions;
+   }
+   
+   public List<FramePoint3D> getICPPositionFromCoPDesiredInitialList()
+   {
+      return icpDesiredInitialPositionsFromCoPs;
+   }
+   
+   public List<FramePoint3D> getICPPositonFromCoPDesiredFinalList()
+   {
+      return icpDesiredFinalPositionsFromCoPs;
    }
 
    public List<FramePoint3D> getCMPPositionDesiredList()
