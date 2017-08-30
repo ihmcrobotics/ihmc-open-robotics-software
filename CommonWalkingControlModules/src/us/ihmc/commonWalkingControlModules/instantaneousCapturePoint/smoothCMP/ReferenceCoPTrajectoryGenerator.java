@@ -487,7 +487,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       // Put first CoP at the exitCoP of the swing foot if not starting from rest 
       else if (numberOfUpcomingFootsteps.getIntegerValue() == 0)
       {
-         transferToSide = transferToSide.getOppositeSide();
+         //transferToSide = transferToSide.getOppositeSide();
          clearHeldPosition();
          isDoneWalking.set(true);
          initializeFootPolygons(transferToSide.getOppositeSide());
