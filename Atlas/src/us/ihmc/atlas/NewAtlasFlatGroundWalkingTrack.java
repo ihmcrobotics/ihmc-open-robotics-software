@@ -1,27 +1,42 @@
 package us.ihmc.atlas;
 
 import com.martiansoftware.jsap.JSAPException;
-import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
+import us.ihmc.atlas.highLevelHumanoidControl.NewAtlasMomentumControllerFactory;
 import us.ihmc.avatar.NewDRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.AbstractMomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationToolkit.controllers.OscillateFeetPerturber;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 
-public class NewAtlasFlatGroundWalkingTrack
+public class NewAtlasFlatGroundWalkingTrack extends NewDRCFlatGroundWalkingTrack
 {
    private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
    private static final boolean USE_BUMPY_GROUND = false;
    private static final boolean USE_FEET_PERTURBER = false;
+
+   public NewAtlasFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
+                                       boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
+   {
+      super(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model,
+           WalkingProvider.VELOCITY_HEADING_COMPONENT, new HeadingAndVelocityEvaluationScriptParameters()); // should always be committed as VELOCITY_HEADING_COMPONENT
+   }
 
    public static void main(String[] args) throws JSAPException
    {
@@ -58,11 +73,25 @@ public class NewAtlasFlatGroundWalkingTrack
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
-      NewDRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new NewDRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
+      NewAtlasFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new NewAtlasFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
                                                                                                 useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model);
 
       if (USE_FEET_PERTURBER)
          createOscillateFeetPerturber(drcFlatGroundWalkingTrack);
+   }
+
+   @Override
+   public AbstractMomentumBasedControllerFactory getControllerFactory(ContactableBodiesFactory contactableBodiesFactory,
+                                                                      SideDependentList<String> footForceSensorNames,
+                                                                      SideDependentList<String> footContactSensorNames,
+                                                                      SideDependentList<String> wristSensorNames,
+                                                                      WalkingControllerParameters walkingControllerParameters,
+                                                                      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters,
+                                                                      NewHighLevelControllerStates initialControllerState,
+                                                                      NewHighLevelControllerStates fallbackControllerState)
+   {
+      return new NewAtlasMomentumControllerFactory(contactableBodiesFactory, footForceSensorNames, footContactSensorNames, wristSensorNames,
+                                                   walkingControllerParameters, capturePointPlannerParameters, initialControllerState, fallbackControllerState);
    }
 
    private static void createOscillateFeetPerturber(NewDRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack)
