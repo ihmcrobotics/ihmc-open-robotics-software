@@ -25,28 +25,25 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.AtlasKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.RobotKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -378,12 +375,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
        * solver.
        */
       WheneverWholeBodyKinematicsSolver kinematicsSolver = new WheneverWholeBodyKinematicsSolver(getRobotModel());
-
-      OneDoFJoint[] initialOneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel);
-      Vector3D initialTranslationOfRootJoint = new Vector3D(sdfFullRobotModel.getRootJoint().getTranslationForReading());
-      Quaternion initialRotationOfRootJoint = new Quaternion(sdfFullRobotModel.getRootJoint().getRotationForReading());
-
-      kinematicsSolver.updateRobotConfigurationData(initialOneDoFJoints, initialTranslationOfRootJoint, initialRotationOfRootJoint);
+      kinematicsSolver.updateRobotConfigurationData(new RobotKinematicsConfiguration(sdfFullRobotModel));
 
       kinematicsSolver.initialize();
       kinematicsSolver.holdCurrentTrajectoryMessages();
@@ -505,13 +497,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
       referenceFrames.updateFrames();
 
-      AtlasKinematicsConfiguration configuration = new AtlasKinematicsConfiguration();
-
-      configuration.putJointConfiguration(sdfFullRobotModel.getOneDoFJoints());
-      configuration.putRootTranslation(sdfFullRobotModel.getRootJoint().getTranslationForReading());
-      configuration.putRootOrientation(sdfFullRobotModel.getRootJoint().getRotationForReading());
-
-      configuration.print();
+      RobotKinematicsConfiguration configuration = new RobotKinematicsConfiguration(sdfFullRobotModel);
 
       System.out.println("End");
    }

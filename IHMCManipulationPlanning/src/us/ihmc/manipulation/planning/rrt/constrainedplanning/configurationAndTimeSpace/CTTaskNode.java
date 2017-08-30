@@ -3,7 +3,7 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.AtlasKinematicsConfiguration;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.RobotKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.NodeData;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -18,7 +18,7 @@ public class CTTaskNode
 
    protected boolean validity = true;
 
-   protected AtlasKinematicsConfiguration configuration;
+   protected RobotKinematicsConfiguration configuration;
 
    public CTTaskNode(CTTaskNode node)
    {
@@ -32,7 +32,7 @@ public class CTTaskNode
       this.childNodes = new ArrayList<CTTaskNode>();
       this.normalizedNodeData = new NodeData(rootData.length);
 
-      this.configuration = new AtlasKinematicsConfiguration();
+      this.configuration = new RobotKinematicsConfiguration();
    }
 
    public CTTaskNode(int dimensionOfData)
@@ -41,7 +41,7 @@ public class CTTaskNode
       this.childNodes = new ArrayList<CTTaskNode>();
       this.normalizedNodeData = new NodeData(dimensionOfData);
 
-      this.configuration = new AtlasKinematicsConfiguration();
+      this.configuration = new RobotKinematicsConfiguration();
    }
 
    public final int getDimensionOfNodeData()
@@ -205,10 +205,10 @@ public class CTTaskNode
 
    public final void setConfigurationJoints(FullHumanoidRobotModel robot)
    {
-      this.configuration.putAtlasConfigurationData(robot);
+      this.configuration.setRobotConfigurationData(robot);
    }
 
-   public AtlasKinematicsConfiguration getConfiguration()
+   public RobotKinematicsConfiguration getConfiguration()
    {
       return configuration;
    }

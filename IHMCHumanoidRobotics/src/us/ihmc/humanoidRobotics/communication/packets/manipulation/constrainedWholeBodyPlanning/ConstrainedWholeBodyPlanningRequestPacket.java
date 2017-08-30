@@ -2,7 +2,6 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedW
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 
 public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<ConstrainedWholeBodyPlanningRequestPacket>
 {
@@ -10,7 +9,7 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
 
    public int numberOfFindInitialGuess;
 
-   public AtlasKinematicsConfiguration initialConfiguration;
+   public RobotKinematicsConfiguration initialConfiguration;
 
    /*
     * ConstrainedEndEffectorTrajectory cannot be imported in
@@ -25,11 +24,7 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
 
    public void setInitialRobotConfigration(FullHumanoidRobotModel fullRobotModel)
    {
-      initialConfiguration = new AtlasKinematicsConfiguration();
-
-      initialConfiguration.putJointConfiguration(FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
-      initialConfiguration.putRootTranslation(fullRobotModel.getRootJoint().getTranslationForReading());
-      initialConfiguration.putRootOrientation(fullRobotModel.getRootJoint().getRotationForReading());
+      initialConfiguration = new RobotKinematicsConfiguration(fullRobotModel);
    }
 
    public void setNumberOfExpanding(int value)
