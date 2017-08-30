@@ -47,7 +47,7 @@ public class ValkyrieDataFileNamespaceRenamer
       @Override
       public void actionPerformed(ActionEvent e)
       {
-         rootRegistry.recursivelyChangeNamespaces(nameSpaceRenamer);
+         rootRegistry.recursivelyChangeNameSpaces(nameSpaceRenamer);
       }
    }
    

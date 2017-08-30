@@ -9,8 +9,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.simulationConstructionSetTools.util.visualizers.RobotFreezeFramer;
 import us.ihmc.simulationconstructionset.DynamicIntegrationMethod;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -22,7 +22,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparer;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
-import us.ihmc.simulationConstructionSetTools.util.visualizers.RobotFreezeFramer;
 
 public class SpringFlamingoSimulation
 {
@@ -96,7 +95,6 @@ public class SpringFlamingoSimulation
             gravity = -(baseGravity - (((double) i) / ((double) (numberOfFlamingos - 1))) * (baseGravity - minGravity));
 
 
-         YoVariableRegistry registry = springFlamingo.getRobotsYoVariableRegistry(); //TODO
 
          // System.out.println(springFlamingo);
          RobotController controller = null;
@@ -282,6 +280,8 @@ public class SpringFlamingoSimulation
          robotFreezeFramer.setNextFreezeTime(0.6);
          springFlamingos[0].setController(robotFreezeFramer);
       }
+      
+      sim.setParameterRootPath(sim.getRootRegistry());
 
       Thread myThread = new Thread(sim);
       myThread.start();

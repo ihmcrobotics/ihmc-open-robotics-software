@@ -68,8 +68,8 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    private final double gravity;
    private final RigidBody pelvis;
 
-   public CenterOfMassHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
-         YoVariableRegistry parentRegistry)
+   public CenterOfMassHeightControlState(YoPDGains comHeightGains, HighLevelHumanoidControllerToolbox controllerToolbox,
+                                         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       super(PelvisHeightControlMode.WALKING_CONTROLLER);
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -85,11 +85,10 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
       // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
       controlPelvisHeightInsteadOfCoMHeight.set(true);
 
-      YoPDGains comHeightControlGains = walkingControllerParameters.createCoMHeightControlGains(registry);
-      YoDouble kpCoMHeight = comHeightControlGains.getYoKp();
-      YoDouble kdCoMHeight = comHeightControlGains.getYoKd();
-      YoDouble maxCoMHeightAcceleration = comHeightControlGains.getYoMaximumFeedback();
-      YoDouble maxCoMHeightJerk = comHeightControlGains.getYoMaximumFeedbackRate();
+      YoDouble kpCoMHeight = comHeightGains.getYoKp();
+      YoDouble kdCoMHeight = comHeightGains.getYoKd();
+      YoDouble maxCoMHeightAcceleration = comHeightGains.getYoMaximumFeedback();
+      YoDouble maxCoMHeightJerk = comHeightGains.getYoMaximumFeedbackRate();
 
       double controlDT = controllerToolbox.getControlDT();
       // TODO Need to extract the maximum velocity parameter.
@@ -195,7 +194,7 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    private final FramePoint3D pelvisPosition = new FramePoint3D();
    private final FramePoint2D comPositionAsFramePoint2d = new FramePoint2D();
    private final Twist currentPelvisTwist = new Twist();
-   
+
    private boolean desiredCMPcontainedNaN = false;
 
    @Override
