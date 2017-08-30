@@ -77,7 +77,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator = new ReferenceCoPTrajectoryGenerator(namePrefix, numberOfPointsPerFoot, maxNumberOfFootstepsToConsider, bipedSupportPolygons,
                                                                   contactableFeet, numberFootstepsToConsider, swingDurations, transferDurations,
                                                                   swingDurationAlphas, swingDurationShiftFractions, transferDurationAlphas, registry);
-
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, numberFootstepsToConsider, swingDurations,
                                                                   transferDurations, swingDurationAlphas, transferDurationAlphas, registry);
 
@@ -288,9 +287,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoMGenerator.initializeForTransfer(ZERO_TIME, referenceCMPGenerator.getTransferCMPTrajectories(),
                                                   referenceCMPGenerator.getSwingCMPTrajectories(), referenceICPGenerator.getICPPositionDesiredInitialList(),
                                                   referenceICPGenerator.getICPPositionDesiredFinalList());
-
-      // TODO implement requested hold position
-      // TODO implement is done walking
    }
 
    @Override
