@@ -2,11 +2,11 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.NewHighLevelControllerStateMessage;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelStates;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 
 public class NewHighLevelStateCommand implements Command<NewHighLevelStateCommand, NewHighLevelControllerStateMessage>
 {
-   private NewHighLevelStates highLevelState;
+   private NewHighLevelControllerStates highLevelState;
 
    @Override
    public void clear()
@@ -26,12 +26,12 @@ public class NewHighLevelStateCommand implements Command<NewHighLevelStateComman
       highLevelState = message.getHighLevelState();
    }
 
-   public void setHighLevelState(NewHighLevelStates highLevelState)
+   public void setHighLevelState(NewHighLevelControllerStates highLevelState)
    {
       this.highLevelState = highLevelState;
    }
 
-   public NewHighLevelStates getHighLevelState()
+   public NewHighLevelControllerStates getHighLevelState()
    {
       return highLevelState;
    }

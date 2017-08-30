@@ -10,12 +10,10 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.NewMomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.graphicsDescription.HeightMap;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelStates;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -59,7 +57,7 @@ public class NewDRCFlatGroundWalkingTrack
       NewMomentumBasedControllerFactory controllerFactory = new NewMomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
                                                                                                   feetContactSensorNames, wristForceSensorNames,
                                                                                                   walkingControllerParameters, capturePointPlannerParameters,
-                                                                                                  NewHighLevelStates.WALKING_STATE);
+                                                                                                  NewHighLevelControllerStates.WALKING_STATE, NewHighLevelControllerStates.DO_NOTHING_STATE);
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
 
 

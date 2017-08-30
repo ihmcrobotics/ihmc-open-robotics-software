@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootste
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.NewHighLevelHumanoidControllerManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.NewHumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewDoNothingControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewHighLevelControllerState;
@@ -36,7 +36,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelStates;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -47,6 +47,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.robotics.sensors.*;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
@@ -54,9 +56,11 @@ import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -73,17 +77,21 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    private boolean createUserDesiredControllerCommandGenerator = true;
 
    private ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
+   private final YoEnum<NewHighLevelControllerStates> requestedHighLevelControllerState = new YoEnum<NewHighLevelControllerStates>("requestedHighLevelControllerState", registry,
+                                                                                                                                   NewHighLevelControllerStates.class, true);
 
    private final WalkingControllerParameters walkingControllerParameters;
    private final ICPTrajectoryPlannerParameters capturePointPlannerParameters;
 
-   private final NewHighLevelStates initialControllerState;
+   private final NewHighLevelControllerStates initialControllerState;
+   private final NewHighLevelControllerStates fallbackControllerState;
 
    private HighLevelHumanoidControllerToolbox controllerToolbox = null;
 
    private boolean isListeningToHighLevelStatePackets = true;
-   private NewHighLevelHumanoidControllerManager highLevelControllerStateMachine = null;
+   private NewHumanoidHighLevelControllerManager highLevelControllerStateMachine = null;
    private final ArrayList<NewHighLevelControllerState> highLevelControllerStates = new ArrayList<>();
+   private final HashMap<NewHighLevelControllerState, ArrayList<StateTransition<NewHighLevelControllerStates>>> highLevelControllerTransitions = new HashMap<>();
 
    private final HighLevelControlManagerFactory managerFactory;
 
@@ -112,13 +120,14 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    public NewMomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
                                             SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
                                             WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters,
-                                            NewHighLevelStates initialControllerState)
+                                            NewHighLevelControllerStates initialControllerState, NewHighLevelControllerStates fallbackControllerState)
    {
       this.footSensorNames = footForceSensorNames;
       this.footContactSensorNames = footContactSensorNames;
       this.wristSensorNames = wristSensorNames;
       this.contactableBodiesFactory = contactableBodiesFactory;
       this.initialControllerState = initialControllerState;
+      this.fallbackControllerState = fallbackControllerState;
 
       this.walkingControllerParameters = walkingControllerParameters;
       this.capturePointPlannerParameters = capturePointPlannerParameters;
@@ -146,7 +155,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    
    /**
     * Specifies whether the inverse kinematics module of the {@link WholeBodyControllerCore} should be created or not.
-    * <p>
+    * <p>            requestedState.set(null);
     * This module is not created by default to prevent creating unused {@link YoVariable}s.
     * </p>
     * 
@@ -192,8 +201,6 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerNetworkSubscriber);
    }
 
-   private ComponentBasedFootstepDataMessageGenerator footstepGenerator;
-
    public void createComponentBasedFootstepDataMessageGenerator()
    {
       createComponentBasedFootstepDataMessageGenerator(false, null);
@@ -206,9 +213,6 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
 
    public void createComponentBasedFootstepDataMessageGenerator(boolean useHeadingAndVelocityScript, HeightMap heightMapForFootstepZ)
    {
-      if (footstepGenerator != null)
-         return;
-
       if (controllerToolbox != null)
       {
          SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
@@ -337,17 +341,45 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       commandInputManager.registerConversionHelper(commandConversionHelper);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
-      // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
-      walkingState = new NewWalkingControllerState(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
-                                                      capturePointPlannerParameters, controllerToolbox);
-      highLevelControllerStates.add(walkingState);
-
-      /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the DoNothingController ////////////////////////////////////////////////////////////
       // Useful as a transition state on the real robot
       NewDoNothingControllerState doNothingState = new NewDoNothingControllerState(controllerToolbox);
       highLevelControllerStates.add(doNothingState);
+      ArrayList<StateTransition<NewHighLevelControllerStates>> doNothingTransitions = new ArrayList<>();
+      doNothingTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.STAND_PREP_STATE));
+      doNothingTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.CALIBRATION));
+      highLevelControllerTransitions.put(doNothingState, doNothingTransitions);
 
+      /** FIXME create the controller core in here instead **/
+      /////////////////////////////////////////////////////////////////////////////////////////////
+      // Setup the WalkingController //////////////////////////////////////////////////////////////
+      walkingState = new NewWalkingControllerState(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
+                                                   capturePointPlannerParameters, controllerToolbox);
+      highLevelControllerStates.add(walkingState);
+      ArrayList<StateTransition<NewHighLevelControllerStates>> walkingTransitions = new ArrayList<>();
+      walkingTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
+      walkingTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, fallbackControllerState));
+      highLevelControllerTransitions.put(walkingState, walkingTransitions);
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
+      // Setup the StandPrepController ////////////////////////////////////////////////////////////
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
+      // Setup the StandReadyController ///////////////////////////////////////////////////////////
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
+      // Setup the WalkingTransitionController ////////////////////////////////////////////////////
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
+      // Setup the FreezeController ///////////////////////////////////////////////////////////////
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
+      // Setup the CalibrationController //////////////////////////////////////////////////////////
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
+      // Setup the DiagnosticsController //////////////////////////////////////////////////////////
+
+      /** FIXME should this be done here? **/
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WholeBodyInverseDynamicsControlCore ////////////////////////////////////////////
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
@@ -374,10 +406,10 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       // Setup the HighLevelHumanoidControllerManager /////////////////////////////////////////////
       // This is the "highest level" controller that enables switching between
       // the different controllers (walking, multi-contact, driving, etc.)
-      highLevelControllerStateMachine = new NewHighLevelHumanoidControllerManager(commandInputManager, statusOutputManager, controllerCore, initialControllerState,
-                                                                                     highLevelControllerStates, controllerToolbox, centerOfPressureDataHolderForEstimator,
-                                                                                     controllerCoreOutput);
-      highLevelControllerStateMachine.setFallbackControllerForFailure(NewHighLevelStates.DO_NOTHING_STATE);
+      highLevelControllerStateMachine = new NewHumanoidHighLevelControllerManager(commandInputManager, statusOutputManager, controllerCore, initialControllerState,
+                                                                                  requestedHighLevelControllerState, highLevelControllerStates,
+                                                                                  highLevelControllerTransitions, controllerToolbox,
+                                                                                  centerOfPressureDataHolderForEstimator, controllerCoreOutput);
       highLevelControllerStateMachine.addYoVariableRegistry(registry);
       highLevelControllerStateMachine.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
 
@@ -462,7 +494,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
 
    public void reinitializeWalking(boolean keepPosition)
    {
-      highLevelControllerStateMachine.requestHighLevelControllerState(NewHighLevelStates.WALKING_STATE);
+      highLevelControllerStateMachine.requestHighLevelControllerState(NewHighLevelControllerStates.WALKING_STATE);
       if (keepPosition)
       {
          if (walkingState != null)
@@ -533,7 +565,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       controllerToolbox.attachRobotMotionStatusChangedListener(listener);
    }
 
-   public void setFallbackControllerForFailure(NewHighLevelStates fallbackController)
+   public void setFallbackControllerForFailure(NewHighLevelControllerStates fallbackController)
    {
       highLevelControllerStateMachine.setFallbackControllerForFailure(fallbackController);
    }
