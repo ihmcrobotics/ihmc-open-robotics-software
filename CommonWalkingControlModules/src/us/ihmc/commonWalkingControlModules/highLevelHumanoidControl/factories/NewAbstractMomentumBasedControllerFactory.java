@@ -17,9 +17,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.NewHumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewDoNothingControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewHighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewWalkingControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
@@ -64,7 +62,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedControllerFactory
+public abstract class NewAbstractMomentumBasedControllerFactory extends AbstractMomentumBasedControllerFactory
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -83,6 +81,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    private final WalkingControllerParameters walkingControllerParameters;
    private final ICPTrajectoryPlannerParameters capturePointPlannerParameters;
 
+   private final StandPrepSetpoints standPrepSetpoints;
    private final NewHighLevelControllerStates initialControllerState;
    private final NewHighLevelControllerStates fallbackControllerState;
 
@@ -117,15 +116,17 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    private boolean setupInverseKinematicsSolver = false;
    private boolean setupVirtualModelControlSolver = false;
 
-   public NewMomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
-                                            SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
-                                            WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters,
-                                            NewHighLevelControllerStates initialControllerState, NewHighLevelControllerStates fallbackControllerState)
+   public NewAbstractMomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
+                                                    SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
+                                                    WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters,
+                                                    StandPrepSetpoints standPrepSetpoints, NewHighLevelControllerStates initialControllerState,
+                                                    NewHighLevelControllerStates fallbackControllerState)
    {
       this.footSensorNames = footForceSensorNames;
       this.footContactSensorNames = footContactSensorNames;
       this.wristSensorNames = wristSensorNames;
       this.contactableBodiesFactory = contactableBodiesFactory;
+      this.standPrepSetpoints = standPrepSetpoints;
       this.initialControllerState = initialControllerState;
       this.fallbackControllerState = fallbackControllerState;
 
@@ -343,7 +344,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the DoNothingController ////////////////////////////////////////////////////////////
       // Useful as a transition state on the real robot
-      NewDoNothingControllerState doNothingState = new NewDoNothingControllerState(controllerToolbox);
+      NewDoNothingControllerState doNothingState = createDoNothingControllerState(controllerToolbox);
       highLevelControllerStates.add(doNothingState);
       ArrayList<StateTransition<NewHighLevelControllerStates>> doNothingTransitions = new ArrayList<>();
       doNothingTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.STAND_PREP_STATE));
@@ -353,8 +354,8 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       /** FIXME create the controller core in here instead **/
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingController //////////////////////////////////////////////////////////////
-      walkingState = new NewWalkingControllerState(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
-                                                   capturePointPlannerParameters, controllerToolbox);
+      walkingState = createWalkingControllerState(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
+                                                  capturePointPlannerParameters, controllerToolbox);
       highLevelControllerStates.add(walkingState);
       ArrayList<StateTransition<NewHighLevelControllerStates>> walkingTransitions = new ArrayList<>();
       walkingTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
@@ -362,7 +363,8 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       highLevelControllerTransitions.put(walkingState, walkingTransitions);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
-      // Setup the StandPrepController ////////////////////////////////////////////////////////////
+      // Setup the NewStandPrepControllerState ////////////////////////////////////////////////////////////
+      NewStandPrepControllerState standPrepControllerState = createStandPrepControllerState(controllerToolbox, standPrepSetpoints);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the StandReadyController ///////////////////////////////////////////////////////////
@@ -602,4 +604,14 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    {
       return null;
    }
+
+   public abstract NewDoNothingControllerState createDoNothingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox);
+
+   public abstract NewStandPrepControllerState createStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepSetpoints standPrepSetpoints);
+
+   public abstract NewWalkingControllerState createWalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
+                                                                          HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
+                                                                          ICPTrajectoryPlannerParameters capturePointPlannerParameters,
+                                                                          HighLevelHumanoidControllerToolbox controllerToolbox);
+
 }
