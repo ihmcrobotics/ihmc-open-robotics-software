@@ -11,7 +11,7 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.6.2"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.6.3"
       classpath "org.gradle:gradle-kotlin-dsl:0.10.3"
       classpath 'us.ihmc:ihmc-commons:0.11.2'
    }
