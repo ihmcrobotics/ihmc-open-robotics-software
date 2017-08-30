@@ -1,11 +1,8 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
-import java.awt.Robot;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-
-import javax.management.RuntimeErrorException;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPPlanningTools;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.CoPTrajectoryPoint;
@@ -124,8 +121,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    private int footstepIndex = 0;
    private int plannedFootstepIndex = -1;
-   private int numberOfSwingSegments = 10;
-   private int numberOfTransferSegments = 10;
+   private int numberOfSwingSegments = 3;
+   private int numberOfTransferSegments = 2;
    private CoPTrajectory activeTrajectory;
    private double initialTime;
    private FramePoint3D tempDoubleSupportPolygonCentroid = new FramePoint3D();
@@ -518,6 +515,16 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
       generateCoPTrajectoriesFromWayPoints();
       planIsAvailable.set(true);
+   }
+
+   private void printTimes()
+   {
+      for(int i = 0; i < getNumberOfFootstepsRegistered(); i++)
+      {
+         PrintTools.error("T" + i + ": " + transferDurations.get(i).getDoubleValue());
+         PrintTools.error("S" + i + ": " + swingDurations.get(i).getDoubleValue());
+      }
+      PrintTools.error("T" + getNumberOfFootstepsRegistered() + ": " + transferDurations.get(getNumberOfFootstepsRegistered()).getDoubleValue());
    }
 
    @Override
@@ -1177,11 +1184,15 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             if (!tempFramePoint1.containsNaN())
             {
                if (trajectoryType == WalkingTrajectoryType.SWING)
+               {
                   swingCoPTrajectories.get(swingTrajectoryIndex).setSegment(timeInState, timeInState + currentPoint.getTime(), tempFramePoint1,
                                                                             currentPoint.getPosition().getFrameTuple());
+               }
                else
+               {
                   transferCoPTrajectories.get(transferTrajectoryIndex).setSegment(timeInState, timeInState + currentPoint.getTime(), tempFramePoint1,
                                                                                   currentPoint.getPosition().getFrameTuple());
+               }
             }
             else
             {

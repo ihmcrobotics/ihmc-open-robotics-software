@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class TransferCoPTrajectory extends CoPTrajectory
 {

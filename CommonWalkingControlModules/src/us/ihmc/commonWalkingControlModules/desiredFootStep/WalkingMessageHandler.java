@@ -185,7 +185,7 @@ public class WalkingMessageHandler
 
       double commandFinalTransferTime = command.getFinalTransferDuration();
 
-      if (commandFinalTransferTime >= 0.0)
+      if (commandFinalTransferTime > 0.0)
          finalTransferTime.set(commandFinalTransferTime);
       else
          finalTransferTime.set(defaultTransferTime.getDoubleValue());

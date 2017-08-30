@@ -10,7 +10,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class Trajectory3D
 {
@@ -86,19 +85,19 @@ public class Trajectory3D
       @Override
       public double getX()
       {
-         return xTrajectory.getDFx();
+         return xTrajectory.getVelocity();
       }
 
       @Override
       public double getY()
       {
-         return yTrajectory.getDFx();
+         return yTrajectory.getVelocity();
       }
 
       @Override
       public double getZ()
       {
-         return zTrajectory.getDFx();
+         return zTrajectory.getVelocity();
       }
    };
 
@@ -107,19 +106,19 @@ public class Trajectory3D
       @Override
       public double getX()
       {
-         return xTrajectory.getDDFx();
+         return xTrajectory.getAcceleration();
       }
 
       @Override
       public double getY()
       {
-         return yTrajectory.getDDFx();
+         return yTrajectory.getAcceleration();
       }
 
       @Override
       public double getZ()
       {
-         return zTrajectory.getDDFx();
+         return zTrajectory.getAcceleration();
       }
    };
 
@@ -693,4 +692,10 @@ public class Trajectory3D
       compute(getFinalTime());
       positionToPack.set(getPosition());
    }
+   
+   public boolean isValidTrajectory()
+   {
+      return (getTrajectoryX().isValidTrajectory() && getTrajectoryY().isValidTrajectory() && getTrajectoryZ().isValidTrajectory());
+   }
+   
 }

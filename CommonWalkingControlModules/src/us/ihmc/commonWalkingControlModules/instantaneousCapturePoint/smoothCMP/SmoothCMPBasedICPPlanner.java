@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.AbstractICPPlanner;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -152,13 +153,19 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    {
       if (footstep == null)
          return;
-
       referenceCoPGenerator.addFootstepToPlan(footstep, timing);
 
       int footstepIndex = referenceCoPGenerator.getNumberOfFootstepsRegistered() - 1;
-      swingDurations.get(footstepIndex).set(timing.getSwingTime());
-      transferDurations.get(footstepIndex).set(timing.getTransferTime());
-
+      if(Double.isFinite(timing.getSwingTime())) 
+         swingDurations.get(footstepIndex).set(timing.getSwingTime());
+      else
+         swingDurations.get(footstepIndex).set(1.0);
+         
+      if(Double.isFinite(timing.getTransferTime()))
+         transferDurations.get(footstepIndex).set(timing.getTransferTime());
+      else
+         transferDurations.get(footstepIndex).set(1.0);
+         
       swingDurationAlphas.get(footstepIndex).set(defaultSwingDurationAlpha.getDoubleValue());
       transferDurationAlphas.get(footstepIndex).set(defaultTransferDurationAlpha.getDoubleValue());
       swingDurationShiftFractions.get(footstepIndex).set(defaultSwingDurationShiftFraction.getDoubleValue());
@@ -245,7 +252,10 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator.computeReferenceCoPsStartingFromDoubleSupport(isInitialTransfer.getBooleanValue(), transferToSide);
       referenceCMPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
       referenceICPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
-      
+
+//      PrintTools.debug("Transfer plan");
+//      printCoPTrajectories();
+
       referenceCoPGenerator.initializeForTransfer(ZERO_TIME);
       referenceICPGenerator.initializeForTransferFromCoPs(referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories());
       
@@ -277,6 +287,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCMPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
       referenceICPGenerator.setNumberOfRegisteredSteps(referenceCoPGenerator.getNumberOfFootstepsRegistered());
       
+//      PrintTools.debug("Swing plan");
+//      printCoPTrajectories();
+
       referenceCoPGenerator.initializeForSwing(ZERO_TIME);
       referenceICPGenerator.initializeForSwingFromCoPs(referenceCoPGenerator.getTransferCoPTrajectories(), referenceCoPGenerator.getSwingCoPTrajectories());
             
@@ -293,13 +306,26 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceICPGenerator.initializeCenterOfMass();
    }
 
+   private void printCoPTrajectories()
+   {
+      List<? extends CoPTrajectory> transferCoPTrajectory = referenceCoPGenerator.getTransferCoPTrajectories();
+      List<? extends CoPTrajectory> swingCoPTrajectory = referenceCoPGenerator.getSwingCoPTrajectories();
+      
+      for (int i = 0; i < referenceCoPGenerator.getNumberOfFootstepsRegistered(); i++)
+      {
+         PrintTools.debug(transferCoPTrajectory.get(i).toString());
+         PrintTools.debug(swingCoPTrajectory.get(i).toString());
+      }
+      PrintTools.debug(transferCoPTrajectory.get(referenceCoPGenerator.getNumberOfFootstepsRegistered()).toString());
+   }
+
    @Override
    /** {@inheritDoc} */
    public void compute(double time)
    {
       timeInCurrentState.set(time - initialTime.getDoubleValue());
       timeInCurrentStateRemaining.set(getCurrentStateDuration() - timeInCurrentState.getDoubleValue());
-
+      
       double timeInCurrentState = MathTools.clamp(this.timeInCurrentState.getDoubleValue(), 0.0, referenceCoPGenerator.getCurrentStateFinalTime());
 
       if (!isInStanding())
@@ -335,6 +361,26 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          desiredCoMVelocity.setToZero();
          desiredCoMAcceleration.setToZero();
       }
+      
+//      if(desiredCoPPosition.containsNaN())
+//      {
+//         PrintTools.error("CoP Position contains NaN: " + desiredCoPPosition.toString());
+//         PrintTools.error("Number of segments = " + referenceCoPGenerator.getNumberOfFootstepsRegistered());
+//      }
+//      if(desiredCMPPosition.containsNaN())
+//      {
+//         PrintTools.error("CMP Position contains NaN: " + desiredCMPPosition.toString());
+//      }
+//      
+//      if(desiredCentroidalAngularMomentum.containsNaN())
+//      {
+//         PrintTools.error("AM contains NaN: " + desiredCentroidalAngularMomentum.toString());
+//      }
+//      
+//      if(desiredICPPosition.containsNaN())
+//      {
+//         PrintTools.error("ICP contains NaN: " + desiredICPPosition.toString());
+//      }
       decayDesiredVelocityIfNeeded();
 
       // done to account for the delayed velocity

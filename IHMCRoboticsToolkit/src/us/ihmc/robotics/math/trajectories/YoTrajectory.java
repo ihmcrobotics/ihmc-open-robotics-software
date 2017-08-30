@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class YoTrajectory extends Trajectory
+public class YoTrajectory
 {
    private String name;
    private YoPolynomial polynomial;
@@ -18,7 +18,6 @@ public class YoTrajectory extends Trajectory
 
    public YoTrajectory(String name, int maximumNumberOfCoefficients, YoVariableRegistry registry)
    {
-      super(maximumNumberOfCoefficients);
       this.name = name;
       tInitial = new YoDouble(name + "t0", registry);
       tFinal = new YoDouble(name + "tF", registry);
@@ -28,7 +27,6 @@ public class YoTrajectory extends Trajectory
 
    public YoTrajectory(YoDouble[] coefficients, YoInteger numberOfCoefficients, YoDouble tInitial, YoDouble tFinal)
    {
-      super(numberOfCoefficients.getIntegerValue());
       polynomial = new YoPolynomial(coefficients, numberOfCoefficients);
       this.tInitial = tInitial;
       this.tFinal = tFinal;
@@ -433,5 +431,23 @@ public class YoTrajectory extends Trajectory
    public YoPolynomial getPolynomial()
    {
       return polynomial;
+   }
+
+   public boolean isValidTrajectory()
+   {
+      boolean retVal = (getInitialTime() < getFinalTime()) && Double.isFinite(getInitialTime()) && Double.isFinite(getFinalTime());
+      double[] coeffs = getCoefficients();
+      for(int i = 0; retVal && i < coeffs.length; i++)
+         retVal &= Double.isFinite(coeffs[i]);
+      return retVal;
+   }
+
+   public void set(Trajectory trajectory)
+   {
+      reshape(trajectory.getNumberOfCoefficients());
+      this.tInitial.set(trajectory.getInitialTime());
+      this.tFinal.set(trajectory.getFinalTime());
+      for(int i = 0; i < getNumberOfCoefficients(); i++)
+         polynomial.setDirectly(i, trajectory.getCoefficient(i));
    }
 }

@@ -696,6 +696,11 @@ public class YoTrajectory3D
       positionToPack.set(getPosition());
    }
 
+   public boolean isValidTrajectory()
+   {
+      return (getYoTrajectoryX().isValidTrajectory() && getYoTrajectoryY().isValidTrajectory() && getYoTrajectoryZ().isValidTrajectory());
+   }
+   
    public void set(Trajectory3D trajToCopy)
    {
       for (int index = 0; index < 3; index++)
