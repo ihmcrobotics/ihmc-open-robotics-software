@@ -230,7 +230,6 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       }
 
       diagnosticController.doControl();
-      estimatorDesiredJointDataHolder.updateFromModel();
       sensorReader.writeCommandsToRobot();
       
       diagnosticControllerTime.set(Conversions.nanosecondsToSeconds(time - startTime.getLongValue()));

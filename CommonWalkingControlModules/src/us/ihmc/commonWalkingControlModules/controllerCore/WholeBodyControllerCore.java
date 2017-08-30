@@ -19,6 +19,7 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 
 public class WholeBodyControllerCore
@@ -41,7 +42,7 @@ public class WholeBodyControllerCore
    private final ExecutionTimer controllerCoreComputeTimer = new ExecutionTimer("controllerCoreComputeTimer", 1.0, registry);
    private final ExecutionTimer controllerCoreSubmitTimer = new ExecutionTimer("controllerCoreSubmitTimer", 1.0, registry);
 
-   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, YoVariableRegistry parentRegistry)
+   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput, YoVariableRegistry parentRegistry)
    {
       feedbackController = new WholeBodyFeedbackController(toolbox, allPossibleCommands, registry);
 
@@ -78,7 +79,7 @@ public class WholeBodyControllerCore
       else
          desiredCenterOfPressureDataHolder = null;
 
-      controllerCoreOutput = new ControllerCoreOutput(desiredCenterOfPressureDataHolder, controlledOneDoFJoints);
+      controllerCoreOutput = new ControllerCoreOutput(desiredCenterOfPressureDataHolder, controlledOneDoFJoints, lowLevelControllerOutput);
 
       parentRegistry.addChild(registry);
    }
@@ -214,7 +215,7 @@ public class WholeBodyControllerCore
          throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
       }
 
-      parseLowLevelDataInOneDoFJoints();
+//      parseLowLevelDataInOneDoFJoints();
 
       if (yoRootJointDesiredConfigurationData != null)
          controllerCoreOutput.setRootJointDesiredConfigurationData(yoRootJointDesiredConfigurationData);

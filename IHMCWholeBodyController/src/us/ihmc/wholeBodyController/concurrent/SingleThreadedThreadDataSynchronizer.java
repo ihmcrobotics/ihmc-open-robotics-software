@@ -199,7 +199,6 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    @Override
    public void publishControllerData()
    {
-      controllerDesiredJointDataHolder.updateFromModel();
    }
 
    @Override
