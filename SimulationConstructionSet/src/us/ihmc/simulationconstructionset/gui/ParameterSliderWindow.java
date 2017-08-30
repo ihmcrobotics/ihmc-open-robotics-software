@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.gui;
 
+import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -22,7 +23,6 @@ public class ParameterSliderWindow implements CloseableAndDisposable
 {
    private static final int MAX_CHANNELS_PER_ROW = 13;
 
-   private ArrayList<JPanel> sliderPanels = new ArrayList<JPanel>();
    private ArrayList<JSliderParameterControl> sliderParameterControls = new ArrayList<JSliderParameterControl>();
 
    private JPanel mainPanel = new JPanel();
@@ -40,9 +40,12 @@ public class ParameterSliderWindow implements CloseableAndDisposable
 
    private CloseableAndDisposableRegistry closeableAndDisposableRegistry;
 
-   public ParameterSliderWindow(final CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   private final SelectedVariableHolder selectedVariableHolder;
+
+   public ParameterSliderWindow(SelectedVariableHolder selectedVariableHolder, final CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       this.closeableAndDisposableRegistry = closeableAndDisposableRegistry;
+      this.selectedVariableHolder = selectedVariableHolder;
 
       System.out.println("Parameter Slider");
 
@@ -117,11 +120,16 @@ public class ParameterSliderWindow implements CloseableAndDisposable
 //      setUpGui(closeableAndDisposableRegistry);
 //   }
 
+
+   public void repaint()
+   {
+      mainPanel.repaint();
+   }
+
    private void setUpGui()
    {
       synchronized (slidersLock)
       {
-         sliderPanels.clear();
          sliderParameterControls.clear();
          mainPanel.removeAll();
 
@@ -129,7 +137,7 @@ public class ParameterSliderWindow implements CloseableAndDisposable
          for (int i=0; i< numberOfSliders; i++)
          {
             JSliderParameterControl jSliderParameterControl;
-            jSliderParameterControl = new JSliderParameterControl("param control " + String.valueOf(i), closeableAndDisposableRegistry);
+            jSliderParameterControl = new JSliderParameterControl(selectedVariableHolder, closeableAndDisposableRegistry);
 
 
 //            if (current.sliderType == MidiControl.SliderType.BOOLEAN)
@@ -145,10 +153,10 @@ public class ParameterSliderWindow implements CloseableAndDisposable
 //               slider = new JSliderControl(SwingConstants.VERTICAL, 0, sliderBoardMax,
 //                                           SliderBoardUtils.valueRatioConvertToIntWithExponents(current, sliderBoardMax), current, closeableAndDisposableRegistry);
 
-            jSliderParameterControl.setPaintLabels(false);
+
             //slider.addChangeListener(new SliderChangeListener(slider, this));
 
-            JPanel sliderPanel = new JPanel(new BorderLayout());
+
 //            if (slider.midiControl.name != null)
 //            {
 //               sliderPanel.setBorder(new TitledBorder(slider.midiControl.name));
@@ -158,34 +166,26 @@ public class ParameterSliderWindow implements CloseableAndDisposable
 //               sliderPanel.setBorder(new TitledBorder(slider.midiControl.var.getName()));
 //            }
 
-            sliderPanel.setBorder(new TitledBorder("slider " + i));
 
-            JTextField jTextField = new JTextField(String.valueOf(i));
 
-            sliderPanel.add(jSliderParameterControl, BorderLayout.CENTER);
 
-            sliderPanel.setName("slider " + i);
-            //slider.set value = new JTextField(slider.midiControl.var.getNumericValueAsAString());
-            sliderParameterControls.add(jSliderParameterControl);
-
-            sliderPanel.add(jTextField, BorderLayout.SOUTH);
 
             //slider.value.addActionListener(new textFieldListener(slider));
             //sliderPanel.add(slider.value, BorderLayout.SOUTH);
-            sliderPanels.add(sliderPanel);
+            sliderParameterControls.add(jSliderParameterControl);
 
-            numRow = Math.round(sliderPanels.size() / MAX_CHANNELS_PER_ROW);
+            numRow = Math.round(sliderParameterControls.size() / MAX_CHANNELS_PER_ROW);
 
-            numCol = sliderPanels.size();
+            numCol = sliderParameterControls.size();
             if (numRow > 1)
                numCol = MAX_CHANNELS_PER_ROW;
 
-            if (sliderPanels.size() % MAX_CHANNELS_PER_ROW != 0)
+            if (sliderParameterControls.size() % MAX_CHANNELS_PER_ROW != 0)
                numRow++;
 
             mainPanel.setLayout(new GridLayout(numRow, numCol));
 
-            mainPanel.add(sliderPanel, sliderPanels.size() - 1);
+            mainPanel.add(jSliderParameterControl, sliderParameterControls.size() - 1);
          }
 
          resizePanel();
@@ -276,11 +276,6 @@ public class ParameterSliderWindow implements CloseableAndDisposable
    @Override
    public void closeAndDispose()
    {
-      sliderPanels.clear();
-      sliderPanels = null;
-
-
-
       sliderParameterControls.clear();
       sliderParameterControls = null;
 
