@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 
-public class DRCSimulationOutputWriter extends PerfectSimulatedOutputWriter implements DRCOutputProcessor
+public class DRCSimulationOutputWriterForControllerThread extends PerfectSimulatedOutputWriter implements DRCOutputProcessor
 {
    private static final int TICKS_TO_DELAY = 0;
 
@@ -29,7 +29,7 @@ public class DRCSimulationOutputWriter extends PerfectSimulatedOutputWriter impl
 
    private final ArrayList<RawOutputWriter> rawOutputWriters = new ArrayList<RawOutputWriter>();
 
-   public DRCSimulationOutputWriter(FloatingRootJointRobot robot)
+   public DRCSimulationOutputWriterForControllerThread(FloatingRootJointRobot robot)
    {
       super(robot);
    }
