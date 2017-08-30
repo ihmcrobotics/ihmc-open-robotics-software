@@ -24,7 +24,7 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.AtlasKinematicsConfiguration;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.RobotKinematicsConfiguration;
 import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -62,20 +62,6 @@ public class WheneverWholeBodyFunctions
       desiredRootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
       Quaternion32 orientation = robotConfigurationData.getPelvisOrientation();
       desiredRootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
-      desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
-
-      desiredRootJoint.getPredecessor().updateFramesRecursively();
-
-   }
-
-   public void setRobotStateFromRobotConfigurationData(AtlasKinematicsConfiguration robotConfigurationData, FloatingInverseDynamicsJoint desiredRootJoint,
-                                                       OneDoFJoint[] oneDoFJoints)
-   {
-      robotConfigurationData.getOneDoFJoints(oneDoFJoints);
-
-      desiredRootJoint.setPosition(robotConfigurationData.rootTranslation);
-
-      desiredRootJoint.setRotation(robotConfigurationData.rootOrientation);
       desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
 
       desiredRootJoint.getPredecessor().updateFramesRecursively();

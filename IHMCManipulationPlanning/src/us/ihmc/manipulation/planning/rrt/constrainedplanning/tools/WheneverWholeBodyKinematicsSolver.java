@@ -30,7 +30,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.AtlasKinematicsConfiguration;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.RobotKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
@@ -117,7 +117,7 @@ public class WheneverWholeBodyKinematicsSolver
    private final EnumMap<LegJointName, YoDouble> legJointLimitReductionFactors = new EnumMap<>(LegJointName.class);
    private final List<RigidBody> listOfControllableRigidBodies = new ArrayList<>();
 
-   private final AtomicReference<AtlasKinematicsConfiguration> latestRobotConfigurationReference = new AtomicReference<>(null);
+   private final AtomicReference<RobotKinematicsConfiguration> latestRobotConfigurationReference = new AtomicReference<>(null);
 
    private final Map<String, FeedbackControlCommand<?>> userFeedbackCommands = new HashMap<>();
    private final YoInteger numberOfActiveCommands = new YoInteger("numberOfActiveCommands", registry);
@@ -253,13 +253,13 @@ public class WheneverWholeBodyKinematicsSolver
       cntForUpdateInternal = 0;
       solutionQualityOld.setToNaN();
 
-      AtlasKinematicsConfiguration robotConfiguration = latestRobotConfigurationReference.get();
+      RobotKinematicsConfiguration robotConfiguration = latestRobotConfigurationReference.get();
 
       if (robotConfiguration == null)
          return false;
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
-      wholeBodyFunctions.setRobotStateFromRobotConfigurationData(robotConfiguration, rootJoint, oneDoFJoints);
+      robotConfiguration.getRobotConfiguration(desiredFullRobotModel);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -518,22 +518,7 @@ public class WheneverWholeBodyKinematicsSolver
       updateRobotConfigurationData(node.getConfiguration());
    }
 
-   public void updateRobotConfigurationData(OneDoFJoint[] joints, Tuple3DReadOnly translation, Tuple4DReadOnly rotation)
-   {
-      AtlasKinematicsConfiguration atlasConfiguration = new AtlasKinematicsConfiguration();
-      atlasConfiguration.putJointConfiguration(joints);
-      atlasConfiguration.putRootTranslation(translation);
-      atlasConfiguration.putRootOrientation(rotation);
-
-      updateRobotConfigurationData(atlasConfiguration);
-   }
-
-   public void updateRobotConfigurationData(OneDoFJoint[] joints, FloatingInverseDynamicsJoint rootJoint)
-   {
-      updateRobotConfigurationData(joints, rootJoint.getTranslationForReading(), rootJoint.getRotationForReading());
-   }
-
-   public void updateRobotConfigurationData(AtlasKinematicsConfiguration atlasConfiguration)
+   public void updateRobotConfigurationData(RobotKinematicsConfiguration atlasConfiguration)
    {
       latestRobotConfigurationReference.set(atlasConfiguration);
    }
