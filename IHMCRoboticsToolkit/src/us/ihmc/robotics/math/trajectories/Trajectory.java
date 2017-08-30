@@ -272,23 +272,9 @@ public class Trajectory
       setCoefficientVariables();
    }
 
-   public void setPentic(double t0, double tFinal, double z0, double zd0, double zdd0, double zFinal, double zdFinal, double zddFinal)
+   public void setQuinticWithZeroTerminalAcceleration(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
    {
-      reshape(6);
-      setTime(t0, tFinal);
-      setPositionRow(0, t0, z0);
-      setPositionRow(1, tFinal, zFinal);
-      setVelocityRow(2, t0, zd0);
-      setVelocityRow(3, tFinal, zdFinal);
-      setAccelerationRow(4, t0, zdd0);
-      setAccelerationRow(5, tFinal, zddFinal);
-      solveForCoefficients();
-      setCoefficientVariables();      
-   }
-   
-   public void setPenticWithZeroTerminalAcceleration(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
-   {
-      setPentic(t0, tFinal, z0, zd0, 0.0, zFinal, zdFinal, 0.0);
+      setQuintic(t0, tFinal, z0, zd0, 0.0, zFinal, zdFinal, 0.0);
    }
    
    public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,

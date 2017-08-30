@@ -484,27 +484,14 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
                                            zIntermediate0.getPoint(), zIntermediate1.getPoint(), zf.getPoint(), zdf.getVector(), zddf.getVector());
    }
 
-   public void setPentic(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0, FramePoint3D zFinal, FrameVector3D zdFinal,
-                         FrameVector3D zddFinal)
-   {
-      z0.checkReferenceFrameMatch(referenceFrame);
-      zd0.checkReferenceFrameMatch(referenceFrame);
-      zdd0.checkReferenceFrameMatch(referenceFrame);
-      zFinal.checkReferenceFrameMatch(referenceFrame);
-      zdFinal.checkReferenceFrameMatch(referenceFrame);
-      zddFinal.checkReferenceFrameMatch(referenceFrame);
-
-      setPentic(t0, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector(), zFinal.getPoint(), zdFinal.getVector(), zddFinal.getVector());
-   }
-
-   public void setPenticWithZeroTerminalAcceleration(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zFinal, FrameVector3D zdFinal)
+   public void setQuinticWithZeroTerminalAcceleration(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zFinal, FrameVector3D zdFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
       zFinal.checkReferenceFrameMatch(referenceFrame);
       zdFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setPenticWithZeroTerminalAcceleration(t0, tFinal, z0.getPoint(), zd0.getVector(), zFinal.getPoint(), zdFinal.getVector());
+      setQuinticWithZeroTerminalAcceleration(t0, tFinal, z0.getPoint(), zd0.getVector(), zFinal.getPoint(), zdFinal.getVector());
    }
 
    public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0,
