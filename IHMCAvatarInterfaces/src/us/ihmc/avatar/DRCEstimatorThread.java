@@ -266,7 +266,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
                if(!outputWriterInitialized.getBooleanValue())
                {
                   outputWriter.initialize();
-                  outputWriterInitialized.set(false);
+                  outputWriterInitialized.set(true);
                }
 
                outputWriter.writeBefore(currentClockTime);
