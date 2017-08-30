@@ -33,7 +33,7 @@ public class LowLevelOneDoFJointDesiredDataHolderList implements LowLevelOneDoFJ
    }
 
    @Override
-   public LowLevelJointDataReadOnly getLowLevelJointData(OneDoFJoint joint)
+   public LowLevelJointData getLowLevelJointData(OneDoFJoint joint)
    {
       return jointMap.get(joint);
    }
@@ -45,7 +45,7 @@ public class LowLevelOneDoFJointDesiredDataHolderList implements LowLevelOneDoFJ
    }
 
    @Override
-   public LowLevelJointDataReadOnly getLowLevelJointData(int index)
+   public LowLevelJointData getLowLevelJointData(int index)
    {
       return jointsAndData.second(index);
    }
