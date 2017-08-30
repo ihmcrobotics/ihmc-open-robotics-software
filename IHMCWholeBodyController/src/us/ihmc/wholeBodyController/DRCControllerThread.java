@@ -28,6 +28,7 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -146,7 +147,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       robotController = createMomentumBasedController(controllerFullRobotModel,
             controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, centerOfMassDataHolderForController,
             threadDataSynchronizer.getControllerContactSensorHolder(),
-            centerOfPressureDataHolderForEstimator, yoGraphicsListRegistry, registry, arrayOfJointsToIgnore);
+            centerOfPressureDataHolderForEstimator, threadDataSynchronizer.getControllerDesiredJointDataHolder(), yoGraphicsListRegistry, registry, arrayOfJointsToIgnore);
 
       createControllerRobotMotionStatusUpdater(controllerFactory, threadDataSynchronizer.getControllerRobotMotionStatusHolder());
 
@@ -213,8 +214,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private ModularRobotController createMomentumBasedController(FullHumanoidRobotModel controllerModel,
          MomentumBasedControllerFactory controllerFactory, YoDouble yoTime, double controlDT, double gravity,
          ForceSensorDataHolderReadOnly forceSensorDataHolderForController, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
-         ContactSensorHolder contactSensorHolder,
-         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
+         ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, 
+         LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
          InverseDynamicsJoint... jointsToIgnore)
    {
       if (CREATE_COM_CALIBRATION_TOOL)
@@ -232,7 +233,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       }
 
       RobotController robotController = controllerFactory.getController(controllerModel, controlDT, gravity, yoTime, yoGraphicsListRegistry,
-            forceSensorDataHolderForController, centerOfMassDataHolder, contactSensorHolder, centerOfPressureDataHolderForEstimator, jointsToIgnore);
+            forceSensorDataHolderForController, centerOfMassDataHolder, contactSensorHolder, centerOfPressureDataHolderForEstimator, lowLevelControllerOutput, jointsToIgnore);
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
       modularRobotController.addRobotController(robotController);

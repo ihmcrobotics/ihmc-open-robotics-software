@@ -35,6 +35,8 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -77,11 +79,13 @@ public class HexapodSimulationController implements RobotController
       this.referenceFrames = new HexapodReferenceFrames(fullRobotModel, RhinoBeetlePhysicalProperties.getOffsetsFromJointBeforeFootToSoleAlignedWithWorld());
       setupPlaneContactStateUpdaters(fullRobotModel, sdfRobot);
 
+      LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerCoreOutput = new LowLevelOneDoFJointDesiredDataHolderList(fullRobotModel.getOneDoFJoints());
+      
       highLevelController = new HexapodHighLevelControlManager(fullRobotModel, referenceFrames, contactStateUpdaters, jointsToControl, idParameters, vmcParameters, yoGraphicsListRegistry, controllerDt, registry);
 
       FeedbackControlCommandList feedbackControlCommandList = createFeedbackControlTemplate();
       WholeBodyControlCoreToolbox toolbox = makeControllerToolbox();
-      this.controllerCore = new WholeBodyControllerCore(toolbox, feedbackControlCommandList, registry);
+      this.controllerCore = new WholeBodyControllerCore(toolbox, feedbackControlCommandList, lowLevelControllerCoreOutput, registry);
 
       for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
       {
