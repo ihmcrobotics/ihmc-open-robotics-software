@@ -178,6 +178,7 @@ public class LogVisualizer
       simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
       simulationOverheadPlotterFactory.createOverheadPlotter();
       scs.getRootRegistry().addChild(parser.getRootRegistry());
+      scs.setParameterRootPath(parser.getRootRegistry());
       scs.setGroundVisible(false);
 
       MultiVideoDataPlayer players = null;
