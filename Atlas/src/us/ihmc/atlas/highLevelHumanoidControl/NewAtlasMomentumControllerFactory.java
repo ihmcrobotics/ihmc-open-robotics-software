@@ -1,16 +1,13 @@
 package us.ihmc.atlas.highLevelHumanoidControl;
 
 import us.ihmc.atlas.highLevelHumanoidControl.highLevelStates.NewAtlasStandPrepSetpoints;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewStandPrepControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.*;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.NewAbstractMomentumBasedControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewDoNothingControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewWalkingControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandPrepSetpoints;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -38,6 +35,20 @@ public class NewAtlasMomentumControllerFactory extends NewAbstractMomentumBasedC
    public NewStandPrepControllerState createStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepSetpoints standPrepSetpoints)
    {
       return new NewStandPrepControllerState(controllerToolbox, standPrepSetpoints);
+   }
+
+   @Override
+   public NewStandReadyControllerState createStandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepSetpoints standPrepSetpoints)
+   {
+      return new NewStandReadyControllerState(controllerToolbox, standPrepSetpoints);
+   }
+
+   @Override
+   public NewStandTransitionControllerState createStandTransitionControllerState(NewStandReadyControllerState standReadyControllerState,
+                                                                                 NewWalkingControllerState walkingControllerState,
+                                                                                 HighLevelHumanoidControllerToolbox controllerToolbox)
+   {
+      return new NewStandTransitionControllerState(standReadyControllerState, walkingControllerState, controllerToolbox);
    }
 
    @Override

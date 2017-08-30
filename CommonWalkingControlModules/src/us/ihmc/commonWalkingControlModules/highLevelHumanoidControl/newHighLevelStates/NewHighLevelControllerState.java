@@ -32,6 +32,6 @@ public abstract class NewHighLevelControllerState extends FinishableState<NewHig
    @Override
    public boolean isDone()
    {
-      return true;
+      return false;
    }
 }
