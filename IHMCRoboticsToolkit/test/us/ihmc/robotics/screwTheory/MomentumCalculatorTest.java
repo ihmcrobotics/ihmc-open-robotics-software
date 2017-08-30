@@ -13,13 +13,13 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.testing.JUnitTools;
 
 public class MomentumCalculatorTest
@@ -44,12 +44,12 @@ public class MomentumCalculatorTest
       Momentum momentum = computeMomentum(elevator, world);
 
       momentum.changeFrame(world);
-      FrameVector linearMomentum = new FrameVector(momentum.getExpressedInFrame(), momentum.getLinearPartCopy());
-      FrameVector angularMomentum = new FrameVector(momentum.getExpressedInFrame(), momentum.getAngularPartCopy());
+      FrameVector3D linearMomentum = new FrameVector3D(momentum.getExpressedInFrame(), momentum.getLinearPartCopy());
+      FrameVector3D angularMomentum = new FrameVector3D(momentum.getExpressedInFrame(), momentum.getAngularPartCopy());
 
-      FrameVector linearMomentumCheck = new FrameVector(joint.getFrameBeforeJoint(), jointAxis);
+      FrameVector3D linearMomentumCheck = new FrameVector3D(joint.getFrameBeforeJoint(), jointAxis);
       linearMomentumCheck.scale(body.getInertia().getMass() * joint.getQd());
-      FrameVector angularMomentumCheck = new FrameVector(world);
+      FrameVector3D angularMomentumCheck = new FrameVector3D(world);
 
       double epsilon = 1e-9;
       EuclidCoreTestTools.assertTuple3DEquals(linearMomentumCheck.getVector(), linearMomentum.getVector(), epsilon);
@@ -77,15 +77,15 @@ public class MomentumCalculatorTest
       Momentum momentum = computeMomentum(elevator, world);
 
       momentum.changeFrame(world);
-      FrameVector linearMomentum = new FrameVector(momentum.getExpressedInFrame(), momentum.getLinearPartCopy());
-      FrameVector angularMomentum = new FrameVector(momentum.getExpressedInFrame(), momentum.getAngularPartCopy());
+      FrameVector3D linearMomentum = new FrameVector3D(momentum.getExpressedInFrame(), momentum.getLinearPartCopy());
+      FrameVector3D angularMomentum = new FrameVector3D(momentum.getExpressedInFrame(), momentum.getAngularPartCopy());
 
-      FrameVector linearMomentumCheck = new FrameVector(world);
+      FrameVector3D linearMomentumCheck = new FrameVector3D(world);
       Matrix3D inertia = body.getInertia().getMassMomentOfInertiaPartCopy();
       Vector3D angularMomentumCheckVector = new Vector3D(jointAxis);
       angularMomentumCheckVector.scale(joint.getQd());
       inertia.transform(angularMomentumCheckVector);
-      FrameVector angularMomentumCheck = new FrameVector(body.getInertia().getExpressedInFrame(), angularMomentumCheckVector);
+      FrameVector3D angularMomentumCheck = new FrameVector3D(body.getInertia().getExpressedInFrame(), angularMomentumCheckVector);
       angularMomentumCheck.changeFrame(world);
 
       double epsilon = 1e-9;

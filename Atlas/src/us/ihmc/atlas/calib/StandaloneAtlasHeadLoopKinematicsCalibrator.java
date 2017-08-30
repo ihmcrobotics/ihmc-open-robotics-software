@@ -20,8 +20,9 @@ import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
@@ -50,7 +51,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    public StandaloneAtlasHeadLoopKinematicsCalibrator(AtlasRobotVersion atlasVersion)
    {
       //load robot
-	  DRCRobotModel robotModel = new AtlasRobotModel(atlasVersion, DRCRobotModel.RobotTarget.SCS, false);
+	  DRCRobotModel robotModel = new AtlasRobotModel(atlasVersion, RobotTarget.SCS, false);
       fullRobotModel = robotModel.createFullRobotModel();
       joints = fullRobotModel.getOneDoFJoints();
 

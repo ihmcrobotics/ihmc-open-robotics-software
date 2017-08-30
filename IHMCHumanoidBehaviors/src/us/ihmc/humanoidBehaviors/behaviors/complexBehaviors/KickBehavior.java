@@ -2,6 +2,9 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -17,10 +20,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -34,7 +34,7 @@ public class KickBehavior extends AbstractBehavior
    private YoBoolean hasInputBeenSet = new YoBoolean("hasInputBeenSet", registry);
    private final FootTrajectoryBehavior footTrajectoryBehavior;
 
-   private FramePoint2d objectToKickPose;
+   private FramePoint2D objectToKickPose;
 
    private final ArrayList<AbstractBehavior> behaviors = new ArrayList<AbstractBehavior>();
 
@@ -71,7 +71,7 @@ public class KickBehavior extends AbstractBehavior
       }
    }
 
-   public void setObjectToKickPoint(FramePoint2d objectToKickPose)
+   public void setObjectToKickPoint(FramePoint2D objectToKickPose)
    {
       this.objectToKickPose = objectToKickPose;
    }
@@ -103,19 +103,19 @@ public class KickBehavior extends AbstractBehavior
       // FramePoint(ankleZUpFrames.get(kickFoot), 0.0,
       // kickFoot.getOppositeSide().negateIfRightSide(0.35), 0));
 
-      submitFootPosition(kickFoot, new FramePoint(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.0, kickFoot.negateIfRightSide(0.25), 0.227));
+      submitFootPosition(kickFoot, new FramePoint3D(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.0, kickFoot.negateIfRightSide(0.25), 0.227));
 
-      submitFootPosition(kickFoot, new FramePoint(ankleZUpFrames.get(kickFoot.getOppositeSide()), -0.2, kickFoot.negateIfRightSide(0.15), 0.127));
+      submitFootPosition(kickFoot, new FramePoint3D(ankleZUpFrames.get(kickFoot.getOppositeSide()), -0.2, kickFoot.negateIfRightSide(0.15), 0.127));
 
-      submitFootPosition(kickFoot, new FramePoint(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.3, kickFoot.negateIfRightSide(0.15), 0.05));
+      submitFootPosition(kickFoot, new FramePoint3D(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.3, kickFoot.negateIfRightSide(0.15), 0.05));
 
       // submitFootPosition(kickFoot, new
       // FramePoint(objectToKickPose.getReferenceFrame(),
       // objectToKickPose.getX(), objectToKickPose.getY(), 0.127));
 
-      submitFootPosition(kickFoot, new FramePoint(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.0, kickFoot.negateIfRightSide(0.25), 0.127));
+      submitFootPosition(kickFoot, new FramePoint3D(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.0, kickFoot.negateIfRightSide(0.25), 0.127));
 
-      submitFootPosition(kickFoot, new FramePoint(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.0, kickFoot.negateIfRightSide(0.25), 0));
+      submitFootPosition(kickFoot, new FramePoint3D(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.0, kickFoot.negateIfRightSide(0.25), 0));
 
       final FootLoadBearingBehavior footStateBehavior = new FootLoadBearingBehavior(communicationBridge);
       pipeLine.submitSingleTaskStage(new BehaviorAction(footStateBehavior)
@@ -131,7 +131,7 @@ public class KickBehavior extends AbstractBehavior
       });
    }
 
-   private void submitFootPosition(RobotSide robotSide, FramePoint desiredFootPosition)
+   private void submitFootPosition(RobotSide robotSide, FramePoint3D desiredFootPosition)
    {
       FrameOrientation desiredFootOrientation = new FrameOrientation(desiredFootPosition.getReferenceFrame());
       FramePose desiredFootPose = new FramePose(desiredFootPosition, desiredFootOrientation);

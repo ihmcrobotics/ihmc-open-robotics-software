@@ -3,13 +3,13 @@ package us.ihmc.humanoidRobotics.footstep;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -55,14 +55,14 @@ public class FootstepUtils
    }
 
    //used once
-   public static FramePoint getCenterOfFootstep(Footstep footstep)
+   public static FramePoint3D getCenterOfFootstep(Footstep footstep)
    {
       return getCenterOfFootstep(footstep, RobotSide.LEFT, 0.0, 0.0);
    }
 
-   public static FramePoint getCenterOfFootstep(Footstep stance, RobotSide side, double centimetersForwardFromCenter, double centimetersInFromCenter)
+   public static FramePoint3D getCenterOfFootstep(Footstep stance, RobotSide side, double centimetersForwardFromCenter, double centimetersInFromCenter)
    {
-      FramePoint stanceCenter = new FramePoint(stance.getSoleReferenceFrame());
+      FramePoint3D stanceCenter = new FramePoint3D(stance.getSoleReferenceFrame());
       stanceCenter.getReferenceFrame().checkReferenceFrameMatch(stance.getSoleReferenceFrame());
       stanceCenter.setX(stanceCenter.getX() + centimetersForwardFromCenter);
       stanceCenter.setY(stanceCenter.getY() + side.negateIfLeftSide(centimetersInFromCenter));
@@ -71,7 +71,7 @@ public class FootstepUtils
       return stanceCenter;
    }
    
-   public static FramePoint getCenterOfPredictedContactPointsInFootstep(Footstep footstep, RobotSide side, double centimetersForwardFromCenter, double centimetersInFromCenter)
+   public static FramePoint3D getCenterOfPredictedContactPointsInFootstep(Footstep footstep, RobotSide side, double centimetersForwardFromCenter, double centimetersInFromCenter)
    {
       Point2D footstepCenter;
       
@@ -89,19 +89,19 @@ public class FootstepUtils
       footstepCenter.setX(footstepCenter.getX() + centimetersForwardFromCenter);
       footstepCenter.setY(footstepCenter.getY() + side.negateIfLeftSide(centimetersInFromCenter));
       
-      FramePoint footstepCenter3d = new FramePoint(footstep.getSoleReferenceFrame(), footstepCenter.getX(), footstepCenter.getY(), 0.0);
+      FramePoint3D footstepCenter3d = new FramePoint3D(footstep.getSoleReferenceFrame(), footstepCenter.getX(), footstepCenter.getY(), 0.0);
       footstepCenter3d.changeFrame(worldFrame);
 
       return footstepCenter3d;
    }
 
    //used in 1 other class
-   public static RobotSide getFrontFootRobotSideBasedOnSoleCenters(SideDependentList<? extends ContactablePlaneBody> bipedFeet, FramePoint destination)
+   public static RobotSide getFrontFootRobotSideBasedOnSoleCenters(SideDependentList<? extends ContactablePlaneBody> bipedFeet, FramePoint3D destination)
    {
-      FramePoint destinationInWorld = new FramePoint(destination);
+      FramePoint3D destinationInWorld = new FramePoint3D(destination);
       destinationInWorld.changeFrame(worldFrame);
       SideDependentList<Double> distances = new SideDependentList<Double>();
-      FramePoint footCenter = new FramePoint();
+      FramePoint3D footCenter = new FramePoint3D();
       for (RobotSide side : RobotSide.values)
       {
          footCenter.setToZero(bipedFeet.get(side).getSoleFrame());
@@ -115,14 +115,14 @@ public class FootstepUtils
    }
 
    //used once
-   public static RobotSide getFrontFootRobotSideFromFootsteps(SideDependentList<Footstep> footSteps, FramePoint destination)
+   public static RobotSide getFrontFootRobotSideFromFootsteps(SideDependentList<Footstep> footSteps, FramePoint3D destination)
    {
-      FramePoint destinationInWorld = new FramePoint(destination);
+      FramePoint3D destinationInWorld = new FramePoint3D(destination);
       destinationInWorld.changeFrame(worldFrame);
       SideDependentList<Double> distances = new SideDependentList<Double>();
       for (RobotSide side : RobotSide.values)
       {
-         FramePoint footstepPosition = new FramePoint();
+         FramePoint3D footstepPosition = new FramePoint3D();
          footSteps.get(side).getPosition(footstepPosition);
          footstepPosition.changeFrame(worldFrame);
          distances.set(side, new Double(footstepPosition.distanceSquared(destinationInWorld)));
@@ -154,18 +154,18 @@ public class FootstepUtils
       return theta;
    }
 
-   public static List<FramePoint> calculateExpectedContactPoints(Footstep atFootstep, ContactablePlaneBody foot)
+   public static List<FramePoint3D> calculateExpectedContactPoints(Footstep atFootstep, ContactablePlaneBody foot)
    {
       if (!atFootstep.getBody().getName().equals(foot.getRigidBody().getName()))
          throw new RuntimeException("The RigidBodies are not the same.");
       
-      List<FramePoint> ret = foot.getContactPointsCopy();
+      List<FramePoint3D> ret = foot.getContactPointsCopy();
       
       ReferenceFrame soleFrame = atFootstep.getSoleReferenceFrame();
       
       for (int i = 0; i < ret.size(); i++)
       {
-         FramePoint contactPoint = ret.get(i);
+         FramePoint3D contactPoint = ret.get(i);
          contactPoint.checkReferenceFrameMatch(foot.getSoleFrame());
          contactPoint.setIncludingFrame(soleFrame, contactPoint.getPoint());
       }

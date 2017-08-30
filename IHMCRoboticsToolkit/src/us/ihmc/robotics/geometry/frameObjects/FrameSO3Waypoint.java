@@ -1,18 +1,17 @@
 package us.ihmc.robotics.geometry.frameObjects;
 
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.AbstractFrameObject;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
-import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class FrameSO3Waypoint extends AbstractFrameObject<FrameSO3Waypoint, SO3Waypoint> implements SO3WaypointInterface<FrameSO3Waypoint>
+public class FrameSO3Waypoint extends FrameGeometryObject<FrameSO3Waypoint, SO3Waypoint> implements SO3WaypointInterface<FrameSO3Waypoint>
 {
    private final SO3Waypoint geometryObject;
    
@@ -39,29 +38,18 @@ public class FrameSO3Waypoint extends AbstractFrameObject<FrameSO3Waypoint, SO3W
       geometryObject.set(orientation, angularVelocity);
    }
 
-   public void set(FrameOrientation orientation, FrameVector angularVelocity)
+   public void set(FrameOrientation orientation, FrameVector3D angularVelocity)
    {
       checkReferenceFrameMatch(orientation);
       checkReferenceFrameMatch(angularVelocity);
       geometryObject.set(orientation.getQuaternion(), angularVelocity.getVector());
    }
 
-   public void setIncludingFrame(FrameOrientation orientation, FrameVector angularVelocity)
+   public void setIncludingFrame(FrameOrientation orientation, FrameVector3D angularVelocity)
    {
       orientation.checkReferenceFrameMatch(angularVelocity);
       setToZero(orientation.getReferenceFrame());
       geometryObject.set(orientation.getQuaternion(), angularVelocity.getVector());
-   }
-
-   public void set(FrameSO3Waypoint so3Waypoint)
-   {
-      checkReferenceFrameMatch(so3Waypoint);
-      geometryObject.set(so3Waypoint);
-   }
-   
-   public void set(SO3Waypoint so3Waypoint)
-   {
-      geometryObject.set(so3Waypoint);
    }
 
    public void setIncludingFrame(ReferenceFrame referenceFrame, SO3WaypointInterface<?> so3Waypoint)
@@ -88,7 +76,7 @@ public class FrameSO3Waypoint extends AbstractFrameObject<FrameSO3Waypoint, SO3W
       geometryObject.setAngularVelocity(angularVelocity);
    }
 
-   public void setAngularVelocity(FrameVector angularVelocity)
+   public void setAngularVelocity(FrameVector3D angularVelocity)
    {
       checkReferenceFrameMatch(angularVelocity);
       geometryObject.setAngularVelocity(angularVelocity.getVector());
@@ -142,13 +130,13 @@ public class FrameSO3Waypoint extends AbstractFrameObject<FrameSO3Waypoint, SO3W
       geometryObject.getAngularVelocity(angularVelocityToPack);
    }
 
-   public void getAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       checkReferenceFrameMatch(angularVelocityToPack);
       geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
    }
 
-   public void getAngularVelocityIncludingFrame(FrameVector angularVelocityToPack)
+   public void getAngularVelocityIncludingFrame(FrameVector3D angularVelocityToPack)
    {
       setToZero(getReferenceFrame());
       geometryObject.getAngularVelocity(angularVelocityToPack.getVector());
@@ -159,13 +147,13 @@ public class FrameSO3Waypoint extends AbstractFrameObject<FrameSO3Waypoint, SO3W
       geometryObject.get(orientationToPack, angularVelocityToPack);
    }
 
-   public void get(FrameOrientation orientationToPack, FrameVector angularVelocityToPack)
+   public void get(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);
    }
 
-   public void getIncludingFrame(FrameOrientation orientationToPack, FrameVector angularVelocityToPack)
+   public void getIncludingFrame(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack)
    {
       getOrientationIncludingFrame(orientationToPack);
       getAngularVelocityIncludingFrame(angularVelocityToPack);
@@ -175,11 +163,5 @@ public class FrameSO3Waypoint extends AbstractFrameObject<FrameSO3Waypoint, SO3W
    {
       so3Waypoint.setOrientation(geometryObject.getOrientation());
       so3Waypoint.setAngularVelocity(geometryObject.getAngularVelocity());
-   }
-
-   @Override
-   public String toString()
-   {
-      return WaypointToStringTools.waypointToString(this);
    }
 }

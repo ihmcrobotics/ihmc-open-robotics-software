@@ -2,23 +2,23 @@ package us.ihmc.robotics.trajectories;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class PointSpliner
 {
    private CubicSplineCurveGenerator[] cubicSplineCurveGenerators;
    private ReferenceFrame referenceFrame;
 
-   public PointSpliner(ArrayList<FramePoint> listOfPoints)
+   public PointSpliner(ArrayList<FramePoint3D> listOfPoints)
    {
       this(listOfPoints, null, null);
    }
 
    @SuppressWarnings("unchecked")
-   public PointSpliner(ArrayList<FramePoint> listOfPoints, FrameVector initialHeading, FrameVector finalHeading)
+   public PointSpliner(ArrayList<FramePoint3D> listOfPoints, FrameVector3D initialHeading, FrameVector3D finalHeading)
    {
       if (listOfPoints.size() < 3)
          throw new RuntimeException("List must have at least 3 elements");
@@ -143,7 +143,7 @@ public class PointSpliner
       }
    }
 
-   public ArrayList<FramePoint> getSplinedPoints(int numberOfPoints)
+   public ArrayList<FramePoint3D> getSplinedPoints(int numberOfPoints)
    {
       Point2D[][] listOfPoints = new Point2D[3][numberOfPoints];
 
@@ -157,7 +157,7 @@ public class PointSpliner
       }
 
 
-      ArrayList<FramePoint> ret = new ArrayList<FramePoint>();
+      ArrayList<FramePoint3D> ret = new ArrayList<FramePoint3D>();
 
       @SuppressWarnings("unused")
       double maxIndex = listOfPoints[0].length - 1;
@@ -175,7 +175,7 @@ public class PointSpliner
          if (listOfPoints[1][i].getX() != listOfPoints[2][i].getX())
             throw new RuntimeException(listOfPoints[1][i].getX() + " != " + listOfPoints[2][i].getX());
 
-         FramePoint framePoint = new FramePoint(referenceFrame);
+         FramePoint3D framePoint = new FramePoint3D(referenceFrame);
 
          framePoint.setX(listOfPoints[0][i].getY());
          framePoint.setY(listOfPoints[1][i].getY());
@@ -189,8 +189,8 @@ public class PointSpliner
 
    public static void main(String[] args)
    {
-      ArrayList<FramePoint> listOfPoints = new ArrayList<FramePoint>();
-      FramePoint framePoint;
+      ArrayList<FramePoint3D> listOfPoints = new ArrayList<FramePoint3D>();
+      FramePoint3D framePoint;
 
 //    framePoint = new FramePoint(ReferenceFrame.getWorldFrame(), 10.0, 4.0, 00.0);
 //    listOfPoints.add(framePoint);
@@ -198,23 +198,23 @@ public class PointSpliner
 //    framePoint = new FramePoint(ReferenceFrame.getWorldFrame(), 12.0, 4.0, 00.0);
 //    listOfPoints.add(framePoint);
 
-      framePoint = new FramePoint(ReferenceFrame.getWorldFrame(), 20.0, 10.0, 00.0);
+      framePoint = new FramePoint3D(ReferenceFrame.getWorldFrame(), 20.0, 10.0, 00.0);
       listOfPoints.add(framePoint);
 
-      framePoint = new FramePoint(ReferenceFrame.getWorldFrame(), 48.0, 4.0, 00.0);
+      framePoint = new FramePoint3D(ReferenceFrame.getWorldFrame(), 48.0, 4.0, 00.0);
       listOfPoints.add(framePoint);
 
-      framePoint = new FramePoint(ReferenceFrame.getWorldFrame(), 30.0, 0.0, 00.0);
+      framePoint = new FramePoint3D(ReferenceFrame.getWorldFrame(), 30.0, 0.0, 00.0);
       listOfPoints.add(framePoint);
 
-      FrameVector initialHeading = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 1.0, 0.0);
-      FrameVector finalHeading = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, -4.0, 0.0);
+      FrameVector3D initialHeading = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 1.0, 0.0);
+      FrameVector3D finalHeading = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, -4.0, 0.0);
 
       PointSpliner pointSpliner = new PointSpliner(listOfPoints, initialHeading, finalHeading);
 
 //    PointSpliner pointSpliner = new PointSpliner(listOfPoints);
 
-      ArrayList<FramePoint> splinedList = pointSpliner.getSplinedPoints(100);
+      ArrayList<FramePoint3D> splinedList = pointSpliner.getSplinedPoints(100);
 
 
       Point2D[] checkPoints = new Point2D[splinedList.size()];

@@ -8,10 +8,10 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -33,16 +33,16 @@ public class SimulatedIMURawSensorReaderTest
 
    private final AxisAngle randomBodyAxisAngle = new AxisAngle();
    private final RigidBodyTransform randomTransformBodyToWorld = new RigidBodyTransform();
-   private final FrameVector randomLinearVelocity = new FrameVector((ReferenceFrame) null);
-   private final FrameVector randomAngularVelocity = new FrameVector((ReferenceFrame) null);
-   private final FrameVector randomLinearAcceleration = new FrameVector((ReferenceFrame) null);
-   private final FrameVector randomAngularAcceleration = new FrameVector((ReferenceFrame) null);
+   private final FrameVector3D randomLinearVelocity = new FrameVector3D((ReferenceFrame) null);
+   private final FrameVector3D randomAngularVelocity = new FrameVector3D((ReferenceFrame) null);
+   private final FrameVector3D randomLinearAcceleration = new FrameVector3D((ReferenceFrame) null);
+   private final FrameVector3D randomAngularAcceleration = new FrameVector3D((ReferenceFrame) null);
 
    private final RotationMatrix expectedIMUOrientation = new RotationMatrix();
    private final Vector3D expectedAngularVelocityInIMUFrame = new Vector3D();
    private final Vector3D expectedLinearAccelerationOfIMUInIMUFrame = new Vector3D();
 
-   private final FrameVector jointToIMUOffset = new FrameVector(bodyFrame, 2.0 * (Math.random() - 0.5), 2.0 * (Math.random() - 0.5),
+   private final FrameVector3D jointToIMUOffset = new FrameVector3D(bodyFrame, 2.0 * (Math.random() - 0.5), 2.0 * (Math.random() - 0.5),
                                                                 2.0 * (Math.random() - 0.5));
    //private final FrameVector jointToIMUOffset = new FrameVector(bodyFrame, 1.0, 0.0, 0.0); // for debugging
 
@@ -63,7 +63,7 @@ public class SimulatedIMURawSensorReaderTest
    public void setUp() throws Exception
    {
       transformIMUToJoint.setRotation(jointToIMURotation);
-      transformIMUToJoint.setTranslation(jointToIMUOffset.getVectorCopy());
+      transformIMUToJoint.setTranslation(jointToIMUOffset);
       transformJointToIMU.setAndInvert(transformIMUToJoint);
 
       imuFrame = fullRobotModel.createOffsetFrame(fullRobotModel.getBodyLink().getParentJoint(), transformIMUToJoint, "imuFrame");
@@ -151,33 +151,33 @@ public class SimulatedIMURawSensorReaderTest
 
    private void generateExpectedAngularVelocity()
    {
-      expectedAngularVelocityInIMUFrame.set(randomAngularVelocity.getVectorCopy()); // in joint/body frame
+      expectedAngularVelocityInIMUFrame.set(randomAngularVelocity); // in joint/body frame
       transformJointToIMU.transform(expectedAngularVelocityInIMUFrame);
    }
 
    private void generateExpectedLinearAcceleration()
    {
-      FrameVector centerAppliedAccelerationPart = new FrameVector(randomLinearAcceleration);
+      FrameVector3D centerAppliedAccelerationPart = new FrameVector3D(randomLinearAcceleration);
 
-      FrameVector centerCoriolisAccelerationPart = new FrameVector(bodyFrame);
+      FrameVector3D centerCoriolisAccelerationPart = new FrameVector3D(bodyFrame);
       centerCoriolisAccelerationPart.cross(randomAngularVelocity, randomLinearVelocity);
 
-      FrameVector gravitationalAccelerationPart = new FrameVector(fullRobotModel.getWorldFrame());
+      FrameVector3D gravitationalAccelerationPart = new FrameVector3D(fullRobotModel.getWorldFrame());
       gravitationalAccelerationPart.setZ(GRAVITY);
       gravitationalAccelerationPart.changeFrame(bodyFrame);
 
-      FrameVector centripedalAccelerationPart = new FrameVector(bodyFrame);
+      FrameVector3D centripedalAccelerationPart = new FrameVector3D(bodyFrame);
       centripedalAccelerationPart.cross(randomAngularVelocity, jointToIMUOffset);
       centripedalAccelerationPart.cross(randomAngularVelocity, centripedalAccelerationPart);
 
-      FrameVector angularAccelerationPart = new FrameVector(bodyFrame);
+      FrameVector3D angularAccelerationPart = new FrameVector3D(bodyFrame);
       angularAccelerationPart.cross(randomAngularAcceleration, jointToIMUOffset);
 
-      expectedLinearAccelerationOfIMUInIMUFrame.set(centerAppliedAccelerationPart.getVectorCopy());
-      expectedLinearAccelerationOfIMUInIMUFrame.add(centerCoriolisAccelerationPart.getVectorCopy());
-      expectedLinearAccelerationOfIMUInIMUFrame.add(gravitationalAccelerationPart.getVectorCopy());
-      expectedLinearAccelerationOfIMUInIMUFrame.add(centripedalAccelerationPart.getVectorCopy());
-      expectedLinearAccelerationOfIMUInIMUFrame.add(angularAccelerationPart.getVectorCopy());
+      expectedLinearAccelerationOfIMUInIMUFrame.set(centerAppliedAccelerationPart);
+      expectedLinearAccelerationOfIMUInIMUFrame.add(centerCoriolisAccelerationPart);
+      expectedLinearAccelerationOfIMUInIMUFrame.add(gravitationalAccelerationPart);
+      expectedLinearAccelerationOfIMUInIMUFrame.add(centripedalAccelerationPart);
+      expectedLinearAccelerationOfIMUInIMUFrame.add(angularAccelerationPart);
 
       transformJointToIMU.transform(expectedLinearAccelerationOfIMUInIMUFrame);
    }
@@ -323,8 +323,8 @@ public class SimulatedIMURawSensorReaderTest
          bodyFrame = rootJoint.getFrameAfterJoint();
       }
 
-      public void update(RigidBodyTransform transformBodyToWorld, FrameVector linearVelocity, FrameVector angularVelocity, FrameVector linearAcceleration,
-                         FrameVector angularAcceleration)
+      public void update(RigidBodyTransform transformBodyToWorld, FrameVector3D linearVelocity, FrameVector3D angularVelocity, FrameVector3D linearAcceleration,
+                         FrameVector3D angularAcceleration)
       {
          // Update Body Pose
          rootJoint.setPositionAndRotation(transformBodyToWorld); // TODO correct?
@@ -374,11 +374,11 @@ public class SimulatedIMURawSensorReaderTest
          return elevator;
       }
 
-      public FrameVector getReferenceFrameTransInWorldFrame(ReferenceFrame frame)
+      public FrameVector3D getReferenceFrameTransInWorldFrame(ReferenceFrame frame)
       {
          Vector3D trans = new Vector3D();
          frame.getTransformToDesiredFrame(worldFrame).getTranslation(trans);
-         FrameVector ret = new FrameVector(worldFrame, trans);
+         FrameVector3D ret = new FrameVector3D(worldFrame, trans);
          return ret;
       }
 

@@ -5,6 +5,10 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.HeightMap;
@@ -16,11 +20,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -97,9 +97,9 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
 
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
       RotationMatrix footToWorldRotation = computeDesiredFootRotation(desiredHeadingFrame);
-      FramePoint footstepPosition = getDesiredFootstepPosition(supportZUpFrame, swingLegSide, footToWorldRotation, 0.0, stepDuration);
+      FramePoint3D footstepPosition = getDesiredFootstepPosition(supportZUpFrame, swingLegSide, footToWorldRotation, 0.0, stepDuration);
 
-      setYoVariables(swingLegSide, footToWorldRotation, footstepPosition.getVectorCopy());
+      setYoVariables(swingLegSide, footToWorldRotation, new Vector3D(footstepPosition));
    }
 
    @Override
@@ -115,7 +115,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getPredictedHeadingFrame(timeFromNow);
       RotationMatrix footToWorldRotation = computeDesiredFootRotation(desiredHeadingFrame);
       FrameOrientation footstepOrientation = new FrameOrientation(worldFrame, footToWorldRotation);
-      FramePoint footstepPosition = getDesiredFootstepPosition(futureSupportZUpFrame, futureSwingLegSide, footToWorldRotation, timeFromNow, stepDuration);
+      FramePoint3D footstepPosition = getDesiredFootstepPosition(futureSupportZUpFrame, futureSwingLegSide, footToWorldRotation, timeFromNow, stepDuration);
       footstepPosition.changeFrame(worldFrame);
 
       FootstepDataMessage predictedFootstep = new FootstepDataMessage();
@@ -125,22 +125,22 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
       return predictedFootstep;
    }
 
-   private FramePoint getDesiredFootstepPosition(ReferenceFrame supportZUpFrame, RobotSide swingLegSide, RotationMatrix footToWorldRotation, double timeFromNow,
+   private FramePoint3D getDesiredFootstepPosition(ReferenceFrame supportZUpFrame, RobotSide swingLegSide, RotationMatrix footToWorldRotation, double timeFromNow,
          double stepDuration)
    {
-      FrameVector2d desiredOffsetFromAnkle = computeDesiredOffsetFromSupport(swingLegSide, timeFromNow, stepDuration);
-      FramePoint footstepPosition = computeDesiredFootPosition(swingLegSide, supportZUpFrame, desiredOffsetFromAnkle, footToWorldRotation);
+      FrameVector2D desiredOffsetFromAnkle = computeDesiredOffsetFromSupport(swingLegSide, timeFromNow, stepDuration);
+      FramePoint3D footstepPosition = computeDesiredFootPosition(swingLegSide, supportZUpFrame, desiredOffsetFromAnkle, footToWorldRotation);
       footstepPosition.changeFrame(worldFrame);
 
       return footstepPosition;
    }
 
-   private final FrameVector2d desiredHeading = new FrameVector2d();
-   private final FrameVector2d desiredVelocity = new FrameVector2d();
-   private final FrameVector2d toLeftOfDesiredHeading = new FrameVector2d();
+   private final FrameVector2D desiredHeading = new FrameVector2D();
+   private final FrameVector2D desiredVelocity = new FrameVector2D();
+   private final FrameVector2D toLeftOfDesiredHeading = new FrameVector2D();
 
    // TODO: clean up
-   private FrameVector2d computeDesiredOffsetFromSupport(RobotSide swingLegSide, double timeFromNow, double stepDuration)
+   private FrameVector2D computeDesiredOffsetFromSupport(RobotSide swingLegSide, double timeFromNow, double stepDuration)
    {
       ReferenceFrame desiredHeadingFrame = desiredHeadingControlModule.getDesiredHeadingFrame();
       ReferenceFrame predictedHeadingFrame = desiredHeadingControlModule.getPredictedHeadingFrame(timeFromNow);
@@ -152,7 +152,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
       velocityMagnitudeInHeading.set(desiredVelocity.dot(desiredHeading));
       velocityMagnitudeToLeftOfHeading.set(desiredVelocity.dot(toLeftOfDesiredHeading));
 
-      FrameVector2d desiredOffsetInPredictedHeadingFrame = new FrameVector2d();
+      FrameVector2D desiredOffsetInPredictedHeadingFrame = new FrameVector2D();
       if (desiredVelocityControlModule.getReferenceFrame().equals(desiredHeadingFrame))
       {
          // Assume constant velocity in rotating heading frame.
@@ -169,7 +169,7 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
          desiredOffsetInPredictedHeadingFrame.scale(stepDuration);
       }
 
-      FrameVector2d desiredOffsetFromSupport = new FrameVector2d(desiredOffsetInPredictedHeadingFrame);
+      FrameVector2D desiredOffsetFromSupport = new FrameVector2D(desiredOffsetInPredictedHeadingFrame);
       desiredOffsetFromSupport.add(0.0, swingLegSide.negateIfRightSide(inPlaceWidth.getDoubleValue()));
 
       if (swingLegSide == RobotSide.LEFT)
@@ -203,12 +203,12 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
       return footToSupportRotation;
    }
 
-   private FramePoint computeDesiredFootPosition(RobotSide upcomingSwingLegSide, ReferenceFrame upcomingSupportZUpFrame, FrameVector2d desiredOffsetFromSupport,
+   private FramePoint3D computeDesiredFootPosition(RobotSide upcomingSwingLegSide, ReferenceFrame upcomingSupportZUpFrame, FrameVector2D desiredOffsetFromSupport,
          RotationMatrix swingFootToWorldRotation)
    {
       ContactablePlaneBody upcomingSwingFoot = contactableBodies.get(upcomingSwingLegSide);
       desiredOffsetFromSupport.changeFrame(upcomingSupportZUpFrame);
-      FramePoint footstepPosition = new FramePoint(upcomingSupportZUpFrame, desiredOffsetFromSupport.getX(), desiredOffsetFromSupport.getY(), 0.0);
+      FramePoint3D footstepPosition = new FramePoint3D(upcomingSupportZUpFrame, desiredOffsetFromSupport.getX(), desiredOffsetFromSupport.getY(), 0.0);
       footstepPosition.changeFrame(worldFrame);
 
       double footstepMinZ = DesiredFootstepCalculatorTools.computeMinZPointWithRespectToSoleInWorldFrame(swingFootToWorldRotation, upcomingSwingFoot);
@@ -237,14 +237,14 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
           * zUpcomingSwing + upcomingSwingMinZ - footstepMinZ
           */
 
-         FramePoint upcomingSwingAnkle = new FramePoint(upcomingSwingFoot.getSoleFrame());
+         FramePoint3D upcomingSwingAnkle = new FramePoint3D(upcomingSwingFoot.getSoleFrame());
          upcomingSwingAnkle.changeFrame(worldFrame);
          double zUpcomingSwing = upcomingSwingAnkle.getZ();
 
-         FrameVector searchDirection = new FrameVector(upcomingSupportZUpFrame, 0.0, 0.0, -1.0);
-         List<FramePoint> contactPointsCopy = upcomingSwingFoot.getContactPointsCopy();
-         FramePoint upcomingSwingMinZPoint = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactPointsCopy, searchDirection, 1).get(0);
-         FrameVector deltaZ = new FrameVector(upcomingSwingMinZPoint);
+         FrameVector3D searchDirection = new FrameVector3D(upcomingSupportZUpFrame, 0.0, 0.0, -1.0);
+         List<FramePoint3D> contactPointsCopy = upcomingSwingFoot.getContactPointsCopy();
+         FramePoint3D upcomingSwingMinZPoint = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactPointsCopy, searchDirection, 1).get(0);
+         FrameVector3D deltaZ = new FrameVector3D(upcomingSwingMinZPoint);
          deltaZ.changeFrame(worldFrame);
          double upcomingSwingMinZ = deltaZ.getZ();
 

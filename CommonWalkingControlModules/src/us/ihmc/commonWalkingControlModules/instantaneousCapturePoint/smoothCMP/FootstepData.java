@@ -1,11 +1,10 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -57,7 +56,7 @@ public class FootstepData
     * Converts a point specified to the required reference frame if required
     * @param newPoint Point to be added
     */
-   public void addUnsafeFootstepPoint(FramePoint2d newPoint)
+   public void addUnsafeFootstepPoint(FramePoint2D newPoint)
    {
       if(newPoint == null)
       {

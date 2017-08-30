@@ -8,9 +8,9 @@ import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumRateTermCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Momentum;
@@ -74,21 +74,21 @@ public class CentroidalMomentumHandler
       adotV.set(centroidalMomentumRateTermCalculator.getADotVTerm());
    }
 
-   public void getAngularMomentum(FrameVector angularMomentumToPack)
+   public void getAngularMomentum(FrameVector3D angularMomentumToPack)
    {
       DenseMatrix64F centroidalMomentumMatrix = centroidalMomentumRateTermCalculator.getCentroidalMomentumMatrix();
       CommonOps.mult(centroidalMomentumMatrix, v, momentum);
       angularMomentumToPack.setIncludingFrame(centerOfMassFrame, 0, momentum);
    }
 
-   public void getLinearMomentum(FrameVector linearMomentumToPack)
+   public void getLinearMomentum(FrameVector3D linearMomentumToPack)
    {
       DenseMatrix64F centroidalMomentumMatrix = centroidalMomentumRateTermCalculator.getCentroidalMomentumMatrix();
       CommonOps.mult(centroidalMomentumMatrix, v, momentum);
       linearMomentumToPack.setIncludingFrame(centerOfMassFrame, 3, momentum);
    }
 
-   public void getCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack)
+   public void getCenterOfMassVelocity(FrameVector3D centerOfMassVelocityToPack)
    {
       getLinearMomentum(centerOfMassVelocityToPack);
       centerOfMassVelocityToPack.scale(1.0 / robotMass);

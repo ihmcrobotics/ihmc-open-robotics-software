@@ -1,5 +1,8 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -10,12 +13,9 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedRefere
 import us.ihmc.quadrupedRobotics.geometry.QuadrupedGeometryTools;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.shapes.FrameEllipsoid3d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -30,7 +30,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
    private final QuadrantDependentList<YoFramePoint> footstepWorkspaceCenterFramePoints = new QuadrantDependentList<>();
    private RobotQuadrant greatestDistanceFeasibleFootstep;
 
-   private final FramePoint temporaryCentroid = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final FramePoint3D temporaryCentroid = new FramePoint3D(ReferenceFrame.getWorldFrame());
 
    public LongestFeasibleStepChooser(QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters, CommonQuadrupedReferenceFrames commonQuadrupedReferenceFrames, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -60,7 +60,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
          QuadrupedGeometryTools.updateFootstepWorkspace(robotQuadrant, actualFootstepWorkspaces.get(robotQuadrant), commonQuadrupedReferenceFrames);
          
          // Update workspace center YoFramePoints
-         FramePoint workspaceCenterPoint = footstepWorkspaceCenterFramePoints.get(robotQuadrant).getFrameTuple();
+         FramePoint3D workspaceCenterPoint = footstepWorkspaceCenterFramePoints.get(robotQuadrant).getFrameTuple();
          double hipHeight = ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant)).getM23();
          
          double x = ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant)).getM03();
@@ -82,7 +82,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
    /**
     * Do the interesting part.
     */
-   private RobotQuadrant doTheCalculations(FrameVector desiredVelocity, double desiredYawRate, RobotQuadrant lastStepFoot, QuadrupedSupportPolygon actualSupportPolygon)
+   private RobotQuadrant doTheCalculations(FrameVector3D desiredVelocity, double desiredYawRate, RobotQuadrant lastStepFoot, QuadrupedSupportPolygon actualSupportPolygon)
    {
       if (desiredVelocity.getX() < ZERO_THRESHOLD && desiredVelocity.getY() < ZERO_THRESHOLD && desiredYawRate < ZERO_THRESHOLD)
       {
@@ -116,7 +116,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
          double greatestDistance = -1.0;
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
          {
-            FramePoint desiredPerfectFoot = desiredPerfectPolygon.getFootstep(robotQuadrant);
+            FramePoint3D desiredPerfectFoot = desiredPerfectPolygon.getFootstep(robotQuadrant);
             desiredPerfectFoot.changeFrame(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant));
             if (actualFootstepWorkspaces.get(robotQuadrant).isInsideOrOnSurface(desiredPerfectFoot, 1e-7))
             {
@@ -140,7 +140,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
    }
    
    @Override
-   public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepFoot, FrameVector desiredVelocity, double desiredYawRate)
+   public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepFoot, FrameVector3D desiredVelocity, double desiredYawRate)
    {
       updateState();
       return doTheCalculations(desiredVelocity, desiredYawRate, lastStepFoot, supportPolygon);

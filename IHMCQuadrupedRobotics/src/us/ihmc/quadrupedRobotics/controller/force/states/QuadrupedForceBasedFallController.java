@@ -1,8 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
-import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotics.partNames.JointRole;
-import us.ihmc.robotics.partNames.QuadrupedJointName;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -11,22 +10,24 @@ import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceCont
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.robotics.dataStructures.parameter.BooleanParameter;
-import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.SoleWaypoint;
-import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
+import us.ihmc.robotics.dataStructures.parameter.BooleanParameter;
+import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
+import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
+import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
+import us.ihmc.robotics.partNames.JointRole;
+import us.ihmc.robotics.partNames.QuadrupedJointName;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-
-import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class QuadrupedForceBasedFallController implements QuadrupedController
 {
@@ -58,7 +59,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
    // YoVariables
    private final YoBoolean yoUseForceFeedbackControl;
    private final YoEnum<FallBehaviorType> fallBehaviorType = YoEnum.create("fallBehaviorType", FallBehaviorType.class, registry);
-   private final YoEuclideanPositionGains yoPositionControllerGains;
+   private final YoPID3DGains yoPositionControllerGains;
 
    // Task space controller
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
@@ -70,7 +71,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
    private final QuadrupedTaskSpaceEstimator.Estimates taskSpaceEstimates;
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedReferenceFrames referenceFrames;
-   private final FramePoint solePositionSetpoint;
+   private final FramePoint3D solePositionSetpoint;
    private final Vector3D zeroVelocity;
    private FullQuadrupedRobotModel fullRobotModel;
 
@@ -82,7 +83,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
       taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       referenceFrames = controllerToolbox.getReferenceFrames();
       quadrupedSoleWaypointList = new QuadrupedSoleWaypointList();
-      solePositionSetpoint = new FramePoint();
+      solePositionSetpoint = new FramePoint3D();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          quadrupedSoleWaypointList.get(quadrant).add(new SoleWaypoint());
@@ -94,7 +95,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();
       fullRobotModel = environment.getFullRobotModel();
 
-      yoPositionControllerGains = new YoEuclideanPositionGains("positionControllerGains", registry);
+      yoPositionControllerGains = new DefaultYoPID3DGains("positionControllerGains", GainCoupling.NONE, true, registry);
       yoUseForceFeedbackControl = new YoBoolean("useForceFeedbackControl", registry);
 
       environment.getParentRegistry().addChild(registry);

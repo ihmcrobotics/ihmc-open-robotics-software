@@ -26,6 +26,10 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -34,15 +38,11 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
-import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -175,15 +175,15 @@ public class RigidBodyControlManagerTest
 
       assertEquals(RigidBodyControlMode.TASKSPACE, manager.getActiveControlMode());
 
-      FramePoint desiredPosition = new FramePoint();
-      FrameVector desiredLinearVelocity = new FrameVector();
-      FrameVector feedForwardLinearAcceleration = new FrameVector();
+      FramePoint3D desiredPosition = new FramePoint3D();
+      FrameVector3D desiredLinearVelocity = new FrameVector3D();
+      FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
       FrameOrientation desiredOrientation = new FrameOrientation();
-      FrameVector desiredAngularVelocity = new FrameVector();
-      FrameVector feedForwardAngularAcceleration = new FrameVector();
+      FrameVector3D desiredAngularVelocity = new FrameVector3D();
+      FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
 
       ReferenceFrame bodyFrame = bodyToControl.getBodyFixedFrame();
-      FramePoint initialPosition = new FramePoint(bodyFrame);
+      FramePoint3D initialPosition = new FramePoint3D(bodyFrame);
       FrameOrientation initialOrientation = new FrameOrientation(bodyFrame);
       initialPosition.changeFrame(worldFrame);
       initialOrientation.changeFrame(worldFrame);
@@ -280,7 +280,7 @@ public class RigidBodyControlManagerTest
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
       referenceFrames.add(ReferenceFrame.getWorldFrame());
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
-      referenceFrames.add(ReferenceFrame.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
+      referenceFrames.add(EuclidFrameRandomTools.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
 
       ReferenceFrameHashCodeResolver resolver = new ReferenceFrameHashCodeResolver(referenceFrames);
       for (int i = 0; i < 50; i++)
@@ -334,7 +334,7 @@ public class RigidBodyControlManagerTest
          assertEquals(RigidBodyControlMode.TASKSPACE, manager.getActiveControlMode());
 
          ReferenceFrame bodyFrame = bodyToControl.getBodyFixedFrame();
-         FramePoint initialPosition = new FramePoint(bodyFrame);
+         FramePoint3D initialPosition = new FramePoint3D(bodyFrame);
          FrameOrientation initialOrientation = new FrameOrientation(bodyFrame);
          initialPosition.changeFrame(worldFrame);
          initialOrientation.changeFrame(worldFrame);
@@ -413,19 +413,19 @@ public class RigidBodyControlManagerTest
 
       assertEquals(RigidBodyControlMode.TASKSPACE, manager.getActiveControlMode());
 
-      FramePoint desiredPosition = new FramePoint();
-      FrameVector desiredLinearVelocity = new FrameVector();
-      FrameVector feedForwardLinearAcceleration = new FrameVector();
+      FramePoint3D desiredPosition = new FramePoint3D();
+      FrameVector3D desiredLinearVelocity = new FrameVector3D();
+      FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
       FrameOrientation desiredOrientation = new FrameOrientation();
-      FrameVector desiredAngularVelocity = new FrameVector();
-      FrameVector feedForwardAngularAcceleration = new FrameVector();
+      FrameVector3D desiredAngularVelocity = new FrameVector3D();
+      FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
       FrameOrientation actualControlFrameOrientation = new FrameOrientation();
-      FramePoint actualControlFramePosition = new FramePoint();
+      FramePoint3D actualControlFramePosition = new FramePoint3D();
 
       ReferenceFrame bodyFrame = bodyToControl.getBodyFixedFrame();
       PoseReferenceFrame controlFrame = new PoseReferenceFrame("TestControlFrame", bodyFrame);
       controlFrame.setPoseAndUpdate(controlFramePosition, controlFrameOrientation);
-      FramePoint initialPosition = new FramePoint(controlFrame);
+      FramePoint3D initialPosition = new FramePoint3D(controlFrame);
       FrameOrientation initialOrientation = new FrameOrientation(controlFrame);
       initialPosition.changeFrame(worldFrame);
       initialOrientation.changeFrame(worldFrame);
@@ -525,8 +525,8 @@ public class RigidBodyControlManagerTest
       Map<String, YoPIDGains> jointspaceGains = new HashMap<>();
       jointspaceGains.put(joint1.getName(), new YoPIDGains("Joint1Gains", testRegistry));
       jointspaceGains.put(joint2.getName(), new YoPIDGains("Joint2Gains", testRegistry));
-      YoOrientationPIDGainsInterface taskspaceOrientationGains = new YoSymmetricSE3PIDGains("OrientationGains", testRegistry);
-      YoPositionPIDGainsInterface taskspacePositionGains = new YoSymmetricSE3PIDGains("PositionGains", testRegistry);
+      YoPID3DGains taskspaceOrientationGains = new SymmetricYoPIDSE3Gains("OrientationGains", testRegistry);
+      YoPID3DGains taskspacePositionGains = new SymmetricYoPIDSE3Gains("PositionGains", testRegistry);
       TObjectDoubleHashMap<String> jointspaceWeights = new TObjectDoubleHashMap<>();
       jointspaceWeights.put(joint1.getName(), 1.0);
       jointspaceWeights.put(joint2.getName(), 1.0);

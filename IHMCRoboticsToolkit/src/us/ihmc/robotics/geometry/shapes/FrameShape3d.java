@@ -1,14 +1,14 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.geometry.Shape3D;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.robotics.geometry.AbstractFrameObject;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape3D<G>> extends AbstractFrameObject<F, G>
+public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape3D<G>> extends FrameGeometryObject<F, G>
 {
    public FrameShape3d(G shape3d)
    {
@@ -25,7 +25,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
     * @param point
     * @return
     */
-   public final double distance(FramePoint point)
+   public final double distance(FramePoint3D point)
    {
       checkReferenceFrameMatch(point);
       
@@ -39,7 +39,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
     * @param normalToPack  out parameter packed with the resulting normal vector
     * @param pointInWorldToCheck
     */
-   public final void getClosestPointAndNormalAt(FramePoint closestPointToPack, FrameVector normalToPack, FramePoint pointInWorldToCheck)
+   public final void getClosestPointAndNormalAt(FramePoint3D closestPointToPack, FrameVector3D normalToPack, FramePoint3D pointInWorldToCheck)
    {
       checkReferenceFrameMatch(pointInWorldToCheck);
       closestPointToPack.setToZero(referenceFrame);
@@ -68,7 +68,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
     * @param pointToCheck
     * @return
     */
-   public final boolean isInsideOrOnSurface(FramePoint pointToCheck)
+   public final boolean isInsideOrOnSurface(FramePoint3D pointToCheck)
    {
       checkReferenceFrameMatch(pointToCheck);
       
@@ -82,7 +82,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
     * @param epsilon
     * @return
     */
-   public final boolean isInsideOrOnSurface(FramePoint pointToCheck, double epsilon)
+   public final boolean isInsideOrOnSurface(FramePoint3D pointToCheck, double epsilon)
    {
       checkReferenceFrameMatch(pointToCheck);
       
@@ -96,7 +96,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
     * @param pointToCheckAndPack both an input parameter (the point to check),
     *          and an output parameter (packed with the resulting ortho point).
     */
-   public final void orthogonalProjection(FramePoint pointToCheckAndPack)
+   public final void orthogonalProjection(FramePoint3D pointToCheckAndPack)
    {
       checkReferenceFrameMatch(pointToCheckAndPack);
       

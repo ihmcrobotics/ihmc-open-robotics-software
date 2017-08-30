@@ -15,6 +15,9 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -27,11 +30,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -164,14 +164,14 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
          Footstep upcomingFootstep = footsteps.get(0);
 
          FootSpoof transferFromFootSpoof = contactableFeet.get(transferFromFootstep.getRobotSide());
-         FramePoint transferFromFootFramePoint = new FramePoint();
+         FramePoint3D transferFromFootFramePoint = new FramePoint3D();
          transferFromFootstep.getPosition(transferFromFootFramePoint);
          FrameOrientation transferFromFootOrientation = new FrameOrientation();
          transferFromFootstep.getOrientation(transferFromFootOrientation);
          transferFromFootSpoof.setPose(transferFromFootFramePoint, transferFromFootOrientation);
 
          FootSpoof transferToFootSpoof = contactableFeet.get(transferToFootstep.getRobotSide());
-         FramePoint transferToFootFramePoint = new FramePoint();
+         FramePoint3D transferToFootFramePoint = new FramePoint3D();
          transferToFootstep.getPosition(transferToFootFramePoint);
          FrameOrientation transferToFootOrientation = new FrameOrientation();
          transferToFootstep.getOrientation(transferToFootOrientation);
@@ -223,13 +223,13 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
                updatable.update(time);
             }
 
-            FramePoint2d transferFromFootPosition = new FramePoint2d();
-            FramePoint2d transferToFootPosition = new FramePoint2d();
+            FramePoint2D transferFromFootPosition = new FramePoint2D();
+            FramePoint2D transferToFootPosition = new FramePoint2D();
 
             transferFromFootstep.getFootstepPose().getPosition2dIncludingFrame(transferFromFootPosition);
             transferToFootstep.getFootstepPose().getPosition2dIncludingFrame(transferToFootPosition);
 
-            FramePoint2d queryPosition = new FramePoint2d();
+            FramePoint2D queryPosition = new FramePoint2D();
 
             double alpha = ((double) i) / ((double) (numberOfTicks - 1));
 
@@ -249,7 +249,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
             boolean isInDoubleSupport = supportLeg == null;
             lookAheadCoMHeightTrajectoryGenerator.solve(coMHeightPartialDerivativesDataToPack, isInDoubleSupport);
 
-            FramePoint comPosition = new FramePoint();
+            FramePoint3D comPosition = new FramePoint3D();
             pelvisFrame.setZ(comPosition.getZ());
             pelvisFrame.update();
 
@@ -328,7 +328,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
          RigidBody foot = contactableFoot.getRigidBody();
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         List<FramePoint2d> contactFramePoints = contactableFoot.getContactPoints2d();
+         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction,
                registry);

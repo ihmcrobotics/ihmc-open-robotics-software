@@ -1,8 +1,8 @@
 package us.ihmc.robotics.controllers;
 
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 
 public interface ControllerFailureListener
 {
-   public void controllerFailed(FrameVector2d fallingDirection);
+   public void controllerFailed(FrameVector2D fallingDirection);
 }

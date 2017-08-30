@@ -14,14 +14,14 @@ import org.ejml.data.DenseMatrix64F;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ScrewTools
 {
@@ -527,7 +527,7 @@ public class ScrewTools
    {
       String jointNameOriginal = original.getName();
       RigidBodyTransform jointTransform = original.getOffsetTransform3D();
-      Vector3D jointAxisCopy = original.getJointAxis().getVectorCopy();
+      Vector3D jointAxisCopy = new Vector3D(original.getJointAxis());
       OneDoFJoint clone;
 
       if (original instanceof RevoluteJoint)
@@ -545,13 +545,13 @@ public class ScrewTools
 
    private static RigidBody cloneRigidBody(RigidBody original, String cloneSuffix, InverseDynamicsJoint parentJointOfClone)
    {
-      FramePoint comOffset = new FramePoint();
+      FramePoint3D comOffset = new FramePoint3D();
       original.getCoMOffset(comOffset);
       comOffset.changeFrame(original.getParentJoint().getFrameAfterJoint());
       String nameOriginal = original.getName();
       Matrix3D massMomentOfInertiaPartCopy = original.getInertia().getMassMomentOfInertiaPartCopy();
       double mass = original.getInertia().getMass();
-      Vector3D comOffsetCopy = comOffset.getVectorCopy();
+      Vector3D comOffsetCopy = new Vector3D(comOffset);
       RigidBody clone = ScrewTools.addRigidBody(nameOriginal + cloneSuffix, parentJointOfClone, massMomentOfInertiaPartCopy, mass, comOffsetCopy);
       return clone;
    }

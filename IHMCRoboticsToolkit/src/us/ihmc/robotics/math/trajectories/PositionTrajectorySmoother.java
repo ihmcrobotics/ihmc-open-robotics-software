@@ -2,11 +2,11 @@ package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 
 public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
@@ -17,21 +17,21 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
    private final YoFrameVector yoSmoothedVelocity;
    private final YoFrameVector yoSmoothedAcceleration;
 
-   private final FramePoint smoothedPosition = new FramePoint();
-   private final FrameVector smoothedVelocity = new FrameVector();
-   private final FrameVector smoothedAcceleration = new FrameVector();
+   private final FramePoint3D smoothedPosition = new FramePoint3D();
+   private final FrameVector3D smoothedVelocity = new FrameVector3D();
+   private final FrameVector3D smoothedAcceleration = new FrameVector3D();
 
-   private final FramePoint positionInput;
-   private final FrameVector velocityInput;
-   private final FrameVector accelerationInput;
+   private final FramePoint3D positionInput;
+   private final FrameVector3D velocityInput;
+   private final FrameVector3D accelerationInput;
 
-   private final FrameVector positionError;
-   private final FrameVector velocityError;
-   private final FrameVector accelerationError;
+   private final FrameVector3D positionError;
+   private final FrameVector3D velocityError;
+   private final FrameVector3D accelerationError;
    
-   private final FrameVector desiredJerk;
+   private final FrameVector3D desiredJerk;
    
-   private final FrameVector tempVector;
+   private final FrameVector3D tempVector;
    
    private final YoDouble positionGain, velocityGain, accelerationGain;
    
@@ -63,17 +63,17 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
       velocityGain = new YoDouble(namePrefix + "VelocityGain", registry);
       accelerationGain = new YoDouble(namePrefix + "AccelerationGain", registry);
       
-      positionInput = new FramePoint(trajectoryReferenceFrame);
-      velocityInput = new FrameVector(trajectoryReferenceFrame);
-      accelerationInput = new FrameVector(trajectoryReferenceFrame);
+      positionInput = new FramePoint3D(trajectoryReferenceFrame);
+      velocityInput = new FrameVector3D(trajectoryReferenceFrame);
+      accelerationInput = new FrameVector3D(trajectoryReferenceFrame);
 
-      positionError = new FrameVector(trajectoryReferenceFrame);
-      velocityError = new FrameVector(trajectoryReferenceFrame);
-      accelerationError = new FrameVector(trajectoryReferenceFrame);
+      positionError = new FrameVector3D(trajectoryReferenceFrame);
+      velocityError = new FrameVector3D(trajectoryReferenceFrame);
+      accelerationError = new FrameVector3D(trajectoryReferenceFrame);
       
-      desiredJerk = new FrameVector(trajectoryReferenceFrame);
+      desiredJerk = new FrameVector3D(trajectoryReferenceFrame);
       
-      tempVector = new FrameVector(trajectoryReferenceFrame);
+      tempVector = new FrameVector3D(trajectoryReferenceFrame);
       
       parentRegistry.addChild(registry);
    }
@@ -175,22 +175,22 @@ public class PositionTrajectorySmoother implements PositionTrajectoryGenerator
       return isTrajectoryInputDone && isSmoothingDone;
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       yoSmoothedPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       yoSmoothedVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       yoSmoothedAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

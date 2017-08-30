@@ -1,6 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -22,10 +24,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -139,8 +139,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
-            FramePoint point1 = offsetPointFromDoor(doorOffsetPoint1);
-            FramePoint point2 = offsetPointFromDoor(doorOffsetPoint2);
+            FramePoint3D point1 = offsetPointFromDoor(doorOffsetPoint1);
+            FramePoint3D point2 = offsetPointFromDoor(doorOffsetPoint2);
 
             walkToInteractableObjectBehavior.setWalkPoints(point1, point2);
          }
@@ -238,13 +238,13 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
    }
 
-   private FramePoint offsetPointFromDoor(Vector3D32 point)
+   private FramePoint3D offsetPointFromDoor(Vector3D32 point)
    {
 
       PoseReferenceFrame doorPose = new PoseReferenceFrame("doorFrame", ReferenceFrame.getWorldFrame());
       doorPose.setPoseAndUpdate(new RigidBodyTransform(searchForDoorBehavior.getLocation()));
 
-      FramePoint point1 = new FramePoint(doorPose, point);
+      FramePoint3D point1 = new FramePoint3D(doorPose, point);
       return point1;
    }
 
@@ -293,7 +293,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
    private FramePose offsetPointFromFrameInWorldFrame(PoseReferenceFrame frame, Point3D point3d, Quaternion quat4d)
    {
-      FramePoint point1 = new FramePoint(frame, point3d);
+      FramePoint3D point1 = new FramePoint3D(frame, point3d);
       point1.changeFrame(ReferenceFrame.getWorldFrame());
       FrameOrientation orient = new FrameOrientation(frame, quat4d);
       orient.changeFrame(ReferenceFrame.getWorldFrame());

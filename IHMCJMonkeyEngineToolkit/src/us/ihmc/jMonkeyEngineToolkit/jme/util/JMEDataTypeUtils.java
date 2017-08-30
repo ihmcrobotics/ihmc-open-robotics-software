@@ -10,6 +10,7 @@ import com.jme3.math.Transform;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -20,7 +21,6 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.Ray3d;
 
@@ -124,7 +124,7 @@ public class JMEDataTypeUtils
       target.set((float) original.getX(), (float) original.getY(), (float) original.getZ());
    }
 
-   public static void packFramePointInJMEVector(FramePoint original, Vector3f target)
+   public static void packFramePointInJMEVector(FramePoint3D original, Vector3f target)
    {
       target.set((float) original.getX(), (float) original.getY(), (float) original.getZ());
    }

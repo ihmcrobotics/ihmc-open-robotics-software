@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset.simulatedSensors;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.corruptors.NoisyYoDouble;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.sensors.RawIMUSensorsInterface;

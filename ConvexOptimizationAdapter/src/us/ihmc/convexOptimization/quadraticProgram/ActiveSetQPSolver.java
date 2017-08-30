@@ -7,6 +7,8 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public interface ActiveSetQPSolver
 {
+   void setConvergenceThreshold(double convergenceThreshold);
+
    void setMaxNumberOfIterations(int maxNumberOfIterations);
 
    void clear();

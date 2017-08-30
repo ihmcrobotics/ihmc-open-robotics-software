@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
@@ -16,9 +19,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameQuaternionInMultipleFrames;
@@ -27,7 +28,6 @@ import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
@@ -60,14 +60,14 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    private final YoDouble currentTime;
    private final YoDouble trajectoryTime;
 
-   private final FramePoint tempPosition = new FramePoint();
+   private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameOrientation tempOrientation = new FrameOrientation();
 
    // For viz
    private final boolean visualize;
    private final YoGraphicsList yoGraphicsList;
    private final BagOfBalls bagOfBalls;
-   private final FramePoint ballPosition = new FramePoint();
+   private final FramePoint3D ballPosition = new FramePoint3D();
    private final int numberOfBalls = 50;
 
    /** Use a YoBoolean to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
@@ -232,7 +232,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       initialOrientationForViz.setAndMatchFrame(tempOrientation);
    }
 
-   public void setInitialPose(FramePoint initialPosition, FrameOrientation initialOrientation)
+   public void setInitialPose(FramePoint3D initialPosition, FrameOrientation initialOrientation)
    {
       this.initialPosition.setAndMatchFrame(initialPosition);
       this.initialOrientation.setAndMatchFrame(initialOrientation);
@@ -250,7 +250,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       finalOrientationForViz.setAndMatchFrame(tempOrientation);
    }
 
-   public void setFinalPose(FramePoint finalPosition, FrameOrientation finalOrientation)
+   public void setFinalPose(FramePoint3D finalPosition, FrameOrientation finalOrientation)
    {
       this.finalPosition.setAndMatchFrame(finalPosition);
       this.finalOrientation.setAndMatchFrame(finalOrientation);
@@ -308,8 +308,10 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       else
       {
          currentPosition.interpolate(initialPosition, finalPosition, quinticParameterPolynomial.getPosition());
-         currentVelocity.subAndScale(alphaVel, finalPosition, initialPosition);
-         currentAcceleration.subAndScale(alphaAcc, finalPosition, initialPosition);
+         currentVelocity.sub(finalPosition, initialPosition);
+         currentVelocity.scale(alphaVel);
+         currentAcceleration.sub(finalPosition, initialPosition);
+         currentAcceleration.scale(alphaAcc);
 
          currentOrientation.interpolate(initialOrientation, finalOrientation, quinticParameterPolynomial.getPosition());
          orientationInterpolationCalculator.computeAngularVelocity(currentAngularVelocity, initialOrientation, finalOrientation, alphaAngVel);
@@ -349,17 +351,17 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       showViz.set(false);
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       currentPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       currentVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       currentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
@@ -369,24 +371,24 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
       currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   public void getAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       currentAngularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);
    }
 
-   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
    {
       currentAngularAcceleration.getFrameTupleIncludingFrame(angularAccelerationToPack);
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);
       getAcceleration(accelerationToPack);
    }
 
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

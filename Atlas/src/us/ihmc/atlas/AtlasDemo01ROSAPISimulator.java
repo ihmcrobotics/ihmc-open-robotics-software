@@ -15,7 +15,7 @@ import com.martiansoftware.jsap.JSAPException;
 import ihmc_msgs.HandDesiredConfigurationRosMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.ros.ROSAPISimulator;
 import us.ihmc.avatar.ros.subscriber.IHMCMsgToPacketSubscriber;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -29,13 +29,16 @@ public class AtlasDemo01ROSAPISimulator extends ROSAPISimulator
 {
    private static final String ROBOT_NAME = "atlas";
    private static final String DEFAULT_ROBOT_MODEL = "ATLAS_UNPLUGGED_V5_NO_HANDS";
-   
-   public AtlasDemo01ROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix,
+
+   private final AtlasRobotVersion robotVersion;
+
+   public AtlasDemo01ROSAPISimulator(AtlasRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix,
          boolean runAutomaticDiagnosticRoutine, boolean disableViz,
          List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> customSubscribers,
          List<Map.Entry<String, RosTopicPublisher<? extends Message>>> customPublishers) throws IOException
    {
       super(robotModel, startingLocation, nameSpace, tfPrefix, runAutomaticDiagnosticRoutine, disableViz);
+      robotVersion = robotModel.getAtlasVersion();
    }
 
    @Override
@@ -49,7 +52,7 @@ public class AtlasDemo01ROSAPISimulator extends ROSAPISimulator
       List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> subscribers = new ArrayList<>();
       MessageFactory messageFactory = NodeConfiguration.newPrivate().getTopicMessageFactory();
 
-      if(robotModel.getDRCHandType().isHandSimulated())
+      if(robotVersion.getHandModel().isHandSimulated())
       {
          HandDesiredConfigurationRosMessage message = messageFactory.newFromType("ihmc_msgs/HandDesiredConfigurationRosMessage");
          RosTopicSubscriberInterface<HandDesiredConfigurationRosMessage> sub = IHMCMsgToPacketSubscriber
@@ -69,17 +72,17 @@ public class AtlasDemo01ROSAPISimulator extends ROSAPISimulator
    public static void main(String[] args) throws JSAPException, IOException
    {
       Options opt = parseArguments(args);
-      
-      DRCRobotModel robotModel;
+
+      AtlasRobotModel robotModel;
       try
       {
          if (opt.robotModel.equals(DEFAULT_STRING))
          {
-            robotModel = AtlasRobotModelFactory.createDRCRobotModel(DEFAULT_ROBOT_MODEL, DRCRobotModel.RobotTarget.SCS, false);
+            robotModel = AtlasRobotModelFactory.createDRCRobotModel(DEFAULT_ROBOT_MODEL, RobotTarget.SCS, false);
          }
          else
          {
-            robotModel = AtlasRobotModelFactory.createDRCRobotModel(opt.robotModel, DRCRobotModel.RobotTarget.SCS, false);
+            robotModel = AtlasRobotModelFactory.createDRCRobotModel(opt.robotModel, RobotTarget.SCS, false);
          }
       }
       catch (IllegalArgumentException e)
@@ -88,7 +91,7 @@ public class AtlasDemo01ROSAPISimulator extends ROSAPISimulator
          System.out.println("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
          return;
       }
-      
+
       DRCStartingLocation startingLocation;
       try
       {
@@ -100,7 +103,7 @@ public class AtlasDemo01ROSAPISimulator extends ROSAPISimulator
          System.out.println("Starting locations: " + DRCObstacleCourseStartingLocation.optionsToString());
          return;
       }
-      
+
       String nameSpace = opt.nameSpace + "/" + ROBOT_NAME;
       new AtlasDemo01ROSAPISimulator(robotModel, startingLocation, nameSpace, opt.tfPrefix, opt.runAutomaticDiagnosticRoutine, opt.disableViz, null, null);
    }

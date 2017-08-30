@@ -5,6 +5,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.beetle.footContact.SimulatedPlaneContactStateUpdater;
 import us.ihmc.exampleSimulations.beetle.parameters.HexapodControllerParameters;
@@ -16,11 +19,8 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -41,7 +41,7 @@ public class HexapodStepController
    private RobotSextant[] legsSwinging = leftTriple;
    private RobotSextant[] legsSupporting = rightTriple;
 
-   private final FramePoint desiredPosition = new FramePoint();
+   private final FramePoint3D desiredPosition = new FramePoint3D();
 
    private RigidBody[] rigidBodiesToControl = new RigidBody[6];
 
@@ -128,7 +128,7 @@ public class HexapodStepController
       parentRegistry.addChild(registry);
    }
 
-   public void doControl(HexapodControllerParameters parameters, FrameVector desiredBodyLinearVelocity, FrameVector desiredAngularVelocity)
+   public void doControl(HexapodControllerParameters parameters, FrameVector3D desiredBodyLinearVelocity, FrameVector3D desiredAngularVelocity)
    {
       contactStateCommands.clear();
       feedbackControlCommandList.clear();
@@ -178,7 +178,7 @@ public class HexapodStepController
       }
    }
 
-   private void replanTrajectories(FrameVector desiredBodyLinearVelocity, FrameVector desiredAngularVelocity)
+   private void replanTrajectories(FrameVector3D desiredBodyLinearVelocity, FrameVector3D desiredAngularVelocity)
    {
       if (swingTime.getDoubleValue() - timeInSwing.getDoubleValue() > 0.1 && replanTrajectories.getBooleanValue())
       {
@@ -203,13 +203,13 @@ public class HexapodStepController
       }
    }
 
-   private final FramePoint currentPosition = new FramePoint();
+   private final FramePoint3D currentPosition = new FramePoint3D();
    private final Twist currentTwist = new Twist();
-   private final FrameVector currentVelocity = new FrameVector();
-   private final FrameVector finalDesiredVelocity = new FrameVector();
-   private final FramePoint pointFixedInBodyFrame = new FramePoint();
+   private final FrameVector3D currentVelocity = new FrameVector3D();
+   private final FrameVector3D finalDesiredVelocity = new FrameVector3D();
+   private final FramePoint3D pointFixedInBodyFrame = new FramePoint3D();
 
-   private void initializeTrajectories(FrameVector desiredBodyLinearVelocity, FrameVector desiredAngularVelocity)
+   private void initializeTrajectories(FrameVector3D desiredBodyLinearVelocity, FrameVector3D desiredAngularVelocity)
    {
       for (RobotSextant robotSextant : legsSwinging)
       {
@@ -248,8 +248,8 @@ public class HexapodStepController
       }
    }
 
-   private final FrameVector desiredLinearVelocity = new FrameVector();
-   private final FrameVector feedForwardLinearAcceleration = new FrameVector();
+   private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
+   private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
 
    private void swingFoot(RobotSextant robotSextant)
    {

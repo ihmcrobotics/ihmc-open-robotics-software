@@ -1,14 +1,14 @@
 package us.ihmc.stateEstimation.humanoid;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.sensorProcessing.simulatedSensors.JointAndIMUSensorMap;
@@ -69,7 +69,7 @@ public class DRCKalmanFilterBasedStateEstimator implements DRCStateEstimatorInte
    public void initializeEstimatorToActual(Tuple3DReadOnly initialCoMPosition, QuaternionReadOnly initialEstimationLinkOrientation)
    {
       // Setting the initial CoM Position here.
-      FramePoint estimatedCoMPosition = new FramePoint();
+      FramePoint3D estimatedCoMPosition = new FramePoint3D();
       stateEstimatorWithPorts.getEstimatedCoMPosition(estimatedCoMPosition);
       estimatedCoMPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       estimatedCoMPosition.set(initialCoMPosition);

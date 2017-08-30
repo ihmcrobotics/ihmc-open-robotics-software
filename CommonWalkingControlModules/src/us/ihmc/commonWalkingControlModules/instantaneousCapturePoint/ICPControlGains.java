@@ -1,100 +1,60 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-
 public class ICPControlGains
 {
-   private final String suffix;
-   private final YoVariableRegistry registry;
+   private double kpParallelToMotion;
+   private double kpOrthogonalToMotion;
+   private double ki;
+   private double kiBleedOff;
+   private double feedbackPartMaxRate;
 
-   private final YoDouble kpParallelToMotion;
-   private final YoDouble kpOrthogonalToMotion;
-   private final YoDouble ki;
-   private final YoDouble kiBleedOff;
-   private YoDouble feedbackPartMaxRate;
-
-   public ICPControlGains(String suffix, YoVariableRegistry registry)
-   {
-      this.suffix = suffix;
-      this.registry = registry;
-
-      kpParallelToMotion = new YoDouble("captureKpParallel" + suffix, registry);
-      kpOrthogonalToMotion = new YoDouble("captureKpOrthogonal" + suffix, registry);
-      ki = new YoDouble("captureKi" + suffix, registry);
-      kiBleedOff = new YoDouble("captureKiBleedOff" + suffix, registry);
-      kiBleedOff.set(1.0);
-   }
-
-   public void setKpParallelToMotion(double kpParallelToMotion)
-   {
-      this.kpParallelToMotion.set(kpParallelToMotion);
-   }
-
-   public void setKpOrthogonalToMotion(double kpOrthogonalToMotion)
-   {
-      this.kpOrthogonalToMotion.set(kpOrthogonalToMotion);
-   }
-
-   public void setKi(double ki)
-   {
-      this.ki.set(ki);
-   }
-
-   public void setKiBleedOff(double kiBleedOff)
-   {
-      this.kiBleedOff.set(kiBleedOff);
-   }
-
-   public void setFeedbackPartMaxRate(double maxRate)
-   {
-      if (feedbackPartMaxRate == null)
-         feedbackPartMaxRate = new YoDouble("feedbackPartMaxRate" + suffix, registry);
-      feedbackPartMaxRate.set(maxRate);
-   }
-
-   public YoDouble getYoKpParallelToMotion()
+   public double getKpParallelToMotion()
    {
       return kpParallelToMotion;
    }
 
-   public YoDouble getYoKpOrthogonalToMotion()
+   public void setKpParallelToMotion(double kpParallelToMotion)
    {
-      return kpOrthogonalToMotion;
-   }
-
-   public YoDouble getYoKi()
-   {
-      return ki;
-   }
-
-   public YoDouble getYoKiBleedOff()
-   {
-      return kiBleedOff;
-   }
-
-   public YoDouble getFeedbackPartMaxRate()
-   {
-      return feedbackPartMaxRate;
-   }
-
-   public double getKpParallelToMotion()
-   {
-      return kpParallelToMotion.getDoubleValue();
+      this.kpParallelToMotion = kpParallelToMotion;
    }
 
    public double getKpOrthogonalToMotion()
    {
-      return kpOrthogonalToMotion.getDoubleValue();
+      return kpOrthogonalToMotion;
+   }
+
+   public void setKpOrthogonalToMotion(double kpOrthogonalToMotion)
+   {
+      this.kpOrthogonalToMotion = kpOrthogonalToMotion;
    }
 
    public double getKi()
    {
-      return ki.getDoubleValue();
+      return ki;
+   }
+
+   public void setKi(double ki)
+   {
+      this.ki = ki;
    }
 
    public double getKiBleedOff()
    {
-      return kiBleedOff.getDoubleValue();
+      return kiBleedOff;
+   }
+
+   public void setKiBleedOff(double kiBleedOff)
+   {
+      this.kiBleedOff = kiBleedOff;
+   }
+
+   public double getFeedbackPartMaxRate()
+   {
+      return feedbackPartMaxRate;
+   }
+
+   public void setFeedbackPartMaxRate(double feedbackPartMaxRate)
+   {
+      this.feedbackPartMaxRate = feedbackPartMaxRate;
    }
 }

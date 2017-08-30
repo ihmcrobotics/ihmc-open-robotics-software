@@ -1,21 +1,34 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
-import us.ihmc.robotics.geometry.FrameObject;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.utils.NameBasedHashCodeTools;
+
+import java.util.Random;
 
 /**
  * This is a holder for frame related information that is passed through packages that implement
  * {@link FrameBasedMessage}.
  */
+@RosMessagePacket(documentation = "This is a holder for frame related information. Valid codes and their associated frames include:\n"
+      + "MIDFEET_ZUP_FRAME = -100\n"
+      + "PELVIS_ZUP_FRAME = -101\n"
+      + "PELVIS_FRAME = -102\n"
+      + "CHEST_FRAME = -103\n"
+      + "CENTER_OF_MASS_FRAME = -104\n"
+      + "LEFT_SOLE_FRAME = -105\n"
+      + "RIGHT_SOLE_FRAME = -106", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, isIHMCPacket = false)
 public class FrameInformation implements EpsilonComparable<FrameInformation>
 {
    /**
     * The ID of the reference frame that a trajectory is executed in.
     */
-   private long trajectoryReferenceFrameId;
+   @RosExportedField(documentation = "The ID of the reference frame that a trajectory is executed in.")
+   public long trajectoryReferenceFrameId;
 
    /**
     * The ID of the reference frame that trajectory data in a packet is expressed in. The frame of the
@@ -25,7 +38,7 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
     * </p>
     * It is recommended that this should be the same frame as the {@link #trajectoryReferenceFrameId} to
     * avoid unexpected behavior. Setting this frame to something different then the trajectory execution
-    * frame is equivalent to calling {@link FrameObject#changeFrame(trajectoryFrame)} on all trajectory
+    * frame is equivalent to calling {@link FrameGeometryObject#changeFrame(ReferenceFrame)} on all trajectory
     * data right before it is received by the controller.
     * </p>
     * The data frame is only useful if the user is unable to change the frame the data is expressed in
@@ -39,7 +52,10 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
     * this will cause the resulting trajectory to be wrong since the transformation to trajectory frame
     * happens at the start of execution rather than every controller tick.
     */
-   private long dataReferenceFrameId = NameBasedHashCodeTools.DEFAULT_HASHCODE;
+   @RosExportedField(documentation = "The ID of the reference frame that trajectory data in a packet is expressed in. The frame of the\n"
+                                   + "trajectory data will be switched to the trajectory frame immediately when the message is received\n"
+                                   + "by the controller.")
+   public long dataReferenceFrameId = NameBasedHashCodeTools.DEFAULT_HASHCODE;
 
    public FrameInformation()
    {
@@ -49,6 +65,12 @@ public class FrameInformation implements EpsilonComparable<FrameInformation>
    public FrameInformation(ReferenceFrame trajectoryFrame)
    {
       trajectoryReferenceFrameId = trajectoryFrame.getNameBasedHashCode();
+   }
+
+   public FrameInformation(Random random)
+   {
+      trajectoryReferenceFrameId = random.nextLong();
+      dataReferenceFrameId = random.nextLong();
    }
 
    public long getTrajectoryReferenceFrameId()

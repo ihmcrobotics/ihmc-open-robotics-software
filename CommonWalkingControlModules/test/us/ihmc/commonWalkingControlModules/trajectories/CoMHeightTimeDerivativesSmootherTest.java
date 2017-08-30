@@ -7,10 +7,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.MemoryTools;
@@ -54,7 +54,7 @@ public class CoMHeightTimeDerivativesSmootherTest
       smoother.initialize(comHeightDataIn);
       smoother.smooth(comHeightDataOut, comHeightDataIn);
 
-      FramePoint comHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      FramePoint3D comHeightPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
       comHeightDataOut.getComHeight(comHeightPoint);
       double comHeightOut = comHeightPoint.getZ();
       double comHeightVelocityOut = comHeightDataOut.getComHeightVelocity();
@@ -99,7 +99,7 @@ public class CoMHeightTimeDerivativesSmootherTest
       smoother.initialize(comHeightDataIn);
       smoother.smooth(comHeightDataOut, comHeightDataIn);
 
-      FramePoint comHeightPoint = new FramePoint(ReferenceFrame.getWorldFrame());
+      FramePoint3D comHeightPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
       comHeightDataOut.getComHeight(comHeightPoint);
       double comHeightOut = comHeightPoint.getZ();
       double comHeightVelocityOut = comHeightDataOut.getComHeightVelocity();

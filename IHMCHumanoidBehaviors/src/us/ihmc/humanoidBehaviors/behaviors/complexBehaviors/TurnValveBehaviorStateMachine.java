@@ -1,6 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine.TurnValveBehaviorState;
@@ -21,9 +23,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -141,8 +141,8 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          @Override
          protected void setBehaviorInput()
          {
-            FramePoint point1 = offsetPointFromValve(valveWalkOffsetPoint1);
-            FramePoint point2 = offsetPointFromValve(valveWalkOffsetPoint2);
+            FramePoint3D point1 = offsetPointFromValve(valveWalkOffsetPoint1);
+            FramePoint3D point2 = offsetPointFromValve(valveWalkOffsetPoint2);
 
             walkToInteractableObjectBehavior.setWalkPoints(point1, point2);
          }
@@ -215,12 +215,12 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
 
    }
 
-   private FramePoint offsetPointFromValve(Vector3D32 point)
+   private FramePoint3D offsetPointFromValve(Vector3D32 point)
    {
       PoseReferenceFrame valvePose = new PoseReferenceFrame("valveFrame", ReferenceFrame.getWorldFrame());
       valvePose.setPoseAndUpdate(new RigidBodyTransform(searchForValveBehavior.getLocation()));
 
-      FramePoint point1 = new FramePoint(valvePose, point);
+      FramePoint3D point1 = new FramePoint3D(valvePose, point);
       return point1;
    }
 

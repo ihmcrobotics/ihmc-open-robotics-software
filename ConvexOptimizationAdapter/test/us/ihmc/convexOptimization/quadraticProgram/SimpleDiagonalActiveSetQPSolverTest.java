@@ -5,6 +5,6 @@ public class SimpleDiagonalActiveSetQPSolverTest extends AbstractSimpleActiveSet
    @Override
    public SimpleActiveSetQPSolverInterface createSolverToTest()
    {
-      return new SimpleEfficientActiveSetQPSolver();
+      return new SimpleDiagonalActiveSetQPSolver();
    }
 }

@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.frames;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public interface ReferenceFrames
 {

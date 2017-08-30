@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.javadecklink.Capture;
+import us.ihmc.javadecklink.Capture.CodecID;
 import us.ihmc.javadecklink.CaptureHandler;
 import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.tools.maps.CircularLongMap;
@@ -18,7 +19,7 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
     */
 
    private final int decklink;
-   private final double quality;
+   private final YoVariableLoggerOptions options;
    private Capture capture;
    
    private final CircularLongMap circularLongMap = new CircularLongMap(10000);
@@ -30,8 +31,8 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
    public BlackmagicVideoDataLogger(String name, File logPath, LogProperties logProperties, int decklinkID, YoVariableLoggerOptions options) throws IOException
    {
       super(logPath, logProperties, name);
-      decklink = decklinkID;
-      quality = options.getVideoQuality();
+      this.decklink = decklinkID;
+      this.options = options;
 
       createCaptureInterface();
    }
@@ -39,11 +40,29 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
    private void createCaptureInterface()
    {
       File timestampFile = new File(timestampData);
-      capture = new Capture(this);
+      
+      switch(options.getVideoCodec())
+      {
+      case AV_CODEC_ID_H264:
+         capture = new Capture(this, CodecID.AV_CODEC_ID_H264);
+         capture.setOption("g", "1");
+         capture.setOption("crf", String.valueOf(options.getCrf()));
+         capture.setOption("profile", "high");
+         capture.setOption("coder", "vlc");
+         break;
+      case AV_CODEC_ID_MJPEG:
+         capture = new Capture(this, CodecID.AV_CODEC_ID_H264);
+         capture.setMJPEGQuality(options.getVideoQuality());
+         break;
+         default: throw new RuntimeException();
+      }
+      
+      
+      
       try
       {
          timestampWriter = new FileWriter(timestampFile);
-         capture.startCapture(videoFile, decklink, quality);
+         capture.startCapture(videoFile, decklink);
       }
       catch (IOException e)
       {

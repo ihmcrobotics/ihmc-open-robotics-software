@@ -1,23 +1,18 @@
 package us.ihmc.graphicsDescription.plotting;
 
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.graphicsDescription.plotting.frames.MetersReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PixelsReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PlotterReferenceFrame;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 @SuppressWarnings("serial")
-public class PlotterVector2d extends FrameVector2d
+public class PlotterVector2d extends FrameVector2D
 {
    public PlotterVector2d(PlotterVector2d frameTuple2d)
    {
       super(frameTuple2d);
-   }
-
-   public PlotterVector2d(PlotterReferenceFrame referenceFrame, double x, double y, String name)
-   {
-      super(referenceFrame, x, y, name);
    }
 
    public PlotterVector2d(PlotterReferenceFrame referenceFrame, double x, double y)

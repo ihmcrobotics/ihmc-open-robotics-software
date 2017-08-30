@@ -2,6 +2,9 @@ package us.ihmc.quadrupedRobotics.controller.forceDevelopment.states;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -33,9 +36,6 @@ import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
@@ -85,7 +85,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final LinearInvertedPendulumModel lipModel;
 
    // feedback controllers
-   private final FramePoint cmpPositionSetpoint;
+   private final FramePoint3D cmpPositionSetpoint;
    private final QuadrupedComPositionController.Setpoints comPositionControllerSetpoints;
    private final QuadrupedComPositionController comPositionController;
    private final QuadrupedBodyOrientationController.Setpoints bodyOrientationControllerSetpoints;
@@ -105,15 +105,15 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private static int NUMBER_OF_PREVIEW_STEPS = 16;
    private double bodyYawSetpoint;
    private final GroundPlaneEstimator groundPlaneEstimator;
-   private final QuadrantDependentList<FramePoint> groundPlanePositions;
+   private final QuadrantDependentList<FramePoint3D> groundPlanePositions;
    private final QuadrupedXGaitSettings xGaitSettings;
    private final QuadrupedXGaitPlanner xGaitStepPlanner;
    private final ArrayList<QuadrupedTimedStep> xGaitPreviewSteps;
    private final EndDependentList<QuadrupedTimedStep> xGaitCurrentSteps;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
-   private final FramePoint supportCentroid;
-   private final FrameVector stepAdjustmentVector;
-   private final FramePoint stepGoalPosition;
+   private final FramePoint3D supportCentroid;
+   private final FrameVector3D stepAdjustmentVector;
+   private final FramePoint3D stepGoalPosition;
 
    // inputs
    private final YoDouble haltTime = new YoDouble("haltTime", registry);
@@ -140,7 +140,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       lipModel = controllerToolbox.getLinearInvertedPendulumModel();
 
       // feedback controllers
-      cmpPositionSetpoint = new FramePoint();
+      cmpPositionSetpoint = new FramePoint3D();
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
       comPositionController = controllerToolbox.getComPositionController();
       bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
@@ -164,7 +164,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       groundPlanePositions = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         groundPlanePositions.set(robotQuadrant, new FramePoint());
+         groundPlanePositions.set(robotQuadrant, new FramePoint3D());
       }
       xGaitSettings = new QuadrupedXGaitSettings();
       xGaitStepPlanner = new QuadrupedXGaitPlanner();
@@ -178,11 +178,11 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       {
          xGaitCurrentSteps.set(robotEnd, new QuadrupedTimedStep());
       }
-      stepAdjustmentVector = new FrameVector();
-      stepGoalPosition = new FramePoint();
+      stepAdjustmentVector = new FrameVector3D();
+      stepGoalPosition = new FramePoint3D();
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
             maximumStepStrideParameter.get());
-      supportCentroid = new FramePoint();
+      supportCentroid = new FramePoint3D();
 
       runtimeEnvironment.getParentRegistry().addChild(registry);
    }

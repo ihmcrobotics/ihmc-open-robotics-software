@@ -11,7 +11,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.math.filters.BacklashProcessingYoVariable;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -45,8 +45,8 @@ public class IMUBasedJointVelocityEstimator
    private final Map<OneDoFJoint, YoDouble> jointPositions = new LinkedHashMap<>();
    private final Map<OneDoFJoint, YoDouble> jointPositionsFromIMUOnly = new LinkedHashMap<>();
    private final OneDoFJoint[] joints;
-   private final FrameVector chestAngularVelocity = new FrameVector();
-   private final FrameVector pelvisAngularVelocity = new FrameVector();
+   private final FrameVector3D chestAngularVelocity = new FrameVector3D();
+   private final FrameVector3D pelvisAngularVelocity = new FrameVector3D();
 
    private final DenseMatrix64F jacobianAngularPart64F = new DenseMatrix64F(3, 3);
    private final DenseMatrix64F inverseAngularJacobian64F = new DenseMatrix64F(3, 3);

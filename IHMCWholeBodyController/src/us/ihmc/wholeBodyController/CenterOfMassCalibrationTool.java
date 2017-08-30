@@ -1,17 +1,17 @@
 package us.ihmc.wholeBodyController;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpPreserveYReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,7 +34,7 @@ public class CenterOfMassCalibrationTool implements Updatable
 
    private final CenterOfMassCalculator spinePitchCenterOfMassCalculator, leftHipPitchCenterOfMassCalculator, rightHipPitchCenterOfMassCalculator,
            leftKneeCenterOfMassCalculator, rightKneeCenterOfMassCalculator;
-   private final FramePoint tempFramePoint = new FramePoint();
+   private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final YoGraphicCoordinateSystem spinePitchZUpFrameViz;
    private final YoGraphicCoordinateSystem leftHipPitchFrameViz, leftHipPitchZUpFrameViz;
 
@@ -132,16 +132,16 @@ public class CenterOfMassCalibrationTool implements Updatable
          ForceSensorDataReadOnly forceSensorData = ankleForceSensors.get(robotSide);
          ReferenceFrame measurementFrame = forceSensorData.getMeasurementFrame();
          forceSensorData.getWrench(footWrench);
-         FrameVector footForce = footWrench.getLinearPartAsFrameVectorCopy();
-         FrameVector footTorque = footWrench.getAngularPartAsFrameVectorCopy();
+         FrameVector3D footForce = footWrench.getLinearPartAsFrameVectorCopy();
+         FrameVector3D footTorque = footWrench.getAngularPartAsFrameVectorCopy();
          
          ReferenceFrame jointFrame = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).getFrameAfterJoint();
          
-         FramePoint forceSensorLocation = new FramePoint(measurementFrame);
+         FramePoint3D forceSensorLocation = new FramePoint3D(measurementFrame);
          forceSensorLocation.changeFrame(jointFrame);
          footForce.changeFrame(jointFrame);
          
-         FrameVector cross = new FrameVector(jointFrame);
+         FrameVector3D cross = new FrameVector3D(jointFrame);
          cross.cross(forceSensorLocation, footForce);
          
          footTorque.changeFrame(jointFrame);

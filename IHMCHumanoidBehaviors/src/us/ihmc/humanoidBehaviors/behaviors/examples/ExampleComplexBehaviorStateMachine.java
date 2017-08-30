@@ -1,6 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine.ExampleStates;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
@@ -12,8 +14,6 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<ExampleStates>
@@ -164,7 +164,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
 
             TextToSpeechPacket p1 = new TextToSpeechPacket("Doing Whole Body Behavior");
             sendPacket(p1);
-            FramePoint point = new FramePoint(midZupFrame, 0.2, 0.2, 0.3);
+            FramePoint3D point = new FramePoint3D(midZupFrame, 0.2, 0.2, 0.3);
             point.changeFrame(ReferenceFrame.getWorldFrame());
 
             //the point in the world you want to move the hand to.

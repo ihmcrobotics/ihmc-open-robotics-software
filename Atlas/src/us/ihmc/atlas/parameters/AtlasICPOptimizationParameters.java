@@ -12,6 +12,11 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
       this.runningOnRealRobot = runningOnRealRobot;
    }
 
+   public boolean useSimpleOptimization()
+   {
+      return false;
+   }
+
    /** {@inheritDoc} */
    @Override
    public int numberOfFootstepsToConsider()
@@ -44,14 +49,14 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFeedbackLateralWeight()
    {
-      return runningOnRealRobot ? 0.5 : 0.5;
+      return runningOnRealRobot ? 0.5 : 0.05;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackForwardWeight()
    {
-      return runningOnRealRobot ? 0.5 : 0.1;
+      return runningOnRealRobot ? 0.5 : 0.5;
    }
 
    /** {@inheritDoc} */
@@ -171,34 +176,6 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    public double getMinimumTimeRemaining()
    {
       return 0.0001;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getDoubleSupportMaxCoPForwardExit()
-   {
-      return 0.0; //0.005;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getDoubleSupportMaxCoPLateralExit()
-   {
-      return 0.0; //0.005;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getSingleSupportMaxCoPForwardExit()
-   {
-      return 0.0; //0.005;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getSingleSupportMaxCoPLateralExit()
-   {
-      return 0.0; //0.005;
    }
 
    /** {@inheritDoc} */

@@ -14,9 +14,10 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ConvexPolygonToolsTest
 {
@@ -32,30 +33,30 @@ public class ConvexPolygonToolsTest
 
       ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame");
       double xMin1 = 0.0, xMax1 = 1.0, yMin1 = 0.0, yMax1 = 1.0;
-      ArrayList<FramePoint2d> points1 = ConvexPolygon2dTestHelpers.generateRandomCircularFramePoints(random, zUpFrame, xMin1, xMax1, yMin1, yMax1, 100);
+      ArrayList<FramePoint2D> points1 = ConvexPolygon2dTestHelpers.generateRandomCircularFramePoints(random, zUpFrame, xMin1, xMax1, yMin1, yMax1, 100);
 
       double xMin2 = 2.0, xMax2 = 3.0, yMin2 = 0.0, yMax2 = 2.0;
-      ArrayList<FramePoint2d> points2 = ConvexPolygon2dTestHelpers.generateRandomCircularFramePoints(random, zUpFrame, xMin2, xMax2, yMin2, yMax2, 100);
+      ArrayList<FramePoint2D> points2 = ConvexPolygon2dTestHelpers.generateRandomCircularFramePoints(random, zUpFrame, xMin2, xMax2, yMin2, yMax2, 100);
 
       FrameConvexPolygon2d polygon1 = new FrameConvexPolygon2d(points1);
       FrameConvexPolygon2d polygon2 = new FrameConvexPolygon2d(points2);
 
       FrameConvexPolygon2dAndConnectingEdges frameConvexPolygon2dAndConnectingEdges = null;
 
-      ArrayList<FramePoint2d> pointsThatShouldBeInCombinedPolygon = new ArrayList<FramePoint2d>();
+      ArrayList<FramePoint2D> pointsThatShouldBeInCombinedPolygon = new ArrayList<FramePoint2D>();
       int numberOfPointsInCombinedPolygon = 10000;
 
       for (int i = 0; i < numberOfPointsInCombinedPolygon; i++)
       {
          int randomIndex = random.nextInt(points1.size());
-         FramePoint2d firstPoint = points1.get(randomIndex);
+         FramePoint2D firstPoint = points1.get(randomIndex);
 
          randomIndex = random.nextInt(points1.size());
-         FramePoint2d secondPoint = points2.get(randomIndex);
+         FramePoint2D secondPoint = points2.get(randomIndex);
 
          double alpha = random.nextDouble();
          //         FramePoint2d morphedPoint = FramePoint2d.morph(firstPoint, secondPoint, alpha);
-         FramePoint2d morphedPoint = new FramePoint2d();
+         FramePoint2D morphedPoint = new FramePoint2D(zUpFrame);
          morphedPoint.interpolate(firstPoint, secondPoint, alpha);
 
          pointsThatShouldBeInCombinedPolygon.add(morphedPoint);
@@ -100,7 +101,7 @@ public class ConvexPolygonToolsTest
       assertTrue(polygon1.isPointInside(connectingEdge2.getSecondEndpointCopy()));
       assertTrue(polygon2.isPointInside(connectingEdge2.getFirstEndpointCopy()));
 
-      ArrayList<FramePoint2d> pointsThatShouldNotBeInOriginals = new ArrayList<FramePoint2d>();
+      ArrayList<FramePoint2D> pointsThatShouldNotBeInOriginals = new ArrayList<FramePoint2D>();
 
       //      pointsThatShouldNotBeInOriginals.add(FramePoint2d.morph(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), -epsilon));
       //      pointsThatShouldNotBeInOriginals.add(FramePoint2d.morph(connectingEdge1.getFirstEndPointCopy(), connectingEdge1.getSecondEndPointCopy(), epsilon));
@@ -111,14 +112,14 @@ public class ConvexPolygonToolsTest
       //      pointsThatShouldNotBeInOriginals.add(FramePoint2d.morph(connectingEdge2.getFirstEndPointCopy(), connectingEdge2.getSecondEndPointCopy(), 1.0 - epsilon));
       //      pointsThatShouldNotBeInOriginals.add(FramePoint2d.morph(connectingEdge2.getFirstEndPointCopy(), connectingEdge2.getSecondEndPointCopy(), 1.0 + epsilon));
 
-      FramePoint2d point1 = new FramePoint2d();
-      FramePoint2d point2 = new FramePoint2d();
-      FramePoint2d point3 = new FramePoint2d();
-      FramePoint2d point4 = new FramePoint2d();
-      FramePoint2d point5 = new FramePoint2d();
-      FramePoint2d point6 = new FramePoint2d();
-      FramePoint2d point7 = new FramePoint2d();
-      FramePoint2d point8 = new FramePoint2d();
+      FramePoint2D point1 = new FramePoint2D(zUpFrame);
+      FramePoint2D point2 = new FramePoint2D(zUpFrame);
+      FramePoint2D point3 = new FramePoint2D(zUpFrame);
+      FramePoint2D point4 = new FramePoint2D(zUpFrame);
+      FramePoint2D point5 = new FramePoint2D(zUpFrame);
+      FramePoint2D point6 = new FramePoint2D(zUpFrame);
+      FramePoint2D point7 = new FramePoint2D(zUpFrame);
+      FramePoint2D point8 = new FramePoint2D(zUpFrame);
 
       point1.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), -epsilon);
       point2.interpolate(connectingEdge1.getFirstEndpointCopy(), connectingEdge1.getSecondEndpointCopy(), epsilon);
@@ -138,15 +139,15 @@ public class ConvexPolygonToolsTest
       pointsThatShouldNotBeInOriginals.add(point7);
       pointsThatShouldNotBeInOriginals.add(point8);
 
-      ArrayList<FramePoint2d> pointsThatAreNotInCombinedPolygon = new ArrayList<FramePoint2d>();
+      ArrayList<FramePoint2D> pointsThatAreNotInCombinedPolygon = new ArrayList<FramePoint2D>();
       int numberOfPointsToCheck = 10000;
 
       double xMin3 = -0.5, xMax3 = 3.5, yMin3 = -0.5, yMax3 = 2.5;
 
-      ArrayList<FramePoint2d> pointsToCheck = ConvexPolygon2dTestHelpers.generateRandomRectangularFramePoints(random, zUpFrame, xMin3, xMax3, yMin3, yMax3,
+      ArrayList<FramePoint2D> pointsToCheck = ConvexPolygon2dTestHelpers.generateRandomRectangularFramePoints(random, zUpFrame, xMin3, xMax3, yMin3, yMax3,
                                                                                                               numberOfPointsToCheck);
 
-      for (FramePoint2d pointToCheck : pointsToCheck)
+      for (FramePoint2D pointToCheck : pointsToCheck)
       {
          if (!combinedPolygon.isPointInside(pointToCheck))
          {
@@ -291,11 +292,11 @@ public class ConvexPolygonToolsTest
 
             for (int i = 0; i < originalPolygon.getNumberOfVertices(); i++)
             {
-               plotter.addFramePoint2d(new FramePoint2d(ReferenceFrame.getWorldFrame(), originalPolygon.getVertex(i)), Color.BLUE);
+               plotter.addFramePoint2d(new FramePoint2D(ReferenceFrame.getWorldFrame(), originalPolygon.getVertex(i)), Color.BLUE);
             }
             for (int i = 0; i < polygon.getNumberOfVertices(); i++)
             {
-               plotter.addFramePoint2d(new FramePoint2d(ReferenceFrame.getWorldFrame(), polygon.getVertex(i)), Color.RED);
+               plotter.addFramePoint2d(new FramePoint2D(ReferenceFrame.getWorldFrame(), polygon.getVertex(i)), Color.RED);
             }
 
             System.out.println("Expecting " + desiredNumberOfVertices + " Vertices.");

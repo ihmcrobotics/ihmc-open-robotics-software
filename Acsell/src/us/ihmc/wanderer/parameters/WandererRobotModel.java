@@ -1,16 +1,11 @@
 package us.ihmc.wanderer.parameters;
 
 import java.io.InputStream;
-import java.util.LinkedHashMap;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.jme3.math.Transform;
 
 import us.ihmc.acsell.network.AcsellSensorSuiteManager;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
-import us.ihmc.avatar.handControl.HandCommandManager;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -18,13 +13,9 @@ import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameterization;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
@@ -34,28 +25,23 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wanderer.controlParameters.WandererCapturePointPlannerParameters;
 import us.ihmc.wanderer.controlParameters.WandererStateEstimatorParameters;
+import us.ihmc.wanderer.controlParameters.WandererUIParameters;
 import us.ihmc.wanderer.controlParameters.WandererWalkingControllerParameters;
-import us.ihmc.wanderer.hardware.controllers.WandererOutputProcessor;
 import us.ihmc.wanderer.initialSetup.WandererInitialSetup;
-import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
-import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 public class WandererRobotModel implements DRCRobotModel
 {
@@ -72,8 +58,6 @@ public class WandererRobotModel implements DRCRobotModel
    private final DRCRobotSensorInformation sensorInformation;
    private final WandererCapturePointPlannerParameters capturePointPlannerParameters;
    private final WandererWalkingControllerParameters walkingControllerParameters;
-
-   private boolean enableJointDamping = true;
 
    private final RobotDescription robotDescription;
 
@@ -124,12 +108,6 @@ public class WandererRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCRobotPhysicalProperties getPhysicalProperties()
-   {
-      return new WandererPhysicalProperties();
-   }
-
-   @Override
    public WandererJointMap getJointMap()
    {
       return jointMap;
@@ -139,12 +117,6 @@ public class WandererRobotModel implements DRCRobotModel
    public Transform getJmeTransformWristToHand(RobotSide side)
    {
       return new Transform();
-   }
-
-   @Override
-   public RigidBodyTransform getTransform3dWristToHand(RobotSide side)
-   {
-      return JMEGeometryUtils.transformFromJMECoordinatesToZup( getJmeTransformWristToHand(side));
    }
 
    private String getSdfFile()
@@ -182,18 +154,6 @@ public class WandererRobotModel implements DRCRobotModel
    }
 
    @Override
-   public void setEnableJointDamping(boolean enableJointDamping)
-   {
-      this.enableJointDamping  = enableJointDamping;
-   }
-
-   @Override
-   public boolean getEnableJointDamping()
-   {
-      return enableJointDamping;
-   }
-
-   @Override
    public HandModel getHandModel()
    {
       return null;
@@ -212,12 +172,10 @@ public class WandererRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
+   public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)
    {
       boolean enableTorqueVelocityLimits = false;
       HumanoidJointNameMap jointMap = getJointMap();
-      boolean enableJointDamping = getEnableJointDamping();
-
       return new HumanoidFloatingRootJointRobot(robotDescription, jointMap, enableJointDamping, enableTorqueVelocityLimits);
    }
 
@@ -257,27 +215,15 @@ public class WandererRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SideDependentList<HandCommandManager> createHandCommandManager()
-   {
-      return null;
-   }
-
-   @Override
    public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
    {
       return capturePointPlannerParameters;
    }
 
    @Override
-   public ICPOptimizationParameters getICPOptimizationParameters()
+   public UIParameters getUIParameters()
    {
-      return null;
-   }
-
-   @Override
-   public DRCHandType getDRCHandType()
-   {
-      return DRCHandType.NONE;
+      return new WandererUIParameters();
    }
 
    @Override
@@ -288,21 +234,9 @@ public class WandererRobotModel implements DRCRobotModel
    }
 
    @Override
-   public FootstepPlanningParameterization getFootstepParameters()
-   {
-      return null;
-   }
-
-   @Override
    public LogModelProvider getLogModelProvider()
    {
       return new SDFLogModelProvider(jointMap.getModelName(), getSdfFileAsStream(), getResourceDirectories());
-   }
-
-   @Override
-   public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel)
-   {
-      return new WandererOutputProcessor(controllerFullRobotModel);
    }
 
    @Override
@@ -318,13 +252,6 @@ public class WandererRobotModel implements DRCRobotModel
       }
    }
 
-   @Override
-   public DefaultArmConfigurations getDefaultArmConfigurations()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
    @Override public String getSimpleRobotName()
    {
       return "WANDERER";
@@ -334,24 +261,6 @@ public class WandererRobotModel implements DRCRobotModel
    public CollisionBoxProvider getCollisionBoxProvider()
    {
       return null;
-   }
-
-   @Override
-   public FootstepSnappingParameters getSnappingParameters()
-   {
-      return null;
-   }
-
-   @Override
-   public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
-   {
-      return walkingControllerParameters.getSliderBoardControlledNeckJointsWithLimits();
-   }
-
-   @Override
-   public SideDependentList<LinkedHashMap<String,ImmutablePair<Double,Double>>> getSliderBoardControlledFingerJointsWithLimits()
-   {
-      return walkingControllerParameters.getSliderBoardControlledFingerJointsWithLimits();
    }
 
    @Override

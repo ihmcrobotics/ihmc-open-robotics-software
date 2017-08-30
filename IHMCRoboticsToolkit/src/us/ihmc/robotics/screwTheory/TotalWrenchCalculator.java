@@ -2,7 +2,7 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.Collection;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class TotalWrenchCalculator
 {

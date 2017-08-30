@@ -6,48 +6,48 @@ import java.util.LinkedHashMap;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfigurationManager;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.CommonNames;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.CommonNames;
-import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfigurationManager;
 
 public class WalkControllerSliderBoard
 {
    private static double MIN_COM_OFFSET_ABOVE_GROUND = 0.0;
    private static double MAX_COM_OFFSET_ABOVE_GROUND = 0.2;
-   
+
    public WalkControllerSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, DRCRobotModel drcRobotModel)
    {
       final YoEnum<SliderBoardMode> sliderBoardMode = new YoEnum<SliderBoardMode>("sliderBoardMode", registry, SliderBoardMode.class);
       final SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
 
-      // TODO: FIXME: This is a super rough, temporary fix for 
-      // https://github.com/ihmcrobotics/ihmc-open-robotics-software/issues/26 
+      // TODO: FIXME: This is a super rough, temporary fix for
+      // https://github.com/ihmcrobotics/ihmc-open-robotics-software/issues/26
       boolean DEBUG_WITH_SLIDERBOARD = false;
       if (DEBUG_WITH_SLIDERBOARD) {
 	      sliderBoardConfigurationManager.setSlider(1, "captureKpParallel", registry, 0.0, 2.0);
 	      sliderBoardConfigurationManager.setKnob(1, "captureKpOrthogonal", registry, 0.0, 2.0);
-	
+
 	      sliderBoardConfigurationManager.setSlider(2, "kp_comHeight", registry, 0.0, 40.0);
 	      sliderBoardConfigurationManager.setKnob(2, "kd_comHeight", registry, 0.0, 13.0);
-	
+
 	      sliderBoardConfigurationManager.setSlider(3, "kpPelvisOrientation", registry, 0.0, 100.0);
 	      sliderBoardConfigurationManager.setKnob(3, "zetaPelvisOrientation", registry, 0.0, 1.0);
-	
+
 	      sliderBoardConfigurationManager.setSlider(4, "kpUpperBody", registry, 0.0, 200.0);
 	      sliderBoardConfigurationManager.setKnob(4, "zetaUpperBody", registry, 0.0, 1.0);
-	
+
 	      sliderBoardConfigurationManager.setSlider(5, "kpAllArmJointsL", registry, 0.0, 120.0);
 	      sliderBoardConfigurationManager.setKnob(5, "zetaAllArmJointsL", registry, 0.0, 1.0);
-	
+
 	      sliderBoardConfigurationManager.setSlider(6, "kpAllArmJointsR", registry, 0.0, 120.0);
 	      sliderBoardConfigurationManager.setKnob(6, "zetaAllArmJointsR", registry, 0.0, 1.0);
       } else {
@@ -89,22 +89,22 @@ public class WalkControllerSliderBoard
 
       sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.WalkingDesireds.toString());
       sliderBoardConfigurationManager.clearControls();
-      
+
       /* ICPAndCoPFun */
       sliderBoardConfigurationManager.setButton(1, registry.getVariable("PelvisICPBasedTranslationManager", "manualModeICPOffset"));
       sliderBoardConfigurationManager.setSlider(1, "desiredICPOffsetX", registry, -0.6, 0.6);
       sliderBoardConfigurationManager.setKnob(1, "desiredICPOffsetY", registry, -0.6, 0.6);
-      
+
       sliderBoardConfigurationManager.setSlider(2, "ChestComOffsetX", registry, -0.5, 0.5);
       sliderBoardConfigurationManager.setKnob(2, "ChestComOffsetY", registry, -0.5, 0.5);
       sliderBoardConfigurationManager.setSlider(3, "ChestComOffsetZ", registry, 0.0, 0.5);
 
       sliderBoardConfigurationManager.setKnob(9, "desiredICPEccentricity", registry, 0, .9);
       sliderBoardConfigurationManager.setKnob(10, "desiredICPAngle", registry, -Math.PI, Math.PI);
-      
+
       sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.ICPAndCoPFun.toString());
       sliderBoardConfigurationManager.clearControls();
-      
+
 
       /* Terrain Exploration Section */
       sliderBoardConfigurationManager.setSlider(1, "footCoPOffsetX", registry, -0.2, 0.2);
@@ -118,7 +118,7 @@ public class WalkControllerSliderBoard
       sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.TerrainExploration.toString());
       sliderBoardConfigurationManager.clearControls();
 
-      if (drcRobotModel != null && drcRobotModel.getWalkingControllerParameters().controlHeadAndHandsWithSliders())
+      if (drcRobotModel != null && drcRobotModel.getSliderBoardParameters().controlHeadAndHandsWithSliders())
       {
          setupHeadAndHandSliders(sliderBoardConfigurationManager, sliderBoardMode, drcRobotModel, registry);
          setupIndividualHandControl(sliderBoardConfigurationManager, sliderBoardMode, drcRobotModel, registry);
@@ -146,8 +146,8 @@ public class WalkControllerSliderBoard
          final YoEnum<SliderBoardMode> sliderBoardMode, final DRCRobotModel drcRobotModel, final YoVariableRegistry registry)
    {
       sliderBoardConfigurationManager.setKnob(1, sliderBoardMode, 0, sliderBoardMode.getEnumValues().length - 1);
-      SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> actuatableFingerJointsWithLimits = drcRobotModel.getSliderBoardControlledFingerJointsWithLimits();
-      //This currently assumes you don't have more than 8 actuatable finger joints per hand because the sliderboard only has 8 sliders. 
+      SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> actuatableFingerJointsWithLimits = drcRobotModel.getSliderBoardParameters().getSliderBoardControlledFingerJointsWithLimits();
+      //This currently assumes you don't have more than 8 actuatable finger joints per hand because the sliderboard only has 8 sliders.
       for (RobotSide side : RobotSide.values())
       {
          int i = 0;
@@ -183,7 +183,7 @@ public class WalkControllerSliderBoard
       final AlphaFilteredYoVariable alphaFilteredUpperHeadPitchPercentage = new AlphaFilteredYoVariable("AlphaFilteredUpperHeadPitchPercentage",registry,alpha,upperHeadPitchPercentage);
       final AlphaFilteredYoVariable alphaFilteredLowerHeadPitchYawPercentage = new AlphaFilteredYoVariable("AlphaFilteredLowerHeadPitchPercentage",registry,alpha,lowerHeadPitchPercentage);
       final LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> sliderBoardControlledNeckJointsWithLimits = drcRobotModel
-            .getSliderBoardControlledNeckJointsWithLimits();
+            .getSliderBoardParameters().getSliderBoardControlledNeckJointsWithLimits();
       int sliderNumber = 0;
 
       if (Arrays.asList(drcRobotModel.getJointMap().getNeckJointNames()).contains(NeckJointName.DISTAL_NECK_YAW))

@@ -7,6 +7,7 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPResult;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.posePlayback.VisualizePoseWorkspace;
 
 public class AtlasVisualPoseWorkspace
@@ -27,7 +28,7 @@ public class AtlasVisualPoseWorkspace
 
          if (config.success())
          {
-            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), DRCRobotModel.RobotTarget.SCS, false);
+            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), RobotTarget.SCS, false);
          }
          else
          {

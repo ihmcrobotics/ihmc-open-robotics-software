@@ -4,6 +4,10 @@ import java.util.ArrayList;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -40,17 +44,14 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMess
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PickUpBallBehavior extends AbstractBehavior
 {
@@ -86,15 +87,15 @@ public class PickUpBallBehavior extends AbstractBehavior
    private final ReferenceFrame chestCoMFrame;
    private final ReferenceFrame pelvisZUpFrame;
 
-
    public PickUpBallBehavior(CommunicationBridge outgoingCommunicationBridge, YoDouble yoTime, YoBoolean yoDoubleSupport,
-         FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
+         FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
+         FullHumanoidRobotModelFactory robotModelFactory)
    {
       super(outgoingCommunicationBridge);
       this.yoTime = yoTime;
       chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
-      
+
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
       this.referenceFrames = referenceFrames;
 
@@ -120,7 +121,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters());
       behaviors.add(walkToLocationBehavior);
-      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior(wholeBodyControllerParameters, yoTime, outgoingCommunicationBridge, fullRobotModel);
+      wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior(robotModelFactory, yoTime, outgoingCommunicationBridge, fullRobotModel);
 
       behaviors.add(wholeBodyBehavior);
 
@@ -282,7 +283,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       desiredAxisAngle.set(axis, rotationDownAngle);
       Quaternion desiredHeadQuat = new Quaternion();
       desiredHeadQuat.set(desiredAxisAngle);
-      
+
       HeadTrajectoryMessage message = new HeadTrajectoryMessage(1, desiredHeadQuat, worldFrame, chestCoMFrame);
 
       HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(communicationBridge, yoTime);
@@ -401,7 +402,7 @@ public class PickUpBallBehavior extends AbstractBehavior
             TextToSpeechPacket p1 = new TextToSpeechPacket("I think i found the ball");
             sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.REACHING_FOR_BALL);
-            FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
+            FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
                   initialSphereDetectionBehavior.getBallLocation().getY(),
                   initialSphereDetectionBehavior.getBallLocation().getZ() + initialSphereDetectionBehavior.getSpehereRadius() + 0.25);
             wholeBodyBehavior.setSolutionQualityThreshold(2.01);
@@ -409,7 +410,7 @@ public class PickUpBallBehavior extends AbstractBehavior
             FrameOrientation tmpOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(45), Math.toRadians(90), 0);
             wholeBodyBehavior.setDesiredHandPose(RobotSide.LEFT, point, tmpOr);
 
-            FramePoint rhPoint = new FramePoint(referenceFrames.getChestFrame(), 0.6, -0.25, 0);
+            FramePoint3D rhPoint = new FramePoint3D(referenceFrames.getChestFrame(), 0.6, -0.25, 0);
             FrameOrientation rhOr = new FrameOrientation(point.getReferenceFrame(), Math.toRadians(45), 0, 0);
 
             //            wholeBodyBehavior.setDesiredHandPose(RobotSide.RIGHT, rhPoint, rhOr);
@@ -423,7 +424,7 @@ public class PickUpBallBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            FramePoint point = new FramePoint(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
+            FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
                   initialSphereDetectionBehavior.getBallLocation().getY(),
                   initialSphereDetectionBehavior.getBallLocation().getZ() + initialSphereDetectionBehavior.getSpehereRadius());
             wholeBodyBehavior.setSolutionQualityThreshold(2.01);
@@ -523,7 +524,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
       ArmTrajectoryTask leftHandBeforeGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, armTrajectoryBehavior);
 
-      
+
       ArmTrajectoryTask leftHandAfterGrab = new ArmTrajectoryTask(leftHandAfterGrabMessage, armTrajectoryBehavior);
 
 
@@ -545,7 +546,7 @@ public class PickUpBallBehavior extends AbstractBehavior
 
 //      pipeLine.submitSingleTaskStage(validateBallTask);
       pipeLine.submitSingleTaskStage(rightArmHomeTask);
-      //RECENTER BODY      
+      //RECENTER BODY
       pipeLine.submitSingleTaskStage(walkToBallTask);
 
       pipeLine.requestNewStage();
@@ -604,11 +605,11 @@ public class PickUpBallBehavior extends AbstractBehavior
       pipeLine.submitSingleTaskStage(rightArmHomeTask);
       //
       pipeLine.submitSingleTaskStage(goHomeLeftArmTask);
-      //      
+      //
       pipeLine.submitSingleTaskStage(goHomeChestTask);
       pipeLine.submitSingleTaskStage(goHomePelvisTask);
-      //      
-      //      
+      //
+      //
       //      pipeLine.submitSingleTaskStage(rightArmHomeTask);
       //      pipeLine.submitSingleTaskStage(lookUp);
    }
@@ -616,11 +617,11 @@ public class PickUpBallBehavior extends AbstractBehavior
    private FramePose2d getoffsetPoint()
    {
 
-      FramePoint2d ballPosition2d = new FramePoint2d(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
+      FramePoint2D ballPosition2d = new FramePoint2D(ReferenceFrame.getWorldFrame(), initialSphereDetectionBehavior.getBallLocation().getX(),
             initialSphereDetectionBehavior.getBallLocation().getY());
-      FramePoint2d robotPosition = new FramePoint2d(midZupFrame, 0.0, 0.0);
+      FramePoint2D robotPosition = new FramePoint2D(midZupFrame, 0.0, 0.0);
       robotPosition.changeFrame(worldFrame);
-      FrameVector2d walkingDirection = new FrameVector2d(worldFrame);
+      FrameVector2D walkingDirection = new FrameVector2D(worldFrame);
       walkingDirection.set(ballPosition2d);
       walkingDirection.sub(robotPosition);
       walkingDirection.normalize();
@@ -698,7 +699,7 @@ public class PickUpBallBehavior extends AbstractBehavior
    {
    }
 
-  
+
 
 
 }

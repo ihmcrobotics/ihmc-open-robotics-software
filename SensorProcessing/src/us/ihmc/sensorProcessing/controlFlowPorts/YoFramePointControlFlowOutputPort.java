@@ -2,13 +2,13 @@ package us.ihmc.sensorProcessing.controlFlowPorts;
 
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 
-public class YoFramePointControlFlowOutputPort extends ControlFlowOutputPort<FramePoint>
+public class YoFramePointControlFlowOutputPort extends ControlFlowOutputPort<FramePoint3D>
 {
    private final YoFramePoint yoFramePoint;
 
@@ -16,11 +16,11 @@ public class YoFramePointControlFlowOutputPort extends ControlFlowOutputPort<Fra
    {
       super(namePrefix, controlFlowElement);
       yoFramePoint = new YoFramePoint(namePrefix, frame, registry);
-      super.setData(new FramePoint(frame));
+      super.setData(new FramePoint3D(frame));
    }
 
    @Override
-   public FramePoint getData()
+   public FramePoint3D getData()
    {
       yoFramePoint.getFrameTuple(super.getData());
 
@@ -28,7 +28,7 @@ public class YoFramePointControlFlowOutputPort extends ControlFlowOutputPort<Fra
    }
 
    @Override
-   public void setData(FramePoint data)
+   public void setData(FramePoint3D data)
    {
       yoFramePoint.set(data);
    }

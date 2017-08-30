@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -210,7 +210,7 @@ public class BlockingSimulationRunner
       ControllerFailureListener controllerFailureListener = new ControllerFailureListener()
       {
          @Override
-         public void controllerFailed(FrameVector2d fallingDirection)
+         public void controllerFailed(FrameVector2D fallingDirection)
          {
             hasControllerFailed.set(true);
             scs.stop();

@@ -3,9 +3,9 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
 
 public class TurnStraightTurnOverheadPath extends CompositeOverheadPath
@@ -31,7 +31,7 @@ public class TurnStraightTurnOverheadPath extends CompositeOverheadPath
    private static List<OverheadPath> calculatePaths(FramePose2d startPose, FramePose2d endPose, double headingOffset, double noTranslationTolerance)
    {
       startPose.checkReferenceFrameMatch(endPose);
-      FramePoint2d endPosition = new FramePoint2d();
+      FramePoint2D endPosition = new FramePoint2D();
       endPose.getPositionIncludingFrame(endPosition);
       double heading = AngleTools.calculateHeading(startPose, endPosition, headingOffset, noTranslationTolerance);
       FrameOrientation2d intermediateOrientation = new FrameOrientation2d(startPose.getReferenceFrame(), heading);

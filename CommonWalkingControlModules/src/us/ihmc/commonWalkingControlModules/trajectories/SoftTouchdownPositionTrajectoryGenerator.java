@@ -3,13 +3,13 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoSpline3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
@@ -34,9 +34,9 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    private final YoDouble startTime;
    private final YoDouble timeIntoTouchdown;
    
-   private final FramePoint p0;
-   private final FrameVector pd0;
-   private final FrameVector pdd0;
+   private final FramePoint3D p0;
+   private final FrameVector3D pd0;
+   private final FrameVector3D pdd0;
    
    private final double tf = Double.POSITIVE_INFINITY;
    private double t0;
@@ -55,9 +55,9 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
       desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
       
-      p0 = new FramePoint();
-      pd0 = new FrameVector();
-      pdd0 = new FrameVector();
+      p0 = new FramePoint3D();
+      pd0 = new FrameVector3D();
+      pdd0 = new FrameVector3D();
       t0 = 0.0;
       
       this.replanningTrajectory = new YoBoolean(namePrefix + "ReplanningTrajectory", parentRegistry);
@@ -121,25 +121,25 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    }
 
    @Override
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       desiredPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
    @Override
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
    @Override
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
    @Override
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);

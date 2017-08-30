@@ -4,6 +4,9 @@ import static us.ihmc.robotics.geometry.AngleTools.*;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -20,9 +23,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -30,7 +31,6 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 /**
@@ -63,19 +63,19 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final YoDouble desiredRotationAngle;
    private final YoDouble finalAngle;
 
-   private final FramePoint initialPosition = new FramePoint();
-   private final FramePoint currentPosition = new FramePoint();
-   private final FramePoint finalPosition = new FramePoint();
+   private final FramePoint3D initialPosition = new FramePoint3D();
+   private final FramePoint3D currentPosition = new FramePoint3D();
+   private final FramePoint3D finalPosition = new FramePoint3D();
 
    private final FrameOrientation initialOrientation = new FrameOrientation();
    private final FrameOrientation finalOrientation = new FrameOrientation();
    private final FrameOrientation currentOrientation = new FrameOrientation();
 
-   private final FrameVector currentVelocity = new FrameVector();
-   private final FrameVector currentAcceleration = new FrameVector();
+   private final FrameVector3D currentVelocity = new FrameVector3D();
+   private final FrameVector3D currentAcceleration = new FrameVector3D();
 
-   private final FrameVector currentAngularVelocity = new FrameVector();
-   private final FrameVector currentAngularAcceleration = new FrameVector();
+   private final FrameVector3D currentAngularVelocity = new FrameVector3D();
+   private final FrameVector3D currentAngularAcceleration = new FrameVector3D();
 
    private final YoFramePoint yoInitialPosition;
    private final YoFramePoint yoFinalPosition;
@@ -100,7 +100,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    private boolean visualize = true;
    private final BagOfBalls bagOfBalls;
-   private final FramePoint ballPosition = new FramePoint();
+   private final FramePoint3D ballPosition = new FramePoint3D();
    private final int numberOfBalls = 50;
 
    private final YoFramePoint circleOrigin;
@@ -250,7 +250,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       circleFrame.update();
    }
 
-   public void updateCircleFrame(FramePoint circleCenter, FrameVector circleNormal)
+   public void updateCircleFrame(FramePoint3D circleCenter, FrameVector3D circleNormal)
    {
       circleOrigin.setAndMatchFrame(circleCenter);
       rotationAxis.setAndMatchFrame(circleNormal);
@@ -448,7 +448,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       yoTangentialCircleFramePose.setAndMatchFrame(tangentialCircleFramePose);
    }
 
-   private final FramePoint currentControlledFramePosition = new FramePoint();
+   private final FramePoint3D currentControlledFramePosition = new FramePoint3D();
 
    private double adjustCurrentDesiredRelativeAngle(double currentDesiredRelativeAngle)
    {
@@ -540,17 +540,17 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       return circleFrame;
    }
 
-   public void getPosition(FramePoint positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       yoCurrentAdjustedPositionWorld.getFrameTupleIncludingFrame(positionToPack);
    }
 
-   public void getVelocity(FrameVector velocityToPack)
+   public void getVelocity(FrameVector3D velocityToPack)
    {
       yoCurrentVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
-   public void getAcceleration(FrameVector accelerationToPack)
+   public void getAcceleration(FrameVector3D accelerationToPack)
    {
       yoCurrentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
@@ -560,12 +560,12 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       yoCurrentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
 
-   public void getAngularVelocity(FrameVector angularVelocityToPack)
+   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
    {
       yoCurrentAngularVelocity.getFrameTupleIncludingFrame(angularVelocityToPack);
    }
 
-   public void getAngularAcceleration(FrameVector angularAccelerationToPack)
+   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
    {
       yoCurrentAngularAcceleration.getFrameTupleIncludingFrame(angularAccelerationToPack);
    }
@@ -578,14 +578,14 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       framePoseToPack.setPoseIncludingFrame(currentPosition, currentOrientation);
    }
 
-   public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);
       getAcceleration(accelerationToPack);
    }
 
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector angularVelocityToPack, FrameVector angularAccelerationToPack)
+   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

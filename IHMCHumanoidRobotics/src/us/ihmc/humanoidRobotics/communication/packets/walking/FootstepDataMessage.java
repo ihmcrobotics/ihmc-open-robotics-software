@@ -9,11 +9,15 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
@@ -21,9 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
@@ -159,7 +161,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       robotSide = footstep.getRobotSide();
 
-      FramePoint location = new FramePoint();
+      FramePoint3D location = new FramePoint3D();
       FrameOrientation orientation = new FrameOrientation();
       footstep.getPose(location, orientation);
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
@@ -195,7 +197,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          positionWaypoints = new Point3D[footstep.getCustomPositionWaypoints().size()];
          for (int i = 0; i < footstep.getCustomPositionWaypoints().size(); i++)
          {
-            FramePoint framePoint = footstep.getCustomPositionWaypoints().get(i);
+            FramePoint3D framePoint = footstep.getCustomPositionWaypoints().get(i);
             framePoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
             positionWaypoints[i] = new Point3D(framePoint.getPoint());
          }
@@ -212,7 +214,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return location;
    }
 
-   public void getLocation(Point3D locationToPack)
+   public void getLocation(Point3DBasics locationToPack)
    {
       locationToPack.set(location);
    }
@@ -222,7 +224,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return orientation;
    }
 
-   public void getOrientation(Quaternion orientationToPack)
+   public void getOrientation(QuaternionBasics orientationToPack)
    {
       orientationToPack.set(this.orientation);
    }
@@ -247,14 +249,14 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.robotSide = robotSide;
    }
 
-   public void setLocation(Point3D location)
+   public void setLocation(Point3DReadOnly location)
    {
       if (this.location == null)
          this.location = new Point3D();
       this.location.set(location);
    }
 
-   public void setOrientation(Quaternion orientation)
+   public void setOrientation(QuaternionReadOnly orientation)
    {
       if (this.orientation == null)
          this.orientation = new Quaternion();

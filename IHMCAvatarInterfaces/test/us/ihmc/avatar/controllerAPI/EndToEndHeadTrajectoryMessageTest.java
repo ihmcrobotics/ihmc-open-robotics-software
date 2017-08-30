@@ -12,18 +12,14 @@ import org.junit.Before;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.controlModules.head.HeadControlMode;
-import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
@@ -35,6 +31,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -146,21 +143,6 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       drcSimulationTestHelper.getSimulationConstructionSet().setCameraFix(0.0, 0.0, 0.4);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
-   }
-
-   @SuppressWarnings("unchecked")
-   public static HeadControlMode findControllerState(SimulationConstructionSet scs)
-   {
-      String headOrientatManagerName = HeadOrientationManager.class.getSimpleName();
-      String headControlStateName = "headControlState";
-      return ((YoEnum<HeadControlMode>) scs.getVariable(headOrientatManagerName, headControlStateName)).getEnumValue();
-   }
-
-   public static double findControllerSwitchTime(SimulationConstructionSet scs)
-   {
-      String headOrientatManagerName = HeadOrientationManager.class.getSimpleName();
-      String headControlStateName = "headControlState";
-      return scs.getVariable(headOrientatManagerName, headControlStateName + "SwitchTime").getValueAsDouble();
    }
 
    public static Quaternion findControllerDesiredOrientation(String bodyName, SimulationConstructionSet scs)

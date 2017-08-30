@@ -9,7 +9,7 @@ float64 time
 
 # Define the desired 3D position to be reached at this trajectory point. It is expressed in world
 # frame.
-geometry_msgs/Vector3 position
+geometry_msgs/Point position
 
 # Define the desired 3D linear velocity to be reached at this trajectory point. It is expressed in
 # world frame.

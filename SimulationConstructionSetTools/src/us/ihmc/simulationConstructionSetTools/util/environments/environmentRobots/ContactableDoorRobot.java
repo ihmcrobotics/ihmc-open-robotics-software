@@ -6,6 +6,9 @@ import java.util.List;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -19,13 +22,10 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameBox3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.util.environments.MultiJointArticulatedContactable;
@@ -198,7 +198,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       return isPointOnOrInside(pointInWorldToCheck);
    }
    
-   private final FramePoint pointToCheck = new FramePoint();
+   private final FramePoint3D pointToCheck = new FramePoint3D();
    @Override
    public boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
@@ -224,7 +224,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    
    private boolean lastInsideHandles; // TODO hack since SlipStickModel doesn't seem to address multi-Link situations
    
-   private boolean isInsideHandles(FramePoint pointInDoorFrame)
+   private boolean isInsideHandles(FramePoint3D pointInDoorFrame)
    {
       for(RobotSide robotSide : RobotSide.values)
       {
@@ -240,12 +240,12 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    @Override
    public void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
-      FramePoint pointToCheck = new FramePoint(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
+      FramePoint3D pointToCheck = new FramePoint3D(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
       
       boolean packedByHandles = false;
       
-      FramePoint frameIntersectionToPack = new FramePoint();
-      FrameVector frameNormalToPack = new FrameVector();
+      FramePoint3D frameIntersectionToPack = new FramePoint3D();
+      FrameVector3D frameNormalToPack = new FrameVector3D();
       
       // check if close enough to handles
       for (RobotSide robotSide : RobotSide.values())
@@ -273,10 +273,10 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       }
       
       frameNormalToPack.changeFrame(ReferenceFrame.getWorldFrame());
-      normalToPack.set(frameNormalToPack.getVectorCopy());
+      normalToPack.set(frameNormalToPack);
       
       frameIntersectionToPack.changeFrame(ReferenceFrame.getWorldFrame());
-      intersectionToPack.set(frameIntersectionToPack.getPointCopy());
+      intersectionToPack.set(frameIntersectionToPack);
    }
    
    @Override

@@ -13,6 +13,8 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -22,7 +24,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.HullFace;
@@ -31,14 +32,13 @@ import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.geometry.PlaneFitter;
 import us.ihmc.robotics.geometry.QuickHull3dWrapper;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**
  * Created by agrabertilton on 1/14/15.
  */
-public class ConvexHullFootstepSnapper implements FootstepSnapper
+public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
 {
    public class PointWriter
    {
@@ -82,14 +82,14 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
    private List<Point3D> pointList = new ArrayList<Point3D>();
    private final PlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
    private FootstepValueFunction footstepValueFunction;
-   private FootstepSnappingParameters parameters;
+   private QuadTreeFootstepSnappingParameters parameters;
    private BasicFootstepMask footstepMask = null;
    private final SimpleFootstepSnapper simpleSnapper = new SimpleFootstepSnapper();
    private boolean useMask = false;
    private double maskBuffer = 0.0;
    private static PointWriter writer = null;
 
-   public ConvexHullFootstepSnapper(FootstepValueFunction valueFunction, FootstepSnappingParameters parameters)
+   public ConvexHullFootstepSnapper(FootstepValueFunction valueFunction, QuadTreeFootstepSnappingParameters parameters)
    {
       this.footstepValueFunction = valueFunction;
       this.parameters = parameters;
@@ -115,7 +115,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
 
    }
 
-   public void updateParameters(FootstepSnappingParameters newParameters)
+   public void updateParameters(QuadTreeFootstepSnappingParameters newParameters)
    {
       parameters.updateParameters(newParameters);
       footstepValueFunction.updateFunction();
@@ -129,7 +129,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       return pointList;
    }
 
-   public FootstepSnappingParameters getParameters()
+   public QuadTreeFootstepSnappingParameters getParameters()
    {
       return parameters;
    }
@@ -190,7 +190,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
 
       //set to the sole pose
-      FramePoint position = new FramePoint();
+      FramePoint3D position = new FramePoint3D();
       FrameOrientation orientation = new FrameOrientation();
       footstep.getPose(position, orientation);
       originalFootstep.setLocation(position.getPoint());
@@ -244,7 +244,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
 
       //set to the sole pose
-      FramePoint position = new FramePoint();
+      FramePoint3D position = new FramePoint3D();
       FrameOrientation orientation = new FrameOrientation();
       footstep.getPose(position, orientation);
       originalFootstep.setLocation(position.getPoint());

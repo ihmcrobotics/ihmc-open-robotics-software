@@ -2,15 +2,15 @@ package us.ihmc.communication.packets;
 
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class LidarScanMessage extends Packet<LidarScanMessage>
 {
@@ -101,7 +101,7 @@ public class LidarScanMessage extends Packet<LidarScanMessage>
       positionToPack.set(lidarPosition);
    }
 
-   public void getLidarPosition(FramePoint positionToPack)
+   public void getLidarPosition(FramePoint3D positionToPack)
    {
       positionToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), lidarPosition);
    }
@@ -161,14 +161,14 @@ public class LidarScanMessage extends Packet<LidarScanMessage>
       scanPointToPack.setZ(scan[index++]);
    }
 
-   public FramePoint getScanFramePoint(int index)
+   public FramePoint3D getScanFramePoint(int index)
    {
-      FramePoint scanPoint = new FramePoint();
+      FramePoint3D scanPoint = new FramePoint3D();
       getScanPoint(index, scanPoint);
       return scanPoint;
    }
 
-   public void getScanPoint(int index, FramePoint scanPointToPack)
+   public void getScanPoint(int index, FramePoint3D scanPointToPack)
    {
       index *= 3;
       scanPointToPack.setToZero(ReferenceFrame.getWorldFrame());
@@ -193,9 +193,9 @@ public class LidarScanMessage extends Packet<LidarScanMessage>
       return scanPoints;
    }
 
-   public FramePoint[] getScanFramePoints()
+   public FramePoint3D[] getScanFramePoints()
    {
-      FramePoint[] scanPoints = new FramePoint[getNumberOfScanPoints()];
+      FramePoint3D[] scanPoints = new FramePoint3D[getNumberOfScanPoints()];
       for (int index = 0; index < getNumberOfScanPoints(); index++)
          scanPoints[index] = getScanFramePoint(index);
       return scanPoints;
@@ -215,7 +215,7 @@ public class LidarScanMessage extends Packet<LidarScanMessage>
          scanPointsToPack.add(getScanPoint3d(index));
    }
 
-   public void getScanFramePoints(List<FramePoint> scanPointsToPack)
+   public void getScanFramePoints(List<FramePoint3D> scanPointsToPack)
    {
       scanPointsToPack.clear();
       for (int index = 0; index < getNumberOfScanPoints(); index++)

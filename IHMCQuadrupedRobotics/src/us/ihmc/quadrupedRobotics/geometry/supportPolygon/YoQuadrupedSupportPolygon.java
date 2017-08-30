@@ -1,16 +1,15 @@
 package us.ihmc.quadrupedRobotics.geometry.supportPolygon;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -65,7 +64,7 @@ public class YoQuadrupedSupportPolygon
       quadrupedSupportPolygon.getBounds(minToPack, maxToPack);
    }
    
-   public RobotQuadrant getClosestFootstep(FramePoint pointToCompare)
+   public RobotQuadrant getClosestFootstep(FramePoint3D pointToCompare)
    {
       putYoValuesIntoSupportPolygon();
       return quadrupedSupportPolygon.getClosestFootstep(pointToCompare);
@@ -77,19 +76,19 @@ public class YoQuadrupedSupportPolygon
       quadrupedSupportPolygon.getCommonTriangle2d(polygonToCompare, commonPolygonToPack, quadrantToAssignToIntersection);
    }
    
-   public double getDistanceInside2d(FramePoint2d point)
+   public double getDistanceInside2d(FramePoint2D point)
    {
       putYoValuesIntoSupportPolygon();
       return quadrupedSupportPolygon.getDistanceInside2d(point);
    }
    
-   public double getDistanceInside2d(FramePoint point)
+   public double getDistanceInside2d(FramePoint3D point)
    {
       putYoValuesIntoSupportPolygon();
       return quadrupedSupportPolygon.getDistanceInside2d(point);
    }
    
-   public double getDistanceInsideInCircle2d(FramePoint point)
+   public double getDistanceInsideInCircle2d(FramePoint3D point)
    {
       putYoValuesIntoSupportPolygon();
       return quadrupedSupportPolygon.getDistanceInsideInCircle2d(point);
@@ -107,31 +106,31 @@ public class YoQuadrupedSupportPolygon
       return quadrupedSupportPolygon.getFirstSupportingQuadrant();
    }
    
-   public FramePoint getFootstep(RobotQuadrant robotQuadrant)
+   public FramePoint3D getFootstep(RobotQuadrant robotQuadrant)
    {
       putYoValuesIntoSupportPolygon();
       return quadrupedSupportPolygon.getFootstep(robotQuadrant);
    }
    
-   public void getFrontMidpoint(FramePoint framePointToPack)
+   public void getFrontMidpoint(FramePoint3D framePointToPack)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.getFrontMidpoint(framePointToPack);
    }
    
-   public void getLeftMidpoint(FramePoint framePointToPack)
+   public void getLeftMidpoint(FramePoint3D framePointToPack)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.getLeftMidpoint(framePointToPack);
    }
    
-   public void getRightMidpoint(FramePoint framePointToPack)
+   public void getRightMidpoint(FramePoint3D framePointToPack)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.getRightMidpoint(framePointToPack);
    }
    
-   public void getHindMidpoint(FramePoint framePointToPack)
+   public void getHindMidpoint(FramePoint3D framePointToPack)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.getHindMidpoint(framePointToPack);
@@ -143,7 +142,7 @@ public class YoQuadrupedSupportPolygon
       return quadrupedSupportPolygon.getHighestFootstep();
    }
    
-   public double getInCircle2d(FramePoint inCircleCenterToPack)
+   public double getInCircle2d(FramePoint3D inCircleCenterToPack)
    {
       putYoValuesIntoSupportPolygon();
       return quadrupedSupportPolygon.getInCircle2d(inCircleCenterToPack);
@@ -155,7 +154,7 @@ public class YoQuadrupedSupportPolygon
       return quadrupedSupportPolygon.getInCircleRadius2d();
    }
    
-   public void getInCirclePoint2d(FramePoint intersectionToPack)
+   public void getInCirclePoint2d(FramePoint3D intersectionToPack)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.getInCirclePoint2d(intersectionToPack);
@@ -272,13 +271,13 @@ public class YoQuadrupedSupportPolygon
       return quadrupedSupportPolygon.getWhichFootstepHasMoved(nextPolygon);
    }
    
-   public boolean isInside(FramePoint point)
+   public boolean isInside(FramePoint3D point)
    {
       putYoValuesIntoSupportPolygon();
       return quadrupedSupportPolygon.isInside(point);
    }
    
-   public boolean isInside(FramePoint2d point)
+   public boolean isInside(FramePoint2D point)
    {
       putYoValuesIntoSupportPolygon();
       return quadrupedSupportPolygon.isInside(point);
@@ -303,14 +302,14 @@ public class YoQuadrupedSupportPolygon
       getYoValuesFromSupportPolygon(quadrupedSupportPolygon);
    }
    
-   public void getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant cornerToPutCircle, double cornerCircleRadius, FramePoint2d centerToPack)
+   public void getCenterOfCircleOfRadiusInCornerOfPolygon(RobotQuadrant cornerToPutCircle, double cornerCircleRadius, FramePoint2D centerToPack)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.getCenterOfCircleOfRadiusInCornerOfPolygon(cornerToPutCircle, cornerCircleRadius, centerToPack);
    }
    
    public boolean getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(RobotQuadrant cornerToPutCircle, double cornerCircleRadius,
-         FramePoint2d centerToPack)
+         FramePoint2D centerToPack)
    {
       putYoValuesIntoSupportPolygon();
       return quadrupedSupportPolygon.getCenterOfCircleOfRadiusInCornerOfTriangleAndCheckNotLargerThanInCircle(cornerToPutCircle, cornerCircleRadius, centerToPack);
@@ -341,7 +340,7 @@ public class YoQuadrupedSupportPolygon
       getYoValuesFromSupportPolygon(quadrupedSupportPolygon);
    }
    
-   public void setFootstep(RobotQuadrant robotQuadrant, FramePoint footstep)
+   public void setFootstep(RobotQuadrant robotQuadrant, FramePoint3D footstep)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.setFootstep(robotQuadrant, footstep);
@@ -403,7 +402,7 @@ public class YoQuadrupedSupportPolygon
       getYoValuesFromSupportPolygon(quadrupedSupportPolygon);
    }
    
-   public void getCentroid2d(FramePoint2d centroidToPack2d)
+   public void getCentroid2d(FramePoint2D centroidToPack2d)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.getCentroid2d(centroidToPack2d);
@@ -412,12 +411,12 @@ public class YoQuadrupedSupportPolygon
    public void getCentroid2d(YoFramePoint2d centroidToPack)
    {
       putYoValuesIntoSupportPolygon();
-      FramePoint2d innerTuple = centroidToPack.getFrameTuple2d();
+      FramePoint2D innerTuple = centroidToPack.getFrameTuple2d();
       quadrupedSupportPolygon.getCentroid2d(innerTuple);
       centroidToPack.setWithoutChecks(innerTuple);
    }
 
-   public void getCentroid(FramePoint centroidToPack)
+   public void getCentroid(FramePoint3D centroidToPack)
    {
       putYoValuesIntoSupportPolygon();
       quadrupedSupportPolygon.getCentroid(centroidToPack);
@@ -426,7 +425,7 @@ public class YoQuadrupedSupportPolygon
    public void getCentroid(YoFramePoint centroidToPack)
    {
       putYoValuesIntoSupportPolygon();
-      FramePoint innerTuple = centroidToPack.getFrameTuple();
+      FramePoint3D innerTuple = centroidToPack.getFrameTuple();
       quadrupedSupportPolygon.getCentroid(innerTuple);
       centroidToPack.setWithoutChecks(innerTuple);
    }

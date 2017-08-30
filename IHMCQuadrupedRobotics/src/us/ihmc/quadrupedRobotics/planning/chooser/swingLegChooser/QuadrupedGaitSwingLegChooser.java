@@ -1,16 +1,16 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -20,8 +20,8 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
    private final YoVariableRegistry registry = new YoVariableRegistry("QuadrupedGaitSwingLegChooser");
    private final YoFrameVector lastVelocity;
    private final QuadrantDependentList<TranslationReferenceFrame> feetFrames = new QuadrantDependentList<>();
-   private final QuadrantDependentList<FramePoint> feet = new QuadrantDependentList<>();
-   private final FramePoint feetCentroid = new FramePoint(ReferenceFrame.getWorldFrame());
+   private final QuadrantDependentList<FramePoint3D> feet = new QuadrantDependentList<>();
+   private final FramePoint3D feetCentroid = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final FramePose feetCentroidPose = new FramePose(ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame centroidFrame = new PoseReferenceFrame("", feetCentroidPose);
    private final YoGraphicReferenceFrame centroidFrameViz;
@@ -35,7 +35,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
    }
    
    @Override
-   public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepQuadrant, FrameVector desiredVelocity, double desiredYawRate)
+   public RobotQuadrant chooseNextSwingLeg(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepQuadrant, FrameVector3D desiredVelocity, double desiredYawRate)
    {
       RobotQuadrant nextSwingLeg = null;
       
@@ -56,13 +56,13 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
       return nextSwingLeg;
    }
   
-   public RobotQuadrant chooseNextSwingLegUsingDistanceFromCentroid(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepQuadrant, FrameVector desiredVelocity, double desiredYawRate)
+   public RobotQuadrant chooseNextSwingLegUsingDistanceFromCentroid(QuadrupedSupportPolygon supportPolygon, RobotQuadrant lastStepQuadrant, FrameVector3D desiredVelocity, double desiredYawRate)
    {
       RobotQuadrant nextSwingLeg = null;
       
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         FramePoint foot = new FramePoint(ReferenceFrame.getWorldFrame());
+         FramePoint3D foot = new FramePoint3D(ReferenceFrame.getWorldFrame());
          foot.setIncludingFrame(supportPolygon.getFootstep(quadrant));
          feet.set(quadrant,  foot);
          
@@ -91,7 +91,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
       RobotQuadrant otherSideHindFoot = forwardFoot.getDiagonalOppositeQuadrant();
       
       TranslationReferenceFrame sameSideHindFootFrame = feetFrames.get(sameSideHindFoot);
-      FramePoint otherSideHindFootFramePoint = feet.get(otherSideHindFoot);
+      FramePoint3D otherSideHindFootFramePoint = feet.get(otherSideHindFoot);
       
       otherSideHindFootFramePoint.changeFrame(sameSideHindFootFrame);
       
@@ -129,7 +129,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
       RobotQuadrant forwardFoot = null;
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         FramePoint foot = feet.get(quadrant);
+         FramePoint3D foot = feet.get(quadrant);
          foot.changeFrame(centroidFrame);
          if(foot.getX() > maxX)
          {

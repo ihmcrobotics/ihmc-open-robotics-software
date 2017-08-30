@@ -185,11 +185,16 @@ public class InverseKinematicsQPSolver
       return desiredJointVelocities;
    }
 
-   public void setRegularizationWeight(double weight)
+   public void setVelocityRegularizationWeight(double weight)
    {
       jointVelocityRegularization.set(weight);
    }
 
+   public void setAccelerationRegularizationWeight(double weight)
+   {
+      jointAccelerationRegularization.set(weight);
+   }
+   
    public void setMinJointVelocities(DenseMatrix64F qDotMin)
    {
       solverInput_lb.set(qDotMin);

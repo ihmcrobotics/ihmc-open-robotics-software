@@ -14,20 +14,20 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoMatrix;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -61,7 +61,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final YoMatrix yoRho;
 
-   private final FrameVector contactNormalVector = new FrameVector();
+   private final FrameVector3D contactNormalVector = new FrameVector3D();
    private final AxisAngle normalContactVectorRotation = new AxisAngle();
 
    private final ReferenceFrame centerOfMassFrame;
@@ -75,8 +75,8 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final YoFramePoint2d desiredCoPCommandInSoleFrame;
    private final Vector2D desiredCoPCommandWeightInSoleFrame = new Vector2D();
 
-   private final List<FramePoint> basisVectorsOrigin = new ArrayList<>();
-   private final List<FrameVector> basisVectors = new ArrayList<>();
+   private final List<FramePoint3D> basisVectorsOrigin = new ArrayList<>();
+   private final List<FrameVector3D> basisVectors = new ArrayList<>();
    private final HashMap<YoContactPoint, YoDouble> maxContactForces = new HashMap<>();
 
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
@@ -84,7 +84,7 @@ public class PlaneContactStateToWrenchMatrixHelper
    public PlaneContactStateToWrenchMatrixHelper(ContactablePlaneBody contactablePlaneBody, ReferenceFrame centerOfMassFrame, int maxNumberOfContactPoints,
          int numberOfBasisVectorsPerContactPoint, YoVariableRegistry parentRegistry)
    {
-      List<FramePoint2d> contactPoints2d = contactablePlaneBody.getContactPoints2d();
+      List<FramePoint2D> contactPoints2d = contactablePlaneBody.getContactPoints2d();
 
       if (contactPoints2d.size() > maxNumberOfContactPoints)
          throw new RuntimeException("Unexpected number of contact points: " + contactPoints2d.size());
@@ -135,8 +135,8 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       for (int i = 0; i < rhoSize; i++)
       {
-         basisVectors.add(new FrameVector(centerOfMassFrame));
-         basisVectorsOrigin.add(new FramePoint(centerOfMassFrame));
+         basisVectors.add(new FrameVector3D(centerOfMassFrame));
+         basisVectorsOrigin.add(new FramePoint3D(centerOfMassFrame));
       }
 
       desiredCoP = new YoFramePoint(namePrefix + "DesiredCoP", planeFrame, registry);
@@ -192,8 +192,8 @@ public class PlaneContactStateToWrenchMatrixHelper
 
          for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
          {
-            FramePoint basisVectorOrigin = basisVectorsOrigin.get(rhoIndex);
-            FrameVector basisVector = basisVectors.get(rhoIndex);
+            FramePoint3D basisVectorOrigin = basisVectorsOrigin.get(rhoIndex);
+            FrameVector3D basisVector = basisVectors.get(rhoIndex);
 
             if (inContact)
             {
@@ -265,8 +265,8 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private void clear(int rhoIndex)
    {
-      FramePoint basisVectorOrigin = basisVectorsOrigin.get(rhoIndex);
-      FrameVector basisVector = basisVectors.get(rhoIndex);
+      FramePoint3D basisVectorOrigin = basisVectorsOrigin.get(rhoIndex);
+      FrameVector3D basisVector = basisVectors.get(rhoIndex);
 
       basisVectorOrigin.setToZero(centerOfMassFrame);
       basisVector.setToZero(centerOfMassFrame);
@@ -326,7 +326,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       normalContactVectorRotationMatrixToPack.set(normalContactVectorRotation);
    }
 
-   private void computeBasisVector(int basisVectorIndex, RotationMatrix normalContactVectorRotationMatrix, FrameVector basisVectorToPack)
+   private void computeBasisVector(int basisVectorIndex, RotationMatrix normalContactVectorRotationMatrix, FrameVector3D basisVectorToPack)
    {
       double angle = basisVectorIndex * basisVectorAngleIncrement;
       double mu = yoPlaneContactState.getCoefficientOfFriction();
@@ -342,7 +342,7 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final SpatialForceVector unitSpatialForceVector = new SpatialForceVector();
    private final DenseMatrix64F singleRhoJacobian = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
 
-   private DenseMatrix64F computeSingleRhoJacobian(FramePoint basisVectorOrigin, FrameVector basisVector)
+   private DenseMatrix64F computeSingleRhoJacobian(FramePoint3D basisVectorOrigin, FrameVector3D basisVector)
    {
       basisVectorOrigin.changeFrame(centerOfMassFrame);
       basisVector.changeFrame(centerOfMassFrame);
@@ -353,10 +353,10 @@ public class PlaneContactStateToWrenchMatrixHelper
       return singleRhoJacobian;
    }
 
-   private final FrameVector forceFromRho = new FrameVector();
+   private final FrameVector3D forceFromRho = new FrameVector3D();
    private final DenseMatrix64F singleRhoCoPJacobian = new DenseMatrix64F(2, 1);
 
-   private DenseMatrix64F computeSingleRhoCoPJacobian(FramePoint basisVectorOrigin, FrameVector basisVector)
+   private DenseMatrix64F computeSingleRhoCoPJacobian(FramePoint3D basisVectorOrigin, FrameVector3D basisVector)
    {
       wrenchFromRho.getLinearPartIncludingFrame(forceFromRho);
       forceFromRho.changeFrame(planeFrame);
@@ -444,12 +444,12 @@ public class PlaneContactStateToWrenchMatrixHelper
       return copRateWeightMatrix;
    }
 
-   public List<FramePoint> getBasisVectorsOrigin()
+   public List<FramePoint3D> getBasisVectorsOrigin()
    {
       return basisVectorsOrigin;
    }
 
-   public List<FrameVector> getBasisVectors()
+   public List<FrameVector3D> getBasisVectors()
    {
       return basisVectors;
    }

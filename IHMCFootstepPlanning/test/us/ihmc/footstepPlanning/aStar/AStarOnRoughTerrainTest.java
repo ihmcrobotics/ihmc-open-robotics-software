@@ -8,8 +8,13 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
 import us.ihmc.footstepPlanning.roughTerrainPlanning.FootstepPlannerOnRoughTerrainTest;
+import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
@@ -19,6 +24,7 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
    private AStarFootstepPlanner planner;
    private FootstepNodeVisualization visualization = null;
 
+   @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testWalkingAroundBox()
@@ -26,6 +32,7 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
       super.testWalkingAroundBox();
    }
 
+   @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    public void testWalkingAroundHole()
@@ -33,12 +40,37 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
       super.testWalkingAroundHole();
    }
 
+   @Override
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
+   public void testOnStaircase()
+   {
+      super.testOnStaircase();
+   }
+
+   @Override
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
+   public void testSimpleGaps()
+   {
+      super.testSimpleGaps();
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
+   public void testStepUpsAndDownsScoringDifficult()
+   {
+      super.testStepUpsAndDownsScoringDifficult(false);
+   }
+
    @Before
    public void createPlanner()
    {
       if (visualizePlanner)
          visualization = new FootstepNodeVisualization(1000, 1.0, null);
-      planner = AStarFootstepPlanner.createDefaultPlanner(visualization);
+      SideDependentList<ConvexPolygon2D> footPolygons = PlanningTestTools.createDefaultFootPolygons();
+      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
+      planner = AStarFootstepPlanner.createRoughTerrainPlanner(visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
    }
 
    @After
