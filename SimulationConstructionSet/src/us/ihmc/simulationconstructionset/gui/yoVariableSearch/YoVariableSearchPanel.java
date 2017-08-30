@@ -55,6 +55,8 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
    private final YoEntryBox entryBox;
    private final SelectedVariableHolder holder;
    private JLabel label;
+   
+   private boolean showOnlyParameters = false;
 
    public YoVariableSearchPanel(SelectedVariableHolder holder, DataBuffer dataBuffer, GraphArrayPanel graphArrayPanel,
                               EntryBoxArrayTabbedPanel entryBoxArrayPanel, BookmarkedVariablesHolder bookmarkedVariablesHolder,
@@ -191,6 +193,22 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
       entryBox.updateActiveContainer();
    }
 
+   
+   public void setShowOnlyParameters(boolean showOnlyParameters)
+   {
+      if(this.showOnlyParameters != showOnlyParameters)
+      {
+         this.showOnlyParameters = showOnlyParameters;
+         
+         SwingUtilities.invokeLater(() -> {
+            if (variableSearchBox.hasSearched())
+            {
+               variableSearchBox.findMatchingVariablesRegularExpression();
+            }
+         });
+      }
+   }
+   
    @Override
    public void stateChanged(ChangeEvent e)
    {
@@ -223,6 +241,7 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
       private final JTextField searchTextField;
       private final Executor searchExecutor = Executors.newSingleThreadExecutor();
       private Searcher searcher;
+      private boolean searched = false;
 
       public VariableSearchBox()
       {
@@ -261,6 +280,11 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
          this.add(searchTextField);
       }
 
+      public boolean hasSearched()
+      {
+         return searched;
+      }
+      
       @Override
       public void actionPerformed(ActionEvent e)
       {
@@ -269,6 +293,8 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
 
       public void findMatchingVariablesRegularExpression()
       {
+         searched = true;
+         
          if (searcher != null)
          {
             searcher.stopSearch();
@@ -276,6 +302,7 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
 
          searcher = new Searcher(searchTextField.getText().toString());
          searchExecutor.execute(searcher);
+         
       }
 
       public class Searcher implements Runnable
@@ -323,6 +350,11 @@ public class YoVariableSearchPanel extends JPanel implements ChangeListener
                DataBufferEntry entry = entries.get(i);
                boolean match = RegularExpression.check(entry.getVariable().getName(), searchText);
 
+               if(match && showOnlyParameters)
+               {
+                  match = entry.getVariable().isParameter();
+               }
+               
                if (match)
                {
                   ret.add(entry.getVariable());

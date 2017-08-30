@@ -27,6 +27,7 @@ public class TimestampPublisher implements Runnable
       if(oldTimestamp < newTimestamp)
       {
          participant.publishTimestamp(newTimestamp);
+         oldTimestamp = newTimestamp;
       }
    }  
    

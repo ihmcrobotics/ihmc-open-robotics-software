@@ -56,6 +56,9 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
 
    private final YoVariableRegistry root;
    private ArrayList<RegistrySettingsChangedListener> registrySettingsChangedListeners = new ArrayList<RegistrySettingsChangedListener>();
+   
+   private String filterText = "";
+   private boolean showOnlyParameters = false;
 
    public NameSpaceHierarchyTree(RegistrySelectedListener nameSpaceSelectedListener, JFrame frame, WriteDataCommandExecutor writeDataCommandExecutor, YoVariableRegistry rootRegistry)
    {
@@ -87,10 +90,15 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       tree.setCellRenderer(new NameSpaceHierarchyNodeRenderer(treeNodeRegistryMap));
    }
    
-   private String filterText = "";
    public void filter(String filterText)
    {
       this.filterText = filterText;
+      createdNewRegistries();
+   }
+   
+   public void filterParameters(boolean showOnlyParameters)
+   {
+      this.showOnlyParameters = showOnlyParameters;
       createdNewRegistries();
    }
 
@@ -249,6 +257,11 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       }
       
       boolean match = RegularExpression.check(registry.getNameSpace().getName(), filterText);
+      if(showOnlyParameters && match)
+      {
+         match = registry.getIfRegistryOrChildrenHaveParameters();
+      }
+       
       if(match)
       {
          // create the top of the tree
