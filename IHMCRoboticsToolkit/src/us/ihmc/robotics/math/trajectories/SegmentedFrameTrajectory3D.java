@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
- * <p>Provides a basic frame work to create and access a list of {@link YoFrameTrajectory3D}. 
+ * <p>Provides a basic frame work to create and access a list of {@link FrameTrajectory3D}. 
  * No methods are provided to set the trajectory list and must be done by extending the class as required</p>
  * The following members are created to ease said task 
  * <list> 
@@ -23,32 +23,29 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * <li> currentSegmentIndex: YoInteger indicating the segment index that is used for computation 
  * <li> currentSegment: Reference to the current segment used for computation
  */
-public abstract class YoSegmentedFrameTrajectory3D //implements YoSegmentedFrameTrajectory3DInterface
+public abstract class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   protected final String name;
 
    protected final int maxNumberOfSegments;
    protected final int maxNumberOfCoefficients;
-   protected final List<YoFrameTrajectory3D> segments = new ArrayList<>();
+   protected final List<FrameTrajectory3D> segments = new ArrayList<>();
 
-   protected final YoInteger numberOfSegments;
-   protected final YoInteger currentSegmentIndex;
+   protected int numberOfSegments;
+   protected int currentSegmentIndex;
 
-   protected YoFrameTrajectory3D currentSegment;
+   protected FrameTrajectory3D currentSegment;
    protected double[] nodeTime;
 
-   public YoSegmentedFrameTrajectory3D(String name, int maxNumberOfSegments, int maxNumberOfCoefficients, YoVariableRegistry registry)
+   public SegmentedFrameTrajectory3D(int maxNumberOfSegments, int maxNumberOfCoefficients)
    {
-      this.name = name;
       this.maxNumberOfSegments = maxNumberOfSegments;
       this.maxNumberOfCoefficients = maxNumberOfCoefficients;
-      numberOfSegments = new YoInteger(name + "NumberOfSegments", registry);
-      currentSegmentIndex = new YoInteger(name + "CurrentSegmentIndex", registry);
-      currentSegmentIndex.set(-1);
+      numberOfSegments = 0;
+      currentSegmentIndex = -1;
       for (int i = 0; i < maxNumberOfSegments; i++)
       {
-         YoFrameTrajectory3D segmentTrajectory = new YoFrameTrajectory3D(name + "Segment" + i, maxNumberOfCoefficients, worldFrame, registry);
+         FrameTrajectory3D segmentTrajectory = new FrameTrajectory3D(maxNumberOfCoefficients, worldFrame);
          segmentTrajectory.reset();
          segments.add(segmentTrajectory);
       }
@@ -59,22 +56,11 @@ public abstract class YoSegmentedFrameTrajectory3D //implements YoSegmentedFrame
    {
       for (int i = 0; i < segments.size(); i++)
          segments.get(i).reset();
-      currentSegmentIndex.set(-1);
+      currentSegmentIndex = -1;
       currentSegment = null;
-      numberOfSegments.set(0);
+      numberOfSegments = 0;
    }
 
-   public void set(SegmentedFrameTrajectory3D trajToCopy)
-   {
-      if(getMaxNumberOfSegments() < trajToCopy.getNumberOfSegments())
-         throw new RuntimeException("Insufficient segments to copy trajectory, needed: " + trajToCopy.getNumberOfSegments() + " available: " + getMaxNumberOfSegments());
-      for(int i = 0; i < trajToCopy.getNumberOfSegments(); i++)
-      {
-         segments.get(i).set(trajToCopy.getSegment(i));
-         numberOfSegments.increment();
-      }
-   }
-   
    public void update(double timeInState)
    {
       setCurrentSegmentIndexFromStateTime(timeInState);
@@ -112,37 +98,37 @@ public abstract class YoSegmentedFrameTrajectory3D //implements YoSegmentedFrame
       else
          throw new RuntimeException("Unable to find suitable segment at time " + timeInState + ", InitialTime: " + segments.get(0).getInitialTime());
       currentSegment = segments.get(segmentIndex);
-      currentSegmentIndex.set(segmentIndex);
+      currentSegmentIndex = segmentIndex;
    }
 
-   public List<YoFrameTrajectory3D> getSegments()
+   public List<FrameTrajectory3D> getSegments()
    {
       return segments;
    }
 
    public int getNumberOfSegments()
    {
-      return numberOfSegments.getIntegerValue();
+      return numberOfSegments;
    }
 
    public int getCurrentSegmentIndex()
    {
-      return currentSegmentIndex.getIntegerValue();
+      return currentSegmentIndex;
    }
 
    public int getCurrentSegmentIndex(double timeInState)
    {
       setCurrentSegmentIndexFromStateTime(timeInState);
-      return currentSegmentIndex.getIntegerValue();
+      return currentSegmentIndex;
    }
 
-   public YoFrameTrajectory3D getCurrentSegment(double timeInState)
+   public FrameTrajectory3D getCurrentSegment(double timeInState)
    {
       setCurrentSegmentIndexFromStateTime(timeInState);
       return currentSegment;
    }
 
-   public YoFrameTrajectory3D getSegment(int segmentIndex)
+   public FrameTrajectory3D getSegment(int segmentIndex)
    {
       return segments.get(segmentIndex);
    }
@@ -165,7 +151,7 @@ public abstract class YoSegmentedFrameTrajectory3D //implements YoSegmentedFrame
 
    public void setNumberOfSegments(int numberOfSegments)
    {
-      this.numberOfSegments.set(numberOfSegments);
+      this.numberOfSegments = numberOfSegments;
    }
 
    
@@ -176,8 +162,7 @@ public abstract class YoSegmentedFrameTrajectory3D //implements YoSegmentedFrame
    public String toString()
    {
       String ret = "";
-      ret += name;
-      for (int i = 0; i < numberOfSegments.getIntegerValue(); i++)
+      for (int i = 0; i < numberOfSegments; i++)
          ret += "\nSegment " + i + ":\n" + segments.get(i).toString();
       return ret;
    }
@@ -189,7 +174,6 @@ public abstract class YoSegmentedFrameTrajectory3D //implements YoSegmentedFrame
    public String toString2()
    {
       String ret = "";
-      ret += name;
       for (int i = 0; i < segments.size(); i++)
          ret += "\nSegment " + i + ":\n" + segments.get(i).toString();
       return ret;
@@ -202,9 +186,8 @@ public abstract class YoSegmentedFrameTrajectory3D //implements YoSegmentedFrame
    public String toString3()
    {
       String ret = "";
-      ret += name;
       FramePoint3D tempFramePointForPrinting = new FramePoint3D();
-      for (int i = 0; i < numberOfSegments.getIntegerValue(); i++)
+      for (int i = 0; i < numberOfSegments; i++)
       {
          ret += "\nSegment " + i + ":\n"; 
          segments.get(i).getStartPoint(tempFramePointForPrinting);

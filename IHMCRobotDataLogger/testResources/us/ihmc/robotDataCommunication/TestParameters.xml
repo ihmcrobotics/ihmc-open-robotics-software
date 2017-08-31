@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<parameters>
+    <registry name="tester">
+        <parameter name="param1" type="DoubleParameter" value="8.0"/>
+        <parameter name="param2" type="DoubleParameter" value="2.0"/>
+    </registry>
+    <registry name="Thread">
+        <parameter name="threadParam1" type="DoubleParameter" value="3.0"/>
+        <parameter name="threadParam2" type="DoubleParameter" value="4.0"/>
+    </registry>
+</parameters>

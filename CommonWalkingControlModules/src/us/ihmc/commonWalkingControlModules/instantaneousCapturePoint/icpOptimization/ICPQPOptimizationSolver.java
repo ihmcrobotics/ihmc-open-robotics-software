@@ -411,8 +411,10 @@ public class ICPQPOptimizationSolver
       copLocationConstraint.setPolygon();
       cmpLocationConstraint.setPolygon();
       reachabilityConstraint.setPolygon();
-      numberOfInequalityConstraints = copLocationConstraint.getInequalityConstraintSize() + reachabilityConstraint.getInequalityConstraintSize();
 
+      numberOfInequalityConstraints = copLocationConstraint.getInequalityConstraintSize();
+      if (indexHandler.useStepAdjustment())
+         numberOfInequalityConstraints += reachabilityConstraint.getInequalityConstraintSize();
       if (indexHandler.useAngularMomentum() && Double.isFinite(cmpSafeDistanceFromEdge))
          numberOfInequalityConstraints += cmpLocationConstraint.getInequalityConstraintSize();
 
@@ -715,7 +717,7 @@ public class ICPQPOptimizationSolver
       if (Double.isFinite(cmpSafeDistanceFromEdge) && indexHandler.useAngularMomentum() && cmpLocationConstraint.getInequalityConstraintSize() > 0)
          addCMPLocationConstraint();
 
-      if (reachabilityConstraint.getInequalityConstraintSize() > 0)
+      if (indexHandler.useStepAdjustment() && reachabilityConstraint.getInequalityConstraintSize() > 0)
          addReachabilityConstraint();
 
       if (indexHandler.useStepAdjustment())
