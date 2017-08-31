@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.jointControlCalculator;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointData;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
@@ -32,7 +33,8 @@ public class PositionJointControlBlender
       positionStepSizeLimiter.updateOutput(q, q);
    }
 
-   public double computeAndUpdateJointPosition(LowLevelJointData positionControllerDesireds, LowLevelJointData walkingControllerDesireds,
+   public void computeAndUpdateJointPosition(LowLevelJointData jointDataToPack, LowLevelJointDataReadOnly positionControllerDesireds,
+                                               LowLevelJointDataReadOnly walkingControllerDesireds,
                                                double forceControlBlendingFactor)
    {
       forceControlBlendingFactor = MathTools.clamp(forceControlBlendingFactor, 0.0, 1.0);
@@ -46,6 +48,6 @@ public class PositionJointControlBlender
 
       positionStepSizeLimiter.updateOutput(currentJointAngle, desiredPosition);
 
-      return positionStepSizeLimiter.getDoubleValue();
+      jointDataToPack.setDesiredPosition(positionStepSizeLimiter.getDoubleValue());
    }
 }
