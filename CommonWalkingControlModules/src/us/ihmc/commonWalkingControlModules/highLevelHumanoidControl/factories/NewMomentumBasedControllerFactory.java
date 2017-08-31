@@ -371,27 +371,38 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       ArrayList<StateTransition<NewHighLevelControllerStates>> standPrepTransitions = new ArrayList<>();
       standPrepTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
       standPrepTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, fallbackControllerState));
-      standPrepTransitions.add(StateMachineTools.buildFinishedStateTransition(standPrepControllerState, NewHighLevelControllerStates.FREEZE_STATE));
+      standPrepTransitions.add(StateMachineTools.buildFinishedStateTransition(standPrepControllerState, NewHighLevelControllerStates.STAND_READY));
       highLevelControllerTransitions.put(standPrepControllerState, standPrepTransitions);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the StandReadyController ///////////////////////////////////////////////////////////
-      NewFreezeControllerState freezeControllerState = createFreezeControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
-      highLevelControllerStates.add(freezeControllerState);
+      NewStandReadyControllerState standReadyControllerState = createStandReadyControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
+      highLevelControllerStates.add(standReadyControllerState);
       ArrayList<StateTransition<NewHighLevelControllerStates>> standReadyTransitions = new ArrayList<>();
+      standReadyTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
       standReadyTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, fallbackControllerState));
       standReadyTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.STAND_TRANSITION_STATE));
-      highLevelControllerTransitions.put(freezeControllerState, standReadyTransitions);
+      highLevelControllerTransitions.put(standReadyControllerState, standReadyTransitions);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the StandTransitionController //////////////////////////////////////////////////////
-      NewStandTransitionControllerState standTransitionControllerState = createStandTransitionControllerState(freezeControllerState, walkingState, controllerToolbox);
+      NewStandTransitionControllerState standTransitionControllerState = createStandTransitionControllerState(standReadyControllerState, walkingState, controllerToolbox);
       highLevelControllerStates.add(standTransitionControllerState);
       ArrayList<StateTransition<NewHighLevelControllerStates>> standTransitionTransitions = new ArrayList<>();
       standTransitionTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
       standTransitionTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, fallbackControllerState));
       standTransitionTransitions.add(StateMachineTools.buildFinishedStateTransition(standTransitionControllerState, NewHighLevelControllerStates.WALKING_STATE));
       highLevelControllerTransitions.put(standTransitionControllerState, standTransitionTransitions);
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
+      // Setup the FreezeController ///////////////////////////////////////////////////////////
+      NewFreezeControllerState freezeControllerState = createFreezeControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
+      highLevelControllerStates.add(freezeControllerState);
+      ArrayList<StateTransition<NewHighLevelControllerStates>> freezeTransitions = new ArrayList<>();
+      freezeTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, fallbackControllerState));
+      freezeTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.DO_NOTHING_STATE));
+      freezeTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.STAND_READY));
+      highLevelControllerTransitions.put(freezeControllerState, freezeTransitions);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the CalibrationController //////////////////////////////////////////////////////////
@@ -634,15 +645,22 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       return new NewStandPrepControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
    }
 
+
+   public NewStandReadyControllerState createStandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                                                       StandPrepParameters standPrepSetpoints, PositionControlParameters positionControlParameters)
+   {
+      return new NewStandReadyControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
+   }
+
    public NewFreezeControllerState createFreezeControllerState(HighLevelHumanoidControllerToolbox controllerToolbox,
-                                                                   StandPrepParameters standPrepSetpoints, PositionControlParameters positionControlParameters)
+                                                               StandPrepParameters standPrepSetpoints, PositionControlParameters positionControlParameters)
    {
       return new NewFreezeControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
    }
 
-   public NewStandTransitionControllerState createStandTransitionControllerState(NewFreezeControllerState standReadyControllerState,
-                                                                                          NewWalkingControllerState walkingControllerState,
-                                                                                          HighLevelHumanoidControllerToolbox controllerToolbox)
+   public NewStandTransitionControllerState createStandTransitionControllerState(NewStandReadyControllerState standReadyControllerState,
+                                                                                 NewWalkingControllerState walkingControllerState,
+                                                                                 HighLevelHumanoidControllerToolbox controllerToolbox)
    {
       return new NewStandTransitionControllerState(standReadyControllerState, walkingControllerState, controllerToolbox);
    }
