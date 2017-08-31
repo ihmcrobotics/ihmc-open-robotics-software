@@ -112,12 +112,12 @@ public class AngularMomentumEstimationParameters
 
    public int getNumberOfPointsToSampleForTransfer()
    {
-      return 20;
+      return 2;
    }
 
    public int getNumberOfPointsToSampleForSwing()
    {
-      return 20;
+      return 2;
    }
 
    public AngularMomentumSplineType getSplineType()

@@ -65,6 +65,8 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 
 	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
 
+	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
+
 	
 	    return current_alignment - initial_alignment;
 	}
@@ -89,6 +91,8 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 
 	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
 
+	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
+
 	
 	    return current_alignment - initial_alignment;
 	}
@@ -108,6 +112,8 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 	    cdr.write_type_3(data.getEnumType());
 
 	    cdr.write_type_7(data.getAllowNullValues());
+
+	    cdr.write_type_7(data.getIsParameter());
    }
 
    public static void read(us.ihmc.robotDataLogger.YoVariableDefinition data, CDR cdr)
@@ -126,6 +132,9 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 
 	    	data.setAllowNullValues(cdr.read_type_7());
 	    	
+
+	    	data.setIsParameter(cdr.read_type_7());
+	    	
    }
    
 	@Override
@@ -140,6 +149,8 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 			    ser.write_type_3("enumType", data.getEnumType());
 			    
 			    ser.write_type_7("allowNullValues", data.getAllowNullValues());
+			    
+			    ser.write_type_7("isParameter", data.getIsParameter());
 			    
 	}
 	
@@ -156,6 +167,8 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 	    			data.setEnumType(ser.read_type_3("enumType"));	
 	    	    
 	    			data.setAllowNullValues(ser.read_type_7("allowNullValues"));	
+	    	    
+	    			data.setIsParameter(ser.read_type_7("isParameter"));	
 	    	    
 	}
 

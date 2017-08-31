@@ -10,11 +10,14 @@ import net.java.games.input.Component;
 import net.java.games.input.Controller;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.graphicsDescription.input.mouse.Mouse3DInterface;
+import us.ihmc.graphicsDescription.input.mouse.Mouse3DListener;
+import us.ihmc.graphicsDescription.input.mouse.Mouse3DListenerHolder;
 import us.ihmc.tools.inputDevices.JInputTools;
 import us.ihmc.tools.inputDevices.JInputTools.ControllerType;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class Mouse3DJoystick
+public class Mouse3DJoystick implements Mouse3DInterface
 {
    private final long POLL_PERIOD_MILLISECONDS = 10;
    private final double POLL_PERIOD_SECONDS = POLL_PERIOD_MILLISECONDS / 1e3;
