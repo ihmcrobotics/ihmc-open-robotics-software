@@ -1,10 +1,10 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.CTTreeTools;
 
 public class CTTaskNodeTree
 {
@@ -85,42 +85,6 @@ public class CTTaskNodeTree
    {
       trajectoryTime = nodeRegion.getTrajectoryTime();
       return trajectoryTime;
-   }
-
-   private void setRandomNormalizedNodeData(CTTaskNode node, int index, boolean isUniform)
-   {
-      Random randomManager = new Random();
-
-      double exceedIntentionalTimeRatio = 1.0;
-      double exceedIntentionalRatio = 0.5;
-
-      if (isUniform)
-         exceedIntentionalRatio = 0.0;
-      else
-         exceedIntentionalRatio = 1.0;
-
-      double value;
-
-      if (index == 0)
-         value = randomManager.nextDouble() * (1.0 + exceedIntentionalTimeRatio);
-      else
-      {
-         value = randomManager.nextDouble() * (1.0 + exceedIntentionalRatio);
-         value = value - 0.5 * exceedIntentionalRatio;
-
-         if (value >= 1)
-            value = 1;
-         if (value <= 0)
-            value = 0;
-      }
-
-      node.setNormalizedNodeData(index, value);
-   }
-
-   public void setRandomNormalizedNodeData(CTTaskNode node, boolean isUniform)
-   {
-      for (int i = 0; i < node.getDimensionOfNodeData(); i++)
-         setRandomNormalizedNodeData(node, i, isUniform);
    }
 
    public void setMatricRatioTimeToTask(double ratio)
@@ -255,7 +219,7 @@ public class CTTaskNodeTree
    public void updateRandomConfiguration()
    {
       CTTaskNode randomNode = createNode();
-      setRandomNormalizedNodeData(randomNode, false);
+      CTTreeTools.setRandomNormalizedNodeData(randomNode, false);
       this.randomNode = randomNode;
    }
 

@@ -137,16 +137,16 @@ public class WheneverWholeBodyKinematicsSolver
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
 
    private static int maximumCntForUpdateInternal = 100;
-   private static int cntForUpdateInternal = 0;
+   private int cntForUpdateInternal = 0;
 
    public static int numberOfTest = 0;
 
    private boolean isSolved = false;
    private boolean isJointLimit = false;
 
-   private static double handWeight = 50.0;
-   private static double chestWeight = 10.0;
-   private static double pelvisWeight = 10.0;
+   private final double handWeight = 50.0;
+   private final double chestWeight = 10.0;
+   private final double pelvisWeight = 10.0;
 
    protected RobotCollisionModel robotCollisionModel;
 
@@ -631,7 +631,7 @@ public class WheneverWholeBodyKinematicsSolver
    }
 
    public void setDesiredHandPose(RobotSide robotSide, Pose3D desiredPoseToMidZUp)
-   {
+   { // TODO Consider adding the desired hand control frame to use when solving
       handSelectionMatrices.get(robotSide).clearSelection();
       handSelectionMatrices.get(robotSide).setLinearAxisSelection(true, true, true);
       handSelectionMatrices.get(robotSide).setAngularAxisSelection(true, true, true);
@@ -744,7 +744,15 @@ public class WheneverWholeBodyKinematicsSolver
 
             feedbackControlCommand.set(rootBody, desiredFullRobotModel.getHand(robotSide));
             feedbackControlCommand.setGains((SE3PIDGainsInterface) gains);
-
+            
+            /*
+             * TODO Setup the control frame to replace ConstrainedWholeBodyPlanningToolboxController.handCoordinateOffsetX
+             * 
+             * FramePose3D pose = new FramePose3D(handControlFrame);
+             * pose.changeFrame(hand.getBodyFixedFrame());
+             * feedbackControlCommand.setControlFrameFixedInEndEffector(pose);
+             */
+            
             feedbackControlCommand.setWeightMatrixForSolver(handWeightMatrices.get(robotSide));
             feedbackControlCommand.setSelectionMatrix(handSelectionMatrices.get(robotSide));
             feedbackControlCommand.set(handFramePoses.get(robotSide));

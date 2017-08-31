@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -12,14 +13,16 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.RobotKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.RobotKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.CTTreeTools;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeFindInitialGuess;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeVisualizer;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.GenericTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.TreeStateVisualizer;
@@ -47,10 +50,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    public static ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
 
    private WheneverWholeBodyKinematicsSolver kinematicsSolver;
-
-   private static ReferenceFrame midZUpFrame;
-
-   private static ReferenceFrame worldFrame;
 
    /*
     * YoVariables
@@ -128,6 +127,12 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       DO_NOTHING, FIND_INITIAL_GUESS, EXPAND_TREE, SHORTCUT_PATH, GENERATE_MOTION
    }
 
+   /*
+    * parallel family.
+    */
+   
+   private final CTTreeFindInitialGuess ctTreeFindInitialGuess;
+   
    public ConstrainedWholeBodyPlanningToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModel,
                                                         StatusMessageOutputManager statusOutputManager, YoVariableRegistry registry,
                                                         YoGraphicsListRegistry yoGraphicsRegistry, boolean startYoVariableServer)
@@ -151,11 +156,13 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          yoGraphicsRegistry.registerYoGraphic("" + robotSide + "endeffectorPoseViz", this.endeffectorFrame.get(robotSide));
       }
 
-      state = CWBToolboxState.FIND_INITIAL_GUESS;
+      this.state = CWBToolboxState.FIND_INITIAL_GUESS;
+      
+      this.ctTreeFindInitialGuess = new CTTreeFindInitialGuess(drcRobotModel, 4, registry);
    }
 
    @Override
-   protected void updateInternal()
+   protected void updateInternal() throws InterruptedException, ExecutionException
    {
       updateCount.increment();
       PrintTools.info("update toolbox " + updateCount.getIntegerValue() + " " + state);
@@ -191,7 +198,9 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       // ************************************************************************************************************** //
 
-      updateVisualizerRobotConfiguration(kinematicsSolver.getFullRobotModelCopy());
+//      RobotKinematicsConfiguration configuration = visualizedNode.getConfiguration();
+//      updateVisualizerRobotConfiguration(configuration);
+      updateVisualizerRobotConfiguration();
       updateVisualizers();
       updateYoVariables();
 
@@ -207,12 +216,18 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    {
       int sizeOfPath = tree.getPath().size();
 
-      kinematicsSolver.updateRobotConfigurationData(tree.getPath().get(sizeOfPath - numberOfMotionPath));
+      CTTaskNode node = tree.getPath().get(sizeOfPath - numberOfMotionPath);
 
-      kinematicsSolver.initialize();
-      kinematicsSolver.holdCurrentTrajectoryMessages();
-      kinematicsSolver.putTrajectoryMessages();
+      visualizedNode = node;
+      
+//      kinematicsSolver.updateRobotConfigurationData(node);
+//
+//      kinematicsSolver.initialize();
+//      kinematicsSolver.holdCurrentTrajectoryMessages();
+//      kinematicsSolver.putTrajectoryMessages();
 
+      
+      
       numberOfMotionPath--;
       if (numberOfMotionPath == 0)
       {
@@ -305,22 +320,29 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    /**
     * state == FIND_INITIAL_GUESS
+    * @throws ExecutionException 
+    * @throws InterruptedException 
     */
-   private void findInitialGuess()
+   private void findInitialGuess() throws InterruptedException, ExecutionException
    {
-      CTTaskNode initialGuessNode = new CTTaskNode(rootNode);
+//      CTTaskNode initialGuessNode = new CTTaskNode(rootNode);
+//
+//      CTTreeTools.setRandomNormalizedNodeData(initialGuessNode, true);
+//      initialGuessNode.setNormalizedNodeData(0, 0);
+//      initialGuessNode.convertNormalizedDataToData(taskRegion);
+//
+//      visualizedNode = initialGuessNode;
+//
+//      updateValidity(visualizedNode);
+//      double scoreInitialGuess = kinematicsSolver.getArmJointLimitScore();
+//      if (!visualizedNode.getValidity())
+//         scoreInitialGuess = 0.0;
 
-      tree.setRandomNormalizedNodeData(initialGuessNode, true);
-      initialGuessNode.setNormalizedNodeData(0, 0);
-      initialGuessNode.convertNormalizedDataToData(taskRegion);
-
-      visualizedNode = initialGuessNode;
-
-      updateValidity(visualizedNode);
-      double scoreInitialGuess = kinematicsSolver.getArmJointLimitScore();
-      if (!visualizedNode.getValidity())
-         scoreInitialGuess = 0.0;
-
+      ctTreeFindInitialGuess.findInitialGuess(rootNode, taskRegion, initialConfiguration, constrainedEndEffectorTrajectory, handCoordinateOffsetX);
+      
+      double scoreInitialGuess = ctTreeFindInitialGuess.getBestScore();
+      visualizedNode = ctTreeFindInitialGuess.getBestNode();
+      
       jointlimitScore.set(scoreInitialGuess);
 
       if (bestScoreInitialGuess < scoreInitialGuess)
@@ -330,10 +352,13 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          rootNode = visualizedNode.createNodeCopy();
       }
 
+      
+      
+      
       /*
        * terminate finding initial guess.
        */
-      numberOfInitialGuess--;
+      numberOfInitialGuess-= ctTreeFindInitialGuess.getInitialGuessNodes().size();
       if (numberOfInitialGuess == 0)
       {
          PrintTools.info("initial guess terminate");
@@ -370,7 +395,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       /*
        * initialize kinematicsSolver.
-       */
+       */      
       kinematicsSolver = new WheneverWholeBodyKinematicsSolver(drcRobotModelFactory);
 
       kinematicsSolver.updateRobotConfigurationData(initialConfiguration);
@@ -508,6 +533,16 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       for (int i = 0; i < FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel).length; i++)
          FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel)[i].setQ(FullRobotModelUtils.getAllJointsExcludingHands(solverRobotModel)[i].getQ());
    }
+   
+   private void updateVisualizerRobotConfiguration(RobotKinematicsConfiguration robotKinematicsConfiguration)
+   {
+      robotKinematicsConfiguration.getRobotConfiguration(visualizedFullRobotModel);      
+   }
+   
+   private void updateVisualizerRobotConfiguration()
+   {
+      updateVisualizerRobotConfiguration(visualizedNode.getConfiguration());      
+   }
 
    /**
     * update visualizers.
@@ -523,7 +558,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          currentIsValid.set(visualizedNode.getValidity());
          currentTrajectoryTime.set(visualizedNode.getNormalizedNodeData(0));
          if (startYoVariableServer)
-            treeVisualizer.update(visualizedNode);
+            treeVisualizer.update(visualizedNode);         
       }
    }
 
