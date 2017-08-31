@@ -83,7 +83,7 @@ public class DRCSimulationTestHelper
    private DRCSimulationStarter simulationStarter;
    private Exception caughtException;
 
-   public DRCSimulationTestHelper(String name, DRCObstacleCourseStartingLocation selectedLocation,
+   public DRCSimulationTestHelper(DRCObstacleCourseStartingLocation selectedLocation,
                                   SimulationTestingParameters simulationconstructionsetparameters, DRCRobotModel robotModel)
    {
       this(new DefaultCommonAvatarEnvironment(), selectedLocation, simulationconstructionsetparameters, robotModel);

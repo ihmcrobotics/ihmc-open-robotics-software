@@ -82,8 +82,8 @@ public class AtlasFinalsWorldStairsTest
       FootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(10, 2, true, true);
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
       DarpaRoboticsChallengeFinalsEnvironment environment = new DarpaRoboticsChallengeFinalsEnvironment(false, false, false, false, true);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpStairsTest", selectedLocation, simulationTestingParameters,
-              robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.createSimulation("DRCWalkingUpStairsTest");
 
       setupCameraForWalkingUpStairs();
 
@@ -129,8 +129,8 @@ public class AtlasFinalsWorldStairsTest
       FootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(8, 3, true, true);
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
       DarpaRoboticsChallengeFinalsEnvironment environment = new DarpaRoboticsChallengeFinalsEnvironment(false, false, false, false, true);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpStairsTest", selectedLocation, simulationTestingParameters,
-            robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.createSimulation("DRCWalkingUpStairsTest");
 
       setupCameraForWalkingUpStairs();
 

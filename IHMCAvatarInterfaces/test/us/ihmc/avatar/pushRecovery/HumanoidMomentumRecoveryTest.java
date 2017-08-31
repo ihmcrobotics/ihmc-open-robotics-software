@@ -242,7 +242,8 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
          }
       };
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(emptyEnvironment, className, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(emptyEnvironment, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.createSimulation(className);
       Vector3D forcePointOffset = new Vector3D(0.0, 0.0, 0.1);
       pushController = new PushRobotController(drcSimulationTestHelper.getRobot(), drcSimulationTestHelper.getRobot().getRootJoint().getName(), forcePointOffset);
 
