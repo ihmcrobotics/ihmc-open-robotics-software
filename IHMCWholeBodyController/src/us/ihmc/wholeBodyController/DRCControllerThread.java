@@ -270,11 +270,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       return modularRobotController;
    }
 
-   public void addOutputProcessorToController(OutputProcessor outputProcessor)
-   {
-      robotController.setOutputProcessor(outputProcessor);
-   }
-
    public static FullInverseDynamicsStructure createInverseDynamicsStructure(FullRobotModel fullRobotModel)
    {
       RigidBody elevator = fullRobotModel.getElevator();
