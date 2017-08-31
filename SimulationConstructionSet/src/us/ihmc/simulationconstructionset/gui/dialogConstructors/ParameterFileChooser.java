@@ -24,19 +24,13 @@ public class ParameterFileChooser
 
    private List<YoVariableRegistry> registries;
    private File parameterFile;
+   
+   private NameSpace defaultRoot = null;
 
-   public ParameterFileChooser(NameSpace defaultRoot)
+   public ParameterFileChooser()
    {
       rootPath = new JTextField("", 30);
 
-      if (defaultRoot == null)
-      {
-         rootPath.setText("");
-      }
-      else
-      {
-         rootPath.setText(defaultRoot.getName());
-      }
 
       JPanel extraPanel = new JPanel();
       extraPanel.setLayout(new GridLayout(2, 1));
@@ -48,13 +42,26 @@ public class ParameterFileChooser
       rootPath.setAlignmentY(Component.TOP_ALIGNMENT);
       extraPanel.add(textHolder);
 
-      fileChooser = new JFileChooser();
+      fileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
       fileChooser.setFileFilter(new MyFileFilter("xml", "XML Files"));
       fileChooser.setAccessory(extraPanel);
    }
 
-   public boolean showDialog(Component parent, YoVariableRegistry registry, boolean save)
+   public boolean showDialog(Component parent, YoVariableRegistry registry, NameSpace newDefaultRoot, boolean save)
    {
+      if(newDefaultRoot != defaultRoot)
+      {
+         if (newDefaultRoot == null)
+         {
+            rootPath.setText("");
+         }
+         else
+         {
+            rootPath.setText(newDefaultRoot.getName());
+         }
+         defaultRoot = newDefaultRoot;
+      }
+      
 
       int returnVal;
 

@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class SimpleICPOptimizationQPSolverTest
 {
@@ -542,6 +543,139 @@ public class SimpleICPOptimizationQPSolverTest
       supportPolygon.update();
 
       return supportPolygon;
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
+   public void testNoExceptions() throws Exception
+   {
+         SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+
+         // feedback
+         FramePoint2D scaledFeedbackWeight = new FramePoint2D(worldFrame, 0.2826586940121205, 0.2826586940121205);
+         double feedbackGainX = 3.61466302555;
+         double feedbackGainY = 3.88533697445;
+         solver.resetFeedbackConditions();
+         solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGainX, feedbackGainY, 100000.0);
+         solver.setMaxCMPDistanceFromEdge(0.06);
+         solver.setCopSafeDistanceToEdge(0.002);
+         solver.setFeedbackRegularizationWeight(0.0025);
+
+         // angular momentum
+         solver.resetAngularMomentumConditions();
+         solver.setAngularMomentumConditions(10.769105592072197, true);
+
+         // footstep
+         FramePoint2D footstepLocation = new FramePoint2D(worldFrame, 0.29744601815922606, -0.6204387201028974);
+         solver.resetFootstepConditions();
+         solver.setFootstepAdjustmentConditions(0.27117253504559974, 9.999820184919336, 9.990452153569914, 1.0, footstepLocation);
+         solver.setFootstepRegularizationWeight(0.0);
+
+         // set previous solutions
+         FramePoint2D previousFootstepSolution = new FramePoint2D(worldFrame, 0.2881204908019306, -0.6381315022331429);
+         FramePoint2D previousFeedbackDeltaSolution = new FramePoint2D(worldFrame, -0.141764770527381, -0.04745626887921585);
+         solver.resetFootstepRegularization(previousFootstepSolution);
+         solver.resetFeedbackRegularization(previousFeedbackDeltaSolution);
+
+         // set constraints
+         FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(worldFrame);
+         supportPolygon.addVertex(new FramePoint2D(worldFrame, -0.12497345851902948, 0.22376754760881368));
+         supportPolygon.addVertex(new FramePoint2D(worldFrame, 0.10434696885177858, 0.2110446302571209));
+         supportPolygon.addVertex(new FramePoint2D(worldFrame, 0.10438193051572264, 0.12238795176076478));
+         supportPolygon.addVertex(new FramePoint2D(worldFrame, -0.12418538788019835, 0.10913840779165224));
+         supportPolygon.update();
+
+         FrameConvexPolygon2d reachabilityPolygon = new FrameConvexPolygon2d(worldFrame);
+         reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, -0.5065556308152076, -0.0163509564360857));
+         reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, 0.893444112012186, -0.015502379303478447));
+         reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, 0.8938502168058939, -0.6855022562280167));
+         reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, -0.5061495260214995, -0.6863508334088992));
+         reachabilityPolygon.update();
+
+         solver.addSupportPolygon(supportPolygon);
+         solver.addReachabilityPolygon(reachabilityPolygon);
+
+         FrameVector2D icpError = new FrameVector2D(worldFrame, -0.07380072407166109, -0.05497512056196603);
+         FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.020230791294742534, 0.1586256502408977);
+
+         NoConvergenceException exception = null;
+         try
+         {
+            solver.compute(icpError, perfectCMP);
+         }
+         catch (NoConvergenceException e)
+         {
+            exception = e;
+         }
+
+         Assert.assertTrue(exception == null);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
+   public void testSimpleNoExceptions() throws Exception
+   {
+      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+
+
+      // feedback
+      FramePoint2D scaledFeedbackWeight = new FramePoint2D(worldFrame, 0.283, 0.283);
+      double feedbackGainX = 3.5;
+      double feedbackGainY = 4.0;
+      solver.resetFeedbackConditions();
+      solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGainX, feedbackGainY, 100000.0);
+      solver.setMaxCMPDistanceFromEdge(0.06);
+      solver.setCopSafeDistanceToEdge(0.002);
+      solver.setFeedbackRegularizationWeight(0.0025);
+
+      // angular momentum
+      solver.resetAngularMomentumConditions();
+      solver.setAngularMomentumConditions(10.77, true);
+
+      // footstep
+      FramePoint2D footstepLocation = new FramePoint2D(worldFrame, 0.297, -0.620);
+      solver.resetFootstepConditions();
+      solver.setFootstepAdjustmentConditions(0.271, 10.0, 10.0, 1.0, footstepLocation);
+      solver.setFootstepRegularizationWeight(0.0);
+
+      // set previous solutions
+      FramePoint2D previousFootstepSolution = new FramePoint2D(worldFrame, 0.288, -0.638);
+      FramePoint2D previousFeedbackDeltaSolution = new FramePoint2D(worldFrame, -0.142, -0.047);
+      solver.resetFootstepRegularization(previousFootstepSolution);
+      solver.resetFeedbackRegularization(previousFeedbackDeltaSolution);
+
+      // set constraints
+      FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(worldFrame);
+      supportPolygon.addVertex(new FramePoint2D(worldFrame, -0.125, 0.224));
+      supportPolygon.addVertex(new FramePoint2D(worldFrame, 0.104, 0.211));
+      supportPolygon.addVertex(new FramePoint2D(worldFrame, 0.104, 0.122));
+      supportPolygon.addVertex(new FramePoint2D(worldFrame, -0.124, 0.109));
+      supportPolygon.update();
+
+      FrameConvexPolygon2d reachabilityPolygon = new FrameConvexPolygon2d(worldFrame);
+      reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, -0.507, -0.016));
+      reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, 0.893, -0.016));
+      reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, 0.894, -0.686));
+      reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, -0.506, -0.686));
+      reachabilityPolygon.update();
+
+      solver.addSupportPolygon(supportPolygon);
+      solver.addReachabilityPolygon(reachabilityPolygon);
+
+      FrameVector2D icpError = new FrameVector2D(worldFrame, -0.074, -0.055);
+      FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.020, 0.159);
+
+      NoConvergenceException exception = null;
+      try
+      {
+         solver.compute(icpError, perfectCMP);
+      }
+      catch (NoConvergenceException e)
+      {
+         exception = e;
+      }
+
+      Assert.assertTrue(exception == null);
    }
 }
 

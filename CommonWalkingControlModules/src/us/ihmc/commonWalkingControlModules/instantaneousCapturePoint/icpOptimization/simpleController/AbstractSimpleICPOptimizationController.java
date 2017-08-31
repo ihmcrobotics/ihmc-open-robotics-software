@@ -40,7 +40,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    protected static final boolean COMPUTE_COST_TO_GO = false;
 
    private static final double footstepAdjustmentSafetyFactor = 1.0;
-   private static final double transferSplitFraction = 0.5;
+   private static final double transferSplitFraction = 0.3;
 
    private static final boolean useAngularMomentumIntegrator = true;
    private static final double angularMomentumIntegratorGain = 50.0;

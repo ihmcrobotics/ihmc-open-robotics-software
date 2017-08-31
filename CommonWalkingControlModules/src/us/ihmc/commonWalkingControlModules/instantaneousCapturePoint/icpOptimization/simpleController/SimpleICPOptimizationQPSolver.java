@@ -26,8 +26,8 @@ public class SimpleICPOptimizationQPSolver
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
 
-   private static final int maxNumberOfIterations = 3;
-   private static final double convergenceThreshold = 1.0e-34;
+   private static final int maxNumberOfIterations = 5;
+   private static final double convergenceThreshold = 1.0e-20;
 
    /** Index handler that manages the indices for the objectives and solutions in the quadratic program. */
    private final SimpleICPQPIndexHandler indexHandler;
@@ -325,8 +325,10 @@ public class SimpleICPOptimizationQPSolver
       copLocationConstraint.setPolygon();
       cmpLocationConstraint.setPolygon();
       reachabilityConstraint.setPolygon();
-      numberOfInequalityConstraints = copLocationConstraint.getInequalityConstraintSize() + reachabilityConstraint.getInequalityConstraintSize();
 
+      numberOfInequalityConstraints = copLocationConstraint.getInequalityConstraintSize();
+      if (indexHandler.useStepAdjustment())
+         numberOfInequalityConstraints += reachabilityConstraint.getInequalityConstraintSize();
       if (indexHandler.useAngularMomentum() && Double.isFinite(cmpSafeDistanceFromEdge))
          numberOfInequalityConstraints += cmpLocationConstraint.getInequalityConstraintSize();
 
@@ -480,6 +482,13 @@ public class SimpleICPOptimizationQPSolver
       this.previousFootstepLocation.set(1, 0, previousFootstepLocation.getY());
    }
 
+   public void resetFeedbackRegularization(FramePoint2D previousFeedbackDeltaSolution)
+   {
+      previousFeedbackDeltaSolution.changeFrame(worldFrame);
+      this.previousFeedbackDeltaSolution.set(0, 0, previousFeedbackDeltaSolution.getX());
+      this.previousFeedbackDeltaSolution.set(1, 0, previousFeedbackDeltaSolution.getY());
+   }
+
 
 
 
@@ -605,7 +614,7 @@ public class SimpleICPOptimizationQPSolver
       if (Double.isFinite(cmpSafeDistanceFromEdge) && indexHandler.useAngularMomentum() && cmpLocationConstraint.getInequalityConstraintSize() > 0)
          addCMPLocationConstraint();
 
-      if (reachabilityConstraint.getInequalityConstraintSize() > 0)
+      if (indexHandler.useStepAdjustment() && reachabilityConstraint.getInequalityConstraintSize() > 0)
          addReachabilityConstraint();
 
       NoConvergenceException noConvergenceException = null;

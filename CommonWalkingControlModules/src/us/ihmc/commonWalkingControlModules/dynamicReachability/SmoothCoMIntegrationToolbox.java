@@ -6,13 +6,12 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointToolbox;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
-import us.ihmc.robotics.math.trajectories.YoTrajectory;
+import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.Trajectory;
 
 public class SmoothCoMIntegrationToolbox
 {
@@ -50,7 +49,7 @@ public class SmoothCoMIntegrationToolbox
                                                     List<FramePoint3D> entryCoMCornerPointsToPack, List<FramePoint3D> exitCoMCornerPointsToPack,
                                                     List<FrameVector3D> entryCoMCornerVelocitiesToPack, List<FrameVector3D> exitCoMCornerVelocitiesToPack,
                                                     List<FrameVector3D> entryCoMCornerAccelerationsToPack, List<FrameVector3D> exitCoMCornerAccelerationsToPack,
-                                                    List<YoFrameTrajectory3D> cmpPolynomials3D, FramePoint3D initialCenterOfMassPosition,
+                                                    List<FrameTrajectory3D> cmpPolynomials3D, FramePoint3D initialCenterOfMassPosition,
                                                     FrameVector3D initialCenterOfMassVelocity, FrameVector3D initialCenterOfMassAcceleration, double omega0)
    {
       computeDesiredCenterOfMassCornerPoints(entryICPCornerPoints, exitICPCornerPoints, entryCoMCornerPointsToPack, exitCoMCornerPointsToPack, cmpPolynomials3D,
@@ -65,10 +64,10 @@ public class SmoothCoMIntegrationToolbox
 
    //TODO: implement validity checks
    public void computeDesiredCenterOfMassCornerPoints(List<FramePoint3D> entryICPCornerPoints, List<FramePoint3D> exitICPCornerPoints,
-                                                      List<FramePoint3D> entryCoMCornerPointsToPack, List<FramePoint3D> exitCoMCornerPointsToPack,
-                                                      List<YoFrameTrajectory3D> cmpPolynomials3D, FramePoint3D initialCenterOfMass, double omega0)
+                                                             List<FramePoint3D> entryCoMCornerPointsToPack, List<FramePoint3D> exitCoMCornerPointsToPack,
+                                                             List<FrameTrajectory3D> cmpPolynomials3D, FramePoint3D initialCenterOfMass, double omega0)
    {
-      YoFrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
+      FrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
       FramePoint3D previousExitCoMCornerPoint = initialCenterOfMass;
 
       for (int i = 0; i < cmpPolynomials3D.size(); i++)
@@ -90,9 +89,9 @@ public class SmoothCoMIntegrationToolbox
    public void computeDesiredCenterOfMassCornerVelocities(List<FramePoint3D> entryICPCornerPoints, List<FramePoint3D> exitICPCornerPoints,
                                                           List<FramePoint3D> entryCoMCornerPoints, List<FramePoint3D> exitCoMCornerPoints,
                                                           List<FrameVector3D> entryCoMCornerVelocitiesToPack, List<FrameVector3D> exitCoMCornerVelocitiesToPack,
-                                                          List<YoFrameTrajectory3D> cmpPolynomials3D, FrameVector3D initialCenterOfMassVelocity, double omega0)
+                                                          List<FrameTrajectory3D> cmpPolynomials3D, FrameVector3D initialCenterOfMassVelocity, double omega0)
    {
-      YoFrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
+      FrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
       FrameVector3D previousExitCoMCornerVelocity = initialCenterOfMassVelocity;
 
       for (int i = 0; i < cmpPolynomials3D.size(); i++)
@@ -115,10 +114,10 @@ public class SmoothCoMIntegrationToolbox
    public void computeDesiredCenterOfMassCornerAccelerations(List<FramePoint3D> entryICPCornerPoints, List<FramePoint3D> exitICPCornerPoints,
                                                              List<FramePoint3D> entryCoMCornerPoints, List<FramePoint3D> exitCoMCornerPoints,
                                                              List<FrameVector3D> entryCoMCornerAccelerationsToPack,
-                                                             List<FrameVector3D> exitCoMCornerAccelerationsToPack, List<YoFrameTrajectory3D> cmpPolynomials3D,
+                                                             List<FrameVector3D> exitCoMCornerAccelerationsToPack, List<FrameTrajectory3D> cmpPolynomials3D,
                                                              FrameVector3D initialCenterOfMassAcceleration, double omega0)
    {
-      YoFrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
+      FrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
       FrameVector3D previousExitCoMCornerAcceleration = initialCenterOfMassAcceleration;
 
       for (int i = 0; i < cmpPolynomials3D.size(); i++)
@@ -139,30 +138,32 @@ public class SmoothCoMIntegrationToolbox
    }
 
    public void computeDesiredCenterOfMassPosition(double omega0, double time, FramePoint3D finalCapturePoint, FramePoint3D initialCenterOfMass,
-                                                  YoFrameTrajectory3D cmpPolynomial3D, FramePoint3D desiredCenterOfMassPositionToPack)
+                                                  FrameTrajectory3D cmpPolynomial3D, FramePoint3D desiredCenterOfMassPositionToPack)
    {
       calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, cmpPolynomial3D, finalCapturePoint, initialCenterOfMass,
                                                            desiredCenterOfMassPositionToPack);
    }
 
    public void computeDesiredCenterOfMassVelocity(double omega0, double time, FramePoint3D finalCapturePoint, FramePoint3D initialCenterOfMass,
-                                                  YoFrameTrajectory3D cmpPolynomial3D, FrameVector3D desiredCenterOfMassVelocityToPack)
+                                                  FrameTrajectory3D cmpPolynomial3D, FrameVector3D desiredCenterOfMassVelocityToPack)
    {
       calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, cmpPolynomial3D, finalCapturePoint, initialCenterOfMass,
                                                            desiredCenterOfMassVelocityToPack);
    }
 
    public void computeDesiredCenterOfMassAcceleration(double omega0, double time, FramePoint3D finalCapturePoint, FramePoint3D initialCenterOfMass,
-                                                      YoFrameTrajectory3D cmpPolynomial3D, FrameVector3D desiredCenterOfMassAccelerationToPack)
+                                                      FrameTrajectory3D cmpPolynomial3D, FrameVector3D desiredCenterOfMassAccelerationToPack)
    {
       calculateCoMQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 2, cmpPolynomial3D, finalCapturePoint, initialCenterOfMass,
                                                            desiredCenterOfMassAccelerationToPack);
    }
 
-   public void calculateCoMQuantityFromCorrespondingCMPPolynomial3D(double omega0, double time, int comDerivativeOrder, YoFrameTrajectory3D cmpPolynomial3D,
-                                                                    FrameTuple3D<?, ?> icpPositionDesiredFinal, FrameTuple3D<?, ?> comPositionDesiredInitial,
-                                                                    FrameTuple3D<?, ?> comQuantityDesired)
-   {
+   public void calculateCoMQuantityFromCorrespondingCMPPolynomial3D(double omega0, double time, int comDerivativeOrder, 
+                                                                           FrameTrajectory3D cmpPolynomial3D, 
+                                                                           FrameTuple3D<?, ?> icpPositionDesiredFinal, 
+                                                                           FrameTuple3D<?, ?> comPositionDesiredInitial, 
+                                                                           FrameTuple3D<?, ?> comQuantityDesired)
+   {        
       int numberOfCoefficients = cmpPolynomial3D.getNumberOfCoefficients();
       if (numberOfCoefficients < 0)
       {
@@ -187,9 +188,8 @@ public class SmoothCoMIntegrationToolbox
                              comQuantityDesired);
    }
 
-   public double calculateCoMQuantityFromCorrespondingCMPPolynomial1D(double omega0, double time, int comDerivativeOrder, YoTrajectory cmpPolynomial,
-                                                                      double icpPositionDesiredFinal, double comPositionDesiredInitial)
-   {
+   public double calculateCoMQuantityFromCorrespondingCMPPolynomial1D(double omega0, double time, int comDerivativeOrder, Trajectory cmpPolynomial, double icpPositionDesiredFinal, double comPositionDesiredInitial)
+   {      
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
 
       initializeMatrices1D(numberOfCoefficients);
@@ -296,13 +296,13 @@ public class SmoothCoMIntegrationToolbox
     * @param alphaCoMDerivativeOrder
     * @param cmpPolynomial3D
     */
-   public void calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedAlphaCoMPrime, int alphaCoMDerivativeOrder,
-                                                               YoFrameTrajectory3D cmpPolynomial3D)
+   public void calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedAlphaCoMPrime, 
+                                                                      int alphaCoMDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
    {
       for (Direction dir : Direction.values())
       {
-         YoTrajectory cmpPolynomial = cmpPolynomial3D.getYoTrajectory(dir);
-
+         Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
+         
          calculateGeneralizedAlphaCoMPrimeOnCMPSegment1D(omega0, time, generalizedAlphaCoMPrimeRow, alphaCoMDerivativeOrder, cmpPolynomial);
 
          CommonOps.insert(generalizedAlphaCoMPrimeRow, generalizedAlphaCoMPrime, dir.ordinal(), dir.ordinal() * generalizedAlphaCoMPrimeRow.numCols);
@@ -310,7 +310,7 @@ public class SmoothCoMIntegrationToolbox
    }
 
    public void calculateGeneralizedAlphaCoMPrimeOnCMPSegment1D(double omega0, double time, DenseMatrix64F generalizedAlphaCoMPrimeRow,
-                                                               int alphaCoMDerivativeOrder, YoTrajectory cmpPolynomial)
+                                                                      int alphaCoMDerivativeOrder, Trajectory cmpPolynomial)
    {
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
 
@@ -348,22 +348,22 @@ public class SmoothCoMIntegrationToolbox
     * @param betaCoMDerivativeOrder
     * @param cmpPolynomial3D
     */
-   public void calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedBetaCoMPrime, int betaCoMDerivativeOrder,
-                                                              YoFrameTrajectory3D cmpPolynomial3D)
-   {
-      for (Direction dir : Direction.values())
+   public void calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedBetaCoMPrime, 
+                                                                     int betaCoMDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
+   {                  
+      for(Direction dir : Direction.values())
       {
-         YoTrajectory cmpPolynomial = cmpPolynomial3D.getYoTrajectory(dir);
-
+         Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
+         
          calculateGeneralizedBetaCoMPrimeOnCMPSegment1D(omega0, time, generalizedBetaCoMPrimeRow, betaCoMDerivativeOrder, cmpPolynomial);
 
          CommonOps.insert(generalizedBetaCoMPrimeRow, generalizedBetaCoMPrime, dir.ordinal(), dir.ordinal() * generalizedBetaCoMPrimeRow.numCols);
       }
    }
 
-   public void calculateGeneralizedBetaCoMPrimeOnCMPSegment1D(double omega0, double time, DenseMatrix64F generalizedBetaCoMPrimeRow, int betaCoMDerivativeOrder,
-                                                              YoTrajectory cmpPolynomial)
-   {
+   public void calculateGeneralizedBetaCoMPrimeOnCMPSegment1D(double omega0, double time, DenseMatrix64F generalizedBetaCoMPrimeRow, 
+                                                                     int betaCoMDerivativeOrder, Trajectory cmpPolynomial)
+   {                        
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
       double timeSegmentInitial = cmpPolynomial.getInitialTime();
 
@@ -402,18 +402,18 @@ public class SmoothCoMIntegrationToolbox
     * @param gammaCoMDerivativeOrder
     * @param cmpPolynomial3D
     */
-   public void calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedGammaCoMPrime, int gammaCoMDerivativeOrder,
-                                                               YoFrameTrajectory3D cmpPolynomial3D)
-   {
+   public void calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedGammaCoMPrime, 
+                                                                      int gammaCoMDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
+   {      
       double timeSegmentInitial = cmpPolynomial3D.getInitialTime();
       double ddGamaPrimeValue = Math.pow(-1.0, gammaCoMDerivativeOrder) * Math.pow(omega0, gammaCoMDerivativeOrder)
             * Math.exp(omega0 * (timeSegmentInitial - time));
       generalizedGammaCoMPrime.set(0, 0, ddGamaPrimeValue);
    }
-
-   public void calculateGeneralizedGammaCoMPrimeOnCMPSegment1D(double omega0, double time, DenseMatrix64F generalizedGammaCoMPrime, int gammaCoMDerivativeOrder,
-                                                               YoTrajectory cmpPolynomial)
-   {
+   
+   public void calculateGeneralizedGammaCoMPrimeOnCMPSegment1D(double omega0, double time, DenseMatrix64F generalizedGammaCoMPrime, 
+                                                                      int gammaCoMDerivativeOrder, Trajectory cmpPolynomial)
+   {      
       double timeSegmentInitial = cmpPolynomial.getInitialTime();
       double ddGamaPrimeValue = Math.pow(-1.0, gammaCoMDerivativeOrder) * Math.pow(omega0, gammaCoMDerivativeOrder)
             * Math.exp(omega0 * (timeSegmentInitial - time));
@@ -432,9 +432,9 @@ public class SmoothCoMIntegrationToolbox
     * @param deltaCoMDerivativeOrder
     * @param cmpPolynomial3D
     */
-   public void calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedDeltaCoMPrime, int deltaCoMDerivativeOrder,
-                                                               YoFrameTrajectory3D cmpPolynomial3D)
-   {
+   public void calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedDeltaCoMPrime, 
+                                                                      int deltaCoMDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
+   {                  
       double timeSegmentInitial = cmpPolynomial3D.getInitialTime();
       double timeSegmentTotal = cmpPolynomial3D.getFinalTime();
       double ddDeltaPrimeValue = 0.5 * Math.exp(omega0 * (timeSegmentInitial - timeSegmentTotal))
@@ -442,10 +442,10 @@ public class SmoothCoMIntegrationToolbox
                   - Math.pow(-1.0, deltaCoMDerivativeOrder) * Math.pow(omega0, deltaCoMDerivativeOrder) * Math.exp(omega0 * (timeSegmentInitial - time)));
       generalizedDeltaCoMPrime.set(0, 0, ddDeltaPrimeValue);
    }
-
-   public void calculateGeneralizedDeltaCoMPrimeOnCMPSegment1D(double omega0, double time, DenseMatrix64F generalizedDeltaCoMPrime, int deltaCoMDerivativeOrder,
-                                                               YoTrajectory cmpPolynomial)
-   {
+   
+   public void calculateGeneralizedDeltaCoMPrimeOnCMPSegment1D(double omega0, double time, DenseMatrix64F generalizedDeltaCoMPrime, 
+                                                                      int deltaCoMDerivativeOrder, Trajectory cmpPolynomial)
+   {                  
       double timeSegmentInitial = cmpPolynomial.getInitialTime();
       double timeSegmentTotal = cmpPolynomial.getFinalTime();
       double ddDeltaPrimeValue = 0.5 * Math.exp(omega0 * (timeSegmentInitial - timeSegmentTotal))
@@ -487,18 +487,18 @@ public class SmoothCoMIntegrationToolbox
       generalizedAlphaPrimeTerminalMatrix.reshape(dimension, dimension * numberOfCoefficients);
       generalizedAlphaPrimeTerminalMatrix.zero();
    }
-
-   private void setPolynomialCoefficientVector3D(DenseMatrix64F polynomialCoefficientCombinedVector, YoFrameTrajectory3D cmpPolynomial3D)
+   
+   private void setPolynomialCoefficientVector3D(DenseMatrix64F polynomialCoefficientCombinedVector, FrameTrajectory3D cmpPolynomial3D)
    {
       for (Direction dir : Direction.values())
       {
-         setPolynomialCoefficientVector1D(polynomialCoefficientVector, cmpPolynomial3D.getYoTrajectory(dir));
-
+         setPolynomialCoefficientVector1D(polynomialCoefficientVector, cmpPolynomial3D.getTrajectory(dir));
+         
          CommonOps.insert(polynomialCoefficientVector, polynomialCoefficientCombinedVector, dir.ordinal() * polynomialCoefficientVector.numRows, 0);
       }
    }
-
-   private void setPolynomialCoefficientVector1D(DenseMatrix64F polynomialCoefficientVector, YoTrajectory cmpPolynomial)
+   
+   private void setPolynomialCoefficientVector1D(DenseMatrix64F polynomialCoefficientVector, Trajectory cmpPolynomial)
    {
       double[] polynomialCoefficients = cmpPolynomial.getCoefficients();
 
