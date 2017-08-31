@@ -81,7 +81,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    private final WalkingControllerParameters walkingControllerParameters;
    private final ICPTrajectoryPlannerParameters capturePointPlannerParameters;
 
-   private final StandPrepSetpoints standPrepSetpoints;
+   private final StandPrepParameters standPrepSetpoints;
    private final NewHighLevelControllerStates initialControllerState;
    private final NewHighLevelControllerStates fallbackControllerState;
 
@@ -119,7 +119,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    public NewMomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
                                             SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
                                             WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters,
-                                            StandPrepSetpoints standPrepSetpoints, NewHighLevelControllerStates initialControllerState,
+                                            StandPrepParameters standPrepSetpoints, NewHighLevelControllerStates initialControllerState,
                                             NewHighLevelControllerStates fallbackControllerState)
    {
       this.footSensorNames = footForceSensorNames;
@@ -630,12 +630,12 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       return new NewDoNothingControllerState(controllerToolbox);
    }
 
-   public NewStandPrepControllerState createStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepSetpoints standPrepSetpoints)
+   public NewStandPrepControllerState createStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepParameters standPrepSetpoints)
    {
       return new NewStandPrepControllerState(controllerToolbox, standPrepSetpoints);
    }
 
-   public NewStandReadyControllerState createStandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepSetpoints standPrepSetpoints)
+   public NewStandReadyControllerState createStandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepParameters standPrepSetpoints)
    {
       return new NewStandReadyControllerState(controllerToolbox, standPrepSetpoints);
    }

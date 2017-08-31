@@ -13,7 +13,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Ab
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.NewMomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandPrepSetpoints;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandPrepParameters;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
@@ -47,7 +47,7 @@ public abstract class NewDRCFlatGroundWalkingTrack
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      StandPrepSetpoints standPrepSetpoints = model.getStandPrepSetpoints();
+      StandPrepParameters standPrepSetpoints = model.getStandPrepSetpoints();
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       RobotContactPointParameters contactPointParameters = model.getContactPointParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
@@ -101,7 +101,7 @@ public abstract class NewDRCFlatGroundWalkingTrack
    public AbstractMomentumBasedControllerFactory getControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
                                                                       SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
                                                                       WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters,
-                                                                      StandPrepSetpoints standPrepSetpoints, NewHighLevelControllerStates initialControllerState, NewHighLevelControllerStates fallbackControllerState)
+                                                                      StandPrepParameters standPrepSetpoints, NewHighLevelControllerStates initialControllerState, NewHighLevelControllerStates fallbackControllerState)
    {
       return new NewMomentumBasedControllerFactory(contactableBodiesFactory, footForceSensorNames, footContactSensorNames, wristSensorNames, walkingControllerParameters,
                                                    capturePointPlannerParameters, standPrepSetpoints, initialControllerState, fallbackControllerState);

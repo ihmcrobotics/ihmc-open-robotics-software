@@ -27,17 +27,17 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
 
    private final OneDoFJoint[] controlledJoints;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
-   private final StandPrepSetpoints standPrepSetpoints;
+   private final StandPrepParameters standPrepSetpoints;
 
    private final YoDouble timeToPrepareForStanding = new YoDouble("timeToPrepareForStanding", registry);
    private final YoDouble minimumTimeDoneWithStandPrep = new YoDouble("minimumTimeDoneWithStandPrep", registry);
 
-   public NewStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepSetpoints standPrepSetpoints)
+   public NewStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepParameters standPrepSetpoints)
    {
       this(controllerToolbox, standPrepSetpoints, TIME_TO_SPLINE_TO_STAND_POSE, MINIMUM_TIME_DONE_WITH_STAND_PREP);
    }
 
-   public NewStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepSetpoints standPrepSetpoints,
+   public NewStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepParameters standPrepSetpoints,
                                       double timeToPrepareForStanding, double minimumTimeDoneWithStandPrep)
    {
       super(NewHighLevelControllerStates.STAND_PREP_STATE);
@@ -71,7 +71,7 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
          OneDoFJoint joint = controlledJoints[jointIndex];
          YoPolynomial trajectory = trajectoriesStandPose.get(joint);
 
-         double desiredAngle = standPrepSetpoints.get(joint.getName());
+         double desiredAngle = standPrepSetpoints.getSetpoint(joint.getName());
          double desiredVelocity = 0.0;
 
          double currentAngle = joint.getQ();
