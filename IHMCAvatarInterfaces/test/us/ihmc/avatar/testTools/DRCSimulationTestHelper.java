@@ -63,15 +63,15 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class DRCSimulationTestHelper
 {
-   private final SimulationConstructionSet scs;
-   private final HumanoidFloatingRootJointRobot sdfRobot;
-   private final AvatarSimulation avatarSimulation;
+   private SimulationConstructionSet scs;
+   private HumanoidFloatingRootJointRobot sdfRobot;
+   private AvatarSimulation avatarSimulation;
    protected final PacketCommunicator controllerCommunicator;
    private final CommonAvatarEnvironmentInterface testEnvironment;
 
    private final SimulationTestingParameters simulationTestingParameters;
 
-   private final NothingChangedVerifier nothingChangedVerifier;
+   private NothingChangedVerifier nothingChangedVerifier;
    private BlockingSimulationRunner blockingSimulationRunner;
    private final WalkingControllerParameters walkingControlParameters;
 
@@ -86,72 +86,52 @@ public class DRCSimulationTestHelper
    public DRCSimulationTestHelper(String name, DRCObstacleCourseStartingLocation selectedLocation,
                                   SimulationTestingParameters simulationconstructionsetparameters, DRCRobotModel robotModel)
    {
-      this(new DefaultCommonAvatarEnvironment(), name, selectedLocation, simulationconstructionsetparameters, robotModel, true);
+      this(new DefaultCommonAvatarEnvironment(), selectedLocation, simulationconstructionsetparameters, robotModel);
    }
 
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCStartingLocation selectedLocation,
                                   SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel)
    {
-      this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, true);
+      this(commonAvatarEnvironmentInterface, selectedLocation, simulationTestingParameters, robotModel, null, null, null, false, false, false,
+           null);
    }
 
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
-                                  SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel, boolean automaticallySpawnSimulation)
-   {
-      this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, null, null, null, false, false, false,
-           automaticallySpawnSimulation, null);
-   }
-
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCStartingLocation selectedLocation,
                                   SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel, boolean addFootstepMessageGenerator,
                                   boolean useHeadingAndVelocityScript, boolean cheatWithGroundHeightAtForFootstep,
                                   HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
-      this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, null, null, null, addFootstepMessageGenerator,
-           useHeadingAndVelocityScript, cheatWithGroundHeightAtForFootstep, true, walkingScriptParameters);
+      this(commonAvatarEnvironmentInterface, selectedLocation, simulationTestingParameters, robotModel, null, null, null, addFootstepMessageGenerator,
+           useHeadingAndVelocityScript, cheatWithGroundHeightAtForFootstep, walkingScriptParameters);
    }
 
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCStartingLocation selectedLocation,
                                   SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
-                                  DRCNetworkModuleParameters drcNetworkModuleParameters, boolean automaticallySimulate)
+                                  DRCNetworkModuleParameters drcNetworkModuleParameters)
    {
-      this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, drcNetworkModuleParameters, null, null, false,
-           false, false, automaticallySimulate, null);
+      this(commonAvatarEnvironmentInterface, selectedLocation, simulationTestingParameters, robotModel, drcNetworkModuleParameters, null, null, false,
+           false, false, null);
    }
 
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
                                   SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
                                   DRCNetworkModuleParameters drcNetworkModuleParameters)
    {
-      this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, drcNetworkModuleParameters, null, null, false,
-           false, false, true, null);
+      this(commonAvatarEnvironmentInterface, selectedLocation, simulationTestingParameters, robotModel, drcNetworkModuleParameters, null, null, false,
+           false, false, null);
    }
 
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCStartingLocation selectedLocation,
                                   SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
                                   DRCNetworkModuleParameters drcNetworkModuleParameters, HighLevelBehaviorFactory highLevelBehaviorFactoryToAdd,
                                   DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup, boolean addFootstepMessageGenerator,
-                                  boolean useHeadingAndVelocityScript, boolean cheatWithGroundHeightAtForFootstep, boolean automaticallySpawnSimulation,
+                                  boolean useHeadingAndVelocityScript, boolean cheatWithGroundHeightAtForFootstep,
                                   HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
-      this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, drcNetworkModuleParameters,
-           highLevelBehaviorFactoryToAdd, initialSetup, addFootstepMessageGenerator, useHeadingAndVelocityScript, cheatWithGroundHeightAtForFootstep,
-           automaticallySpawnSimulation, walkingScriptParameters, true);
-   }
-
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
-                                  SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
-                                  DRCNetworkModuleParameters drcNetworkModuleParameters, HighLevelBehaviorFactory highLevelBehaviorFactoryToAdd,
-                                  DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup, boolean addFootstepMessageGenerator,
-                                  boolean useHeadingAndVelocityScript, boolean cheatWithGroundHeightAtForFootstep, boolean automaticallySpawnSimulation,
-                                  HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters, boolean useBlockingSimulationRunner)
-   {
       this.controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
-                                                                                            new IHMCCommunicationKryoNetClassList());
+            new IHMCCommunicationKryoNetClassList());
       this.testEnvironment = commonAvatarEnvironmentInterface;
-
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
-
       this.simulationTestingParameters = simulationTestingParameters;
 
       try
@@ -195,7 +175,15 @@ public class DRCSimulationTestHelper
       {
          networkProcessorParameters = drcNetworkModuleParameters;
       }
+   }
 
+   public void createSimulation(String name)
+   {
+      createSimulation(name, true, true);
+   }
+
+   public void createSimulation(String name, boolean automaticallySpawnSimulation, boolean useBlockingSimulationRunner)
+   {
       simulationStarter.createSimulation(networkProcessorParameters, automaticallySpawnSimulation, false);
 
       scs = simulationStarter.getSimulationConstructionSet();
