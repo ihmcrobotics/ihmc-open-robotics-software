@@ -16,8 +16,8 @@ public class RobotKinematicsConfiguration
    private int jointConfigurationHash;
    private double[] jointConfiguration;
 
-   private Vector3D rootTranslation = new Vector3D();
-   private Quaternion rootOrientation = new Quaternion();
+   public Vector3D rootTranslation = new Vector3D();
+   public Quaternion rootOrientation = new Quaternion();
 
    public RobotKinematicsConfiguration()
    {
@@ -54,8 +54,10 @@ public class RobotKinematicsConfiguration
       for (int i = 0; i < oneDoFJoints.length; i++)
          jointConfiguration[i] = oneDoFJoints[i].getQ();
 
-      this.rootTranslation.set(rootTranslation);
-      this.rootOrientation.set(rootOrientation);
+      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      
+      this.rootTranslation.set(rootJoint.getTranslationForReading());
+      this.rootOrientation.set(rootJoint.getRotationForReading());
    }
 
    public void getRobotConfiguration(FullHumanoidRobotModel fullRobotModelToUpdate)

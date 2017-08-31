@@ -263,7 +263,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       ConstrainedWholeBodyPlanningRequestPacket packet = new ConstrainedWholeBodyPlanningRequestPacket();
 
       ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory = endeffectorTrajectory;
-      packet.setNumberOfFindInitialGuess(60);
+      packet.setNumberOfFindInitialGuess(160);
       packet.setNumberOfExpanding(600);
       packet.setInitialRobotConfigration(sdfFullRobotModel);
 
