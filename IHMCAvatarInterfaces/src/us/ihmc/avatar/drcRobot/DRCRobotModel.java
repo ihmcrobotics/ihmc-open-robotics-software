@@ -7,7 +7,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandPrepSetpoints;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandPrepParameters;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -89,7 +89,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
-   public default StandPrepSetpoints getStandPrepSetpoints()
+   public default StandPrepParameters getStandPrepSetpoints()
    {
       return null;
    }

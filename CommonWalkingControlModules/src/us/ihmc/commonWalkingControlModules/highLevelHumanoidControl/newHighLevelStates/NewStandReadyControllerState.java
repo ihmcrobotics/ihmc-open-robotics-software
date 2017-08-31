@@ -15,9 +15,9 @@ public class NewStandReadyControllerState extends NewHighLevelControllerState
 
    private final OneDoFJoint[] controlledJoints;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
-   private final StandPrepSetpoints standPrepSetpoints;
+   private final StandPrepParameters standPrepSetpoints;
 
-   public NewStandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepSetpoints standPrepSetpoints)
+   public NewStandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepParameters standPrepSetpoints)
    {
       super(NewHighLevelControllerStates.STAND_READY_STATE);
 
@@ -44,7 +44,7 @@ public class NewStandReadyControllerState extends NewHighLevelControllerState
       for (int jointIndex = 0; jointIndex < controlledJoints.length; jointIndex++)
       {
          OneDoFJoint joint = controlledJoints[jointIndex];
-         double qDesired = standPrepSetpoints.get(joint.getName());
+         double qDesired = standPrepSetpoints.getSetpoint(joint.getName());
          double qdDesired = 0.0;
 
          lowLevelOneDoFJointDesiredDataHolder.setDesiredJointPosition(joint, qDesired);
