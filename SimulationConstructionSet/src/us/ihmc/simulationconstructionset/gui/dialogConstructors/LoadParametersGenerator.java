@@ -12,18 +12,19 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class LoadParametersGenerator implements LoadParametersConstructor
 {
    private final SimulationConstructionSet scs;
+   private ParameterFileChooser fileChooser;
 
    public LoadParametersGenerator(SimulationConstructionSet scs)
    {
       this.scs = scs;
+      this.fileChooser = new ParameterFileChooser();
    }
 
    @Override
    public void constructDialog()
    {
-      ParameterFileChooser fileChooser = new ParameterFileChooser(scs.getParameterRootPath());
 
-      if (fileChooser.showDialog(scs.getJFrame(), scs.getRootRegistry(), false))
+      if (fileChooser.showDialog(scs.getJFrame(), scs.getRootRegistry(), scs.getParameterRootPath(), false))
       {
          try
          {
@@ -41,15 +42,13 @@ public class LoadParametersGenerator implements LoadParametersConstructor
             JOptionPane.showMessageDialog(scs.getJFrame(), "Cannot read from " + fileChooser.getFile() + "\n" + e.getMessage(), "Cannot read from file", JOptionPane.ERROR_MESSAGE);
          }
       }
-
-      fileChooser.closeAndDispose();
    }
 
    @Override
    public void closeAndDispose()
    {
-      // TODO Auto-generated method stub
-
+      fileChooser.closeAndDispose();
+      fileChooser = null;
    }
 
 }

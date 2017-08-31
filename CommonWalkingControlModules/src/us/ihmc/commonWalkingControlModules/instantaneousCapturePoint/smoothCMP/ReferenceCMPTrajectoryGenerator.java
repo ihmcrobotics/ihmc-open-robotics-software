@@ -33,7 +33,7 @@ public class ReferenceCMPTrajectoryGenerator
    private double initialTime;
    private int numberOfRegisteredSteps;
    private final int maxNumberOfCoefficients = 10;
-   private final int maxNumberOfSegments = 25;
+   private final int maxNumberOfSegments = 5;
    private CMPTrajectory activeTrajectory;
 
    private final FramePoint3D desiredCMP = new FramePoint3D();
@@ -55,16 +55,16 @@ public class ReferenceCMPTrajectoryGenerator
 
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
-         CMPTrajectory transferCMPTrajectory = new CMPTrajectory(namePrefix + "Transfer" + i, maxNumberOfSegments, maxNumberOfCoefficients, registry);
-         CMPTrajectory swingCMPTrajectory = new CMPTrajectory(namePrefix + "Swing" + i, maxNumberOfSegments, maxNumberOfCoefficients, registry);
+         CMPTrajectory transferCMPTrajectory = new CMPTrajectory(maxNumberOfSegments, maxNumberOfCoefficients);
+         CMPTrajectory swingCMPTrajectory = new CMPTrajectory(maxNumberOfSegments, maxNumberOfCoefficients);
          transferCMPTrajectories.add(transferCMPTrajectory);
          swingCMPTrajectories.add(swingCMPTrajectory);
       }
-      CMPTrajectory transferCMPTrajectory = new CMPTrajectory(namePrefix + "Transfer" + maxNumberOfFootstepsToConsider, maxNumberOfSegments, maxNumberOfCoefficients, registry);
+      CMPTrajectory transferCMPTrajectory = new CMPTrajectory(maxNumberOfSegments, maxNumberOfCoefficients);
       transferCMPTrajectories.add(transferCMPTrajectory);
-      this.torqueTrajectory = new TorqueTrajectory(namePrefix + "TempTorqueTraj", maxNumberOfSegments, maxNumberOfCoefficients, registry);
+      this.torqueTrajectory = new TorqueTrajectory(maxNumberOfSegments, maxNumberOfCoefficients);
       this.verticalGroundReaction = new YoDouble("CMPTorqueOffsetScalingFactor", registry);
-      this.trajMathTools = new TrajectoryMathTools(namePrefix + "CMPPlanner", maxNumberOfCoefficients, registry);
+      this.trajMathTools = new TrajectoryMathTools(maxNumberOfCoefficients);
    }
    
    public void setGroundReaction(double z)
