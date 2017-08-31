@@ -45,7 +45,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.robotics.sensors.*;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -63,7 +62,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public abstract class NewAbstractMomentumBasedControllerFactory extends AbstractMomentumBasedControllerFactory
+public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedControllerFactory
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -117,11 +116,11 @@ public abstract class NewAbstractMomentumBasedControllerFactory extends Abstract
    private boolean setupInverseKinematicsSolver = false;
    private boolean setupVirtualModelControlSolver = false;
 
-   public NewAbstractMomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
-                                                    SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
-                                                    WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters,
-                                                    StandPrepSetpoints standPrepSetpoints, NewHighLevelControllerStates initialControllerState,
-                                                    NewHighLevelControllerStates fallbackControllerState)
+   public NewMomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
+                                            SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
+                                            WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters,
+                                            StandPrepSetpoints standPrepSetpoints, NewHighLevelControllerStates initialControllerState,
+                                            NewHighLevelControllerStates fallbackControllerState)
    {
       this.footSensorNames = footForceSensorNames;
       this.footContactSensorNames = footContactSensorNames;
@@ -626,19 +625,35 @@ public abstract class NewAbstractMomentumBasedControllerFactory extends Abstract
       return null;
    }
 
-   public abstract NewDoNothingControllerState createDoNothingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox);
+   public NewDoNothingControllerState createDoNothingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox)
+   {
+      return new NewDoNothingControllerState(controllerToolbox);
+   }
 
-   public abstract NewStandPrepControllerState createStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepSetpoints standPrepSetpoints);
+   public NewStandPrepControllerState createStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepSetpoints standPrepSetpoints)
+   {
+      return new NewStandPrepControllerState(controllerToolbox, standPrepSetpoints);
+   }
 
-   public abstract NewStandReadyControllerState createStandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepSetpoints standPrepSetpoints);
+   public NewStandReadyControllerState createStandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepSetpoints standPrepSetpoints)
+   {
+      return new NewStandReadyControllerState(controllerToolbox, standPrepSetpoints);
+   }
 
-   public abstract NewStandTransitionControllerState createStandTransitionControllerState(NewStandReadyControllerState standReadyControllerState,
+   public NewStandTransitionControllerState createStandTransitionControllerState(NewStandReadyControllerState standReadyControllerState,
                                                                                           NewWalkingControllerState walkingControllerState,
-                                                                                          HighLevelHumanoidControllerToolbox controllerToolbox);
+                                                                                          HighLevelHumanoidControllerToolbox controllerToolbox)
+   {
+      return new NewStandTransitionControllerState(standReadyControllerState, walkingControllerState, controllerToolbox);
+   }
 
-   public abstract NewWalkingControllerState createWalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
+   public NewWalkingControllerState createWalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                                                           HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
                                                                           ICPTrajectoryPlannerParameters capturePointPlannerParameters,
-                                                                          HighLevelHumanoidControllerToolbox controllerToolbox);
+                                                                          HighLevelHumanoidControllerToolbox controllerToolbox)
+   {
+      return new NewWalkingControllerState(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters, capturePointPlannerParameters,
+                                           controllerToolbox);
+   }
 
 }

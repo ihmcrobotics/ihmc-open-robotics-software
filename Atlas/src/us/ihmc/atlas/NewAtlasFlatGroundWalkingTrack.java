@@ -13,7 +13,9 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.AbstractMomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.NewMomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandPrepSetpoints;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -78,20 +80,6 @@ public class NewAtlasFlatGroundWalkingTrack extends NewDRCFlatGroundWalkingTrack
 
       if (USE_FEET_PERTURBER)
          createOscillateFeetPerturber(drcFlatGroundWalkingTrack);
-   }
-
-   @Override
-   public AbstractMomentumBasedControllerFactory getControllerFactory(ContactableBodiesFactory contactableBodiesFactory,
-                                                                      SideDependentList<String> footForceSensorNames,
-                                                                      SideDependentList<String> footContactSensorNames,
-                                                                      SideDependentList<String> wristSensorNames,
-                                                                      WalkingControllerParameters walkingControllerParameters,
-                                                                      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters,
-                                                                      NewHighLevelControllerStates initialControllerState,
-                                                                      NewHighLevelControllerStates fallbackControllerState)
-   {
-      return new NewAtlasMomentumControllerFactory(contactableBodiesFactory, footForceSensorNames, footContactSensorNames, wristSensorNames,
-                                                   walkingControllerParameters, capturePointPlannerParameters, initialControllerState, fallbackControllerState);
    }
 
    private static void createOscillateFeetPerturber(NewDRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack)
