@@ -21,6 +21,8 @@ import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.PositionControlParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandPrepParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
@@ -515,5 +517,17 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public PlanarRegionFootstepPlanningParameters getPlanarRegionFootstepPlannerParameters()
    {
       return planarRegionFootstepPlanningParameters;
+   }
+
+   @Override
+   public StandPrepParameters getStandPrepSetpoints()
+   {
+      return new ValkyrieStandPrepParameters();
+   }
+
+   @Override
+   public PositionControlParameters getPositionControlParameters()
+   {
+      return new ValkyriePositionControlParameters();
    }
 }

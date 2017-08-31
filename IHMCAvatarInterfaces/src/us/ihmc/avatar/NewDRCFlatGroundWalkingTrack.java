@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Ab
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.NewMomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.PositionControlParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandPrepParameters;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
@@ -48,6 +49,7 @@ public abstract class NewDRCFlatGroundWalkingTrack
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
       StandPrepParameters standPrepSetpoints = model.getStandPrepSetpoints();
+      PositionControlParameters positionControlParameters = model.getPositionControlParameters();
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       RobotContactPointParameters contactPointParameters = model.getContactPointParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
@@ -59,8 +61,8 @@ public abstract class NewDRCFlatGroundWalkingTrack
 
       AbstractMomentumBasedControllerFactory controllerFactory = getControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames,
                                                                                       wristForceSensorNames, walkingControllerParameters, capturePointPlannerParameters,
-                                                                                      standPrepSetpoints, NewHighLevelControllerStates.WALKING_STATE,
-                                                                                      NewHighLevelControllerStates.DO_NOTHING_STATE);
+                                                                                      standPrepSetpoints, positionControlParameters,
+                                                                                      NewHighLevelControllerStates.WALKING_STATE, NewHighLevelControllerStates.DO_NOTHING_STATE);
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
 
 
@@ -101,10 +103,11 @@ public abstract class NewDRCFlatGroundWalkingTrack
    public AbstractMomentumBasedControllerFactory getControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
                                                                       SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
                                                                       WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters,
-                                                                      StandPrepParameters standPrepSetpoints, NewHighLevelControllerStates initialControllerState, NewHighLevelControllerStates fallbackControllerState)
+                                                                      StandPrepParameters standPrepSetpoints, PositionControlParameters positionControlParameters,
+                                                                      NewHighLevelControllerStates initialControllerState, NewHighLevelControllerStates fallbackControllerState)
    {
       return new NewMomentumBasedControllerFactory(contactableBodiesFactory, footForceSensorNames, footContactSensorNames, wristSensorNames, walkingControllerParameters,
-                                                   capturePointPlannerParameters, standPrepSetpoints, initialControllerState, fallbackControllerState);
+                                                   capturePointPlannerParameters, standPrepSetpoints, positionControlParameters, initialControllerState, fallbackControllerState);
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)

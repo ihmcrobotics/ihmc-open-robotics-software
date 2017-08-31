@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.jointControlCalculator;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
@@ -14,30 +15,18 @@ public class EffortJointControlBlender
    /** This is for hardware debug purposes only. */
    private static final boolean ENABLE_TAU_SCALE = false;
 
-   private final PIDController pidPositionController;
    private final YoDouble tauOffset;
    private final YoDouble tauScale;
-   private final YoDouble standPrepAngle;
-   private final YoDouble initialAngle;
 
-   private final OneDoFJoint oneDoFJoint;
-   private final double controlDT;
-
-   public EffortJointControlBlender(String namePrefix, OneDoFJoint oneDoFJoint, Map<String, Double> gains, double torqueOffset, double standPrepAngle, double controlDT, YoVariableRegistry parentRegistry)
+   public EffortJointControlBlender(String nameSuffix, OneDoFJoint oneDoFJoint, Map<String, Double> gains, double torqueOffset, YoVariableRegistry parentRegistry)
    {
-      this.controlDT = controlDT;
-      this.oneDoFJoint = oneDoFJoint;
+      String namePrefix = oneDoFJoint.getName();
+      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + nameSuffix + "Command");
 
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + "Command");
-
-      this.standPrepAngle = new YoDouble(namePrefix + "StandPrepAngle", registry);
-      this.initialAngle = new YoDouble(namePrefix + "InitialAngle", registry);
-
-      pidPositionController = new PIDController(namePrefix + "StandPrep", registry);
-      this.tauOffset = new YoDouble("tau_offset_" + namePrefix, registry);
+      this.tauOffset = new YoDouble("tau_offset_" + namePrefix + nameSuffix, registry);
       if (ENABLE_TAU_SCALE)
       {
-         tauScale = new YoDouble("tau_scale_" + namePrefix, registry);
+         tauScale = new YoDouble("tau_scale_" + namePrefix + nameSuffix, registry);
          tauScale.set(1.0);
       }
       else
@@ -45,51 +34,26 @@ public class EffortJointControlBlender
          tauScale = null;
       }
 
-      pidPositionController.setProportionalGain(gains.get("kp"));
-      pidPositionController.setDerivativeGain(gains.get("kd"));
-      pidPositionController.setIntegralGain(gains.get("ki"));
-      pidPositionController.setMaxIntegralError(50.0);
-      pidPositionController.setCumulativeError(0.0);
-
       tauOffset.set(torqueOffset);
-
-      this.standPrepAngle.set(standPrepAngle);
 
       parentRegistry.addChild(registry);
    }
 
    public void initialize()
    {
-      pidPositionController.setCumulativeError(0.0);
-
-      double q = oneDoFJoint.getQ();
-      double jointLimitLower = oneDoFJoint.getJointLimitLower();
-      double jointLimitUpper = oneDoFJoint.getJointLimitUpper();
-      if (Double.isNaN(q) || Double.isInfinite(q))
-         q = standPrepAngle.getDoubleValue();
-      q = MathTools.clamp(q, jointLimitLower, jointLimitUpper);
-
-      initialAngle.set(q);
    }
 
-   public double computeAndUpdateJointTorque(LowLevelOneDoFJointDesiredDataHolder positionControllerDesireds, LowLevelOneDoFJointDesiredDataHolder
-                                           walkingControllerDesireds, double forceControlFactor, double masterPositionGain)
+   public double computeAndUpdateJointTorque(LowLevelJointData positionControllerDesireds, LowLevelJointData walkingControllerDesireds,
+                                             double forceControlFactor)
    {
       forceControlFactor = MathTools.clamp(forceControlFactor, 0.0, 1.0);
       if (ENABLE_TAU_SCALE)
          forceControlFactor *= tauScale.getDoubleValue();
 
-      double q = oneDoFJoint.getQ();
-      double qDesired = positionControllerDesireds.getDesiredJointPosition(oneDoFJoint);
-      double qd = oneDoFJoint.getQd();
-      double qdDesired = positionControllerDesireds.getDesiredJointVelocity(oneDoFJoint);
+      double positionControlTau = (1.0 - forceControlFactor) * positionControllerDesireds.getDesiredTorque();
+      double walkingControlTau = forceControlFactor * walkingControllerDesireds.getDesiredTorque();
 
-      double positionControlTau = (1.0 - forceControlFactor) * masterPositionGain * pidPositionController.compute(q, qDesired, qd, qdDesired, controlDT);
-      double walkingControlTau = forceControlFactor * walkingControllerDesireds.getDesiredJointTorque(oneDoFJoint);
-
-      double desiredEffort = positionControlTau + walkingControlTau + tauOffset.getDoubleValue();
-
-      return desiredEffort;
+      return positionControlTau + walkingControlTau + tauOffset.getDoubleValue();
    }
 
    public void subtractTorqueOffset(double torqueOffset)
