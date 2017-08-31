@@ -85,9 +85,9 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
       constrainToMinMax.put(CoPPointName.TOE_COP, true);
 
       constrainToSupportPolygon.put(CoPPointName.MIDFEET_COP, false);
-      constrainToSupportPolygon.put(CoPPointName.HEEL_COP, true);
-      constrainToSupportPolygon.put(CoPPointName.BALL_COP, true);
-      constrainToSupportPolygon.put(CoPPointName.TOE_COP, true);
+      constrainToSupportPolygon.put(CoPPointName.HEEL_COP, false);
+      constrainToSupportPolygon.put(CoPPointName.BALL_COP, false);
+      constrainToSupportPolygon.put(CoPPointName.TOE_COP, false);
 
       stepLengthToCoPOffsetFactor.put(CoPPointName.MIDFEET_COP, 0.0);
       stepLengthToCoPOffsetFactor.put(CoPPointName.HEEL_COP, 1.0 / 3.0);
@@ -189,7 +189,7 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
     */
    public double getSwingDurationShiftFraction()
    {
-      return 0.8;
+      return 0.99;
    }
 
    @Override
