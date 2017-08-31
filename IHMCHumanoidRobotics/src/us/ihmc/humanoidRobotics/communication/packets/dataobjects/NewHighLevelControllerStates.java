@@ -8,6 +8,8 @@ public enum NewHighLevelControllerStates
    DO_NOTHING_STATE,
    @RosEnumValueDocumentation(documentation = "Stand prep state.")
    STAND_PREP_STATE,
+   @RosEnumValueDocumentation(documentation = "Stand ready state.")
+   STAND_READY,
    @RosEnumValueDocumentation(documentation = "Freeze state.")
    FREEZE_STATE,
    @RosEnumValueDocumentation(documentation = "Stand transition state.")

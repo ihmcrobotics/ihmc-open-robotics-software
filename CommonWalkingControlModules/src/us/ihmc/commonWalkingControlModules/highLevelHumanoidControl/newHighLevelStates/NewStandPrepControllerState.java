@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
@@ -13,13 +12,10 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.HashMap;
 
 public class NewStandPrepControllerState extends NewHighLevelControllerState
 {

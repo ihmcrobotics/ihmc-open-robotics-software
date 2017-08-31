@@ -30,21 +30,21 @@ public class NewStandTransitionControllerState extends NewHighLevelControllerSta
    private final PairList<OneDoFJoint, ImmutablePair<EffortJointControlBlender, PositionJointControlBlender>> jointCommandBlenders = new PairList<>();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   private final NewFreezeControllerState freezeControllerState;
+   private final NewStandReadyControllerState standReadyControllerState;
    private final NewWalkingControllerState walkingControllerState;
 
-   public NewStandTransitionControllerState(NewFreezeControllerState freezeControllerState, NewWalkingControllerState walkingControllerState,
+   public NewStandTransitionControllerState(NewStandReadyControllerState standReadyControllerState, NewWalkingControllerState walkingControllerState,
                                             HighLevelHumanoidControllerToolbox controllerToolbox)
    {
-      this(freezeControllerState, walkingControllerState, controllerToolbox, TIME_TO_RAMP_UP_CONTROL);
+      this(standReadyControllerState, walkingControllerState, controllerToolbox, TIME_TO_RAMP_UP_CONTROL);
    }
 
-   public NewStandTransitionControllerState(NewFreezeControllerState freezeControllerState, NewWalkingControllerState walkingControllerState,
+   public NewStandTransitionControllerState(NewStandReadyControllerState standReadyControllerState, NewWalkingControllerState walkingControllerState,
                                             HighLevelHumanoidControllerToolbox controllerToolbox, double standTransitionDuration)
    {
       super(NewHighLevelControllerStates.STAND_TRANSITION_STATE);
 
-      this.freezeControllerState = freezeControllerState;
+      this.standReadyControllerState = standReadyControllerState;
       this.walkingControllerState = walkingControllerState;
       this.standTransitionDuration.set(standTransitionDuration);
 
@@ -77,15 +77,15 @@ public class NewStandTransitionControllerState extends NewHighLevelControllerSta
    @Override
    public void doAction()
    {
-      freezeControllerState.doAction();
+      standReadyControllerState.doAction();
       walkingControllerState.doAction();
 
       walkingControlRatioTrajectory.compute(getTimeInCurrentState());
       double gainRatio = walkingControlRatioTrajectory.getPosition();
 
-      ControllerCoreCommand standReadyCommand = freezeControllerState.getControllerCoreCommand();
+      ControllerCoreCommand standReadyCommand = standReadyControllerState.getControllerCoreCommand();
       ControllerCoreCommand walkingCommand = walkingControllerState.getControllerCoreCommand();
-      LowLevelOneDoFJointDesiredDataHolder freezeJointCommand = standReadyCommand.getLowLevelOneDoFJointDesiredDataHolder();
+      LowLevelOneDoFJointDesiredDataHolder standReadyJointCommand = standReadyCommand.getLowLevelOneDoFJointDesiredDataHolder();
       LowLevelOneDoFJointDesiredDataHolder walkingJointCommand = walkingCommand.getLowLevelOneDoFJointDesiredDataHolder();
 
       for (int jointIndex = 0; jointIndex < jointCommandBlenders.size(); jointIndex++)
@@ -97,9 +97,9 @@ public class NewStandTransitionControllerState extends NewHighLevelControllerSta
          EffortJointControlBlender effortBlender = blenderPair.getLeft();
          PositionJointControlBlender positionBlender = blenderPair.getRight();
 
-         effortBlender.computeAndUpdateJointTorque(lowLevelJointData, freezeJointCommand.getLowLevelJointData(joint),
+         effortBlender.computeAndUpdateJointTorque(lowLevelJointData, standReadyJointCommand.getLowLevelJointData(joint),
                                                    walkingJointCommand.getLowLevelJointData(joint), gainRatio);
-         positionBlender.computeAndUpdateJointPosition(lowLevelJointData, freezeJointCommand.getLowLevelJointData(joint),
+         positionBlender.computeAndUpdateJointPosition(lowLevelJointData, standReadyJointCommand.getLowLevelJointData(joint),
                                                        walkingJointCommand.getLowLevelJointData(joint), gainRatio);
       }
 
@@ -109,7 +109,7 @@ public class NewStandTransitionControllerState extends NewHighLevelControllerSta
    @Override
    public void doTransitionOutOfAction()
    {
-      freezeControllerState.doTransitionOutOfAction();
+      standReadyControllerState.doTransitionOutOfAction();
    }
 
    @Override
