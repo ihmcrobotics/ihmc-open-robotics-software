@@ -49,6 +49,11 @@ public class LowLevelOneDoFJointDesiredDataHolderList implements LowLevelOneDoFJ
    {
       return jointsAndData.second(index);
    }
+   
+   public String getJointName(int index)
+   {
+      return jointsAndData.first(index).getName();
+   }
 
 //   public void updateFromModel()
 //   {
@@ -75,10 +80,6 @@ public class LowLevelOneDoFJointDesiredDataHolderList implements LowLevelOneDoFJ
          if (otherData != null)
          {
             data.set(otherData);
-         }
-         else
-         {
-            System.err.println("No data for joint " + joint.getName());
          }
 
       }

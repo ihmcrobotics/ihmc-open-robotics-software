@@ -215,7 +215,7 @@ public class WholeBodyControllerCore
          throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
       }
 
-//      parseLowLevelDataInOneDoFJoints();
+      clearOnEDoFJointOutputs();
 
       if (yoRootJointDesiredConfigurationData != null)
          controllerCoreOutput.setRootJointDesiredConfigurationData(yoRootJointDesiredConfigurationData);
@@ -274,39 +274,38 @@ public class WholeBodyControllerCore
       yoLowLevelOneDoFJointDesiredDataHolder.insertDesiredTorquesIntoOneDoFJoints(controlledOneDoFJoints);
    }
 
-   private void parseLowLevelDataInOneDoFJoints()
+   //TODO: Clear OneDoFJoint of these fields and get rid of this.
+   private void clearOnEDoFJointOutputs()
    {
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
          OneDoFJoint joint = controlledOneDoFJoints[i];
-         LowLevelJointDataReadOnly lowLevelJointData = yoLowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(joint);
+         System.out.println("Checking " + joint.getName());
 
-         if (!lowLevelJointData.hasControlMode())
-            throw new NullPointerException("Joint: " + joint.getName() + " has no control mode.");
-
-         switch (lowLevelJointData.getControlMode())
+         // Zero out joint for testing purposes
+         joint.setqDesired(Double.NaN);
+         joint.setQdDesired(Double.NaN);
+         joint.setQddDesired(Double.NaN);
+         joint.setTau(Double.NaN);
+         
+         if(joint.getKp() != 0.0)
          {
-         case FORCE_CONTROL:
-            joint.setUnderPositionControl(false);
-            break;
-         case POSITION_CONTROL:
-            joint.setUnderPositionControl(true);
-            break;
-         default:
-            throw new RuntimeException("Unhandled joint control mode: " + lowLevelJointData.getControlMode());
+            throw new RuntimeException(joint.toString() + " is not zero kp " + joint.getKp() + " - function is removed");
          }
-
-         if (lowLevelJointData.hasDesiredPosition())
-            joint.setqDesired(lowLevelJointData.getDesiredPosition());
-
-         if (lowLevelJointData.hasDesiredVelocity())
-            joint.setQdDesired(lowLevelJointData.getDesiredVelocity());
-
-         if (lowLevelJointData.hasDesiredAcceleration())
-            joint.setQddDesired(lowLevelJointData.getDesiredAcceleration());
-
-         if (lowLevelJointData.hasDesiredTorque())
-            joint.setTau(lowLevelJointData.getDesiredTorque());
+         if(joint.getKd() != 0.0)
+         {
+            throw new RuntimeException(joint.toString() + " is not zero kd " + joint.getKd() + " - function is removed");
+         }
+         
+         if(joint.isUnderPositionControl())
+         {
+            throw new RuntimeException(joint.toString() + " is under position control - function is removed");
+         }
+         
+         if(!joint.isUseFeedBackForceControl())
+         {
+            throw new RuntimeException(joint.toString() + " disabled feedback force control - function is removed");
+         }
       }
    }
 

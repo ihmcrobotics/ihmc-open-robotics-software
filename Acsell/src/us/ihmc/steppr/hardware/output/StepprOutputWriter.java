@@ -15,12 +15,10 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.steppr.hardware.StepprJoint;
@@ -33,6 +31,10 @@ import us.ihmc.steppr.hardware.configuration.StepprRightAnkleSpringProperties;
 import us.ihmc.steppr.hardware.configuration.StepprRightHipXSpringProperties;
 import us.ihmc.steppr.hardware.controllers.StepprStandPrep;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class StepprOutputWriter implements DRCOutputProcessor, ControllerStateChangedListener,  ControllerFailureListener
 {
@@ -45,7 +47,8 @@ public class StepprOutputWriter implements DRCOutputProcessor, ControllerStateCh
 
    private final StepprCommand command = new StepprCommand(registry);
 
-   private EnumMap<StepprJoint, OneDoFJoint> wholeBodyControlJoints;
+   private EnumMap<StepprJoint, OneDoFJoint> wholeBodyControlState;
+   private EnumMap<StepprJoint, LowLevelJointData> wholeBodyControlJoints;
    private EnumMap<StepprJoint, YoDouble> tauControllerOutput;
    private final EnumMap<StepprJoint, OneDoFJoint> standPrepJoints;
    private final StepprStandPrep standPrep = new StepprStandPrep();
@@ -206,9 +209,9 @@ public class StepprOutputWriter implements DRCOutputProcessor, ControllerStateCh
           */
          for (StepprJoint joint : StepprJoint.values)
          {
-            OneDoFJoint wholeBodyControlJoint = wholeBodyControlJoints.get(joint);
+            OneDoFJoint wholeBodyControlState = this.wholeBodyControlState.get(joint);
             OneDoFJoint standPrepJoint = standPrepJoints.get(joint);
-            RawJointSensorDataHolder rawSensorData = rawJointSensorDataHolderMap.get(wholeBodyControlJoint);
+            RawJointSensorDataHolder rawSensorData = rawJointSensorDataHolderMap.get(wholeBodyControlState);
 
             standPrepJoint.setQ(rawSensorData.getQ_raw());
             standPrepJoint.setQd(rawSensorData.getQd_raw());
@@ -221,24 +224,25 @@ public class StepprOutputWriter implements DRCOutputProcessor, ControllerStateCh
           */
          for (StepprJoint joint : StepprJoint.values)
          {
-            OneDoFJoint wholeBodyControlJoint = wholeBodyControlJoints.get(joint);
+            OneDoFJoint wholeBodyControlState = this.wholeBodyControlState.get(joint);
+            LowLevelJointData wholeBodyControlJoint = this.wholeBodyControlJoints.get(joint);
             OneDoFJoint standPrepJoint = standPrepJoints.get(joint);
-            RawJointSensorDataHolder rawSensorData = rawJointSensorDataHolderMap.get(wholeBodyControlJoint);
+            RawJointSensorDataHolder rawSensorData = rawJointSensorDataHolderMap.get(wholeBodyControlState);
 
             double controlRatio = getControlRatioByJointControlMode(joint);
 
-            double desiredAcceleration = wholeBodyControlJoint.getQddDesired();
+            double desiredAcceleration = wholeBodyControlJoint.getDesiredAcceleration();
             double motorReflectedInertia = yoReflectedMotorInertia.get(joint).getDoubleValue();
             double motorInertiaTorque = motorReflectedInertia * desiredAcceleration;
             double desiredQddFeedForwardTorque = desiredQddFeedForwardGain.get(joint).getDoubleValue()*desiredAcceleration;
             yoTauInertiaViz.get(joint).set(motorInertiaTorque);
 
             double kd = (wholeBodyControlJoint.getKd()+masterMotorDamping.getDoubleValue()*yoMotorDamping.get(joint).getDoubleValue()) * controlRatio + standPrepJoint.getKd() * (1.0 - controlRatio);
-            double tau = (wholeBodyControlJoint.getTau()+ motorInertiaTorque+desiredQddFeedForwardTorque) * controlRatio + standPrepJoint.getTau() * (1.0 - controlRatio);
+            double tau = (wholeBodyControlJoint.getDesiredTorque()+ motorInertiaTorque+desiredQddFeedForwardTorque) * controlRatio + standPrepJoint.getTau() * (1.0 - controlRatio);
 
             AcsellJointCommand jointCommand = command.getAcsellJointCommand(joint);
 
-            desiredJointQ.get(joint).set(wholeBodyControlJoint.getqDesired());
+            desiredJointQ.get(joint).set(wholeBodyControlJoint.getDesiredPosition());
 
             tauControllerOutput.get(joint).set(tau);
             double tauSpring = 0;
@@ -248,7 +252,7 @@ public class StepprOutputWriter implements DRCOutputProcessor, ControllerStateCh
                yoTauSpringCorrection.get(joint).set(tauSpring);
                yoTauTotal.get(joint).set(tau);
             }
-            jointCommand.setTauDesired(tau - tauSpring, wholeBodyControlJoint.getQddDesired(), rawSensorData);
+            jointCommand.setTauDesired(tau - tauSpring, wholeBodyControlJoint.getDesiredAcceleration(), rawSensorData);
 
             jointCommand.setDamping(kd);
 
@@ -333,9 +337,10 @@ public class StepprOutputWriter implements DRCOutputProcessor, ControllerStateCh
    }
 
    @Override
-   public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerCoreOutput, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
-      wholeBodyControlJoints = StepprUtil.createJointMap(controllerModel.getOneDoFJoints());
+      wholeBodyControlJoints = StepprUtil.createOutputMap(lowLevelControllerCoreOutput);
+      wholeBodyControlState = StepprUtil.createJointMap(controllerRobotModel.getOneDoFJoints());
       this.rawJointSensorDataHolderMap = rawJointSensorDataHolderMap;
    }
 

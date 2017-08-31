@@ -66,7 +66,8 @@ public class SimulatedLowLevelOutputWriter implements LowLevelOutputWriter
          LowLevelJointDataReadOnly data = revoluteJoints.second(i);
 
 
-         if (data.hasDesiredTorque())
+
+         if(data.hasDesiredTorque())
          {
             pinJoint.setTau(data.getDesiredTorque());
          }

@@ -155,7 +155,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       registry.addChild(robotController.getYoVariableRegistry());
       if(outputProcessor != null)
       {
-         outputProcessor.setFullRobotModel(controllerFullRobotModel, threadDataSynchronizer.getControllerRawJointSensorDataHolderMap());
+         outputProcessor.setLowLevelControllerCoreOutput(controllerFullRobotModel, threadDataSynchronizer.getControllerDesiredJointDataHolder(), threadDataSynchronizer.getControllerRawJointSensorDataHolderMap());
          outputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForController);
          registry.addChild(outputProcessor.getControllerYoVariableRegistry());
       }
@@ -403,7 +403,10 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       }
       catch (Exception e)
       {
-         globalDataProducer.notifyControllerCrash(CrashLocation.CONTROLLER_WRITE, e.getMessage());
+         if(globalDataProducer != null)
+         {
+            globalDataProducer.notifyControllerCrash(CrashLocation.CONTROLLER_WRITE, e.getMessage());
+         }
          throw new RuntimeException(e);
 
       }
