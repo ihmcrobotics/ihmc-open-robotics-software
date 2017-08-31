@@ -18,12 +18,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * Created by Peter on 8/29/2017.
  */
 
-
 public class ParameterSliderWindow implements CloseableAndDisposable
 {
-   private static final int MAX_CHANNELS_PER_ROW = 13;
-
-   private ArrayList<JSliderParameterControl> sliderParameterControls = new ArrayList<JSliderParameterControl>();
+   private static final int MAX_CHANNELS_PER_ROW = 8;
 
    private JPanel mainPanel = new JPanel();
 
@@ -34,233 +31,42 @@ public class ParameterSliderWindow implements CloseableAndDisposable
    private static final int sliderWidth = 80;
    private static final int sliderHeight = 300;
 
-   private VariableChangedListener listener;
    private final Object slidersLock = new Object();
-   private ReentrantLock controlsLock = new ReentrantLock();
 
    private CloseableAndDisposableRegistry closeableAndDisposableRegistry;
 
    private final SelectedVariableHolder selectedVariableHolder;
+   private int numberOfSliders;
 
    public ParameterSliderWindow(SelectedVariableHolder selectedVariableHolder, final CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
+      this(MAX_CHANNELS_PER_ROW, selectedVariableHolder, closeableAndDisposableRegistry);
+   }
+
+   public ParameterSliderWindow(int numberOfSliders, SelectedVariableHolder selectedVariableHolder,
+                                final CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   {
+      this.numberOfSliders = numberOfSliders;
+      this.numCol = Math.min(numberOfSliders, MAX_CHANNELS_PER_ROW);
+      this.numRow = (int) Math.ceil(numberOfSliders / (double) MAX_CHANNELS_PER_ROW);
       this.closeableAndDisposableRegistry = closeableAndDisposableRegistry;
       this.selectedVariableHolder = selectedVariableHolder;
-
-      System.out.println("Parameter Slider");
 
       frame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
       frame.getContentPane().setLayout(new BorderLayout());
       frame.getContentPane().add(mainPanel, BorderLayout.CENTER);
       frame.setTitle("Parameter Slider");
+
+      mainPanel.removeAll();
+      mainPanel.setLayout(new GridLayout(numRow, numCol));
+
+      for (int i = 0; i < numberOfSliders; i++)
+      {
+         mainPanel.add(new JSliderParameterControl(selectedVariableHolder, closeableAndDisposableRegistry));
+      }
+
       frame.setVisible(true);
-
-      setUpGui();
-
-//      sliderBoard.addListener(new SliderBoardControlAddedListener()
-//      {
-//         @Override
-//         public void controlAdded(MidiControl ctrl)
-//         {
-//            addSlider(ctrl);
-//         }
-//
-//         @Override
-//         public void controlRemoved(MidiControl ctrl)
-//         {
-//            removeSlider(ctrl, closeableAndDisposableRegistry);
-//         }
-//      });
-//
-//      listener = new VariableChangedListener()
-//      {
-//         @Override
-//         public void variableChanged(YoVariable<?> v)
-//         {
-//            synchronized (VirtualSliderBoardGui.this)
-//            {
-//               synchronized (slidersLock)
-//               {
-//
-//                  for (JSliderControl tmpControl : sliders)
-//                  {
-//                     if (tmpControl.getControl().var == v)
-//                     {
-//                        updateSlider(tmpControl);
-//                     }
-//                  }
-//               }
-//            }
-//         }
-//      };
-
-      // Thread valueCheckerThread = new Thread(new ValueChecker());
-      // valueCheckerThread.start();
-
-      //closeableAndDisposableRegistry.registerCloseableAndDisposable(this);
-   }
-
-//   private synchronized void addSlider(MidiControl ctrl)
-//   {
-//      virtualMidiControls.add(ctrl);
-//      ctrl.var.addVariableChangedListener(listener);
-//      setUpGui(closeableAndDisposableRegistry);
-//   }
-//
-//   private void removeSlider(MidiControl midiControl, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
-//   {
-//      controlsLock.lock();
-//      virtualMidiControls.remove(midiControl);
-//
-//      if (midiControl.var.getVariableChangedListeners().contains(listener))
-//      {
-//         midiControl.var.removeVariableChangedListener(listener);
-//      }
-//
-//      setUpGui(closeableAndDisposableRegistry);
-//   }
-
-
-   public void repaint()
-   {
-      mainPanel.repaint();
-   }
-
-   private void setUpGui()
-   {
-      synchronized (slidersLock)
-      {
-         sliderParameterControls.clear();
-         mainPanel.removeAll();
-
-         int numberOfSliders = 3;
-         for (int i=0; i< numberOfSliders; i++)
-         {
-            JSliderParameterControl jSliderParameterControl;
-            jSliderParameterControl = new JSliderParameterControl(selectedVariableHolder, closeableAndDisposableRegistry);
-
-
-//            if (current.sliderType == MidiControl.SliderType.BOOLEAN)
-//            {
-//               slider = new JSliderControl(SwingConstants.VERTICAL, 0, 1, SliderBoardUtils.valueRatioConvertToIntWithExponents(current, 0), current,
-//                                           closeableAndDisposableRegistry);
-//            } else if (current.sliderType == MidiControl.SliderType.ENUM)
-//            {
-//               slider = new JSliderControl(SwingConstants.VERTICAL, 0, ((YoEnum<?>) current.var).getEnumValues().length - 1,
-//                                           SliderBoardUtils.valueRatioConvertToIntWithExponents(current,
-//                                                                                                ((YoEnum<?>) current.var).getEnumValues().length - 1), current, closeableAndDisposableRegistry);
-//            } else
-//               slider = new JSliderControl(SwingConstants.VERTICAL, 0, sliderBoardMax,
-//                                           SliderBoardUtils.valueRatioConvertToIntWithExponents(current, sliderBoardMax), current, closeableAndDisposableRegistry);
-
-
-            //slider.addChangeListener(new SliderChangeListener(slider, this));
-
-
-//            if (slider.midiControl.name != null)
-//            {
-//               sliderPanel.setBorder(new TitledBorder(slider.midiControl.name));
-//            }
-//            else
-//            {
-//               sliderPanel.setBorder(new TitledBorder(slider.midiControl.var.getName()));
-//            }
-
-
-
-
-
-            //slider.value.addActionListener(new textFieldListener(slider));
-            //sliderPanel.add(slider.value, BorderLayout.SOUTH);
-            sliderParameterControls.add(jSliderParameterControl);
-
-            numRow = Math.round(sliderParameterControls.size() / MAX_CHANNELS_PER_ROW);
-
-            numCol = sliderParameterControls.size();
-            if (numRow > 1)
-               numCol = MAX_CHANNELS_PER_ROW;
-
-            if (sliderParameterControls.size() % MAX_CHANNELS_PER_ROW != 0)
-               numRow++;
-
-            mainPanel.setLayout(new GridLayout(numRow, numCol));
-
-            mainPanel.add(jSliderParameterControl, sliderParameterControls.size() - 1);
-         }
-
-         resizePanel();
-      }
-   }
-
-//   private synchronized void updateSlider(JSliderControl slider)
-//   {
-//      if (!slider.changeLock)
-//      {
-//         slider.updatedRemotly = true;
-//
-//         // slider.ctrl.currentVal = sliderVal;
-//         slider.setValue(SliderBoardUtils.valueRatioConvertToIntWithExponents(slider.midiControl, slider.sliderMax));
-//
-//         String formattedValue = new DecimalFormat("#.##").format(slider.midiControl.var.getValueAsDouble());
-//
-//         slider.value.setText(formattedValue);
-//      }
-//   }
-
-//   private synchronized void sliderSlid(JSlider slider, double sliderVal)
-//   {
-//      if (!slider.updatedRemotly)
-//      {
-//         // channel is between 0 and 15. value is between 0 and 127.
-//         if (slider.midiControl.currentVal == sliderVal)
-//            return;
-//         slider.midiControl.currentVal = sliderVal;
-//         slider.lock();
-//         slider.midiControl.var.setValueFromDouble(sliderVal);
-//
-//         for (VariableChangedListener listener : sliderBoard.getVariableChangedListeners())
-//         {
-//            listener.variableChanged(slider.midiControl.var);
-//         }
-//
-//         // System.out.println(slider.ctrl.var.getValueAsDouble()+" " +SliderBoardUtils.valueRatioConvertToIntWithExponents(slider.ctrl, slider.sliderMax));
-//
-//         slider.setValue(SliderBoardUtils.valueRatioConvertToIntWithExponents(slider.midiControl, slider.sliderMax));
-//
-//         String formattedValue = new DecimalFormat("#.##").format(slider.midiControl.var.getValueAsDouble());
-//
-//         slider.value.setText(formattedValue);
-//      }
-//      else
-//         slider.updatedRemotly = false;
-//   }
-
-//   private class SliderChangeListener implements ChangeListener
-//   {
-//      JSliderControl slider;
-//      VirtualSliderBoardGui board;
-//
-//      public SliderChangeListener(JSliderControl slider, VirtualSliderBoardGui board)
-//      {
-//         this.board = board;
-//         this.slider = slider;
-//      }
-//
-//      @Override
-//      public void stateChanged(ChangeEvent e)
-//      {
-//         // System.out.println();
-//         board.sliderSlid(slider, SliderBoardUtils.valueRatioConvertToDoubleWithExponents(slider.midiControl, slider.getValue(), slider.sliderMax));
-//      }
-//   }
-
-
-   private void resizePanel()
-   {
-      synchronized (slidersLock)
-      {
-         frame.setSize(sliderWidth * (sliderParameterControls.size() / numRow), sliderHeight * numRow);
-      }
+      frame.pack();
    }
 
    public void setTitle(String name)
@@ -276,11 +82,6 @@ public class ParameterSliderWindow implements CloseableAndDisposable
    @Override
    public void closeAndDispose()
    {
-      sliderParameterControls.clear();
-      sliderParameterControls = null;
-
-      listener = null;
-
       SwingUtilities.invokeLater(new Runnable()
       {
          @Override
@@ -295,28 +96,4 @@ public class ParameterSliderWindow implements CloseableAndDisposable
          }
       });
    }
-
-   //   public class TextFieldListener implements ActionListener
-//   {
-//      JSlider slider;
-//
-//      public TextFieldListener(JSlider slider)
-//      {
-//         this.slider = slider;
-//      }
-//
-//      @Override
-//      public void actionPerformed(ActionEvent e)
-//      {
-//         try
-//         {
-//            Double val = new Double(slider.value.getText());
-//            sliderSlid(slider, val);
-//         }
-//         catch (Exception ex)
-//         {
-//            System.err.println("An Invalid Value Was Entered Onto The Virtual SliderBoard");
-//         }
-//      }
-//   }
 }
