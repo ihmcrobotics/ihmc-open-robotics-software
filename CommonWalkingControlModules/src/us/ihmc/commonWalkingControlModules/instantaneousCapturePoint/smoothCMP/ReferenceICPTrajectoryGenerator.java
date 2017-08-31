@@ -133,7 +133,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       currentSegmentIndex = new YoInteger("CurrentSegment", registry);
 
       icpQuantityInitialConditionList.add(new FramePoint3D());
-      while (icpDesiredInitialPositions.size() < defaultSize)
+      for (int i = 0; i < defaultSize; i++)
       {
          icpDesiredInitialPositions.add(new FramePoint3D());
          icpDesiredFinalPositions.add(new FramePoint3D());
@@ -386,7 +386,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    @Override
    public void compute(double time)
    {
-      if (!isStanding.getBooleanValue())
+      // Disturbing logic
+      if (!isStanding.getBooleanValue() || (!isInitialTransfer.getBooleanValue()) && cmpTrajectories.size() > 0)
       {
          localTimeInCurrentPhase.set(time - startTimeOfCurrentPhase.getDoubleValue());
 
