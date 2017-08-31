@@ -98,8 +98,9 @@ public class SimpleICPQPIndexHandler
          footstepStartingIndex = feedbackCMPIndex + 2;
 
       numberOfFootstepVariables = 2 * numberOfFootstepsToConsider;
-      numberOfFreeVariables = numberOfFootstepVariables + 2; // all the footstep locations, the CMP delta, and the dynamic relaxation
-
+      numberOfFreeVariables = 2; // the CMP delta
+      if (useStepAdjustment)
+         numberOfFreeVariables += numberOfFootstepVariables; // all the footstep locations
       if (useAngularMomentum)
          numberOfFreeVariables += 2;
    }

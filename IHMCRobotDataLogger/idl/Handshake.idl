@@ -30,6 +30,7 @@ module robotDataLogger{
 		unsigned short registry;
 		unsigned short enumType;
 		boolean allowNullValues;
+		boolean isParameter;
 	};
 	
 	struct JointDefinition

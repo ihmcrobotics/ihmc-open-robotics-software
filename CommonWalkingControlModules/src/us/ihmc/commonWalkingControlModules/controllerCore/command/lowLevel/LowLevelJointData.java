@@ -1,20 +1,16 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.google.common.util.concurrent.AtomicDouble;
-
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class LowLevelJointData implements LowLevelJointDataReadOnly
 {
    private LowLevelJointControlMode controlMode;
-   private final AtomicDouble desiredTorque = new AtomicDouble(Double.NaN);
-   private final AtomicDouble desiredPosition = new AtomicDouble(Double.NaN);
-   private final AtomicDouble desiredVelocity = new AtomicDouble(Double.NaN);
-   private final AtomicDouble desiredAcceleration = new AtomicDouble(Double.NaN);
-   private final AtomicDouble desiredCurrent = new AtomicDouble(Double.NaN);
-   private final AtomicBoolean resetIntegrators = new AtomicBoolean(false);
+   private double desiredTorque = Double.NaN;
+   private double desiredPosition = Double.NaN;
+   private double desiredVelocity = Double.NaN;
+   private double desiredAcceleration = Double.NaN;
+   private double desiredCurrent = Double.NaN;
+   private boolean resetIntegrators = false;
 
    public LowLevelJointData()
    {
@@ -24,23 +20,23 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
    public void clear()
    {
       controlMode = null;
-      desiredTorque.set(Double.NaN);
-      desiredPosition.set(Double.NaN);
-      desiredVelocity.set(Double.NaN);
-      desiredAcceleration.set(Double.NaN);
-      desiredCurrent.set(Double.NaN);
-      resetIntegrators.set(false);
+      desiredTorque = Double.NaN;
+      desiredPosition = Double.NaN;
+      desiredVelocity = Double.NaN;
+      desiredAcceleration = Double.NaN;
+      desiredCurrent = Double.NaN;
+      resetIntegrators = false;
    }
 
    public void set(LowLevelJointDataReadOnly other)
    {
       controlMode = other.getControlMode();
-      desiredTorque.set(other.getDesiredTorque());
-      desiredPosition.set(other.getDesiredPosition());
-      desiredVelocity.set(other.getDesiredVelocity());
-      desiredAcceleration.set(other.getDesiredAcceleration());
-      desiredCurrent.set(other.getDesiredCurrent());
-      resetIntegrators.set(other.peekResetIntegratorsRequest());
+      desiredTorque = other.getDesiredTorque();
+      desiredPosition = other.getDesiredPosition();
+      desiredVelocity = other.getDesiredVelocity();
+      desiredAcceleration = other.getDesiredAcceleration();
+      desiredCurrent = other.getDesiredCurrent();
+      resetIntegrators = other.peekResetIntegratorsRequest();
    }
 
    /**
@@ -52,17 +48,17 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
       if (!hasControlMode())
          controlMode = other.getControlMode();
       if (!hasDesiredTorque())
-         desiredTorque.set(other.getDesiredTorque());
+         desiredTorque = other.getDesiredTorque();
       if (!hasDesiredPosition())
-         desiredPosition.set(other.getDesiredPosition());
+         desiredPosition = other.getDesiredPosition();
       if (!hasDesiredVelocity())
-         desiredVelocity.set(other.getDesiredVelocity());
+         desiredVelocity = other.getDesiredVelocity();
       if (!hasDesiredAcceleration())
-         desiredAcceleration.set(other.getDesiredAcceleration());
+         desiredAcceleration = other.getDesiredAcceleration();
       if (!hasDesiredCurrent())
-         desiredCurrent.set(other.getDesiredCurrent());
+         desiredCurrent = other.getDesiredCurrent();
       if (!peekResetIntegratorsRequest())
-         resetIntegrators.set(other.peekResetIntegratorsRequest());
+         resetIntegrators = other.peekResetIntegratorsRequest();
    }
    
    public void setDesiredsFromOneDoFJoint(OneDoFJoint jointToExtractDesiredsFrom)
@@ -81,32 +77,32 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
 
    public void setDesiredTorque(double tau)
    {
-      desiredTorque.set(tau);
+      desiredTorque = tau;
    }
 
    public void setDesiredPosition(double q)
    {
-      desiredPosition.set(q);
+      desiredPosition = q;
    }
 
    public void setDesiredVelocity(double qd)
    {
-      desiredVelocity.set(qd);
+      desiredVelocity = qd;
    }
 
    public void setDesiredAcceleration(double qdd)
    {
-      desiredAcceleration.set(qdd);
+      desiredAcceleration = qdd;
    }
 
    public void setDesiredCurrent(double i)
    {
-      desiredCurrent.set(i);
+      desiredCurrent = i;
    }
 
    public void setResetIntegrators(boolean reset)
    {
-      resetIntegrators.set(reset);
+      resetIntegrators = reset;
    }
 
    @Override
@@ -118,31 +114,31 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
    @Override
    public boolean hasDesiredTorque()
    {
-      return !Double.isNaN(desiredTorque.get());
+      return !Double.isNaN(desiredTorque);
    }
 
    @Override
    public boolean hasDesiredPosition()
    {
-      return !Double.isNaN(desiredPosition.get());
+      return !Double.isNaN(desiredPosition);
    }
 
    @Override
    public boolean hasDesiredVelocity()
    {
-      return !Double.isNaN(desiredVelocity.get());
+      return !Double.isNaN(desiredVelocity);
    }
 
    @Override
    public boolean hasDesiredAcceleration()
    {
-      return !Double.isNaN(desiredAcceleration.get());
+      return !Double.isNaN(desiredAcceleration);
    }
 
    @Override
    public boolean hasDesiredCurrent()
    {
-      return !Double.isNaN(desiredCurrent.get());
+      return !Double.isNaN(desiredCurrent);
    }
 
    @Override
@@ -154,43 +150,46 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
    @Override
    public double getDesiredTorque()
    {
-      return desiredTorque.doubleValue();
+      return desiredTorque;
    }
 
    @Override
    public double getDesiredPosition()
    {
-      return desiredPosition.doubleValue();
+      return desiredPosition;
    }
 
    @Override
    public double getDesiredVelocity()
    {
-      return desiredVelocity.doubleValue();
+      return desiredVelocity;
    }
 
    @Override
    public double getDesiredAcceleration()
    {
-      return desiredAcceleration.doubleValue();
+      return desiredAcceleration;
    }
 
    @Override
    public double getDesiredCurrent()
    {
-      return desiredCurrent.doubleValue();
+      return desiredCurrent;
    }
 
    @Override
    public boolean pollResetIntegratorsRequest()
    {
-      return resetIntegrators.getAndSet(false);
+      boolean resetIntegrators = this.resetIntegrators;
+      this.resetIntegrators = false;
+      return resetIntegrators;
+      
    }
 
    @Override
    public boolean peekResetIntegratorsRequest()
    {
-      return resetIntegrators.get();
+      return resetIntegrators;
    }
 
    @Override

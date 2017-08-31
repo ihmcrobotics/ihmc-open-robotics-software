@@ -13,9 +13,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFrameHolder
+public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHolder
 {
    private ReferenceFrame referenceFrame;
 
@@ -23,89 +22,89 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
    private final FrameVector3D frameVelocity = new FrameVector3D();
    private final FrameVector3D frameAcceleration = new FrameVector3D();
 
-   public YoFrameTrajectory3D(String name, int maximumNumberOfCoefficients, ReferenceFrame referenceFrame, YoVariableRegistry registry)
+   public FrameTrajectory3D(int maximumNumberOfCoefficients, ReferenceFrame referenceFrame)
    {
-      super(name, maximumNumberOfCoefficients, registry);
+      super(maximumNumberOfCoefficients);
       this.referenceFrame = referenceFrame;
    }
 
-   public YoFrameTrajectory3D(YoTrajectory xTrajectory, YoTrajectory yTrajectory, YoTrajectory zTrajectory, ReferenceFrame referenceFrame)
+   public FrameTrajectory3D(Trajectory xTrajectory, Trajectory yTrajectory, Trajectory zTrajectory, ReferenceFrame referenceFrame)
    {
       super(xTrajectory, yTrajectory, zTrajectory);
       this.referenceFrame = referenceFrame;
    }
 
-   public YoFrameTrajectory3D(YoTrajectory[] yoTrajectories, ReferenceFrame referenceFrame)
+   public FrameTrajectory3D(Trajectory[] trajectories, ReferenceFrame referenceFrame)
    {
-      super(yoTrajectories);
+      super(trajectories);
       this.referenceFrame = referenceFrame;
    }
 
-   public YoFrameTrajectory3D(List<YoTrajectory> yoTrajectories, ReferenceFrame referenceFrame)
+   public FrameTrajectory3D(List<Trajectory> trajectories, ReferenceFrame referenceFrame)
    {
-      super(yoTrajectories);
+      super(trajectories);
       this.referenceFrame = referenceFrame;
    }
 
-   public static YoFrameTrajectory3D[] createYoFrameTrajectory3DArray(YoTrajectory[] xTrajectory, YoTrajectory[] yTrajectory, YoTrajectory[] zTrajectory,
-                                                                      ReferenceFrame referenceFrame)
+   public static FrameTrajectory3D[] createFrameTrajectory3DArray(Trajectory[] xTrajectory, Trajectory[] yTrajectory, Trajectory[] zTrajectory,
+                                                                  ReferenceFrame referenceFrame)
    {
       if (xTrajectory.length != yTrajectory.length || xTrajectory.length != zTrajectory.length)
          throw new RuntimeException("Cannot handle different number of trajectories for the different axes.");
 
-      YoFrameTrajectory3D[] yoTrajectory3Ds = new YoFrameTrajectory3D[xTrajectory.length];
+      FrameTrajectory3D[] trajectory3Ds = new FrameTrajectory3D[xTrajectory.length];
 
       for (int i = 0; i < xTrajectory.length; i++)
       {
-         yoTrajectory3Ds[i] = new YoFrameTrajectory3D(xTrajectory[i], yTrajectory[i], zTrajectory[i], referenceFrame);
+         trajectory3Ds[i] = new FrameTrajectory3D(xTrajectory[i], yTrajectory[i], zTrajectory[i], referenceFrame);
       }
-      return yoTrajectory3Ds;
+      return trajectory3Ds;
    }
 
-   public static YoFrameTrajectory3D[] createYoFrameTrajectory3DArray(List<YoTrajectory> xTrajectory, List<YoTrajectory> yTrajectory,
-                                                                      List<YoTrajectory> zTrajectory, ReferenceFrame referenceFrame)
+   public static FrameTrajectory3D[] createFrameTrajectory3DArray(List<Trajectory> xTrajectory, List<Trajectory> yTrajectory,
+                                                                  List<Trajectory> zTrajectory, ReferenceFrame referenceFrame)
    {
       if (xTrajectory.size() != yTrajectory.size() || xTrajectory.size() != zTrajectory.size())
          throw new RuntimeException("Cannot handle different number of trajectories for the different axes.");
 
-      YoFrameTrajectory3D[] yoTrajectory3Ds = new YoFrameTrajectory3D[xTrajectory.size()];
+      FrameTrajectory3D[] trajectory3Ds = new FrameTrajectory3D[xTrajectory.size()];
 
       for (int i = 0; i < xTrajectory.size(); i++)
       {
-         yoTrajectory3Ds[i] = new YoFrameTrajectory3D(xTrajectory.get(i), yTrajectory.get(i), zTrajectory.get(i), referenceFrame);
+         trajectory3Ds[i] = new FrameTrajectory3D(xTrajectory.get(i), yTrajectory.get(i), zTrajectory.get(i), referenceFrame);
       }
 
-      return yoTrajectory3Ds;
+      return trajectory3Ds;
    }
 
-   public static List<YoFrameTrajectory3D> createYoFrameTrajectory3DList(YoTrajectory[] xTrajectory, YoTrajectory[] yTrajectory, YoTrajectory[] zTrajectory,
-                                                                         ReferenceFrame referenceFrame)
+   public static List<FrameTrajectory3D> createFrameTrajectory3DList(Trajectory[] xTrajectory, Trajectory[] yTrajectory, Trajectory[] zTrajectory,
+                                                                     ReferenceFrame referenceFrame)
    {
       if (xTrajectory.length != yTrajectory.length || xTrajectory.length != zTrajectory.length)
          throw new RuntimeException("Cannot handle different number of trajectories for the different axes.");
 
-      List<YoFrameTrajectory3D> yoTrajectory3Ds = new ArrayList<>(xTrajectory.length);
+      List<FrameTrajectory3D> trajectory3Ds = new ArrayList<>(xTrajectory.length);
 
       for (int i = 0; i < xTrajectory.length; i++)
       {
-         yoTrajectory3Ds.add(new YoFrameTrajectory3D(xTrajectory[i], yTrajectory[i], zTrajectory[i], referenceFrame));
+         trajectory3Ds.add(new FrameTrajectory3D(xTrajectory[i], yTrajectory[i], zTrajectory[i], referenceFrame));
       }
-      return yoTrajectory3Ds;
+      return trajectory3Ds;
    }
 
-   public static List<YoFrameTrajectory3D> createYoFrameTrajectoryl3DList(List<YoTrajectory> xTrajectory, List<YoTrajectory> yTrajectory,
-                                                                          List<YoTrajectory> zTrajectory, ReferenceFrame referenceFrame)
+   public static List<FrameTrajectory3D> createFrameTrajectoryl3DList(List<Trajectory> xTrajectory, List<Trajectory> yTrajectory,
+                                                                      List<Trajectory> zTrajectory, ReferenceFrame referenceFrame)
    {
       if (xTrajectory.size() != yTrajectory.size() || xTrajectory.size() != zTrajectory.size())
          throw new RuntimeException("Cannot handle different number of trajectories for the different axes.");
 
-      List<YoFrameTrajectory3D> yoTrajectory3Ds = new ArrayList<>(xTrajectory.size());
+      List<FrameTrajectory3D> trajectory3Ds = new ArrayList<>(xTrajectory.size());
 
       for (int i = 0; i < xTrajectory.size(); i++)
       {
-         yoTrajectory3Ds.add(new YoFrameTrajectory3D(xTrajectory.get(i), yTrajectory.get(i), zTrajectory.get(i), referenceFrame));
+         trajectory3Ds.add(new FrameTrajectory3D(xTrajectory.get(i), yTrajectory.get(i), zTrajectory.get(i), referenceFrame));
       }
-      return yoTrajectory3Ds;
+      return trajectory3Ds;
    }
 
    public void setReferenceFrame(ReferenceFrame referenceFrame)
@@ -113,13 +112,13 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       this.referenceFrame = referenceFrame;
    }
 
-   public void set(YoFrameTrajectory3D other)
+   public void set(FrameTrajectory3D other)
    {
       setReferenceFrame(other.getReferenceFrame());
 
-      xTrajectory.set(other.getYoTrajectoryX());
-      yTrajectory.set(other.getYoTrajectoryY());
-      zTrajectory.set(other.getYoTrajectoryZ());
+      xTrajectory.set(other.getTrajectoryX());
+      yTrajectory.set(other.getTrajectoryY());
+      zTrajectory.set(other.getTrajectoryZ());
    }
 
    public void setConstant(double t0, double tFinal, FramePoint3D z0)
@@ -167,7 +166,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setCubicInitialPositionThreeFinalConditions(t0, tFinal, z0.getPoint(), zFinal.getPoint(), zdFinal.getVector(), zddFinal.getVector());
    }
 
-   public void setCubicThreeInitialConditionsFinalPosition(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0, FramePoint3D zFinal)
+   public void setCubicThreeInitialConditionsFinalPosition(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0,
+                                                           FramePoint3D zFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -188,8 +188,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setCubicUsingFinalAccelerationButNotFinalPosition(t0, tFinal, z0.getPoint(), zd0.getVector(), zdFinal.getVector(), zddFinal.getVector());
    }
 
-   public void setCubicUsingIntermediatePoints(double t0, double tIntermediate1, double tIntermediate2, double tFinal, FramePoint3D z0, FramePoint3D zIntermediate1,
-                                               FramePoint3D zIntermediate2, FramePoint3D zFinal)
+   public void setCubicUsingIntermediatePoints(double t0, double tIntermediate1, double tIntermediate2, double tFinal, FramePoint3D z0,
+                                               FramePoint3D zIntermediate1, FramePoint3D zIntermediate2, FramePoint3D zFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zIntermediate1.checkReferenceFrameMatch(referenceFrame);
@@ -200,7 +200,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                                       zFinal.getPoint());
    }
 
-   public void setCubicUsingIntermediatePoint(double t0, double tIntermediate1, double tFinal, FramePoint3D z0, FramePoint3D zIntermediate1, FramePoint3D zFinal)
+   public void setCubicUsingIntermediatePoint(double t0, double tIntermediate1, double tFinal, FramePoint3D z0, FramePoint3D zIntermediate1,
+                                              FramePoint3D zFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zIntermediate1.checkReferenceFrameMatch(referenceFrame);
@@ -286,7 +287,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setQuadraticUsingInitialAcceleration(t0, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector());
    }
 
-   public void setQuadraticUsingIntermediatePoint(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FramePoint3D zIntermediate, FramePoint3D zFinal)
+   public void setQuadraticUsingIntermediatePoint(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FramePoint3D zIntermediate,
+                                                  FramePoint3D zFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zIntermediate.checkReferenceFrameMatch(referenceFrame);
@@ -327,8 +329,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setQuarticUsingFinalAcceleration(t0, tFinal, z0.getPoint(), zd0.getVector(), zFinal.getPoint(), zdFinal.getVector(), zddFinal.getVector());
    }
 
-   public void setQuarticUsingIntermediateVelocity(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdIntermediate,
-                                                   FramePoint3D zFinal, FrameVector3D zdFinal)
+   public void setQuarticUsingIntermediateVelocity(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0,
+                                                   FrameVector3D zdIntermediate, FramePoint3D zFinal, FrameVector3D zdFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -340,7 +342,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                                           zdFinal.getVector());
    }
 
-   public void setQuarticUsingMidPoint(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zMid, FramePoint3D zFinal, FrameVector3D zdFinal)
+   public void setQuarticUsingMidPoint(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zMid, FramePoint3D zFinal,
+                                       FrameVector3D zdFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -352,7 +355,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
    }
 
    public void setQuarticUsingOneIntermediateVelocity(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint3D z0,
-                                                      FramePoint3D zIntermediate0, FramePoint3D zIntermediate1, FramePoint3D zFinal, FrameVector3D zdIntermediate1)
+                                                      FramePoint3D zIntermediate0, FramePoint3D zIntermediate1, FramePoint3D zFinal,
+                                                      FrameVector3D zdIntermediate1)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zIntermediate0.checkReferenceFrameMatch(referenceFrame);
@@ -364,8 +368,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                                              zFinal.getPoint(), zdIntermediate1.getVector());
    }
 
-   public void setQuarticUsingWayPoint(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zIntermediate, FramePoint3D zf,
-                                       FrameVector3D zdf)
+   public void setQuarticUsingWayPoint(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zIntermediate,
+                                       FramePoint3D zf, FrameVector3D zdf)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -376,7 +380,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setQuarticUsingWayPoint(t0, tIntermediate, tFinal, z0.getPoint(), zd0.getVector(), zIntermediate.getPoint(), zf.getPoint(), zdf.getVector());
    }
 
-   public void setQuintic(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0, FramePoint3D zf, FrameVector3D zdf, FrameVector3D zddf)
+   public void setQuintic(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0, FramePoint3D zf, FrameVector3D zdf,
+                          FrameVector3D zddf)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -445,8 +450,9 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                                zdIntermediate.getVector(), zf.getPoint());
    }
 
-   public void setSeptic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zIntermediate0,
-                         FrameVector3D zdIntermediate0, FramePoint3D zIntermediate1, FrameVector3D zdIntermediate1, FramePoint3D zf, FrameVector3D zdf)
+   public void setSeptic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint3D z0, FrameVector3D zd0,
+                         FramePoint3D zIntermediate0, FrameVector3D zdIntermediate0, FramePoint3D zIntermediate1, FrameVector3D zdIntermediate1,
+                         FramePoint3D zf, FrameVector3D zdf)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -462,8 +468,8 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
    }
 
    public void setSepticInitialAndFinalAcceleration(double t0, double tIntermediate0, double tIntermediate1, double tFinal, FramePoint3D z0, FrameVector3D zd0,
-                                                    FrameVector3D zdd0, FramePoint3D zIntermediate0, FramePoint3D zIntermediate1, FramePoint3D zf, FrameVector3D zdf,
-                                                    FrameVector3D zddf)
+                                                    FrameVector3D zdd0, FramePoint3D zIntermediate0, FramePoint3D zIntermediate1, FramePoint3D zf,
+                                                    FrameVector3D zdf, FrameVector3D zddf)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -503,8 +509,9 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                              zdf.getVector(), zddf.getVector());
    }
 
-   public void setSexticUsingWaypointVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0,
-                                                             FrameVector3D zdIntermediate, FrameVector3D zddIntermediate, FramePoint3D zFinal, FrameVector3D zdFinal)
+   public void setSexticUsingWaypointVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0,
+                                                             FrameVector3D zdd0, FrameVector3D zdIntermediate, FrameVector3D zddIntermediate,
+                                                             FramePoint3D zFinal, FrameVector3D zdFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -517,10 +524,10 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       setSexticUsingWaypointVelocityAndAcceleration(t0, tIntermediate, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector(), zdIntermediate.getVector(),
                                                     zddIntermediate.getVector(), zFinal.getPoint(), zdFinal.getVector());
    }
-   
+
    public void setDirectly(Direction direction, DenseMatrix64F coefficients)
    {
-      getYoTrajectory(direction).setDirectly(coefficients);
+      getTrajectory(direction).setDirectly(coefficients);
    }
 
    public FramePoint3D getFramePosition()
@@ -535,7 +542,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       positionToPack.setToZero(referenceFrame);
       positionToPack.set(getPosition());
    }
-   
+
    public void getFramePositionInitial(FramePoint3D positionToPack)
    {
       compute(xTrajectory.getInitialTime());
@@ -543,7 +550,7 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
       positionToPack.setToZero(referenceFrame);
       positionToPack.set(getPosition());
    }
-   
+
    public void getFramePositionFinal(FramePoint3D positionToPack)
    {
       compute(xTrajectory.getFinalTime());
@@ -599,18 +606,19 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
    {
       return Math.max(Math.max(xTrajectory.getNumberOfCoefficients(), yTrajectory.getNumberOfCoefficients()), zTrajectory.getNumberOfCoefficients());
    }
-   
+
    public void getDerivative(int order, double x, FrameTuple3D<?, ?> dQuantity)
    {
-      dQuantity.setIncludingFrame(referenceFrame, xTrajectory.getDerivative(order, x), yTrajectory.getDerivative(order, x), zTrajectory.getDerivative(order, x));
+      dQuantity.setIncludingFrame(referenceFrame, xTrajectory.getDerivative(order, x), yTrajectory.getDerivative(order, x),
+                                  zTrajectory.getDerivative(order, x));
    }
 
-   public void getDerivative(YoFrameTrajectory3D dervTraj, int order)
+   public void getDerivative(FrameTrajectory3D dervTraj, int order)
    {
       checkReferenceFrameMatch(dervTraj);
       super.getDerivative(dervTraj, order);
    }
-   
+
    public void getStartPoint(FramePoint3D positionToPack)
    {
       positionToPack.setToZero(referenceFrame);
@@ -626,11 +634,5 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
    public boolean isValidTrajectory()
    {
       return super.isValidTrajectory();
-   }
-   
-   public void set(FrameTrajectory3D trajToCopy)
-   {
-      checkReferenceFrameMatch(trajToCopy);
-      super.set(trajToCopy);
    }
 }
