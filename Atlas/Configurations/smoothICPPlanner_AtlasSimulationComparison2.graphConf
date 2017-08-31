@@ -2,9 +2,9 @@
 <GraphGroup>
 	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCMPPositionX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.achievedCMPX,root.atlas.ActualCMPComputer.actualCMPX</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCMPPositionX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.achievedCMPX,root.atlas.ActualCMPComputer.actualCMPX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.ICPPlannerWithAngularMomentumOffsetWrapper.icpPlannerModifiedCMPPositionX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.ICPPlannerWithAngularMomentumOffsetWrapper.icpPlannerModifiedCMPVelocityX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCMPVelocityX</Variables>
 		<GraphConfiguration>
-			<Name>config49</Name>
+			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -14,9 +14,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCMPPositionY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.achievedCMPY,root.atlas.ActualCMPComputer.actualCMPY</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCMPPositionY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.achievedCMPY,root.atlas.ActualCMPComputer.actualCMPY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.ICPPlannerWithAngularMomentumOffsetWrapper.icpPlannerModifiedCMPPositionY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.ICPPlannerWithAngularMomentumOffsetWrapper.icpPlannerModifiedCMPVelocityY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCMPVelocityY</Variables>
 		<GraphConfiguration>
-			<Name>config50</Name>
+			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -26,9 +26,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCMPPositionZ</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCMPPositionZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.ICPPlannerWithAngularMomentumOffsetWrapper.icpPlannerModifiedCMPPositionZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.ICPPlannerWithAngularMomentumOffsetWrapper.icpPlannerModifiedCMPVelocityZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCMPVelocityZ</Variables>
 		<GraphConfiguration>
-			<Name>config51</Name>
+			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -40,7 +40,7 @@
 	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredICPPositionX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.HighLevelHumanoidControllerToolbox.capturePointX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.icpPositionX</Variables>
 		<GraphConfiguration>
-			<Name>config52</Name>
+			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -52,7 +52,7 @@
 	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredICPPositionY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.HighLevelHumanoidControllerToolbox.capturePointY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.icpPositionY</Variables>
 		<GraphConfiguration>
-			<Name>config53</Name>
+			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -64,7 +64,7 @@
 	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredICPPositionZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.HighLevelHumanoidControllerToolbox.capturePointZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.ICPBasedLinearMomentumRateOfChangeControlModule.ICPProportionalController.icpPositionZ</Variables>
 		<GraphConfiguration>
-			<Name>config54</Name>
+			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -74,9 +74,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoMPositionX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.HighLevelHumanoidControllerToolbox.CommonHumanoidReferenceFramesVisualizer.centerOfMassX,root.atlas.ExactCoMCalcualtor.exactCenterOfMassPositionX</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoMPositionX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.HighLevelHumanoidControllerToolbox.CommonHumanoidReferenceFramesVisualizer.centerOfMassX,root.atlas.ExactCoMCalcualtor.exactCenterOfMassPositionX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoMVelocityX,root.atlas.ExactCoMCalcualtor.exactCenterOfMassVelocityX</Variables>
 		<GraphConfiguration>
-			<Name>config55</Name>
+			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -86,9 +86,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoMPositionY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.HighLevelHumanoidControllerToolbox.CommonHumanoidReferenceFramesVisualizer.centerOfMassY,root.atlas.ExactCoMCalcualtor.exactCenterOfMassPositionY</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoMPositionY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.HighLevelHumanoidControllerToolbox.CommonHumanoidReferenceFramesVisualizer.centerOfMassY,root.atlas.ExactCoMCalcualtor.exactCenterOfMassPositionY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoMVelocityY,root.atlas.ExactCoMCalcualtor.exactCenterOfMassVelocityY</Variables>
 		<GraphConfiguration>
-			<Name>config56</Name>
+			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -98,9 +98,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoMPositionZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.HighLevelHumanoidControllerToolbox.CommonHumanoidReferenceFramesVisualizer.centerOfMassZ,root.atlas.ExactCoMCalcualtor.exactCenterOfMassPositionZ</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoMPositionZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.HighLevelHumanoidControllerToolbox.CommonHumanoidReferenceFramesVisualizer.centerOfMassZ,root.atlas.ExactCoMCalcualtor.exactCenterOfMassPositionZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoMVelocityZ,root.atlas.ExactCoMCalcualtor.exactCenterOfMassVelocityZ</Variables>
 		<GraphConfiguration>
-			<Name>config57</Name>
+			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -112,7 +112,7 @@
 	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.HighLevelHumanoidControllerToolbox.CenterOfPressureX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoPPositionX</Variables>
 		<GraphConfiguration>
-			<Name>config58</Name>
+			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -124,7 +124,7 @@
 	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.HighLevelHumanoidControllerToolbox.CenterOfPressureY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoPPositionY</Variables>
 		<GraphConfiguration>
-			<Name>config59</Name>
+			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -136,7 +136,7 @@
 	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoPPositionZ</Variables>
 		<GraphConfiguration>
-			<Name>config60</Name>
+			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -148,7 +148,7 @@
 	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.l_footWrenchBasedFootSwitch.l_footForceWorldFrameX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.r_footWrenchBasedFootSwitch.r_footForceWorldFrameX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.l_footWrenchBasedFootSwitch.l_footTorqueWorldFrameX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.r_footWrenchBasedFootSwitch.r_footTorqueWorldFrameX</Variables>
 		<GraphConfiguration>
-			<Name>config61</Name>
+			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -160,7 +160,7 @@
 	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.l_footWrenchBasedFootSwitch.l_footForceWorldFrameY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.r_footWrenchBasedFootSwitch.r_footForceWorldFrameY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.l_footWrenchBasedFootSwitch.l_footTorqueWorldFrameY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.r_footWrenchBasedFootSwitch.r_footTorqueWorldFrameY</Variables>
 		<GraphConfiguration>
-			<Name>config62</Name>
+			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -172,7 +172,7 @@
 	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.l_footWrenchBasedFootSwitch.l_footForceWorldFrameZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.r_footWrenchBasedFootSwitch.r_footForceWorldFrameZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.l_footWrenchBasedFootSwitch.l_footTorqueWorldFrameZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.r_footWrenchBasedFootSwitch.r_footTorqueWorldFrameZ</Variables>
 		<GraphConfiguration>
-			<Name>config63</Name>
+			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -184,7 +184,7 @@
 	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCentroidalAngularMomentumX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCentroidalTorqueX</Variables>
 		<GraphConfiguration>
-			<Name>config64</Name>
+			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -196,7 +196,7 @@
 	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCentroidalAngularMomentumY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCentroidalTorqueY</Variables>
 		<GraphConfiguration>
-			<Name>config65</Name>
+			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -208,7 +208,7 @@
 	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCentroidalAngularMomentumZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCentroidalTorqueZ</Variables>
 		<GraphConfiguration>
-			<Name>config66</Name>
+			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -220,7 +220,7 @@
 	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredICPVelocityX</Variables>
 		<GraphConfiguration>
-			<Name>config67</Name>
+			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -232,7 +232,7 @@
 	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredICPVelocityY</Variables>
 		<GraphConfiguration>
-			<Name>config68</Name>
+			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -244,7 +244,7 @@
 	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredICPVelocityZ,root.atlas.t</Variables>
 		<GraphConfiguration>
-			<Name>config69</Name>
+			<Name>config21</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -256,7 +256,7 @@
 	<Graph>
 		<Variables>root.atlas.ExactCoMCalcualtor.exactCenterOfMassVelocityX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoMVelocityX,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.l_footFootPositionInWorldX,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.r_footFootPositionInWorldX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.l_footLegSingularityAndKneeCollapseAvoidanceControlModule.l_footDesiredFootPositionX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.FeetManager.rightFootControlModule.r_footLegSingularityAndKneeCollapseAvoidanceControlModule.r_footDesiredFootPositionX</Variables>
 		<GraphConfiguration>
-			<Name>config70</Name>
+			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -268,7 +268,7 @@
 	<Graph>
 		<Variables>root.atlas.ExactCoMCalcualtor.exactCenterOfMassVelocityY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoMVelocityY,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.l_footFootPositionInWorldY,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.r_footFootPositionInWorldY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.l_footLegSingularityAndKneeCollapseAvoidanceControlModule.l_footDesiredFootPositionY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.FeetManager.rightFootControlModule.r_footLegSingularityAndKneeCollapseAvoidanceControlModule.r_footDesiredFootPositionY</Variables>
 		<GraphConfiguration>
-			<Name>config71</Name>
+			<Name>config23</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -280,7 +280,7 @@
 	<Graph>
 		<Variables>root.atlas.ExactCoMCalcualtor.exactCenterOfMassVelocityZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoMVelocityZ,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.l_footFootPositionInWorldZ,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.r_footFootPositionInWorldZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.l_footLegSingularityAndKneeCollapseAvoidanceControlModule.l_footDesiredFootPositionZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.FeetManager.rightFootControlModule.r_footLegSingularityAndKneeCollapseAvoidanceControlModule.r_footDesiredFootPositionZ</Variables>
 		<GraphConfiguration>
-			<Name>config72</Name>
+			<Name>config24</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
