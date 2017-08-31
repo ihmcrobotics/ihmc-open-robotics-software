@@ -450,5 +450,4 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
 
    public abstract void calculateJointStateChecksum(GenericCRC32 checksum);
 
-   public abstract void calculateJointDesiredChecksum(GenericCRC32 checksum);
 }
