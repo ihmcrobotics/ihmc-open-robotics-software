@@ -11,8 +11,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import javax.naming.ldap.Control;
-
 public class NewStandTransitionControllerState extends NewHighLevelControllerState
 {
    private static final double TIME_TO_RAMP_UP_CONTROL = 0.7;
@@ -27,16 +25,16 @@ public class NewStandTransitionControllerState extends NewHighLevelControllerSta
    private final OneDoFJoint[] controlledJoints;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   private final NewStandReadyControllerState standReadyControllerState;
+   private final NewFreezeControllerState standReadyControllerState;
    private final NewWalkingControllerState walkingControllerState;
 
-   public NewStandTransitionControllerState(NewStandReadyControllerState standReadyControllerState, NewWalkingControllerState walkingControllerState,
+   public NewStandTransitionControllerState(NewFreezeControllerState standReadyControllerState, NewWalkingControllerState walkingControllerState,
                                             HighLevelHumanoidControllerToolbox controllerToolbox)
    {
       this(standReadyControllerState, walkingControllerState, controllerToolbox, TIME_TO_RAMP_UP_CONTROL);
    }
 
-   public NewStandTransitionControllerState(NewStandReadyControllerState standReadyControllerState, NewWalkingControllerState walkingControllerState,
+   public NewStandTransitionControllerState(NewFreezeControllerState standReadyControllerState, NewWalkingControllerState walkingControllerState,
                                             HighLevelHumanoidControllerToolbox controllerToolbox, double standTransitionDuration)
    {
       super(NewHighLevelControllerStates.STAND_TRANSITION_STATE);

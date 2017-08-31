@@ -15,7 +15,7 @@ import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class NewStandReadyControllerState extends NewHighLevelControllerState
+public class NewFreezeControllerState extends NewHighLevelControllerState
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -26,10 +26,10 @@ public class NewStandReadyControllerState extends NewHighLevelControllerState
 
    private final YoDouble masterGain = new YoDouble("standReadyMasterGain", registry);
 
-   public NewStandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepParameters standPrepSetpoints,
-                                       PositionControlParameters positionControlParameters)
+   public NewFreezeControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepParameters standPrepSetpoints,
+                                   PositionControlParameters positionControlParameters)
    {
-      super(NewHighLevelControllerStates.STAND_READY_STATE);
+      super(NewHighLevelControllerStates.FREEZE_STATE);
 
       masterGain.set(positionControlParameters.getPositionControlMasterGain());
 

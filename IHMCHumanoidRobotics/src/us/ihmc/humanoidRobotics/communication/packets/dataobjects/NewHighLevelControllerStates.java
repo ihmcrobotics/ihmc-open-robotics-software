@@ -8,14 +8,12 @@ public enum NewHighLevelControllerStates
    DO_NOTHING_STATE,
    @RosEnumValueDocumentation(documentation = "Stand prep state.")
    STAND_PREP_STATE,
-   @RosEnumValueDocumentation(documentation = "Stand ready state.")
-   STAND_READY_STATE,
+   @RosEnumValueDocumentation(documentation = "Freeze state.")
+   FREEZE_STATE,
    @RosEnumValueDocumentation(documentation = "Stand transition state.")
    STAND_TRANSITION_STATE,
    @RosEnumValueDocumentation(documentation = "whole body force control employing IHMC walking, balance, and manipulation algorithms")
    WALKING_STATE,
-   @RosEnumValueDocumentation(documentation = "Freeze state.")
-   FREEZE_STATE,
    @RosEnumValueDocumentation(documentation = "The robot is peforming an automated diagnostic routine")
    DIAGNOSTICS,
    @RosEnumValueDocumentation(documentation = "Automated calibration routine depending on the robot. For Valkyrie: estimation of the joint torque offsets.")
