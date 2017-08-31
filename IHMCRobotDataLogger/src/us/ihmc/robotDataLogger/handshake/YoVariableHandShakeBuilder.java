@@ -238,7 +238,7 @@ public class YoVariableHandShakeBuilder
          YoVariableDefinition yoVariableDefinition = handshake.getVariables().add();
          yoVariableDefinition.setName(variable.getName());
          yoVariableDefinition.setRegistry((short) registryID);
-
+         yoVariableDefinition.setIsParameter(variable.isParameter());
          switch (variable.getYoVariableType())
          {
          case DOUBLE:

@@ -29,6 +29,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.producers.VideoDataServerImageCallback;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -486,7 +487,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
             int framesPerSecond = 25;
             RawVideoDataServer drcRenderedSceneVideoHandler = new RawVideoDataServer(scsSensorOutputPacketCommunicator);
-            simulationConstructionSet.startStreamingVideoData(cameraConfiguration, width, height, drcRenderedSceneVideoHandler, timeStampProvider,
+            simulationConstructionSet.startStreamingVideoData(cameraConfiguration, width, height, new VideoDataServerImageCallback(drcRenderedSceneVideoHandler), timeStampProvider,
                                                               framesPerSecond);
          }
 

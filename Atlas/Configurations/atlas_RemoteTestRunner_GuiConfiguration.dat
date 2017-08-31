@@ -1,7 +1,11 @@
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
+<<<<<<< HEAD
 		<Variables></Variables>
+=======
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoPPositionX</Variables>
+>>>>>>> develop
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -13,7 +17,11 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
+<<<<<<< HEAD
 		<Variables></Variables>
+=======
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerDesiredCoPPositionY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.icpPlannerIsStanding</Variables>
+>>>>>>> develop
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +33,11 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
+<<<<<<< HEAD
 		<Variables></Variables>
+=======
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.FootstepAngularMomentumPredictor.icpPlannerAngularMomentumNumberOfRegisteredFootsteps</Variables>
+>>>>>>> develop
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -48,6 +60,7 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+<<<<<<< HEAD
 	<Graph>
 		<Variables></Variables>
 		<GraphConfiguration>
@@ -72,6 +85,8 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+=======
+>>>>>>> develop
 </GraphGroup>
 <Entry Boxes Tab Pane>
 </Entry Boxes Tab Pane>
@@ -117,8 +132,14 @@ null,
 </Track Booleans>
 </Track data>
 <Fix Position>
+<<<<<<< HEAD
 <Fix X>0.049096548430143966</Fix X>
 <Fix Y>0.004782935646160658</Fix Y>
 <Fix Z>1.0081640957154614</Fix Z>
+=======
+<Fix X>-0.044279659427992425</Fix X>
+<Fix Y>0.0036316242429557813</Fix Y>
+<Fix Z>0.977062627301738</Fix Z>
+>>>>>>> develop
 </Fix Position>
 </Canvas 1>

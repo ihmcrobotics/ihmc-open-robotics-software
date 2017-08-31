@@ -2,28 +2,26 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
-import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
 
-public class CMPTrajectory extends YoSegmentedFrameTrajectory3D
+public class CMPTrajectory extends SegmentedFrameTrajectory3D
 {
-   private final YoDouble timeIntoStep;
+   private double timeIntoStep;
 
-   public CMPTrajectory(String namePrefix, int maxNumberOfSegments, int maxNumberOfCoefficients, YoVariableRegistry registry)
+   public CMPTrajectory(int maxNumberOfSegments, int maxNumberOfCoefficients)
    {
-      super(namePrefix + "CMP", maxNumberOfSegments, maxNumberOfCoefficients, registry);
-      timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
+      super(maxNumberOfSegments, maxNumberOfCoefficients);
+      reset();
    }
 
    public void reset()
    {
       super.reset();
-      timeIntoStep.setToNaN();
+      timeIntoStep = Double.NaN;
    }
 
-   public YoFrameTrajectory3D getCurrentSegment()
+   public FrameTrajectory3D getCurrentSegment()
    {
       return currentSegment;
    }
@@ -31,7 +29,7 @@ public class CMPTrajectory extends YoSegmentedFrameTrajectory3D
    public void update(double timeInState)
    {
       super.update(timeInState);
-      timeIntoStep.set(timeInState);
+      timeIntoStep = timeInState;
    }
 
    public void update(double timeInState, FramePoint3D desiredCMPToPack)
@@ -54,16 +52,16 @@ public class CMPTrajectory extends YoSegmentedFrameTrajectory3D
 
    public boolean isDone()
    {
-      boolean currentIsLast = currentSegmentIndex.getIntegerValue() == numberOfSegments.getIntegerValue() - 1;
-      boolean currentIsDone = !currentSegment.timeIntervalContains(timeIntoStep.getDoubleValue());
+      boolean currentIsLast = currentSegmentIndex  == numberOfSegments - 1;
+      boolean currentIsDone = !currentSegment.timeIntervalContains(timeIntoStep);
 
       return currentIsLast && currentIsDone;
    }
    
    public void getExitCMPLocation(FramePoint3D exitCMPLocationToPack)
    {
-      segments.get(numberOfSegments.getIntegerValue() - 1).compute(segments.get(numberOfSegments.getIntegerValue() -1).getFinalTime());
-      exitCMPLocationToPack.setIncludingFrame(segments.get(numberOfSegments.getIntegerValue() - 1).getFramePosition());
+      segments.get(numberOfSegments - 1).compute(segments.get(numberOfSegments -1).getFinalTime());
+      exitCMPLocationToPack.setIncludingFrame(segments.get(numberOfSegments - 1).getFramePosition());
    }
 
    public void getEntryCMPLocation(FramePoint3D entryCMPLocationToPack)

@@ -47,8 +47,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajec
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
@@ -77,6 +75,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -97,7 +97,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    public abstract double getLegLength();
 
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 50000)
+   @Test
    public void testSingleTrajectoryPoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -170,7 +170,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 50000)
+   @Test
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -243,7 +243,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 50000)
+   @Test
    public void testMultipleTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -385,7 +385,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test(timeout = 30000)
+   @Test
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -450,7 +450,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 40.0)
-   @Test(timeout = 80000)
+   @Test
    public void testQueuedMessages() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -634,7 +634,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test(timeout = 30000)
+   @Test
    public void testQueueWithWrongPreviousId() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -754,7 +754,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 40000)
+   @Test
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -947,7 +947,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 60000)
+   @Test
    public void testStopAllTrajectory() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
