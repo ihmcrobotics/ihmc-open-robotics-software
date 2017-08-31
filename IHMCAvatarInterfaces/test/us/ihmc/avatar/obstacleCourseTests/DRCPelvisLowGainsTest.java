@@ -83,8 +83,8 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCPelvisFlippingOutBugTest", selectedLocation, simulationTestingParameters,
-              robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.createSimulation("DRCPelvisFlippingOutBugTest");
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
 

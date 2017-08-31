@@ -78,7 +78,8 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
@@ -104,7 +105,8 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.5);
       assertTrue(success);
 

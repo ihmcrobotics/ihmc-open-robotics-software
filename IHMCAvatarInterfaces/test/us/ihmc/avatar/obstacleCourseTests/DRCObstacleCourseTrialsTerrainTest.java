@@ -79,7 +79,8 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsSlopeLeftFootPose.xml";
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DRC_TRIALS_TRAINING_WALKING;
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCSlopeTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("DRCSlopeTest");
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.01);
@@ -110,7 +111,8 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsSlopeLeftFootPose.xml";
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DRC_TRIALS_TRAINING_WALKING;
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCSlopeTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("DRCSlopeTest");
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.01);
@@ -151,7 +153,8 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsZigzagHurdlesLeftFootPose.xml";
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCZigzagHurdlesTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("DRCZigzagHurdlesTest");
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.01);
@@ -177,7 +180,8 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       String scriptName = "scripts/ExerciseAndJUnitScripts/DRCTrialsZigzagHurdlesLeftFootPose.xml";
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_ZIGZAG_BLOCKS;
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCZigzagHurdlesTest", selectedLocation, simulationTestingParameters, getRobotModelWithAdditionalFootContactPoints());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, selectedLocation, simulationTestingParameters, getRobotModelWithAdditionalFootContactPoints());
+      drcSimulationTestHelper.createSimulation("DRCZigzagHurdlesTest");
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.01);
@@ -212,7 +216,8 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DRC_TRIALS_TRAINING_WALKING;
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingOntoSlopesTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("DRCWalkingOntoSlopesTest");
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
       setupCameraForWalkingOntoSlopes(simulationConstructionSet);

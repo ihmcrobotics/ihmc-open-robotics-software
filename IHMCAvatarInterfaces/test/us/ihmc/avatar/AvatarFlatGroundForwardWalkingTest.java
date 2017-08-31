@@ -133,7 +133,8 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       robotModel = getRobotModel();
       fullRobotModel = robotModel.createFullRobotModel();
       simulationTestingParameters.setKeepSCSUp(keepSCSUp());
-      drcSimulationTestHelper = new DRCSimulationTestHelper(emptyEnvironment, className, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(emptyEnvironment, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.createSimulation(className);
       ThreadTools.sleep(1000);
    }
 
