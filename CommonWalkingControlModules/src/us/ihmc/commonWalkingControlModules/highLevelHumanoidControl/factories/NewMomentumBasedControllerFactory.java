@@ -82,6 +82,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    private final ICPTrajectoryPlannerParameters capturePointPlannerParameters;
 
    private final StandPrepParameters standPrepSetpoints;
+   private final PositionControlParameters positionControlParameters;
    private final NewHighLevelControllerStates initialControllerState;
    private final NewHighLevelControllerStates fallbackControllerState;
 
@@ -119,14 +120,15 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    public NewMomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
                                             SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
                                             WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters,
-                                            StandPrepParameters standPrepSetpoints, NewHighLevelControllerStates initialControllerState,
-                                            NewHighLevelControllerStates fallbackControllerState)
+                                            StandPrepParameters standPrepSetpoints, PositionControlParameters positionControlParameters,
+                                            NewHighLevelControllerStates initialControllerState, NewHighLevelControllerStates fallbackControllerState)
    {
       this.footSensorNames = footForceSensorNames;
       this.footContactSensorNames = footContactSensorNames;
       this.wristSensorNames = wristSensorNames;
       this.contactableBodiesFactory = contactableBodiesFactory;
       this.standPrepSetpoints = standPrepSetpoints;
+      this.positionControlParameters = positionControlParameters;
       this.initialControllerState = initialControllerState;
       this.fallbackControllerState = fallbackControllerState;
 
@@ -374,7 +376,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the StandReadyController ///////////////////////////////////////////////////////////
-      NewStandReadyControllerState standReadyControllerState = createStandReadyControllerState(controllerToolbox, standPrepSetpoints);
+      NewStandReadyControllerState standReadyControllerState = createStandReadyControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
       highLevelControllerStates.add(standReadyControllerState);
       ArrayList<StateTransition<NewHighLevelControllerStates>> standReadyTransitions = new ArrayList<>();
       standReadyTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
@@ -635,9 +637,10 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       return new NewStandPrepControllerState(controllerToolbox, standPrepSetpoints);
    }
 
-   public NewStandReadyControllerState createStandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepParameters standPrepSetpoints)
+   public NewStandReadyControllerState createStandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                                                       StandPrepParameters standPrepSetpoints, PositionControlParameters positionControlParameters)
    {
-      return new NewStandReadyControllerState(controllerToolbox, standPrepSetpoints);
+      return new NewStandReadyControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
    }
 
    public NewStandTransitionControllerState createStandTransitionControllerState(NewStandReadyControllerState standReadyControllerState,
