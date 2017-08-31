@@ -109,7 +109,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       if (yoGraphicsListRegistry != null)
       {
-         setupVisualizers(yoGraphicsListRegistry, maxNumberOfFootstepsToConsider);
+         setupVisualizers(yoGraphicsListRegistry);
       }
    }
 
@@ -140,7 +140,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       }
    }
 
-   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, int maxNumberOfFootstepsToConsider)
+   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
