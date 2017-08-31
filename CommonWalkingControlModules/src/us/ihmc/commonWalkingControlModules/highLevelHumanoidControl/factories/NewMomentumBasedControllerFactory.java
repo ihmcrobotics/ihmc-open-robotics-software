@@ -366,7 +366,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the NewStandPrepControllerState ////////////////////////////////////////////////////////////
-      NewStandPrepControllerState standPrepControllerState = createStandPrepControllerState(controllerToolbox, standPrepSetpoints);
+      NewStandPrepControllerState standPrepControllerState = createStandPrepControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
       highLevelControllerStates.add(standPrepControllerState);
       ArrayList<StateTransition<NewHighLevelControllerStates>> standPrepTransitions = new ArrayList<>();
       standPrepTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
@@ -632,9 +632,10 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       return new NewDoNothingControllerState(controllerToolbox);
    }
 
-   public NewStandPrepControllerState createStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepParameters standPrepSetpoints)
+   public NewStandPrepControllerState createStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepParameters standPrepSetpoints,
+                                                                     PositionControlParameters positionControlParameters)
    {
-      return new NewStandPrepControllerState(controllerToolbox, standPrepSetpoints);
+      return new NewStandPrepControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
    }
 
    public NewStandReadyControllerState createStandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox,
