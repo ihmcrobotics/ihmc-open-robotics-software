@@ -21,8 +21,8 @@ public class CreateParameterSliderWindowAction extends AbstractAction
       this.executor = executor;
 
       this.putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_S));
-      this.putValue(Action.LONG_DESCRIPTION, "Long Description");
-      this.putValue(Action.SHORT_DESCRIPTION, "Short Description");
+      this.putValue(Action.LONG_DESCRIPTION, "Creates a new Parameter Slider window for tuning parameters");
+      this.putValue(Action.SHORT_DESCRIPTION, "New parameter slider window");
    }
 
    @Override
