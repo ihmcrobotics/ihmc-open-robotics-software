@@ -3,7 +3,6 @@ package us.ihmc.atlas;
 import us.ihmc.avatar.AvatarFlatGroundForwardWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.robotics.partNames.ArmJointName;
 
 public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWalkingTest
 {
@@ -25,7 +24,7 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
 
    @Override
    public int getNumberOfSteps()
-   {
+   { 
       return 6;
    }
 

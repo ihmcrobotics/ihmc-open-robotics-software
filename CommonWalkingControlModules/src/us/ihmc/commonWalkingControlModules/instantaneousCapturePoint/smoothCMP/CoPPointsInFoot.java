@@ -250,4 +250,9 @@ public class CoPPointsInFoot
    {
       return copPointsList.isEmpty();
    }
+
+   public int getNumberOfCoPPoints()
+   {
+      return copPointsList.size();
+   }
 }
