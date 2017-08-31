@@ -51,14 +51,16 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final YoDouble defaultSwingDurationShiftFraction;
    
    private static final double ICP_CORNER_POINT_SIZE = 0.01;
-   private final List<YoFramePointInMultipleFrames> icpEntryCornerPoints = new ArrayList<>();
-   private final List<YoFramePointInMultipleFrames> icpExitCornerPoints = new ArrayList<>();
+   private List<YoFramePointInMultipleFrames> icpPhaseEntryCornerPoints = new ArrayList<>();
+   private List<YoFramePointInMultipleFrames> icpPhaseExitCornerPoints = new ArrayList<>();
 
    private final FullRobotModel fullRobotModel;
    private final double gravityZ;
 
    private final YoFramePoint yoSingleSupportFinalCoM;
    private final FramePoint3D singleSupportFinalCoM = new FramePoint3D();
+   
+   private final int maxNumberOfICPCornerPointsVisualized = 20;
 
    public SmoothCMPBasedICPPlanner(FullRobotModel fullRobotModel, BipedSupportPolygons bipedSupportPolygons,
                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maxNumberOfFootstepsToConsider,
@@ -78,12 +80,15 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       {
          YoDouble swingDurationShiftFraction = new YoDouble(namePrefix + "SwingDurationShiftFraction" + i, registry);
          swingDurationShiftFractions.add(swingDurationShiftFraction);
-         
+      }
+      
+      for (int i = 0; i < maxNumberOfICPCornerPointsVisualized - 1; i++)
+      {
          YoFramePointInMultipleFrames entryCornerPoint = new YoFramePointInMultipleFrames(namePrefix + "EntryCornerPoints" + i, registry, framesToRegister);
-         icpEntryCornerPoints.add(entryCornerPoint);
+         icpPhaseEntryCornerPoints.add(entryCornerPoint);
 
          YoFramePointInMultipleFrames exitCornerPoint = new YoFramePointInMultipleFrames(namePrefix + "ExitCornerPoints" + i, registry, framesToRegister);
-         icpExitCornerPoints.add(exitCornerPoint);
+         icpPhaseExitCornerPoints.add(exitCornerPoint);
       }
 
       referenceCoPGenerator = new ReferenceCoPTrajectoryGenerator(namePrefix, numberOfPointsPerFoot, maxNumberOfFootstepsToConsider, bipedSupportPolygons,
@@ -102,7 +107,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       if (yoGraphicsListRegistry != null)
       {
-         setupVisualizers(yoGraphicsListRegistry);
+         setupVisualizers(yoGraphicsListRegistry, maxNumberOfFootstepsToConsider);
       }
    }
 
@@ -133,7 +138,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       }
    }
 
-   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
+   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, int maxNumberOfFootstepsToConsider)
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
@@ -141,23 +146,22 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator.createVisualizerForConstantCoPs(yoGraphicsList, artifactList);
       
       
-      for (int i = 0; i < numberFootstepsToConsider.getIntegerValue() - 1; i++)
+      for (int i = 0; i < maxNumberOfICPCornerPointsVisualized - 1; i++)
       {
-         YoFramePoint icpEntryCornerPointInWorld = icpEntryCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly();
+         YoFramePoint icpEntryCornerPointInWorld = icpPhaseEntryCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly();
          YoGraphicPosition icpEntryCornerPointsViz = new YoGraphicPosition("ICPEntryCornerPoints" + i, icpEntryCornerPointInWorld, ICP_CORNER_POINT_SIZE,
-                                                                           YoAppearance.Blue(), GraphicType.SOLID_BALL);
+                                                                           YoAppearance.Green(), GraphicType.SOLID_BALL);
 
          yoGraphicsList.add(icpEntryCornerPointsViz);
          artifactList.add(icpEntryCornerPointsViz.createArtifact());
 
-         YoFramePoint icpExitCornerPointInWorld = icpExitCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly();
+         YoFramePoint icpExitCornerPointInWorld = icpPhaseExitCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly();
          YoGraphicPosition icpExitCornerPointsViz = new YoGraphicPosition("ICPExitCornerPoints" + i, icpExitCornerPointInWorld, ICP_CORNER_POINT_SIZE,
                                                                        YoAppearance.Blue(), GraphicType.BALL);
 
          yoGraphicsList.add(icpExitCornerPointsViz);
          artifactList.add(icpExitCornerPointsViz.createArtifact());
       }
-      
 
       artifactList.setVisible(VISUALIZE);
       yoGraphicsList.setVisible(VISUALIZE);
@@ -310,8 +314,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       referenceICPGenerator.initializeCenterOfMass();
       
-      referenceICPGenerator.getICPEntryCornerPoints(icpEntryCornerPoints);
-      referenceICPGenerator.getICPExitCornerPoints(icpExitCornerPoints);
+      referenceICPGenerator.getICPPhaseEntryCornerPoints(icpPhaseEntryCornerPoints);
+      referenceICPGenerator.getICPPhaseExitCornerPoints(icpPhaseExitCornerPoints);
       
       // TODO implement requested hold position
       // TODO implement is done walking
@@ -342,8 +346,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       referenceICPGenerator.initializeCenterOfMass();
       
-      referenceICPGenerator.getICPEntryCornerPoints(icpEntryCornerPoints);
-      referenceICPGenerator.getICPExitCornerPoints(icpExitCornerPoints);
+      referenceICPGenerator.getICPPhaseEntryCornerPoints(icpPhaseEntryCornerPoints);
+      referenceICPGenerator.getICPPhaseExitCornerPoints(icpPhaseExitCornerPoints);
    }
 
    private void printCoPTrajectories()
