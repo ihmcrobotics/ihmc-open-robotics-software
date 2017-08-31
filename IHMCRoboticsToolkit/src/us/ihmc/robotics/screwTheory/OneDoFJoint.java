@@ -456,13 +456,11 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
     * VRC HACKS
     */
 
-   @Deprecated
    public void setqDesired(double qDesired)
    {
       this.qDesired = qDesired;
    }
 
-   @Deprecated
    public void setQdDesired(double qdDesired)
    {
       this.qdDesired = qdDesired;
@@ -488,11 +486,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       checksum.update(qdd);
    }
 
-   @Override
-   public void calculateJointDesiredChecksum(GenericCRC32 checksum)
-   {
-      checksum.update(qddDesired);
-   }
 
    public abstract FrameVector3D getJointAxis();
 
