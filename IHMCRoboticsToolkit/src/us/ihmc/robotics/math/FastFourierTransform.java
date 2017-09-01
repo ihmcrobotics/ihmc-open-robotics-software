@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 
 import java.util.List;
@@ -24,11 +25,6 @@ public class FastFourierTransform
    private List<ComplexNumber> rootsOfUnity;
    private ComplexNumber[] coefficients;
    private ComplexNumber[] transformedCoeffs;
-
-   public FastFourierTransform()
-   {
-      this(2048);
-   }
 
    private int temp;
 
@@ -65,11 +61,31 @@ public class FastFourierTransform
                + coefficients.length);
       int index = 0;
       for (; index < coefficients.length; index++)
+      {
          this.coefficients[index].setToPurelyReal(coefficients[index]);
+      }
       for (; index < maxNumberOfCoefficients; index++)
+      {
          this.coefficients[index].setToPurelyReal(0.0);
+      }
    }
 
+   public void setCoefficients(double[] coefficients, int numberOfCoefficientsToUse)
+   {
+      if (coefficients.length > maxNumberOfCoefficients)
+         throw new RuntimeException("Insufficient number of coefficients for FFT transform, max: " + maxNumberOfCoefficients + ", provided: "
+               + numberOfCoefficientsToUse);
+      int index = 0;
+      for (; index < numberOfCoefficientsToUse; index++)
+      {
+         this.coefficients[index].setToPurelyReal(coefficients[index]);
+      }
+      for (; index < maxNumberOfCoefficients; index++)
+      {
+         this.coefficients[index].setToPurelyReal(0.0);
+      }
+   }
+   
    private ComplexNumber tempComplex1 = new ComplexNumber(), tempComplex2 = new ComplexNumber(), tempComplex = new ComplexNumber();
 
    public ComplexNumber[] getForwardTransform()
