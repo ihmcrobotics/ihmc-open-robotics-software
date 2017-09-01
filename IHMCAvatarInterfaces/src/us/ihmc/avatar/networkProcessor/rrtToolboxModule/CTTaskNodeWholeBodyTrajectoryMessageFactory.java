@@ -2,11 +2,14 @@ package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -28,36 +31,34 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
       
    }
    
-   private void generateHandTrajectoryMessages()
+   private void updateHandTrajectoryMessages()
    {
-      for(RobotSide robotSide : RobotSide.values)
-      {
-         
-      }
+      handTrajectoryMessages.put(RobotSide.LEFT, new HandTrajectoryMessage(RobotSide.LEFT, this.trajectoryTime, new Point3D(0.5, 0.35, 1.0), new Quaternion(), ReferenceFrame.getWorldFrame()));
+      handTrajectoryMessages.put(RobotSide.RIGHT, new HandTrajectoryMessage(RobotSide.RIGHT, this.trajectoryTime, new Point3D(0.5, -0.35, 1.0), new Quaternion(), ReferenceFrame.getWorldFrame()));
    }
    
-   private void generateChestTrajectoryMessage()
+   private void updateChestTrajectoryMessage()   
    {
       
    }
    
-   private void generatePelvisTrajectoryMessage()
+   private void updatePelvisTrajectoryMessage()
    {
       
    }
    
    public void setCTTaskNodePath(ArrayList<CTTaskNode> path)
    {
-      trajectoryTime = ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory.getTrajectoryTime();
+      this.trajectoryTime = ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory.getTrajectoryTime();
       
       this.path = path;
    }
 
    public WholeBodyTrajectoryMessage getWholeBodyTrajectoryMessage()
    {
-      generateHandTrajectoryMessages();
-      generateChestTrajectoryMessage();
-      generatePelvisTrajectoryMessage();
+      updateHandTrajectoryMessages();
+      updateChestTrajectoryMessage();
+      updatePelvisTrajectoryMessage();
       wholeBodyTrajectoryMessage.clear();
       
       for(RobotSide robotSide : RobotSide.values)
