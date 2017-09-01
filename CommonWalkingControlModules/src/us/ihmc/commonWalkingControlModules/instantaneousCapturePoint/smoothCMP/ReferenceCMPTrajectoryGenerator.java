@@ -6,7 +6,6 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.AngularMomentumTrajectory;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.TorqueTrajectory;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -176,7 +175,6 @@ public class ReferenceCMPTrajectoryGenerator
          torqueTrajectory.scale(1.0/verticalGroundReaction.getDoubleValue());
          if(copTrajectoryReference.getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
          {
-            PrintTools.debug("Swing CoP segments: " + copTrajectoryReference.getNumberOfSegments() + " Torque Segments: " + torqueTrajectory.getNumberOfSegments());
             return;
          }
          trajMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
@@ -190,7 +188,6 @@ public class ReferenceCMPTrajectoryGenerator
          torqueTrajectory.scale(1.0/verticalGroundReaction.getDoubleValue());
          if(copTrajectoryReference.getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
          {
-            PrintTools.debug("Transfer CoP segments: " + copTrajectoryReference.getNumberOfSegments() + " Torque Segments: " + torqueTrajectory.getNumberOfSegments());
             return;
          }
          trajMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
@@ -200,7 +197,6 @@ public class ReferenceCMPTrajectoryGenerator
          torqueTrajectory.scale(1.0/verticalGroundReaction.getDoubleValue());
          if(copTrajectoryReference.getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
          {
-            PrintTools.debug("Swing CoP segments: " + copTrajectoryReference.getNumberOfSegments() + " Torque Segments: " + torqueTrajectory.getNumberOfSegments());
             return;
          }
          trajMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
