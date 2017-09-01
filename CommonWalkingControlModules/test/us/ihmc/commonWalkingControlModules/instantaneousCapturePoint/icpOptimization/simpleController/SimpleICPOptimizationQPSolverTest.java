@@ -556,7 +556,7 @@ public class SimpleICPOptimizationQPSolverTest
          double feedbackGainX = 3.61466302555;
          double feedbackGainY = 3.88533697445;
          solver.resetFeedbackConditions();
-         solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGainX, feedbackGainY, 100000.0);
+         solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGainX, feedbackGainY, 10000.0);
          solver.setMaxCMPDistanceFromEdge(0.06);
          solver.setCopSafeDistanceToEdge(0.002);
          solver.setFeedbackRegularizationWeight(0.0025);
