@@ -666,12 +666,14 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    }
 
    public NewWalkingControllerState createWalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                                                          HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                                                          ICPTrajectoryPlannerParameters capturePointPlannerParameters,
-                                                                          HighLevelHumanoidControllerToolbox controllerToolbox)
+                                                                 HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
+                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters,
+                                                                 HighLevelHumanoidControllerToolbox controllerToolbox)
    {
-      return new NewWalkingControllerState(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters, capturePointPlannerParameters,
-                                           controllerToolbox);
+      WalkingHighLevelHumanoidController walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory,
+                                                                                                    walkingControllerParameters, capturePointPlannerParameters,
+                                                                                                    controllerToolbox);
+      return new NewWalkingControllerState(walkingController);
    }
 
 }
