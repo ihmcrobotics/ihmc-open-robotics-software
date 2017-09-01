@@ -23,6 +23,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -114,10 +115,10 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final List<SwingCoPTrajectory> swingCoPTrajectories = new ArrayList<>();
 
    // Runtime variables
-   private FramePoint3D desiredCoPPosition = new FramePoint3D();
-   private FrameVector3D desiredCoPVelocity = new FrameVector3D();
-   private FrameVector3D desiredCoPAcceleration = new FrameVector3D();
-   private FramePoint3D heldCoPPosition = new FramePoint3D();
+   private final FramePoint3D desiredCoPPosition = new FramePoint3D();
+   private final FrameVector3D desiredCoPVelocity = new FrameVector3D();
+   private final FrameVector3D desiredCoPAcceleration = new FrameVector3D();
+   private final FramePoint3D heldCoPPosition = new FramePoint3D();
 
    private int footstepIndex = 0;
    private int plannedFootstepIndex = -1;
@@ -340,15 +341,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       for (int footIndex = 0; footIndex < copLocationWaypoints.size(); footIndex++)
       {
          CoPPointsInFoot copPointsInFoot = copLocationWaypoints.get(footIndex);
-         List<CoPPointName> copPointNames = copPointsInFoot.getCoPPointList();
-         for (int i = 0; i < copPointNames.size(); i++)
-         {
-            YoGraphicPosition copViz = new YoGraphicPosition(footIndex + "Foot CoP Waypoint" + copPointNames.get(i).toString(),
-                                                             copPointsInFoot.getWaypointInWorldFrameReadOnly(i), COP_POINT_SIZE, YoAppearance.Green(),
-                                                             GraphicType.BALL);
-            yoGraphicsList.add(copViz);
-            artifactList.add(copViz.createArtifact());
-         }
+         copPointsInFoot.setupVisualizers(yoGraphicsList, artifactList, COP_POINT_SIZE);
       }
    }
 
