@@ -1,10 +1,13 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.*;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.*;
@@ -12,14 +15,24 @@ import java.util.*;
 public class NewWalkingControllerState extends NewHighLevelControllerState
 {
    private final static NewHighLevelControllerStates controllerState = NewHighLevelControllerStates.WALKING_STATE;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
+   private final WholeBodyControllerCore controllerCore;
    private final WalkingHighLevelHumanoidController walkingController;
 
-   public NewWalkingControllerState(WalkingHighLevelHumanoidController walkingController)
+   private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
+
+   public NewWalkingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, WholeBodyControllerCore controllerCore,
+                                    WalkingHighLevelHumanoidController walkingController)
    {
       super(controllerState);
 
+      this.controllerToolbox = controllerToolbox;
+      this.controllerCore = controllerCore;
       this.walkingController = walkingController;
+
+      registry.addChild(walkingController.getYoVariableRegistry());
    }
 
 
@@ -31,6 +44,8 @@ public class NewWalkingControllerState extends NewHighLevelControllerState
 
    public void initialize()
    {
+      controllerCore.initialize();
+      controllerToolbox.initialize();
       walkingController.initialize();
    }
 
@@ -44,18 +59,14 @@ public class NewWalkingControllerState extends NewHighLevelControllerState
    public void doAction()
    {
       walkingController.doAction();
-   }
 
-   public void updateFailureDetection()
-   {
-      walkingController.updateFailureDetection();
-   }
+      ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
+      controllerCoreTimer.startMeasurement();
+      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
+      controllerCore.compute();
+      controllerCoreTimer.stopMeasurement();
 
-   public void updateManagers(WalkingState currentState)
-   {
-      walkingController.updateManagers(currentState);
    }
-
 
    public void reinitializePelvisOrientation(boolean reinitialize)
    {
@@ -83,7 +94,7 @@ public class NewWalkingControllerState extends NewHighLevelControllerState
    @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
-      return walkingController.getYoVariableRegistry();
+      return registry;
    }
 
    /**

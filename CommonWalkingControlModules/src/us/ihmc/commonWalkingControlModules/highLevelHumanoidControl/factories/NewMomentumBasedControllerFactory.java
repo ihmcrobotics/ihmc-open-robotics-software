@@ -344,6 +344,34 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       commandInputManager.registerConversionHelper(commandConversionHelper);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
+      // Setup the WalkingController //////////////////////////////////////////////////////////////
+      WalkingHighLevelHumanoidController walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory,
+                                                                                                    walkingControllerParameters, capturePointPlannerParameters,
+                                                                                                    controllerToolbox);
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
+      // Setup the WholeBodyInverseDynamicsControlCore ////////////////////////////////////////////
+      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
+
+      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame,
+                                                                            momentumOptimizationSettings, yoGraphicsListRegistry, registry);
+      toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
+      if (setupInverseDynamicsSolver)
+         toolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
+      if (setupInverseKinematicsSolver)
+         toolbox.setupForInverseKinematicsSolver();
+      if (setupVirtualModelControlSolver)
+      {
+         RigidBody[] controlledBodies = {fullRobotModel.getPelvis(), fullRobotModel.getFoot(RobotSide.LEFT), fullRobotModel.getFoot(RobotSide.RIGHT)};
+         toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controlledBodies, contactablePlaneBodies);
+      }
+      FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
+      WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, template, registry);
+      ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the DoNothingController ////////////////////////////////////////////////////////////
       // Useful as a transition state on the real robot
       NewDoNothingControllerState doNothingState = createDoNothingControllerState(controllerToolbox);
@@ -353,11 +381,9 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       doNothingTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.CALIBRATION));
       highLevelControllerTransitions.put(doNothingState, doNothingTransitions);
 
-      /** FIXME create the controller core in here instead **/
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingController //////////////////////////////////////////////////////////////
-      walkingState = createWalkingControllerState(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
-                                                  capturePointPlannerParameters, controllerToolbox);
+      walkingState = createWalkingControllerState(walkingController, controllerToolbox, controllerCore);
       highLevelControllerStates.add(walkingState);
       ArrayList<StateTransition<NewHighLevelControllerStates>> walkingTransitions = new ArrayList<>();
       walkingTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
@@ -406,32 +432,11 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the CalibrationController //////////////////////////////////////////////////////////
+      // todo
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the DiagnosticsController //////////////////////////////////////////////////////////
-
-      /** FIXME should this be done here? **/
-      /////////////////////////////////////////////////////////////////////////////////////////////
-      // Setup the WholeBodyInverseDynamicsControlCore ////////////////////////////////////////////
-      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
-      
-      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
-      ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame,
-                                                                            momentumOptimizationSettings, yoGraphicsListRegistry, registry);
-      toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
-      if (setupInverseDynamicsSolver)
-         toolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
-      if (setupInverseKinematicsSolver)
-         toolbox.setupForInverseKinematicsSolver();
-      if (setupVirtualModelControlSolver)
-      {
-         RigidBody[] controlledBodies = {fullRobotModel.getPelvis(), fullRobotModel.getFoot(RobotSide.LEFT), fullRobotModel.getFoot(RobotSide.RIGHT)};
-         toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controlledBodies, contactablePlaneBodies);
-      }
-      FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
-      WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, template, registry);
-      ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
+      // todo
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the HighLevelHumanoidControllerManager /////////////////////////////////////////////
@@ -665,15 +670,10 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       return new NewStandTransitionControllerState(standReadyControllerState, walkingControllerState, controllerToolbox);
    }
 
-   public NewWalkingControllerState createWalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                                                 HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters,
-                                                                 HighLevelHumanoidControllerToolbox controllerToolbox)
+   public NewWalkingControllerState createWalkingControllerState(WalkingHighLevelHumanoidController walkingController,
+                                                                 HighLevelHumanoidControllerToolbox controllerToolbox, WholeBodyControllerCore controllerCore)
    {
-      WalkingHighLevelHumanoidController walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory,
-                                                                                                    walkingControllerParameters, capturePointPlannerParameters,
-                                                                                                    controllerToolbox);
-      return new NewWalkingControllerState(walkingController);
+      return new NewWalkingControllerState(controllerToolbox, controllerCore, walkingController);
    }
 
 }

@@ -58,7 +58,6 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
    private final NewHighLevelControllerStateChangeStatusMessage highLevelStateChangeStatusMessage = new NewHighLevelControllerStateChangeStatusMessage();
 
    private final ExecutionTimer highLevelControllerTimer = new ExecutionTimer("activeHighLevelControllerTimer", 1.0, registry);
-   private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
 
    public NewHumanoidHighLevelControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
                                                 WholeBodyControllerCore controllerCore, NewHighLevelControllerStates initialControllerState,
@@ -177,11 +176,7 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
       highLevelControllerTimer.startMeasurement();
       stateMachine.doAction();
       highLevelControllerTimer.stopMeasurement();
-      ControllerCoreCommand controllerCoreCommandList = stateMachine.getCurrentState().getControllerCoreCommand();
-      controllerCoreTimer.startMeasurement();
-      controllerCore.submitControllerCoreCommand(controllerCoreCommandList);
-      controllerCore.compute();
-      controllerCoreTimer.stopMeasurement();
+
       reportDesiredCenterOfPressureForEstimator();
    }
 
