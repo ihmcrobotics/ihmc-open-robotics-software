@@ -1,13 +1,11 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.jointControlCalculator.EffortJointControlBlender;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.jointControlCalculator.PositionJointControlBlender;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.jointControlCalculator.JointControlBlender;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -27,7 +25,7 @@ public class NewStandTransitionControllerState extends NewHighLevelControllerSta
 
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.OFF);
 
-   private final PairList<OneDoFJoint, ImmutablePair<EffortJointControlBlender, PositionJointControlBlender>> jointCommandBlenders = new PairList<>();
+   private final PairList<OneDoFJoint, JointControlBlender> jointCommandBlenders = new PairList<>();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final NewStandReadyControllerState standReadyControllerState;
@@ -51,11 +49,8 @@ public class NewStandTransitionControllerState extends NewHighLevelControllerSta
       OneDoFJoint[] controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
       for (OneDoFJoint controlledJoint : controlledJoints)
       {
-         EffortJointControlBlender effortBlender = new EffortJointControlBlender("_StandTransition", controlledJoint, registry);
-         PositionJointControlBlender positionBlender = new PositionJointControlBlender("_StandTransition", controlledJoint, registry);
-
-         ImmutablePair<EffortJointControlBlender, PositionJointControlBlender> blenderPair = new ImmutablePair<>(effortBlender, positionBlender);
-         jointCommandBlenders.add(controlledJoint, blenderPair);
+         JointControlBlender jointControlBlender = new JointControlBlender("_StandTransition", controlledJoint, registry);
+         jointCommandBlenders.add(controlledJoint, jointControlBlender);
       }
 
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
@@ -91,16 +86,11 @@ public class NewStandTransitionControllerState extends NewHighLevelControllerSta
       for (int jointIndex = 0; jointIndex < jointCommandBlenders.size(); jointIndex++)
       {
          OneDoFJoint joint = jointCommandBlenders.get(jointIndex).getLeft();
+         JointControlBlender jointControlBlender = jointCommandBlenders.get(jointIndex).getRight();
          LowLevelJointData lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(joint);
 
-         ImmutablePair<EffortJointControlBlender, PositionJointControlBlender> blenderPair = jointCommandBlenders.get(jointIndex).getRight();
-         EffortJointControlBlender effortBlender = blenderPair.getLeft();
-         PositionJointControlBlender positionBlender = blenderPair.getRight();
-
-         effortBlender.computeAndUpdateJointTorque(lowLevelJointData, standReadyJointCommand.getLowLevelJointData(joint),
-                                                   walkingJointCommand.getLowLevelJointData(joint), gainRatio);
-         positionBlender.computeAndUpdateJointPosition(lowLevelJointData, standReadyJointCommand.getLowLevelJointData(joint),
-                                                       walkingJointCommand.getLowLevelJointData(joint), gainRatio);
+         jointControlBlender.computeAndUpdateJointControl(lowLevelJointData, standReadyJointCommand.getLowLevelJointData(joint),
+                                                          walkingJointCommand.getLowLevelJointData(joint), gainRatio);
       }
 
       controllerCoreCommand.completeLowLevelJointData(lowLevelOneDoFJointDesiredDataHolder);
