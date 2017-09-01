@@ -6,7 +6,6 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.WalkingTrajectoryType;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,7 +18,6 @@ import us.ihmc.robotics.math.trajectories.Trajectory;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
-import us.ihmc.robotics.math.trajectories.YoTrajectory;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -35,7 +33,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class FootstepAngularMomentumPredictor implements AngularMomentumTrajectoryGeneratorInterface
 {
    // Shit ton of YoVariables shall be created if thou sets this flag to true
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector3D zeroVector = new FrameVector3D();
@@ -536,6 +534,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       segmentCoMTrajectory.setQuintic(initialTime, finalTime, tempFramePoint1, comInitialVelocities.get(comIndex),
                                       comInitialAccelerations.get(comIndex), tempFramePoint2, comFinalVelocities.get(comIndex),
                                       comFinalAccelerations.get(comIndex));
+      trajMathTools.getDerivative(segmentCoMVelocity, segmentCoMTrajectory);
    }
 
    private void setFootTrajectoriesForSegment(double initialTime, double finalTime)

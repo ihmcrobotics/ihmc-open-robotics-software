@@ -85,7 +85,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final List<FrameTrajectory3D> cmpTrajectories = new ArrayList<>();
 
    private final YoBoolean continuouslyAdjustForICPContinuity;
-   private final YoBoolean areCoMDynamicsSatisfied;
    private List<FrameTuple3D<?, ?>> icpQuantityInitialConditionList = new ArrayList<FrameTuple3D<?, ?>>();
 
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
@@ -107,7 +106,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
       continuouslyAdjustForICPContinuity = new YoBoolean("continuouslyAdjustForICPContinuity", registry);
       continuouslyAdjustForICPContinuity.set(CONTINUOUSLY_ADJUST_FOR_ICP_DISCONTINUITY);
-      areCoMDynamicsSatisfied = new YoBoolean("areCoMDynamicsSatisfied", registry);
 
       totalNumberOfCMPSegments = new YoInteger(namePrefix + "TotalNumberOfICPSegments", registry);
 
@@ -397,14 +395,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
    FrameVector3D comVelocityDynamicsCurrent = new FrameVector3D();
    
-   private void checkCoMDynamics(double time, FrameVector3D comVelocityDesiredCurrent, FramePoint3D icpPositionDesiredCurrent, FramePoint3D comPositionDesiredCurrent)
-   {
-      comVelocityDynamicsCurrent.sub(icpPositionDesiredCurrent, comPositionDesiredCurrent);
-      comVelocityDynamicsCurrent.scale(omega0.getDoubleValue());
-
-      areCoMDynamicsSatisfied.set(comVelocityDesiredCurrent.epsilonEquals(comVelocityDynamicsCurrent, 10e-5));
-   }
-
    private int getCurrentSegmentIndex(double timeInCurrentPhase, List<FrameTrajectory3D> cmpTrajectories)
    {
       int currentSegmentIndex = FIRST_SEGMENT;
