@@ -79,7 +79,7 @@ public class CTTreeFindInitialGuess
 
          CTTaskNode initialGuessNode = new CTTaskNode(node);
 
-         CTTreeTools.setRandomNormalizedNodeData(initialGuessNode, true);
+         CTTreeTools.setRandomNormalizedNodeData(initialGuessNode, true, 0.0);
          initialGuessNode.setNormalizedNodeData(0, 0);
          initialGuessNode.convertNormalizedDataToData(taskRegion);
 

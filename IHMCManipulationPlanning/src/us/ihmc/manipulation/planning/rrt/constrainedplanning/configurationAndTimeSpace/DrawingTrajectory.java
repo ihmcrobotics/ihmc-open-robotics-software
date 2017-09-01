@@ -83,7 +83,7 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
 
       ConfigurationSpace holdingConfiguration = new ConfigurationSpace();
 
-      holdingConfiguration.setTranslation(-0.2, -0.5, 0.65);
+      holdingConfiguration.setTranslation(-0.2, -0.5, 0.60);
       holdingConfiguration.setRotation(0.5 * Math.PI, 0.0, -0.5 * Math.PI);
 
       configurationSpaces.put(RobotSide.RIGHT, holdingConfiguration);

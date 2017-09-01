@@ -36,6 +36,8 @@ public class CTTaskNodeTree
    private ArrayList<String> taskNames;
 
    private double trajectoryTime;
+   
+   private double treeReachingTime = 0.0;
 
    public CTTaskNodeTree(CTTaskNode rootNode)
    {
@@ -48,6 +50,8 @@ public class CTTaskNodeTree
       this.taskNames.add("time");
       for (int i = 1; i < this.dimensionOfTask + 1; i++)
          this.taskNames.add("Task_" + i + "_");
+      
+      this.treeReachingTime = 0.0;
    }
 
    public CTTaskNodeTree(CTTaskNode rootNode, String... taskNames)
@@ -64,6 +68,8 @@ public class CTTaskNodeTree
       else
          for (int i = 1; i < this.dimensionOfTask + 1; i++)
             this.taskNames.add("Task_" + i + "_" + taskNames[i - 1]);
+      
+      this.treeReachingTime = 0.0;
    }
 
    public void setTaskRegion(TaskRegion taskRegion)
@@ -219,7 +225,7 @@ public class CTTaskNodeTree
    public void updateRandomConfiguration()
    {
       CTTaskNode randomNode = createNode();
-      CTTreeTools.setRandomNormalizedNodeData(randomNode, false);
+      CTTreeTools.setRandomNormalizedNodeData(randomNode, false, this.treeReachingTime);
       this.randomNode = randomNode;
    }
 
@@ -337,6 +343,9 @@ public class CTTaskNodeTree
       {
          this.nearNode.addChildNode(this.newNode);
          this.wholeNodes.add(this.newNode);
+         
+         if(this.newNode.getNormalizedNodeData(0) > this.treeReachingTime)
+            this.treeReachingTime = this.newNode.getNormalizedNodeData(0);
       }
       else
       {

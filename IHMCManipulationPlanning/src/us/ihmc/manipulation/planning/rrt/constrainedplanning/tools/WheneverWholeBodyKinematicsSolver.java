@@ -136,7 +136,7 @@ public class WheneverWholeBodyKinematicsSolver
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
 
-   private static int maximumCntForUpdateInternal = 100;
+   private static int maximumCntForUpdateInternal = 150;
    private int cntForUpdateInternal = 0;
 
    public static int numberOfTest = 0;
@@ -283,6 +283,10 @@ public class WheneverWholeBodyKinematicsSolver
       return true;
    }
 
+   private double deltaSolutionQuality = 0.0;
+   private double deltaSolutionQualityOld = 0.0;
+   private double accSolutionQuality = 0.0;
+   
    private void updateInternal()
    {
       // Updating the reference frames and twist calculator.
@@ -317,11 +321,15 @@ public class WheneverWholeBodyKinematicsSolver
       inverseKinematicsSolution.setDesiredJointState(rootJoint, oneDoFJoints);
       inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
 
-      double solutionUltimateStableThreshold = 0.0001;
+       double solutionUltimateStableThresholdVEL = 1.0e-4;
+      double solutionUltimateStableThresholdACC = 1.0e-6;
       double solutionStableThreshold = 0.0004;
       double solutionQualityThreshold = 0.005;
 
-      double deltaSolutionQuality = solutionQuality.getDoubleValue() - solutionQualityOld.getDoubleValue();
+      deltaSolutionQuality = solutionQuality.getDoubleValue() - solutionQualityOld.getDoubleValue();
+      accSolutionQuality = deltaSolutionQuality - deltaSolutionQualityOld;
+      
+      
       boolean isSolutionStable = (Math.abs(deltaSolutionQuality) < solutionStableThreshold);
       boolean isSolutionGoodEnough = solutionQuality.getDoubleValue() < solutionQualityThreshold;
       boolean isGoodSolutionCur = isSolutionStable && isSolutionGoodEnough;
@@ -331,17 +339,18 @@ public class WheneverWholeBodyKinematicsSolver
          isSolved = true;
       }
 
-      boolean isSolutionUltimateStable = (Math.abs(deltaSolutionQuality) < solutionUltimateStableThreshold);
+      boolean isSolutionUltimateStable = (Math.abs(accSolutionQuality) < solutionUltimateStableThresholdACC) && (Math.abs(deltaSolutionQuality) < solutionUltimateStableThresholdVEL);
 
       if (DEBUG)
          PrintTools.info("" + cntForUpdateInternal + " cur SQ " + solutionQuality.getDoubleValue() + " " + isSolutionGoodEnough + " " + isSolutionStable + " "
                + isGoodSolutionCur + " " + isSolutionUltimateStable);
 
-      if (isSolutionUltimateStable)
+      if (!isSolutionGoodEnough && isSolutionUltimateStable && cntForUpdateInternal > 4)
       {
          isJointLimit = true;
       }
 
+      deltaSolutionQualityOld = deltaSolutionQuality;
       solutionQualityOld.set(solutionQuality.getDoubleValue());
       cntForUpdateInternal++;
    }
@@ -368,7 +377,7 @@ public class WheneverWholeBodyKinematicsSolver
          if (isJointLimit)
          {
             if (DEBUG)
-               PrintTools.info("cntForUpdateInternal " + " FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
+               PrintTools.info("cntForUpdateInternal " + " FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue() +" " + deltaSolutionQuality +" " + accSolutionQuality);
 
             return false;
          }
@@ -380,12 +389,13 @@ public class WheneverWholeBodyKinematicsSolver
             if (DEBUG)
                printOutRobotModel(desiredFullRobotModel, referenceFrames.getMidFootZUpGroundFrame());
             if (DEBUG)
-               PrintTools.info("cntForUpdateInternal " + " TRUE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
+               PrintTools.info("cntForUpdateInternal " + " TRUE " + cntForUpdateInternal);
 
             return true;
          }
       }
-      PrintTools.info("cntForUpdateInternal " + " FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue());
+      if (DEBUG)
+         PrintTools.info("cntForUpdateInternal " + " FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue() + " " + deltaSolutionQuality + " " + accSolutionQuality);
 
       return false;
    }
@@ -792,9 +802,9 @@ public class WheneverWholeBodyKinematicsSolver
    {
       double jointLimitScore = 0;
 
-      jointLimitScore = jointLimitScore + getJointLimitScore("back_bkz");
-      jointLimitScore = jointLimitScore + getJointLimitScore("back_bky");
-      jointLimitScore = jointLimitScore + getJointLimitScore("back_bkx");
+//      jointLimitScore = jointLimitScore + getJointLimitScore("back_bkz");
+//      jointLimitScore = jointLimitScore + getJointLimitScore("back_bky");
+//      jointLimitScore = jointLimitScore + getJointLimitScore("back_bkx");
       jointLimitScore = jointLimitScore + getArmJointLimitScore(RobotSide.LEFT);
       jointLimitScore = jointLimitScore + getArmJointLimitScore(RobotSide.RIGHT);
 
@@ -832,24 +842,18 @@ public class WheneverWholeBodyKinematicsSolver
       double lowerValue = aJoint.getJointLimitLower();
 
       double limitSize = upperValue - lowerValue;
-      aJointValue = aJointValue / limitSize;
-      upperValue = upperValue / limitSize;
-      lowerValue = lowerValue / limitSize;
 
-      double base = 100.0;
+      double diffUpper = upperValue - aJointValue;
+      double diffLower = aJointValue - lowerValue;
 
-      //      double diffUpper = Math.abs((upperValue - aJointValue) * (upperValue - aJointValue) * (upperValue - aJointValue) * (upperValue - aJointValue));
-      //      double diffLower = Math.abs((aJointValue - lowerValue) * (aJointValue - lowerValue) * (aJointValue - lowerValue) * (aJointValue - lowerValue));
-
-      double diffUpper = Math.pow(base, Math.abs((upperValue - aJointValue) * (upperValue - aJointValue)));
-      double diffLower = Math.pow(base, Math.abs((aJointValue - lowerValue) * (aJointValue - lowerValue)));
-
-      jointLimitScore = (diffUpper > diffLower) ? diffUpper : diffLower;
+      // Yoshikawa.
+      jointLimitScore = diffUpper * diffLower / limitSize / limitSize;
 
       if (DEBUG)
          PrintTools.info("" + jointName + " " + jointLimitScore + " " + aJointValue + " " + upperValue + " " + lowerValue);
 
       return jointLimitScore;
+           
    }
 
    public void printOutRobotModel(FullHumanoidRobotModel printFullRobotModel, ReferenceFrame frame)
