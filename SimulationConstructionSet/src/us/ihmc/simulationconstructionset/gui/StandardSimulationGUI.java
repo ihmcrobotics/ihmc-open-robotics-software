@@ -473,9 +473,9 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       return viewportWindow;
    }
 
-   public ParameterSliderWindow  createNewParameterSliderWindow(String viewportName, final int screenID, final boolean maximizeWindow)
+   public YoVariableSliderWindow createNewParameterSliderWindow(String viewportName, final int screenID, final boolean maximizeWindow)
    {
-      return new ParameterSliderWindow(selectedVariableHolder, closeableAndDisposableRegistry);
+      return new YoVariableSliderWindow(selectedVariableHolder, closeableAndDisposableRegistry);
    }
 
    public HeatmapWindow createNewHeatmapWindow(String name)
