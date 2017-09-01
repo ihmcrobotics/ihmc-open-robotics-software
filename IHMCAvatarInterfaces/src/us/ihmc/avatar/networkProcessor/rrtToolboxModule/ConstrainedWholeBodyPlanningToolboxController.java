@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWh
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.RobotKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.CTTreeTools;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeFindInitialGuess;
@@ -115,7 +115,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    private static int terminateToolboxCondition = 1000;
 
-   private CTTaskNodeWholeBodyTrajectoryMessageFactory ctTaskNodeWholeBodyTrajectoryMessageFactory;
+   public CTTaskNodeWholeBodyTrajectoryMessageFactory ctTaskNodeWholeBodyTrajectoryMessageFactory;
 
    /**
     * Toolbox state
@@ -198,8 +198,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       // ************************************************************************************************************** //
 
-//      RobotKinematicsConfiguration configuration = visualizedNode.getConfiguration();
-//      updateVisualizerRobotConfiguration(configuration);
       updateVisualizerRobotConfiguration();
       updateVisualizers();
       updateYoVariables();
@@ -219,12 +217,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       CTTaskNode node = tree.getPath().get(sizeOfPath - numberOfMotionPath);
 
       visualizedNode = node;
-      
-//      kinematicsSolver.updateRobotConfigurationData(node);
-//
-//      kinematicsSolver.initialize();
-//      kinematicsSolver.holdCurrentTrajectoryMessages();
-//      kinematicsSolver.putTrajectoryMessages();
 
       
       
@@ -238,6 +230,10 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
           * generate WholeBodyTrajectoryMessage.
           */
          ctTaskNodeWholeBodyTrajectoryMessageFactory = new CTTaskNodeWholeBodyTrajectoryMessageFactory();
+         
+         ctTaskNodeWholeBodyTrajectoryMessageFactory.setCTTaskNodePath(tree.getPath());
+         
+         
       }
    }
 
@@ -330,19 +326,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
     */
    private void findInitialGuess() throws InterruptedException, ExecutionException
    {
-//      CTTaskNode initialGuessNode = new CTTaskNode(rootNode);
-//
-//      CTTreeTools.setRandomNormalizedNodeData(initialGuessNode, true);
-//      initialGuessNode.setNormalizedNodeData(0, 0);
-//      initialGuessNode.convertNormalizedDataToData(taskRegion);
-//
-//      visualizedNode = initialGuessNode;
-//
-//      updateValidity(visualizedNode);
-//      double scoreInitialGuess = kinematicsSolver.getArmJointLimitScore();
-//      if (!visualizedNode.getValidity())
-//         scoreInitialGuess = 0.0;
-
       ctTreeFindInitialGuess.findInitialGuess(rootNode, taskRegion, initialConfiguration, constrainedEndEffectorTrajectory, handCoordinateOffsetX);
       
       double scoreInitialGuess = ctTreeFindInitialGuess.getBestScore();
@@ -468,9 +451,14 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       };
    }
 
-   private ConstrainedWholeBodyPlanningToolboxOutputStatus packResult()
+   private ConstrainedWholeBodyPlanningToolboxOutputStatus packResult(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage)
    {
       ConstrainedWholeBodyPlanningToolboxOutputStatus result = new ConstrainedWholeBodyPlanningToolboxOutputStatus();
+      
+      if(wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT) == null || wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT) == null)
+         result.wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+      else
+         result.wholeBodyTrajectoryMessage = wholebodyTrajectoryMessage;
 
       return result;
    }

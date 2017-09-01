@@ -15,7 +15,7 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
     * ConstrainedEndEffectorTrajectory cannot be imported in
     * IHMCHumanoidRobotics.
     */
-   //public ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
+   // public ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
 
    public ConstrainedWholeBodyPlanningRequestPacket()
    {
