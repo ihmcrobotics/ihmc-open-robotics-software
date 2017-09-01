@@ -20,7 +20,7 @@ public class PositionJointControlBlender
       this.oneDoFJoint = oneDoFJoint;
       String namePrefix = oneDoFJoint.getName();
 
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + nameSuffix + "Command");
+      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + nameSuffix + "PositionJointControlBlender");
 
       this.positionStepSizeLimiter = new DeltaLimitedYoVariable(namePrefix + "PositionStepSizeLimiter", registry, 0.15);
 

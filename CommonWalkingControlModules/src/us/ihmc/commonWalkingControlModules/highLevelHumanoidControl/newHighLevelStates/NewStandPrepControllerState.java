@@ -59,8 +59,8 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
          YoPolynomial trajectory = new YoPolynomial(jointName + "_StandPrepTrajectory", 4, registry);
          YoDouble standPrepFinalConfiguration = new YoDouble(jointName + "_StandPrepFinalConfiguration", registry);
 
-         EffortJointControlCalculator effortCalculator = new EffortJointControlCalculator("_StandReady", controlledJoint, controllerToolbox.getControlDT(), registry);
-         PositionJointControlCalculator positionCalculator = new PositionJointControlCalculator("_StandReady", controlledJoint, registry);
+         EffortJointControlCalculator effortCalculator = new EffortJointControlCalculator("_StandPrep", controlledJoint, controllerToolbox.getControlDT(), registry);
+         PositionJointControlCalculator positionCalculator = new PositionJointControlCalculator("_StandPrep", controlledJoint, registry);
 
          standPrepFinalConfiguration.set(standPrepSetpoints.getSetpoint(jointName));
          effortCalculator.setProportionalGain(positionControlParameters.getProportionalGain(jointName));
