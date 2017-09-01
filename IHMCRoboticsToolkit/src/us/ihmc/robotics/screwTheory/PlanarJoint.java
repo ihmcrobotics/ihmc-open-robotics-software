@@ -396,13 +396,6 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
       checksum.update(jointAcceleration.getLinearPartZ());
    }
 
-   @Override
-   public void calculateJointDesiredChecksum(GenericCRC32 checksum)
-   {
-      checksum.update(jointAccelerationDesired.getAngularPartY());
-      checksum.update(jointAccelerationDesired.getLinearPartX());
-      checksum.update(jointAccelerationDesired.getLinearPartZ());
-   }
 
    @Override
    public int getConfigurationMatrixSize()
