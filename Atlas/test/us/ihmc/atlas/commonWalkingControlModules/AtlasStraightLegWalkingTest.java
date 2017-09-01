@@ -79,7 +79,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    @Test(timeout = 120000)
    public void testSteppingDown() throws Exception
    {
-      double stepDownHeight = 0.15;
+      double stepDownHeight = 0.12;
       super.testSteppingDown(stepDownHeight, 0.30, 1);
    }
 
@@ -421,6 +421,6 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    public static void main(String[] args) throws Exception
    {
       AtlasStraightLegWalkingTest test = new AtlasStraightLegWalkingTest();
-      test.testWalkingOverStairs();
+      test.testSteppingDown();
    }
 }
