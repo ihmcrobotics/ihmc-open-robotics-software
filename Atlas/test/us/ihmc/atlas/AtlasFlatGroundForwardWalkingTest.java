@@ -2,9 +2,12 @@ package us.ihmc.atlas;
 
 import org.junit.Test;
 
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
 import us.ihmc.avatar.AvatarFlatGroundForwardWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -12,9 +15,18 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWalkingTest
 {
    private final AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ;
-   private final AtlasRobotModel robotModel = new AtlasRobotModel(version, RobotTarget.SCS, false);
+   private final AtlasRobotModel robotModel = new AtlasRobotModel(version, RobotTarget.SCS, false)
+   {
+
+      @Override
+      public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
+      {
+         return new AtlasSmoothCMPPlannerParameters(new AtlasPhysicalProperties());
+      }
+   };
+
    private final AtlasJointMap jointMap = new AtlasJointMap(version, robotModel.getPhysicalProperties());
-   
+
    private final int numberOfSteps = 8;
    private final double stepWidth = 0.25;
    private final double stepLength = 0.5;
