@@ -50,7 +50,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
    private final YoDouble defaultSwingDurationShiftFraction;
    
-   private static final double ICP_CORNER_POINT_SIZE = 0.01;
+   private static final double ICP_CORNER_POINT_SIZE = 0.005;
    private List<YoFramePointInMultipleFrames> icpPhaseEntryCornerPoints = new ArrayList<>();
    private List<YoFramePointInMultipleFrames> icpPhaseExitCornerPoints = new ArrayList<>();
 
@@ -144,13 +144,12 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
       referenceCoPGenerator.createVisualizerForConstantCoPs(yoGraphicsList, artifactList);
-      
-      
+
       for (int i = 0; i < maxNumberOfICPCornerPointsVisualized - 1; i++)
       {
          YoFramePoint icpEntryCornerPointInWorld = icpPhaseEntryCornerPoints.get(i).buildUpdatedYoFramePointForVisualizationOnly();
          YoGraphicPosition icpEntryCornerPointsViz = new YoGraphicPosition("ICPEntryCornerPoints" + i, icpEntryCornerPointInWorld, ICP_CORNER_POINT_SIZE,
-                                                                           YoAppearance.Green(), GraphicType.SOLID_BALL);
+                                                                           YoAppearance.Blue(), GraphicType.SOLID_BALL);
 
          yoGraphicsList.add(icpEntryCornerPointsViz);
          artifactList.add(icpEntryCornerPointsViz.createArtifact());
