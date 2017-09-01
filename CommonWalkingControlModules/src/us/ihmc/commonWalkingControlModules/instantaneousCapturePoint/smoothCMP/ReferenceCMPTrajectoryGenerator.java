@@ -167,33 +167,35 @@ public class ReferenceCMPTrajectoryGenerator
          return;
       }
       int numberOfFootstepsToSet = Math.min(numberOfFootstepsToConsider.getIntegerValue(), numberOfRegisteredSteps);
+      int index = 0;
       if(phase == WalkingTrajectoryType.SWING)
       {
-         cmpTrajectoryReference = swingCMPTrajectories.get(0);
-         copTrajectoryReference = swingCoPTrajectories.get(0);
-         torqueTrajectory.set(swingAngularMomentumTrajectories.get(0));
+         cmpTrajectoryReference = swingCMPTrajectories.get(index);
+         copTrajectoryReference = swingCoPTrajectories.get(index);
+         torqueTrajectory.set(swingAngularMomentumTrajectories.get(index));
          torqueTrajectory.scale(1.0/verticalGroundReaction.getDoubleValue());
          if(copTrajectoryReference.getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
          {
             return;
          }
          trajMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
+         index++;
       }
-
-      for (int i = 0; i < numberOfFootstepsToSet; i++)
+      
+      for ( ;index < numberOfFootstepsToSet; index++)
       {
-         cmpTrajectoryReference = transferCMPTrajectories.get(i);
-         copTrajectoryReference = transferCoPTrajectories.get(i);
-         torqueTrajectory.set(transferAngularMomentumTrajectories.get(i));
+         cmpTrajectoryReference = transferCMPTrajectories.get(index);
+         copTrajectoryReference = transferCoPTrajectories.get(index);
+         torqueTrajectory.set(transferAngularMomentumTrajectories.get(index));
          torqueTrajectory.scale(1.0/verticalGroundReaction.getDoubleValue());
          if(copTrajectoryReference.getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
          {
             return;
          }
          trajMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
-         cmpTrajectoryReference = swingCMPTrajectories.get(i);
-         copTrajectoryReference = swingCoPTrajectories.get(i);
-         torqueTrajectory.set(swingAngularMomentumTrajectories.get(i));
+         cmpTrajectoryReference = swingCMPTrajectories.get(index);
+         copTrajectoryReference = swingCoPTrajectories.get(index);
+         torqueTrajectory.set(swingAngularMomentumTrajectories.get(index));
          torqueTrajectory.scale(1.0/verticalGroundReaction.getDoubleValue());
          if(copTrajectoryReference.getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
          {
