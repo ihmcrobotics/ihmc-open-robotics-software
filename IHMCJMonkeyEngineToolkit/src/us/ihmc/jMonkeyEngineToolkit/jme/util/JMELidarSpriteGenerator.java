@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.jme3.app.SimpleApplication;
 import com.jme3.collision.Collidable;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
@@ -24,7 +25,7 @@ import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
 public class JMELidarSpriteGenerator extends Node implements Updatable
 {
    private static final Point3D32 ORIGIN = new Point3D32();
-   protected JMERenderer jmeRenderer;
+   protected SimpleApplication jmeRenderer;
    protected Node thisObject = this;
    protected Geometry pointCloudGeometry;
    protected ArrayList<ColorRGBA> colors;
@@ -36,12 +37,12 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
 
    protected final AtomicReference<Point3D32[]> pointSource = new AtomicReference<>();
 
-   public JMELidarSpriteGenerator(JMERenderer jmeRenderer)
+   public JMELidarSpriteGenerator(SimpleApplication jmeRenderer)
    {
       this(jmeRenderer, null);
    }
 
-   public JMELidarSpriteGenerator(JMERenderer jmeRenderer, ColorRGBA colorRGBA)
+   public JMELidarSpriteGenerator(SimpleApplication jmeRenderer, ColorRGBA colorRGBA)
    {
       super("JMELidarFINALVisualizer");
 
@@ -115,7 +116,6 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
    {
       this.pointSource.set(source);
       newCloudAvailable = true;
-
    }
 
    public void update()
