@@ -20,6 +20,15 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
       exitCoPName = CoPPointName.TOE_COP;
       swingCopPointsToPlan = new CoPPointName[]{CoPPointName.BALL_COP, CoPPointName.TOE_COP};
       transferCoPPointsToPlan = new CoPPointName[]{CoPPointName.MIDFEET_COP, CoPPointName.HEEL_COP};
+
+      copOffsetFrameNames.clear();
+      stepLengthOffsetPolygon.clear();
+      constrainToMinMax.clear();
+      constrainToSupportPolygon.clear();
+      stepLengthToCoPOffsetFactor.clear();
+      copOffsetsInFootFrame.clear();
+      copOffsetBoundsInFootFrame.clear();
+
       copOffsetFrameNames.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
       copOffsetFrameNames.put(CoPPointName.BALL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
       copOffsetFrameNames.put(CoPPointName.TOE_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
