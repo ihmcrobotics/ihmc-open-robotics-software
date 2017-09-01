@@ -221,7 +221,6 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       velocityReductionFactor.set(Double.NaN);
    }
 
-
    @Override
    /** {@inheritDoc} */
    public void setSupportLeg(RobotSide robotSide)

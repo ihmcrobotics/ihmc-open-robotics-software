@@ -10,11 +10,11 @@ public class AngularMomentumEstimationParameters
    /**
     * Defines the percentage of the total robot mass that is to be considered as the swing leg
     */
-   private double percentageSwingLegMass = 0.05;
+   private double percentageSwingLegMass = 0.10;
    /**
     * Defines the percentage of the total robot mass that is to be considered as the support leg
     */
-   private double percentageSupportLegMass = 0.05;
+   private double percentageSupportLegMass = 0.10;
    /**
     * Defines the percentage of the total robot mass that is to be considered as the support leg
     */
@@ -103,11 +103,6 @@ public class AngularMomentumEstimationParameters
    public SmoothCMPPlannerParameters getCoPPlannerParameters()
    {
       return this.copPlannerParameters;
-   }
-
-   public CoPPointName[] getCoPPointList()
-   {
-      return copPlannerParameters.getCoPPointsToPlan();
    }
 
    public double getSwingFootMaxLift()
