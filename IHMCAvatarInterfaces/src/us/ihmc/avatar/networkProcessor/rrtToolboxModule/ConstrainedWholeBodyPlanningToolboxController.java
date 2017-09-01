@@ -165,7 +165,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    protected void updateInternal() throws InterruptedException, ExecutionException
    {
       updateCount.increment();
-      PrintTools.info("update toolbox " + updateCount.getIntegerValue() + " " + state);
+      PrintTools.info("" + updateCount.getIntegerValue() + " " + state);
 
       // ************************************************************************************************************** //      
       switch (state)
@@ -206,7 +206,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       // ************************************************************************************************************** //      
       if (updateCount.getIntegerValue() == terminateToolboxCondition)
-         isDone.set(true);
+         terminateToolboxController();
    }
 
    /**
@@ -232,7 +232,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       if (numberOfMotionPath == 0)
       {
          state = CWBToolboxState.DO_NOTHING;
-         isDone.set(true);
+         terminateToolboxController();
 
          /*
           * generate WholeBodyTrajectoryMessage.
@@ -306,6 +306,11 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       visualizedNode = tree.getNewNode().createNodeCopy();
       visualizedNode.setValidity(tree.getNewNode().getValidity());
 
+      
+      double jointScore = kinematicsSolver.getArmJointLimitScore();
+      
+      jointlimitScore.set(jointScore);
+      
       /*
        * terminate expanding tree.
        */
@@ -375,6 +380,10 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       }
    }
 
+   
+   long startTime;
+   
+   
    @Override
    protected boolean initialize()
    {
@@ -423,7 +432,20 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          treeVisualizer.initialize();
       }
 
+      
+      startTime = System.currentTimeMillis();      
       return true;
+   }
+   
+   private void terminateToolboxController()
+   {
+      long stopTime = System.currentTimeMillis();
+      long elapsedTime = stopTime - startTime;
+      System.out.println("===========================================");
+      System.out.println("toolbox executing time is "+elapsedTime/1000.0 +" seconds");
+      System.out.println("===========================================");
+      
+      isDone.set(true);
    }
 
    @Override

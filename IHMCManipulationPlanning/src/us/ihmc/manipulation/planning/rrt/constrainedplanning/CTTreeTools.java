@@ -6,21 +6,31 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTim
 
 public class CTTreeTools
 {
-   public static void setRandomNormalizedNodeData(CTTaskNode node, boolean isUniform)
+   /**
+    * note.
+    * packet.setNumberOfFindInitialGuess(100);
+      packet.setNumberOfExpanding(600);
+      seed = 11.
+      timeintentionalratio = 5.0.
+      initial stuck.
+    */
+   static Random randomManager = new Random(25);
+   
+   public static void setRandomNormalizedNodeData(CTTaskNode node, boolean isUniform, double treeReachingTime)
    {
       for (int i = 0; i < node.getDimensionOfNodeData(); i++)
-         setRandomNormalizedNodeData(node, i, isUniform);
+         setRandomNormalizedNodeData(node, i, isUniform, treeReachingTime);
    }
 
-   public static void setRandomNormalizedNodeData(CTTaskNode node, int index, boolean isUniform)
-   {
-      Random randomManager = new Random();
-      setRandomNormalizedNodeData(node, randomManager, index, isUniform);
+   public static void setRandomNormalizedNodeData(CTTaskNode node, int index, boolean isUniform, double treeReachingTime)
+   {  
+      setRandomNormalizedNodeData(node, randomManager, index, isUniform, treeReachingTime);
    }
 
-   public static void setRandomNormalizedNodeData(CTTaskNode node, Random randomManager, int index, boolean isUniform)
+   public static void setRandomNormalizedNodeData(CTTaskNode node, Random randomManager, int index, boolean isUniform, double treeReachingTime)
    {
-      double exceedIntentionalTimeRatio = 1.0;
+      double exceedIntentionalTimeRatio = 3.0 * treeReachingTime;
+      
       double exceedIntentionalRatio = 0.5;
 
       if (isUniform)
