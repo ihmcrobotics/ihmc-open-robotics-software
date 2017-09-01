@@ -708,13 +708,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getDefaultTransferTime()
    {
-      return (runningOnRealRobot ? 0.8 : 0.8); //Math.sqrt(jointMap.getModelScale()) *
+      return (runningOnRealRobot ? 0.8 : 0.25); //Math.sqrt(jointMap.getModelScale()) *
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      return (runningOnRealRobot ? 1.2 : 1.20); //Math.sqrt(jointMap.getModelScale()) *
+      return (runningOnRealRobot ? 1.2 : 0.6); //Math.sqrt(jointMap.getModelScale()) *
    }
 
    @Override
