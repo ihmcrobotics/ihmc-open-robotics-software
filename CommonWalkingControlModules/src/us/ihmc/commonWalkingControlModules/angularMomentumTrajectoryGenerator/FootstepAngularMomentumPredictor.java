@@ -524,7 +524,6 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
          phaseTime += copPointsInFoot.get(j).getTime();
       }
    }
-   
    private void setCoMTrajectory(double initialTime, double finalTime, int comIndex)
    {
       tempFramePoint1.set(comInitialPositions.get(comIndex));

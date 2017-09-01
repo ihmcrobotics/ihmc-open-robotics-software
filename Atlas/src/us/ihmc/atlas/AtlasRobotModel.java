@@ -10,7 +10,6 @@ import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasReachableFootstepExpansion;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
@@ -19,6 +18,7 @@ import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
+import us.ihmc.avatar.DRCSimulationOutputWriterForControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
@@ -28,7 +28,6 @@ import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffset
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -61,12 +60,14 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
+import us.ihmc.sensorProcessing.outputData.LowLevelOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
+import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
@@ -77,7 +78,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final static double DESIRED_ATLAS_HEIGHT = 0.66;
    private final static double DESIRED_ATLAS_WEIGHT = 15;
 
-   private static final boolean USE_SMOOTH_CMP_PLANNER = true;
+   private static final boolean USE_SMOOTH_CMP_PLANNER = false;
 
    private final double HARDSTOP_RESTRICTION_ANGLE = Math.toRadians(5.0);
 
@@ -796,4 +797,17 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       return planarRegionFootstepPlannerParameters;
    }
+   
+   @Override
+   public DRCOutputProcessor getCustomSimulationOutputProcessor(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
+   {
+      return new DRCSimulationOutputWriterForControllerThread(humanoidFloatingRootJointRobot);
+   }
+   
+   @Override
+   public LowLevelOutputWriter getCustomSimulationOutputWriter(LowLevelOutputWriter outputWriter)
+   {
+      return null;
+   }
+   
 }

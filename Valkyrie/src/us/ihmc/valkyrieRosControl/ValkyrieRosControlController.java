@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -28,7 +27,6 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
-import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
@@ -40,11 +38,12 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.SettableTimestampProvider;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
+import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.wholeBodyController.DRCControllerThread;
-import us.ihmc.wholeBodyController.DRCOutputWriter;
-import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
+import us.ihmc.wholeBodyController.DRCOutputProcessor;
+import us.ihmc.wholeBodyController.DRCOutputProcessorWithTorqueOffsets;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRobotControlElementCoordinator;
@@ -262,13 +261,13 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       /*
        * Create output writer
        */
-      ValkyrieRosControlOutputWriter valkyrieOutputWriter = new ValkyrieRosControlOutputWriter(robotModel);
-      DRCOutputWriter drcOutputWriter = valkyrieOutputWriter;
+      ValkyrieRosControlLowLevelOutputWriter valkyrieLowLevelOutputWriter = new ValkyrieRosControlLowLevelOutputWriter();
 
+      DRCOutputProcessor drcOutputWriter = null;
       if (DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET)
       {
          double controllerDT = robotModel.getControllerDT();
-         DRCOutputWriterWithTorqueOffsets drcOutputWriterWithTorqueOffsets = new DRCOutputWriterWithTorqueOffsets(drcOutputWriter, controllerDT);
+         DRCOutputProcessorWithTorqueOffsets drcOutputWriterWithTorqueOffsets = new DRCOutputProcessorWithTorqueOffsets(drcOutputWriter, controllerDT);
          drcOutputWriter = drcOutputWriterWithTorqueOffsets;
       }
 
@@ -283,7 +282,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       RobotContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
       PeriodicRealtimeThreadScheduler estimatorScheduler = new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY);
       DRCEstimatorThread estimatorThread = new DRCEstimatorThread(sensorInformation, contactPointParameters, stateEstimatorParameters, sensorReaderFactory,
-            threadDataSynchronizer, estimatorScheduler, dataProducer, yoVariableServer, gravity);
+            threadDataSynchronizer, estimatorScheduler, dataProducer, valkyrieLowLevelOutputWriter, yoVariableServer, gravity);
       estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, sensorInformation, controllerFactory, threadDataSynchronizer, drcOutputWriter,
             dataProducer, yoVariableServer, gravity, estimatorDT);

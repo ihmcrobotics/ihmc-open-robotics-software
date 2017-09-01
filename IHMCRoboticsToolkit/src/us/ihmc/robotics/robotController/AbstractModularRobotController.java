@@ -84,7 +84,10 @@ public abstract class AbstractModularRobotController implements RobotController
          throw new RuntimeException("Already have a outputProcessor");
    
       this.outputProcessor = outputProcessor;
-      registry.addChild(outputProcessor.getYoVariableRegistry());
+      if(this.outputProcessor != null)
+      {
+         registry.addChild(outputProcessor.getYoVariableRegistry());
+      }
    }
 
    public void setRawOutputWriter(RawOutputWriter rawOutputWriter)

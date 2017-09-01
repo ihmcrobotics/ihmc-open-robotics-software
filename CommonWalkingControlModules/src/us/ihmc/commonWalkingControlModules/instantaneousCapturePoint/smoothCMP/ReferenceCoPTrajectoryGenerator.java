@@ -9,8 +9,8 @@ import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.Co
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
+import us.ihmc.commonWalkingControlModules.configurations.CoPSupportPolygonNames;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters.CoPSupportPolygonNames;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -23,6 +23,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -114,10 +115,10 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final List<SwingCoPTrajectory> swingCoPTrajectories = new ArrayList<>();
 
    // Runtime variables
-   private FramePoint3D desiredCoPPosition = new FramePoint3D();
-   private FrameVector3D desiredCoPVelocity = new FrameVector3D();
-   private FrameVector3D desiredCoPAcceleration = new FrameVector3D();
-   private FramePoint3D heldCoPPosition = new FramePoint3D();
+   private final FramePoint3D desiredCoPPosition = new FramePoint3D();
+   private final FrameVector3D desiredCoPVelocity = new FrameVector3D();
+   private final FrameVector3D desiredCoPAcceleration = new FrameVector3D();
+   private final FramePoint3D heldCoPPosition = new FramePoint3D();
 
    private int footstepIndex = 0;
    private int plannedFootstepIndex = -1;
@@ -284,15 +285,25 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       this.exitCoPForwardSafetyMarginOnToes.set(parameters.getExitCoPForwardSafetyMarginOnToes());
 
       EnumMap<CoPPointName, Vector2D> copOffsets = parameters.getCopOffsetsInFootFrame();
-      for (int waypointNumber = 0; waypointNumber < parameters.getCoPPointsToPlan().length; waypointNumber++)
-         setSymmetricCoPConstantOffsets(parameters.getCoPPointsToPlan()[waypointNumber], copOffsets.get(parameters.getCoPPointsToPlan()[waypointNumber]));
+      CoPPointName[] transferCoPNames = parameters.getTransferCoPPointsToPlan();
+      CoPPointName[] swingCoPNames = parameters.getSwingCoPPointsToPlan();
+      for (int waypointNumber = 0; waypointNumber < transferCoPNames.length; waypointNumber++)
+         setSymmetricCoPConstantOffsets(transferCoPNames[waypointNumber], copOffsets.get(transferCoPNames[waypointNumber]));
+      for (int waypointNumber = 0; waypointNumber < swingCoPNames.length; waypointNumber++)
+         setSymmetricCoPConstantOffsets(swingCoPNames[waypointNumber], copOffsets.get(swingCoPNames[waypointNumber]));
 
       EnumMap<CoPPointName, Vector2D> copForwardOffsetBounds = parameters.getCoPForwardOffsetBoundsInFoot();
-      for (int waypointIndex = 0; waypointIndex < parameters.getCoPPointsToPlan().length; waypointIndex++)
+      for (int waypointIndex = 0; waypointIndex < transferCoPNames.length; waypointIndex++)
       {
-         Vector2D bounds = copForwardOffsetBounds.get(parameters.getCoPPointsToPlan()[waypointIndex]);
-         minCoPOffsets.get(parameters.getCoPPointsToPlan()[waypointIndex]).set(bounds.getX());
-         maxCoPOffsets.get(parameters.getCoPPointsToPlan()[waypointIndex]).set(bounds.getY());
+         Vector2D bounds = copForwardOffsetBounds.get(transferCoPNames[waypointIndex]);
+         minCoPOffsets.get(transferCoPNames[waypointIndex]).set(bounds.getX());
+         maxCoPOffsets.get(transferCoPNames[waypointIndex]).set(bounds.getY());
+      }
+      for (int waypointIndex = 0; waypointIndex < swingCoPNames.length; waypointIndex++)
+      {
+         Vector2D bounds = copForwardOffsetBounds.get(swingCoPNames[waypointIndex]);
+         minCoPOffsets.get(swingCoPNames[waypointIndex]).set(bounds.getX());
+         maxCoPOffsets.get(swingCoPNames[waypointIndex]).set(bounds.getY());
       }
    }
 
@@ -330,15 +341,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       for (int footIndex = 0; footIndex < copLocationWaypoints.size(); footIndex++)
       {
          CoPPointsInFoot copPointsInFoot = copLocationWaypoints.get(footIndex);
-         List<CoPPointName> copPointNames = copPointsInFoot.getCoPPointList();
-         for (int i = 0; i < copPointNames.size(); i++)
-         {
-            YoGraphicPosition copViz = new YoGraphicPosition(footIndex + "Foot CoP Waypoint" + copPointNames.get(i).toString(),
-                                                             copPointsInFoot.getWaypointInWorldFrameReadOnly(i), COP_POINT_SIZE, YoAppearance.Green(),
-                                                             GraphicType.BALL);
-            yoGraphicsList.add(copViz);
-            artifactList.add(copViz.createArtifact());
-         }
+         copPointsInFoot.setupVisualizers(yoGraphicsList, artifactList, COP_POINT_SIZE);
       }
    }
 

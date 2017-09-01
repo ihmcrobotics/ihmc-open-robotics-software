@@ -8,7 +8,6 @@ import com.esotericsoftware.minlog.Log;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -21,7 +20,7 @@ import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
 import us.ihmc.rosControl.wholeRobot.JointStateHandle;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
-import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
@@ -37,6 +36,7 @@ import us.ihmc.valkyrieRosControl.dataHolders.YoMicroStrainIMUHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoSwitchableFilterModeIMUHandleHolder;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactory
 {
@@ -74,7 +74,7 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
    @Override
    public void build(FloatingInverseDynamicsJoint rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
          ContactSensorHolder contactSensorHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap,
-         DesiredJointDataHolder estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
+         LowLevelOneDoFJointDesiredDataHolderList estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
    {
       YoVariableRegistry sensorReaderRegistry = new YoVariableRegistry("ValkyrieRosControlSensorReader");
 
@@ -95,13 +95,13 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
             if (effortJointHandles.containsKey(joint.getName()))
             {
                YoEffortJointHandleHolder holder = new YoEffortJointHandleHolder(effortJointHandles.get(joint.getName()), oneDoFJoint,
-                     estimatorDesiredJointDataHolder.get(oneDoFJoint), sensorReaderRegistry);
+                     estimatorDesiredJointDataHolder.getLowLevelJointData(oneDoFJoint), sensorReaderRegistry);
                yoEffortJointHandleHolders.add(holder);
             }
             else if (positionJointHandles.containsKey(joint.getName()))
             {
                YoPositionJointHandleHolder holder = new YoPositionJointHandleHolder(positionJointHandles.get(joint.getName()), oneDoFJoint,
-                     estimatorDesiredJointDataHolder.get(oneDoFJoint), sensorReaderRegistry);
+                     estimatorDesiredJointDataHolder.getLowLevelJointData(oneDoFJoint), sensorReaderRegistry);
                yoPositionJointHandleHolders.add(holder);
             }
             else if(jointStateHandles.containsKey(joint.getName()))
