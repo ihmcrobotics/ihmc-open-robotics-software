@@ -20,10 +20,10 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 
-public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWriter
+public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputProcessor
 {
    private final boolean runningOnRealRobot;
-   private final DRCOutputWriter drcOutputWriter;
+   private final DRCOutputProcessor drcOutputProcessor;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoDouble alphaDesiredVelocity = new YoDouble(
@@ -74,20 +74,23 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
    private final ArmJointName[] armJointsForIntegratingAcceleration;
    private final SpineJointName[] spineJointsForIntegratingAcceleration;
 
-   public DRCOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, LegJointName[] legJointToIntegrate,
+   public DRCOutputProcessorWithAccelerationIntegration(DRCOutputProcessor drcOutputWriter, LegJointName[] legJointToIntegrate,
          ArmJointName[] armJointToIntegrate, SpineJointName[] spineJointToIntegrate, double updateDT, boolean runningOnRealRobot)
    {
       this(drcOutputWriter, legJointToIntegrate, armJointToIntegrate, spineJointToIntegrate, updateDT, runningOnRealRobot, false);
    }
 
-   public DRCOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, LegJointName[] legJointToIntegrate,
+   public DRCOutputProcessorWithAccelerationIntegration(DRCOutputProcessor drcOutputWriter, LegJointName[] legJointToIntegrate,
          ArmJointName[] armJointToIntegrate, SpineJointName[] spineJointToIntegrate, double updateDT, boolean runningOnRealRobot, boolean conservative)
    {
       this.runningOnRealRobot = runningOnRealRobot;
       this.conservative = conservative;
-      this.drcOutputWriter = drcOutputWriter;
+      this.drcOutputProcessor = drcOutputWriter;
       this.updateDT = updateDT;
-      registry.addChild(drcOutputWriter.getControllerYoVariableRegistry());
+      if(drcOutputWriter != null)
+      {
+         registry.addChild(drcOutputWriter.getControllerYoVariableRegistry());
+      }
 
       alphaDesiredVelocity.set(0.0);
       alphaDesiredPosition.set(0.0);
@@ -116,7 +119,7 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
 
    }
 
-   public DRCOutputWriterWithAccelerationIntegration(DRCOutputWriter drcOutputWriter, double updateDT, boolean runningOnRealRobot)
+   public DRCOutputProcessorWithAccelerationIntegration(DRCOutputProcessor drcOutputWriter, double updateDT, boolean runningOnRealRobot)
    {
       this(drcOutputWriter,
             new LegJointName[] { LegJointName.HIP_PITCH, LegJointName.HIP_ROLL, LegJointName.HIP_YAW },
@@ -152,7 +155,10 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
    @Override
    public void initialize()
    {
-      drcOutputWriter.initialize();
+      if(drcOutputProcessor != null)
+      {
+         drcOutputProcessor.initialize();
+      }
    }
 
    @Override
@@ -162,7 +168,7 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
    }
 
    @Override
-   public void writeAfterController(long timestamp)
+   public void processAfterController(long timestamp)
    {
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
@@ -198,7 +204,10 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
          }
       }
 
-      drcOutputWriter.writeAfterController(timestamp);
+      if(drcOutputProcessor != null)
+      {
+         drcOutputProcessor.processAfterController(timestamp);
+      }
    }
 
    private void integrateAccelerationsToGetDesiredVelocities(OneDoFJoint oneDoFJoint, YoDouble qd_d_joint, YoDouble q_d_joint)
@@ -238,7 +247,10 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
    @Override
    public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
-      drcOutputWriter.setFullRobotModel(controllerModel, rawJointSensorDataHolderMap);
+      if(drcOutputProcessor != null)
+      {
+         drcOutputProcessor.setFullRobotModel(controllerModel, rawJointSensorDataHolderMap);
+      }
 
       oneDoFJoints = new ArrayList<OneDoFJoint>();
 
@@ -355,6 +367,9 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
    @Override
    public void setForceSensorDataHolderForController(ForceSensorDataHolderReadOnly forceSensorDataHolderForEstimator)
    {
-      drcOutputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForEstimator);
+      if(drcOutputProcessor != null)
+      {
+         drcOutputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForEstimator);
+      }
    }
 }

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import com.jme3.math.Transform;
 
 import us.ihmc.acsell.network.AcsellSensorSuiteManager;
+import us.ihmc.avatar.DRCSimulationOutputWriterForControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
@@ -28,6 +29,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.outputData.LowLevelOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
@@ -39,6 +41,7 @@ import us.ihmc.wanderer.controlParameters.WandererStateEstimatorParameters;
 import us.ihmc.wanderer.controlParameters.WandererUIParameters;
 import us.ihmc.wanderer.controlParameters.WandererWalkingControllerParameters;
 import us.ihmc.wanderer.initialSetup.WandererInitialSetup;
+import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
@@ -268,5 +271,18 @@ public class WandererRobotModel implements DRCRobotModel
    {
       System.err.println("Need to add access to stand prep joint angles.");
       return 0;
+   }
+   
+
+   @Override
+   public DRCOutputProcessor getCustomSimulationOutputProcessor(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
+   {
+      return new DRCSimulationOutputWriterForControllerThread(humanoidFloatingRootJointRobot);
+   }
+   
+   @Override
+   public LowLevelOutputWriter getCustomSimulationOutputWriter(LowLevelOutputWriter outputWriter)
+   {
+      return null;
    }
 }
