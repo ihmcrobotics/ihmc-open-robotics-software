@@ -14,7 +14,7 @@ public class CTTreeTools
       timeintentionalratio = 5.0.
       initial stuck.
     */
-   static Random randomManager = new Random(25);
+   static Random randomManager = new Random();
    
    public static void setRandomNormalizedNodeData(CTTaskNode node, boolean isUniform, double treeReachingTime)
    {
