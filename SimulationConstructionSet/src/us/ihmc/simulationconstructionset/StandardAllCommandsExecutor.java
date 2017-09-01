@@ -139,19 +139,19 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
 
 
    @Override
-   public ParameterSliderWindow createNewParameterSliderWindow()
+   public YoVariableSliderWindow createNewYoVariableSliderWindow()
    {
-      return createNewParameterSliderWindow(null);
+      return createNewYoVariableSliderWindow(null);
    }
 
    @Override
-   public ParameterSliderWindow createNewParameterSliderWindow(String viewportName)
+   public YoVariableSliderWindow createNewYoVariableSliderWindow(String viewportName)
    {
-      return createNewParameterSliderWindow(viewportName, 0, false);
+      return createNewYoVariableSliderWindow(viewportName, 0, false);
    }
 
    @Override
-   public ParameterSliderWindow createNewParameterSliderWindow(String viewportName, int screenID, boolean maximizeWindow)
+   public YoVariableSliderWindow createNewYoVariableSliderWindow(String viewportName, int screenID, boolean maximizeWindow)
    {
       if (standardSimulationGUI != null)
          return standardSimulationGUI.createNewParameterSliderWindow("", 1, false);
@@ -161,7 +161,7 @@ public class StandardAllCommandsExecutor implements AllCommandsExecutor
    }
 
    @Override
-   public ParameterSliderWindow getParameterSliderWindow(String windowName)
+   public YoVariableSliderWindow getParameterSliderWindow(String windowName)
    {
       throw new RuntimeException("method not implemented");
 

@@ -96,7 +96,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    private JMenu configurationMenu;
    private CreateNewGraphWindowAction createNewGraphWindowAction;
    private CreateNewViewportWindowAction createNewViewportWindowAction;
-   private CreateParameterSliderWindowAction createParameterSliderWindowAction;
+   private CreateYoVariableSliderWindowAction createYoVariableSliderWindowAction;
    private CropBufferAction cropBufferAction;
    private PackBufferAction packBufferAction;
    private CutBufferAction cutBufferAction;
@@ -297,8 +297,8 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       createNewViewportWindowAction = new CreateNewViewportWindowAction(allCommandsExecutor);
       guiActions.add(createNewViewportWindowAction);
 
-      createParameterSliderWindowAction = new CreateParameterSliderWindowAction(allCommandsExecutor);
-      guiActions.add(createParameterSliderWindowAction);
+      createYoVariableSliderWindowAction = new CreateYoVariableSliderWindowAction(allCommandsExecutor);
+      guiActions.add(createYoVariableSliderWindowAction);
 
       // Help Menu Items:
       AboutDialogConstructor aboutDialogConstructor = allDialogConstructorsHolder.getAboutDialogConstructor();
@@ -731,7 +731,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
 
       windowMenu.add(createNewGraphWindowAction);
       windowMenu.add(createNewViewportWindowAction);
-      windowMenu.add(createParameterSliderWindowAction);
+      windowMenu.add(createYoVariableSliderWindowAction);
       menuBar.add(windowMenu);
       
       menuBar.add(createParameterMenu());

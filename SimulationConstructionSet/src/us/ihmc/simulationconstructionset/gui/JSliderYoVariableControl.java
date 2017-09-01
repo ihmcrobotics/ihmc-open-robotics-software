@@ -23,7 +23,7 @@ import java.util.ArrayList;
 /**
  * Created by Peter on 8/29/2017.
  */
-public class JSliderParameterControl extends JPanel implements CloseableAndDisposable, MouseListener
+public class JSliderYoVariableControl extends JPanel implements CloseableAndDisposable, MouseListener
 {
    private static final int SLIDER_MIN_VALUE = 0;
    private static final int SLIDER_MAX_VALUE = 100;
@@ -48,7 +48,7 @@ public class JSliderParameterControl extends JPanel implements CloseableAndDispo
    private MinMaxTextEntryBox minTextEntryBox;
    private MinMaxTextEntryBox maxTextEntryBox;
 
-   public JSliderParameterControl(SelectedVariableHolder selectedVariableHolder, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   public JSliderYoVariableControl(SelectedVariableHolder selectedVariableHolder, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       super(new BorderLayout());
       this.setMinimumSize(new Dimension(200, 400));
@@ -179,7 +179,7 @@ public class JSliderParameterControl extends JPanel implements CloseableAndDispo
 
          //         yoVariable.
 
-         if (yoVariable != null && yoVariable.isParameter())
+         if (yoVariable != null)
          {
             //check if there is a current yoVariable
             if (this.yoVariable != null)
@@ -299,18 +299,18 @@ public class JSliderParameterControl extends JPanel implements CloseableAndDispo
    private class SliderChangeListener implements ChangeListener
    {
       JSlider slider;
-      JSliderParameterControl jSliderParameterControl;
+      JSliderYoVariableControl jSliderYoVariableControl;
 
-      public SliderChangeListener(JSlider slider, JSliderParameterControl jSliderParameterControl)
+      public SliderChangeListener(JSlider slider, JSliderYoVariableControl jSliderYoVariableControl)
       {
          this.slider = slider;
-         this.jSliderParameterControl = jSliderParameterControl;
+         this.jSliderYoVariableControl = jSliderYoVariableControl;
       }
 
       @Override
       public void stateChanged(ChangeEvent e)
       {
-         if (!jSliderParameterControl.getSliderToBeSetWithoutNotifiers())
+         if (!jSliderYoVariableControl.getSliderToBeSetWithoutNotifiers())
          {
 
             int sliderValue = slider.getValue();
@@ -333,18 +333,18 @@ public class JSliderParameterControl extends JPanel implements CloseableAndDispo
 
    private class YoVariableChangeListener implements VariableChangedListener
    {
-      JSliderParameterControl jSliderParameterControl;
+      JSliderYoVariableControl jSliderYoVariableControl;
 
-      public YoVariableChangeListener(JSliderParameterControl jSliderParameterControl)
+      public YoVariableChangeListener(JSliderYoVariableControl jSliderYoVariableControl)
       {
-         this.jSliderParameterControl = jSliderParameterControl;
+         this.jSliderYoVariableControl = jSliderYoVariableControl;
       }
 
       @Override
       public void variableChanged(YoVariable<?> v)
       {
          //change slider
-         jSliderParameterControl.setSliderPosition(convertParameterValueToSlider(v.getValueAsDouble()));
+         jSliderYoVariableControl.setSliderPosition(convertParameterValueToSlider(v.getValueAsDouble()));
 
          //change text box
          setTextFieldDouble(v.getValueAsDouble());
@@ -353,13 +353,13 @@ public class JSliderParameterControl extends JPanel implements CloseableAndDispo
 
    private class MinMaxTextEntryBox implements ActionListener
    {
-      JSliderParameterControl jSliderParameterControl;
+      JSliderYoVariableControl jSliderYoVariableControl;
       MutableDouble valueToUpdate = new MutableDouble();
       JTextField jTextField;
 
-      public MinMaxTextEntryBox(JSliderParameterControl jSliderParameterControl, JTextField jTextField)
+      public MinMaxTextEntryBox(JSliderYoVariableControl jSliderYoVariableControl, JTextField jTextField)
       {
-         this.jSliderParameterControl = jSliderParameterControl;
+         this.jSliderYoVariableControl = jSliderYoVariableControl;
          this.jTextField = jTextField;
       }
 
@@ -372,7 +372,7 @@ public class JSliderParameterControl extends JPanel implements CloseableAndDispo
             valueToUpdate.setValue(value);
 
             //Set slider
-            jSliderParameterControl.setSliderPosition(jSliderParameterControl.convertParameterValueToSlider(yoVariable.getValueAsDouble()));
+            jSliderYoVariableControl.setSliderPosition(jSliderYoVariableControl.convertParameterValueToSlider(yoVariable.getValueAsDouble()));
 
             setSliderEnable(areMinMaxValid());
          }
@@ -396,11 +396,11 @@ public class JSliderParameterControl extends JPanel implements CloseableAndDispo
 
    private class TextFieldListener implements ActionListener
    {
-      JSliderParameterControl jSliderParameterControl;
+      JSliderYoVariableControl jSliderYoVariableControl;
 
-      public TextFieldListener(JSliderParameterControl jSliderParameterControl)
+      public TextFieldListener(JSliderYoVariableControl jSliderYoVariableControl)
       {
-         this.jSliderParameterControl = jSliderParameterControl;
+         this.jSliderYoVariableControl = jSliderYoVariableControl;
       }
 
       @Override
@@ -408,10 +408,10 @@ public class JSliderParameterControl extends JPanel implements CloseableAndDispo
       {
          try
          {
-            double value = jSliderParameterControl.getTextFieldValue();
+            double value = jSliderYoVariableControl.getTextFieldValue();
 
             //Set slider
-            jSliderParameterControl.setSliderPosition(jSliderParameterControl.convertParameterValueToSlider(value));
+            jSliderYoVariableControl.setSliderPosition(jSliderYoVariableControl.convertParameterValueToSlider(value));
 
             //set yoVaiable
             setYoVariable(value);
