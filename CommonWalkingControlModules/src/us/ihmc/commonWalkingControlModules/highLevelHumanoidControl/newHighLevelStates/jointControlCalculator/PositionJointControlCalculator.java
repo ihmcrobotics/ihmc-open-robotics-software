@@ -14,20 +14,19 @@ import java.util.Map;
 public class PositionJointControlCalculator
 {
    private final DeltaLimitedYoVariable positionStepSizeLimiter;
-
    private final YoDouble initialAngle;
 
    private final OneDoFJoint oneDoFJoint;
 
-   public PositionJointControlCalculator(String namePrefix, OneDoFJoint oneDoFJoint, YoVariableRegistry parentRegistry)
+   public PositionJointControlCalculator(String nameSuffix, OneDoFJoint oneDoFJoint, YoVariableRegistry parentRegistry)
    {
       this.oneDoFJoint = oneDoFJoint;
+      String namePrefix = oneDoFJoint.getName();
+      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + nameSuffix + "PositionJointControlCalculator");
 
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + "Command");
+      this.initialAngle = new YoDouble(namePrefix + nameSuffix + "InitialAngle", registry);
 
-      this.initialAngle = new YoDouble(namePrefix + "InitialAngle", registry);
-
-      this.positionStepSizeLimiter = new DeltaLimitedYoVariable(namePrefix + "PositionStepSizeLimiter", registry, 0.15);
+      this.positionStepSizeLimiter = new DeltaLimitedYoVariable(namePrefix + nameSuffix + "PositionStepSizeLimiter", registry, 0.15);
 
       parentRegistry.addChild(registry);
    }

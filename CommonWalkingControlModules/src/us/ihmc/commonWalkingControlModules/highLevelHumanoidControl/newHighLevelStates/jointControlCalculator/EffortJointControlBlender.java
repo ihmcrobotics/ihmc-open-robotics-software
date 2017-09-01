@@ -21,7 +21,7 @@ public class EffortJointControlBlender
    public EffortJointControlBlender(String nameSuffix, OneDoFJoint oneDoFJoint, YoVariableRegistry parentRegistry)
    {
       String namePrefix = oneDoFJoint.getName();
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + nameSuffix + "Command");
+      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + nameSuffix + "EffortJointControlBlender");
 
       if (ENABLE_TAU_SCALE)
       {

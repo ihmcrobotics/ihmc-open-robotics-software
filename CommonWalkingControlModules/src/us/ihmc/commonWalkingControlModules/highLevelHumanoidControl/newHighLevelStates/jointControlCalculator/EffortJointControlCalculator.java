@@ -18,18 +18,18 @@ public class EffortJointControlCalculator
    private final OneDoFJoint oneDoFJoint;
    private final double controlDT;
 
-   public EffortJointControlCalculator(String standSuffix, OneDoFJoint oneDoFJoint, double controlDT, YoVariableRegistry parentRegistry)
+   public EffortJointControlCalculator(String nameSuffix, OneDoFJoint oneDoFJoint, double controlDT, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
       this.oneDoFJoint = oneDoFJoint;
 
       String namePrefix = oneDoFJoint.getName();
 
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + standSuffix + "Command");
+      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + nameSuffix + "EffortJointControlCalculator");
 
-      this.initialAngle = new YoDouble(namePrefix + standSuffix + "InitialAngle", registry);
+      this.initialAngle = new YoDouble(namePrefix + nameSuffix + "InitialAngle", registry);
 
-      pidPositionController = new PIDController(namePrefix + standSuffix, registry);
+      pidPositionController = new PIDController(namePrefix + nameSuffix, registry);
 
       pidPositionController.setMaxIntegralError(50.0);
       pidPositionController.setCumulativeError(0.0);
