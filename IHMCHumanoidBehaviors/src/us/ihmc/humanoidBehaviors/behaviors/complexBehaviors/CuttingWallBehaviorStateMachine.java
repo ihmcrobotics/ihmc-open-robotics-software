@@ -2,27 +2,31 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.CuttingWallBehaviorStateMachine.CuttingWallBehaviorState;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<CuttingWallBehaviorState> implements CoactiveDataListenerInterface
 {
-   private final AtlasPrimitiveActions atlasPrimitiveActions;
+
+   private HandTrajectoryBehavior leftHandTrajectoryBehavior;
+   private HandTrajectoryBehavior rightHandTrajectoryBehavior;
+
+   private WholeBodyTrajectoryBehavior wholebodyTrajectoryBehavior;
+
    private CommunicationBridge communicationBridge;
 
    public enum CuttingWallBehaviorState
@@ -31,14 +35,17 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
    }
 
    public CuttingWallBehaviorStateMachine(CommunicationBridge communicationBridge, YoDouble yoTime, FullHumanoidRobotModel fullRobotModel,
-                                          HumanoidReferenceFrames referenceFrames, AtlasPrimitiveActions atlasPrimitiveActions)
+                                          HumanoidReferenceFrames referenceFrames)
    {
       super("cuttingWallBehaviorState", CuttingWallBehaviorState.class, yoTime, communicationBridge);
 
       this.communicationBridge = communicationBridge;
       communicationBridge.addListeners(this);
 
-      this.atlasPrimitiveActions = atlasPrimitiveActions;
+      this.leftHandTrajectoryBehavior = new HandTrajectoryBehavior("left", communicationBridge, yoTime);
+      this.rightHandTrajectoryBehavior = new HandTrajectoryBehavior("right", communicationBridge, yoTime);
+
+      this.wholebodyTrajectoryBehavior = new WholeBodyTrajectoryBehavior(communicationBridge, yoTime);
 
       setupStateMachine();
    }
@@ -46,50 +53,56 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
    private void setupStateMachine()
    {
       BehaviorAction<CuttingWallBehaviorState> waiting = new BehaviorAction<CuttingWallBehaviorState>(CuttingWallBehaviorState.WAITING,
-                                                                                                      atlasPrimitiveActions.rightArmGoHomeBehavior,
-                                                                                                      atlasPrimitiveActions.leftHandDesiredConfigurationBehavior)
+                                                                                                      leftHandTrajectoryBehavior, rightHandTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
             PrintTools.info("setBehaviorInput WAITING");
-            GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
-            atlasPrimitiveActions.rightArmGoHomeBehavior.setInput(goHomeRightArmMessage);
 
-            HandDesiredConfigurationMessage handMessage = new HandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE);
-            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior.setInput(handMessage);
+            HandTrajectoryMessage leftHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.5, 0.4, 1.0), new Quaternion(),
+                                                                                        ReferenceFrame.getWorldFrame());
+            HandTrajectoryMessage rightHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 3.0, new Point3D(0.5, -0.4, 1.0), new Quaternion(),
+                                                                                         ReferenceFrame.getWorldFrame());
+
+            leftHandTrajectoryBehavior.setInput(leftHandTrajectoryMessage);
+            rightHandTrajectoryBehavior.setInput(rightHandTrajectoryMessage);
          }
       };
 
       BehaviorAction<CuttingWallBehaviorState> planning = new BehaviorAction<CuttingWallBehaviorState>(CuttingWallBehaviorState.PLANNING,
-                                                                                                       atlasPrimitiveActions.rightArmGoHomeBehavior,
-                                                                                                       atlasPrimitiveActions.leftHandDesiredConfigurationBehavior)
+                                                                                                       leftHandTrajectoryBehavior, rightHandTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
             PrintTools.info("setBehaviorInput PLANNING");
-            GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
-            atlasPrimitiveActions.rightArmGoHomeBehavior.setInput(goHomeRightArmMessage);
 
-            HandDesiredConfigurationMessage handMessage = new HandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE);
-            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior.setInput(handMessage);
+            HandTrajectoryMessage leftHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.6, 0.4, 1.0), new Quaternion(),
+                                                                                        ReferenceFrame.getWorldFrame());
+            HandTrajectoryMessage rightHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 3.0, new Point3D(0.6, -0.4, 1.0), new Quaternion(),
+                                                                                         ReferenceFrame.getWorldFrame());
+
+            leftHandTrajectoryBehavior.setInput(leftHandTrajectoryMessage);
+            rightHandTrajectoryBehavior.setInput(rightHandTrajectoryMessage);
          }
       };
 
       BehaviorAction<CuttingWallBehaviorState> cutting = new BehaviorAction<CuttingWallBehaviorState>(CuttingWallBehaviorState.CUTTING,
-                                                                                                      atlasPrimitiveActions.rightArmGoHomeBehavior,
-                                                                                                      atlasPrimitiveActions.leftHandDesiredConfigurationBehavior)
+                                                                                                      leftHandTrajectoryBehavior, rightHandTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
             PrintTools.info("setBehaviorInput CUTTING");
-            GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
-            atlasPrimitiveActions.rightArmGoHomeBehavior.setInput(goHomeRightArmMessage);
 
-            HandDesiredConfigurationMessage handMessage = new HandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE);
-            atlasPrimitiveActions.leftHandDesiredConfigurationBehavior.setInput(handMessage);
+            HandTrajectoryMessage leftHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.5, 0.4, 1.0), new Quaternion(),
+                                                                                        ReferenceFrame.getWorldFrame());
+            HandTrajectoryMessage rightHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 3.0, new Point3D(0.5, -0.4, 1.0), new Quaternion(),
+                                                                                         ReferenceFrame.getWorldFrame());
+
+            leftHandTrajectoryBehavior.setInput(leftHandTrajectoryMessage);
+            rightHandTrajectoryBehavior.setInput(rightHandTrajectoryMessage);
          }
       };
 

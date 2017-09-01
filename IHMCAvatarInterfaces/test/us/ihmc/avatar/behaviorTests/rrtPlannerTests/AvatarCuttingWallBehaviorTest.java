@@ -202,9 +202,6 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
    @Test
    public void testForCuttingWallBehavior() throws SimulationExceededMaximumTimeException, IOException
    {
-      if (visulaizerOn)
-         ThreadTools.sleep(1000);
-
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -219,27 +216,20 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       /*
        * Behavior create.
        */
-      AtlasPrimitiveActions atlasPrimitiveActions = new AtlasPrimitiveActions(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), sdfFullRobotModel,
-                                                                              getRobotModel(), referenceFrames, drcBehaviorTestHelper.getYoTime(),
-                                                                              getRobotModel(), drcBehaviorTestHelper.getSimulationConstructionSet().getRootRegistry());
 
-      
-            
       CuttingWallBehaviorStateMachine cuttingWallBehaviorStateMachine = new CuttingWallBehaviorStateMachine(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
                                                                                                             drcBehaviorTestHelper.getYoTime(),
-                                                                                                            sdfFullRobotModel, referenceFrames,
-                                                                                                            atlasPrimitiveActions);
+                                                                                                            sdfFullRobotModel, referenceFrames);
 
       System.out.println("Behavior Dispatch");
       drcBehaviorTestHelper.dispatchBehavior(cuttingWallBehaviorStateMachine);
-      
-      
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10.0);
       System.out.println("End");
 
    }
 
-   @Test
+//   @Test
    public void testForToolbox() throws SimulationExceededMaximumTimeException, IOException
    {
       if (visulaizerOn)
