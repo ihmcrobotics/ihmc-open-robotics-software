@@ -23,7 +23,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * <li> currentSegmentIndex: YoInteger indicating the segment index that is used for computation 
  * <li> currentSegment: Reference to the current segment used for computation
  */
-public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInterface
+public abstract class YoSegmentedFrameTrajectory3D //implements YoSegmentedFrameTrajectory3DInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    protected final String name;
@@ -64,6 +64,17 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
       numberOfSegments.set(0);
    }
 
+   public void set(SegmentedFrameTrajectory3D trajToCopy)
+   {
+      if(getMaxNumberOfSegments() < trajToCopy.getNumberOfSegments())
+         throw new RuntimeException("Insufficient segments to copy trajectory, needed: " + trajToCopy.getNumberOfSegments() + " available: " + getMaxNumberOfSegments());
+      for(int i = 0; i < trajToCopy.getNumberOfSegments(); i++)
+      {
+         segments.get(i).set(trajToCopy.getSegment(i));
+         numberOfSegments.increment();
+      }
+   }
+   
    public void update(double timeInState)
    {
       setCurrentSegmentIndexFromStateTime(timeInState);

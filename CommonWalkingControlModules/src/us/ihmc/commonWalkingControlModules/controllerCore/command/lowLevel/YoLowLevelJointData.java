@@ -1,10 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class YoLowLevelJointData implements LowLevelJointDataReadOnly
 {
@@ -15,6 +17,9 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
    private final YoDouble desiredAcceleration;
    private final YoDouble desiredCurrent;
    private final YoBoolean resetIntegrators;
+   
+   private final YoDouble kp;
+   private final YoDouble kd;
 
    public YoLowLevelJointData(String namePrefix, YoVariableRegistry registry, String suffixString)
    {
@@ -27,6 +32,9 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
       desiredAcceleration = new YoDouble(namePrefix + "DesiredAcceleration" + suffixString, registry);
       desiredCurrent = new YoDouble(namePrefix + "DesiredCurrent" + suffixString, registry);
       resetIntegrators = new YoBoolean(namePrefix + "ResetIntegrators" + suffixString, registry);
+      
+      kp = new YoDouble(namePrefix + "Kp" + suffixString, registry);
+      kd = new YoDouble(namePrefix + "Kd" + suffixString, registry);
 
       clear();
    }
@@ -39,6 +47,8 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
       desiredVelocity.set(Double.NaN);
       desiredAcceleration.set(Double.NaN);
       desiredCurrent.set(Double.NaN);
+      kp.set(Double.NaN);
+      kd.set(Double.NaN);
       resetIntegrators.set(false);
    }
 
@@ -51,6 +61,8 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
       desiredAcceleration.set(other.getDesiredAcceleration());
       desiredCurrent.set(other.getDesiredCurrent());
       resetIntegrators.set(other.peekResetIntegratorsRequest());
+      kp.set(other.getKp());
+      kd.set(other.getKd());
    }
 
    /**
@@ -73,6 +85,10 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
          desiredCurrent.set(other.getDesiredCurrent());
       if (!peekResetIntegratorsRequest())
          resetIntegrators.set(other.peekResetIntegratorsRequest());
+      if(!hasKp())
+         kp.set(other.getKp());
+      if(!hasKd())
+         kd.set(other.getKd());
    }
    
    public void setDesiredsFromOneDoFJoint(OneDoFJoint jointToExtractDesiredsFrom)
@@ -82,6 +98,8 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
       setDesiredVelocity(jointToExtractDesiredsFrom.getQdDesired());
       setDesiredAcceleration(jointToExtractDesiredsFrom.getQddDesired());
       setResetIntegrators(jointToExtractDesiredsFrom.getResetIntegrator());
+      setKp(jointToExtractDesiredsFrom.getKp());
+      setKd(jointToExtractDesiredsFrom.getKd());
    }
 
    public void setControlMode(LowLevelJointControlMode controlMode)
@@ -215,5 +233,39 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
       ret += "desiredAcceleration = " + getDesiredAcceleration() + "\n";
       ret += "desiredCurrent = " + getDesiredCurrent() + "\n";
       return ret;
+   }
+
+   @Override
+   public boolean hasKp()
+   {
+      return !kp.isNaN();
+   }
+
+   @Override
+   public boolean hasKd()
+   {
+      return kd.isNaN();
+   }
+
+   @Override
+   public double getKp()
+   {
+      return kp.getValue();
+   }
+
+   @Override
+   public double getKd()
+   {
+      return kd.getValue();
+   }
+   
+   public void setKp(double kp)
+   {
+      this.kp.set(kp);
+   }
+
+   public void setKd(double kd)
+   {
+      this.kd.set(kd);
    }
 }
