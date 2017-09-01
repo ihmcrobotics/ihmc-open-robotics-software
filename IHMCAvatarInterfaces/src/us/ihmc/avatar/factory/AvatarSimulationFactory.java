@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.avatar.DRCEstimatorThread;
-import us.ihmc.avatar.DRCSimulationOutputWriter;
+import us.ihmc.avatar.SimulatedLowLevelOutputWriter;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
@@ -22,11 +22,11 @@ import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataPr
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.robotDataLogger.YoVariableServer;
-import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.LowLevelOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
@@ -53,10 +53,11 @@ import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.wholeBodyController.DRCControllerThread;
-import us.ihmc.wholeBodyController.DRCOutputWriter;
-import us.ihmc.wholeBodyController.DRCOutputWriterWithStateChangeSmoother;
-import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
+import us.ihmc.wholeBodyController.DRCOutputProcessor;
+import us.ihmc.wholeBodyController.DRCOutputProcessorWithStateChangeSmoother;
+import us.ihmc.wholeBodyController.DRCOutputProcessorWithTorqueOffsets;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
@@ -85,7 +86,8 @@ public class AvatarSimulationFactory
    private SimulationConstructionSet simulationConstructionSet;
    private ThreadDataSynchronizerInterface threadDataSynchronizer;
    private SensorReaderFactory sensorReaderFactory;
-   private DRCOutputWriter simulationOutputWriter;
+   private LowLevelOutputWriter simulationOutputWriter;
+   private DRCOutputProcessor simulationOutputProcessor;
    private DRCEstimatorThread stateEstimationThread;
    private DRCControllerThread controllerThread;
    private AbstractThreadedRobotController threadedRobotController;
@@ -158,29 +160,31 @@ public class AvatarSimulationFactory
                                                                                   robotModel.get().getStateEstimatorParameters());
       }
    }
-
+   
    private void setupSimulationOutputWriter()
    {
-      simulationOutputWriter = new DRCSimulationOutputWriter(humanoidFloatingRootJointRobot);
+      simulationOutputWriter = robotModel.get().getCustomSimulationOutputWriter(new SimulatedLowLevelOutputWriter(humanoidFloatingRootJointRobot, true));
+      
+   }
 
-      DRCOutputWriter customOutputWriter = robotModel.get().getCustomSimulationOutputWriter(simulationOutputWriter);
+   private void setupSimulationOutputProcessor()
+   {
 
-      if (customOutputWriter != null)
-         simulationOutputWriter = customOutputWriter;
+      simulationOutputProcessor = robotModel.get().getCustomSimulationOutputProcessor(humanoidFloatingRootJointRobot);
 
       if (doSmoothJointTorquesAtControllerStateChanges.get())
       {
-         DRCOutputWriterWithStateChangeSmoother drcOutputWriterWithStateChangeSmoother = new DRCOutputWriterWithStateChangeSmoother(simulationOutputWriter);
+         DRCOutputProcessorWithStateChangeSmoother drcOutputWriterWithStateChangeSmoother = new DRCOutputProcessorWithStateChangeSmoother(simulationOutputProcessor);
          momentumBasedControllerFactory.get()
                                        .attachControllerStateChangedListener(drcOutputWriterWithStateChangeSmoother.createControllerStateChangedListener());
-         simulationOutputWriter = drcOutputWriterWithStateChangeSmoother;
+         simulationOutputProcessor = drcOutputWriterWithStateChangeSmoother;
       }
 
       if (doSlowIntegrationForTorqueOffset.get())
       {
-         DRCOutputWriterWithTorqueOffsets outputWriterWithTorqueOffsets = new DRCOutputWriterWithTorqueOffsets(simulationOutputWriter,
+         DRCOutputProcessorWithTorqueOffsets outputWriterWithTorqueOffsets = new DRCOutputProcessorWithTorqueOffsets(simulationOutputProcessor,
                                                                                                                robotModel.get().getControllerDT());
-         simulationOutputWriter = outputWriterWithTorqueOffsets;
+         simulationOutputProcessor = outputWriterWithTorqueOffsets;
       }
    }
 
@@ -189,7 +193,7 @@ public class AvatarSimulationFactory
       stateEstimationThread = new DRCEstimatorThread(robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(),
                                                      robotModel.get().getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer,
                                                      new PeriodicNonRealtimeThreadScheduler("DRCSimGazeboYoVariableServer"), humanoidGlobalDataProducer.get(),
-                                                     yoVariableServer, gravity.get());
+                                                     simulationOutputWriter, yoVariableServer, gravity.get());
 
       if (humanoidGlobalDataProducer.get() != null)
       {
@@ -206,7 +210,7 @@ public class AvatarSimulationFactory
    private void setupControllerThread()
    {
       controllerThread = new DRCControllerThread(robotModel.get(), robotModel.get().getSensorInformation(), momentumBasedControllerFactory.get(),
-                                                 threadDataSynchronizer, simulationOutputWriter, humanoidGlobalDataProducer.get(), yoVariableServer,
+                                                 threadDataSynchronizer, simulationOutputProcessor, humanoidGlobalDataProducer.get(), yoVariableServer,
                                                  gravity.get(), robotModel.get().getEstimatorDT());
    }
 
@@ -409,6 +413,7 @@ public class AvatarSimulationFactory
       setupThreadDataSynchronizer();
       setupSensorReaderFactory();
       setupSimulationOutputWriter();
+      setupSimulationOutputProcessor();
       setupStateEstimationThread();
       setupControllerThread();
       createClosableAndDisposableRegistry();
