@@ -581,7 +581,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       trajMathTools.subtract(swingFootTrajectory, swingFootTrajectory, segmentCoMTrajectory);
       trajMathTools.subtract(swingFootVelocity, swingFootVelocity, segmentCoMVelocity);
       trajMathTools.subtract(supportFootTrajectory, supportFootTrajectory, segmentCoMTrajectory);
-      trajMathTools.subtract(supportFootVelocity, supportFootTrajectory, segmentCoMVelocity);
+      trajMathTools.subtract(supportFootVelocity, supportFootVelocity, segmentCoMVelocity);
 
       trajMathTools.crossProduct(swingFootTrajectory, swingFootTrajectory, swingFootVelocity);
       trajMathTools.scale(swingFootTrajectory, swingFootTrajectory, swingLegMass.getDoubleValue());
