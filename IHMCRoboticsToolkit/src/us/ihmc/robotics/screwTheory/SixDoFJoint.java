@@ -423,12 +423,6 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
       checksum.update(jointAcceleration.getLinearPart());
    }
 
-   @Override
-   public void calculateJointDesiredChecksum(GenericCRC32 checksum)
-   {
-      checksum.update(jointAccelerationDesired.getAngularPart());
-      checksum.update(jointAccelerationDesired.getLinearPart());
-   }
 
    @Override
    public void getLinearAcceleration(Vector3DBasics linearAccelerationToPack)

@@ -6,7 +6,6 @@ import java.util.List;
 
 import us.ihmc.acsell.hardware.sensorReader.AcsellSensorReader;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -14,7 +13,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
@@ -24,6 +23,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprUtil;
 import us.ihmc.steppr.hardware.state.StepprState;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class StepprSensorReaderFactory implements SensorReaderFactory
 {
@@ -41,7 +41,7 @@ public class StepprSensorReaderFactory implements SensorReaderFactory
 
    @Override
    public void build(FloatingInverseDynamicsJoint rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
-         ContactSensorHolder contactSensorHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap, DesiredJointDataHolder estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
+         ContactSensorHolder contactSensorHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap, LowLevelOneDoFJointDesiredDataHolderList estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
    {
       stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
 

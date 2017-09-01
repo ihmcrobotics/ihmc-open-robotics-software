@@ -16,38 +16,34 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
-import us.ihmc.robotics.math.trajectories.YoTrajectory;
-import us.ihmc.robotics.math.trajectories.YoTrajectory3D;
+import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.Trajectory;
+import us.ihmc.robotics.math.trajectories.Trajectory3D;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class TrajectoryMathToolsTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static YoVariableRegistry registry = new YoVariableRegistry("TrajectoryMathTestRegistry");
-   private static TrajectoryMathTools trajMath = new TrajectoryMathTools("TestToolsClass", 16, registry);
+   private static TrajectoryMathTools trajMath = new TrajectoryMathTools(16);
    private static final double epsilon = 1e-6;
 
    @Before
    public void setupTest()
    {
-      registry.clear();
    }
 
    @After
    public void finishTest()
    {
-
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTrajectoryAddition()
    {
-      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 7, registry);
-      YoTrajectory traj2 = new YoTrajectory("Trajectory2", 7, registry);
+      Trajectory traj1 = new Trajectory(7);
+      Trajectory traj2 = new Trajectory(7);
       traj1.setCubic(1, 10, 1.5, -2.5);
       traj2.setCubic(1, 10, 12.5, 3.5);
       Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
@@ -64,22 +60,22 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void testTrajectoryMultiTimeScaleAddition()
    {
-      List<YoTrajectory> resultTrajectoryList = new ArrayList<>(3);
-      resultTrajectoryList.add(new YoTrajectory("ResultTraj0", 6, registry));
-      resultTrajectoryList.add(new YoTrajectory("ResultTraj1", 6, registry));
-      resultTrajectoryList.add(new YoTrajectory("ResultTraj2", 6, registry));
-      resultTrajectoryList.add(new YoTrajectory("ResultTraj3", 6, registry));
-      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 7, registry);
-      YoTrajectory traj2 = new YoTrajectory("Trajectory2", 7, registry);
+      List<Trajectory> resultTrajectoryList = new ArrayList<>(3);
+      resultTrajectoryList.add(new Trajectory(6));
+      resultTrajectoryList.add(new Trajectory(6));
+      resultTrajectoryList.add(new Trajectory(6));
+      resultTrajectoryList.add(new Trajectory(6));
+      Trajectory traj1 = new Trajectory(7);
+      Trajectory traj2 = new Trajectory(7);
       traj1.setCubic(1, 6, 1.5, -2.5);
       traj2.setCubic(3, 5, 12.5, 3.5);
       Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
       Assert.assertTrue(traj2.getNumberOfCoefficients() == 4);
       int numberOfSegments = trajMath.add(resultTrajectoryList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 3);
-      YoTrajectory traj3 = resultTrajectoryList.get(0);
-      YoTrajectory traj4 = resultTrajectoryList.get(1);
-      YoTrajectory traj5 = resultTrajectoryList.get(2);
+      Trajectory traj3 = resultTrajectoryList.get(0);
+      Trajectory traj4 = resultTrajectoryList.get(1);
+      Trajectory traj5 = resultTrajectoryList.get(2);
       Assert.assertEquals(traj3.getInitialTime(), 1.0, epsilon);
       Assert.assertEquals(traj3.getFinalTime(), 3.0, epsilon);
       Assert.assertTrue(traj3.getNumberOfCoefficients() == 4);
@@ -110,8 +106,8 @@ public class TrajectoryMathToolsTest
    public void testMultiTimeScaleOperation()
    {
       List<Double> timeList = new ArrayList<>(Arrays.asList(0.0, 0.0, 0.0, 0.0));
-      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 10, registry);
-      YoTrajectory traj2 = new YoTrajectory("Trajectory2", 10, registry);
+      Trajectory traj1 = new Trajectory(10);
+      Trajectory traj2 = new Trajectory(10);
       traj1.setConstant(5, 10, 1);
       traj2.setConstant(1, 4, 1);
       int numberOfSegments = trajMath.getSegmentTimeList(timeList, traj1, traj2, Epsilons.ONE_MILLIONTH);
@@ -299,8 +295,8 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void testTrajectorySubtraction()
    {
-      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 7, registry);
-      YoTrajectory traj2 = new YoTrajectory("Trajectory2", 7, registry);
+      Trajectory traj1 = new Trajectory(7);
+      Trajectory traj2 = new Trajectory(7);
       traj1.setCubic(0, 2, 3.5, -2.5);
       traj2.setCubic(0, 2, -0.5, -0.6);
       Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
@@ -317,22 +313,22 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void testTrajectoryMultiTimeScaleSubtraction()
    {
-      List<YoTrajectory> resultTrajectoryList = new ArrayList<>(3);
-      resultTrajectoryList.add(new YoTrajectory("ResultTraj0", 6, registry));
-      resultTrajectoryList.add(new YoTrajectory("ResultTraj1", 6, registry));
-      resultTrajectoryList.add(new YoTrajectory("ResultTraj2", 6, registry));
-      resultTrajectoryList.add(new YoTrajectory("ResultTraj3", 6, registry));
-      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 7, registry);
-      YoTrajectory traj2 = new YoTrajectory("Trajectory2", 7, registry);
+      List<Trajectory> resultTrajectoryList = new ArrayList<>(3);
+      resultTrajectoryList.add(new Trajectory(6));
+      resultTrajectoryList.add(new Trajectory(6));
+      resultTrajectoryList.add(new Trajectory(6));
+      resultTrajectoryList.add(new Trajectory(6));
+      Trajectory traj1 = new Trajectory(7);
+      Trajectory traj2 = new Trajectory(7);
       traj1.setCubic(0, 6, 2.1, 10.5);
       traj2.setCubic(1, 10, -10.6, 6.5);
       Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
       Assert.assertTrue(traj2.getNumberOfCoefficients() == 4);
       int numberOfSegments = trajMath.subtract(resultTrajectoryList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 3);
-      YoTrajectory traj3 = resultTrajectoryList.get(0);
-      YoTrajectory traj4 = resultTrajectoryList.get(1);
-      YoTrajectory traj5 = resultTrajectoryList.get(2);
+      Trajectory traj3 = resultTrajectoryList.get(0);
+      Trajectory traj4 = resultTrajectoryList.get(1);
+      Trajectory traj5 = resultTrajectoryList.get(2);
       Assert.assertEquals(traj3.getInitialTime(), 0.0, epsilon);
       Assert.assertEquals(traj3.getFinalTime(), 1.0, epsilon);
       Assert.assertTrue(traj3.getNumberOfCoefficients() == 4);
@@ -362,8 +358,8 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void testTrajectoryMultiplication2()
    {
-      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 8, registry);
-      YoTrajectory traj2 = new YoTrajectory("Trajectory2", 8, registry);
+      Trajectory traj1 = new Trajectory(8);
+      Trajectory traj2 = new Trajectory(8);
       traj1.setLinear(0, 10, 1, 2);
       traj2.setLinear(0, 10, 2, 3);
       trajMath.multiply(traj1, traj1, traj2);
@@ -377,8 +373,8 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void testTrajectoryMultiplication()
    {
-      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 7, registry);
-      YoTrajectory traj2 = new YoTrajectory("Trajectory2", 7, registry);
+      Trajectory traj1 = new Trajectory(7);
+      Trajectory traj2 = new Trajectory(7);
       traj1.setCubic(12, 15, 19.5, 200.5);
       traj2.setCubic(12, 15, 0.5, 0.1);
       Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
@@ -398,19 +394,19 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void testTrajectoryMultiTimeScaleMultiplication()
    {
-      List<YoTrajectory> resultTrajectoryList = new ArrayList<>(2);
-      resultTrajectoryList.add(new YoTrajectory("ResultTraj0", 7, registry));
-      resultTrajectoryList.add(new YoTrajectory("ResultTraj1", 7, registry));
-      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 7, registry);
-      YoTrajectory traj2 = new YoTrajectory("Trajectory2", 7, registry);
+      List<Trajectory> resultTrajectoryList = new ArrayList<>(2);
+      resultTrajectoryList.add(new Trajectory(7));
+      resultTrajectoryList.add(new Trajectory(7));
+      Trajectory traj1 = new Trajectory(7);
+      Trajectory traj2 = new Trajectory(7);
       traj1.setCubic(1, 6, 1.1, 2.5);
       traj2.setCubic(1, 10, -1.6, 0.5);
       Assert.assertTrue(traj1.getNumberOfCoefficients() == 4);
       Assert.assertTrue(traj2.getNumberOfCoefficients() == 4);
       int numberOfSegments = trajMath.multiply(resultTrajectoryList, traj1, traj2, Epsilons.ONE_MILLIONTH);
       Assert.assertTrue(numberOfSegments == 2);
-      YoTrajectory traj3 = resultTrajectoryList.get(0);
-      YoTrajectory traj4 = resultTrajectoryList.get(1);
+      Trajectory traj3 = resultTrajectoryList.get(0);
+      Trajectory traj4 = resultTrajectoryList.get(1);
       Assert.assertEquals(traj3.getInitialTime(), 1.0, epsilon);
       Assert.assertEquals(traj3.getFinalTime(), 6.0, epsilon);
       Assert.assertTrue(traj3.getNumberOfCoefficients() == 7);
@@ -435,27 +431,27 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void test3DTrajectoryAddition()
    {
-      YoTrajectory3D traj1 = new YoTrajectory3D("Trajectory1", 3, registry);
-      YoTrajectory3D traj2 = new YoTrajectory3D("Trajectory2", 3, registry);
+      Trajectory3D traj1 = new Trajectory3D(3);
+      Trajectory3D traj2 = new Trajectory3D(3);
       traj1.setLinear(0, 1, new Point3D(0.5, 0.1, 10), new Point3D(1, 10, 5));
       traj2.setLinear(0, 1, new Point3D(), new Point3D(5, 7.7, 1));
       trajMath.add(traj1, traj1, traj2);
 
-      YoTrajectory traj = traj1.getYoTrajectoryX();
+      Trajectory traj = traj1.getTrajectoryX();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
       Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
       Assert.assertTrue(traj.getNumberOfCoefficients() == 2);
       Assert.assertEquals(traj.getCoefficient(0), 0.5, epsilon);
       Assert.assertEquals(traj.getCoefficient(1), 5.5, epsilon);
 
-      traj = traj1.getYoTrajectoryY();
+      traj = traj1.getTrajectoryY();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
       Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
       Assert.assertTrue(traj.getNumberOfCoefficients() == 2);
       Assert.assertEquals(traj.getCoefficient(0), 0.1, epsilon);
       Assert.assertEquals(traj.getCoefficient(1), 9.9 + 7.7, epsilon);
 
-      traj = traj1.getYoTrajectoryZ();
+      traj = traj1.getTrajectoryZ();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
       Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
       Assert.assertTrue(traj.getNumberOfCoefficients() == 2);
@@ -467,27 +463,27 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void test3DTrajectorySubtraction()
    {
-      YoTrajectory3D traj1 = new YoTrajectory3D("Trajectory1", 3, registry);
-      YoTrajectory3D traj2 = new YoTrajectory3D("Trajectory2", 3, registry);
+      Trajectory3D traj1 = new Trajectory3D(3);
+      Trajectory3D traj2 = new Trajectory3D(3);
       traj1.setLinear(0, 1, new Point3D(0.1, 3.414, 1.87), new Point3D(2.09, 1.35, 5.35));
       traj2.setLinear(0, 1, new Point3D(3.14, 1.59, 12.9), new Point3D(4.51, 5.32, 1.12));
       trajMath.subtract(traj1, traj1, traj2);
 
-      YoTrajectory traj = traj1.getYoTrajectoryX();
+      Trajectory traj = traj1.getTrajectoryX();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
       Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
       Assert.assertTrue(traj.getNumberOfCoefficients() == 2);
       Assert.assertEquals(traj.getCoefficient(0), -3.04, epsilon);
       Assert.assertEquals(traj.getCoefficient(1), 0.62, epsilon);
 
-      traj = traj1.getYoTrajectoryY();
+      traj = traj1.getTrajectoryY();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
       Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
       Assert.assertTrue(traj.getNumberOfCoefficients() == 2);
       Assert.assertEquals(traj.getCoefficient(0), 1.824, epsilon);
       Assert.assertEquals(traj.getCoefficient(1), -5.794, epsilon);
 
-      traj = traj1.getYoTrajectoryZ();
+      traj = traj1.getTrajectoryZ();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
       Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
       Assert.assertTrue(traj.getNumberOfCoefficients() == 2);
@@ -499,13 +495,13 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void test3DTrajectoryDotProducts()
    {
-      YoTrajectory3D traj1 = new YoTrajectory3D("Trajectory1", 3, registry);
-      YoTrajectory3D traj2 = new YoTrajectory3D("Trajectory2", 3, registry);
+      Trajectory3D traj1 = new Trajectory3D(3);
+      Trajectory3D traj2 = new Trajectory3D(3);
       traj1.setLinear(0, 1, new Point3D(1, 3, 5), new Point3D(6, 4, 2));
       traj2.setLinear(0, 1, new Point3D(2, 4, 6), new Point3D(5, 3, 1));
       trajMath.dotProduct(traj1, traj1, traj2);
 
-      YoTrajectory traj = traj1.getYoTrajectoryX();
+      Trajectory traj = traj1.getTrajectoryX();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
       Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
       Assert.assertTrue(traj.getNumberOfCoefficients() == 3);
@@ -513,7 +509,7 @@ public class TrajectoryMathToolsTest
       Assert.assertEquals(traj.getCoefficient(1), 13, epsilon);
       Assert.assertEquals(traj.getCoefficient(2), 15, epsilon);
 
-      traj = traj1.getYoTrajectoryY();
+      traj = traj1.getTrajectoryY();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
       Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
       Assert.assertTrue(traj.getNumberOfCoefficients() == 3);
@@ -521,7 +517,7 @@ public class TrajectoryMathToolsTest
       Assert.assertEquals(traj.getCoefficient(1), 1, epsilon);
       Assert.assertEquals(traj.getCoefficient(2), -1, epsilon);
 
-      traj = traj1.getYoTrajectoryZ();
+      traj = traj1.getTrajectoryZ();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
       Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
       Assert.assertTrue(traj.getNumberOfCoefficients() == 3);
@@ -534,13 +530,13 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void test3DTrajectoryCrossProduct()
    {
-      YoTrajectory3D traj1 = new YoTrajectory3D("Trajectory1", 3, registry);
-      YoTrajectory3D traj2 = new YoTrajectory3D("Trajectory2", 3, registry);
+      Trajectory3D traj1 = new Trajectory3D(3);
+      Trajectory3D traj2 = new Trajectory3D(3);
       traj1.setLinear(0, 1, new Point3D(1, 3, 5), new Point3D(6, 4, 2));
       traj2.setLinear(0, 1, new Point3D(2, 4, 6), new Point3D(5, 3, 1));
       trajMath.crossProduct(traj1, traj1, traj2);
 
-      YoTrajectory traj = traj1.getYoTrajectoryX();
+      Trajectory traj = traj1.getTrajectoryX();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
       Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
       Assert.assertTrue(traj.getNumberOfCoefficients() == 3);
@@ -548,7 +544,7 @@ public class TrajectoryMathToolsTest
       Assert.assertEquals(traj.getCoefficient(1), 8, epsilon);
       Assert.assertEquals(traj.getCoefficient(2), -8, epsilon);
 
-      traj = traj1.getYoTrajectoryY();
+      traj = traj1.getTrajectoryY();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
       Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
       Assert.assertTrue(traj.getNumberOfCoefficients() == 3);
@@ -556,7 +552,7 @@ public class TrajectoryMathToolsTest
       Assert.assertEquals(traj.getCoefficient(1), -16, epsilon);
       Assert.assertEquals(traj.getCoefficient(2), 16, epsilon);
 
-      traj = traj1.getYoTrajectoryZ();
+      traj = traj1.getTrajectoryZ();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
       Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
       Assert.assertTrue(traj.getNumberOfCoefficients() == 3);
@@ -569,8 +565,8 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void testIntegration()
    {
-      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 2, registry);
-      YoTrajectory traj2 = new YoTrajectory("Trajectory2", 3, registry);
+      Trajectory traj1 = new Trajectory(2);
+      Trajectory traj2 = new Trajectory(3);
       traj1.setLinear(1, 11, 4, 5);
       trajMath.getIntergal(traj2, traj1);
       Assert.assertEquals(traj2.getCoefficient(0), -4.00, epsilon);
@@ -582,8 +578,8 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void testDifferentiation()
    {
-      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 3, registry);
-      YoTrajectory traj2 = new YoTrajectory("Trajectory2", 2, registry);
+      Trajectory traj1 = new Trajectory(3);
+      Trajectory traj2 = new Trajectory(2);
       traj1.setQuadratic(1, 11, 4, 0, 5);
       trajMath.getDerivative(traj2, traj1);
       Assert.assertEquals(traj2.getCoefficient(0), traj1.getCoefficient(1), epsilon);
@@ -594,7 +590,7 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void testShifting()
    {
-      YoTrajectory traj1 = new YoTrajectory("Trajectory1", 3, registry);
+      Trajectory traj1 = new Trajectory(3);
       traj1.setDirectlyFast(0, 1);
       traj1.setDirectlyFast(1, 2);
       traj1.setDirectlyFast(2, 3);
@@ -609,18 +605,18 @@ public class TrajectoryMathToolsTest
       Assert.assertEquals(traj1.getCoefficient(2), 3, epsilon);
    }
 
-   private class DummySegmentedTrajectory extends YoSegmentedFrameTrajectory3D
+   private class DummySegmentedTrajectory extends SegmentedFrameTrajectory3D
    {
 
-      public DummySegmentedTrajectory(String name, int maxNumberOfSegments, int maxNumberOfCoefficients, YoVariableRegistry registry)
+      public DummySegmentedTrajectory(String name, int maxNumberOfSegments, int maxNumberOfCoefficients)
       {
-         super(name, maxNumberOfSegments, maxNumberOfCoefficients, registry);
+         super(maxNumberOfSegments, maxNumberOfCoefficients);
       }
 
       public void setSegment(double t0, double tFinal, FramePoint3D z0, FramePoint3D zf)
       {
-         segments.get(numberOfSegments.getIntegerValue()).setLinear(t0, tFinal, z0, zf);
-         numberOfSegments.increment();
+         segments.get(numberOfSegments).setLinear(t0, tFinal, z0, zf);
+         numberOfSegments++;
       }
    }
 
@@ -628,9 +624,9 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void testSegmentedAddition()
    {
-      DummySegmentedTrajectory traj1 = new DummySegmentedTrajectory("TestTraj1", 4, 2, registry);
-      DummySegmentedTrajectory traj2 = new DummySegmentedTrajectory("TestTraj2", 4, 2, registry);
-      DummySegmentedTrajectory traj3 = new DummySegmentedTrajectory("TestTraj3", 10, 2, registry);
+      DummySegmentedTrajectory traj1 = new DummySegmentedTrajectory("TestTraj1", 4, 2);
+      DummySegmentedTrajectory traj2 = new DummySegmentedTrajectory("TestTraj2", 4, 2);
+      DummySegmentedTrajectory traj3 = new DummySegmentedTrajectory("TestTraj3", 10, 2);
       traj1.setSegment(0, 1, new FramePoint3D(worldFrame, 10, 11, 12), new FramePoint3D(worldFrame, 13, 14, 15));
       traj1.setSegment(1, 2, new FramePoint3D(worldFrame, 15, 20, 25), new FramePoint3D(worldFrame, 20, 25, 30));
       traj1.setSegment(2, 3, new FramePoint3D(worldFrame, 25, 28, 31), new FramePoint3D(worldFrame, 35, 38, 41));

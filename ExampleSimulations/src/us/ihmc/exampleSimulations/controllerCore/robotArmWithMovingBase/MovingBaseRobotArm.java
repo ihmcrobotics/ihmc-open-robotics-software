@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -27,6 +26,8 @@ import us.ihmc.robotics.screwTheory.PrismaticJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.simulationconstructionset.KinematicPoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -327,10 +328,11 @@ public class MovingBaseRobotArm extends Robot
       for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
          OneDoFJoint oneDoFJoint = pair.getKey();
+         LowLevelJointDataReadOnly data = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(oneDoFJoint); 
 
-         if (lowLevelOneDoFJointDesiredDataHolder.hasDesiredTorqueForJoint(oneDoFJoint))
+         if (data.hasDesiredTorque())
          {
-            double tau = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointTorque(oneDoFJoint);
+            double tau = data.getDesiredTorque();
             pair.getValue().setTau(tau);
          }
       }
@@ -341,15 +343,17 @@ public class MovingBaseRobotArm extends Robot
       for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
          OneDoFJoint oneDoFJoint = pair.getKey();
-         if (lowLevelOneDoFJointDesiredDataHolder.hasDesiredPositionForJoint(oneDoFJoint))
+         LowLevelJointDataReadOnly data = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(oneDoFJoint); 
+
+         if (data.hasDesiredPosition())
          {
-            double q = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointPosition(oneDoFJoint);
+            double q = data.getDesiredPosition();
             pair.getValue().setQ(q);
          }
 
-         if (lowLevelOneDoFJointDesiredDataHolder.hasDesiredVelocityForJoint(oneDoFJoint))
+         if (data.hasDesiredVelocity())
          {
-            double qd = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointVelocity(oneDoFJoint);
+            double qd = data.getDesiredVelocity();
             pair.getValue().setQd(qd);
          }
       }

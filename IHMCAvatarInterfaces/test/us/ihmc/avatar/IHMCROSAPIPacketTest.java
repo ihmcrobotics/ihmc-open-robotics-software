@@ -25,7 +25,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -38,18 +37,17 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataLogger.RobotVisualizer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
+import us.ihmc.simulationConstructionSetTools.robotController.AbstractThreadedRobotController;
+import us.ihmc.simulationConstructionSetTools.robotController.SingleThreadedRobotController;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationConstructionSetTools.robotController.AbstractThreadedRobotController;
-import us.ihmc.simulationConstructionSetTools.robotController.SingleThreadedRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
@@ -57,6 +55,7 @@ import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 {
@@ -142,7 +141,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
-      DRCSimulationOutputWriter outputWriter = new DRCSimulationOutputWriter(sdfRobot);
+      DRCSimulationOutputWriterForControllerThread outputWriter = new DRCSimulationOutputWriterForControllerThread(sdfRobot);
       HumanoidGlobalDataProducer globalDataProducer = new HumanoidGlobalDataProducer(controllerCommunicatorServer);
 
       AbstractThreadedRobotController robotController = createController(robotModel, controllerCommunicatorServer, globalDataProducer, outputWriter, sdfRobot);
@@ -240,7 +239,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
-      DRCSimulationOutputWriter outputWriter = new DRCSimulationOutputWriter(sdfRobot);
+      DRCSimulationOutputWriterForControllerThread outputWriter = new DRCSimulationOutputWriterForControllerThread(sdfRobot);
       HumanoidGlobalDataProducer globalDataProducer = new HumanoidGlobalDataProducer(packetCommunicatorServer);
 
       AbstractThreadedRobotController robotController = createController(robotModel, packetCommunicatorServer, globalDataProducer, outputWriter, sdfRobot);
@@ -300,7 +299,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
    }
 
    private AbstractThreadedRobotController createController(DRCRobotModel robotModel, PacketCommunicator packetCommunicator,
-         HumanoidGlobalDataProducer dataProducer, DRCSimulationOutputWriter outputWriter, FloatingRootJointRobot sdfRobot)
+         HumanoidGlobalDataProducer dataProducer, DRCSimulationOutputWriterForControllerThread outputWriter, FloatingRootJointRobot sdfRobot)
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
       double gravity = -9.7925;
@@ -319,7 +318,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 
       DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSensorInformation(), robotModel.getContactPointParameters(),
             robotModel.getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer,
-            new PeriodicNonRealtimeThreadScheduler("DRCPoseCommunicator"), dataProducer, null, gravity);
+            new PeriodicNonRealtimeThreadScheduler("DRCPoseCommunicator"), dataProducer, null, robotVisualizer, gravity);
 
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer,
             outputWriter, dataProducer, robotVisualizer, gravity, robotModel.getEstimatorDT());

@@ -5,11 +5,11 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 
-public interface DRCOutputWriter
+public interface DRCOutputProcessor
 {
    public abstract void initialize();
    
-   public abstract void writeAfterController(long timestamp);
+   public abstract void processAfterController(long timestamp);
 
    public abstract void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap);
 

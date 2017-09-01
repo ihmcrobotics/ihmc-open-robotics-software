@@ -55,11 +55,11 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
    private final YoDouble finalTransferTime;
 
    // Default parameters
-   private final int defaultNumberOfSteps = 6;
-   private final double defaultStepLength = 0.5;
+   private final int defaultNumberOfSteps = 5;
+   private final double defaultStepLength = 0.35;
    private final double defaultStepWidth = 0.25;
    private final double defaultSwingTime = 1.0;
-   private final double defaultTransferTime = 0.4;
+   private final double defaultTransferTime = 0.35;
    private final double defaultInitialTransferTime = 1.0;
    private final double defaultFinalTransferTime = 1.0;
    
@@ -165,12 +165,12 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
          }
       };
 
-      statemachine.addStateWithDoneTransition(setup, TestSmoothICPPlannerBehaviorState.CONFIRM_WALK);
-      statemachine.addStateWithDoneTransition(waitForConfirmation, TestSmoothICPPlannerBehaviorState.WALK_FORWARD);
-      statemachine.addStateWithDoneTransition(walkForward, TestSmoothICPPlannerBehaviorState.RESET_ROBOT);
-      statemachine.addStateWithDoneTransition(resetRobot, TestSmoothICPPlannerBehaviorState.DONE);
+//      statemachine.addStateWithDoneTransition(setup, TestSmoothICPPlannerBehaviorState.CONFIRM_WALK);
+//      statemachine.addStateWithDoneTransition(waitForConfirmation, TestSmoothICPPlannerBehaviorState.WALK_FORWARD);
+      statemachine.addStateWithDoneTransition(walkForward, TestSmoothICPPlannerBehaviorState.DONE);
+//      statemachine.addStateWithDoneTransition(resetRobot, TestSmoothICPPlannerBehaviorState.DONE);
       statemachine.addState(doneState);
-      statemachine.setStartState(TestSmoothICPPlannerBehaviorState.SETUP_ROBOT);
+      statemachine.setStartState(TestSmoothICPPlannerBehaviorState.WALK_FORWARD);
 
    }
 

@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
+package us.ihmc.sensorProcessing.outputData;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -11,6 +11,9 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
    private double desiredAcceleration = Double.NaN;
    private double desiredCurrent = Double.NaN;
    private boolean resetIntegrators = false;
+   
+   private double kp = Double.NaN;
+   private double kd = Double.NaN;
 
    public LowLevelJointData()
    {
@@ -26,6 +29,9 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
       desiredAcceleration = Double.NaN;
       desiredCurrent = Double.NaN;
       resetIntegrators = false;
+      
+      kp = Double.NaN;
+      kd = Double.NaN;
    }
 
    public void set(LowLevelJointDataReadOnly other)
@@ -37,6 +43,8 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
       desiredAcceleration = other.getDesiredAcceleration();
       desiredCurrent = other.getDesiredCurrent();
       resetIntegrators = other.peekResetIntegratorsRequest();
+      kp = other.getKp();
+      kd = other.getKd();
    }
 
    /**
@@ -59,6 +67,10 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
          desiredCurrent = other.getDesiredCurrent();
       if (!peekResetIntegratorsRequest())
          resetIntegrators = other.peekResetIntegratorsRequest();
+      if(!hasKp())
+         kp = other.getKp();
+      if(!hasKd())
+         kd = other.getKd();
    }
    
    public void setDesiredsFromOneDoFJoint(OneDoFJoint jointToExtractDesiredsFrom)
@@ -68,6 +80,8 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
       setDesiredVelocity(jointToExtractDesiredsFrom.getQdDesired());
       setDesiredAcceleration(jointToExtractDesiredsFrom.getQddDesired());
       setResetIntegrators(jointToExtractDesiredsFrom.getResetIntegrator());
+      setKp(jointToExtractDesiredsFrom.getKp());
+      setKd(jointToExtractDesiredsFrom.getKd());
    }
 
    public void setControlMode(LowLevelJointControlMode controlMode)
@@ -202,5 +216,39 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
       ret += "desiredAcceleration = " + getDesiredAcceleration() + "\n";
       ret += "desiredCurrent = " + getDesiredCurrent() + "\n";
       return ret;
+   }
+
+   @Override
+   public boolean hasKp()
+   {
+      return !Double.isNaN(kp);
+   }
+
+   @Override
+   public boolean hasKd()
+   {
+      return !Double.isNaN(kd);
+   }
+
+   @Override
+   public double getKp()
+   {
+      return kp;
+   }
+
+   @Override
+   public double getKd()
+   {
+      return kd;
+   }
+   
+   public void setKp(double kp)
+   {
+      this.kp = kp;
+   }
+
+   public void setKd(double kd)
+   {
+      this.kd = kd;
    }
 }
