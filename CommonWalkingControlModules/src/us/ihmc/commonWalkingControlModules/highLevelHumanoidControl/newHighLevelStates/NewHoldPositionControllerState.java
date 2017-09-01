@@ -6,8 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.jointControlCalculator.EffortJointControlCalculator;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.jointControlCalculator.PositionJointControlCalculator;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.jointControlCalculator.JointControlCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -22,7 +21,7 @@ public class NewHoldPositionControllerState extends NewHighLevelControllerState
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.OFF);
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   private final PairList<OneDoFJoint, ImmutablePair<YoDouble, ImmutablePair<EffortJointControlCalculator, PositionJointControlCalculator>>> jointControllers = new PairList<>();
+   private final PairList<OneDoFJoint, ImmutablePair<YoDouble, JointControlCalculator>> jointControllers = new PairList<>();
 
    private final YoDouble masterGain;
 
@@ -43,18 +42,16 @@ public class NewHoldPositionControllerState extends NewHighLevelControllerState
       for (OneDoFJoint controlledJoint : controlledJoints)
       {
          String jointName = controlledJoint.getName();
-         EffortJointControlCalculator effortCalculator = new EffortJointControlCalculator(nameSuffix, controlledJoint, controllerToolbox.getControlDT(), registry);
+         JointControlCalculator jointControlCalculator = new JointControlCalculator(nameSuffix, controlledJoint, controllerToolbox.getControlDT(), registry);
 
-         PositionJointControlCalculator positionCalculator = new PositionJointControlCalculator(nameSuffix, controlledJoint, registry);
          YoDouble freezePosition = new YoDouble(jointName + nameSuffix + "_qDesired", registry);
 
          freezePosition.set(standPrepSetpoints.getSetpoint(jointName));
-         effortCalculator.setProportionalGain(positionControlParameters.getProportionalGain(jointName));
-         effortCalculator.setDerivativeGain(positionControlParameters.getDerivativeGain(jointName));
-         effortCalculator.setIntegralGain(positionControlParameters.getIntegralGain(jointName));
+         jointControlCalculator.setProportionalGain(positionControlParameters.getProportionalGain(jointName));
+         jointControlCalculator.setDerivativeGain(positionControlParameters.getDerivativeGain(jointName));
+         jointControlCalculator.setIntegralGain(positionControlParameters.getIntegralGain(jointName));
 
-         ImmutablePair<EffortJointControlCalculator, PositionJointControlCalculator> controllers = new ImmutablePair<>(effortCalculator, positionCalculator);
-         ImmutablePair<YoDouble, ImmutablePair<EffortJointControlCalculator, PositionJointControlCalculator>> data = new ImmutablePair<>(freezePosition, controllers);
+         ImmutablePair<YoDouble, JointControlCalculator> data = new ImmutablePair<>(freezePosition, jointControlCalculator);
          jointControllers.add(controlledJoint, data);
       }
 
@@ -71,17 +68,13 @@ public class NewHoldPositionControllerState extends NewHighLevelControllerState
    {
       for (int jointIndex = 0; jointIndex < jointControllers.size(); jointIndex++)
       {
-         ImmutablePair<YoDouble, ImmutablePair<EffortJointControlCalculator, PositionJointControlCalculator>> data = jointControllers.get(jointIndex).getRight();
-         ImmutablePair<EffortJointControlCalculator, PositionJointControlCalculator> controllerPair = data.getRight();
+         ImmutablePair<YoDouble, JointControlCalculator> data = jointControllers.get(jointIndex).getRight();
          YoDouble setpoint = data.getLeft();
          OneDoFJoint joint = jointControllers.get(jointIndex).getLeft();
          setpoint.set(joint.getqDesired());
 
-         EffortJointControlCalculator effortCalculator = controllerPair.getLeft();
-         PositionJointControlCalculator positionCalculator = controllerPair.getRight();
-
-         effortCalculator.initialize();
-         positionCalculator.initialize();
+         JointControlCalculator jointControlCalculator = data.getRight();
+         jointControlCalculator.initialize();
       }
    }
 
@@ -91,17 +84,14 @@ public class NewHoldPositionControllerState extends NewHighLevelControllerState
       for (int jointIndex = 0; jointIndex < jointControllers.size(); jointIndex++)
       {
          OneDoFJoint joint = jointControllers.get(jointIndex).getLeft();
-         ImmutablePair<YoDouble, ImmutablePair<EffortJointControlCalculator, PositionJointControlCalculator>> data = jointControllers.get(jointIndex).getRight();
-         ImmutablePair<EffortJointControlCalculator, PositionJointControlCalculator> controllerPair = data.getRight();
-         EffortJointControlCalculator effortCalculator = controllerPair.getLeft();
-         PositionJointControlCalculator positionCalculator = controllerPair.getRight();
+         ImmutablePair<YoDouble, JointControlCalculator> data = jointControllers.get(jointIndex).getRight();
+         JointControlCalculator jointControlCalculator = data.getRight();
          YoDouble desiredPosition = data.getLeft();
 
          LowLevelJointData lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(joint);
          lowLevelJointData.setDesiredPosition(desiredPosition.getDoubleValue());
 
-         effortCalculator.computeAndUpdateJointTorque(lowLevelJointData, masterGain.getDoubleValue());
-         positionCalculator.computeAndUpdateJointPosition(lowLevelJointData, masterGain.getDoubleValue());
+         jointControlCalculator.computeAndUpdateJointControl(lowLevelJointData, masterGain.getDoubleValue());
       }
 
       controllerCoreCommand.completeLowLevelJointData(lowLevelOneDoFJointDesiredDataHolder);
