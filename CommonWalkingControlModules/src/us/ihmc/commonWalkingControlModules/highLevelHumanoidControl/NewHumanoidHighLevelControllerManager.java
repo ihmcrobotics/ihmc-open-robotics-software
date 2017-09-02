@@ -24,8 +24,11 @@ import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.*;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -43,7 +46,6 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
    private final GenericStateMachine<NewHighLevelControllerStates, NewHighLevelControllerState> stateMachine;
    private final NewHighLevelControllerStates initialControllerState;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
-
 
    private final YoBoolean isListeningToHighLevelStateMessage = new YoBoolean("isListeningToHighLevelStateMessage", registry);
    private final YoEnum<NewHighLevelControllerStates> requestedHighLevelControllerState;
@@ -179,6 +181,7 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
       highLevelControllerTimer.stopMeasurement();
 
       reportDesiredCenterOfPressureForEstimator();
+      copyJointDesiredsToJoints();
    }
 
    private final SideDependentList<FramePoint2D> desiredFootCoPs = new SideDependentList<FramePoint2D>(new FramePoint2D(), new FramePoint2D());
@@ -191,6 +194,28 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
       {
          controllerToolbox.getDesiredCenterOfPressure(contactableFeet.get(robotSide), desiredFootCoPs.get(robotSide));
          centerOfPressureDataHolderForEstimator.setCenterOfPressure(desiredFootCoPs.get(robotSide), fullHumanoidRobotModel.getFoot(robotSide));
+      }
+   }
+
+   private void copyJointDesiredsToJoints()
+   {
+      LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder = stateMachine.getCurrentState().getOutputForLowLevelController();
+      for (int jointIndex = 0; jointIndex < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithLowLevelData(); jointIndex++)
+      {
+         OneDoFJoint controlledJoint = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(jointIndex);
+         LowLevelJointDataReadOnly jointDataReadOnly = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(controlledJoint);
+
+         if (jointDataReadOnly.hasDesiredPosition())
+            controlledJoint.setqDesired(jointDataReadOnly.getDesiredPosition());
+
+         if (jointDataReadOnly.hasDesiredVelocity())
+            controlledJoint.setQdDesired(jointDataReadOnly.getDesiredVelocity());
+
+         if (jointDataReadOnly.hasDesiredAcceleration())
+            controlledJoint.setQddDesired(jointDataReadOnly.getDesiredAcceleration());
+
+         if (jointDataReadOnly.hasDesiredTorque())
+            controlledJoint.setTau(jointDataReadOnly.getDesiredTorque());
       }
    }
 

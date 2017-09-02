@@ -62,7 +62,7 @@ public abstract class NewDRCFlatGroundWalkingTrack
       AbstractMomentumBasedControllerFactory controllerFactory = getControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames,
                                                                                       wristForceSensorNames, walkingControllerParameters, capturePointPlannerParameters,
                                                                                       standPrepSetpoints, positionControlParameters,
-                                                                                      NewHighLevelControllerStates.WALKING_STATE, NewHighLevelControllerStates.DO_NOTHING_STATE);
+                                                                                      NewHighLevelControllerStates.STAND_PREP_STATE, NewHighLevelControllerStates.DO_NOTHING_STATE);
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
 
 
