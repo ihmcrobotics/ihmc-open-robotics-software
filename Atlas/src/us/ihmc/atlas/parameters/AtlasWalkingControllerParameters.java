@@ -714,7 +714,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public double getDefaultSwingTime()
    {
-      return (runningOnRealRobot ? 1.2 : 0.60); //Math.sqrt(jointMap.getModelScale()) *
+      return (runningOnRealRobot ? 1.2 : 0.6); //Math.sqrt(jointMap.getModelScale()) *
    }
 
    @Override
