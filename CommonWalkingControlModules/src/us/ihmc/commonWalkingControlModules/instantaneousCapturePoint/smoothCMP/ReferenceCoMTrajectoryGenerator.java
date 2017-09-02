@@ -6,9 +6,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.SmoothCoMIntegrationToolbox;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
@@ -25,17 +23,9 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenerator
 {
-   private final YoDouble omega0;
-   private ReferenceFrame trajectoryFrame;
-
    private final static int FIRST_SEGMENT = 0;
 
    private final static int defaultSize = 100;
-
-   private final List<FramePoint3D> cmpDesiredFinalPositions = new ArrayList<>(defaultSize);
-
-   private List<FramePoint3D> icpDesiredInitialPositions = new ArrayList<>(defaultSize);
-   private List<FramePoint3D> icpDesiredFinalPositions = new ArrayList<>(defaultSize);
 
    private final List<FramePoint3D> comDesiredInitialPositions = new ArrayList<>(defaultSize);
    private final List<FrameVector3D> comDesiredInitialVelocities = new ArrayList<>(defaultSize);
@@ -44,18 +34,23 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
    private final List<FrameVector3D> comDesiredFinalVelocities = new ArrayList<>(defaultSize);
    private final List<FrameVector3D> comDesiredFinalAccelerations = new ArrayList<>(defaultSize);
 
-   private FramePoint3D comPositionDesiredCurrent = new FramePoint3D();
-   private FrameVector3D comVelocityDesiredCurrent = new FrameVector3D();
-   private FrameVector3D comAccelerationDesiredCurrent = new FrameVector3D();
+   private final List<FrameTrajectory3D> cmpTrajectories = new ArrayList<>(defaultSize);
 
-   private FramePoint3D icpPositionDesiredFinalCurrentSegment = new FramePoint3D();
-   private FramePoint3D comPositionDesiredInitialCurrentSegment = new FramePoint3D();
-   private FrameVector3D comVelocityDesiredInitialCurrentSegment = new FrameVector3D();
-   private FrameVector3D comAccelerationDesiredInitialCurrentSegment = new FrameVector3D();
+   private List<FramePoint3D> icpDesiredInitialPositions = new ArrayList<>(defaultSize);
+   private List<FramePoint3D> icpDesiredFinalPositions = new ArrayList<>(defaultSize);
+
+   private final FramePoint3D comPositionDesiredCurrent = new FramePoint3D();
+   private final FrameVector3D comVelocityDesiredCurrent = new FrameVector3D();
+   private final FrameVector3D comAccelerationDesiredCurrent = new FrameVector3D();
+
+   private final FramePoint3D icpPositionDesiredFinalCurrentSegment = new FramePoint3D();
+   private final FramePoint3D comPositionDesiredInitialCurrentSegment = new FramePoint3D();
+   private final FrameVector3D comVelocityDesiredInitialCurrentSegment = new FrameVector3D();
+   private final FrameVector3D comAccelerationDesiredInitialCurrentSegment = new FrameVector3D();
    
-   private FramePoint3D comPositionDesiredFinalCurrentSegment = new FramePoint3D();
+   private final FramePoint3D comPositionDesiredFinalCurrentSegment = new FramePoint3D();
 
-   private YoInteger currentSegmentIndex;
+   private final YoInteger currentSegmentIndex;
 
    private final YoBoolean isStanding;
    private final YoBoolean isInitialTransfer;
@@ -69,23 +64,17 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
    private int numberOfSegmentsSwing0;
    private int numberOfSegmentsTransfer0;
 
-   private YoDouble startTimeOfCurrentPhase;
-   private YoDouble localTimeInCurrentPhase;
-
-   private final List<FrameTrajectory3D> copTrajectories = new ArrayList<>(defaultSize);
-   private final List<FrameTrajectory3D> cmpTrajectories = new ArrayList<>(defaultSize);
-
-   private List<FrameTuple3D<?, ?>> icpQuantityInitialConditionList = new ArrayList<FrameTuple3D<?, ?>>();
+   private final YoDouble omega0;
+   private final YoDouble startTimeOfCurrentPhase;
+   private final YoDouble localTimeInCurrentPhase;
 
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
    private final SmoothCoMIntegrationToolbox comToolbox = new SmoothCoMIntegrationToolbox(icpToolbox);
 
    public ReferenceCoMTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isStanding,
-                                          YoBoolean isInitialTransfer, YoBoolean isDoubleSupport, ReferenceFrame trajectoryFrame,
-                                          YoVariableRegistry registry)
+                                          YoBoolean isInitialTransfer, YoBoolean isDoubleSupport, YoVariableRegistry registry)
    {
       this.omega0 = omega0;
-      this.trajectoryFrame = trajectoryFrame;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
       this.isStanding = isStanding;
       this.isInitialTransfer = isInitialTransfer;
@@ -97,9 +86,8 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
       localTimeInCurrentPhase = new YoDouble(namePrefix + "CoMGeneratorLocalTimeCurrentPhase", registry);
       localTimeInCurrentPhase.set(0.0);
 
-      currentSegmentIndex = new YoInteger("CoMGeneratorCurrentSegment", registry);
+      currentSegmentIndex = new YoInteger(namePrefix + "CoMGeneratorCurrentSegment", registry);
 
-      icpQuantityInitialConditionList.add(new FramePoint3D());
       for(int i = 0; i < defaultSize; i++)
       {
          comDesiredInitialPositions.add(new FramePoint3D());
@@ -108,8 +96,6 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
          comDesiredFinalVelocities.add(new FrameVector3D());
          comDesiredInitialAccelerations.add(new FrameVector3D());
          comDesiredFinalAccelerations.add(new FrameVector3D());
-
-         icpQuantityInitialConditionList.add(new FrameVector3D());
       }
    }
 
@@ -124,7 +110,7 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
    {
       reset();
       startTimeOfCurrentPhase.set(initialTime);
-      
+
       this.icpDesiredInitialPositions = icpDesiredInitialPositions;
       this.icpDesiredFinalPositions = icpDesiredFinalPositions;
 

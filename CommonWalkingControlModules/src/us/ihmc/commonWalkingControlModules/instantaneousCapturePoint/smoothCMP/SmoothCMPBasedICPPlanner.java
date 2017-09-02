@@ -105,7 +105,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
                                                                   registry);
 
       referenceCoMGenerator = new ReferenceCoMTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isStanding, isInitialTransfer, isDoubleSupport,
-                                                                  worldFrame, registry);
+                                                                  registry);
 
       angularMomentumGenerator = new FootstepAngularMomentumPredictor(namePrefix, omega0, debug, registry);
 
