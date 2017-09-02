@@ -77,7 +77,6 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    private ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
    private final YoEnum<NewHighLevelControllerStates> requestedHighLevelControllerState = new YoEnum<NewHighLevelControllerStates>("requestedHighLevelControllerState", registry,
                                                                                                                                    NewHighLevelControllerStates.class, true);
-
    private final WalkingControllerParameters walkingControllerParameters;
    private final ICPTrajectoryPlannerParameters capturePointPlannerParameters;
 
@@ -102,7 +101,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    private final SideDependentList<String> wristSensorNames;
    private final ContactableBodiesFactory contactableBodiesFactory;
 
-   private NewWalkingControllerState walkingState;
+   private WalkingHighLevelHumanoidController walkingState;
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
@@ -345,7 +344,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingController //////////////////////////////////////////////////////////////
-      WalkingHighLevelHumanoidController walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory,
+      walkingState = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory,
                                                                                                     walkingControllerParameters, capturePointPlannerParameters,
                                                                                                     controllerToolbox);
 
@@ -383,12 +382,12 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingController //////////////////////////////////////////////////////////////
-      walkingState = createWalkingControllerState(walkingController, controllerToolbox, controllerCore);
-      highLevelControllerStates.add(walkingState);
+      NewWalkingControllerState walkingControllerState = createWalkingControllerState(walkingState, controllerToolbox, controllerCore);
+      highLevelControllerStates.add(walkingControllerState);
       ArrayList<StateTransition<NewHighLevelControllerStates>> walkingTransitions = new ArrayList<>();
       walkingTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
       walkingTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, fallbackControllerState));
-      highLevelControllerTransitions.put(walkingState, walkingTransitions);
+      highLevelControllerTransitions.put(walkingControllerState, walkingTransitions);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the NewStandPrepControllerState ////////////////////////////////////////////////////////////
@@ -412,7 +411,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the StandTransitionController //////////////////////////////////////////////////////
-      NewStandTransitionControllerState standTransitionControllerState = createStandTransitionControllerState(standReadyControllerState, walkingState, controllerToolbox);
+      NewStandTransitionControllerState standTransitionControllerState = createStandTransitionControllerState(standReadyControllerState, walkingControllerState, controllerToolbox);
       highLevelControllerStates.add(standTransitionControllerState);
       ArrayList<StateTransition<NewHighLevelControllerStates>> standTransitionTransitions = new ArrayList<>();
       standTransitionTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));

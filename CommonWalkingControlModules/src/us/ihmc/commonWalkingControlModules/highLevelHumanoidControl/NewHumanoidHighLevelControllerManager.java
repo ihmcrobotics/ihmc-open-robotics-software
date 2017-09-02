@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewHighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewWalkingControllerState;
@@ -250,7 +251,7 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
     * @param iterations number of times to run a single state
     * @param walkingState
     */
-   public void warmup(int iterations, NewWalkingControllerState walkingState)
+   public void warmup(int iterations, WalkingHighLevelHumanoidController walkingState)
    {
       PrintTools.info(this, "Starting JIT warmup routine");
       ArrayList<WalkingStateEnum> states = new ArrayList<>();

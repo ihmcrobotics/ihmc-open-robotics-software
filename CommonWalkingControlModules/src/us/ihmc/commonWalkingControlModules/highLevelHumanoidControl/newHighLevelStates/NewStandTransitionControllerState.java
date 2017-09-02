@@ -10,6 +10,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelCo
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -78,10 +79,8 @@ public class NewStandTransitionControllerState extends NewHighLevelControllerSta
       walkingControlRatioTrajectory.compute(getTimeInCurrentState());
       double gainRatio = walkingControlRatioTrajectory.getPosition();
 
-      ControllerCoreCommand standReadyCommand = standReadyControllerState.getControllerCoreCommand();
-      ControllerCoreCommand walkingCommand = walkingControllerState.getControllerCoreCommand();
-      LowLevelOneDoFJointDesiredDataHolder standReadyJointCommand = standReadyCommand.getLowLevelOneDoFJointDesiredDataHolder();
-      LowLevelOneDoFJointDesiredDataHolder walkingJointCommand = walkingCommand.getLowLevelOneDoFJointDesiredDataHolder();
+      LowLevelOneDoFJointDesiredDataHolderReadOnly standReadyJointCommand = standReadyControllerState.getOutputForLowLevelController();
+      LowLevelOneDoFJointDesiredDataHolderReadOnly walkingJointCommand = walkingControllerState.getOutputForLowLevelController();
 
       for (int jointIndex = 0; jointIndex < jointCommandBlenders.size(); jointIndex++)
       {
@@ -92,8 +91,6 @@ public class NewStandTransitionControllerState extends NewHighLevelControllerSta
          jointControlBlender.computeAndUpdateJointControl(lowLevelJointData, standReadyJointCommand.getLowLevelJointData(joint),
                                                           walkingJointCommand.getLowLevelJointData(joint), gainRatio);
       }
-
-      controllerCoreCommand.completeLowLevelJointData(lowLevelOneDoFJointDesiredDataHolder);
    }
 
    @Override
@@ -115,9 +112,9 @@ public class NewStandTransitionControllerState extends NewHighLevelControllerSta
    }
 
    @Override
-   public ControllerCoreCommand getControllerCoreCommand()
+   public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
    {
-      return controllerCoreCommand;
+      return lowLevelOneDoFJointDesiredDataHolder;
    }
 
 }
