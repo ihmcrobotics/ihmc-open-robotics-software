@@ -12,6 +12,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -22,8 +23,6 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
    private static final double MINIMUM_TIME_DONE_WITH_STAND_PREP = 1.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.OFF);
 
    private final OneDoFJoint[] controlledJoints;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
@@ -121,8 +120,6 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
 
          jointControlCalculator.computeAndUpdateJointControl(lowLevelJointData, masterGain.getDoubleValue());
       }
-
-      controllerCoreCommand.completeLowLevelJointData(lowLevelOneDoFJointDesiredDataHolder);
    }
 
    @Override
@@ -145,9 +142,9 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
    }
 
    @Override
-   public ControllerCoreCommand getControllerCoreCommand()
+   public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
    {
-      return controllerCoreCommand;
+      return lowLevelOneDoFJointDesiredDataHolder;
    }
 
 }

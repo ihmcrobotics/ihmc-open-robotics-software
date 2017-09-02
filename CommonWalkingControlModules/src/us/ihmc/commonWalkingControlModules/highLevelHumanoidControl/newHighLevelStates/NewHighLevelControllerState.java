@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class NewHighLevelControllerState extends FinishableState<NewHighLevelControllerStates>
@@ -27,7 +28,7 @@ public abstract class NewHighLevelControllerState extends FinishableState<NewHig
 
    public abstract void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput);
 
-   public abstract ControllerCoreCommand getControllerCoreCommand();
+   public abstract LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController();
 
    @Override
    public boolean isDone()

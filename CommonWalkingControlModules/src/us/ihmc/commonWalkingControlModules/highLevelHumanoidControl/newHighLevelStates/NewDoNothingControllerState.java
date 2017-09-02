@@ -13,6 +13,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class NewDoNothingControllerState extends NewHighLevelControllerState
@@ -24,8 +25,6 @@ public class NewDoNothingControllerState extends NewHighLevelControllerState
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
 
    private final OneDoFJoint[] allRobotJoints;
-
-   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.OFF);
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
 
    public NewDoNothingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox)
@@ -62,7 +61,6 @@ public class NewDoNothingControllerState extends NewHighLevelControllerState
          allRobotJoints[i].setTau(0.0);
          lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(allRobotJoints[i], 0.0);
       }
-      controllerCoreCommand.completeLowLevelJointData(lowLevelOneDoFJointDesiredDataHolder);
    }
 
    @Override
@@ -86,8 +84,8 @@ public class NewDoNothingControllerState extends NewHighLevelControllerState
    }
 
    @Override
-   public ControllerCoreCommand getControllerCoreCommand()
+   public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
    {
-      return controllerCoreCommand;
+      return lowLevelOneDoFJointDesiredDataHolder;
    }
 }
