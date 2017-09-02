@@ -17,11 +17,9 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ReferenceCMPTrajectoryGenerator
 {
-   private final List<YoDouble> swingDurations;
-   private final List<YoDouble> swingSplitFractions;
-
-   private final List<YoDouble> transferDurations;
-   private final List<YoDouble> transferSplitFractions;
+   private static final boolean tryBySubtracting = false;
+   private static final int maxNumberOfCoefficients = 10;
+   private static final int maxNumberOfSegments = 5;
 
    private final List<CMPTrajectory> transferCMPTrajectories = new ArrayList<>();
    private final List<CMPTrajectory> swingCMPTrajectories = new ArrayList<>();
@@ -31,25 +29,16 @@ public class ReferenceCMPTrajectoryGenerator
 
    private double initialTime;
    private int numberOfRegisteredSteps;
-   private final int maxNumberOfCoefficients = 10;
-   private final int maxNumberOfSegments = 5;
    private CMPTrajectory activeTrajectory;
 
    private final FramePoint3D desiredCMP = new FramePoint3D();
    private final FrameVector3D desiredCMPVelocity = new FrameVector3D();
    private CMPTrajectory cmpTrajectoryReference;
    private CoPTrajectory copTrajectoryReference;
-   private TorqueTrajectory torqueTrajectory; 
+   private final TorqueTrajectory torqueTrajectory;
 
-   public ReferenceCMPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, YoInteger numberOfFootstepsToConsider, List<YoDouble> swingDurations,
-                                          List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions, List<YoDouble> transferSplitFractions,
-                                          YoVariableRegistry registry)
+   public ReferenceCMPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, YoInteger numberOfFootstepsToConsider, YoVariableRegistry registry)
    {
-      this.swingDurations = swingDurations;
-      this.transferDurations = transferDurations;
-      this.swingSplitFractions = swingSplitFractions;
-      this.transferSplitFractions = transferSplitFractions;
-
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
 
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
@@ -62,7 +51,7 @@ public class ReferenceCMPTrajectoryGenerator
       CMPTrajectory transferCMPTrajectory = new CMPTrajectory(maxNumberOfSegments, maxNumberOfCoefficients);
       transferCMPTrajectories.add(transferCMPTrajectory);
       this.torqueTrajectory = new TorqueTrajectory(maxNumberOfSegments, maxNumberOfCoefficients);
-      this.verticalGroundReaction = new YoDouble("CMPTorqueOffsetScalingFactor", registry);
+      this.verticalGroundReaction = new YoDouble(namePrefix + "CMPTorqueOffsetScalingFactor", registry);
       this.trajMathTools = new TrajectoryMathTools(maxNumberOfCoefficients);
    }
    
@@ -178,6 +167,8 @@ public class ReferenceCMPTrajectoryGenerator
          {
             return;
          }
+         if (tryBySubtracting)
+            torqueTrajectory.scale(-1.0);
          trajMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
          index++;
       }
@@ -192,6 +183,8 @@ public class ReferenceCMPTrajectoryGenerator
          {
             return;
          }
+         if (tryBySubtracting)
+            torqueTrajectory.scale(-1.0);
          trajMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
          cmpTrajectoryReference = swingCMPTrajectories.get(index);
          copTrajectoryReference = swingCoPTrajectories.get(index);
@@ -201,6 +194,8 @@ public class ReferenceCMPTrajectoryGenerator
          {
             return;
          }
+         if (tryBySubtracting)
+            torqueTrajectory.scale(-1.0);
          trajMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
       }
       cmpTrajectoryReference = transferCMPTrajectories.get(numberOfFootstepsToSet);
@@ -209,6 +204,8 @@ public class ReferenceCMPTrajectoryGenerator
       torqueTrajectory.scale(1.0/verticalGroundReaction.getDoubleValue());
       if(copTrajectoryReference.getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
          return;
+      if (tryBySubtracting)
+         torqueTrajectory.scale(-1.0);
       trajMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
    }
 
