@@ -3,7 +3,6 @@ package us.ihmc.robotics.math.trajectories;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -381,8 +380,6 @@ public class YoTrajectory
 
    public void compute(double x)
    {
-      if ( x < tInitial.getDoubleValue() || x > tFinal.getDoubleValue())
-         PrintTools.debug("Shady stuff x: " + x + " tInitial: " + tInitial.getDoubleValue() + " tFinal: " + tFinal.getDoubleValue());
       polynomial.compute(x);
    } 
 
