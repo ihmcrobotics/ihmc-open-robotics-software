@@ -17,14 +17,14 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ReferenceCMPTrajectoryGenerator
 {
-   private static final boolean tryBySubtracting = false;
+   private static final boolean tryBySubtracting = true;
    private static final int maxNumberOfCoefficients = 10;
    private static final int maxNumberOfSegments = 5;
 
    private final List<CMPTrajectory> transferCMPTrajectories = new ArrayList<>();
    private final List<CMPTrajectory> swingCMPTrajectories = new ArrayList<>();
    private final YoDouble verticalGroundReaction;
-   private final TrajectoryMathTools trajMathTools;
+   private final TrajectoryMathTools trajectoryMathTools;
    private final YoInteger numberOfFootstepsToConsider;
 
    private double initialTime;
@@ -33,8 +33,6 @@ public class ReferenceCMPTrajectoryGenerator
 
    private final FramePoint3D desiredCMP = new FramePoint3D();
    private final FrameVector3D desiredCMPVelocity = new FrameVector3D();
-   private CMPTrajectory cmpTrajectoryReference;
-   private CoPTrajectory copTrajectoryReference;
    private final TorqueTrajectory torqueTrajectory;
 
    public ReferenceCMPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, YoInteger numberOfFootstepsToConsider, YoVariableRegistry registry)
@@ -52,7 +50,7 @@ public class ReferenceCMPTrajectoryGenerator
       transferCMPTrajectories.add(transferCMPTrajectory);
       this.torqueTrajectory = new TorqueTrajectory(maxNumberOfSegments, maxNumberOfCoefficients);
       this.verticalGroundReaction = new YoDouble(namePrefix + "CMPTorqueOffsetScalingFactor", registry);
-      this.trajMathTools = new TrajectoryMathTools(maxNumberOfCoefficients);
+      this.trajectoryMathTools = new TrajectoryMathTools(maxNumberOfCoefficients);
    }
    
    public void setGroundReaction(double z)
@@ -159,8 +157,8 @@ public class ReferenceCMPTrajectoryGenerator
       int index = 0;
       if(phase == WalkingTrajectoryType.SWING)
       {
-         cmpTrajectoryReference = swingCMPTrajectories.get(index);
-         copTrajectoryReference = swingCoPTrajectories.get(index);
+         CMPTrajectory cmpTrajectoryReference = swingCMPTrajectories.get(index);
+         CoPTrajectory copTrajectoryReference = swingCoPTrajectories.get(index);
          torqueTrajectory.set(swingAngularMomentumTrajectories.get(index));
          torqueTrajectory.scale(1.0/verticalGroundReaction.getDoubleValue());
          if(copTrajectoryReference.getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
@@ -169,14 +167,14 @@ public class ReferenceCMPTrajectoryGenerator
          }
          if (tryBySubtracting)
             torqueTrajectory.scale(-1.0);
-         trajMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
+         trajectoryMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
          index++;
       }
       
       for ( ;index < numberOfFootstepsToSet; index++)
       {
-         cmpTrajectoryReference = transferCMPTrajectories.get(index);
-         copTrajectoryReference = transferCoPTrajectories.get(index);
+         CMPTrajectory cmpTrajectoryReference = transferCMPTrajectories.get(index);
+         CoPTrajectory copTrajectoryReference = transferCoPTrajectories.get(index);
          torqueTrajectory.set(transferAngularMomentumTrajectories.get(index));
          torqueTrajectory.scale(1.0/verticalGroundReaction.getDoubleValue());
          if(copTrajectoryReference.getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
@@ -185,7 +183,7 @@ public class ReferenceCMPTrajectoryGenerator
          }
          if (tryBySubtracting)
             torqueTrajectory.scale(-1.0);
-         trajMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
+         trajectoryMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
          cmpTrajectoryReference = swingCMPTrajectories.get(index);
          copTrajectoryReference = swingCoPTrajectories.get(index);
          torqueTrajectory.set(swingAngularMomentumTrajectories.get(index));
@@ -196,17 +194,17 @@ public class ReferenceCMPTrajectoryGenerator
          }
          if (tryBySubtracting)
             torqueTrajectory.scale(-1.0);
-         trajMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
+         trajectoryMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
       }
-      cmpTrajectoryReference = transferCMPTrajectories.get(numberOfFootstepsToSet);
-      copTrajectoryReference = transferCoPTrajectories.get(numberOfFootstepsToSet);
+      CMPTrajectory cmpTrajectoryReference = transferCMPTrajectories.get(numberOfFootstepsToSet);
+      CoPTrajectory copTrajectoryReference = transferCoPTrajectories.get(numberOfFootstepsToSet);
       torqueTrajectory.set(transferAngularMomentumTrajectories.get(numberOfFootstepsToSet));
       torqueTrajectory.scale(1.0/verticalGroundReaction.getDoubleValue());
       if(copTrajectoryReference.getNumberOfSegments() == 0 || torqueTrajectory.getNumberOfSegments() == 0)
          return;
       if (tryBySubtracting)
          torqueTrajectory.scale(-1.0);
-      trajMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
+      trajectoryMathTools.addSegmentedTrajectories(cmpTrajectoryReference, copTrajectoryReference, torqueTrajectory, Epsilons.ONE_HUNDRED_THOUSANDTH);
    }
 
    private void copyCoPTrajectoriesToCMPTrajectories(List<? extends CoPTrajectory> transferCoPTrajectories,
@@ -215,8 +213,8 @@ public class ReferenceCMPTrajectoryGenerator
       int numberOfFootstepsToCopy = Math.min(numberOfFootstepsToConsider.getIntegerValue(), numberOfRegisteredSteps);
       for (int i = 0; i < numberOfFootstepsToCopy; i++)
       {
-         cmpTrajectoryReference = transferCMPTrajectories.get(i);
-         copTrajectoryReference = transferCoPTrajectories.get(i);
+         CMPTrajectory cmpTrajectoryReference = transferCMPTrajectories.get(i);
+         CoPTrajectory copTrajectoryReference = transferCoPTrajectories.get(i);
          for (int j = 0; j < copTrajectoryReference.getNumberOfSegments(); j++)
             cmpTrajectoryReference.getSegment(j).set(copTrajectoryReference.getSegments().get(j));
          cmpTrajectoryReference.setNumberOfSegments(copTrajectoryReference.getNumberOfSegments());
@@ -226,8 +224,8 @@ public class ReferenceCMPTrajectoryGenerator
             cmpTrajectoryReference.getSegment(j).set(copTrajectoryReference.getSegments().get(j));
          cmpTrajectoryReference.setNumberOfSegments(copTrajectoryReference.getNumberOfSegments());
       }
-      cmpTrajectoryReference = transferCMPTrajectories.get(numberOfFootstepsToCopy);
-      copTrajectoryReference = transferCoPTrajectories.get(numberOfFootstepsToCopy);
+      CMPTrajectory cmpTrajectoryReference = transferCMPTrajectories.get(numberOfFootstepsToCopy);
+      CoPTrajectory copTrajectoryReference = transferCoPTrajectories.get(numberOfFootstepsToCopy);
       for (int j = 0; j < copTrajectoryReference.getNumberOfSegments(); j++)
          cmpTrajectoryReference.getSegment(j).set(copTrajectoryReference.getSegments().get(j));
       cmpTrajectoryReference.setNumberOfSegments(copTrajectoryReference.getNumberOfSegments());
