@@ -33,7 +33,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class FootstepAngularMomentumPredictor implements AngularMomentumTrajectoryGeneratorInterface
 {
    // Shit ton of YoVariables shall be created if thou sets this flag to true
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final FrameVector3D zeroVector = new FrameVector3D();
