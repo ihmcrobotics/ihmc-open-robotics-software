@@ -32,7 +32,8 @@ ihmc {
 }
 
 testSuites {
-   bambooPlanKeys = ["LIBS-UI2", "LIBS-FAST2", "LIBS-FLAKY2", "LIBS-SLOW2", "LIBS-VIDEO2", "LIBS-INDEVELOPMENT2"]
+   def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
+   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "FLAKY", prefix + "VIDEO"]
    disableBambooConfigurationCheck = true
 }
 
