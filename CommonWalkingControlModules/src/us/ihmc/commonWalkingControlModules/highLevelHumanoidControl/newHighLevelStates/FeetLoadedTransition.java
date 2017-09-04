@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
 
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -9,28 +9,42 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FeetLoadedTransition implements StateTransitionCondition
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private static final double MINIMUM_FORCE_TO_SWITCH = 50.0;
+   private static final double MINIMUM_WEIGHT_FRACTION = 1.0 / 4.0;
+   private static final double TIME_WINDOW = 5.0;
 
    private final SideDependentList<ForceSensorDataReadOnly> footSensors = new SideDependentList<>();
+
+   private final YoBoolean areFeetLoaded;
+   private final YoDouble weightPerFootForLoaded;
 
    private final YoDouble prepLeftFootFz;
    private final YoDouble prepRightFootFz;
    private final SimpleMovingAverageFilteredYoVariable prepLeftFootFzAverage;
    private final SimpleMovingAverageFilteredYoVariable prepRightFootFzAverage;
 
-   public FeetLoadedTransition(ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetContactSensors, double controlDT,
-                               YoVariableRegistry parentRegistry)
+   public FeetLoadedTransition(ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetContactSensors,
+                               HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
          footSensors.put(robotSide, forceSensorDataHolder.getByName(feetContactSensors.get(robotSide)));
 
-      int windowSize = (int) Math.floor(14.0 / controlDT);
+      double controlDT = controllerToolbox.getControlDT();
+      double gravityZ = controllerToolbox.getGravityZ();
+      double totalMass = controllerToolbox.getFullRobotModel().getTotalMass();
+
+      int windowSize = (int) Math.floor(TIME_WINDOW / controlDT);
+
+      areFeetLoaded = new YoBoolean("areFeetLoaded", registry);
+      weightPerFootForLoaded = new YoDouble("weightPerFootForLoaded", registry);
+      weightPerFootForLoaded.set(gravityZ * totalMass * MINIMUM_WEIGHT_FRACTION);
+
       prepLeftFootFz = new YoDouble("prepLeftFootFz", registry);
       prepRightFootFz = new YoDouble("prepRightFootFz", registry);
       prepLeftFootFzAverage = new SimpleMovingAverageFilteredYoVariable("prepLeftFootFzAverage", windowSize, prepLeftFootFz, registry);
@@ -49,7 +63,9 @@ public class FeetLoadedTransition implements StateTransitionCondition
       prepRightFootFz.set(temporaryFootWrench.getLinearPartZ());
       prepLeftFootFzAverage.update();
       prepRightFootFzAverage.update();
-      return (prepLeftFootFzAverage.getDoubleValue() + prepRightFootFzAverage.getDoubleValue() > 2.0 * MINIMUM_FORCE_TO_SWITCH);
+      areFeetLoaded.set((prepLeftFootFzAverage.getDoubleValue() + prepRightFootFzAverage.getDoubleValue() > 2.0 * weightPerFootForLoaded.getDoubleValue()));
+
+      return areFeetLoaded.getBooleanValue();
    }
 
    @Override
