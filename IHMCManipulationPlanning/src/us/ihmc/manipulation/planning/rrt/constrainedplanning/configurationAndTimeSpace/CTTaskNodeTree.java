@@ -412,7 +412,12 @@ public class CTTaskNodeTree
    {
       return optimalPath;
    }
-
+   
+   public double getTreeReachingTime()
+   {
+      return treeReachingTime;
+   }
+   
    /*
     * public void saveNodes() { String fileName = "/home/shadylady/tree.txt";
     * BufferedWriter bw = null; FileWriter fw = null;

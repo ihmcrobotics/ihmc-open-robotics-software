@@ -16,6 +16,11 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
 
    public WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage;
 
+   public ConstrainedWholeBodyPlanningToolboxOutputStatus()
+   {
+      
+   }
+   
    @Override
    public boolean epsilonEquals(ConstrainedWholeBodyPlanningToolboxOutputStatus other, double epsilon)
    {

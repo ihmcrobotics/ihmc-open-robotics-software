@@ -200,6 +200,8 @@ public class CTTaskNode
       
       nodeCopy.parentNode = this.parentNode;
       
+      nodeCopy.validity = this.validity;
+      
       return nodeCopy;
    }
 

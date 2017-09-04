@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -55,16 +56,20 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
    }
 
    public WholeBodyTrajectoryMessage getWholeBodyTrajectoryMessage()
-   {
+   {  
+      wholeBodyTrajectoryMessage.clear();
+      
       updateHandTrajectoryMessages();
       updateChestTrajectoryMessage();
       updatePelvisTrajectoryMessage();
-      wholeBodyTrajectoryMessage.clear();
+      
       
       for(RobotSide robotSide : RobotSide.values)
          wholeBodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessages.get(robotSide));
-      wholeBodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
-      wholeBodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);
+//      wholeBodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
+//      wholeBodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);
+      
+
       
       return wholeBodyTrajectoryMessage;
    }

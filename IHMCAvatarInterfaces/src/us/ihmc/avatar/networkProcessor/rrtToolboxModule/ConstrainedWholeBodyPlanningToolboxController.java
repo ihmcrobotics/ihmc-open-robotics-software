@@ -222,18 +222,17 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       
       numberOfMotionPath--;
       if (numberOfMotionPath == 0)
-      {
-         state = CWBToolboxState.DO_NOTHING;
-         terminateToolboxController();
-
+      {  
          /*
           * generate WholeBodyTrajectoryMessage.
           */
+         terminateToolboxController();
          ctTaskNodeWholeBodyTrajectoryMessageFactory = new CTTaskNodeWholeBodyTrajectoryMessageFactory();
          
          ctTaskNodeWholeBodyTrajectoryMessageFactory.setCTTaskNodePath(tree.getPath());
          
-         
+         reportMessage(packResult(ctTaskNodeWholeBodyTrajectoryMessageFactory.getWholeBodyTrajectoryMessage(), 4));         
+         PrintTools.info("packResult");
       }
    }
 
@@ -313,9 +312,19 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       numberOfExpanding--;
       if (numberOfExpanding == 0)
       {
-         state = CWBToolboxState.SHORTCUT_PATH;
+         if(tree.getTreeReachingTime() != 1.0)
+         {
+            packResult(null, 2);
+            terminateToolboxController();
+            
+            PrintTools.info("Fail to reach end.");
+         }
+         else
+         {
+            state = CWBToolboxState.SHORTCUT_PATH;
 
-         PrintTools.info("Total update solver");
+            PrintTools.info("Total update solver");   
+         }
       }
    }
 
@@ -339,33 +348,37 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
          rootNode = visualizedNode.createNodeCopy();
       }
-
-      
-      
       
       /*
        * terminate finding initial guess.
        */
       numberOfInitialGuess-= ctTreeFindInitialGuess.getInitialGuessNodes().size();
-      if (numberOfInitialGuess == 0)
+      if (numberOfInitialGuess < 1)
       {
          PrintTools.info("initial guess terminate");
-         state = CWBToolboxState.EXPAND_TREE;
+         
+         if(rootNode.getValidity() == false)
+         {
+            packResult(null, 1);
+            terminateToolboxController();
+         }
+         else
+         {
+            state = CWBToolboxState.EXPAND_TREE;
 
-         rootNode.convertDataToNormalizedData(taskRegion);
+            rootNode.convertDataToNormalizedData(taskRegion);
 
-         PrintTools.info("" + bestScoreInitialGuess);
-         for (int i = 0; i < rootNode.getDimensionOfNodeData(); i++)
-            PrintTools.info("" + i + " " + rootNode.getNodeData(i));
+            PrintTools.info("" + bestScoreInitialGuess);
+            for (int i = 0; i < rootNode.getDimensionOfNodeData(); i++)
+               PrintTools.info("" + i + " " + rootNode.getNodeData(i));
 
-         tree = new CTTaskNodeTree(rootNode);
-         tree.setTaskRegion(taskRegion);
+            tree = new CTTaskNodeTree(rootNode);
+            tree.setTaskRegion(taskRegion);   
+         }
       }
    }
-
    
    long startTime;
-   
    
    @Override
    protected boolean initialize()
@@ -422,6 +435,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    
    private void terminateToolboxController()
    {
+      state = CWBToolboxState.DO_NOTHING;
+      
       long stopTime = System.currentTimeMillis();
       long elapsedTime = stopTime - startTime;
       System.out.println("===========================================");
@@ -451,15 +466,23 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       };
    }
 
-   private ConstrainedWholeBodyPlanningToolboxOutputStatus packResult(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage)
+   private ConstrainedWholeBodyPlanningToolboxOutputStatus packResult(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage, int planningResult)
    {
       ConstrainedWholeBodyPlanningToolboxOutputStatus result = new ConstrainedWholeBodyPlanningToolboxOutputStatus();
       
       if(wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT) == null || wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT) == null)
+      {
          result.wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+         PrintTools.info("no message");
+      }  
       else
+      {
          result.wholeBodyTrajectoryMessage = wholebodyTrajectoryMessage;
-
+         PrintTools.info("message");
+      }
+      
+      result.planningResult = planningResult;
+      
       return result;
    }
 
