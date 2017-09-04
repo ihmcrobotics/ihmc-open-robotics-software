@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
@@ -19,19 +20,19 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class NewStandPrepControllerState extends NewHighLevelControllerState
 {
-   private static final double TIME_TO_SPLINE_TO_STAND_POSE = 0.5;
-   private static final double MINIMUM_TIME_DONE_WITH_STAND_PREP = 1.0;
+   private static final double TIME_TO_SPLINE_TO_STAND_POSE = 0.1;
+   private static final double MINIMUM_TIME_DONE_WITH_STAND_PREP = 0.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final OneDoFJoint[] controlledJoints;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   private final PairList<OneDoFJoint, ImmutablePair<ImmutablePair<YoDouble, YoPolynomial>, JointControlCalculator>> jointsData = new PairList<>();
+   private final PairList<OneDoFJoint, ImmutablePair<ImmutableTriple<YoDouble, YoPolynomial, YoDouble>, JointControlCalculator>> jointsData = new PairList<>();
 
    private final YoDouble timeToPrepareForStanding = new YoDouble("timeToPrepareForStanding", registry);
    private final YoDouble minimumTimeDoneWithStandPrep = new YoDouble("minimumTimeDoneWithStandPrep", registry);
-   private final YoDouble masterGain = new YoDouble("standReadyMasterGain", registry);
+   private final YoDouble masterGain = new YoDouble("standPrepMasterGain", registry);
 
    public NewStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepParameters standPrepSetpoints,
                                       PositionControlParameters positionControlParameters)
@@ -56,6 +57,7 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
 
          YoPolynomial trajectory = new YoPolynomial(jointName + "_StandPrepTrajectory", 4, registry);
          YoDouble standPrepFinalConfiguration = new YoDouble(jointName + "_StandPrepFinalConfiguration", registry);
+         YoDouble standPrepDesiredConfiguration = new YoDouble(jointName + "_StandPrepDesiredConfiguration", registry);
 
          JointControlCalculator jointControlCalculator = new JointControlCalculator("_StandPrep", controlledJoint, controllerToolbox.getControlDT(), registry);
 
@@ -64,9 +66,9 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
          jointControlCalculator.setDerivativeGain(positionControlParameters.getDerivativeGain(jointName));
          jointControlCalculator.setIntegralGain(positionControlParameters.getIntegralGain(jointName));
 
-         ImmutablePair<YoDouble, YoPolynomial> trajectoryPair = new ImmutablePair<>(standPrepFinalConfiguration, trajectory);
+         ImmutableTriple<YoDouble, YoPolynomial, YoDouble> trajectoryPair = new ImmutableTriple<>(standPrepFinalConfiguration, trajectory, standPrepDesiredConfiguration);
 
-         ImmutablePair<ImmutablePair<YoDouble, YoPolynomial>, JointControlCalculator> jointData = new ImmutablePair<>(trajectoryPair, jointControlCalculator);
+         ImmutablePair<ImmutableTriple<YoDouble, YoPolynomial, YoDouble>, JointControlCalculator> jointData = new ImmutablePair<>(trajectoryPair, jointControlCalculator);
          jointsData.add(controlledJoint, jointData);
       }
 
@@ -84,18 +86,19 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
       {
          OneDoFJoint joint = jointsData.get(jointIndex).getLeft();
-         ImmutablePair<YoDouble, YoPolynomial> trajectoryData = jointsData.get(jointIndex).getRight().getLeft();
+         ImmutableTriple<YoDouble, YoPolynomial, YoDouble> trajectoryData = jointsData.get(jointIndex).getRight().getLeft();
          JointControlCalculator jointControlCalculator = jointsData.get(jointIndex).getRight().getRight();
-         YoDouble standPrepSetpoint = trajectoryData.getLeft();
-         YoPolynomial trajectory = trajectoryData.getRight();
+         YoDouble standPrepFinal = trajectoryData.getLeft();
+         YoPolynomial trajectory = trajectoryData.getMiddle();
 
-         double desiredAngle = standPrepSetpoint.getDoubleValue();
-         double desiredVelocity = 0.0;
+         double desiredFinalPosition = standPrepFinal.getDoubleValue();
+         double desiredFinalVelocity = 0.0;
 
          double currentAngle = joint.getQ();
-         double currentVelocity = joint.getQd();
+         //double currentVelocity = joint.getQd();
+         double currentVelocity = 0.0;
 
-         trajectory.setCubic(0.0, timeToPrepareForStanding.getDoubleValue(), currentAngle, currentVelocity, desiredAngle, desiredVelocity);
+         trajectory.setCubic(0.0, timeToPrepareForStanding.getDoubleValue(), currentAngle, currentVelocity, desiredFinalPosition, desiredFinalVelocity);
          jointControlCalculator.initialize();
       }
    }
@@ -108,15 +111,19 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
       {
          OneDoFJoint joint = jointsData.get(jointIndex).getLeft();
-         ImmutablePair<YoDouble, YoPolynomial> trajectoryData = jointsData.get(jointIndex).getRight().getLeft();
+         ImmutableTriple<YoDouble, YoPolynomial, YoDouble> trajectoryData = jointsData.get(jointIndex).getRight().getLeft();
          JointControlCalculator jointControlCalculator = jointsData.get(jointIndex).getRight().getRight();
 
-         YoPolynomial trajectory = trajectoryData.getRight();
+         YoPolynomial trajectory = trajectoryData.getMiddle();
+         YoDouble desiredPosition = trajectoryData.getRight();
+
          trajectory.compute(timeInTrajectory);
+         desiredPosition.set(trajectory.getPosition());
 
          LowLevelJointData lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(joint);
-         lowLevelJointData.setDesiredPosition(trajectory.getPosition());
+         lowLevelJointData.setDesiredPosition(desiredPosition.getDoubleValue());
          lowLevelJointData.setDesiredVelocity(trajectory.getVelocity());
+         lowLevelJointData.setDesiredAcceleration(trajectory.getAcceleration());
 
          jointControlCalculator.computeAndUpdateJointControl(lowLevelJointData, masterGain.getDoubleValue());
       }

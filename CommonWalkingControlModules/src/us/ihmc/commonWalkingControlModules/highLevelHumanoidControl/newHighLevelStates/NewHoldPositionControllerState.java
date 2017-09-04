@@ -24,7 +24,7 @@ public class NewHoldPositionControllerState extends NewHighLevelControllerState
    private final YoDouble masterGain;
 
    public NewHoldPositionControllerState(NewHighLevelControllerStates stateEnum, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                         StandPrepParameters standPrepSetpoints, PositionControlParameters positionControlParameters)
+                                         PositionControlParameters positionControlParameters)
    {
       super(stateEnum);
 
@@ -43,8 +43,8 @@ public class NewHoldPositionControllerState extends NewHighLevelControllerState
          JointControlCalculator jointControlCalculator = new JointControlCalculator(nameSuffix, controlledJoint, controllerToolbox.getControlDT(), registry);
 
          YoDouble freezePosition = new YoDouble(jointName + nameSuffix + "_qDesired", registry);
+         freezePosition.setToNaN();
 
-         freezePosition.set(standPrepSetpoints.getSetpoint(jointName));
          jointControlCalculator.setProportionalGain(positionControlParameters.getProportionalGain(jointName));
          jointControlCalculator.setDerivativeGain(positionControlParameters.getDerivativeGain(jointName));
          jointControlCalculator.setIntegralGain(positionControlParameters.getIntegralGain(jointName));
@@ -67,8 +67,8 @@ public class NewHoldPositionControllerState extends NewHighLevelControllerState
       for (int jointIndex = 0; jointIndex < jointControllers.size(); jointIndex++)
       {
          ImmutablePair<YoDouble, JointControlCalculator> data = jointControllers.get(jointIndex).getRight();
-         YoDouble setpoint = data.getLeft();
          OneDoFJoint joint = jointControllers.get(jointIndex).getLeft();
+         YoDouble setpoint = data.getLeft();
          setpoint.set(joint.getqDesired());
 
          JointControlCalculator jointControlCalculator = data.getRight();
@@ -88,6 +88,8 @@ public class NewHoldPositionControllerState extends NewHighLevelControllerState
 
          LowLevelJointData lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(joint);
          lowLevelJointData.setDesiredPosition(desiredPosition.getDoubleValue());
+         lowLevelJointData.setDesiredVelocity(0.0);
+         lowLevelJointData.setDesiredAcceleration(0.0);
 
          jointControlCalculator.computeAndUpdateJointControl(lowLevelJointData, masterGain.getDoubleValue());
       }

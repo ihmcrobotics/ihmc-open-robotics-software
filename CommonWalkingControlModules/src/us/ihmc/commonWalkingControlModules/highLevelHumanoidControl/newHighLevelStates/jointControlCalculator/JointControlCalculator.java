@@ -1,19 +1,15 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.jointControlCalculator;
 
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JointControlCalculator
 {
    private final PIDController pidPositionController;
    private final DeltaLimitedYoVariable positionStepSizeLimiter;
-   private final YoDouble initialAngle;
-
    private final OneDoFJoint oneDoFJoint;
    private final double controlDT;
 
@@ -23,8 +19,6 @@ public class JointControlCalculator
       this.controlDT = controlDT;
       String namePrefix = oneDoFJoint.getName();
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + nameSuffix + "JointControlCalculator");
-
-      this.initialAngle = new YoDouble(namePrefix + nameSuffix + "InitialAngle", registry);
 
       this.positionStepSizeLimiter = new DeltaLimitedYoVariable(namePrefix + nameSuffix + "PositionStepSizeLimiter", registry, 0.15);
 
@@ -54,30 +48,23 @@ public class JointControlCalculator
    public void initialize()
    {
       pidPositionController.setCumulativeError(0.0);
-      positionStepSizeLimiter.updateOutput(oneDoFJoint.getQ(), oneDoFJoint.getQ());
-
-      double q = oneDoFJoint.getQ();
-      double jointLimitLower = oneDoFJoint.getJointLimitLower();
-      double jointLimitUpper = oneDoFJoint.getJointLimitUpper();
-      q = MathTools.clamp(q, jointLimitLower, jointLimitUpper);
-
-      initialAngle.set(q);
+      positionStepSizeLimiter.updateOutput(oneDoFJoint.getqDesired(), oneDoFJoint.getqDesired());
    }
 
-   public void computeAndUpdateJointControl(LowLevelJointData positionControllerDesireds, double masterPositionGain)
+   public void computeAndUpdateJointControl(LowLevelJointData positionControllerDesiredsToPack, double masterPositionGain)
    {
       double currentJointAngle = oneDoFJoint.getQ();
-      double desiredPosition = masterPositionGain * positionControllerDesireds.getDesiredPosition();
+      double desiredPosition = masterPositionGain * positionControllerDesiredsToPack.getDesiredPosition();
 
-      positionStepSizeLimiter.updateOutput(currentJointAngle, desiredPosition);
-      desiredPosition = positionStepSizeLimiter.getDoubleValue();
+      //positionStepSizeLimiter.updateOutput(currentJointAngle, desiredPosition);
+      //desiredPosition = positionStepSizeLimiter.getDoubleValue();
 
       double qd = oneDoFJoint.getQd();
-      double qDesired = positionControllerDesireds.getDesiredPosition();
-      double qdDesired = positionControllerDesireds.getDesiredVelocity();
+      double qDesired = positionControllerDesiredsToPack.getDesiredPosition();
+      double qdDesired = positionControllerDesiredsToPack.getDesiredVelocity();
       double desiredTorque = masterPositionGain * pidPositionController.compute(currentJointAngle, qDesired, qd, qdDesired, controlDT);
 
-      positionControllerDesireds.setDesiredPosition(desiredPosition);
-      positionControllerDesireds.setDesiredTorque(desiredTorque);
+      positionControllerDesiredsToPack.setDesiredPosition(desiredPosition);
+      positionControllerDesiredsToPack.setDesiredTorque(desiredTorque);
    }
 }

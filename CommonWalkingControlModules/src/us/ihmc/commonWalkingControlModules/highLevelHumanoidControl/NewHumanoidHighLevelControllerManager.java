@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewHighLevelControllerState;
@@ -49,6 +50,7 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
 
    private final YoBoolean isListeningToHighLevelStateMessage = new YoBoolean("isListeningToHighLevelStateMessage", registry);
    private final YoEnum<NewHighLevelControllerStates> requestedHighLevelControllerState;
+   private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
    private final CommandInputManager commandInputManager;
@@ -90,6 +92,8 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
       this.controllerToolbox = controllerToolbox;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
       this.registry.addChild(controllerToolbox.getYoVariableRegistry());
+
+      yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controllerToolbox.getFullRobotModel().getOneDoFJoints(), registry);
 
       controllerToolbox.attachControllerFailureListener(new ControllerFailureListener()
       {
@@ -217,6 +221,8 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
          if (jointDataReadOnly.hasDesiredTorque())
             controlledJoint.setTau(jointDataReadOnly.getDesiredTorque());
       }
+
+      yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
    }
 
    // FIXME should not be able to transition to all controllers
