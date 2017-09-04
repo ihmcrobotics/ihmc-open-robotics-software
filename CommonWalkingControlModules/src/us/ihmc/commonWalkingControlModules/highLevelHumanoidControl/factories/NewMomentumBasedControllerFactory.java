@@ -409,7 +409,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       standReadyTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, fallbackControllerState));
       standReadyTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.STAND_TRANSITION_STATE));
       StateTransition<NewHighLevelControllerStates> feetLoadedTransition = new StateTransition<>(NewHighLevelControllerStates.STAND_TRANSITION_STATE,
-           new FeetLoadedTransition(forceSensorDataHolder, sensorInformation.getFeetForceSensorNames(), controllerToolbox.getControlDT(), registry));
+           new FeetLoadedTransition(forceSensorDataHolder, sensorInformation.getFeetForceSensorNames(), controllerToolbox, registry));
       standReadyTransitions.add(feetLoadedTransition);
       highLevelControllerTransitions.put(standReadyControllerState, standReadyTransitions);
 
