@@ -20,6 +20,7 @@ import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.robotics.sensors.*;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -79,9 +80,10 @@ public abstract class AbstractMomentumBasedControllerFactory implements Closeabl
    public abstract void createUserDesiredControllerCommandGenerator();
 
    public abstract RobotController getController(FullHumanoidRobotModel fullRobotModel, double controlDT, double gravity, YoDouble yoTime,
-                                        YoGraphicsListRegistry yoGraphicsListRegistry, ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                        CenterOfMassDataHolderReadOnly centerOfMassDataHolder, ContactSensorHolder contactSensorHolder,
-                                        CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, InverseDynamicsJoint... jointsToIgnore);
+                                                 YoGraphicsListRegistry yoGraphicsListRegistry, DRCRobotSensorInformation sensorInformation,
+                                                 ForceSensorDataHolderReadOnly forceSensorDataHolder, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
+                                                 ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+                                                 InverseDynamicsJoint... jointsToIgnore);
 
    public abstract void reinitializeWalking(boolean keepPosition);
 

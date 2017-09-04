@@ -144,7 +144,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       InverseDynamicsJoint[] arrayOfJointsToIgnore = createListOfJointsToIgnore(controllerFullRobotModel, robotModel, sensorInformation);
 
       robotController = createMomentumBasedController(controllerFullRobotModel,
-            controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, centerOfMassDataHolderForController,
+            controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, sensorInformation, forceSensorDataHolderForController, centerOfMassDataHolderForController,
             threadDataSynchronizer.getControllerContactSensorHolder(),
             centerOfPressureDataHolderForEstimator, yoGraphicsListRegistry, registry, arrayOfJointsToIgnore);
 
@@ -212,8 +212,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    private ModularRobotController createMomentumBasedController(FullHumanoidRobotModel controllerModel,
                                                                 AbstractMomentumBasedControllerFactory controllerFactory, YoDouble yoTime, double controlDT, double gravity,
-                                                                ForceSensorDataHolderReadOnly forceSensorDataHolderForController, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
-                                                                ContactSensorHolder contactSensorHolder,
+                                                                DRCRobotSensorInformation sensorInformation, ForceSensorDataHolderReadOnly forceSensorDataHolderForController,
+                                                                CenterOfMassDataHolderReadOnly centerOfMassDataHolder, ContactSensorHolder contactSensorHolder,
                                                                 CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
                                                                 InverseDynamicsJoint... jointsToIgnore)
    {
@@ -231,7 +231,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          }
       }
 
-      RobotController robotController = controllerFactory.getController(controllerModel, controlDT, gravity, yoTime, yoGraphicsListRegistry,
+      RobotController robotController = controllerFactory.getController(controllerModel, controlDT, gravity, yoTime, yoGraphicsListRegistry, sensorInformation,
             forceSensorDataHolderForController, centerOfMassDataHolder, contactSensorHolder, centerOfPressureDataHolderForEstimator, jointsToIgnore);
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");

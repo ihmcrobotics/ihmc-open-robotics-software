@@ -19,7 +19,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class NewStandPrepControllerState extends NewHighLevelControllerState
 {
-   private static final double TIME_TO_SPLINE_TO_STAND_POSE = 4.0;
+   private static final double TIME_TO_SPLINE_TO_STAND_POSE = 0.5;
    private static final double MINIMUM_TIME_DONE_WITH_STAND_PREP = 1.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
