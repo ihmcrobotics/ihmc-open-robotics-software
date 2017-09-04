@@ -642,6 +642,11 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       return null;
    }
 
+   public NewHighLevelControllerStates getCurrentNewHighLevelControllerState()
+   {
+      return highLevelControllerStateMachine.getCurrentHighLevelState();
+   }
+
    public NewDoNothingControllerState createDoNothingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox)
    {
       return new NewDoNothingControllerState(controllerToolbox);
