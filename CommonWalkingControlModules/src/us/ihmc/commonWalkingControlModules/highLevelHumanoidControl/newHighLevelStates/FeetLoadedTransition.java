@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FeetLoadedTransition implements StateTransitionCondition
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private static final double MINIMUM_WEIGHT_FRACTION = 1.0 / 4.0;
    private static final double TIME_WINDOW = 5.0;
