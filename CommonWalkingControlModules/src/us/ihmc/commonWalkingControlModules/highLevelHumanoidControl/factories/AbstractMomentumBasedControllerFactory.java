@@ -12,6 +12,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
@@ -113,4 +114,6 @@ public abstract class AbstractMomentumBasedControllerFactory implements Closeabl
    public abstract void warmupWalkingController(int iterations);
 
    public abstract HighLevelState getCurrentHighLevelState();
+
+   public abstract NewHighLevelControllerStates getCurrentNewHighLevelControllerState();
 }

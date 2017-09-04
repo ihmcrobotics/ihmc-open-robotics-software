@@ -39,6 +39,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -549,6 +550,11 @@ public class MomentumBasedControllerFactory extends AbstractMomentumBasedControl
    public HighLevelState getCurrentHighLevelState()
    {
       return highLevelHumanoidControllerManager.getCurrentHighLevelState();
+   }
+
+   public NewHighLevelControllerStates getCurrentNewHighLevelControllerState()
+   {
+      return null;
    }
 
    public CommandInputManager getCommandInputManager()

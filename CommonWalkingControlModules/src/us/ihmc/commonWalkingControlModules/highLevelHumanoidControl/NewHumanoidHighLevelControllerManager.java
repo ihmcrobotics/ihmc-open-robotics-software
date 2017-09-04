@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLow
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewHighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewWalkingControllerState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -15,8 +14,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelStateCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NewHighLevelStateCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NewHighLevelControllerStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.NewHighLevelControllerStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -173,9 +171,9 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
    {
       if (isListeningToHighLevelStateMessage.getBooleanValue())
       {
-         if (commandInputManager.isNewCommandAvailable(HighLevelStateCommand.class))
+         if (commandInputManager.isNewCommandAvailable(NewHighLevelControllerStateCommand.class))
          {
-            requestedHighLevelControllerState.set(commandInputManager.pollNewestCommand(NewHighLevelStateCommand.class).getHighLevelState());
+            requestedHighLevelControllerState.set(commandInputManager.pollNewestCommand(NewHighLevelControllerStateCommand.class).getHighLevelControllerState());
          }
       }
 

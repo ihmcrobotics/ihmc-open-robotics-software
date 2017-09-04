@@ -15,9 +15,9 @@ public class HighLevelStateBehavior extends AbstractBehavior
       super(outgoingCommunicationBridge);
    }
 
-   public void setInput(HighLevelStateMessage thighStatePacket)
+   public void setInput(HighLevelStateMessage highLevelStatePacket)
    {
-      this.outgoingHighLevelStatePacket = thighStatePacket;
+      this.outgoingHighLevelStatePacket = highLevelStatePacket;
    }
 
    @Override
