@@ -85,6 +85,8 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
 
             leftHandTrajectoryBehavior.setInput(leftHandTrajectoryMessage);
             rightHandTrajectoryBehavior.setInput(rightHandTrajectoryMessage);
+            
+            
          }
       };
 
