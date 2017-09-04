@@ -50,6 +50,7 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -291,18 +292,19 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    }
 
    public RobotController getController(FullHumanoidRobotModel fullRobotModel, double controlDT, double gravity, YoDouble yoTime,
-                                        YoGraphicsListRegistry yoGraphicsListRegistry, ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                        CenterOfMassDataHolderReadOnly centerOfMassDataHolder, ContactSensorHolder contactSensorHolder,
-                                        CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, InverseDynamicsJoint... jointsToIgnore)
+                                        YoGraphicsListRegistry yoGraphicsListRegistry, DRCRobotSensorInformation sensorInformation,
+                                        ForceSensorDataHolderReadOnly forceSensorDataHolder, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
+                                        ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+                                        InverseDynamicsJoint... jointsToIgnore)
    {
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
       SideDependentList<ContactableFoot> feet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
-      List<ContactablePlaneBody> addidionalContacts = contactableBodiesFactory.createAdditionalContactPoints(fullRobotModel);
+      List<ContactablePlaneBody> additionalContacts = contactableBodiesFactory.createAdditionalContactPoints(fullRobotModel);
       List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
          contactablePlaneBodies.add(feet.get(robotSide));
-      contactablePlaneBodies.addAll(addidionalContacts);
+      contactablePlaneBodies.addAll(additionalContacts);
 
       double gravityZ = Math.abs(gravity);
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
@@ -317,9 +319,8 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
       double omega0 = walkingControllerParameters.getOmega0();
-      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, centerOfMassDataHolder,
-            wristForceSensors, yoTime, gravityZ, omega0, feet, controlDT, updatables, contactablePlaneBodies, yoGraphicsListRegistry,
-            jointsToIgnore);
+      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, centerOfMassDataHolder, wristForceSensors,
+            yoTime, gravityZ, omega0, feet, controlDT, updatables, contactablePlaneBodies, yoGraphicsListRegistry, jointsToIgnore);
       controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createComponentBasedFootstepDataMessageGenerator)
@@ -407,6 +408,9 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       standReadyTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
       standReadyTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, fallbackControllerState));
       standReadyTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.STAND_TRANSITION_STATE));
+      StateTransition<NewHighLevelControllerStates> feetLoadedTransition = new StateTransition<>(NewHighLevelControllerStates.STAND_TRANSITION_STATE,
+           new FeetLoadedTransition(forceSensorDataHolder, sensorInformation.getFeetForceSensorNames(), controllerToolbox.getControlDT(), registry));
+      standReadyTransitions.add(feetLoadedTransition);
       highLevelControllerTransitions.put(standReadyControllerState, standReadyTransitions);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
