@@ -8,6 +8,6 @@ public class NewFreezeControllerState extends NewHoldPositionControllerState
    public NewFreezeControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepParameters standPrepSetpoints,
                                    PositionControlParameters positionControlParameters)
    {
-      super(NewHighLevelControllerStates.FREEZE_STATE, controllerToolbox, standPrepSetpoints, positionControlParameters);
+      super(NewHighLevelControllerStates.FREEZE_STATE, controllerToolbox, positionControlParameters);
    }
 }
