@@ -80,7 +80,7 @@ public class DRCSimulationTestHelper
    private final ScriptedFootstepGenerator scriptedFootstepGenerator;
    private final ScriptedHandstepGenerator scriptedHandstepGenerator;
 
-   private DRCNetworkModuleParameters networkProcessorParameters;
+   private DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
    private DRCSimulationStarter simulationStarter;
    private Exception caughtException;
 
@@ -91,7 +91,6 @@ public class DRCSimulationTestHelper
    private HighLevelBehaviorFactory highLevelBehaviorFactory = null;
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = null;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = null;
-   private DRCNetworkModuleParameters drcNetworkModuleParameters = null;
    private final DRCGuiInitialSetup guiInitialSetup;
 
    public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel)
@@ -106,6 +105,8 @@ public class DRCSimulationTestHelper
       scriptedHandstepGenerator = new ScriptedHandstepGenerator(fullRobotModel);
 
       guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
+
+      networkProcessorParameters.enableNetworkProcessor(false);
    }
 
    public void createSimulation(String name)
@@ -122,24 +123,13 @@ public class DRCSimulationTestHelper
          simulationStarter.registerHighLevelController(highLevelBehaviorFactory);
       if (initialSetup != null)
          simulationStarter.setRobotInitialSetup(initialSetup);
-      if (startingLocation != null)
-         simulationStarter.setStartingLocation(startingLocation);
+      simulationStarter.setStartingLocation(startingLocation);
       simulationStarter.setGuiInitialSetup(guiInitialSetup);
       simulationStarter.setInitializeEstimatorToActual(true);
       simulationStarter.setFlatGroundWalkingScriptParameters(walkingScriptParameters);
 
       if (addFootstepMessageGenerator)
          simulationStarter.addFootstepMessageGenerator(useHeadingAndVelocityScript, cheatWithGroundHeightAtFootstep);
-
-      if (drcNetworkModuleParameters == null)
-      {
-         networkProcessorParameters = new DRCNetworkModuleParameters();
-         networkProcessorParameters.enableNetworkProcessor(false);
-      }
-      else
-      {
-         networkProcessorParameters = drcNetworkModuleParameters;
-      }
 
       try
       {
