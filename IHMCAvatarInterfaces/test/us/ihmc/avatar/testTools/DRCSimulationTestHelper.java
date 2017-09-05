@@ -1,14 +1,5 @@
 package us.ihmc.avatar.testTools;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -40,9 +31,6 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.tools.exceptions.NoConvergenceException;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -60,14 +48,26 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 public class DRCSimulationTestHelper
 {
    private SimulationConstructionSet scs;
    private HumanoidFloatingRootJointRobot sdfRobot;
    private AvatarSimulation avatarSimulation;
-   protected final PacketCommunicator controllerCommunicator;
-   private final CommonAvatarEnvironmentInterface testEnvironment;
+   protected final PacketCommunicator controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
+         new IHMCCommunicationKryoNetClassList());
+   private CommonAvatarEnvironmentInterface testEnvironment;
 
    private final SimulationTestingParameters simulationTestingParameters;
 
@@ -82,6 +82,15 @@ public class DRCSimulationTestHelper
    private final DRCNetworkModuleParameters networkProcessorParameters;
    private DRCSimulationStarter simulationStarter;
    private Exception caughtException;
+
+   private DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+   private boolean addFootstepMessageGenerator = false;
+   private boolean useHeadAndVelocityScript = false;
+   private boolean cheatWithGroundHeightAtFootstep = false;
+   private HighLevelBehaviorFactory highLevelBehaviorFactory = null;
+   private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = null;
+   private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = null;
+   private DRCNetworkModuleParameters drcNetworkModuleParameters = null;
 
    public DRCSimulationTestHelper(DRCObstacleCourseStartingLocation selectedLocation,
                                   SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel)
@@ -120,20 +129,9 @@ public class DRCSimulationTestHelper
                                   boolean useHeadingAndVelocityScript, boolean cheatWithGroundHeightAtForFootstep,
                                   HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
-      this.controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
-            new IHMCCommunicationKryoNetClassList());
       this.testEnvironment = commonAvatarEnvironmentInterface;
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
       this.simulationTestingParameters = simulationTestingParameters;
-
-      try
-      {
-         controllerCommunicator.connect();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
 
       fullRobotModel = robotModel.createFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -176,6 +174,15 @@ public class DRCSimulationTestHelper
 
    public void createSimulation(String name, boolean automaticallySpawnSimulation, boolean useBlockingSimulationRunner)
    {
+      try
+      {
+         controllerCommunicator.connect();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+
       simulationStarter.createSimulation(networkProcessorParameters, automaticallySpawnSimulation, false);
 
       scs = simulationStarter.getSimulationConstructionSet();
@@ -511,5 +518,45 @@ public class DRCSimulationTestHelper
             }
          }
       }
+   }
+
+   public void setSelectedLocation(DRCObstacleCourseStartingLocation selectedLocation)
+   {
+      this.selectedLocation = selectedLocation;
+   }
+
+   public void setAddFootstepMessageGenerator(boolean addFootstepMessageGenerator)
+   {
+      this.addFootstepMessageGenerator = addFootstepMessageGenerator;
+   }
+
+   public void setUseHeadAndVelocityScript(boolean useHeadAndVelocityScript)
+   {
+      this.useHeadAndVelocityScript = useHeadAndVelocityScript;
+   }
+
+   public void setCheatWithGroundHeightAtFootstep(boolean cheatWithGroundHeightAtFootstep)
+   {
+      this.cheatWithGroundHeightAtFootstep = cheatWithGroundHeightAtFootstep;
+   }
+
+   public void setHighLevelBehaviorFactory(HighLevelBehaviorFactory highLevelBehaviorFactory)
+   {
+      this.highLevelBehaviorFactory = highLevelBehaviorFactory;
+   }
+
+   public void setInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup)
+   {
+      this.initialSetup = initialSetup;
+   }
+
+   public void setWalkingScriptParameters(HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
+   {
+      this.walkingScriptParameters = walkingScriptParameters;
+   }
+
+   public void setDrcNetworkModuleParameters(DRCNetworkModuleParameters drcNetworkModuleParameters)
+   {
+      this.drcNetworkModuleParameters = drcNetworkModuleParameters;
    }
 }
