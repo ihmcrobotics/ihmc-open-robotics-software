@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 import java.util.ArrayList;
 import java.util.List;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.SmoothCoMIntegrationToolbox;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointAdjustmentToolbox;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointToolbox;
@@ -30,14 +31,9 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 {
    private final static boolean CONTINUOUSLY_ADJUST_FOR_ICP_DISCONTINUITY = true;
 
-   private final YoDouble omega0;
-   private ReferenceFrame trajectoryFrame;
-
    private final static int FIRST_SEGMENT = 0;
 
    private final static int defaultSize = 50;
-
-   private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final List<FramePoint3D> cmpDesiredFinalPositions = new ArrayList<>();
    
@@ -47,65 +43,56 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final List<FramePoint3D> icpDesiredInitialPositionsFromCoPs = new ArrayList<>();
    private final List<FramePoint3D> icpDesiredFinalPositionsFromCoPs = new ArrayList<>();
 
-   private FramePoint3D icpPositionDesiredCurrent = new FramePoint3D();
-   private FrameVector3D icpVelocityDesiredCurrent = new FrameVector3D();
-   private FrameVector3D icpAccelerationDesiredCurrent = new FrameVector3D();
-   private FrameVector3D icpVelocityDynamicsCurrent = new FrameVector3D();
-   private YoFrameVector yoICPVelocityDynamicsCurrent;
+   private final FramePoint3D icpPositionDesiredCurrent = new FramePoint3D();
+   private final FrameVector3D icpVelocityDesiredCurrent = new FrameVector3D();
+   private final FrameVector3D icpAccelerationDesiredCurrent = new FrameVector3D();
+   private final FrameVector3D icpVelocityDynamicsCurrent = new FrameVector3D();
+   private final YoFrameVector yoICPVelocityDynamicsCurrent;
 
-   private FramePoint3D icpPositionDesiredFinalCurrentSegment = new FramePoint3D();
-
-   private FramePoint3D cmpPositionDesiredInitial = new FramePoint3D();
-   private FramePoint3D icpPositionDesiredTerminal = new FramePoint3D();
-   
-   private YoInteger currentSegmentIndex;
+   private final FramePoint3D icpPositionDesiredFinalCurrentSegment = new FramePoint3D();
+   private final FramePoint3D icpPositionDesiredTerminal = new FramePoint3D();
 
    private final YoBoolean isStanding;
    private final YoBoolean isInitialTransfer;
    private final YoBoolean isDoubleSupport;
 
+   private final YoBoolean continuouslyAdjustForICPContinuity;
    private final YoBoolean areICPDynamicsSatisfied;
 
    private final YoInteger totalNumberOfCMPSegments;
    private final YoInteger numberOfFootstepsToConsider;
+   private final YoInteger currentSegmentIndex;
+
+   private final YoDouble startTimeOfCurrentPhase;
+   private final YoDouble localTimeInCurrentPhase;
+   private final YoDouble omega0;
 
    private int numberOfFootstepsRegistered;
-   
-   private int numberOfSegmentsSwing0;
-   private int numberOfSegmentsTransfer0;
-
-   private YoDouble startTimeOfCurrentPhase;
-   private YoDouble localTimeInCurrentPhase;
-
-   private boolean isPaused = false;
 
    private final List<FrameTrajectory3D> copTrajectories = new ArrayList<>();
    private final List<FrameTrajectory3D> cmpTrajectories = new ArrayList<>();
 
-   private final YoBoolean continuouslyAdjustForICPContinuity;
-   private List<FrameTuple3D<?, ?>> icpQuantityInitialConditionList = new ArrayList<FrameTuple3D<?, ?>>();
-   
-   private List<Integer> icpPhaseEntryCornerPointIndices = new ArrayList<Integer>();
-   private List<Integer> icpPhaseExitCornerPointIndices = new ArrayList<Integer>();
+
+   private final TIntArrayList icpPhaseExitCornerPointIndices = new TIntArrayList();
+   private final TIntArrayList icpPhaseEntryCornerPointIndices = new TIntArrayList();
 
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
    private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox(icpToolbox);
 
    public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isStanding,
-                                          YoBoolean isInitialTransfer, YoBoolean isDoubleSupport, ReferenceFrame trajectoryFrame,
+                                          YoBoolean isInitialTransfer, YoBoolean isDoubleSupport,
                                           YoVariableRegistry registry)
    {
       this.omega0 = omega0;
-      this.trajectoryFrame = trajectoryFrame;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
       this.isStanding = isStanding;
       this.isInitialTransfer = isInitialTransfer;
       this.isDoubleSupport = isDoubleSupport;
 
-      areICPDynamicsSatisfied = new YoBoolean("areICPDynamicsSatisfied", registry);
+      areICPDynamicsSatisfied = new YoBoolean(namePrefix + "AreICPDynamicsSatisfied", registry);
       areICPDynamicsSatisfied.set(false);
 
-      continuouslyAdjustForICPContinuity = new YoBoolean("continuouslyAdjustForICPContinuity", registry);
+      continuouslyAdjustForICPContinuity = new YoBoolean(namePrefix + "ContinuouslyAdjustForICPContinuity", registry);
       continuouslyAdjustForICPContinuity.set(CONTINUOUSLY_ADJUST_FOR_ICP_DISCONTINUITY);
 
       totalNumberOfCMPSegments = new YoInteger(namePrefix + "TotalNumberOfICPSegments", registry);
@@ -114,11 +101,10 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       localTimeInCurrentPhase = new YoDouble(namePrefix + "LocalTimeCurrentPhase", registry);
       localTimeInCurrentPhase.set(0.0);
 
-      yoICPVelocityDynamicsCurrent = new YoFrameVector("ICPVelocityDynamics", ReferenceFrame.getWorldFrame(), registry);
+      yoICPVelocityDynamicsCurrent = new YoFrameVector(namePrefix + "ICPVelocityDynamics", ReferenceFrame.getWorldFrame(), registry);
 
-      currentSegmentIndex = new YoInteger("CurrentSegment", registry);
+      currentSegmentIndex = new YoInteger(namePrefix + "CurrentSegment", registry);
 
-      icpQuantityInitialConditionList.add(new FramePoint3D());
       for (int i = 0; i < defaultSize; i++)
       {
          icpDesiredInitialPositions.add(new FramePoint3D());
@@ -128,8 +114,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          icpDesiredFinalPositionsFromCoPs.add(new FramePoint3D());
          
          cmpDesiredFinalPositions.add(new FramePoint3D());
-
-         icpQuantityInitialConditionList.add(new FrameVector3D());
       }
    }
 
@@ -193,8 +177,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          totalNumberOfCMPSegments.increment();
       }
       icpPhaseExitCornerPointIndices.add(totalNumberOfCMPSegments.getIntegerValue());
-      numberOfSegmentsTransfer0 = transferCMPTrajectories.get(0).getNumberOfSegments();
-      
+
       initialize();
    }
 
@@ -247,10 +230,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          cmpTrajectories.add(transferCMPTrajectory.getSegment(cmpSegment));
          totalNumberOfCMPSegments.increment();
       }
-      icpPhaseExitCornerPointIndices.add(totalNumberOfCMPSegments.getIntegerValue());;
+      icpPhaseExitCornerPointIndices.add(totalNumberOfCMPSegments.getIntegerValue());
 
-      numberOfSegmentsSwing0 = swingCMPTrajectories.get(0).getNumberOfSegments();
-      
       initialize();
    }
    
@@ -404,8 +385,6 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       areICPDynamicsSatisfied.set(icpVelocityDesiredCurrent.epsilonEquals(icpVelocityDynamicsCurrent, 10e-5));
    }
 
-   FrameVector3D comVelocityDynamicsCurrent = new FrameVector3D();
-   
    private int getCurrentSegmentIndex(double timeInCurrentPhase, List<FrameTrajectory3D> cmpTrajectories)
    {
       int currentSegmentIndex = FIRST_SEGMENT;
@@ -584,15 +563,5 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    public int getTotalNumberOfSegments()
    {
       return totalNumberOfCMPSegments.getIntegerValue();
-   }
-
-   public void pause()
-   {
-      isPaused = true;
-   }
-
-   public void resume()
-   {
-      isPaused = false;
    }
 }

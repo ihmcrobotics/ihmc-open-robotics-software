@@ -39,6 +39,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
    private static final boolean VISUALIZE = true;
+   private static final boolean debug = true;
 
    private static final double ZERO_TIME = 0.0;
 
@@ -51,7 +52,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private final List<YoDouble> swingDurationShiftFractions = new ArrayList<>();
    private final YoDouble defaultSwingDurationShiftFraction;
    
-   private static final double ICP_CORNER_POINT_SIZE = 0.005;
+   private static final double ICP_CORNER_POINT_SIZE = 0.002;
    private List<YoFramePointInMultipleFrames> icpPhaseEntryCornerPoints = new ArrayList<>();
    private List<YoFramePointInMultipleFrames> icpPhaseExitCornerPoints = new ArrayList<>();
 
@@ -98,16 +99,15 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator = new ReferenceCoPTrajectoryGenerator(namePrefix, numberOfPointsPerFoot, maxNumberOfFootstepsToConsider, bipedSupportPolygons,
                                                                   contactableFeet, numberFootstepsToConsider, swingDurations, transferDurations,
                                                                   swingDurationAlphas, swingDurationShiftFractions, transferDurationAlphas, registry);
-      referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, numberFootstepsToConsider, swingDurations,
-                                                                  transferDurations, swingDurationAlphas, transferDurationAlphas, registry);
+      referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, numberFootstepsToConsider, registry);
 
       referenceICPGenerator = new ReferenceICPTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isStanding, isInitialTransfer, isDoubleSupport,
-                                                                  worldFrame, registry);
+                                                                  registry);
 
       referenceCoMGenerator = new ReferenceCoMTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isStanding, isInitialTransfer, isDoubleSupport,
-                                                                  worldFrame, registry);
+                                                                  registry);
 
-      angularMomentumGenerator = new FootstepAngularMomentumPredictor(namePrefix, omega0, registry);
+      angularMomentumGenerator = new FootstepAngularMomentumPredictor(namePrefix, omega0, debug, registry);
 
       areCoMDynamicsSatisfied = new YoBoolean("areCoMDynamicsSatisfied", registry);
       areCoMDynamicsSatisfied.set(false);
@@ -169,6 +169,19 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
          yoGraphicsList.add(icpExitCornerPointsViz);
          artifactList.add(icpExitCornerPointsViz.createArtifact());
+      }
+
+      if (debug)
+      {
+         YoGraphicPosition referenceCMPPositionViz = new YoGraphicPosition("Reference CMP", desiredCMPPosition, 0.015, YoAppearance.Green(),
+                                                                           GraphicType.BALL_WITH_ROTATED_CROSS);
+         YoGraphicPosition referenceCoPPositionViz = new YoGraphicPosition("Reference CoP", desiredCoPPosition, 0.015, YoAppearance.Purple(),
+                                                                           GraphicType.BALL_WITH_ROTATED_CROSS);
+
+         yoGraphicsList.add(referenceCMPPositionViz);
+         yoGraphicsList.add(referenceCoPPositionViz);
+         artifactList.add(referenceCMPPositionViz.createArtifact());
+         artifactList.add(referenceCoPPositionViz.createArtifact());
       }
 
       artifactList.setVisible(VISUALIZE);
