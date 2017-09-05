@@ -115,17 +115,19 @@ public class EuclideanTrajectoryPointCalculator
       maxWeight = Double.NaN;
    }
 
-   public void computeTrajectoryPointTimes(double firstTrajectoryPointTime, ArrayList<Double> trajectoryTimes)
+   
+   
+   public void computeTrajectoryPointTimes(double firstTrajectoryPointTime, double[] trajectoryTimes)
    {
       int numberOfTrajectoryPoints = getNumberOfTrajectoryPoints();
       
       trajectoryPoints.get(0).setTime(firstTrajectoryPointTime);
-      trajectoryPoints.get(trajectoryPoints.size() - 1).setTime(firstTrajectoryPointTime + trajectoryTimes.get(numberOfTrajectoryPoints-1));
+      trajectoryPoints.get(trajectoryPoints.size() - 1).setTime(firstTrajectoryPointTime + trajectoryTimes[numberOfTrajectoryPoints-1]);
       
       for (int i = 1; i < numberOfTrajectoryPoints - 1; i++)
       {
          double time = 0;         
-         time = firstTrajectoryPointTime + trajectoryTimes.get(i);
+         time = firstTrajectoryPointTime + trajectoryTimes[i];
          trajectoryPoints.get(i).setTime(time);
       }
    }

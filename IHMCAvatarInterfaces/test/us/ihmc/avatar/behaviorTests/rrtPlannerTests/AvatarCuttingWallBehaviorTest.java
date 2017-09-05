@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.jfree.util.PrintStreamLogTarget;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +12,6 @@ import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
-import us.ihmc.avatar.networkProcessor.rrtToolboxModule.ConstrainedWholeBodyPlanningToolboxController;
 import us.ihmc.avatar.networkProcessor.rrtToolboxModule.ConstrainedWholeBodyPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
@@ -32,6 +30,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.CuttingWallBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -43,6 +42,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -273,8 +273,21 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
                                                                                                                    drcBehaviorTestHelper.getYoTime());
 
       ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
+      PrintTools.info(""+endeffectorTrajectory.getTrajectoryTime());
+      
       planningBehavior.setInputs(endeffectorTrajectory, sdfFullRobotModel);      
       PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
+      
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+      int numberOfPath = 20;
+      for(int i=0;i<numberOfPath;i++)
+      {
+         double localTime = ((double)(i)/numberOfPath)*endeffectorTrajectory.getTrajectoryTime();
+         ConfigurationSpace configurationSpace = new ConfigurationSpace();
+         scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(localTime, RobotSide.LEFT, configurationSpace)));
+      }
+
+      
       
       System.out.println("Behavior Dispatch");
       drcBehaviorTestHelper.dispatchBehavior(planningBehavior);
@@ -288,6 +301,9 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       
       drcBehaviorTestHelper.send(planningBehavior.getWholebodyTrajectoryMessage());
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+      
+            
+      
       
       System.out.println("End");
       

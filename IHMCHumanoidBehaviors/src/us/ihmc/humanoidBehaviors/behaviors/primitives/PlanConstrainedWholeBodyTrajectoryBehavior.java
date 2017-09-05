@@ -30,7 +30,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
 {
    public static ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
-   
+
    private final boolean DEBUG = true;
 
    private PipeLine pipeLine = new PipeLine();
@@ -42,7 +42,7 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
    private final SleepBehavior sleepBehavior;
 
    private WholeBodyTrajectoryMessage wholebodyTrajectoryMessage;
-   
+
    private ConcurrentListeningQueue<ConstrainedWholeBodyPlanningToolboxOutputStatus> cwbtoolboxOutputStatusQueue = new ConcurrentListeningQueue<ConstrainedWholeBodyPlanningToolboxOutputStatus>(20);
    private FullHumanoidRobotModel fullRobotModel;
 
@@ -70,7 +70,7 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
    {
       return cwbtoolboxOutputStatus;
    }
-   
+
    public WholeBodyTrajectoryMessage getWholebodyTrajectoryMessage()
    {
       return wholebodyTrajectoryMessage;
@@ -106,7 +106,7 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
                sendPacket(p1);
             }
             ConstrainedWholeBodyPlanningRequestPacket request = new ConstrainedWholeBodyPlanningRequestPacket();
-            
+
             request.setNumberOfFindInitialGuess(200);
             request.setNumberOfExpanding(600);
             request.setInitialRobotConfigration(fullRobotModel);
@@ -149,7 +149,6 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
                {
                   planningSuccess = true;
                   wholebodyTrajectoryMessage = cwbtoolboxOutputStatus.wholeBodyTrajectoryMessage;
-                  PrintTools.info(""+wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT).getTrajectoryTime());
                }
                else
                   planningSuccess = false;

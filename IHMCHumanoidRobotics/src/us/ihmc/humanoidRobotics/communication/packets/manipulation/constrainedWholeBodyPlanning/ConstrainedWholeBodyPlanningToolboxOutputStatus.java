@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning;
 
+import java.util.ArrayList;
+
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 
@@ -18,9 +20,9 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
 
    public ConstrainedWholeBodyPlanningToolboxOutputStatus()
    {
-      
+
    }
-   
+
    @Override
    public boolean epsilonEquals(ConstrainedWholeBodyPlanningToolboxOutputStatus other, double epsilon)
    {

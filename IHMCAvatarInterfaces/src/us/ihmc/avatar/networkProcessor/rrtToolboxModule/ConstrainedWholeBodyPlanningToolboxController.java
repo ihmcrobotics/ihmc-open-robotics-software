@@ -131,9 +131,9 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    /*
     * parallel family.
     */
-   
+
    private final CTTreeFindInitialGuess ctTreeFindInitialGuess;
-   
+
    public ConstrainedWholeBodyPlanningToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModel,
                                                         StatusMessageOutputManager statusOutputManager, YoVariableRegistry registry,
                                                         YoGraphicsListRegistry yoGraphicsRegistry, boolean startYoVariableServer)
@@ -158,7 +158,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       }
 
       this.state = CWBToolboxState.FIND_INITIAL_GUESS;
-      
+
       this.ctTreeFindInitialGuess = new CTTreeFindInitialGuess(drcRobotModel, 4, registry);
    }
 
@@ -219,20 +219,18 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       visualizedNode = node;
 
-      
-      
       numberOfMotionPath--;
       if (numberOfMotionPath == 0)
-      {  
+      {
          /*
           * generate WholeBodyTrajectoryMessage.
           */
          terminateToolboxController();
          ctTaskNodeWholeBodyTrajectoryMessageFactory = new CTTaskNodeWholeBodyTrajectoryMessageFactory();
-         
+
          ctTaskNodeWholeBodyTrajectoryMessageFactory.setCTTaskNodePath(tree.getPath(), constrainedEndEffectorTrajectory);
-         
-         reportMessage(packResult(ctTaskNodeWholeBodyTrajectoryMessageFactory.getWholeBodyTrajectoryMessage(), 4));         
+
+         reportMessage(packResult(ctTaskNodeWholeBodyTrajectoryMessageFactory.getWholeBodyTrajectoryMessage(), 4));
          PrintTools.info("packResult");
       }
    }
@@ -302,29 +300,28 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       visualizedNode = tree.getNewNode().createNodeCopy();
       visualizedNode.setValidity(tree.getNewNode().getValidity());
 
-      
       double jointScore = kinematicsSolver.getArmJointLimitScore();
-      
+
       jointlimitScore.set(jointScore);
-      
+
       /*
        * terminate expanding tree.
        */
       numberOfExpanding--;
       if (numberOfExpanding == 0)
       {
-         if(tree.getTreeReachingTime() != 1.0)
+         if (tree.getTreeReachingTime() != 1.0)
          {
             packResult(null, 2);
             terminateToolboxController();
-            
+
             PrintTools.info("Fail to reach end.");
          }
          else
          {
             state = CWBToolboxState.SHORTCUT_PATH;
 
-            PrintTools.info("Total update solver");   
+            PrintTools.info("Total update solver");
          }
       }
    }
@@ -337,10 +334,10 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private void findInitialGuess() throws InterruptedException, ExecutionException
    {
       ctTreeFindInitialGuess.findInitialGuess(rootNode, taskRegion, initialConfiguration, constrainedEndEffectorTrajectory, handCoordinateOffsetX);
-      
+
       double scoreInitialGuess = ctTreeFindInitialGuess.getBestScore();
       visualizedNode = ctTreeFindInitialGuess.getBestNode();
-      
+
       jointlimitScore.set(scoreInitialGuess);
 
       if (bestScoreInitialGuess < scoreInitialGuess)
@@ -349,16 +346,16 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
          rootNode = visualizedNode.createNodeCopy();
       }
-      
+
       /*
        * terminate finding initial guess.
        */
-      numberOfInitialGuess-= ctTreeFindInitialGuess.getInitialGuessNodes().size();
+      numberOfInitialGuess -= ctTreeFindInitialGuess.getInitialGuessNodes().size();
       if (numberOfInitialGuess < 1)
       {
          PrintTools.info("initial guess terminate");
-         
-         if(rootNode.getValidity() == false)
+
+         if (rootNode.getValidity() == false)
          {
             packResult(null, 1);
             terminateToolboxController();
@@ -374,13 +371,13 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
                PrintTools.info("" + i + " " + rootNode.getNodeData(i));
 
             tree = new CTTaskNodeTree(rootNode);
-            tree.setTaskRegion(taskRegion);   
+            tree.setTaskRegion(taskRegion);
          }
       }
    }
-   
+
    long startTime;
-   
+
    @Override
    protected boolean initialize()
    {
@@ -398,12 +395,12 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       numberOfInitialGuess = request.numberOfFindInitialGuess;
 
       initialConfiguration = request.initialConfiguration;
-      
+
       constrainedEndEffectorTrajectory = PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory;
 
       /*
        * initialize kinematicsSolver.
-       */      
+       */
       kinematicsSolver = new WheneverWholeBodyKinematicsSolver(drcRobotModelFactory);
 
       kinematicsSolver.updateRobotConfigurationData(initialConfiguration);
@@ -431,21 +428,20 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          treeVisualizer.initialize();
       }
 
-      
-      startTime = System.currentTimeMillis();      
+      startTime = System.currentTimeMillis();
       return true;
    }
-   
+
    private void terminateToolboxController()
    {
       state = CWBToolboxState.DO_NOTHING;
-      
+
       long stopTime = System.currentTimeMillis();
       long elapsedTime = stopTime - startTime;
       System.out.println("===========================================");
-      System.out.println("toolbox executing time is "+elapsedTime/1000.0 +" seconds");
+      System.out.println("toolbox executing time is " + elapsedTime / 1000.0 + " seconds");
       System.out.println("===========================================");
-      
+
       isDone.set(true);
    }
 
@@ -472,20 +468,21 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private ConstrainedWholeBodyPlanningToolboxOutputStatus packResult(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage, int planningResult)
    {
       ConstrainedWholeBodyPlanningToolboxOutputStatus result = new ConstrainedWholeBodyPlanningToolboxOutputStatus();
-      
-      if(wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT) == null || wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT) == null)
+
+      if (wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT) == null
+            || wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT) == null)
       {
          result.wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
          PrintTools.info("no message");
-      }  
+      }
       else
       {
          result.wholeBodyTrajectoryMessage = wholebodyTrajectoryMessage;
          PrintTools.info("message");
       }
-      
+
       result.planningResult = planningResult;
-      
+
       return result;
    }
 
@@ -569,15 +566,15 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       for (int i = 0; i < FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel).length; i++)
          FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel)[i].setQ(FullRobotModelUtils.getAllJointsExcludingHands(solverRobotModel)[i].getQ());
    }
-   
+
    private void updateVisualizerRobotConfiguration(RobotKinematicsConfiguration robotKinematicsConfiguration)
    {
-      robotKinematicsConfiguration.getRobotConfiguration(visualizedFullRobotModel);      
+      robotKinematicsConfiguration.getRobotConfiguration(visualizedFullRobotModel);
    }
-   
+
    private void updateVisualizerRobotConfiguration()
    {
-      updateVisualizerRobotConfiguration(visualizedNode.getConfiguration());      
+      updateVisualizerRobotConfiguration(visualizedNode.getConfiguration());
    }
 
    /**
@@ -594,7 +591,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          currentIsValid.set(visualizedNode.getValidity());
          currentTrajectoryTime.set(visualizedNode.getNormalizedNodeData(0));
          if (startYoVariableServer)
-            treeVisualizer.update(visualizedNode);         
+            treeVisualizer.update(visualizedNode);
       }
    }
 
