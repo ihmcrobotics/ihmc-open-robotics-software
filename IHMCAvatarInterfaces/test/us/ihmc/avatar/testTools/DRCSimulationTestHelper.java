@@ -522,11 +522,6 @@ public class DRCSimulationTestHelper
       this.walkingScriptParameters = walkingScriptParameters;
    }
 
-   public void setDrcNetworkModuleParameters(DRCNetworkModuleParameters drcNetworkModuleParameters)
-   {
-      this.drcNetworkModuleParameters = drcNetworkModuleParameters;
-   }
-
    public void setTestEnvironment(CommonAvatarEnvironmentInterface testEnvironment)
    {
       this.testEnvironment = testEnvironment;
