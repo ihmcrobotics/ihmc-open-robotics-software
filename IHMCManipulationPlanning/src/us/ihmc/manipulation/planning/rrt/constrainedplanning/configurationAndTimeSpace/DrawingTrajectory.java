@@ -104,6 +104,25 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
 
       taskNodeRegion.setRandomRegion(0, 0.0, trajectoryTime);
 
+//      taskNodeRegion.setRandomRegion(1, 0.75, 0.90);
+//      taskNodeRegion.setRandomRegion(2, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
+//      taskNodeRegion.setRandomRegion(3, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
+//      taskNodeRegion.setRandomRegion(4, -3.0 / 180 * Math.PI, 3.0 / 180 * Math.PI);
+//
+//      taskNodeRegion.setRandomRegion(5, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(6, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(7, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(8, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(9, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(10, -160.0 / 180 * Math.PI, -0.0 / 180 * Math.PI);
+//
+//      taskNodeRegion.setRandomRegion(11, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(12, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(13, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(14, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(15, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(16, 0.0, 0.0);
+      
       taskNodeRegion.setRandomRegion(1, 0.75, 0.90);
       taskNodeRegion.setRandomRegion(2, -20.0 / 180 * Math.PI, 5.0 / 180 * Math.PI);
       taskNodeRegion.setRandomRegion(3, -10.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
