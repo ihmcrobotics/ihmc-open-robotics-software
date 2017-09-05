@@ -197,7 +197,7 @@ public class CTTaskNodeTree
 
    private CTTaskNode createNode()
    {
-      return rootNode.createNode();
+      return new CTTaskNode(rootNode);
    }
 
    /*

@@ -29,6 +29,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
 {
+   public static ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
+   
    private final boolean DEBUG = true;
 
    private PipeLine pipeLine = new PipeLine();
@@ -43,8 +45,6 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
    
    private ConcurrentListeningQueue<ConstrainedWholeBodyPlanningToolboxOutputStatus> cwbtoolboxOutputStatusQueue = new ConcurrentListeningQueue<ConstrainedWholeBodyPlanningToolboxOutputStatus>(20);
    private FullHumanoidRobotModel fullRobotModel;
-
-   private ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
 
    private ConstrainedWholeBodyPlanningToolboxOutputStatus cwbtoolboxOutputStatus;
 
@@ -62,7 +62,7 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
 
    public void setInputs(ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory, FullHumanoidRobotModel fullRobotModel)
    {
-      this.constrainedEndEffectorTrajectory = constrainedEndEffectorTrajectory;
+      PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = constrainedEndEffectorTrajectory;
       this.fullRobotModel = fullRobotModel;
    }
 
@@ -107,7 +107,6 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
             }
             ConstrainedWholeBodyPlanningRequestPacket request = new ConstrainedWholeBodyPlanningRequestPacket();
             
-//            ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory = constrainedEndEffectorTrajectory;
             request.setNumberOfFindInitialGuess(200);
             request.setNumberOfExpanding(600);
             request.setInitialRobotConfigration(fullRobotModel);

@@ -13,6 +13,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
@@ -47,7 +48,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
     */
    private DRCRobotModel drcRobotModelFactory;
 
-   public static ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
+   private ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
 
    private WheneverWholeBodyKinematicsSolver kinematicsSolver;
 
@@ -229,7 +230,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          terminateToolboxController();
          ctTaskNodeWholeBodyTrajectoryMessageFactory = new CTTaskNodeWholeBodyTrajectoryMessageFactory();
          
-         ctTaskNodeWholeBodyTrajectoryMessageFactory.setCTTaskNodePath(tree.getPath());
+         ctTaskNodeWholeBodyTrajectoryMessageFactory.setCTTaskNodePath(tree.getPath(), constrainedEndEffectorTrajectory);
          
          reportMessage(packResult(ctTaskNodeWholeBodyTrajectoryMessageFactory.getWholeBodyTrajectoryMessage(), 4));         
          PrintTools.info("packResult");
@@ -397,6 +398,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       numberOfInitialGuess = request.numberOfFindInitialGuess;
 
       initialConfiguration = request.initialConfiguration;
+      
+      constrainedEndEffectorTrajectory = PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory;
 
       /*
        * initialize kinematicsSolver.

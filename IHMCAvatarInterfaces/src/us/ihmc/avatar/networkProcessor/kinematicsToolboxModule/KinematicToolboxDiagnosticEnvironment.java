@@ -75,14 +75,14 @@ public class KinematicToolboxDiagnosticEnvironment
       final DRCPoseCommunicator poseCommunicator = new DRCPoseCommunicator(humanoidFullRobotModel, jointConfigurationGatherer, auxiliaryRobotDataProvider,
                                                                      dataProducer, sensorOutputMapReadOnly, sensorRawOutputMapReadOnly,
                                                                      robotMotionStatusFromController, sensorInformation, scheduler, netClassList);
-      scheduler.schedule(new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            poseCommunicator.write();
-         }
-      }, 1, TimeUnit.MILLISECONDS);
+//      scheduler.schedule(new Runnable()
+//      {
+//         @Override
+//         public void run()
+//         {
+//            poseCommunicator.write();
+//         }
+//      }, 1, TimeUnit.MILLISECONDS);
 
       DRCNetworkModuleParameters parameters = new DRCNetworkModuleParameters();
       parameters.enableNetworkProcessor(true);

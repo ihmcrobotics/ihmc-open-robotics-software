@@ -274,7 +274,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
 
       ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
       planningBehavior.setInputs(endeffectorTrajectory, sdfFullRobotModel);      
-      ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory = endeffectorTrajectory;
+      PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
       
       System.out.println("Behavior Dispatch");
       drcBehaviorTestHelper.dispatchBehavior(planningBehavior);
@@ -286,7 +286,6 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       
       
       
-//      drcBehaviorTestHelper.send(planningBehavior.getConstrainedWholeBodyPlanningToolboxOutputStatus().wholeBodyTrajectoryMessage);
       drcBehaviorTestHelper.send(planningBehavior.getWholebodyTrajectoryMessage());
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10.0);
       
@@ -353,7 +352,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
 
       ConstrainedWholeBodyPlanningRequestPacket packet = new ConstrainedWholeBodyPlanningRequestPacket();
 
-      ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory = endeffectorTrajectory;
+      PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
       packet.setNumberOfFindInitialGuess(200);
       packet.setNumberOfExpanding(600);
       packet.setInitialRobotConfigration(sdfFullRobotModel);
