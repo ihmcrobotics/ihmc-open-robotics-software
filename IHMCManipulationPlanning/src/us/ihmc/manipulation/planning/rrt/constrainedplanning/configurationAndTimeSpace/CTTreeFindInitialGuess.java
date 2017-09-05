@@ -28,6 +28,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class CTTreeFindInitialGuess
 {
    private final int numberOfSolvers;
+   
    private final List<WheneverWholeBodyKinematicsSolver> kinematicsSolvers = new ArrayList<>();
 
    private final List<YoInteger> cntKinematicsSolvers = new ArrayList<>();
@@ -76,7 +77,6 @@ public class CTTreeFindInitialGuess
 
       for (int i = 0; i < numberOfSolvers; i++)
       {
-
          CTTaskNode initialGuessNode = new CTTaskNode(node);
 
          CTTreeTools.setRandomNormalizedNodeData(initialGuessNode, true, 0.0);
