@@ -30,7 +30,6 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTim
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.TreeStateVisualizer;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -231,7 +230,9 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
          ctTaskNodeWholeBodyTrajectoryMessageFactory.setCTTaskNodePath(tree.getPath(), constrainedEndEffectorTrajectory);
 
-         reportMessage(packResult(ctTaskNodeWholeBodyTrajectoryMessageFactory.getWholeBodyTrajectoryMessage(), 4));
+         ConstrainedWholeBodyPlanningToolboxOutputStatus packResult = packResult(ctTaskNodeWholeBodyTrajectoryMessageFactory.getWholeBodyTrajectoryMessage(), 4);
+         packResult(packResult, tree.getPath());
+         reportMessage(packResult);
          PrintTools.info("packResult");
       }
    }
@@ -486,6 +487,34 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       return result;
    }
+   
+   private void packResult(ConstrainedWholeBodyPlanningToolboxOutputStatus result, ArrayList<CTTaskNode> path)
+   {
+      SideDependentList<ArrayList<Pose3D>> handTrajectories = new SideDependentList<>();
+      
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         handTrajectories.put(robotSide, new ArrayList<Pose3D>());
+      }
+      
+      for(int i=0;i<path.size();i++)
+      {
+         CTTaskNode node = path.get(i);
+         
+         for(RobotSide robotSide : RobotSide.values)
+         {  
+            ConfigurationSpace configurationSpace = CTTreeTools.getConfigurationSpace(node, robotSide);
+
+            Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(node.getNodeData(0), robotSide, configurationSpace);
+            
+            handTrajectories.get(robotSide).add(desiredPose);
+         }   
+      }
+      
+      
+      
+      result.handTrajectories = handTrajectories;
+   }
 
    /**
     * update validity of input node. 
@@ -552,15 +581,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    /**
     * set fullRobotModel.
     */
-   private void updateVisualizerRobotConfiguration(FullHumanoidRobotModel solverRobotModel)
-   {
-      visualizedFullRobotModel.getRootJoint().setPosition(solverRobotModel.getRootJoint().getTranslationForReading());
-      visualizedFullRobotModel.getRootJoint().setRotation(solverRobotModel.getRootJoint().getRotationForReading());
-
-      for (int i = 0; i < FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel).length; i++)
-         FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel)[i].setQ(FullRobotModelUtils.getAllJointsExcludingHands(solverRobotModel)[i].getQ());
-   }
-
    private void updateVisualizerRobotConfiguration(RobotKinematicsConfiguration robotKinematicsConfiguration)
    {
       robotKinematicsConfiguration.getRobotConfiguration(visualizedFullRobotModel);

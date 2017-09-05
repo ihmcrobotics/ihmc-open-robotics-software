@@ -190,7 +190,7 @@ public class CTTaskNodeTree
          matric = normalizedtimeGap * normalizedtimeGap * matricRatioTimeToTask
                + normalizedTaskDisplacement * normalizedTaskDisplacement * (1 - matricRatioTimeToTask);
          matric = Math.sqrt(matric);
-         //         matric = getNormalizedDisplacement(nodeOne, nodeTwo);
+                  matric = getNormalizedDisplacement(nodeOne, nodeTwo);
          return matric;
       }
    }

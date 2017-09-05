@@ -8,7 +8,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class CTTreeTools
 {
-   static Random randomManager = new Random();
+   static Random randomManager = new Random(50);
    
    public static void setRandomNormalizedNodeData(CTTaskNode node, boolean isUniform, double treeReachingTime)
    {
