@@ -40,7 +40,6 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.simulationTesting.NothingChangedVerifier;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
@@ -83,55 +82,19 @@ public class DRCSimulationTestHelper
    private DRCSimulationStarter simulationStarter;
    private Exception caughtException;
 
-   private DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+   private DRCStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
    private boolean addFootstepMessageGenerator = false;
-   private boolean useHeadAndVelocityScript = false;
+   private boolean useHeadingAndVelocityScript = false;
    private boolean cheatWithGroundHeightAtFootstep = false;
    private HighLevelBehaviorFactory highLevelBehaviorFactory = null;
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = null;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = null;
    private DRCNetworkModuleParameters drcNetworkModuleParameters = null;
 
-   public DRCSimulationTestHelper(DRCObstacleCourseStartingLocation selectedLocation,
-                                  SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel)
+   public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel)
    {
-      this(new DefaultCommonAvatarEnvironment(), selectedLocation, simulationTestParameters, robotModel);
-   }
-
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCStartingLocation selectedLocation,
-                                  SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel)
-   {
-      this(commonAvatarEnvironmentInterface, selectedLocation, simulationTestingParameters, robotModel, null, null, null, false, false, false,
-           null);
-   }
-
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCStartingLocation selectedLocation,
-                                  SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel, boolean addFootstepMessageGenerator,
-                                  boolean useHeadingAndVelocityScript, boolean cheatWithGroundHeightAtForFootstep,
-                                  HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
-   {
-      this(commonAvatarEnvironmentInterface, selectedLocation, simulationTestingParameters, robotModel, null, null, null, addFootstepMessageGenerator,
-           useHeadingAndVelocityScript, cheatWithGroundHeightAtForFootstep, walkingScriptParameters);
-   }
-
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCStartingLocation selectedLocation,
-                                  SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
-                                  DRCNetworkModuleParameters drcNetworkModuleParameters)
-   {
-      this(commonAvatarEnvironmentInterface, selectedLocation, simulationTestingParameters, robotModel, drcNetworkModuleParameters, null, null, false,
-           false, false, null);
-   }
-
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCStartingLocation selectedLocation,
-                                  SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
-                                  DRCNetworkModuleParameters drcNetworkModuleParameters, HighLevelBehaviorFactory highLevelBehaviorFactoryToAdd,
-                                  DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup, boolean addFootstepMessageGenerator,
-                                  boolean useHeadingAndVelocityScript, boolean cheatWithGroundHeightAtForFootstep,
-                                  HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
-   {
-      this.testEnvironment = commonAvatarEnvironmentInterface;
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
-      this.simulationTestingParameters = simulationTestingParameters;
+      this.simulationTestingParameters = simulationTestParameters;
 
       fullRobotModel = robotModel.createFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -140,11 +103,11 @@ public class DRCSimulationTestHelper
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
 
-      simulationStarter = new DRCSimulationStarter(robotModel, commonAvatarEnvironmentInterface);
+      simulationStarter = new DRCSimulationStarter(robotModel, testEnvironment);
       simulationStarter.setRunMultiThreaded(simulationTestingParameters.getRunMultiThreaded());
       simulationStarter.setUsePerfectSensors(simulationTestingParameters.getUsePefectSensors());
-      if (highLevelBehaviorFactoryToAdd != null)
-         simulationStarter.registerHighLevelController(highLevelBehaviorFactoryToAdd);
+      if (highLevelBehaviorFactory != null)
+         simulationStarter.registerHighLevelController(highLevelBehaviorFactory);
       if (initialSetup != null)
          simulationStarter.setRobotInitialSetup(initialSetup);
       if (selectedLocation != null)
@@ -154,7 +117,7 @@ public class DRCSimulationTestHelper
       simulationStarter.setFlatGroundWalkingScriptParameters(walkingScriptParameters);
 
       if (addFootstepMessageGenerator)
-         simulationStarter.addFootstepMessageGenerator(useHeadingAndVelocityScript, cheatWithGroundHeightAtForFootstep);
+         simulationStarter.addFootstepMessageGenerator(useHeadingAndVelocityScript, cheatWithGroundHeightAtFootstep);
 
       if (drcNetworkModuleParameters == null)
       {
@@ -530,9 +493,9 @@ public class DRCSimulationTestHelper
       this.addFootstepMessageGenerator = addFootstepMessageGenerator;
    }
 
-   public void setUseHeadAndVelocityScript(boolean useHeadAndVelocityScript)
+   public void setUseHeadAndVelocityScript(boolean useHeadingAndVelocityScript)
    {
-      this.useHeadAndVelocityScript = useHeadAndVelocityScript;
+      this.useHeadingAndVelocityScript = useHeadingAndVelocityScript;
    }
 
    public void setCheatWithGroundHeightAtFootstep(boolean cheatWithGroundHeightAtFootstep)
