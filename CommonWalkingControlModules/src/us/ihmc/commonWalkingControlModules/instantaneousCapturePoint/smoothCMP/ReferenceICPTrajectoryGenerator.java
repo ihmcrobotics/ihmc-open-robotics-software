@@ -35,12 +35,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final static int FIRST_SEGMENT = 0;
 
-   private final static int defaultSize = 1000;
+   private final static int defaultSize = 50;
 
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final List<FramePoint3D> cmpDesiredFinalPositions = new ArrayList<>();
-
+   
    private final List<FramePoint3D> icpDesiredInitialPositions = new ArrayList<>();
    private final List<FramePoint3D> icpDesiredFinalPositions = new ArrayList<>();
    
@@ -591,6 +591,24 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    public List<FramePoint3D> getICPPositionDesiredFinalList()
    {
       return icpDesiredFinalPositions;
+   }
+   
+   public void getICPEntryCornerPoints(List<? extends YoFramePoint> icpEntryCornerPointsToPack)
+   {
+      for(int i = 0; i < icpEntryCornerPointsToPack.size(); i++)
+      {
+         FramePoint3D icpEntryCornerPoint = icpDesiredInitialPositions.get(i);
+         icpEntryCornerPointsToPack.get(i).set(icpEntryCornerPoint);
+      }
+   }
+
+   public void getICPExitCornerPoints(List<? extends YoFramePoint> icpExitCornerPointsToPack)
+   {
+      for(int i = 0; i < icpExitCornerPointsToPack.size(); i++)
+      {
+         FramePoint3D icpExitCornerPoint = icpDesiredFinalPositions.get(i);
+         icpExitCornerPointsToPack.get(i).set(icpExitCornerPoint);
+      }
    }
 
    public List<FramePoint3D> getCoMPositionDesiredInitialList()

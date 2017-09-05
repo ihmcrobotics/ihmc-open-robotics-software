@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.jointControlCalculator;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointData;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
