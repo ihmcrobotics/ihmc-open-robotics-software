@@ -346,9 +346,8 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingController //////////////////////////////////////////////////////////////
-      walkingState = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory,
-                                                                                                    walkingControllerParameters, capturePointPlannerParameters,
-                                                                                                    controllerToolbox);
+      walkingState = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
+                                                            capturePointPlannerParameters, controllerToolbox);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WholeBodyInverseDynamicsControlCore ////////////////////////////////////////////
@@ -375,7 +374,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the DoNothingController ////////////////////////////////////////////////////////////
       // Useful as a transition state on the real robot
-      NewDoNothingControllerState doNothingState = createDoNothingControllerState(controllerToolbox);
+      NewDoNothingControllerState doNothingState = createDoNothingControllerState(controllerToolbox, highLevelControllerParameters);
       highLevelControllerStates.add(doNothingState);
       ArrayList<StateTransition<NewHighLevelControllerStates>> doNothingTransitions = new ArrayList<>();
       doNothingTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.STAND_PREP_STATE));
@@ -384,7 +383,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingController //////////////////////////////////////////////////////////////
-      NewWalkingControllerState walkingControllerState = createWalkingControllerState(walkingState, controllerToolbox, controllerCore);
+      NewWalkingControllerState walkingControllerState = createWalkingControllerState(walkingState, highLevelControllerParameters, controllerToolbox, controllerCore);
       highLevelControllerStates.add(walkingControllerState);
       ArrayList<StateTransition<NewHighLevelControllerStates>> walkingTransitions = new ArrayList<>();
       walkingTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
@@ -393,7 +392,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the NewStandPrepControllerState ////////////////////////////////////////////////////////////
-      NewStandPrepControllerState standPrepControllerState = createStandPrepControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
+      NewStandPrepControllerState standPrepControllerState = createStandPrepControllerState(controllerToolbox, highLevelControllerParameters);
       highLevelControllerStates.add(standPrepControllerState);
       ArrayList<StateTransition<NewHighLevelControllerStates>> standPrepTransitions = new ArrayList<>();
       standPrepTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
@@ -403,7 +402,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the StandReadyController ///////////////////////////////////////////////////////////
-      NewStandReadyControllerState standReadyControllerState = createStandReadyControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
+      NewStandReadyControllerState standReadyControllerState = createStandReadyControllerState(controllerToolbox, highLevelControllerParameters);
       highLevelControllerStates.add(standReadyControllerState);
       ArrayList<StateTransition<NewHighLevelControllerStates>> standReadyTransitions = new ArrayList<>();
       standReadyTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
@@ -417,7 +416,8 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the StandTransitionController //////////////////////////////////////////////////////
-      NewStandTransitionControllerState standTransitionControllerState = createStandTransitionControllerState(standReadyControllerState, walkingControllerState, controllerToolbox);
+      NewStandTransitionControllerState standTransitionControllerState = createStandTransitionControllerState(standReadyControllerState, walkingControllerState,
+                                                                                                              controllerToolbox, highLevelControllerParameters);
       highLevelControllerStates.add(standTransitionControllerState);
       ArrayList<StateTransition<NewHighLevelControllerStates>> standTransitionTransitions = new ArrayList<>();
       standTransitionTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, NewHighLevelControllerStates.FREEZE_STATE));
@@ -427,7 +427,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the FreezeController ///////////////////////////////////////////////////////////
-      NewFreezeControllerState freezeControllerState = createFreezeControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
+      NewFreezeControllerState freezeControllerState = createFreezeControllerState(controllerToolbox, highLevelControllerParameters);
       highLevelControllerStates.add(freezeControllerState);
       ArrayList<StateTransition<NewHighLevelControllerStates>> freezeTransitions = new ArrayList<>();
       freezeTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, fallbackControllerState));
@@ -649,40 +649,42 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       return highLevelControllerStateMachine.getCurrentHighLevelState();
    }
 
-   public NewDoNothingControllerState createDoNothingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox)
+   public NewDoNothingControllerState createDoNothingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                                                     HighLevelControllerParameters highLevelControllerParameters)
    {
-      return new NewDoNothingControllerState(controllerToolbox);
+      return new NewDoNothingControllerState(controllerToolbox, highLevelControllerParameters);
    }
 
-   public NewStandPrepControllerState createStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepParameters standPrepSetpoints,
-                                                                     PositionControlParameters positionControlParameters)
+   public NewStandPrepControllerState createStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                                                     HighLevelControllerParameters highLevelControllerParameters)
    {
-      return new NewStandPrepControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
+      return new NewStandPrepControllerState(controllerToolbox, highLevelControllerParameters);
    }
 
    public NewStandReadyControllerState createStandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox,
-                                                                       StandPrepParameters standPrepSetpoints, PositionControlParameters positionControlParameters)
+                                                                       HighLevelControllerParameters highLevelControllerParameters)
    {
-      return new NewStandReadyControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
+      return new NewStandReadyControllerState(controllerToolbox, highLevelControllerParameters);
    }
 
    public NewFreezeControllerState createFreezeControllerState(HighLevelHumanoidControllerToolbox controllerToolbox,
-                                                               StandPrepParameters standPrepSetpoints, PositionControlParameters positionControlParameters)
+                                                               HighLevelControllerParameters highLevelControllerParameters)
    {
-      return new NewFreezeControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
+      return new NewFreezeControllerState(controllerToolbox, highLevelControllerParameters);
    }
 
    public NewStandTransitionControllerState createStandTransitionControllerState(NewStandReadyControllerState standReadyControllerState,
                                                                                  NewWalkingControllerState walkingControllerState,
-                                                                                 HighLevelHumanoidControllerToolbox controllerToolbox)
+                                                                                 HighLevelHumanoidControllerToolbox controllerToolbox,
+                                                                                 HighLevelControllerParameters highLevelControllerParameters)
    {
-      return new NewStandTransitionControllerState(standReadyControllerState, walkingControllerState, controllerToolbox);
+      return new NewStandTransitionControllerState(standReadyControllerState, walkingControllerState, controllerToolbox, highLevelControllerParameters);
    }
 
-   public NewWalkingControllerState createWalkingControllerState(WalkingHighLevelHumanoidController walkingController,
+   public NewWalkingControllerState createWalkingControllerState(WalkingHighLevelHumanoidController walkingController, HighLevelControllerParameters highLevelControllerParameters,
                                                                  HighLevelHumanoidControllerToolbox controllerToolbox, WholeBodyControllerCore controllerCore)
    {
-      return new NewWalkingControllerState(controllerToolbox, controllerCore, walkingController);
+      return new NewWalkingControllerState(controllerToolbox, highLevelControllerParameters, controllerCore, walkingController);
    }
 
 }

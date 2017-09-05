@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLeve
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
@@ -34,19 +35,21 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
    private final YoDouble minimumTimeDoneWithStandPrep = new YoDouble("minimumTimeDoneWithStandPrep", registry);
    private final YoDouble masterGain = new YoDouble("standPrepMasterGain", registry);
 
-   public NewStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepParameters standPrepSetpoints,
-                                      PositionControlParameters positionControlParameters)
+   public NewStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
    {
-      this(controllerToolbox, standPrepSetpoints, positionControlParameters, TIME_TO_SPLINE_TO_STAND_POSE, MINIMUM_TIME_DONE_WITH_STAND_PREP);
+      this(controllerToolbox, highLevelControllerParameters, TIME_TO_SPLINE_TO_STAND_POSE, MINIMUM_TIME_DONE_WITH_STAND_PREP);
    }
 
-   public NewStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, StandPrepParameters standPrepSetpoints,
-                                      PositionControlParameters positionControlParameters, double timeToPrepareForStanding, double minimumTimeDoneWithStandPrep)
+   public NewStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
+                                      double timeToPrepareForStanding, double minimumTimeDoneWithStandPrep)
    {
       super(NewHighLevelControllerStates.STAND_PREP_STATE);
 
       this.timeToPrepareForStanding.set(timeToPrepareForStanding);
       this.minimumTimeDoneWithStandPrep.set(minimumTimeDoneWithStandPrep);
+
+      PositionControlParameters positionControlParameters = highLevelControllerParameters.getPositionControlParameters();
+      StandPrepParameters standPrepParameters = highLevelControllerParameters.getStandPrepParameters();
 
       controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
       masterGain.set(positionControlParameters.getPositionControlMasterGain());
@@ -61,7 +64,7 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
 
          JointControlCalculator jointControlCalculator = new JointControlCalculator("_StandPrep", controlledJoint, controllerToolbox.getControlDT(), registry);
 
-         standPrepFinalConfiguration.set(standPrepSetpoints.getSetpoint(jointName));
+         standPrepFinalConfiguration.set(standPrepParameters.getSetpoint(jointName));
          jointControlCalculator.setProportionalGain(positionControlParameters.getProportionalGain(jointName));
          jointControlCalculator.setDerivativeGain(positionControlParameters.getDerivativeGain(jointName));
          jointControlCalculator.setIntegralGain(positionControlParameters.getIntegralGain(jointName));

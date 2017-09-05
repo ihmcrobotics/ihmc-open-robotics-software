@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
 
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
@@ -9,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.tools.lists.PairList;
@@ -17,14 +19,13 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class NewStandTransitionControllerState extends NewHighLevelControllerState
 {
+   private static final NewHighLevelControllerStates controllerState = NewHighLevelControllerStates.STAND_TRANSITION_STATE;
    private static final double TIME_TO_RAMP_UP_CONTROL = 0.7;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoDouble standTransitionDuration = new YoDouble("standTransitionDuration", registry);
    private final YoPolynomial walkingControlRatioTrajectory = new YoPolynomial("walkingControlRatioTrajectory", 2, registry);
-
-   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.OFF);
 
    private final PairList<OneDoFJoint, JointControlBlender> jointCommandBlenders = new PairList<>();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
@@ -33,28 +34,32 @@ public class NewStandTransitionControllerState extends NewHighLevelControllerSta
    private final NewWalkingControllerState walkingControllerState;
 
    public NewStandTransitionControllerState(NewStandReadyControllerState standReadyControllerState, NewWalkingControllerState walkingControllerState,
-                                            HighLevelHumanoidControllerToolbox controllerToolbox)
+                                            HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
    {
-      this(standReadyControllerState, walkingControllerState, controllerToolbox, TIME_TO_RAMP_UP_CONTROL);
+      this(standReadyControllerState, walkingControllerState, controllerToolbox, highLevelControllerParameters, TIME_TO_RAMP_UP_CONTROL);
    }
 
    public NewStandTransitionControllerState(NewStandReadyControllerState standReadyControllerState, NewWalkingControllerState walkingControllerState,
-                                            HighLevelHumanoidControllerToolbox controllerToolbox, double standTransitionDuration)
+                                            HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
+                                            double standTransitionDuration)
    {
-      super(NewHighLevelControllerStates.STAND_TRANSITION_STATE);
+      super(controllerState);
 
       this.standReadyControllerState = standReadyControllerState;
       this.walkingControllerState = walkingControllerState;
       this.standTransitionDuration.set(standTransitionDuration);
 
       OneDoFJoint[] controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
+      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
+
       for (OneDoFJoint controlledJoint : controlledJoints)
       {
          JointControlBlender jointControlBlender = new JointControlBlender("_StandTransition", controlledJoint, registry);
          jointCommandBlenders.add(controlledJoint, jointControlBlender);
-      }
 
-      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
+         LowLevelJointControlMode jointControlMode = highLevelControllerParameters.getLowLevelJointControlMode(controlledJoint.getName(), controllerState);
+         lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(controlledJoint, jointControlMode);
+      }
    }
 
    @Override

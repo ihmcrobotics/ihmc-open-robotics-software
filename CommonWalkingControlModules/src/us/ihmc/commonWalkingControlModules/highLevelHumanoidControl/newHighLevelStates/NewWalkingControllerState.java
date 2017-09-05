@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
 
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
@@ -9,7 +10,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -26,14 +29,20 @@ public class NewWalkingControllerState extends NewHighLevelControllerState
 
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
 
-   public NewWalkingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, WholeBodyControllerCore controllerCore,
-                                    WalkingHighLevelHumanoidController walkingController)
+   public NewWalkingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
+                                    WholeBodyControllerCore controllerCore, WalkingHighLevelHumanoidController walkingController)
    {
       super(controllerState);
 
       this.controllerToolbox = controllerToolbox;
       this.controllerCore = controllerCore;
       this.walkingController = walkingController;
+
+      OneDoFJoint[] controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
+      for (OneDoFJoint controlledJoint : controlledJoints)
+      {
+         LowLevelJointControlMode jointControlMode = highLevelControllerParameters.getLowLevelJointControlMode(controlledJoint.getName(), controllerState);
+      }
 
       registry.addChild(walkingController.getYoVariableRegistry());
    }
