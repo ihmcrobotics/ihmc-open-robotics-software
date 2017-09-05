@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLeve
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
@@ -27,7 +28,7 @@ public class NewDoNothingControllerState extends NewHighLevelControllerState
    private final OneDoFJoint[] allRobotJoints;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
 
-   public NewDoNothingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox)
+   public NewDoNothingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
    {
       super(controllerState);
 
@@ -37,13 +38,18 @@ public class NewDoNothingControllerState extends NewHighLevelControllerState
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         ContactablePlaneBody contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
          footContactStates.put(robotSide, controllerToolbox.getFootContactState(robotSide));
       }
 
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(allRobotJoints.length);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(allRobotJoints);
-      lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(allRobotJoints, LowLevelJointControlMode.FORCE_CONTROL);
+
+      OneDoFJoint[] oneDoFJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
+      for (OneDoFJoint joint : oneDoFJoints)
+      {
+         LowLevelJointControlMode jointControlMode = highLevelControllerParameters.getLowLevelJointControlMode(joint.getName(), controllerState);
+         lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(joint, jointControlMode);
+      }
    }
 
    @Override

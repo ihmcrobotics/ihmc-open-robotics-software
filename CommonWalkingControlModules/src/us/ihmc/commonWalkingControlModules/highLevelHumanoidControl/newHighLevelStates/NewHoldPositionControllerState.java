@@ -17,7 +17,7 @@ public class NewHoldPositionControllerState extends NewHighLevelControllerState
 {
    private final YoVariableRegistry registry;
 
-   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
+   protected final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final PairList<OneDoFJoint, ImmutablePair<YoDouble, JointControlCalculator>> jointControllers = new PairList<>();
 
