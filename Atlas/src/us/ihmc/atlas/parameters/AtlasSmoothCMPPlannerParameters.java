@@ -71,4 +71,22 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
    {
       return atlasPhysicalProperties.getFootLengthForControl();
    }
+   
+   @Override
+   public double getTransferSplitFraction()
+   {
+      return 0.5;
+   }
+   
+   @Override
+   public double getSwingSplitFraction()
+   {
+      return 0.5;
+   }
+   
+   @Override
+   public double getSwingDurationShiftFraction()
+   {
+      return 0.8;
+   }
 }

@@ -380,9 +380,8 @@ public class YoTrajectory
 
    public void compute(double x)
    {
-      //if (x >= tInitial.getDoubleValue() && x <= tFinal.getDoubleValue())
-         polynomial.compute(x);
-   }
+      polynomial.compute(x);
+   } 
 
    public double getIntegral(double from, double to)
    {

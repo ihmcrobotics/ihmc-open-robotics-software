@@ -73,7 +73,8 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.001);
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
@@ -110,7 +111,8 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCWalkingUpToRampLongStepsTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("DRCWalkingUpToRampLongStepsTest");
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
