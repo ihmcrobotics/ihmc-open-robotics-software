@@ -39,7 +39,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTestInterface
+public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTestInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
@@ -137,7 +137,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
    }
 
    @Test
-   public void testForwardWalk() throws SimulationExceededMaximumTimeException
+   public void testSideStepping() throws SimulationExceededMaximumTimeException
    {
       setupTest();
       setupCameraSideView();
@@ -149,21 +149,22 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       
       ControllerSpy controllerSpy = new ControllerSpy(drcSimulationTestHelper);
       
-      for (int currentStep = 0; currentStep < numberOfSteps; currentStep++)
+      double centerStepY = 0.0;
+      for (int currentStep = 1; currentStep < numberOfSteps + 1; currentStep++)
       {
          if (drcSimulationTestHelper.getQueuedControllerCommands().isEmpty())
          {
-            Point3D footLocation = new Point3D(stepLength * currentStep, side.negateIfRightSide(stepWidth / 2), 0.0);
+            if(currentStep % 2 != 0)
+            {
+               centerStepY += stepLength;
+            }
+            Point3D footLocation = new Point3D(0, centerStepY + side.negateIfRightSide(stepWidth / 2), 0.0);
             rootLocations.add(new Point3D(stepLength * currentStep, 0.0, 0.0));
             Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
             addFootstep(footLocation, footOrientation, side, footMessage);
             side = side.getOppositeSide();
          }
       }
-      Point3D footLocation = new Point3D(stepLength * (numberOfSteps-1), side.negateIfRightSide(stepWidth / 2), 0.0);
-      rootLocations.add(new Point3D(stepLength * (numberOfSteps-1), 0.0, 0.0));
-      Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      addFootstep(footLocation, footOrientation, side, footMessage);
 
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -179,7 +180,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
    }
    
    @Test
-   public void testForwardWalkWithForceDisturbances() throws SimulationExceededMaximumTimeException
+   public void testSideSteppingWithForceDisturbances() throws SimulationExceededMaximumTimeException
    {
       setupTest();
       setupCameraSideView();
@@ -191,21 +192,22 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       
       ControllerSpy controllerSpy = new ControllerSpy(drcSimulationTestHelper);
       
-      for (int currentStep = 0; currentStep < numberOfSteps; currentStep++)
+      double centerStepY = 0.0;
+      for (int currentStep = 1; currentStep < numberOfSteps + 1; currentStep++)
       {
          if (drcSimulationTestHelper.getQueuedControllerCommands().isEmpty())
          {
-            Point3D footLocation = new Point3D(stepLength * currentStep, side.negateIfRightSide(stepWidth / 2), 0.0);
+            if(currentStep % 2 != 0)
+            {
+               centerStepY += stepLength;
+            }
+            Point3D footLocation = new Point3D(0, centerStepY + side.negateIfRightSide(stepWidth / 2), 0.0);
             rootLocations.add(new Point3D(stepLength * currentStep, 0.0, 0.0));
             Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
             addFootstep(footLocation, footOrientation, side, footMessage);
             side = side.getOppositeSide();
          }
       }
-      Point3D footLocation = new Point3D(stepLength * (numberOfSteps-1), side.negateIfRightSide(stepWidth / 2), 0.0);
-      rootLocations.add(new Point3D(stepLength * (numberOfSteps-1), 0.0, 0.0));
-      Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      addFootstep(footLocation, footOrientation, side, footMessage);
 
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -220,13 +222,13 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
       
-      magnitude1 = 40; //TODO: overwritten
+      magnitude1 = 150; //TODO: overwritten
       PrintTools.info("Force magnitude = " + magnitude1 + "N along " + forceDirection1.toString());
       pushRobotController.applyForceDelayed(firstPushCondition, delay1, forceDirection1, magnitude1, duration1);       
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
       
-      magnitude2 = 100; //TODO:overwritten
+      magnitude2 = 120; //TODO:overwritten
       PrintTools.info("Force magnitude = " + magnitude2 + "N along " + forceDirection2.toString());
       pushRobotController.applyForceDelayed(secondPushCondition, delay2, forceDirection2, magnitude2, duration2);    
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);

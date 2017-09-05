@@ -73,7 +73,7 @@ public class SmoothCapturePointToolbox
    }
    
    public void computeDesiredCornerPoints(List<FramePoint3D> entryCornerPointsToPack, List<FramePoint3D> exitCornerPointsToPack,
-                                                   List<FrameTrajectory3D> cmpPolynomials3D, double omega0)
+                                          List<FrameTrajectory3D> cmpPolynomials3D, double omega0)
    {
       FrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(cmpPolynomials3D.size() - 1);
       
