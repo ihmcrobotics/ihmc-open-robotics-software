@@ -168,7 +168,7 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
       
       public AngularMomentumSpy(DRCSimulationTestHelper simulationTestHelper)
       {
-         YoVariableRegistry scsRegistry = drcSimulationTestHelper.getYovariableRegistry();
+         YoVariableRegistry scsRegistry = drcSimulationTestHelper.getYoVariableRegistry();
          drcSimulationTestHelper.addRobotControllerOnControllerThread(this);
          floatingRootJointModel = drcSimulationTestHelper.getRobot();
          rootJoint = floatingRootJointModel.getRootJoint();

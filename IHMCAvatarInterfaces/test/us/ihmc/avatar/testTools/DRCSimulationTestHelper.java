@@ -84,9 +84,9 @@ public class DRCSimulationTestHelper
    private Exception caughtException;
 
    public DRCSimulationTestHelper(DRCObstacleCourseStartingLocation selectedLocation,
-                                  SimulationTestingParameters simulationconstructionsetparameters, DRCRobotModel robotModel)
+                                  SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel)
    {
-      this(new DefaultCommonAvatarEnvironment(), selectedLocation, simulationconstructionsetparameters, robotModel);
+      this(new DefaultCommonAvatarEnvironment(), selectedLocation, simulationTestParameters, robotModel);
    }
 
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, DRCStartingLocation selectedLocation,
@@ -276,7 +276,7 @@ public class DRCSimulationTestHelper
       avatarSimulation.addRobotControllerOnEstimatorThread(controller);
    }
 
-   public CommonAvatarEnvironmentInterface getTestEnviroment()
+   public CommonAvatarEnvironmentInterface getTestEnvironment()
    {
       return testEnvironment;
    }
@@ -369,7 +369,7 @@ public class DRCSimulationTestHelper
       scs.getRootRegistry().addChild(childRegistry);
    }
 
-   public YoVariableRegistry getYovariableRegistry()
+   public YoVariableRegistry getYoVariableRegistry()
    {
       return scs.getRootRegistry();
    }
