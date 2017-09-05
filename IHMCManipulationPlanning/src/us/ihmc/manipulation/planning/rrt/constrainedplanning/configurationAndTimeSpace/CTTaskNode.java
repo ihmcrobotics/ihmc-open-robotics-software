@@ -172,7 +172,6 @@ public class CTTaskNode
       else
          ;
 
-//      CTTaskNode createdNewNode = this.createNode();
       CTTaskNode createdNewNode = new CTTaskNode(this);
 
       for (int i = 0; i < createdNewNode.getDimensionOfNodeData(); i++)
@@ -225,10 +224,5 @@ public class CTTaskNode
    {
       return validity;
    }
-
-//   public CTTaskNode createNode()
-//   {
-//      return new CTTaskNode(this);
-//   }
    
 }

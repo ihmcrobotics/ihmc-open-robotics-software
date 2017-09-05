@@ -3,7 +3,9 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedW
 import java.util.ArrayList;
 
 import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacket<ConstrainedWholeBodyPlanningToolboxOutputStatus>
 {
@@ -17,6 +19,8 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
    public int planningResult;
 
    public WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage;
+   
+   public SideDependentList<ArrayList<Pose3D>> handTrajectories = new SideDependentList<>();
 
    public ConstrainedWholeBodyPlanningToolboxOutputStatus()
    {
@@ -28,6 +32,8 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
    {
       if (planningResult != other.planningResult)
          return false;
+      if (handTrajectories != other.handTrajectories)
+         return false;
       return (wholeBodyTrajectoryMessage.epsilonEquals(other.wholeBodyTrajectoryMessage, epsilon));
    }
 
@@ -36,6 +42,7 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
    {
       planningResult = other.planningResult;
       wholeBodyTrajectoryMessage = other.wholeBodyTrajectoryMessage;
+      handTrajectories = other.handTrajectories;
    }
 
 }

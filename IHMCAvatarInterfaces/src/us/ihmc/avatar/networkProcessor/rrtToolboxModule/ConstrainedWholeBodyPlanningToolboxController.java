@@ -21,6 +21,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWh
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.RobotKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.CTTreeTools;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeFindInitialGuess;
@@ -506,21 +507,14 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       /*
        * set whole body tasks. pose from 'constrainedEndEffectorTrajectory' is
-       * considered as being in MidZUpframe. for kinematics solver, append
-       * offset
+       * considered as being in MidZUpframe. for kinematicsSolver, append offset
        */
       SideDependentList<ConfigurationSpace> configurationSpaces = new SideDependentList<>();
 
-      configurationSpaces.put(RobotSide.LEFT, new ConfigurationSpace());
-      configurationSpaces.get(RobotSide.LEFT).setTranslation(node.getNodeData(5), node.getNodeData(6), node.getNodeData(7));
-      configurationSpaces.get(RobotSide.LEFT).setRotation(node.getNodeData(8), node.getNodeData(9), node.getNodeData(10));
-
-      configurationSpaces.put(RobotSide.RIGHT, new ConfigurationSpace());
-      configurationSpaces.get(RobotSide.RIGHT).setTranslation(node.getNodeData(11), node.getNodeData(12), node.getNodeData(13));
-      configurationSpaces.get(RobotSide.RIGHT).setRotation(node.getNodeData(14), node.getNodeData(15), node.getNodeData(16));
-
       for (RobotSide robotSide : RobotSide.values)
       {
+         configurationSpaces.put(robotSide, CTTreeTools.getConfigurationSpace(node, robotSide));
+
          Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(node.getNodeData(0), robotSide, configurationSpaces.get(robotSide));
          setEndEffectorPose(robotSide, desiredPose);
 
