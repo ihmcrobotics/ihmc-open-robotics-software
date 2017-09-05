@@ -87,7 +87,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       fullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
-      YoVariableRegistry registry = drcSimulationTestHelper.getYovariableRegistry();
+      YoVariableRegistry registry = drcSimulationTestHelper.getYoVariableRegistry();
       double timeToCompleteWalking = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames, registry);
       sendArmTrajectoryMessageWithRandomPoints(random, robotModel, fullRobotModel);
 
@@ -114,7 +114,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       fullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
-      YoVariableRegistry registry = drcSimulationTestHelper.getYovariableRegistry();
+      YoVariableRegistry registry = drcSimulationTestHelper.getYoVariableRegistry();
       double timeToCompleteWalking = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames, registry);
 
 
