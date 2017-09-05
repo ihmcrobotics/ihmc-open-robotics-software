@@ -13,6 +13,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelCo
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.tools.lists.PairList;
@@ -21,12 +22,11 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class NewStandPrepControllerState extends NewHighLevelControllerState
 {
-   private static final double TIME_TO_SPLINE_TO_STAND_POSE = 0.5;
+   private static final NewHighLevelControllerStates controllerState = NewHighLevelControllerStates.STAND_PREP_STATE;
    private static final double MINIMUM_TIME_DONE_WITH_STAND_PREP = 0.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final OneDoFJoint[] controlledJoints;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final PairList<OneDoFJoint, ImmutablePair<ImmutableTriple<YoDouble, YoPolynomial, YoDouble>, JointControlCalculator>> jointsData = new PairList<>();
@@ -37,22 +37,23 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
 
    public NewStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
    {
-      this(controllerToolbox, highLevelControllerParameters, TIME_TO_SPLINE_TO_STAND_POSE, MINIMUM_TIME_DONE_WITH_STAND_PREP);
+      this(controllerToolbox, highLevelControllerParameters, MINIMUM_TIME_DONE_WITH_STAND_PREP);
    }
 
    public NewStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
-                                      double timeToPrepareForStanding, double minimumTimeDoneWithStandPrep)
+                                      double minimumTimeDoneWithStandPrep)
    {
-      super(NewHighLevelControllerStates.STAND_PREP_STATE);
+      super(controllerState);
 
-      this.timeToPrepareForStanding.set(timeToPrepareForStanding);
+      this.timeToPrepareForStanding.set(highLevelControllerParameters.getTimeToMoveInStandPrep());
       this.minimumTimeDoneWithStandPrep.set(minimumTimeDoneWithStandPrep);
 
       PositionControlParameters positionControlParameters = highLevelControllerParameters.getPositionControlParameters();
       StandPrepParameters standPrepParameters = highLevelControllerParameters.getStandPrepParameters();
 
-      controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
+      OneDoFJoint[] controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
       masterGain.set(positionControlParameters.getPositionControlMasterGain());
+      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
       for (OneDoFJoint controlledJoint : controlledJoints)
       {
@@ -73,9 +74,11 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
 
          ImmutablePair<ImmutableTriple<YoDouble, YoPolynomial, YoDouble>, JointControlCalculator> jointData = new ImmutablePair<>(trajectoryPair, jointControlCalculator);
          jointsData.add(controlledJoint, jointData);
+
+         LowLevelJointControlMode jointControlMode = highLevelControllerParameters.getLowLevelJointControlMode(controlledJoint.getName(), controllerState);
+         lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(controlledJoint, jointControlMode);
       }
 
-      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
    }
 
    @Override

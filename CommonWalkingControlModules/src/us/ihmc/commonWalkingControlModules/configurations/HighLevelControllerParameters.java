@@ -17,4 +17,7 @@ public interface HighLevelControllerParameters
    NewHighLevelControllerStates getFallbackControllerState();
 
    boolean automaticallyTransitionToWalkingWhenReady();
+
+   double getTimeToMoveInStandPrep();
+   double getMinimumTimeInStandReady();
 }

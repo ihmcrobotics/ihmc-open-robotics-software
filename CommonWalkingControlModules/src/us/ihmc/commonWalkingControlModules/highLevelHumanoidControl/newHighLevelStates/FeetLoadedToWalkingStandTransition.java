@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
 
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
@@ -16,22 +17,29 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
 {
-   private final NewHighLevelControllerStates nextState;
+   private final NewHighLevelControllerState currentState;
+   private final NewHighLevelControllerStates nextStateEnum;
    private final YoEnum<NewHighLevelControllerStates> requestedState;
 
    private final YoBoolean waitForRequest;
 
-   public FeetLoadedToWalkingStandTransition(NewHighLevelControllerStates nextState, YoEnum<NewHighLevelControllerStates> requestedState,
+   private final YoDouble minimumTimeInState;
+
+   public FeetLoadedToWalkingStandTransition(NewHighLevelControllerState currentState, NewHighLevelControllerStates nextStateEnum, YoEnum<NewHighLevelControllerStates> requestedState,
                                              ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetContactSensors,
-                                             HighLevelHumanoidControllerToolbox controllerToolbox, boolean waitForRequest, YoVariableRegistry parentRegistry)
+                                             HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters, YoVariableRegistry parentRegistry)
    {
       super(forceSensorDataHolder, feetContactSensors, controllerToolbox, parentRegistry);
 
-      this.nextState = nextState;
+      this.currentState = currentState;
+      this.nextStateEnum = nextStateEnum;
       this.requestedState = requestedState;
 
+      minimumTimeInState = new YoDouble("minimumTimeLoadingFeet", registry);
+      minimumTimeInState.set(highLevelControllerParameters.getMinimumTimeInStandReady());
+
       this.waitForRequest = new YoBoolean("waitForRequestToTransitionToWalking", registry);
-      this.waitForRequest.set(waitForRequest);
+      this.waitForRequest.set(!highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady());
    }
 
    @Override
@@ -40,7 +48,10 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
       if (super.checkCondition())
          return false;
 
-      boolean transitionRequested = nextState.equals(requestedState.getEnumValue());
+      if (currentState.getTimeInCurrentState() < minimumTimeInState.getDoubleValue())
+         return false;
+
+      boolean transitionRequested = nextStateEnum.equals(requestedState.getEnumValue());
 
       if (waitForRequest.getBooleanValue())
          return transitionRequested;

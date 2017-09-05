@@ -57,4 +57,16 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    {
       return runningOnRealRobot;
    }
+
+   @Override
+   public double getTimeToMoveInStandPrep()
+   {
+      return 5.0;
+   }
+
+   @Override
+   public double getMinimumTimeInStandReady()
+   {
+      return 3.0;
+   }
 }

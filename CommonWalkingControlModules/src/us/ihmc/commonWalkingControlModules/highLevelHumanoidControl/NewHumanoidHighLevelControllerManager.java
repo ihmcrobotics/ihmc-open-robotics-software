@@ -205,19 +205,22 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
       for (int jointIndex = 0; jointIndex < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithLowLevelData(); jointIndex++)
       {
          OneDoFJoint controlledJoint = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(jointIndex);
-         LowLevelJointDataReadOnly jointDataReadOnly = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(controlledJoint);
+         LowLevelJointDataReadOnly lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(controlledJoint);
 
-         if (jointDataReadOnly.hasDesiredPosition())
-            controlledJoint.setqDesired(jointDataReadOnly.getDesiredPosition());
+         if (!lowLevelJointData.hasControlMode())
+            throw new NullPointerException("Joint: " + controlledJoint.getName() + " has no control mode.");
 
-         if (jointDataReadOnly.hasDesiredVelocity())
-            controlledJoint.setQdDesired(jointDataReadOnly.getDesiredVelocity());
+         if (lowLevelJointData.hasDesiredPosition())
+            controlledJoint.setqDesired(lowLevelJointData.getDesiredPosition());
 
-         if (jointDataReadOnly.hasDesiredAcceleration())
-            controlledJoint.setQddDesired(jointDataReadOnly.getDesiredAcceleration());
+         if (lowLevelJointData.hasDesiredVelocity())
+            controlledJoint.setQdDesired(lowLevelJointData.getDesiredVelocity());
 
-         if (jointDataReadOnly.hasDesiredTorque())
-            controlledJoint.setTau(jointDataReadOnly.getDesiredTorque());
+         if (lowLevelJointData.hasDesiredAcceleration())
+            controlledJoint.setQddDesired(lowLevelJointData.getDesiredAcceleration());
+
+         if (lowLevelJointData.hasDesiredTorque())
+            controlledJoint.setTau(lowLevelJointData.getDesiredTorque());
       }
 
       yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
