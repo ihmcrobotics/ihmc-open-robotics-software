@@ -84,7 +84,7 @@ public class DRCSimulationTestHelper
    private DRCSimulationStarter simulationStarter;
    private Exception caughtException;
 
-   private DRCStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+   private DRCStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
    private boolean addFootstepMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = false;
    private boolean cheatWithGroundHeightAtFootstep = false;
@@ -122,8 +122,8 @@ public class DRCSimulationTestHelper
          simulationStarter.registerHighLevelController(highLevelBehaviorFactory);
       if (initialSetup != null)
          simulationStarter.setRobotInitialSetup(initialSetup);
-      if (selectedLocation != null)
-         simulationStarter.setStartingLocation(selectedLocation);
+      if (startingLocation != null)
+         simulationStarter.setStartingLocation(startingLocation);
       simulationStarter.setGuiInitialSetup(guiInitialSetup);
       simulationStarter.setInitializeEstimatorToActual(true);
       simulationStarter.setFlatGroundWalkingScriptParameters(walkingScriptParameters);
@@ -487,9 +487,9 @@ public class DRCSimulationTestHelper
       }
    }
 
-   public void setSelectedLocation(DRCStartingLocation selectedLocation)
+   public void setStartingLocation(DRCStartingLocation startingLocation)
    {
-      this.selectedLocation = selectedLocation;
+      this.startingLocation = startingLocation;
    }
 
    public void setAddFootstepMessageGenerator(boolean addFootstepMessageGenerator)
