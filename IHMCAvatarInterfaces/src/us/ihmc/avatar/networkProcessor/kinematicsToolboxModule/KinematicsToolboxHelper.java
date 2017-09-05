@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -35,6 +34,8 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 
 public class KinematicsToolboxHelper
 {
@@ -101,9 +102,11 @@ public class KinematicsToolboxHelper
       {
          if (output.hasDataForJoint(joint))
          {
-            joint.setQ(output.getDesiredJointPosition(joint));
-            joint.setqDesired(output.getDesiredJointPosition(joint));
-            joint.setQd(output.getDesiredJointVelocity(joint));
+            LowLevelJointDataReadOnly data = output.getLowLevelJointData(joint); 
+
+            joint.setQ(data.getDesiredPosition()); // ?????
+            joint.setqDesired(data.getDesiredPosition());
+            joint.setQd(data.getDesiredVelocity());
          }
       }
 

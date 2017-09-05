@@ -1,11 +1,15 @@
 package us.ihmc.robotDataCommunication;
 
+import java.io.IOException;
+
 import us.ihmc.commons.Conversions;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
-import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.parameters.XmlParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -18,6 +22,8 @@ public class TestYoVariableConnection
    {
       A, B, C, D
    }
+   
+   private final XmlParameterReader parameterReader;
    
    private final YoVariableRegistry registry = new YoVariableRegistry("tester");
    private final YoDouble var1 = new YoDouble("var1", registry);
@@ -34,6 +40,11 @@ public class TestYoVariableConnection
    private final YoBoolean gc = new YoBoolean("gc", registry);
    
    
+   private final DoubleParameter param1 = new DoubleParameter("param1", registry);
+   private final DoubleParameter param2 = new DoubleParameter("param2", registry);
+   
+   private final YoDouble param1Echo = new YoDouble("param1Echo", registry);
+   private final YoDouble param2Echo = new YoDouble("param2Echo", registry);
    
    private final YoVariableServer server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(), null, LogSettings.TEST_LOGGER, 0.001);
    private final JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(server);
@@ -41,9 +52,11 @@ public class TestYoVariableConnection
    
    private volatile long timestamp = 0;
    
-   public TestYoVariableConnection()
+   public TestYoVariableConnection() throws IOException
    {
       new YoInteger("var5", registry);
+      parameterReader = new XmlParameterReader(getClass().getResourceAsStream("TestParameters.xml"));
+      
       server.setSendKeepAlive(true);
       server.setMainRegistry(registry, null, null);
       
@@ -57,6 +70,8 @@ public class TestYoVariableConnection
       startVariableSummary.set(false);
       
       jvmStatisticsGenerator.start();
+      
+      parameterReader.readParametersInRegistry(registry);
       
       new ThreadTester(server).start();
       server.start();
@@ -88,6 +103,9 @@ public class TestYoVariableConnection
             gc.set(false);
          }
          
+         param1Echo.set(param1.getValue());
+         param2Echo.set(param2.getValue());
+         
          timestamp += Conversions.millisecondsToNanoseconds(1);
          server.update(timestamp);
          ThreadTools.sleep(timeout.getIntegerValue());
@@ -105,10 +123,17 @@ public class TestYoVariableConnection
       private final YoEnum<TestEnum> echoThreadIn = new YoEnum<TestEnum>("echoThreadIn", registry, TestEnum.class, false);
       private final YoEnum<TestEnum> echoThreadOut = new YoEnum<TestEnum>("echoThreadOut", registry, TestEnum.class, false);
 
+      private final DoubleParameter param1 = new DoubleParameter("threadParam1", registry);
+      private final DoubleParameter param2 = new DoubleParameter("threadParam2", registry);
+      
+      private final YoDouble param1Echo = new YoDouble("threadParam1Echo", registry);
+      private final YoDouble param2Echo = new YoDouble("threadParam2Echo", registry);
+      
       
       public ThreadTester(YoVariableServer server)
       {
          server.addRegistry(registry, null);
+         parameterReader.readParametersInRegistry(registry);
       }
       
       public void run()
@@ -121,6 +146,9 @@ public class TestYoVariableConnection
             
             echoThreadOut.set(echoThreadIn.getEnumValue());
             
+            param1Echo.set(param1.getValue());
+            param2Echo.set(param2.getValue());
+            
             server.update(timestamp, registry);
             
             ThreadTools.sleep(10);
@@ -130,7 +158,7 @@ public class TestYoVariableConnection
       
    }
    
-   public static void main(String[] args)
+   public static void main(String[] args) throws IOException
    {
       new TestYoVariableConnection();
    }

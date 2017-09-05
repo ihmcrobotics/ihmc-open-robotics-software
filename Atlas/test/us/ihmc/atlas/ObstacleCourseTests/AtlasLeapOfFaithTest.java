@@ -26,7 +26,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    /** {@inheritDoc} */
    public void testUnknownStepDownTwoFeetOnEachStep() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.10;
+      double stepDownHeight = 0.08;
       super.testUnknownStepDownTwoFeetOnEachStep(stepDownHeight);
    }
 
@@ -35,7 +35,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    /** {@inheritDoc} */
    public void testUnknownStepDownOneFootOnEachStep() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.10;
+      double stepDownHeight = 0.08;
       super.testUnknownStepDownOneFootOnEachStep(stepDownHeight);
    }
 
@@ -53,7 +53,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    /** {@inheritDoc} */
    public void testUnknownStepDownOneFootOnEachStepWithUncertainty() throws SimulationExceededMaximumTimeException
    {
-      double stepDownHeight = 0.09;
+      double stepDownHeight = 0.07;
       super.testUnknownStepDownOneFootOnEachStepWithUncertainty(stepDownHeight);
    }
 
@@ -120,7 +120,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
       @Override
       public double nominalHeightAboveAnkle()
       {
-         return 0.77;
+         return 0.79;
       }
 
       @Override
@@ -166,6 +166,6 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    public static void main(String[] args) throws Exception
    {
       AtlasLeapOfFaithTest test = new AtlasLeapOfFaithTest();
-      test.testDropOffsWhileWalking();
+      test.testUnknownStepDownOneFootOnEachStep();
    }
 }

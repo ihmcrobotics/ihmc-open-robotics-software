@@ -131,13 +131,13 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       setupTest(getSlowstepScript());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      // push timing:
+      // push timing:t
       StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
       double delay = 0.5 * swingTime;
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double percentWeight = 0.13;
+      double percentWeight = 0.11;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -246,7 +246,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(xDirection, yDirection, 0.0);
-      double percentWeight = 0.20;
+      double percentWeight = 0.18;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -270,7 +270,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
-      double percentWeight = 0.08;
+      double percentWeight = 0.07;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.7 * swingTime;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);

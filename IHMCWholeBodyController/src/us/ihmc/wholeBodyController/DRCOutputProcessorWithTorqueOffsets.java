@@ -3,6 +3,8 @@ package us.ihmc.wholeBodyController;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import com.esotericsoftware.kryo.io.Output;
+
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -11,10 +13,10 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 
-public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter, JointTorqueOffsetProcessor
+public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, JointTorqueOffsetProcessor
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final DRCOutputWriter drcOutputWriter;
+   private final DRCOutputProcessor drcOutputWriter;
 
    private final YoDouble alphaTorqueOffset = new YoDouble("alphaTorqueOffset",
          "Filter for integrating acceleration to get a torque offset at each joint", registry);
@@ -26,21 +28,27 @@ public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter, JointT
 
    private final double updateDT;
 
-   public DRCOutputWriterWithTorqueOffsets(DRCOutputWriter drcOutputWriter, double updateDT)
+   public DRCOutputProcessorWithTorqueOffsets(DRCOutputProcessor drcOutputWriter, double updateDT)
    {
       this.updateDT = updateDT;
       this.drcOutputWriter = drcOutputWriter;
-      registry.addChild(drcOutputWriter.getControllerYoVariableRegistry());
+      if(drcOutputWriter != null)
+      {
+         registry.addChild(drcOutputWriter.getControllerYoVariableRegistry());
+      }
    }
 
    @Override
    public void initialize()
    {
-      drcOutputWriter.initialize();
+      if(drcOutputWriter != null)
+      {
+         drcOutputWriter.initialize();
+      }
    }
 
    @Override
-   public void writeAfterController(long timestamp)
+   public void processAfterController(long timestamp)
    {
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
@@ -60,13 +68,19 @@ public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter, JointT
          oneDoFJoint.setTau(oneDoFJoint.getTau() + offsetTorque + ditherTorque);
       }
 
-      drcOutputWriter.writeAfterController(timestamp);
+      if(drcOutputWriter != null)
+      {
+         drcOutputWriter.processAfterController(timestamp);
+      }
    }
 
    @Override
    public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
-      drcOutputWriter.setFullRobotModel(controllerModel, rawJointSensorDataHolderMap);
+      if(drcOutputWriter != null)
+      {
+         drcOutputWriter.setFullRobotModel(controllerModel, rawJointSensorDataHolderMap);
+      }
 
       oneDoFJoints = new ArrayList<OneDoFJoint>();
       controllerModel.getOneDoFJoints(oneDoFJoints);
@@ -86,7 +100,10 @@ public class DRCOutputWriterWithTorqueOffsets implements DRCOutputWriter, JointT
    @Override
    public void setForceSensorDataHolderForController(ForceSensorDataHolderReadOnly forceSensorDataHolderForController)
    {
-      drcOutputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForController);
+      if(drcOutputWriter != null)
+      {
+         drcOutputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForController);
+      }
    }
 
    @Override

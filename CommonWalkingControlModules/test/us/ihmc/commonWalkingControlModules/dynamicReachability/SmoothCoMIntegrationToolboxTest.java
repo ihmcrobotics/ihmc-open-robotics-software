@@ -1,13 +1,12 @@
 package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
-import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointToolbox;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -15,6 +14,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SmoothCoMIntegrationToolboxTest
@@ -37,7 +38,7 @@ public class SmoothCoMIntegrationToolboxTest
       // Linear polynomial: y(x) = a0 + a1*x
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
       int numberOfCoefficients = 2;
-      YoFrameTrajectory3D linear3D = new YoFrameTrajectory3D(namePrefix + "Linear", numberOfCoefficients, worldFrame, registry);
+      FrameTrajectory3D linear3D = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
       
       for(int i = 0; i < nTests; i++)
       {
@@ -122,7 +123,7 @@ public class SmoothCoMIntegrationToolboxTest
       // Linear polynomial: y(x) = a0 + a1*x
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
       int numberOfCoefficients = 2;
-      YoFrameTrajectory3D linear3D = new YoFrameTrajectory3D(namePrefix + "Linear", numberOfCoefficients, worldFrame, registry);
+      FrameTrajectory3D linear3D = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
       
       for(int i = 0; i < nTests; i++)
       {
@@ -201,7 +202,7 @@ public class SmoothCoMIntegrationToolboxTest
    // Linear polynomial: y(x) = a0 + a1*x
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
       int numberOfCoefficients = 2;
-      YoFrameTrajectory3D linear3D = new YoFrameTrajectory3D(namePrefix + "Linear", numberOfCoefficients, worldFrame, registry);
+      FrameTrajectory3D linear3D = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
       
       for(int i = 0; i < nTests; i++)
       {
@@ -279,7 +280,7 @@ public class SmoothCoMIntegrationToolboxTest
       }
    }
    
-   public static void calculateCoMPositionByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint3D icpPositionDesiredFinal, FramePoint3D comPositionDesiredInitial, FramePoint3D comPositionDesiredCurrent)
+   public static void calculateCoMPositionByHand3DLinear(double omega0, double time, FrameTrajectory3D linear3D, FramePoint3D icpPositionDesiredFinal, FramePoint3D comPositionDesiredInitial, FramePoint3D comPositionDesiredCurrent)
    {      
       linear3D.compute(linear3D.getInitialTime());
       FramePoint3D cmpRefInit = new FramePoint3D(linear3D.getFramePosition());
@@ -312,7 +313,7 @@ public class SmoothCoMIntegrationToolboxTest
       }
    }
    
-   public static void calculateCoMVelocityByHand3DLinear(double omega0, double time, YoFrameTrajectory3D linear3D, FramePoint3D icpPositionDesiredFinal, FramePoint3D comPositionDesiredFinal, FrameVector3D comVelocityDesiredCurrent)
+   public static void calculateCoMVelocityByHand3DLinear(double omega0, double time, FrameTrajectory3D linear3D, FramePoint3D icpPositionDesiredFinal, FramePoint3D comPositionDesiredFinal, FrameVector3D comVelocityDesiredCurrent)
    {      
       linear3D.compute(linear3D.getInitialTime());
       FramePoint3D cmpRefInit = new FramePoint3D(linear3D.getFramePosition());
