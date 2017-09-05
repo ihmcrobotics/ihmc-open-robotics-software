@@ -16,9 +16,9 @@ import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.wholeBodyController.DRCOutputWriter;
+import us.ihmc.wholeBodyController.DRCOutputProcessor;
 
-public class DRCSimulationOutputWriter extends PerfectSimulatedOutputWriter implements DRCOutputWriter
+public class DRCSimulationOutputWriter extends PerfectSimulatedOutputWriter implements DRCOutputProcessor
 {
    private static final int TICKS_TO_DELAY = 0;
 
@@ -35,7 +35,7 @@ public class DRCSimulationOutputWriter extends PerfectSimulatedOutputWriter impl
    }
 
    @Override
-   public void writeAfterController(long timestamp)
+   public void processAfterController(long timestamp)
    {
       for (int i = 0; i < revoluteJoints.size(); i++)
       {
