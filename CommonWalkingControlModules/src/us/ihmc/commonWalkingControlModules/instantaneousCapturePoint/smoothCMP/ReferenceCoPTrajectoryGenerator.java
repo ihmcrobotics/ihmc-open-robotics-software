@@ -19,9 +19,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
@@ -520,16 +517,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       planIsAvailable.set(true);
    }
 
-   private void printTimes()
-   {
-      for(int i = 0; i < getNumberOfFootstepsRegistered(); i++)
-      {
-         PrintTools.error("T" + i + ": " + transferDurations.get(i).getDoubleValue());
-         PrintTools.error("S" + i + ": " + swingDurations.get(i).getDoubleValue());
-      }
-      PrintTools.error("T" + getNumberOfFootstepsRegistered() + ": " + transferDurations.get(getNumberOfFootstepsRegistered()).getDoubleValue());
-   }
-
    @Override
    public void computeReferenceCoPsStartingFromSingleSupport(RobotSide supportSide)
    {
@@ -840,8 +827,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             && MathTools.isGreaterThanWithPrecision(supportToSwingStepLength, footstepLengthThresholdToPutExitCoPOnToes.getDoubleValue(),
                                                     Epsilons.ONE_HUNDREDTH))
       {
-         PrintTools.debug("Putting exit CoP on toes for stride length, stepLength: " + supportToSwingStepLength + " threshold: "
-               + footstepLengthThresholdToPutExitCoPOnToes.getDoubleValue());
          framePointToPack.setIncludingFrame(supportFootPolygon.getCentroid(), 0.0);
          framePointToPack.add(supportFootPolygon.getMaxX() - exitCoPForwardSafetyMarginOnToes.getDoubleValue(),
                               copOffsets.get(supportSide).get(exitCoPName).getY(), 0.0);
@@ -853,9 +838,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             && MathTools.isGreaterThanWithPrecision(supportToSwingStepLength, footstepLengthThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue(),
                                                     Epsilons.ONE_HUNDREDTH))
       {
-         PrintTools.debug("Putting exit CoP on toes for stepping down, height:" + supportToSwingStepHeight + ", threshold: "
-               + footstepHeightThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue() + "\n stepLength: " + supportToSwingStepLength + ", threshold: "
-               + footstepLengthThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue());
          framePointToPack.setIncludingFrame(supportFootPolygon.getCentroid(), 0.0);
          framePointToPack.add(supportFootPolygon.getMaxX(), 0.0, 0.0);
          constrainToPolygon(framePointToPack, supportFootPolygon, safeDistanceFromCoPToSupportEdgesWhenSteppingDown.getDoubleValue());

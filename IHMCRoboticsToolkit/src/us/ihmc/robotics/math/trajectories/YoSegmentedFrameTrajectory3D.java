@@ -100,6 +100,21 @@ public abstract class YoSegmentedFrameTrajectory3D //implements YoSegmentedFrame
       currentSegment.getFrameAcceleration(desiredAccelerationToPack);
    }
 
+   public void getFramePosition(FramePoint3D desiredPositionToPack)
+   {
+      currentSegment.getFramePosition(desiredPositionToPack);
+   }
+
+   public void getFrameVelocity(FrameVector3D desiredVelocityToPack)
+   {
+      currentSegment.getFrameVelocity(desiredVelocityToPack);
+   }
+
+   public void getFrameAcceleration(FrameVector3D desiredAccelerationToPack)
+   {
+      currentSegment.getFrameAcceleration(desiredAccelerationToPack);
+   }
+
    private void setCurrentSegmentIndexFromStateTime(double timeInState)
    {
       int segmentIndex = 0;
