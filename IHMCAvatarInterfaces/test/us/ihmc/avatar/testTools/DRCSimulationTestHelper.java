@@ -487,7 +487,7 @@ public class DRCSimulationTestHelper
       this.addFootstepMessageGenerator = addFootstepMessageGenerator;
    }
 
-   public void setUseHeadAndVelocityScript(boolean useHeadingAndVelocityScript)
+   public void setUseHeadingAndVelocityScript(boolean useHeadingAndVelocityScript)
    {
       this.useHeadingAndVelocityScript = useHeadingAndVelocityScript;
    }
