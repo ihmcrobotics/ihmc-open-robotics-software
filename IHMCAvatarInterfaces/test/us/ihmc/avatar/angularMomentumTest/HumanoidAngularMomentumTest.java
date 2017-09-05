@@ -83,7 +83,8 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
          }
       };
       simulationTestingParameters.setKeepSCSUp(true);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(emptyEnvironment, className, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(emptyEnvironment, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.createSimulation(className);
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
       Point3D cameraPosition = new Point3D(0.0, 10.0, 1.0);
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);

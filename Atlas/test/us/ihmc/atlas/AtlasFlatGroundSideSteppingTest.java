@@ -2,19 +2,44 @@ package us.ihmc.atlas;
 
 import org.junit.Test;
 
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarFlatGroundSideSteppingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasFlatGroundSideSteppingTest extends AvatarFlatGroundSideSteppingTest
 {
-   private final AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ;
-   private final AtlasRobotModel robotModel = new AtlasRobotModel(version, RobotTarget.SCS, false);
-   private final AtlasJointMap jointMap = new AtlasJointMap(version, robotModel.getPhysicalProperties());
-   
+   private final AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
+   private final AtlasJointMap jointMap = new AtlasJointMap(version, new AtlasPhysicalProperties());
+   private final RobotTarget target = RobotTarget.SCS;
+   private final AtlasRobotModel robotModel = new AtlasRobotModel(version, target, false)
+   {
+      @Override
+      public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
+      {
+         return new AtlasSmoothCMPPlannerParameters(new AtlasPhysicalProperties());
+      }
+
+      @Override
+      public WalkingControllerParameters getWalkingControllerParameters()
+      {
+         return new AtlasWalkingControllerParameters(target, jointMap, getContactPointParameters())
+         {
+            public boolean alwaysAllowMomentum()
+            {
+               return true;
+            }
+         };
+      }
+   };
+
    private final int numberOfSteps = 10;
    private final double stepWidth = 0.25;
    private final double stepLength = 0.5;
@@ -24,12 +49,12 @@ public class AtlasFlatGroundSideSteppingTest extends AvatarFlatGroundSideSteppin
    private final double finalTransferTime = 1.0;
    
    private final double forcePercentageOfWeight1 = 0.025;
-   private final double forceDuration1 = 0.5;
+   private final double forceDuration1 = 1.0;
    private final double forceDelay1 = 0.0 * swingTime;
    private final Vector3D forceDirection1 = new Vector3D(0.0, -1.0, 0.0);
    
    private final double forcePercentageOfWeight2 = 0.025;
-   private final double forceDuration2 = 0.5;
+   private final double forceDuration2 = 1.0;
    private final double forceDelay2 = 1.0 * swingTime;
    private final Vector3D forceDirection2 = new Vector3D(1.0, 0.0, 0.0);
    

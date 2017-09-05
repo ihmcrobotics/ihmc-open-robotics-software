@@ -65,9 +65,11 @@ public class SimulatedLowLevelOutputWriter implements LowLevelOutputWriter
          OneDegreeOfFreedomJoint pinJoint = revoluteJoints.first(i);
          LowLevelJointDataReadOnly data = revoluteJoints.second(i);
 
-         double tau = data.getDesiredTorque();
 
-         pinJoint.setTau(tau);
+         if (data.hasDesiredTorque())
+         {
+            pinJoint.setTau(data.getDesiredTorque());
+         }
          if (data.hasKp())
          {
             pinJoint.setKp(data.getKp());

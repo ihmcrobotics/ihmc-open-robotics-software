@@ -74,7 +74,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, "AvatarLeapOfFaithTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("AvatarLeapOfFaithTest");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
@@ -147,7 +148,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
@@ -214,7 +216,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
@@ -282,7 +285,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
@@ -380,7 +384,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double starterLength = 0.35;
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stepLengths, starterLength, 0.0, 0.0);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
@@ -478,7 +483,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double starterLength = 0.35;
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stepLengths, starterLength, 0.0, currentHeight);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 

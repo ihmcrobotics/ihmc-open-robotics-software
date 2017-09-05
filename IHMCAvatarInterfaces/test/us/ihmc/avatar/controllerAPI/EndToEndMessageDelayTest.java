@@ -57,7 +57,8 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
       
       DRCRobotModel robotModel = getRobotModel();
       DRCRobotJointMap jointMap = robotModel.getJointMap();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       
       ThreadTools.sleep(1000);

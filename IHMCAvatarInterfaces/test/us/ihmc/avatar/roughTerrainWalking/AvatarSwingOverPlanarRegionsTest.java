@@ -56,7 +56,8 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
 
       DRCStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(new LittleWallsWithIncreasingHeightPlanarRegionEnvironment(), className, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(new LittleWallsWithIncreasingHeightPlanarRegionEnvironment(), startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.createSimulation(className);
       ThreadTools.sleep(1000);
       drcSimulationTestHelper.getSimulationConstructionSet().setCameraPosition(8.0, -8.0, 5.0);
       drcSimulationTestHelper.getSimulationConstructionSet().setCameraFix(1.5, 0.0, 0.8);
