@@ -2,30 +2,45 @@ package us.ihmc.atlas;
 
 import org.junit.Test;
 
+import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarFlatGroundForwardWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWalkingTest
 {
-   private final AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ;
-   private final AtlasRobotModel robotModel = new AtlasRobotModel(version, RobotTarget.SCS, false)
+   private final AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
+   private final AtlasJointMap jointMap = new AtlasJointMap(version, new AtlasPhysicalProperties());
+   private final RobotTarget target = RobotTarget.SCS;
+   private final AtlasRobotModel robotModel = new AtlasRobotModel(version, target, false)
    {
-
       @Override
       public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
       {
          return new AtlasSmoothCMPPlannerParameters(new AtlasPhysicalProperties());
       }
+
+      @Override
+      public WalkingControllerParameters getWalkingControllerParameters()
+      {
+         return new AtlasWalkingControllerParameters(target, jointMap, getContactPointParameters())
+         {
+            public boolean alwaysAllowMomentum()
+            {
+               return true;
+            }
+         };
+      }
    };
 
-   private final AtlasJointMap jointMap = new AtlasJointMap(version, robotModel.getPhysicalProperties());
 
    private final int numberOfSteps = 8;
    private final double stepWidth = 0.25;
