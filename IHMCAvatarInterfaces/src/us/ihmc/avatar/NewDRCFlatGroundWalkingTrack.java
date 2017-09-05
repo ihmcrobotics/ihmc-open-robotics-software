@@ -6,6 +6,7 @@ import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
@@ -13,10 +14,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Ab
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.NewMomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.PositionControlParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandPrepParameters;
 import us.ihmc.graphicsDescription.HeightMap;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -48,8 +46,7 @@ public abstract class NewDRCFlatGroundWalkingTrack
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
-      StandPrepParameters standPrepSetpoints = model.getStandPrepSetpoints();
-      PositionControlParameters positionControlParameters = model.getPositionControlParameters();
+      HighLevelControllerParameters highLevelControllerParameters = model.getHighLevelControllerParameters();
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       RobotContactPointParameters contactPointParameters = model.getContactPointParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
@@ -61,8 +58,7 @@ public abstract class NewDRCFlatGroundWalkingTrack
 
       AbstractMomentumBasedControllerFactory controllerFactory = getControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames,
                                                                                       wristForceSensorNames, walkingControllerParameters, capturePointPlannerParameters,
-                                                                                      standPrepSetpoints, positionControlParameters,
-                                                                                      NewHighLevelControllerStates.STAND_PREP_STATE, NewHighLevelControllerStates.DO_NOTHING_STATE);
+                                                                                      highLevelControllerParameters);
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
 
 
@@ -103,11 +99,10 @@ public abstract class NewDRCFlatGroundWalkingTrack
    public AbstractMomentumBasedControllerFactory getControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
                                                                       SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
                                                                       WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters,
-                                                                      StandPrepParameters standPrepSetpoints, PositionControlParameters positionControlParameters,
-                                                                      NewHighLevelControllerStates initialControllerState, NewHighLevelControllerStates fallbackControllerState)
+                                                                      HighLevelControllerParameters highLevelControllerParameters)
    {
       return new NewMomentumBasedControllerFactory(contactableBodiesFactory, footForceSensorNames, footContactSensorNames, wristSensorNames, walkingControllerParameters,
-                                                   capturePointPlannerParameters, standPrepSetpoints, positionControlParameters, initialControllerState, fallbackControllerState);
+                                                   capturePointPlannerParameters, highLevelControllerParameters);
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)

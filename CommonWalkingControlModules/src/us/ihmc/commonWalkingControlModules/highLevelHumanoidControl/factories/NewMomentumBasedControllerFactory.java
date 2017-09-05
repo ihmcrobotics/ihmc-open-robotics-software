@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -81,8 +78,10 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    private final WalkingControllerParameters walkingControllerParameters;
    private final ICPTrajectoryPlannerParameters capturePointPlannerParameters;
 
+   private final HighLevelControllerParameters highLevelControllerParameters;
    private final StandPrepParameters standPrepSetpoints;
    private final PositionControlParameters positionControlParameters;
+
    private final NewHighLevelControllerStates initialControllerState;
    private final NewHighLevelControllerStates fallbackControllerState;
 
@@ -120,20 +119,21 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    public NewMomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
                                             SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
                                             WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters,
-                                            StandPrepParameters standPrepSetpoints, PositionControlParameters positionControlParameters,
-                                            NewHighLevelControllerStates initialControllerState, NewHighLevelControllerStates fallbackControllerState)
+                                            HighLevelControllerParameters highLevelControllerParameters)
    {
       this.footSensorNames = footForceSensorNames;
       this.footContactSensorNames = footContactSensorNames;
       this.wristSensorNames = wristSensorNames;
       this.contactableBodiesFactory = contactableBodiesFactory;
-      this.standPrepSetpoints = standPrepSetpoints;
-      this.positionControlParameters = positionControlParameters;
-      this.initialControllerState = initialControllerState;
-      this.fallbackControllerState = fallbackControllerState;
+      this.highLevelControllerParameters = highLevelControllerParameters;
 
       this.walkingControllerParameters = walkingControllerParameters;
       this.capturePointPlannerParameters = capturePointPlannerParameters;
+
+      standPrepSetpoints = highLevelControllerParameters.getStandPrepParameters();
+      positionControlParameters = highLevelControllerParameters.getPositionControlParameters();
+      initialControllerState = highLevelControllerParameters.getDefaultInitialControllerState();
+      fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
 
       commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
@@ -291,6 +291,7 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       closeableAndDisposableRegistry.closeAndDispose();
    }
 
+   @Override
    public RobotController getController(FullHumanoidRobotModel fullRobotModel, double controlDT, double gravity, YoDouble yoTime,
                                         YoGraphicsListRegistry yoGraphicsListRegistry, DRCRobotSensorInformation sensorInformation,
                                         ForceSensorDataHolderReadOnly forceSensorDataHolder, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
@@ -409,7 +410,8 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
       standReadyTransitions.add(StateMachineTools.buildRequestableStateTransition(requestedHighLevelControllerState, fallbackControllerState));
       StateTransition<NewHighLevelControllerStates> feetLoadedTransition = new StateTransition<>(NewHighLevelControllerStates.STAND_TRANSITION_STATE,
            new FeetLoadedToWalkingStandTransition(NewHighLevelControllerStates.STAND_TRANSITION_STATE, requestedHighLevelControllerState, forceSensorDataHolder,
-                                                  sensorInformation.getFeetForceSensorNames(), controllerToolbox, false, registry));
+                                                  sensorInformation.getFeetForceSensorNames(), controllerToolbox,
+                                                  highLevelControllerParameters.automaticallyTransitionToWalkingWhenReady(), registry));
       standReadyTransitions.add(feetLoadedTransition);
       highLevelControllerTransitions.put(standReadyControllerState, standReadyTransitions);
 
@@ -657,7 +659,6 @@ public class NewMomentumBasedControllerFactory extends AbstractMomentumBasedCont
    {
       return new NewStandPrepControllerState(controllerToolbox, standPrepSetpoints, positionControlParameters);
    }
-
 
    public NewStandReadyControllerState createStandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox,
                                                                        StandPrepParameters standPrepSetpoints, PositionControlParameters positionControlParameters)
