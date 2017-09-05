@@ -191,6 +191,7 @@ public class BalanceManager
       {
          icpPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
                                                    icpPlannerParameters.getNumberOfCoPWayPointsPerFoot(), registry, yoGraphicsListRegistry, controllerToolbox.getGravityZ());
+         ((SmoothCMPBasedICPPlanner)icpPlanner).setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
       }
 
       ICPPlannerWithAngularMomentumOffsetWrapper icpWrapper = new ICPPlannerWithAngularMomentumOffsetWrapper(icpPlanner, bipedSupportPolygons.getSoleZUpFrames());

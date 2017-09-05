@@ -601,4 +601,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       areCoMDynamicsSatisfied.set(comVelocityDesiredCurrent.epsilonEquals(comVelocityDynamicsCurrent, 10e-5));
    }
+
+   public void setDefaultPhaseTimes(double defaultSwingTime, double defaultTransferTime)
+   {
+      referenceCoPGenerator.setDefaultPhaseTimes(defaultSwingTime, defaultTransferTime);
+   }
 }

@@ -59,6 +59,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final SideDependentList<EnumMap<CoPPointName, YoFrameVector2d>> copOffsets = new SideDependentList<>();
    private EnumMap<CoPPointName, CoPSupportPolygonNames> copSupportPolygon;
    private EnumMap<CoPPointName, Boolean> isConstrainedToSupportPolygonFlags;
+   private double defaultSwingTime;
+   private double defaultTransferTime;
 
    private EnumMap<CoPPointName, Boolean> isConstrainedToMinMaxFlags;
    private final EnumMap<CoPPointName, YoDouble> maxCoPOffsets = new EnumMap<CoPPointName, YoDouble>(CoPPointName.class);
@@ -243,6 +245,12 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       parentRegistry.addChild(registry);
       clear();
    }
+   
+   public void setDefaultPhaseTimes(double defaultSwingTime, double defaultTransferTime)
+   {
+      this.defaultSwingTime = defaultSwingTime;
+      this.defaultTransferTime = defaultTransferTime;
+   }
 
    @Override
    public void initializeParameters(SmoothCMPPlannerParameters parameters)
@@ -251,7 +259,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       numberOfPointsPerFoot.set(parameters.getNumberOfCoPWayPointsPerFoot());
       orderOfSplineInterpolation.set(parameters.getOrderOfCoPInterpolation());
       percentageChickenSupport.set(0.5);
-
+      
       this.copSupportPolygon = parameters.getSupportPolygonNames();
       this.isConstrainedToSupportPolygonFlags = parameters.getIsConstrainedToSupportPolygonFlags();
       this.isConstrainedToMinMaxFlags = parameters.getIsConstrainedToMinMaxFlags();
@@ -538,7 +546,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          copLocationWaypoints.get(footstepIndex).setSupportFootLocation(tempFramePoint1);
          if(upcomingFootstepsData.get(footstepIndex).getSwingTime() == Double.POSITIVE_INFINITY)
          {
-            upcomingFootstepsData.get(footstepIndex).setSwingTime(1.0);
+            upcomingFootstepsData.get(footstepIndex).setSwingTime(defaultSwingTime);
             computeCoPPointsForFootstep(footstepIndex + 1);
          }
          else
