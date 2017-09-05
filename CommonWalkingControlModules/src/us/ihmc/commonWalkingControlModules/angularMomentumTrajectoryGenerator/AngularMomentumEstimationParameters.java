@@ -105,11 +105,6 @@ public class AngularMomentumEstimationParameters
       return this.copPlannerParameters;
    }
 
-   public CoPPointName[] getCoPPointList()
-   {
-      return copPlannerParameters.getCoPPointsToPlan();
-   }
-
    public double getSwingFootMaxLift()
    {
       return 0.10;
