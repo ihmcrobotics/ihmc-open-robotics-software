@@ -94,7 +94,9 @@ public class ICPQPIndexHandler
    public void computeProblemSize()
    {
       numberOfFootstepVariables = 2 * numberOfFootstepsToConsider;
-      numberOfFreeVariables = numberOfFootstepVariables + 4; // all the footstep locations, the CMP delta, and the dynamic relaxation
+      numberOfFreeVariables = 4; // all the footstep locations, the CMP delta, and the dynamic relaxation
+      if (useStepAdjustment)
+         numberOfFreeVariables += numberOfFootstepVariables;
       if (useAngularMomentum)
          numberOfFreeVariables += 2;
 

@@ -306,9 +306,4 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
       checksum.update(jointAngularAcceleration.getVector());
    }
 
-   @Override
-   public void calculateJointDesiredChecksum(GenericCRC32 checksum)
-   {
-      checksum.update(jointAngularAccelerationDesired.getVector());
-   }
 }

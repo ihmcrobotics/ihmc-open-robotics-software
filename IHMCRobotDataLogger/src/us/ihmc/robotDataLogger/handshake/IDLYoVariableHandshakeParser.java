@@ -29,6 +29,13 @@ import us.ihmc.robotDataLogger.YoType;
 import us.ihmc.robotDataLogger.YoVariableDefinition;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotics.dataStructures.MutableColor;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.parameters.EnumParameter;
+import us.ihmc.yoVariables.parameters.IntegerParameter;
+import us.ihmc.yoVariables.parameters.LongParameter;
+import us.ihmc.yoVariables.parameters.YoParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -98,6 +105,9 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
       addJointStates(handshake);
       addGraphicObjects(handshake);
 
+      DefaultParameterReader parameterReader = new DefaultParameterReader();
+      parameterReader.readParametersInRegistry(regs.get(0));
+      
       this.numberOfVariables = handshake.getVariables().size();
       this.numberOfJointStateVariables = getNumberOfJointStateVariables(handshake);
       this.stateVariables = 1 + numberOfVariables + numberOfJointStateVariables;
@@ -145,38 +155,83 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
          }
 
          YoType type = yoVariableDefinition.getType();
-         switch (type)
+         if(yoVariableDefinition.getIsParameter())
          {
-         case DoubleYoVariable:
-            YoDouble doubleVar = new YoDouble(name, parent);
-            variableList.add(doubleVar);
-            break;
-
-         case IntegerYoVariable:
-            YoInteger intVar = new YoInteger(name, parent);
-            variableList.add(intVar);
-            break;
-
-         case BooleanYoVariable:
-            YoBoolean boolVar = new YoBoolean(name, parent);
-            variableList.add(boolVar);
-            break;
-
-         case LongYoVariable:
-            YoLong longVar = new YoLong(name, parent);
-            variableList.add(longVar);
-            break;
-
-         case EnumYoVariable:
-            EnumType enumType = handshake.getEnumTypes().get(yoVariableDefinition.getEnumType());
-            String[] names = enumType.getEnumValues().toStringArray();
-            boolean allowNullValues = yoVariableDefinition.getAllowNullValues();
-            YoEnum enumVar = new YoEnum(name, "", parent, allowNullValues, names);
-            variableList.add(enumVar);
-            break;
-
-         default:
-            throw new RuntimeException("Unknown YoVariable type: " + type.name());
+            YoParameter<?> newParameter;
+            switch (type)
+            {
+            case DoubleYoVariable:
+               newParameter = new DoubleParameter(name, parent);
+               break;
+   
+            case IntegerYoVariable:
+               newParameter = new IntegerParameter(name, parent);
+               break;
+   
+            case BooleanYoVariable:
+               newParameter = new BooleanParameter(name, parent);
+               break;
+   
+            case LongYoVariable:
+               newParameter = new LongParameter(name, parent);
+               break;
+   
+            case EnumYoVariable:
+               EnumType enumType = handshake.getEnumTypes().get(yoVariableDefinition.getEnumType());
+               String[] names = enumType.getEnumValues().toStringArray();
+               boolean allowNullValues = yoVariableDefinition.getAllowNullValues();
+               newParameter = new EnumParameter<>(name, "", parent, allowNullValues, names);
+               break;
+   
+            default:
+               throw new RuntimeException("Unknown YoVariable type: " + type.name());
+            }
+            
+            YoVariable<?> newVariable = parent.getYoVariable(parent.getNumberOfYoVariables() - 1);
+            
+            // Test if this is the correct variable
+            if(newParameter != newVariable.getParameter())
+            {
+               throw new RuntimeException("Last variable index in the registry is not the parameter just added.");
+            }
+            variableList.add(newVariable);
+            
+         }
+         else
+         {
+            switch (type)
+            {
+            case DoubleYoVariable:
+               YoDouble doubleVar = new YoDouble(name, parent);
+               variableList.add(doubleVar);
+               break;
+   
+            case IntegerYoVariable:
+               YoInteger intVar = new YoInteger(name, parent);
+               variableList.add(intVar);
+               break;
+   
+            case BooleanYoVariable:
+               YoBoolean boolVar = new YoBoolean(name, parent);
+               variableList.add(boolVar);
+               break;
+   
+            case LongYoVariable:
+               YoLong longVar = new YoLong(name, parent);
+               variableList.add(longVar);
+               break;
+   
+            case EnumYoVariable:
+               EnumType enumType = handshake.getEnumTypes().get(yoVariableDefinition.getEnumType());
+               String[] names = enumType.getEnumValues().toStringArray();
+               boolean allowNullValues = yoVariableDefinition.getAllowNullValues();
+               YoEnum enumVar = new YoEnum(name, "", parent, allowNullValues, names);
+               variableList.add(enumVar);
+               break;
+   
+            default:
+               throw new RuntimeException("Unknown YoVariable type: " + type.name());
+            }
          }
       }
 
