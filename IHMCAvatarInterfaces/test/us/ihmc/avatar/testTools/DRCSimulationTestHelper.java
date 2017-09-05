@@ -64,6 +64,7 @@ public class DRCSimulationTestHelper
    private SimulationConstructionSet scs;
    private HumanoidFloatingRootJointRobot sdfRobot;
    private AvatarSimulation avatarSimulation;
+
    protected final PacketCommunicator controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
          new IHMCCommunicationKryoNetClassList());
    private CommonAvatarEnvironmentInterface testEnvironment;
@@ -74,11 +75,12 @@ public class DRCSimulationTestHelper
    private BlockingSimulationRunner blockingSimulationRunner;
    private final WalkingControllerParameters walkingControlParameters;
 
+   private final DRCRobotModel robotModel;
    private final FullHumanoidRobotModel fullRobotModel;
    private final ScriptedFootstepGenerator scriptedFootstepGenerator;
    private final ScriptedHandstepGenerator scriptedHandstepGenerator;
 
-   private final DRCNetworkModuleParameters networkProcessorParameters;
+   private DRCNetworkModuleParameters networkProcessorParameters;
    private DRCSimulationStarter simulationStarter;
    private Exception caughtException;
 
@@ -90,9 +92,11 @@ public class DRCSimulationTestHelper
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = null;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = null;
    private DRCNetworkModuleParameters drcNetworkModuleParameters = null;
+   private final DRCGuiInitialSetup guiInitialSetup;
 
    public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel)
    {
+      this.robotModel = robotModel;
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
       this.simulationTestingParameters = simulationTestParameters;
 
@@ -101,8 +105,16 @@ public class DRCSimulationTestHelper
       scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel, walkingControlParameters);
       scriptedHandstepGenerator = new ScriptedHandstepGenerator(fullRobotModel);
 
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
+      guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
+   }
 
+   public void createSimulation(String name)
+   {
+      createSimulation(name, true, true);
+   }
+
+   public void createSimulation(String name, boolean automaticallySpawnSimulation, boolean useBlockingSimulationRunner)
+   {
       simulationStarter = new DRCSimulationStarter(robotModel, testEnvironment);
       simulationStarter.setRunMultiThreaded(simulationTestingParameters.getRunMultiThreaded());
       simulationStarter.setUsePerfectSensors(simulationTestingParameters.getUsePefectSensors());
@@ -128,15 +140,7 @@ public class DRCSimulationTestHelper
       {
          networkProcessorParameters = drcNetworkModuleParameters;
       }
-   }
 
-   public void createSimulation(String name)
-   {
-      createSimulation(name, true, true);
-   }
-
-   public void createSimulation(String name, boolean automaticallySpawnSimulation, boolean useBlockingSimulationRunner)
-   {
       try
       {
          controllerCommunicator.connect();
@@ -216,7 +220,7 @@ public class DRCSimulationTestHelper
 
    public FullHumanoidRobotModel getSDFFullRobotModel()
    {
-      return (FullHumanoidRobotModel) fullRobotModel;
+      return fullRobotModel;
    }
 
    public CommonHumanoidReferenceFrames getReferenceFrames()
@@ -483,7 +487,7 @@ public class DRCSimulationTestHelper
       }
    }
 
-   public void setSelectedLocation(DRCObstacleCourseStartingLocation selectedLocation)
+   public void setSelectedLocation(DRCStartingLocation selectedLocation)
    {
       this.selectedLocation = selectedLocation;
    }
@@ -521,5 +525,15 @@ public class DRCSimulationTestHelper
    public void setDrcNetworkModuleParameters(DRCNetworkModuleParameters drcNetworkModuleParameters)
    {
       this.drcNetworkModuleParameters = drcNetworkModuleParameters;
+   }
+
+   public void setTestEnvironment(CommonAvatarEnvironmentInterface testEnvironment)
+   {
+      this.testEnvironment = testEnvironment;
+   }
+
+   public void setNetworkProcessorParameters(DRCNetworkModuleParameters networkProcessorParameters)
+   {
+      this.networkProcessorParameters = networkProcessorParameters;
    }
 }
