@@ -47,7 +47,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.wholeBodyController.DRCControllerThread;
-import us.ihmc.wholeBodyController.DRCOutputWriter;
+import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
@@ -67,7 +67,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    private SensorReader sensorReader;
    private DiagnosticParameters diagnosticParameters;
    private AutomatedDiagnosticAnalysisController automatedDiagnosticAnalysisController;
-   private DRCOutputWriter outputWriter;
+   private DRCOutputProcessor outputWriter;
 
    private final Point3D scsCameraPosition = new Point3D(0.0, -8.0, 1.8);
    private final Point3D scsCameraFix = new Point3D(0.0, 0.0, 1.35);
@@ -265,7 +265,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
          automatedDiagnosticAnalysisController.doControl();
       }
 
-      outputWriter.writeAfterController(0);
+      outputWriter.processAfterController(0);
       long endTime = System.nanoTime();
       controllerTime.set(Conversions.nanosecondsToSeconds(endTime - startTime));
       averageControllerTime.update();
