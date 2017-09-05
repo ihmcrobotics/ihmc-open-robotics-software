@@ -16,6 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWh
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.CTTreeTools;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -53,9 +54,7 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
       
       
       
-      SideDependentList<ConfigurationSpace> configurationSpaces = new SideDependentList<>();
-      
-      
+            
       int numberOfTrajectoryPoints = path.size();
       
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, numberOfTrajectoryPoints);
@@ -69,15 +68,9 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
       {
          CTTaskNode trajectoryNode = path.get(i);
          
-         configurationSpaces.put(RobotSide.LEFT, new ConfigurationSpace());
-         configurationSpaces.get(RobotSide.LEFT).setTranslation(trajectoryNode.getNodeData(5), trajectoryNode.getNodeData(6), trajectoryNode.getNodeData(7));
-         configurationSpaces.get(RobotSide.LEFT).setRotation(trajectoryNode.getNodeData(8), trajectoryNode.getNodeData(9), trajectoryNode.getNodeData(10));
-
-         configurationSpaces.put(RobotSide.RIGHT, new ConfigurationSpace());
-         configurationSpaces.get(RobotSide.RIGHT).setTranslation(trajectoryNode.getNodeData(11), trajectoryNode.getNodeData(12), trajectoryNode.getNodeData(13));
-         configurationSpaces.get(RobotSide.RIGHT).setRotation(trajectoryNode.getNodeData(14), trajectoryNode.getNodeData(15), trajectoryNode.getNodeData(16));
+         ConfigurationSpace configurationSpace = CTTreeTools.getConfigurationSpace(trajectoryNode, RobotSide.LEFT);
          
-         Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(trajectoryNode.getNodeData(0), RobotSide.LEFT, configurationSpaces.get(RobotSide.LEFT));
+         Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(trajectoryNode.getNodeData(0), RobotSide.LEFT, configurationSpace);
          
          
          
@@ -99,19 +92,12 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
       
       
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
-      {
-         
+      {         
          CTTaskNode trajectoryNode = path.get(i);
          
-         configurationSpaces.put(RobotSide.LEFT, new ConfigurationSpace());
-         configurationSpaces.get(RobotSide.LEFT).setTranslation(trajectoryNode.getNodeData(5), trajectoryNode.getNodeData(6), trajectoryNode.getNodeData(7));
-         configurationSpaces.get(RobotSide.LEFT).setRotation(trajectoryNode.getNodeData(8), trajectoryNode.getNodeData(9), trajectoryNode.getNodeData(10));
-
-         configurationSpaces.put(RobotSide.RIGHT, new ConfigurationSpace());
-         configurationSpaces.get(RobotSide.RIGHT).setTranslation(trajectoryNode.getNodeData(11), trajectoryNode.getNodeData(12), trajectoryNode.getNodeData(13));
-         configurationSpaces.get(RobotSide.RIGHT).setRotation(trajectoryNode.getNodeData(14), trajectoryNode.getNodeData(15), trajectoryNode.getNodeData(16));
+         ConfigurationSpace configurationSpace = CTTreeTools.getConfigurationSpace(trajectoryNode, RobotSide.LEFT);
          
-         Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(trajectoryNode.getNodeData(0), RobotSide.LEFT, configurationSpaces.get(RobotSide.LEFT));
+         Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(trajectoryNode.getNodeData(0), RobotSide.LEFT, configurationSpace);
          
          
          

@@ -279,25 +279,28 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
       
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-      int numberOfPath = 20;
-      for(int i=0;i<numberOfPath;i++)
-      {
-         double localTime = ((double)(i)/numberOfPath)*endeffectorTrajectory.getTrajectoryTime();
-         ConfigurationSpace configurationSpace = new ConfigurationSpace();
-         scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(localTime, RobotSide.LEFT, configurationSpace)));
-      }
+      
+      
 
       
       
       System.out.println("Behavior Dispatch");
       drcBehaviorTestHelper.dispatchBehavior(planningBehavior);
 
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(7.0);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10.0);
       System.out.println("Go Motion");
       
       PrintTools.info("planningResult "+ planningBehavior.getConstrainedWholeBodyPlanningToolboxOutputStatus().planningResult);
       
-      
+      ArrayList<Pose3D> handTrajectories = planningBehavior.getHandTrajectories(RobotSide.LEFT);
+      int numberOfPath = handTrajectories.size();
+      for(int i=0;i<numberOfPath;i++)
+      {
+         Pose3D pose = handTrajectories.get(i);
+         PrintTools.info(""+pose +" " + numberOfPath);
+         scs.addStaticLinkGraphics(getXYZAxis(pose));
+      }
       
       drcBehaviorTestHelper.send(planningBehavior.getWholebodyTrajectoryMessage());
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10.0);

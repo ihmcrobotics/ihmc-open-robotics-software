@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacket<ConstrainedWholeBodyPlanningToolboxOutputStatus>
@@ -24,7 +25,8 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
 
    public ConstrainedWholeBodyPlanningToolboxOutputStatus()
    {
-
+      handTrajectories.put(RobotSide.LEFT, new ArrayList<Pose3D>());
+      handTrajectories.put(RobotSide.RIGHT, new ArrayList<Pose3D>());
    }
 
    @Override

@@ -1,16 +1,13 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
 
 import org.apache.commons.lang3.StringUtils;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FrameVector3D;
@@ -18,6 +15,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * This multi waypoint trajectory generator helper will generate velocities at intermediate way points of a trajectory which will result in a smooth path trough

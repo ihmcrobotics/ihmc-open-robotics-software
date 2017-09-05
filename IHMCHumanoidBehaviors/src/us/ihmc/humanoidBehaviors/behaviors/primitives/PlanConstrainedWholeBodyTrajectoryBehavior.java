@@ -1,11 +1,14 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import java.util.ArrayList;
+
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
@@ -18,6 +21,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWh
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -42,6 +46,8 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
    private final SleepBehavior sleepBehavior;
 
    private WholeBodyTrajectoryMessage wholebodyTrajectoryMessage;
+   
+   private SideDependentList<ArrayList<Pose3D>> handTrajectories = new SideDependentList<>();
 
    private ConcurrentListeningQueue<ConstrainedWholeBodyPlanningToolboxOutputStatus> cwbtoolboxOutputStatusQueue = new ConcurrentListeningQueue<ConstrainedWholeBodyPlanningToolboxOutputStatus>(20);
    private FullHumanoidRobotModel fullRobotModel;
@@ -69,6 +75,11 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
    public ConstrainedWholeBodyPlanningToolboxOutputStatus getConstrainedWholeBodyPlanningToolboxOutputStatus()
    {
       return cwbtoolboxOutputStatus;
+   }
+   
+   public ArrayList<Pose3D> getHandTrajectories(RobotSide robotSide)
+   {
+      return handTrajectories.get(robotSide);
    }
 
    public WholeBodyTrajectoryMessage getWholebodyTrajectoryMessage()
@@ -107,7 +118,7 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
             }
             ConstrainedWholeBodyPlanningRequestPacket request = new ConstrainedWholeBodyPlanningRequestPacket();
 
-            request.setNumberOfFindInitialGuess(200);
+            request.setNumberOfFindInitialGuess(280);
             request.setNumberOfExpanding(600);
             request.setInitialRobotConfigration(fullRobotModel);
 
@@ -141,7 +152,6 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-
             if (cwbtoolboxOutputStatusQueue.isNewPacketAvailable())
             {
                cwbtoolboxOutputStatus = cwbtoolboxOutputStatusQueue.getLatestPacket();
@@ -149,9 +159,13 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
                {
                   planningSuccess = true;
                   wholebodyTrajectoryMessage = cwbtoolboxOutputStatus.wholeBodyTrajectoryMessage;
+                  
+                  handTrajectories = cwbtoolboxOutputStatus.handTrajectories;
                }
                else
+               {
                   planningSuccess = false;
+               }  
             }
             else
             {
