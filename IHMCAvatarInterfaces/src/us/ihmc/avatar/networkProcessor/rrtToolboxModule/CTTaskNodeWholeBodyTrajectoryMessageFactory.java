@@ -2,10 +2,10 @@ package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 
 import java.util.ArrayList;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
@@ -17,6 +17,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class CTTaskNodeWholeBodyTrajectoryMessageFactory
 {  
    private ArrayList<CTTaskNode> path;
+   
+   private ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
    
    private double firstTrajectoryPointTime = 1.0;
    private double trajectoryTime;
@@ -48,9 +50,10 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
       
    }
    
-   public void setCTTaskNodePath(ArrayList<CTTaskNode> path)
+   public void setCTTaskNodePath(ArrayList<CTTaskNode> path, ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory)
    {
-      this.trajectoryTime = ConstrainedWholeBodyPlanningToolboxController.constrainedEndEffectorTrajectory.getTrajectoryTime();
+      this.constrainedEndEffectorTrajectory = constrainedEndEffectorTrajectory;
+      this.trajectoryTime = constrainedEndEffectorTrajectory.getTrajectoryTime();
       
       this.path = path;
    }
