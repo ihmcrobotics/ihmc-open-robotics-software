@@ -623,7 +623,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          throw new RuntimeException("Unable to constrain " + copPointName.toString() + " using given parameters: "
                + stepLengthOffsetReferencePolygons.get(copPointName).toString());
       case FINAL_SWING_POLYGON:
-         convertToFramePointRetainingZ(tempFramePoint1, supportFootPolygon.getCentroid(), swingFootInitialPolygon.getReferenceFrame());
+         supportFootPolygon.getFrameVertex(supportFootPolygon.getMaxXMaxYIndex(), tempFramePoint2d);
+         convertToFramePointRetainingZ(tempFramePoint1, tempFramePoint2d, swingFootInitialPolygon.getReferenceFrame());
          return getStepLengthBasedOffset(swingFootInitialPolygon, tempFramePoint1, stepLengthToCoPOffsetFactors.get(copPointName));
       case FINAL_DOUBLE_SUPPORT_POLYGON:
          getDoubleSupportPolygonCentroid(tempDoubleSupportPolygonCentroid, swingFootInitialPolygon, supportFootPolygon,
@@ -875,10 +876,12 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       {
       //TODO should all the calculations be done with respect to the support polygon
       case INITIAL_SWING_POLYGON:
-         convertToFramePointRetainingZ(tempFramePoint1, swingFootInitialPolygon.getCentroid(), supportFootPolygon.getReferenceFrame());
+         swingFootInitialPolygon.getFrameVertex(swingFootInitialPolygon.getMaxXMaxYIndex(), tempFramePoint2d);
+         convertToFramePointRetainingZ(tempFramePoint1, tempFramePoint2d, supportFootPolygon.getReferenceFrame());
          return getStepLengthBasedOffset(supportFootPolygon, tempFramePoint1, stepLengthToCoPOffsetFactors.get(coPPointName));
       case FINAL_SWING_POLYGON:
-         convertToFramePointRetainingZ(tempFramePoint1, swingFootPredictedFinalPolygon.getCentroid(), supportFootPolygon.getReferenceFrame());
+         swingFootPredictedFinalPolygon.getFrameVertex(swingFootPredictedFinalPolygon.getMaxXMaxYIndex(), tempFramePoint2d);
+         convertToFramePointRetainingZ(tempFramePoint1, tempFramePoint2d, supportFootPolygon.getReferenceFrame());
          return getStepLengthBasedOffset(supportFootPolygon, tempFramePoint1, stepLengthToCoPOffsetFactors.get(coPPointName));
       case INITIAL_DOUBLE_SUPPORT_POLYGON:
          getDoubleSupportPolygonCentroid(tempDoubleSupportPolygonCentroid, supportFootPolygon, swingFootInitialPolygon, supportFootPolygon.getReferenceFrame());
@@ -927,7 +930,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    private double getStepLengthBasedOffset(FrameConvexPolygon2d supportPolygon, FramePoint3D referencePoint, double stepLengthToCoPOffsetFactor)
    {
-      return stepLengthToCoPOffsetFactor * (referencePoint.getX() - supportPolygon.getCentroid().getX());
+      return stepLengthToCoPOffsetFactor * (referencePoint.getX() - supportPolygon.getMaxX());
    }
 
    /**
