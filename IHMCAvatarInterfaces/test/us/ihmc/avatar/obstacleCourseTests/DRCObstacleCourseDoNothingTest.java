@@ -90,7 +90,8 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
 
       DRCRobotModel robotModel = getRobotModel();
       
-      drcSimulationTestHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.createSimulation(name);
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForWalkingOverSmallPlatform(simulationConstructionSet);

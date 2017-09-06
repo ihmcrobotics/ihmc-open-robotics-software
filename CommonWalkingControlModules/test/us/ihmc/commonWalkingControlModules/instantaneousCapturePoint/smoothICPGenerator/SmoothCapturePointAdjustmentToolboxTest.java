@@ -6,7 +6,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
@@ -14,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -43,11 +43,11 @@ public class SmoothCapturePointAdjustmentToolboxTest
       int numberOfSegments = 3;
       int numberOfSwingSegments = 0;
       
-      YoFrameTrajectory3D linear3DSegment1 = new YoFrameTrajectory3D(namePrefix + "LinearAdjustedSegment1", numberOfCoefficients, worldFrame, registry);
-      YoFrameTrajectory3D linear3DSegment2 = new YoFrameTrajectory3D(namePrefix + "LinearAdjustedSegment2", numberOfCoefficients, worldFrame, registry);
-      YoFrameTrajectory3D linear3DSegment3 = new YoFrameTrajectory3D(namePrefix + "LinearAdjustedSegment3", numberOfCoefficients, worldFrame, registry);
+      FrameTrajectory3D linear3DSegment1 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+      FrameTrajectory3D linear3DSegment2 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+      FrameTrajectory3D linear3DSegment3 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
 
-      List<YoFrameTrajectory3D> cmpPolynomials3D = new ArrayList<YoFrameTrajectory3D>();
+      List<FrameTrajectory3D> cmpPolynomials3D = new ArrayList<FrameTrajectory3D>();
       List<FramePoint3D> entryCornerPoints = new ArrayList<FramePoint3D>();
       List<FramePoint3D> exitCornerPoints = new ArrayList<FramePoint3D>();
       
@@ -155,13 +155,13 @@ public class SmoothCapturePointAdjustmentToolboxTest
       int numberOfSegments = 4;
       int numberOfSwingSegments = 1;
       
-      YoFrameTrajectory3D linear3DSegment1 = new YoFrameTrajectory3D(namePrefix + "LinearAdjustedSegment1", numberOfCoefficients, worldFrame, registry);
-      YoFrameTrajectory3D linear3DSegment2 = new YoFrameTrajectory3D(namePrefix + "LinearAdjustedSegment2", numberOfCoefficients, worldFrame, registry);
-      YoFrameTrajectory3D linear3DSegment3 = new YoFrameTrajectory3D(namePrefix + "LinearAdjustedSegment3", numberOfCoefficients, worldFrame, registry);
-      YoFrameTrajectory3D linear3DSegment4 = new YoFrameTrajectory3D(namePrefix + "LinearAdjustedSegment4", numberOfCoefficients, worldFrame, registry);
+      FrameTrajectory3D linear3DSegment1 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+      FrameTrajectory3D linear3DSegment2 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+      FrameTrajectory3D linear3DSegment3 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+      FrameTrajectory3D linear3DSegment4 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
 
-      List<YoFrameTrajectory3D> cmpPolynomials3DSwing = new ArrayList<YoFrameTrajectory3D>();
-      List<YoFrameTrajectory3D> cmpPolynomials3DTransfer = new ArrayList<YoFrameTrajectory3D>();
+      List<FrameTrajectory3D> cmpPolynomials3DSwing = new ArrayList<FrameTrajectory3D>();
+      List<FrameTrajectory3D> cmpPolynomials3DTransfer = new ArrayList<FrameTrajectory3D>();
       List<FramePoint3D> entryCornerPointsSwing = new ArrayList<FramePoint3D>();
       List<FramePoint3D> exitCornerPointsSwing = new ArrayList<FramePoint3D>();
       List<FramePoint3D> entryCornerPointsTransfer = new ArrayList<FramePoint3D>();
@@ -291,17 +291,17 @@ public class SmoothCapturePointAdjustmentToolboxTest
       int numberOfSegments = 4;
       int numberOfSwingSegments = 1;
       
-      YoFrameTrajectory3D linear3DSegment1 = new YoFrameTrajectory3D(namePrefix + "LinearAdjustedSegment1", numberOfCoefficients, worldFrame, registry);
-      YoFrameTrajectory3D linear3DSegment2 = new YoFrameTrajectory3D(namePrefix + "LinearAdjustedSegment2", numberOfCoefficients, worldFrame, registry);
-      YoFrameTrajectory3D linear3DSegment3 = new YoFrameTrajectory3D(namePrefix + "LinearAdjustedSegment3", numberOfCoefficients, worldFrame, registry);
-      YoFrameTrajectory3D linear3DSegment4 = new YoFrameTrajectory3D(namePrefix + "LinearAdjustedSegment4", numberOfCoefficients, worldFrame, registry);
+      FrameTrajectory3D linear3DSegment1 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+      FrameTrajectory3D linear3DSegment2 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+      FrameTrajectory3D linear3DSegment3 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+      FrameTrajectory3D linear3DSegment4 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
       
-      YoFrameTrajectory3D linear3DSegment2Updated = new YoFrameTrajectory3D(namePrefix + "LinearAdjustedSegment2Updated", numberOfCoefficients, worldFrame, registry);
-      YoFrameTrajectory3D linear3DSegment3Updated = new YoFrameTrajectory3D(namePrefix + "LinearAdjustedSegment3Updated", numberOfCoefficients, worldFrame, registry);
-      YoFrameTrajectory3D linear3DSegment4Updated = new YoFrameTrajectory3D(namePrefix + "LinearAdjustedSegment4Updated", numberOfCoefficients, worldFrame, registry);
+      FrameTrajectory3D linear3DSegment2Updated = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+      FrameTrajectory3D linear3DSegment3Updated = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+      FrameTrajectory3D linear3DSegment4Updated = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
 
-      List<YoFrameTrajectory3D> cmpPolynomials3DSwing = new ArrayList<YoFrameTrajectory3D>();
-      List<YoFrameTrajectory3D> cmpPolynomials3DTransferUpdated = new ArrayList<YoFrameTrajectory3D>();
+      List<FrameTrajectory3D> cmpPolynomials3DSwing = new ArrayList<FrameTrajectory3D>();
+      List<FrameTrajectory3D> cmpPolynomials3DTransferUpdated = new ArrayList<FrameTrajectory3D>();
       
       List<FramePoint3D> entryCornerPointsSwing = new ArrayList<FramePoint3D>();
       List<FramePoint3D> exitCornerPointsSwing = new ArrayList<FramePoint3D>();
@@ -457,11 +457,11 @@ public class SmoothCapturePointAdjustmentToolboxTest
       int numberOfSegments = 3;
       int numberOfSwingSegments = 0;
       
-      YoFrameTrajectory3D cubic3DSegment1 = new YoFrameTrajectory3D(namePrefix + "CubicAdjustedSegment1", numberOfCoefficients, worldFrame, registry);
-      YoFrameTrajectory3D cubic3DSegment2 = new YoFrameTrajectory3D(namePrefix + "CubicAdjustedSegment2", numberOfCoefficients, worldFrame, registry);
-      YoFrameTrajectory3D cubic3DSegment3 = new YoFrameTrajectory3D(namePrefix + "CubicAdjustedSegment3", numberOfCoefficients, worldFrame, registry);
+      FrameTrajectory3D cubic3DSegment1 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+      FrameTrajectory3D cubic3DSegment2 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+      FrameTrajectory3D cubic3DSegment3 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
 
-      List<YoFrameTrajectory3D> cmpPolynomials3D = new ArrayList<YoFrameTrajectory3D>();
+      List<FrameTrajectory3D> cmpPolynomials3D = new ArrayList<FrameTrajectory3D>();
       List<FramePoint3D> entryCornerPoints = new ArrayList<FramePoint3D>();
       List<FramePoint3D> exitCornerPoints = new ArrayList<FramePoint3D>();
       
@@ -569,13 +569,13 @@ public class SmoothCapturePointAdjustmentToolboxTest
       int numberOfSegments = 4;
       int numberOfSwingSegments = 1;
       
-      YoFrameTrajectory3D cubic3DSegment1 = new YoFrameTrajectory3D(namePrefix + "CubicAdjustedSegment1", numberOfCoefficients, worldFrame, registry);
-      YoFrameTrajectory3D cubic3DSegment2 = new YoFrameTrajectory3D(namePrefix + "CubicAdjustedSegment2", numberOfCoefficients, worldFrame, registry);
-      YoFrameTrajectory3D cubic3DSegment3 = new YoFrameTrajectory3D(namePrefix + "CubicAdjustedSegment3", numberOfCoefficients, worldFrame, registry);
-      YoFrameTrajectory3D cubic3DSegment4 = new YoFrameTrajectory3D(namePrefix + "CubicAdjustedSegment4", numberOfCoefficients, worldFrame, registry);
+      FrameTrajectory3D cubic3DSegment1 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+      FrameTrajectory3D cubic3DSegment2 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+      FrameTrajectory3D cubic3DSegment3 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+      FrameTrajectory3D cubic3DSegment4 = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
 
-      List<YoFrameTrajectory3D> cmpPolynomials3DSwing = new ArrayList<YoFrameTrajectory3D>();
-      List<YoFrameTrajectory3D> cmpPolynomials3DTransfer = new ArrayList<YoFrameTrajectory3D>();
+      List<FrameTrajectory3D> cmpPolynomials3DSwing = new ArrayList<FrameTrajectory3D>();
+      List<FrameTrajectory3D> cmpPolynomials3DTransfer = new ArrayList<FrameTrajectory3D>();
       List<FramePoint3D> entryCornerPointsSwing = new ArrayList<FramePoint3D>();
       List<FramePoint3D> exitCornerPointsSwing = new ArrayList<FramePoint3D>();
       List<FramePoint3D> entryCornerPointsTransfer = new ArrayList<FramePoint3D>();

@@ -96,7 +96,8 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
 
       if (scriptName != null && !scriptName.isEmpty())
       {
@@ -127,7 +128,8 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(cinderBlockFieldEnvironment, "EndToEndCinderBlockFieldTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(cinderBlockFieldEnvironment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("EndToEndCinderBlockFieldTest");
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
@@ -157,7 +159,8 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(stairsEnvironment, "EndToEndCinderBlockFieldTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(stairsEnvironment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("EndToEndCinderBlockFieldTest");
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
@@ -181,7 +184,8 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.001);
 
@@ -265,7 +269,8 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double starterLength = 0.35;
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stepLengths, starterLength, 0.0, currentHeight);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
@@ -357,7 +362,8 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double starterLength = 0.35;
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stepLengths, starterLength, 0.0, currentHeight);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
@@ -458,7 +464,8 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       double starterLength = 0.35;
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stepLengths, starterLength, 0.0, 0.0);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, "HumanoidPointyRocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(stepDownEnvironment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 

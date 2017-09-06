@@ -104,7 +104,8 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
    {
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_BOTTOM;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCRampSnapFootstepsTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("DRCRampSnapFootstepsTest");
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
+package us.ihmc.sensorProcessing.outputData;
 
 public interface LowLevelJointDataReadOnly
 {
@@ -16,4 +16,9 @@ public interface LowLevelJointDataReadOnly
    public abstract double getDesiredCurrent();
    public abstract boolean pollResetIntegratorsRequest();
    public abstract boolean peekResetIntegratorsRequest();
+   
+   boolean hasKp();
+   boolean hasKd();
+   double getKp();
+   double getKd();
 }

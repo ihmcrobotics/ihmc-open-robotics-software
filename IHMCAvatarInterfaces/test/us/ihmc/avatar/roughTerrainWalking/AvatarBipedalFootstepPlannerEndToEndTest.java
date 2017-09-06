@@ -123,8 +123,9 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup();
 
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(steppingStonesEnvironment, "steppingStonesTestHelper", startingLocation,
-                                                            simulationTestingParameters, robotModel, networkModuleParameters);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(steppingStonesEnvironment, startingLocation, simulationTestingParameters, robotModel,
+            networkModuleParameters);
+      drcSimulationTestHelper.createSimulation("steppingStonesTestHelper");
 
       toolboxCommunicator.connect();
       toolboxCommunicator.attachListener(FootstepPlanningToolboxOutputStatus.class, this::setOutputStatus);
