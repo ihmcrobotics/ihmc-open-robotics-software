@@ -23,7 +23,7 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.0'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.2'
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
 }
 
