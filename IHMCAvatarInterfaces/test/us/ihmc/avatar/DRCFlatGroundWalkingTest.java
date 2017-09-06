@@ -90,9 +90,10 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, robotModel.getSimpleRobotName() + "FlatGroundWalking", selectedLocation,
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, selectedLocation,
             simulationTestingParameters, getRobotModel(), true, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, getWalkingScriptParameters());
-      
+     drcSimulationTestHelper.createSimulation(robotModel.getSimpleRobotName() + "FlatGroundWalking");
+
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForUnitTest(scs);
       simulateAndAssertGoodWalking(drcSimulationTestHelper, doPelvisWarmup);
