@@ -452,7 +452,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       // Put first CoP as per chicken support computations in case starting from rest
       if (atAStop && numberOfUpcomingFootsteps.getIntegerValue() == 0)
       {
-         //TODO does this work
          isDoneWalking.set(true);
          if (holdDesiredState.getBooleanValue())
          {
@@ -755,20 +754,23 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    private double getTransferSegmentTimes(int segmentIndex)
    {
+      double transferTime = transferDurations.get(footstepIndex).getDoubleValue();
+      if(transferTime <= 0.0 || Double.isInfinite(transferTime) || Double.isNaN(transferTime))
+         transferTime = defaultTransferTime;
       if (useTransferSplitFractionFor.get(footstepIndex) == UseSplitFractionFor.TIME)
       {
          switch (segmentIndex)
          {
          case 0:
-            return transferDurations.get(footstepIndex).getDoubleValue() * transferSplitFractions.get(footstepIndex).getDoubleValue();
+            return transferTime * transferSplitFractions.get(footstepIndex).getDoubleValue();
          case 1:
-            return transferDurations.get(footstepIndex).getDoubleValue() * (1.0 - transferSplitFractions.get(footstepIndex).getDoubleValue());
+            return transferTime * (1.0 - transferSplitFractions.get(footstepIndex).getDoubleValue());
          default:
             throw new RuntimeException("For some reason we didn't just use a array that summed to one");
          }
       }
       else
-         return transferDurations.get(footstepIndex).getDoubleValue() * 0.5;
+         return transferTime * 0.5;
    }
 
    private void computeCoPPointsForFootstepSwing(int copLocationsIndex)
