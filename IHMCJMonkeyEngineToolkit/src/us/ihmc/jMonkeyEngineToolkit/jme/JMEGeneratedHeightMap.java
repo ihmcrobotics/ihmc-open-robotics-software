@@ -21,14 +21,14 @@ import us.ihmc.robotics.geometry.Ray3d;
 public class JMEGeneratedHeightMap implements HeightMap
 {
    private final boolean DEBUG = false;
-   
+
    private final static int cacheSize = 1000000;
    private final static double measurementHeight = 100.0;
 
    private final int resolution;
    private final double elementTestSize;
 
-//   private final double xMin = -100.0, xMax = 100.0, yMin = -100.0, yMax = 100.0; 
+   //   private final double xMin = -100.0, xMax = 100.0, yMin = -100.0, yMax = 100.0; 
    private final double xMin = 0.0, xMax = 0.0, yMin = 0.0, yMax = 0.0; // Disable rendering heightmap
    private final BoundingBox3D boundingBox = new BoundingBox3D(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
@@ -37,14 +37,12 @@ public class JMEGeneratedHeightMap implements HeightMap
    private final Node zUpNode = new Node("jmeGeneratedHeightMapZUpNode");
 
    private final AssetManager assetManager;
-   private final JMEAssetLocator assetLocator;
 
    private final SimpleLRUCache<Long, GroundPoint> cache = new SimpleLRUCache<Long, GroundPoint>(cacheSize);
 
    private int lookups = 0;
    private int cacheHits = 0;
-   
-   
+
    private final ThreadLocal<Ray3d> tempRay = new ThreadLocal<Ray3d>()
    {
       @Override
@@ -58,15 +56,14 @@ public class JMEGeneratedHeightMap implements HeightMap
    {
       Logger.getLogger("").setLevel(Level.WARNING);
       this.resolution = resolution;
-      this.elementTestSize = 1.0/((double)resolution) + 1e-12;
+      this.elementTestSize = 1.0 / ((double) resolution) + 1e-12;
 
       System.out.println("Generating heightmap tree");
       final URL resource = AssetManager.class.getResource("Desktop.cfg");
       assetManager = JmeSystem.newAssetManager(resource);
       JMERenderer.setupAssetManger(assetManager);
-      assetLocator = new JMEAssetLocator(assetManager);
 
-//      zUpNode.setLocalRotation(JMEGeometryUtils.getRotationFromJMEToZupCoordinates());
+      //      zUpNode.setLocalRotation(JMEGeometryUtils.getRotationFromJMEToZupCoordinates());
       rootNode.attachChild(zUpNode);
 
       for (Graphics3DNode node : nodes)
@@ -93,14 +90,14 @@ public class JMEGeneratedHeightMap implements HeightMap
 
       GroundPoint point = cache.get(key);
 
-      if(DEBUG)
+      if (DEBUG)
       {
-         if(lookups % 10000 == 0)
+         if (lookups % 10000 == 0)
          {
-            System.out.println("Cache hit percentage: " + (((double) cacheHits)/((double) lookups) * 100.0));
+            System.out.println("Cache hit percentage: " + (((double) cacheHits) / ((double) lookups) * 100.0));
          }
       }
-      
+
       if (point != null)
       {
          if (Math.abs(x - point.x) > elementTestSize || Math.abs(y - point.y) > elementTestSize)
@@ -135,7 +132,7 @@ public class JMEGeneratedHeightMap implements HeightMap
 
    private JMEGraphics3DNode addNodesRecursively(Graphics3DNode graphics3dNode, Node parentNode)
    {
-      JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode, assetLocator, null, null);
+      JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode, assetManager, null, null);
       Graphics3DNodeType nodeType = graphics3dNode.getNodeType();
       jmeNode.setType(nodeType);
 
@@ -214,7 +211,7 @@ public class JMEGeneratedHeightMap implements HeightMap
       }
 
    }
-   
+
    public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
