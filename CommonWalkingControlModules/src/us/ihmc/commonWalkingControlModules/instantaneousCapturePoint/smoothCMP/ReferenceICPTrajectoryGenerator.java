@@ -333,20 +333,19 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
    public void adjustDesiredTrajectoriesForInitialSmoothing()
    {
-      if ((isInitialTransfer.getBooleanValue() || (isDoubleSupport.getBooleanValue() && continuouslyAdjustForICPContinuity.getBooleanValue()))
+      // isDoubleSupport.getBooleanValue() && 
+      if ((isInitialTransfer.getBooleanValue() || (continuouslyAdjustForICPContinuity.getBooleanValue()))
             && copTrajectories.size() > 1)
       {
          icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(icpDesiredInitialPositionsFromCoPs, icpDesiredFinalPositionsFromCoPs, copTrajectories,
                                                                            omega0.getDoubleValue());
       }
-      reset();
+      //reset();
    }
 
    @Override
    public void compute(double time)
    {
-      // Disturbing logic
-      //if (!isStanding.getBooleanValue() || (!isInitialTransfer.getBooleanValue()) && cmpTrajectories.size() > 0)
       if(cmpTrajectories.size() > 0)
       {
          localTimeInCurrentPhase.set(time - startTimeOfCurrentPhase.getDoubleValue());
@@ -363,11 +362,10 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          icpToolbox.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(),
                                                                     icpPositionDesiredFinalCurrentSegment, cmpPolynomial3D, icpAccelerationDesiredCurrent);
          
-         if(!isDoubleSupport.getBooleanValue())
+         //if(!isDoubleSupport.getBooleanValue())
          {
             setICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(), currentSegmentIndex.getIntegerValue()); // TODO: add controller dt for proper continuation
          }
-         
          checkICPDynamics(localTimeInCurrentPhase.getDoubleValue(), icpVelocityDesiredCurrent, icpPositionDesiredCurrent, cmpPolynomial3D);
       }
    }

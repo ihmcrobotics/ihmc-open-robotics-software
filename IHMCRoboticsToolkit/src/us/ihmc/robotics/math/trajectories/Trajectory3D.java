@@ -670,6 +670,11 @@ public class Trajectory3D
       return "X: " + xTrajectory.toString() + "\n" + "Y: " + yTrajectory.toString() + "\n" + "Z: " + zTrajectory.toString();
    }
 
+   public String toString2()
+   {
+      return "X: " + xTrajectory.toString2() + "\n" + "Y: " + yTrajectory.toString2() + "\n" + "Z: " + zTrajectory.toString2();
+   }
+
    public void getDerivative(int order, double x, Tuple3DBasics dTrajectory)
    {
       dTrajectory.set(xTrajectory.getDerivative(order, x), yTrajectory.getDerivative(order, x), zTrajectory.getDerivative(order, x));
