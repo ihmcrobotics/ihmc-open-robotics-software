@@ -101,8 +101,8 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
 
    public ArrayList<Graphics3DObject> getXYZAxis(Pose3D pose)
    {
-      double axisHeight = 0.1;
-      double axisRadius = 0.01;
+      double axisHeight = 0.05;
+      double axisRadius = 0.005;
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
 
       Graphics3DObject retX = new Graphics3DObject();
@@ -287,7 +287,6 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       System.out.println("Behavior Dispatch");
       drcBehaviorTestHelper.dispatchBehavior(planningBehavior);
 
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10.0);
       System.out.println("Go Motion");
       
@@ -295,20 +294,20 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       
       ArrayList<Pose3D> handTrajectories = planningBehavior.getHandTrajectories(RobotSide.LEFT);
       int numberOfPath = handTrajectories.size();
-      for(int i=0;i<numberOfPath;i++)
+      for(int i=0;i<numberOfPath - 10;i++)
       {
          Pose3D pose = handTrajectories.get(i);
-         PrintTools.info(""+pose +" " + numberOfPath);
          scs.addStaticLinkGraphics(getXYZAxis(pose));
       }
       
+      System.out.println("Send " + drcBehaviorTestHelper.getYoTime());
       drcBehaviorTestHelper.send(planningBehavior.getWholebodyTrajectoryMessage());
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10.0);
       
             
       
       
-      System.out.println("End");
+      System.out.println("End " + drcBehaviorTestHelper.getYoTime());
       
       
       
