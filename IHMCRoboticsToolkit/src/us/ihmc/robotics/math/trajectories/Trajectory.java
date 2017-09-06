@@ -830,6 +830,15 @@ public class Trajectory
       return inString + " TInitial: " + tInitial + " TFinal: " + tFinal;
    }
 
+   public String toString2()
+   {
+      compute(tInitial);
+      String retString = "TInitial: " + tInitial + " Val: " + f;
+      compute(tFinal);
+      retString = retString + " TFinal: " + tFinal + " Val: " + f;
+      return retString;
+   }
+
    public boolean isValidTrajectory()
    {
       boolean retVal = (getInitialTime() < getFinalTime()) && Double.isFinite(getInitialTime()) && Double.isFinite(getFinalTime());
