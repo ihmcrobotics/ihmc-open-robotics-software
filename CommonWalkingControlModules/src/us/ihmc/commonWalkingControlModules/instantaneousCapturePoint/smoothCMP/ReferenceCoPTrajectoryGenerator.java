@@ -755,7 +755,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private double getTransferSegmentTimes(int segmentIndex)
    {
       double transferTime = transferDurations.get(footstepIndex).getDoubleValue();
-      if(transferTime <= 0.0 || Double.isInfinite(transferTime) || Double.isNaN(transferTime))
+      if(transferTime <= 0.0 || !Double.isFinite(transferTime)) 
          transferTime = defaultTransferTime;
       if (useTransferSplitFractionFor.get(footstepIndex) == UseSplitFractionFor.TIME)
       {
@@ -788,16 +788,19 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    private double getSwingSegmentTimes(int segmentIndex)
    {
+      double swingTime = swingDurations.get(footstepIndex).getDoubleValue();
+      if(swingTime <= 0.0 || !Double.isFinite(swingTime)) 
+         swingTime = defaultSwingTime;
       switch (segmentIndex)
       {
       case 0:
-         return swingDurations.get(footstepIndex).getDoubleValue() * swingDurationShiftFractions.get(footstepIndex).getDoubleValue()
+         return swingTime * swingDurationShiftFractions.get(footstepIndex).getDoubleValue()
                * swingSplitFractions.get(footstepIndex).getDoubleValue();
       case 1:
-         return swingDurations.get(footstepIndex).getDoubleValue() * swingDurationShiftFractions.get(footstepIndex).getDoubleValue()
+         return swingTime * swingDurationShiftFractions.get(footstepIndex).getDoubleValue()
                * (1.0 - swingSplitFractions.get(footstepIndex).getDoubleValue());
       case 2:
-         return swingDurations.get(footstepIndex).getDoubleValue() * (1.0 - swingDurationShiftFractions.get(footstepIndex).getDoubleValue());
+         return swingTime * (1.0 - swingDurationShiftFractions.get(footstepIndex).getDoubleValue());
       default:
          throw new RuntimeException("For some reason we didn't just use a array that summed to one here as well");
       }
