@@ -183,7 +183,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
        * Create diagnostic controller
        */
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      DiagnosticControllerToolbox toolbox = new DiagnosticControllerToolbox(fullRobotModel, sensorOutputMap, diagnosticParameters, walkingControllerParameters,
+      DiagnosticControllerToolbox toolbox = new DiagnosticControllerToolbox(fullRobotModel, estimatorDesiredJointDataHolder, sensorOutputMap, diagnosticParameters, walkingControllerParameters,
             diagnosticControllerTime, diagnosticControllerDT, diagnosticSensorProcessingConfiguration, registry);
 
       InputStream gainStream = getClass().getClassLoader().getResourceAsStream(diagnosticGainsFilePath);
