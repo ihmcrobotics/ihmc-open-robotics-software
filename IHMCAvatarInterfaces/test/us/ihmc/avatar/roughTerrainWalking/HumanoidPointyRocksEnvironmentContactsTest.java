@@ -243,7 +243,8 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          }
       };
       DRCRobotModel robotModel = getRobotModel(15, 8, onlyEdgeContacts);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, className, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.createSimulation(className);
       drcSimulationTestHelper.getSimulationConstructionSet().hideAllYoGraphics();
 
       // increase ankle damping to match the real robot better

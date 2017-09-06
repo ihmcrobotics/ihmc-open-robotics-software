@@ -9,6 +9,11 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
@@ -47,6 +52,18 @@ public class CoPPointsInFoot
       }
       swingFootCentroid = new YoFramePointInMultipleFrames("step" + stepNumber + "swingCentroid", registry, framesToRegister);
       supportFootCentroid = new YoFramePointInMultipleFrames("step" + stepNumber + "supportCentroid", registry, framesToRegister);
+   }
+
+   public void setupVisualizers(YoGraphicsList graphicsList, ArtifactList artifactList, double pointSize)
+   {
+      for (int i = 0; i < copLocationsInWorldFrameReadOnly.size(); i++)
+      {
+         YoFramePoint copLocation = copLocationsInWorldFrameReadOnly.get(i);
+         YoGraphicPosition yoGraphicPosition = new YoGraphicPosition(copLocation.getNamePrefix(), copLocation, pointSize, YoAppearance.Green(),
+                                                                     YoGraphicPosition.GraphicType.BALL);
+         graphicsList.add(yoGraphicPosition);
+         artifactList.add(yoGraphicPosition.createArtifact());
+      }
    }
 
    public void notifyVariableChangedListeners()
@@ -249,5 +266,10 @@ public class CoPPointsInFoot
    public boolean isEmpty()
    {
       return copPointsList.isEmpty();
+   }
+
+   public int getNumberOfCoPPoints()
+   {
+      return copPointsList.size();
    }
 }

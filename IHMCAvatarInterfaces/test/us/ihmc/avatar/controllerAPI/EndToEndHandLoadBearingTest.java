@@ -53,7 +53,8 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       TestingEnvironment testingEnvironment = new TestingEnvironment();
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(testingEnvironment, testName, selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(testingEnvironment, selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.createSimulation(testName);
       double totalMass = fullRobotModel.getTotalMass();
       PushRobotController pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();

@@ -7,14 +7,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import us.ihmc.commons.Conversions;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-public class DRCOutputWriterWithStateChangeSmoother implements DRCOutputWriter
+public class DRCOutputProcessorWithStateChangeSmoother implements DRCOutputProcessor
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -27,12 +27,15 @@ public class DRCOutputWriterWithStateChangeSmoother implements DRCOutputWriter
    private final YoDouble timeAtHighLevelControllerStateChange = new YoDouble("timeAtControllerStateChange", registry);
    private final YoDouble slopTime = new YoDouble("slopTimeForSmoothedJointTorques", registry);
 
-   private final DRCOutputWriter drcOutputWriter;
+   private final DRCOutputProcessor drcOutputProcessor;
 
-   public DRCOutputWriterWithStateChangeSmoother(DRCOutputWriter drcOutputWriter)
+   public DRCOutputProcessorWithStateChangeSmoother(DRCOutputProcessor drcOutputWriter)
    {
-      this.drcOutputWriter = drcOutputWriter;
-      registry.addChild(drcOutputWriter.getControllerYoVariableRegistry());
+      this.drcOutputProcessor = drcOutputWriter;
+      if(drcOutputWriter != null)
+      {
+         registry.addChild(drcOutputWriter.getControllerYoVariableRegistry());
+      }
 
       alphaForJointTorqueForStateChanges.set(0.0);
       slopTime.set(0.16);
@@ -42,11 +45,14 @@ public class DRCOutputWriterWithStateChangeSmoother implements DRCOutputWriter
    @Override
    public void initialize()
    {
-      drcOutputWriter.initialize();      
+      if(drcOutputProcessor != null)
+      {
+         drcOutputProcessor.initialize();               
+      }
    }
 
    @Override
-   public void writeAfterController(long timestamp)
+   public void processAfterController(long timestamp)
    {
       if (hasHighLevelControllerStateChanged.get())
       {
@@ -75,7 +81,10 @@ public class DRCOutputWriterWithStateChangeSmoother implements DRCOutputWriter
          oneDoFJoint.setTau(smoothedJointTorque.getDoubleValue());
       }
 
-      drcOutputWriter.writeAfterController(timestamp);
+      if(drcOutputProcessor != null)
+      {
+         drcOutputProcessor.processAfterController(timestamp);
+      }
    }
 
    public ControllerStateChangedListener createControllerStateChangedListener()
@@ -95,7 +104,10 @@ public class DRCOutputWriterWithStateChangeSmoother implements DRCOutputWriter
    @Override
    public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
-      drcOutputWriter.setFullRobotModel(controllerModel, rawJointSensorDataHolderMap);
+      if(drcOutputProcessor != null)
+      {
+         drcOutputProcessor.setFullRobotModel(controllerModel, rawJointSensorDataHolderMap);
+      }
 
       OneDoFJoint[] joints = controllerModel.getOneDoFJoints();
       for (int i = 0; i < joints.length; i++)
@@ -112,7 +124,10 @@ public class DRCOutputWriterWithStateChangeSmoother implements DRCOutputWriter
    @Override
    public void setForceSensorDataHolderForController(ForceSensorDataHolderReadOnly forceSensorDataHolderForController)
    {
-      drcOutputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForController);
+      if(drcOutputProcessor != null)
+      {
+         drcOutputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForController);
+      }
    }
 
    @Override

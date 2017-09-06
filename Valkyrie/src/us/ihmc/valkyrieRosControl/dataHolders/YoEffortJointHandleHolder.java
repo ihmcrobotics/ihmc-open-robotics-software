@@ -1,18 +1,18 @@
 package us.ihmc.valkyrieRosControl.dataHolders;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.rosControl.EffortJointHandle;
-import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
-import us.ihmc.sensorProcessing.model.DesiredJointDataHolder.DesiredJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoEffortJointHandleHolder
 {
    private final String name;
    private final EffortJointHandle handle;
    private final OneDoFJoint joint;
-   private final DesiredJointDataHolder.DesiredJointData desiredJointData;
+   private final LowLevelJointDataReadOnly desiredJointData;
 
    private final YoDouble tauMeasured;
    private final YoDouble q;
@@ -22,7 +22,7 @@ public class YoEffortJointHandleHolder
    private final YoDouble controllerTauDesired;
    private final YoDouble tauDesired;
 
-   public YoEffortJointHandleHolder(EffortJointHandle handle, OneDoFJoint joint, DesiredJointData desiredJointData, YoVariableRegistry parentRegistry)
+   public YoEffortJointHandleHolder(EffortJointHandle handle, OneDoFJoint joint, LowLevelJointDataReadOnly desiredJointData, YoVariableRegistry parentRegistry)
    {
       this.name = handle.getName();
       YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -46,8 +46,8 @@ public class YoEffortJointHandleHolder
       this.q.set(handle.getPosition());
       this.qd.set(handle.getVelocity());
       this.tauMeasured.set(handle.getEffort());
-      this.controllerTauDesired.set(desiredJointData.getTauDesired());
-      this.controllerQddDesired.set(desiredJointData.getQddDesired());
+      this.controllerTauDesired.set(desiredJointData.getDesiredTorque());
+      this.controllerQddDesired.set(desiredJointData.getDesiredAcceleration());
    }
 
    public void setDesiredEffort(double effort)

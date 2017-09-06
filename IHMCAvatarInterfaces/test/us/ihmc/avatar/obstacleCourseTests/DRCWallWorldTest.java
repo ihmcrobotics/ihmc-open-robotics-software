@@ -71,8 +71,8 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       double wallMaxY = 3.5;
       WallWorldEnvironment environment = new WallWorldEnvironment(-1.0, wallMaxY);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpToRampShortStepsTest", selectedLocation, simulationTestingParameters,
-              getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("DRCWalkingUpToRampShortStepsTest");
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
       setupCameraForHandstepsOnWalls();
       ThreadTools.sleep(1000);
