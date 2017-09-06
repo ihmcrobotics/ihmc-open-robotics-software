@@ -472,7 +472,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       ConstrainedWholeBodyPlanningToolboxOutputStatus result = new ConstrainedWholeBodyPlanningToolboxOutputStatus();
 
       if (wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT) == null
-            || wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT) == null)
+            || wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT) == null)      
       {
          result.wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
          PrintTools.info("no message");
@@ -480,7 +480,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       else
       {
          result.wholeBodyTrajectoryMessage = wholebodyTrajectoryMessage;
-         PrintTools.info("message");
+         PrintTools.info("message " +wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT).getTrajectoryTime());
       }
 
       result.planningResult = planningResult;
@@ -554,7 +554,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(node.getNodeData(2));
-
       desiredChestOrientation.appendPitchRotation(node.getNodeData(3));
       desiredChestOrientation.appendRollRotation(node.getNodeData(4));
       kinematicsSolver.setDesiredChestOrientation(desiredChestOrientation);

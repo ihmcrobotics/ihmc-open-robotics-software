@@ -8,7 +8,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class CTTreeTools
 {
-   static Random randomManager = new Random(50);
+   /**
+    * seed 50 is tested to avoid invalid zone better.
+    */
+   static Random randomManager = new Random(1);
    
    public static void setRandomNormalizedNodeData(CTTaskNode node, boolean isUniform, double treeReachingTime)
    {
