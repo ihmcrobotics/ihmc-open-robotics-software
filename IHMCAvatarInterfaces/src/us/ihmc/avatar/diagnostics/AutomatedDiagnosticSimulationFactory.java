@@ -111,11 +111,11 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       if (diagnosticParameters == null)
          diagnosticParameters = new DiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER, false);
 
-      DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters, stateEstimatorParameters);
+      LowLevelOneDoFJointDesiredDataHolderList lowLevelOutput = new LowLevelOneDoFJointDesiredDataHolderList(fullRobotModel.getOneDoFJoints());
+      DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters, stateEstimatorParameters, lowLevelOutput);
 
       SensorOutputMapReadOnly sensorOutputMap = createStateEstimator(fullRobotModel, stateEstimatorParameters, sensorProcessingConfiguration);
 
-      LowLevelOneDoFJointDesiredDataHolderList lowLevelOutput = new LowLevelOneDoFJointDesiredDataHolderList(fullRobotModel.getOneDoFJoints());
       DiagnosticControllerToolbox diagnosticControllerToolbox = new DiagnosticControllerToolbox(fullRobotModel, lowLevelOutput, sensorOutputMap, diagnosticParameters, walkingControllerParameters, yoTime, dt,
             sensorProcessingConfiguration, simulationRegistry);
       automatedDiagnosticAnalysisController = new AutomatedDiagnosticAnalysisController(diagnosticControllerToolbox, gainStream, setpointStream,

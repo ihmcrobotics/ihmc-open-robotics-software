@@ -151,10 +151,11 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
        */
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      estimatorDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolderList(fullRobotModel.getOneDoFJoints());
 
       ValkyrieDiagnosticParameters diagnosticParameters = new ValkyrieDiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER, robotModel, true);
       DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters,
-            stateEstimatorParameters);
+            stateEstimatorParameters, estimatorDesiredJointDataHolder);
 
       HashMap<String, PositionJointHandle> emptyPositionJointHandles = new HashMap<>();
       HashMap<String, JointStateHandle> emptyJointStateHandles = new HashMap<>();
@@ -166,7 +167,6 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       ContactSensorHolder contactSensorHolder = new ContactSensorHolder(Arrays.asList(fullRobotModel.getContactSensorDefinitions()));
       RawJointSensorDataHolderMap rawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(fullRobotModel);
-      estimatorDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolderList(fullRobotModel.getOneDoFJoints());
       sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, contactSensorHolder, rawJointSensorDataHolderMap,
             estimatorDesiredJointDataHolder, registry);
       sensorReader = sensorReaderFactory.getSensorReader();
