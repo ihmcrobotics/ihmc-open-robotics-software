@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.commonWalkingControlModules.dynamicReachability.SmoothCoMIntegrationToolbox;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointAdjustmentToolbox;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -17,7 +15,6 @@ import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.Trajectory;
-import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -144,7 +141,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       startTimeOfCurrentPhase.set(initialTime);
       
       icpPhaseEntryCornerPointIndices.add(totalNumberOfCMPSegments.getIntegerValue());
-      
+
       int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
       for (int stepIndex = 0; stepIndex < numberOfSteps; stepIndex++)
       {
@@ -269,7 +266,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       
       if(isInitialTransfer.getBooleanValue())
       {
-         setICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(), -1);            
+         setICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(), -1);
       }
    }
    
@@ -348,7 +345,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    public void compute(double time)
    {
       // Disturbing logic
-      if (!isStanding.getBooleanValue() || (!isInitialTransfer.getBooleanValue()) && cmpTrajectories.size() > 0)
+      //if (!isStanding.getBooleanValue() || (!isInitialTransfer.getBooleanValue()) && cmpTrajectories.size() > 0)
+      if(cmpTrajectories.size() > 0)
       {
          localTimeInCurrentPhase.set(time - startTimeOfCurrentPhase.getDoubleValue());
 
