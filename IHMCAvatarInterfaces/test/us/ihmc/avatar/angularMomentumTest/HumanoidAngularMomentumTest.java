@@ -32,7 +32,6 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private OffsetAndYawRobotInitialSetup location = new OffsetAndYawRobotInitialSetup(new Vector3D(0.0, 0.0, 0.0), 0.0);
    private DRCRobotModel robotModel;
    private FullHumanoidRobotModel fullRobotModel;
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -74,16 +73,9 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
       robotModel = getRobotModel();
       FlatGroundEnvironment emptyEnvironment = new FlatGroundEnvironment();
       String className = getClass().getSimpleName();
-      DRCStartingLocation startingLocation = new DRCStartingLocation()
-      {
-         @Override
-         public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
-         {
-            return location;
-         }
-      };
       simulationTestingParameters.setKeepSCSUp(true);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(emptyEnvironment, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
       drcSimulationTestHelper.createSimulation(className);
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
       Point3D cameraPosition = new Point3D(0.0, 10.0, 1.0);
@@ -168,7 +160,7 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
       
       public AngularMomentumSpy(DRCSimulationTestHelper simulationTestHelper)
       {
-         YoVariableRegistry scsRegistry = drcSimulationTestHelper.getYovariableRegistry();
+         YoVariableRegistry scsRegistry = drcSimulationTestHelper.getYoVariableRegistry();
          drcSimulationTestHelper.addRobotControllerOnControllerThread(this);
          floatingRootJointModel = drcSimulationTestHelper.getRobot();
          rootJoint = floatingRootJointModel.getRootJoint();

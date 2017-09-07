@@ -1,16 +1,10 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-/**
- * Object that stores points in the specified feet frame
- * @author Apoorv S
- */
 
 public class FootstepData
 {
@@ -50,25 +44,12 @@ public class FootstepData
       this.footstep = footstep;
       this.timing = timing;
    }
-   
-   /**
-    * Add a foot frame point to the list of points. 
-    * Converts a point specified to the required reference frame if required
-    * @param newPoint Point to be added
-    */
-   public void addUnsafeFootstepPoint(FramePoint2D newPoint)
-   {
-      if(newPoint == null)
-      {
-         return;
-      }
-      else 
-      {
-         if(newPoint.getReferenceFrame() != footstep.getSoleReferenceFrame())
-            newPoint.changeFrame(footstep.getSoleReferenceFrame());
-      }
-   }
 
+   public void setSwingTime(double swingTime)
+   {
+      this.timing.setTimings(swingTime, timing.getTransferTime());
+   }
+   
    public Footstep getFootstep()
    {
       return footstep;

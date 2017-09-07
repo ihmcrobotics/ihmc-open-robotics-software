@@ -20,6 +20,8 @@ import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
@@ -34,6 +36,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final boolean isRunningOnRealRobot;
    private final FullRobotModel fullRobotModel;
+   private final LowLevelOneDoFJointDesiredDataHolderList lowLevelControlOutputs;
 
    private final YoDouble fingerControllerTime = new YoDouble("fingerControllerTime", registry);
    private final YoLong lastEstimatorStartTime = new YoLong("lastEstimatorStartTime", registry);
@@ -42,6 +45,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
 
    private final SideDependentList<LinkedHashMap<ValkyrieSimulatedFingerJoint, YoDouble>> kpMap = new SideDependentList<>();
    private final SideDependentList<LinkedHashMap<ValkyrieSimulatedFingerJoint, YoDouble>> kdMap = new SideDependentList<>();
+   private final SideDependentList<LinkedHashMap<ValkyrieSimulatedFingerJoint, LowLevelJointData>> outputs = new SideDependentList<>();
 
    private final long controlDTInNS;
    private final long estimatorDTInNS;
@@ -67,6 +71,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
       PrintTools.debug(DEBUG, "Running on real robot: " + isRunningOnRealRobot);
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.fullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
+      this.lowLevelControlOutputs = threadDataSynchronizer.getControllerDesiredJointDataHolder();
       this.controlDTInNS = Conversions.secondsToNanoseconds(robotModel.getControllerDT());
       this.estimatorDTInNS = Conversions.secondsToNanoseconds(robotModel.getEstimatorDT());
       sendFingerJointGains.set(true);
@@ -120,13 +125,15 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
 
                kpMap.get(robotSide).put(simulatedFingerJoint, kp);
                kdMap.get(robotSide).put(simulatedFingerJoint, kd);
+               
+               outputs.get(robotSide).put(simulatedFingerJoint, lowLevelControlOutputs.getLowLevelJointData(simulatedFingerJoint.getRelatedRevoluteJoint(robotSide, fullRobotModel)));
             }
          }
 
          handDesiredConfigurationMessageSubscribers.put(robotSide, new HandDesiredConfigurationMessageSubscriber(robotSide));
          if (globalDataProducer != null)
             globalDataProducer.attachListener(HandDesiredConfigurationMessage.class, handDesiredConfigurationMessageSubscribers.get(robotSide));
-         fingerSetControllers.put(robotSide, new ValkyrieFingerSetController(robotSide, fingerControllerTime, fingerTrajectoryTime, fullRobotModel, isRunningOnRealRobot, registry, controllerRegistry));
+         fingerSetControllers.put(robotSide, new ValkyrieFingerSetController(robotSide, fingerControllerTime, fingerTrajectoryTime, fullRobotModel, lowLevelControlOutputs, isRunningOnRealRobot, registry, controllerRegistry));
 
          jointAngleCommunicators.put(robotSide, new HandJointAngleCommunicator(robotSide, globalDataProducer, closeableAndDisposableRegistry));
       }
@@ -139,9 +146,10 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
             {
                PinJoint relatedPinJoint = simulatedFingerJoint.getRelatedPinJoint(robotSide, simulatedRobot);
                RevoluteJoint relatedRevoluteJoint = (RevoluteJoint) simulatedFingerJoint.getRelatedRevoluteJoint(robotSide, fullRobotModel);
+               LowLevelJointData output = lowLevelControlOutputs.getLowLevelJointData(relatedRevoluteJoint);
 
-               relatedRevoluteJoint.setKp(kpMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
-               relatedRevoluteJoint.setKd(kdMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
+               output.setKp(kpMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
+               output.setKd(kdMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
 
                double fullyExtensonPositionLimit = ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(robotSide, simulatedFingerJoint.getRelatedRealFingerJoint());
                double fullyFlexedPositionLimit = ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(robotSide, simulatedFingerJoint.getRelatedRealFingerJoint());
@@ -247,8 +255,8 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
          {
             for (ValkyrieSimulatedFingerJoint simulatedFingerJoint : ValkyrieSimulatedFingerJoint.values)
             {
-               simulatedFingerJoint.getRelatedRevoluteJoint(robotSide, fullRobotModel).setKp(kpMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
-               simulatedFingerJoint.getRelatedRevoluteJoint(robotSide, fullRobotModel).setKd(kdMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
+               outputs.get(robotSide).get(simulatedFingerJoint).setKp(kpMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
+               outputs.get(robotSide).get(simulatedFingerJoint).setKd(kdMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
             }
          }
 

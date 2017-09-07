@@ -3,6 +3,8 @@ package us.ihmc.sensorProcessing.diagnostic;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
 
 public class OneDoFJointSensorValidityChecker implements DiagnosticUpdatable
 {
@@ -12,14 +14,16 @@ public class OneDoFJointSensorValidityChecker implements DiagnosticUpdatable
    private final DoubleYoVariableValidityChecker tauChecker;
 
    private final OneDoFJoint joint;
-
+   private final LowLevelJointDataReadOnly output;
+   
    private final boolean hasYoVariables;
 
-   public OneDoFJointSensorValidityChecker(OneDoFJoint jointToCheck, YoDouble position, YoDouble velocity, YoDouble tau,
+   public OneDoFJointSensorValidityChecker(OneDoFJoint jointToCheck, LowLevelJointDataReadOnly outputDataToCheck, YoDouble position, YoDouble velocity, YoDouble tau,
          YoVariableRegistry parentRegistry)
    {
       hasYoVariables = true;
       this.joint = jointToCheck;
+      this.output = outputDataToCheck;
       String jointName = jointToCheck.getName();
       registry = new YoVariableRegistry(jointName + "JointSensorValidityChecker");
       parentRegistry.addChild(registry);
@@ -31,10 +35,11 @@ public class OneDoFJointSensorValidityChecker implements DiagnosticUpdatable
       tauChecker = new DoubleYoVariableValidityChecker(tau, registry);
    }
 
-   public OneDoFJointSensorValidityChecker(OneDoFJoint jointToCheck, YoVariableRegistry parentRegistry)
+   public OneDoFJointSensorValidityChecker(OneDoFJoint jointToCheck, LowLevelJointData outputDataToCheck, YoVariableRegistry parentRegistry)
    {
       hasYoVariables = false;
       this.joint = jointToCheck;
+      this.output = outputDataToCheck;
       String jointName = jointToCheck.getName();
 
       registry = new YoVariableRegistry(jointName + "SensorValidityChecker");
@@ -74,7 +79,7 @@ public class OneDoFJointSensorValidityChecker implements DiagnosticUpdatable
       {
          positionChecker.update(joint.getQ());
          velocityChecker.update(joint.getQd());
-         tauChecker.update(joint.getTau());
+         tauChecker.update(output.getDesiredTorque());
       }
    }
 

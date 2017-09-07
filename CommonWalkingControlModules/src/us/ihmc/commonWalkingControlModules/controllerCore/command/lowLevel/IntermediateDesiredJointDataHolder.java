@@ -31,7 +31,6 @@ public class IntermediateDesiredJointDataHolder
    
    public void copyFromController()
    {
-      controllerDataHolder.updateFromModel();
       for(int i = 0; i < controllerDataHolder.getNumberOfJointsWithLowLevelData(); i++)
       {
          intermediateDesiredJointData[i].set(controllerDataHolder.getLowLevelJointData(i));

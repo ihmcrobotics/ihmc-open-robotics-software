@@ -5,6 +5,8 @@ import java.util.Map;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
@@ -22,25 +24,28 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
 
    private Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> jointForceTrackingDelayEstimators;
    private Map<OneDoFJoint, OneDoFJointFourierAnalysis> jointFourierAnalysisMap;
+   
+   private final LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder;
 
    private final double dt;
    private final DiagnosticParameters diagnosticParameters;
    private final boolean enableLogging;
 
-   public DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, double dt)
+   public DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, double dt, LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
-      this(diagnosticParameters, null, dt);
+      this(diagnosticParameters, null, dt, lowLevelOneDoFJointDesiredDataHolder);
    }
 
-   public DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, SensorProcessingConfiguration sensorProcessingConfiguration)
+   public DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, SensorProcessingConfiguration sensorProcessingConfiguration, LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
-      this(diagnosticParameters, sensorProcessingConfiguration, sensorProcessingConfiguration.getEstimatorDT());
+      this(diagnosticParameters, sensorProcessingConfiguration, sensorProcessingConfiguration.getEstimatorDT(), lowLevelOneDoFJointDesiredDataHolder);
    }
 
-   private DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, SensorProcessingConfiguration sensorProcessingConfiguration, double dt)
+   private DiagnosticSensorProcessingConfiguration(DiagnosticParameters diagnosticParameters, SensorProcessingConfiguration sensorProcessingConfiguration, double dt, LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
       this.sensorProcessingConfiguration = sensorProcessingConfiguration;
       this.dt = dt;
+      this.lowLevelOneDoFJointDesiredDataHolder = lowLevelOneDoFJointDesiredDataHolder;
       this.diagnosticParameters = diagnosticParameters;
       enableLogging = diagnosticParameters.enableLogging();
    }
@@ -54,15 +59,15 @@ public class DiagnosticSensorProcessingConfiguration implements SensorProcessing
       List<String> jointsToIgnore = diagnosticParameters.getJointsToIgnoreDuringDiagnostic();
       double fftObservationWindow = diagnosticParameters.getFFTObservationWindow();
 
-      jointSensorValidityCheckers = sensorProcessing.addJointSensorValidityCheckers(enableLogging, jointsToIgnore);
+      jointSensorValidityCheckers = sensorProcessing.addJointSensorValidityCheckers(enableLogging, lowLevelOneDoFJointDesiredDataHolder, jointsToIgnore);
       imuSensorValidityCheckers = sensorProcessing.addIMUSensorValidityCheckers(enableLogging);
       wrenchSensorValidityCheckers = sensorProcessing.addWrenchSensorValidityCheckers(enableLogging);
 
       jointPositionVelocityConsistencyCheckers = sensorProcessing.addJointPositionVelocityConsistencyCheckers(jointsToIgnore);
       imuOrientationAngularVelocityConsistencyCheckers = sensorProcessing.addIMUOrientationAngularVelocityConsistencyCheckers();
 
-      jointForceTrackingDelayEstimators = sensorProcessing.addJointForceTrackingDelayEstimators(jointsToIgnore);
-      jointFourierAnalysisMap = sensorProcessing.addJointFourierAnalysis(fftObservationWindow, jointsToIgnore);
+      jointForceTrackingDelayEstimators = sensorProcessing.addJointForceTrackingDelayEstimators(jointsToIgnore, lowLevelOneDoFJointDesiredDataHolder);
+      jointFourierAnalysisMap = sensorProcessing.addJointFourierAnalysis(fftObservationWindow, jointsToIgnore, lowLevelOneDoFJointDesiredDataHolder);
 
       double delayEstimatorFilterBreakFrequency = diagnosticParameters.getDelayEstimatorFilterBreakFrequency();
       double delayEstimatorIntputSignalsSMAWindow = diagnosticParameters.getDelayEstimatorIntputSignalsSMAWindow();
