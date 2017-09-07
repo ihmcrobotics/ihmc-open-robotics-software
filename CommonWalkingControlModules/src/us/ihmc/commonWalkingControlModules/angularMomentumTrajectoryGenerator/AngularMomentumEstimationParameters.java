@@ -10,11 +10,11 @@ public class AngularMomentumEstimationParameters
    /**
     * Defines the percentage of the total robot mass that is to be considered as the swing leg
     */
-   private double percentageSwingLegMass = 0.075;
+   private double percentageSwingLegMass = 0.05;
    /**
     * Defines the percentage of the total robot mass that is to be considered as the support leg
     */
-   private double percentageSupportLegMass = 0.075;
+   private double percentageSupportLegMass = 0.05;
    /**
     * Defines the percentage of the total robot mass that is to be considered as the support leg
     */

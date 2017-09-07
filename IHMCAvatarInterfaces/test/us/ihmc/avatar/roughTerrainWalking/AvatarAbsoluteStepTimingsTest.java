@@ -53,9 +53,9 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
    {
       String className = getClass().getSimpleName();
       CommonAvatarEnvironmentInterface environment = new TestingEnvironment();
-      DRCStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(environment);
       drcSimulationTestHelper.createSimulation(className);
       ThreadTools.sleep(1000);
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -168,9 +168,9 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
    {
       String className = getClass().getSimpleName();
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
-      DRCStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(environment);
       drcSimulationTestHelper.createSimulation(className);
       ThreadTools.sleep(1000);
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();

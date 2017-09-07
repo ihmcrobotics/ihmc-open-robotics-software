@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import us.ihmc.avatar.DRCSimulationOutputWriterForControllerThread;
+import us.ihmc.avatar.SimulatedLowLevelOutputWriter;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -35,6 +35,7 @@ import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnviro
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticSensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.LowLevelOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -47,7 +48,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.wholeBodyController.DRCControllerThread;
-import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
@@ -67,7 +67,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    private SensorReader sensorReader;
    private DiagnosticParameters diagnosticParameters;
    private AutomatedDiagnosticAnalysisController automatedDiagnosticAnalysisController;
-   private DRCOutputProcessor outputWriter;
+   private LowLevelOutputWriter lowLevelOutputWriter;
 
    private final Point3D scsCameraPosition = new Point3D(0.0, -8.0, 1.8);
    private final Point3D scsCameraFix = new Point3D(0.0, 0.0, 1.35);
@@ -111,19 +111,20 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       if (diagnosticParameters == null)
          diagnosticParameters = new DiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER, false);
 
-      DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters, stateEstimatorParameters);
+      LowLevelOneDoFJointDesiredDataHolderList lowLevelOutput = new LowLevelOneDoFJointDesiredDataHolderList(fullRobotModel.getOneDoFJoints());
+      DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters, stateEstimatorParameters, lowLevelOutput);
 
       SensorOutputMapReadOnly sensorOutputMap = createStateEstimator(fullRobotModel, stateEstimatorParameters, sensorProcessingConfiguration);
 
-      DiagnosticControllerToolbox diagnosticControllerToolbox = new DiagnosticControllerToolbox(fullRobotModel, sensorOutputMap, diagnosticParameters, walkingControllerParameters, yoTime, dt,
+      DiagnosticControllerToolbox diagnosticControllerToolbox = new DiagnosticControllerToolbox(fullRobotModel, lowLevelOutput, sensorOutputMap, diagnosticParameters, walkingControllerParameters, yoTime, dt,
             sensorProcessingConfiguration, simulationRegistry);
       automatedDiagnosticAnalysisController = new AutomatedDiagnosticAnalysisController(diagnosticControllerToolbox, gainStream, setpointStream,
             simulationRegistry);
       automatedDiagnosticAnalysisController.setRobotIsAlive(startWithRobotAlive);
       automatedDiagnosticConfiguration = new AutomatedDiagnosticConfiguration(diagnosticControllerToolbox, automatedDiagnosticAnalysisController);
 
-      outputWriter = new DRCSimulationOutputWriterForControllerThread(simulatedRobot);
-      outputWriter.setFullRobotModel(fullRobotModel, null);
+      lowLevelOutputWriter = new SimulatedLowLevelOutputWriter(simulatedRobot, false); 
+      lowLevelOutputWriter.setLowLevelOneDoFJointDesiredDataHolderList(lowLevelOutput);
 
       int simulationTicksPerControlTick = (int) (robotModel.getEstimatorDT() / robotModel.getSimulateDT());
       simulatedRobot.setController(this, simulationTicksPerControlTick);
@@ -250,6 +251,8 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    public void doControl()
    {
       long startTime = System.nanoTime();
+      
+      lowLevelOutputWriter.writeBefore(startTime);
       sensorReader.read();
       humanoidReferenceFrames.updateFrames();
 
@@ -265,7 +268,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
          automatedDiagnosticAnalysisController.doControl();
       }
 
-      outputWriter.processAfterController(0);
+      lowLevelOutputWriter.writeAfter();
       long endTime = System.nanoTime();
       controllerTime.set(Conversions.nanosecondsToSeconds(endTime - startTime));
       averageControllerTime.update();

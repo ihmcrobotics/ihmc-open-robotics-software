@@ -48,6 +48,8 @@ import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistency
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.WrenchSensorValidityChecker;
 import us.ihmc.sensorProcessing.imu.IMUSensor;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -221,6 +223,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final Wrench tempWrench = new Wrench();
 
    private AuxiliaryRobotData auxiliaryRobotData;
+   
 
    public SensorProcessing(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorProcessingConfiguration sensorProcessingConfiguration,
          YoVariableRegistry parentRegistry)
@@ -1130,7 +1133,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     * Use only for diagnostics.
     * @return The map with all the validity checkers.
     */
-   public Map<OneDoFJoint, OneDoFJointSensorValidityChecker> addJointSensorValidityCheckers(boolean enableLogging, List<String> jointsToIgnore)
+   public Map<OneDoFJoint, OneDoFJointSensorValidityChecker> addJointSensorValidityCheckers(boolean enableLogging, LowLevelOneDoFJointDesiredDataHolderReadOnly outputDataHolder, List<String> jointsToIgnore)
    {
       LinkedHashMap<OneDoFJoint, OneDoFJointSensorValidityChecker> validityCheckerMap = new LinkedHashMap<>();
 
@@ -1144,7 +1147,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          YoDouble position = outputJointPositions.get(jointToCheck);
          YoDouble velocity = outputJointVelocities.get(jointToCheck);
          YoDouble tau = outputJointTaus.get(jointToCheck);
-         OneDoFJointSensorValidityChecker validityChecker = new OneDoFJointSensorValidityChecker(jointToCheck, position, velocity, tau, registry);
+         OneDoFJointSensorValidityChecker validityChecker = new OneDoFJointSensorValidityChecker(jointToCheck, outputDataHolder.getLowLevelJointData(jointToCheck), position, velocity, tau, registry);
          if (enableLogging)
             validityChecker.setupForLogging();
          validityCheckerMap.put(jointToCheck, validityChecker);
@@ -1235,7 +1238,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return consistencyCheckerMap;
    }
 
-   public Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> addJointForceTrackingDelayEstimators(List<String> jointsToIgnore)
+   public Map<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> addJointForceTrackingDelayEstimators(List<String> jointsToIgnore, LowLevelOneDoFJointDesiredDataHolderReadOnly outputDataHolder)
    {
       LinkedHashMap<OneDoFJoint, OneDoFJointForceTrackingDelayEstimator> delayEstimatorMap = new LinkedHashMap<>();
 
@@ -1246,7 +1249,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointsToIgnore.contains(jointToCheck.getName()))
             continue;
 
-         OneDoFJointForceTrackingDelayEstimator delayEstimator = new OneDoFJointForceTrackingDelayEstimator(jointToCheck, updateDT, registry);
+         OneDoFJointForceTrackingDelayEstimator delayEstimator = new OneDoFJointForceTrackingDelayEstimator(jointToCheck, outputDataHolder.getLowLevelJointData(jointToCheck), updateDT, registry);
          delayEstimatorMap.put(jointToCheck, delayEstimator);
          diagnosticModules.add(delayEstimator);
       }
@@ -1254,7 +1257,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return delayEstimatorMap;
    }
 
-   public Map<OneDoFJoint, OneDoFJointFourierAnalysis> addJointFourierAnalysis(double estimationWindow, List<String> jointsToIgnore)
+   public Map<OneDoFJoint, OneDoFJointFourierAnalysis> addJointFourierAnalysis(double estimationWindow, List<String> jointsToIgnore, LowLevelOneDoFJointDesiredDataHolderReadOnly outputDataHolder)
    {
       LinkedHashMap<OneDoFJoint, OneDoFJointFourierAnalysis> jointFourierAnalysisMap = new LinkedHashMap<>();
 
@@ -1265,7 +1268,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointsToIgnore.contains(jointToCheck.getName()))
             continue;
 
-         OneDoFJointFourierAnalysis jointFourierAnalysis = new OneDoFJointFourierAnalysis(jointToCheck, estimationWindow, updateDT, registry);
+         OneDoFJointFourierAnalysis jointFourierAnalysis = new OneDoFJointFourierAnalysis(jointToCheck, outputDataHolder.getLowLevelJointData(jointToCheck), estimationWindow, updateDT, registry);
          jointFourierAnalysisMap.put(jointToCheck, jointFourierAnalysis);
          diagnosticModules.add(jointFourierAnalysis);
       }

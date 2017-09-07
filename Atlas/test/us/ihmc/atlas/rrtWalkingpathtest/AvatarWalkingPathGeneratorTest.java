@@ -168,7 +168,9 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
          drcSimulationTestHelper.destroySimulation();
       }
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, startingLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper.setStartingLocation(startingLocation);
       drcSimulationTestHelper.createSimulation(getSimpleRobotName());
 
    }

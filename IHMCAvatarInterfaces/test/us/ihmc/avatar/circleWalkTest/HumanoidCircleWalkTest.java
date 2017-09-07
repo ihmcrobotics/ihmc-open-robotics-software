@@ -212,7 +212,9 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       robotModel = getRobotModel();
       fullRobotModel = robotModel.createFullRobotModel();
       simulationTestingParameters.setKeepSCSUp(keepSCSUp());
-      drcSimulationTestHelper = new DRCSimulationTestHelper(emptyEnvironment, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setStartingLocation(startingLocation);
+      drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
       drcSimulationTestHelper.createSimulation(className);
       ThreadTools.sleep(1000);
    }

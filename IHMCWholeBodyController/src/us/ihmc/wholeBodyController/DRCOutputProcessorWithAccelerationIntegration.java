@@ -4,11 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -18,7 +13,15 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.tools.lists.PairList;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputProcessor
 {
@@ -56,15 +59,15 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
    private final YoDouble kPosArmJointTorque = new YoDouble("kPosArmJointTorque",
          "Gain for position control in order to achieve acceleration control using additional joint torque (Arms only)", registry);
 
-   private ArrayList<OneDoFJoint> oneDoFJoints;
-   private LinkedHashMap<OneDoFJoint, YoDouble> alphaDesiredVelocityMap;
-   private LinkedHashMap<OneDoFJoint, YoDouble> alphaDesiredPositionMap;
-   private LinkedHashMap<OneDoFJoint, YoDouble> velocityTorqueMap;
-   private LinkedHashMap<OneDoFJoint, YoDouble> positionTorqueMap;
-   private LinkedHashMap<OneDoFJoint, YoDouble> kVelJointTorqueMap;
-   private LinkedHashMap<OneDoFJoint, YoDouble> kPosJointTorqueMap;
-   private LinkedHashMap<OneDoFJoint, YoDouble> desiredVelocities;
-   private LinkedHashMap<OneDoFJoint, YoDouble> desiredPositions;
+   private PairList<OneDoFJoint, LowLevelJointData> jointStateAndData;
+   private LinkedHashMap<LowLevelJointData, YoDouble> alphaDesiredVelocityMap;
+   private LinkedHashMap<LowLevelJointData, YoDouble> alphaDesiredPositionMap;
+   private LinkedHashMap<LowLevelJointData, YoDouble> velocityTorqueMap;
+   private LinkedHashMap<LowLevelJointData, YoDouble> positionTorqueMap;
+   private LinkedHashMap<LowLevelJointData, YoDouble> kVelJointTorqueMap;
+   private LinkedHashMap<LowLevelJointData, YoDouble> kPosJointTorqueMap;
+   private LinkedHashMap<LowLevelJointData, YoDouble> desiredVelocities;
+   private LinkedHashMap<LowLevelJointData, YoDouble> desiredPositions;
 
    private final double updateDT;
    private final boolean conservative;
@@ -170,37 +173,38 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
    @Override
    public void processAfterController(long timestamp)
    {
-      for (int i = 0; i < oneDoFJoints.size(); i++)
+      for (int i = 0; i < jointStateAndData.size(); i++)
       {
-         OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
-         YoDouble qd_d_joint = desiredVelocities.get(oneDoFJoint);
-         YoDouble q_d_joint = desiredPositions.get(oneDoFJoint);
+         LowLevelJointData jointData = jointStateAndData.second(i);
+         OneDoFJoint jointState = jointStateAndData.first(i);
+         YoDouble qd_d_joint = desiredVelocities.get(jointData);
+         YoDouble q_d_joint = desiredPositions.get(jointData);
 
-         boolean integrateDesiredAccelerations = oneDoFJoint.getIntegrateDesiredAccelerations();
+         boolean integrateDesiredAccelerations = jointState.getIntegrateDesiredAccelerations();
          // Don't call the listener there, we want to be able to set those both from the controller and SCS.
-         doAccelerationIntegrationMap.get(oneDoFJoint).set(integrateDesiredAccelerations, false);
+         doAccelerationIntegrationMap.get(jointData).set(integrateDesiredAccelerations, false);
 
          if (integrateDesiredAccelerations)
          {
-            integrateAccelerationsToGetDesiredVelocities(oneDoFJoint, qd_d_joint, q_d_joint);
-            oneDoFJoint.setQdDesired(qd_d_joint.getDoubleValue());
-            oneDoFJoint.setKd(0.0);
-            oneDoFJoint.setKp(0.0);
+            integrateAccelerationsToGetDesiredVelocities(jointState, jointData, qd_d_joint, q_d_joint);
+            jointData.setDesiredVelocity(qd_d_joint.getDoubleValue());
+            jointData.setKd(0.0);
+            jointData.setKp(0.0);
 
-            double kVel = kVelJointTorqueMap.get(oneDoFJoint).getDoubleValue();
-            double kPos = kPosJointTorqueMap.get(oneDoFJoint).getDoubleValue();
-            double velocityTorque = kVel * (qd_d_joint.getDoubleValue() - oneDoFJoint.getQd());
-            double positionTorque = kPos * (q_d_joint.getDoubleValue() - oneDoFJoint.getQ());
+            double kVel = kVelJointTorqueMap.get(jointData).getDoubleValue();
+            double kPos = kPosJointTorqueMap.get(jointData).getDoubleValue();
+            double velocityTorque = kVel * (qd_d_joint.getDoubleValue() - jointState.getQd());
+            double positionTorque = kPos * (q_d_joint.getDoubleValue() - jointState.getQ());
 
-            velocityTorqueMap.get(oneDoFJoint).set(velocityTorque);
-            positionTorqueMap.get(oneDoFJoint).set(positionTorque);
+            velocityTorqueMap.get(jointData).set(velocityTorque);
+            positionTorqueMap.get(jointData).set(positionTorque);
 
-            oneDoFJoint.setTau(oneDoFJoint.getTau() + velocityTorque + positionTorque);
+            jointData.setDesiredTorque(jointData.getDesiredTorque() + velocityTorque + positionTorque);
          }
          else
          {
-            qd_d_joint.set(oneDoFJoint.getQd());
-            q_d_joint.set(oneDoFJoint.getQ());
+            qd_d_joint.set(jointState.getQd());
+            q_d_joint.set(jointState.getQ());
          }
       }
 
@@ -210,12 +214,12 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
       }
    }
 
-   private void integrateAccelerationsToGetDesiredVelocities(OneDoFJoint oneDoFJoint, YoDouble qd_d_joint, YoDouble q_d_joint)
+   private void integrateAccelerationsToGetDesiredVelocities(OneDoFJoint jointState, LowLevelJointData lowLevelJointData, YoDouble qd_d_joint, YoDouble q_d_joint)
    {
-      double currentPosition = oneDoFJoint.getQ();
-      double currentVelocity = oneDoFJoint.getQd();
+      double currentPosition = jointState.getQ();
+      double currentVelocity = jointState.getQd();
 
-      if (oneDoFJoint.getResetDesiredAccelerationIntegrator())
+      if (jointState.getResetDesiredAccelerationIntegrator())
       {
          //       qd_d_joint.set(currentVelocity);
          qd_d_joint.set(0.0);
@@ -227,9 +231,9 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
       double previousDesiredVelocity = qd_d_joint.getDoubleValue();
       double previousDesiredPosition = q_d_joint.getDoubleValue();
 
-      double desiredAcceleration = oneDoFJoint.getQddDesired();
-      double alphaVel = alphaDesiredVelocityMap.get(oneDoFJoint).getDoubleValue();
-      double alphaPos = alphaDesiredPositionMap.get(oneDoFJoint).getDoubleValue();
+      double desiredAcceleration = lowLevelJointData.getDesiredAcceleration();
+      double alphaVel = alphaDesiredVelocityMap.get(lowLevelJointData).getDoubleValue();
+      double alphaPos = alphaDesiredPositionMap.get(lowLevelJointData).getDoubleValue();
       double desiredVelocity = doCleverIntegration(previousDesiredVelocity, desiredAcceleration, currentVelocity, alphaVel);
       double desiredPosition = doCleverIntegration(previousDesiredPosition, desiredVelocity, currentPosition, alphaPos);
 
@@ -242,90 +246,95 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
       return alpha * (previousDesiredValue + desiredValueRate * updateDT) + (1.0 - alpha) * currentValue;
    }
 
-   private final LinkedHashMap<OneDoFJoint, YoBoolean> doAccelerationIntegrationMap = new LinkedHashMap<>();
+   private final LinkedHashMap<LowLevelJointData, YoBoolean> doAccelerationIntegrationMap = new LinkedHashMap<>();
 
    @Override
-   public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerCoreOutput, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       if(drcOutputProcessor != null)
       {
-         drcOutputProcessor.setFullRobotModel(controllerModel, rawJointSensorDataHolderMap);
+         drcOutputProcessor.setLowLevelControllerCoreOutput(controllerRobotModel, lowLevelControllerCoreOutput, rawJointSensorDataHolderMap);
       }
 
-      oneDoFJoints = new ArrayList<OneDoFJoint>();
+      jointStateAndData = new PairList<>();
 
       if (conservative)
       {
          for (RobotSide robotSide : RobotSide.values)
          {
             for (LegJointName jointName : legJointsForIntegratingAcceleration)
-               oneDoFJoints.add(controllerModel.getLegJoint(robotSide, jointName));
+               jointStateAndData.add(controllerRobotModel.getLegJoint(robotSide, jointName), lowLevelControllerCoreOutput.getLowLevelJointData(controllerRobotModel.getLegJoint(robotSide, jointName)));
             for (ArmJointName jointName : armJointsForIntegratingAcceleration)
-               oneDoFJoints.add(controllerModel.getArmJoint(robotSide, jointName));
+               jointStateAndData.add(controllerRobotModel.getArmJoint(robotSide, jointName), lowLevelControllerCoreOutput.getLowLevelJointData(controllerRobotModel.getArmJoint(robotSide, jointName)));
          }
          
          for (SpineJointName jointName : spineJointsForIntegratingAcceleration)
-            oneDoFJoints.add(controllerModel.getSpineJoint(jointName));
+            jointStateAndData.add(controllerRobotModel.getSpineJoint(jointName), lowLevelControllerCoreOutput.getLowLevelJointData(controllerRobotModel.getSpineJoint(jointName)));
       }
       else
       {
-         controllerModel.getOneDoFJoints(oneDoFJoints);
+         for(int i = 0; i < lowLevelControllerCoreOutput.getNumberOfJointsWithLowLevelData(); i++)
+         {
+            jointStateAndData.add(lowLevelControllerCoreOutput.getOneDoFJoint(i), lowLevelControllerCoreOutput.getLowLevelJointData(lowLevelControllerCoreOutput.getOneDoFJoint(i)));
+         }
       }
 
       ArrayList<OneDoFJoint> armOneDoFJoints = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody hand = controllerModel.getHand(robotSide);
+         RigidBody hand = controllerRobotModel.getHand(robotSide);
          if (hand != null)
          {
-            InverseDynamicsJoint[] armJoints = ScrewTools.createJointPath(controllerModel.getChest(), hand);
+            InverseDynamicsJoint[] armJoints = ScrewTools.createJointPath(controllerRobotModel.getChest(), hand);
             OneDoFJoint[] filterArmJoints = ScrewTools.filterJoints(armJoints, OneDoFJoint.class);
             for (OneDoFJoint armJoint : filterArmJoints)
                armOneDoFJoints.add(armJoint);
          }
       }
 
-      desiredVelocities = new LinkedHashMap<OneDoFJoint, YoDouble>();
-      desiredPositions = new LinkedHashMap<OneDoFJoint, YoDouble>();
+      desiredVelocities = new LinkedHashMap<>();
+      desiredPositions = new LinkedHashMap<>();
 
       alphaDesiredVelocityMap = new LinkedHashMap<>();
       alphaDesiredPositionMap = new LinkedHashMap<>();
 
-      kVelJointTorqueMap = new LinkedHashMap<OneDoFJoint, YoDouble>();
-      kPosJointTorqueMap = new LinkedHashMap<OneDoFJoint, YoDouble>();
+      kVelJointTorqueMap = new LinkedHashMap<>();
+      kPosJointTorqueMap = new LinkedHashMap<>();
 
       velocityTorqueMap = new LinkedHashMap<>();
       positionTorqueMap = new LinkedHashMap<>();
 
-      for (int i = 0; i < oneDoFJoints.size(); i++)
+      for (int i = 0; i < jointStateAndData.size(); i++)
       {
-         final OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
-         final YoBoolean doAccelerationIntegration = new YoBoolean("doAccelerationIntegration_" + oneDoFJoint.getName(), registry);
-         YoDouble desiredVelocity = new YoDouble("qd_d_" + oneDoFJoint.getName(), registry);
-         YoDouble desiredPosition = new YoDouble("q_d_" + oneDoFJoint.getName(), registry);
+         final OneDoFJoint jointState = jointStateAndData.first(i);
+         final LowLevelJointData jointData = jointStateAndData.second(i);
+         
+         final YoBoolean doAccelerationIntegration = new YoBoolean("doAccelerationIntegration_" + jointState.getName(), registry);
+         YoDouble desiredVelocity = new YoDouble("qd_d_" + jointState.getName(), registry);
+         YoDouble desiredPosition = new YoDouble("q_d_" + jointState.getName(), registry);
 
-         desiredVelocities.put(oneDoFJoint, desiredVelocity);
-         desiredPositions.put(oneDoFJoint, desiredPosition);
+         desiredVelocities.put(jointData, desiredVelocity);
+         desiredPositions.put(jointData, desiredPosition);
 
-         YoDouble velocityTorque = new YoDouble("tau_vel_" + oneDoFJoint.getName(), registry);
-         YoDouble positionTorque = new YoDouble("tau_pos_" + oneDoFJoint.getName(), registry);
+         YoDouble velocityTorque = new YoDouble("tau_vel_" + jointState.getName(), registry);
+         YoDouble positionTorque = new YoDouble("tau_pos_" + jointState.getName(), registry);
 
-         velocityTorqueMap.put(oneDoFJoint, velocityTorque);
-         positionTorqueMap.put(oneDoFJoint, positionTorque);
+         velocityTorqueMap.put(jointData, velocityTorque);
+         positionTorqueMap.put(jointData, positionTorque);
 
-         if (armOneDoFJoints.contains(oneDoFJoint))
+         if (armOneDoFJoints.contains(jointState))
          {
-            alphaDesiredVelocityMap.put(oneDoFJoint, alphaArmDesiredVelocity);
-            alphaDesiredPositionMap.put(oneDoFJoint, alphaArmDesiredPosition);
-            kVelJointTorqueMap.put(oneDoFJoint, kVelArmJointTorque);
-            kPosJointTorqueMap.put(oneDoFJoint, kPosArmJointTorque);
+            alphaDesiredVelocityMap.put(jointData, alphaArmDesiredVelocity);
+            alphaDesiredPositionMap.put(jointData, alphaArmDesiredPosition);
+            kVelJointTorqueMap.put(jointData, kVelArmJointTorque);
+            kPosJointTorqueMap.put(jointData, kPosArmJointTorque);
          }
          else
          {
-            alphaDesiredVelocityMap.put(oneDoFJoint, alphaDesiredVelocity);
-            alphaDesiredPositionMap.put(oneDoFJoint, alphaDesiredPosition);
-            kVelJointTorqueMap.put(oneDoFJoint, kVelJointTorque);
-            kPosJointTorqueMap.put(oneDoFJoint, kPosJointTorque);
+            alphaDesiredVelocityMap.put(jointData, alphaDesiredVelocity);
+            alphaDesiredPositionMap.put(jointData, alphaDesiredPosition);
+            kVelJointTorqueMap.put(jointData, kVelJointTorque);
+            kPosJointTorqueMap.put(jointData, kPosJointTorque);
          }
 
          // We want to be able to set those both from the controller and SCS.
@@ -334,14 +343,14 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
             @Override
             public void variableChanged(YoVariable<?> v)
             {
-               oneDoFJoint.setIntegrateDesiredAccelerations(doAccelerationIntegration.getBooleanValue());
+               jointState.setIntegrateDesiredAccelerations(doAccelerationIntegration.getBooleanValue());
             }
          });
 
          doAccelerationIntegration.set(false);
          doAccelerationIntegration.notifyVariableChangedListeners();
 
-         doAccelerationIntegrationMap.put(oneDoFJoint, doAccelerationIntegration);
+         doAccelerationIntegrationMap.put(jointData, doAccelerationIntegration);
       }
 
       if (runningOnRealRobot)
@@ -349,18 +358,18 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
          for (RobotSide robotSide : RobotSide.values)
          {
             for (LegJointName legJointName : legJointsForIntegratingAcceleration)
-               controllerModel.getLegJoint(robotSide, legJointName).setIntegrateDesiredAccelerations(true);
+               controllerRobotModel.getLegJoint(robotSide, legJointName).setIntegrateDesiredAccelerations(true);
 
             for (ArmJointName armJointName : armJointsForIntegratingAcceleration)
             {
-               OneDoFJoint armJoint = controllerModel.getArmJoint(robotSide, armJointName);
+               OneDoFJoint armJoint = controllerRobotModel.getArmJoint(robotSide, armJointName);
                if(armJoint!=null)
                   armJoint.setIntegrateDesiredAccelerations(true);
             }
          }
 
          for (SpineJointName spineJointName : spineJointsForIntegratingAcceleration)
-            controllerModel.getSpineJoint(spineJointName).setIntegrateDesiredAccelerations(true);
+            controllerRobotModel.getSpineJoint(spineJointName).setIntegrateDesiredAccelerations(true);
       }
    }
 

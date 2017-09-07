@@ -75,9 +75,9 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGroundEnvironment);
       drcSimulationTestHelper.createSimulation("DRCWalkingOverSmallPlatformTest");
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();

@@ -5,8 +5,6 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
@@ -18,8 +16,11 @@ import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.WrenchSensorValidityChecker;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DiagnosticControllerToolbox
 {
@@ -40,14 +41,16 @@ public class DiagnosticControllerToolbox
 
    private final double dt;
    private final FullHumanoidRobotModel fullRobotModel;
+   private final LowLevelOneDoFJointDesiredDataHolderList lowLevelOutput;
    private final WalkingControllerParameters walkingControllerParameters;
    private final SensorOutputMapReadOnly sensorOutputMap;
 
-   public DiagnosticControllerToolbox(FullHumanoidRobotModel fullRobotModel, SensorOutputMapReadOnly sensorOutputMap, DiagnosticParameters diagnosticParameters,
+   public DiagnosticControllerToolbox(FullHumanoidRobotModel fullRobotModel, LowLevelOneDoFJointDesiredDataHolderList lowLevelOutput, SensorOutputMapReadOnly sensorOutputMap, DiagnosticParameters diagnosticParameters,
          WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double dt,
          DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration, YoVariableRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
+      this.lowLevelOutput = lowLevelOutput;
       this.yoTime = yoTime;
       this.dt = dt;
 
@@ -71,6 +74,11 @@ public class DiagnosticControllerToolbox
    public FullHumanoidRobotModel getFullRobotModel()
    {
       return fullRobotModel;
+   }
+
+   public LowLevelOneDoFJointDesiredDataHolderList getLowLevelOutput()
+   {
+      return lowLevelOutput;
    }
 
    public DiagnosticParameters getDiagnosticParameters()
