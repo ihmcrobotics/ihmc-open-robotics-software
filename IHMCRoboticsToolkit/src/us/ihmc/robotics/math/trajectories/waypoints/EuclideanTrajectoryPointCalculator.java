@@ -268,7 +268,7 @@ public class EuclideanTrajectoryPointCalculator
          thirdTrajectoryPoint = trajectoryPoints.get(numberOfTrajectoryPoints - 1);
 
          computedLinearVelocity.setToZero(thirdTrajectoryPoint.getReferenceFrame());
-         PrintTools.info(""+firstTrajectoryPoint.getTime() +" "+secondTrajectoryPoint.getTime());
+
          computeTrajectoryPointVelocity(firstTrajectoryPoint, secondTrajectoryPoint, thirdTrajectoryPoint, TrajectoryPoint.THIRD, computedLinearVelocity);
          thirdTrajectoryPoint.setLinearVelocity(computedLinearVelocity);
       }
@@ -280,7 +280,7 @@ public class EuclideanTrajectoryPointCalculator
 
       for (int i = 1; i < numberOfTrajectoryPoints - 1; i++)
       {
-         PrintTools.info(""+i);         
+//         PrintTools.info(""+i);         
          firstTrajectoryPoint = trajectoryPoints.get(i - 1);
          secondTrajectoryPoint = trajectoryPoints.get(i);
          thirdTrajectoryPoint = trajectoryPoints.get(i + 1);
@@ -369,7 +369,7 @@ public class EuclideanTrajectoryPointCalculator
          linearVelocityToPack.set(direction, polynomial.getVelocity());
          
       }
-      PrintTools.info(""+linearVelocityToPack );
+//      PrintTools.info(""+linearVelocityToPack );
    }
 
    public int getNumberOfTrajectoryPoints()

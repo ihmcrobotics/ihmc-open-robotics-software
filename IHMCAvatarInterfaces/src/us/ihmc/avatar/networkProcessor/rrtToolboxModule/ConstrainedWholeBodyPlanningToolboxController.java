@@ -243,6 +243,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
     */
    private void shortcutPath()
    {
+      tree.getPath().clear();
+
       ArrayList<CTTaskNode> revertedPath = new ArrayList<CTTaskNode>();
       CTTaskNode currentNode = tree.getNewNode();
       revertedPath.add(currentNode);
@@ -260,30 +262,38 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       PrintTools.info("" + revertedPathSize);
 
-      tree.getPath().clear();
-      
-      for (int j = 0; j < revertedPathSize-1; j++)
+      tree.addNodeOnPath(revertedPath.get(revertedPathSize - 1));
+      int currentIndex = 0;
+      for (int j = 0; j < revertedPathSize - 1; j++)
       {
          int i = revertedPathSize - 1 - j;
-         double generalizedTimeGap = revertedPath.get(i-1).getNormalizedNodeData(0)
-               - revertedPath.get(i).getNormalizedNodeData(0);
+//         double generalizedTimeGap = revertedPath.get(i - 1).getNormalizedNodeData(0) - revertedPath.get(i).getNormalizedNodeData(0);
+         
+         double generalizedTimeGap = revertedPath.get(i - 1).getNormalizedNodeData(0) - tree.getPath().get(currentIndex).getNormalizedNodeData(0);
 
          if (generalizedTimeGap > tree.dismissableTimeGap)
          {
-            tree.addNodeOnPath(revertedPath.get(revertedPathSize - 1 - j));
+            tree.addNodeOnPath(revertedPath.get(i - 1));
+            currentIndex++;
          }
 
       }
 
-      tree.addNodeOnPath(revertedPath.get(0));
-      
       PrintTools.info("the size of the path is " + tree.getPath().size() + " before dismissing " + revertedPathSize);
 
       numberOfMotionPath = tree.getPath().size();
+
+      treeVisualizer.update(tree.getPath());
       /*
        * terminate state
        */
       state = CWBToolboxState.GENERATE_MOTION;
+
+      for (int i = 0; i < numberOfMotionPath; i++)
+         PrintTools.info("" + i + " " + tree.getPath().get(i).getNodeData(0));
+
+      for (int i = 0; i < revertedPathSize; i++)
+         PrintTools.info("" + i + " " + revertedPath.get(i).getNodeData(0));
    }
 
    /**
