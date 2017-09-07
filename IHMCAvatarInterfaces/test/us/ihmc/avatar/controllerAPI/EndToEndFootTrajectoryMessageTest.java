@@ -158,7 +158,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(4.0, 0.0, 0.0), new Point3D(10.0, 0.0, -0.1));
       ThreadTools.sleep(1000);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
-
+      
       RobotSide robotSide = RobotSide.LEFT;
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);

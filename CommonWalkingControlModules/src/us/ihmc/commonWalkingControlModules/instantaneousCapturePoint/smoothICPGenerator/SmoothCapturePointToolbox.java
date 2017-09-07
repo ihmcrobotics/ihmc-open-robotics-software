@@ -11,8 +11,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.Trajectory;
-import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
-import us.ihmc.robotics.math.trajectories.YoTrajectory;
 
 /**
  * @author Tim Seyde
