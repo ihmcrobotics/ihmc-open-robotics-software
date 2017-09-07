@@ -6,7 +6,6 @@ buildscript {
    }
    dependencies {
       classpath "gradle.plugin.us.ihmc:ihmc-build:0.7.3"
-      classpath 'us.ihmc:ihmc-commons:0.11.2'
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
