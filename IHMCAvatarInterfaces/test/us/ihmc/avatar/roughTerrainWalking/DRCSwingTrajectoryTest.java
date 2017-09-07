@@ -146,10 +146,10 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       for (int i = 0; i < heights.length; i++)
       {
          double currentHeight = heights[i];
-         DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
          FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
-         drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
-                 getRobotModel());
+         drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+         drcSimulationTestHelper.setTestEnvironment(flatGroundEnvironment);
+         drcSimulationTestHelper.createSimulation("DRCWalkingOverSmallPlatformTest");
          FullHumanoidRobotModel estimatorRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
          TestController testController = new TestController(estimatorRobotModel);
          drcSimulationTestHelper.getRobot().setController(testController, 1);
@@ -195,10 +195,10 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
 
       boolean success;
       double currentHeight = 0.6;
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
-              getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGroundEnvironment);
+      drcSimulationTestHelper.createSimulation("DRCWalkingOverSmallPlatformTest");
 
       ThreadTools.sleep(1000);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
@@ -226,10 +226,10 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
 
       boolean success;
       double currentHeight = -0.1;
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "DRCWalkingOverSmallPlatformTest", selectedLocation, simulationTestingParameters,
-            getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGroundEnvironment);
+      drcSimulationTestHelper.createSimulation("DRCWalkingOverSmallPlatformTest");
 
       ThreadTools.sleep(1000);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);

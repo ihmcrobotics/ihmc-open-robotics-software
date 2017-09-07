@@ -308,7 +308,10 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
          }
       };
       simulationTestingParameters.setKeepSCSUp(keepSCSUp());
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, className, startingLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.setStartingLocation(startingLocation);
+      drcSimulationTestHelper.createSimulation(className);
       robotModel = getRobotModel();
       fullRobotModel = robotModel.createFullRobotModel();
       

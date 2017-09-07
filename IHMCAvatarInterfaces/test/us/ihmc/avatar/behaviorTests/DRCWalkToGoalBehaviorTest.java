@@ -100,8 +100,6 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
    private final double ORIENTATION_THRESHOLD = 0.05;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
-   private final DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
-
    private YoDouble yoTime;
 
    private ForceSensorDataHolder forceSensorDataHolder;
@@ -132,8 +130,8 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       {
          throw new RuntimeException(e);
       }
-      drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, getSimpleRobotName(),
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation(getSimpleRobotName());
 
       Robot robotToTest = drcSimulationTestHelper.getRobot();
       yoTime = robotToTest.getYoTime();
