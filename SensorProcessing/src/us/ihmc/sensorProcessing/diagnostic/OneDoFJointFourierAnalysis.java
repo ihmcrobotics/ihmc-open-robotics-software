@@ -2,16 +2,18 @@ package us.ihmc.sensorProcessing.diagnostic;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class OneDoFJointFourierAnalysis implements DiagnosticUpdatable
 {
    private final YoVariableRegistry registry;
 
    private final OneDoFJoint joint;
-
+   private final LowLevelJointDataReadOnly output;
+   
    private final Online1DSignalFourierAnalysis velocityFourierAnalysis;
    private final Online1DSignalFourierAnalysis tauFourierAnalysis;
    private final Online1DSignalFourierAnalysis tauDesiredFourierAnalysis;
@@ -21,14 +23,19 @@ public class OneDoFJointFourierAnalysis implements DiagnosticUpdatable
    private final YoDouble tau;
    private final YoDouble tauDesired;
 
-   public OneDoFJointFourierAnalysis(OneDoFJoint joint, double estimationWindow, double dt, YoVariableRegistry parentRegistry)
+   public OneDoFJointFourierAnalysis(OneDoFJoint joint, LowLevelJointDataReadOnly outputDataToCheck, double estimationWindow, double dt, YoVariableRegistry parentRegistry)
    {
-      this(joint, estimationWindow, dt, null, null, null, parentRegistry);
+      this(joint, outputDataToCheck, estimationWindow, dt, null, null, null, parentRegistry);
    }
 
    public OneDoFJointFourierAnalysis(OneDoFJoint joint, double estimationWindow, double dt, YoDouble velocity, YoDouble tau, YoDouble tauDesired, YoVariableRegistry parentRegistry)
    {
+      this(joint, null, estimationWindow, dt, velocity, tau, tauDesired, parentRegistry);
+   }
+   private OneDoFJointFourierAnalysis(OneDoFJoint joint, LowLevelJointDataReadOnly outputDataToCheck, double estimationWindow, double dt, YoDouble velocity, YoDouble tau, YoDouble tauDesired, YoVariableRegistry parentRegistry)
+   {
       this.joint = joint;
+      this.output = outputDataToCheck;
       String jointName = joint.getName();
 
       registry = new YoVariableRegistry(jointName + "FourierAnalysis");
@@ -85,7 +92,7 @@ public class OneDoFJointFourierAnalysis implements DiagnosticUpdatable
       {
          velocityFourierAnalysis.update(joint.getQd());
          tauFourierAnalysis.update(joint.getTauMeasured());
-         tauDesiredFourierAnalysis.update(joint.getTau());
+         tauDesiredFourierAnalysis.update(output.getDesiredTorque());
       }
    }
 
