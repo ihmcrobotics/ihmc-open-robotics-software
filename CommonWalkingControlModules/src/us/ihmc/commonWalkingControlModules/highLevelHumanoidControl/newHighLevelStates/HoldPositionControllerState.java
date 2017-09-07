@@ -57,11 +57,6 @@ public class HoldPositionControllerState extends NewHighLevelControllerState
    }
 
    @Override
-   public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
-   {
-   }
-
-   @Override
    public void doTransitionIntoAction()
    {
       for (int jointIndex = 0; jointIndex < jointControllers.size(); jointIndex++)
@@ -113,4 +108,8 @@ public class HoldPositionControllerState extends NewHighLevelControllerState
    {
       return lowLevelOneDoFJointDesiredDataHolder;
    }
+
+   @Override
+   public void warmup(int iterations)
+   {}
 }

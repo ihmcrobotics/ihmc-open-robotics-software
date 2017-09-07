@@ -410,35 +410,12 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
       commandInputManager.registerConversionHelper(commandConversionHelper);
 
-      /////////////////////////////////////////////////////////////////////////////////////////////
-      // Setup the WholeBodyInverseDynamicsControlCore ////////////////////////////////////////////
-      InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
-
-      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
-      ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame,
-                                                                            momentumOptimizationSettings, yoGraphicsListRegistry, registry);
-      toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
-      if (setupInverseDynamicsSolver)
-         toolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
-      if (setupInverseKinematicsSolver)
-         toolbox.setupForInverseKinematicsSolver();
-      if (setupVirtualModelControlSolver)
-      {
-         RigidBody[] controlledBodies = {fullRobotModel.getPelvis(), fullRobotModel.getFoot(RobotSide.LEFT), fullRobotModel.getFoot(RobotSide.RIGHT)};
-         toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controlledBodies, contactablePlaneBodies);
-      }
-      FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
-      WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, template, registry);
-      ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
-
       NewHumanoidHighLevelControllerManager highLevelHumanoidControllerManager = new NewHumanoidHighLevelControllerManager(commandInputManager, statusMessageOutputManager,
-                                                                                                                           controllerCore, initialControllerState,
-                                                                                                                           highLevelControllerParameters, walkingControllerParameters,
-                                                                                                                           icpPlannerParameters, requestedHighLevelControllerState,
-                                                                                                                           controllerFactoriesMap, stateTransitionFactories, managerFactory,
-                                                                                                                           controllerToolbox, centerOfPressureDataHolderForEstimator,
-                                                                                                                           controllerCoreOutput);
+                                                                                                                           initialControllerState, highLevelControllerParameters,
+                                                                                                                           walkingControllerParameters, icpPlannerParameters,
+                                                                                                                           requestedHighLevelControllerState, controllerFactoriesMap,
+                                                                                                                           stateTransitionFactories, managerFactory, controllerToolbox,
+                                                                                                                           centerOfPressureDataHolderForEstimator);
       highLevelHumanoidControllerManager.addYoVariableRegistry(registry);
       return highLevelHumanoidControllerManager;
    }

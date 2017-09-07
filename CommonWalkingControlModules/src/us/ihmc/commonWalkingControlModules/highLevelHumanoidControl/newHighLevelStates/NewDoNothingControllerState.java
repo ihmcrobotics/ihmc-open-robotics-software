@@ -53,11 +53,6 @@ public class NewDoNothingControllerState extends NewHighLevelControllerState
    }
 
    @Override
-   public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
-   {
-   }
-
-   @Override
    public void doAction()
    {
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
@@ -93,5 +88,10 @@ public class NewDoNothingControllerState extends NewHighLevelControllerState
    public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
    {
       return lowLevelOneDoFJointDesiredDataHolder;
+   }
+
+   @Override
+   public void warmup(int iterations)
+   {
    }
 }

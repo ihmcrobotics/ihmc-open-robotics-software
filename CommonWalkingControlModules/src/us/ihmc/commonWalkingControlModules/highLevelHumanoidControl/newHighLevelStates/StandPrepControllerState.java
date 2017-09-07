@@ -80,11 +80,6 @@ public class StandPrepControllerState extends NewHighLevelControllerState
    }
 
    @Override
-   public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
-   {
-   }
-
-   @Override
    public void doTransitionIntoAction()
    {
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
@@ -158,4 +153,8 @@ public class StandPrepControllerState extends NewHighLevelControllerState
       return lowLevelOneDoFJointDesiredDataHolder;
    }
 
+   @Override
+   public void warmup(int iterations)
+   {
+   }
 }

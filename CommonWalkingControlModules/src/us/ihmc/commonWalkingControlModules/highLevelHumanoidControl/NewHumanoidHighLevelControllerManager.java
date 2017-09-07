@@ -60,8 +60,6 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
-   private final ControllerCoreOutputReadOnly controllerCoreOutput;
-   private final WholeBodyControllerCore controllerCore;
 
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
@@ -76,37 +74,33 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
    private final ExecutionTimer highLevelControllerTimer = new ExecutionTimer("activeHighLevelControllerTimer", 1.0, registry);
 
    public NewHumanoidHighLevelControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
-                                                WholeBodyControllerCore controllerCore, NewHighLevelControllerStates initialControllerState,
+                                                NewHighLevelControllerStates initialControllerState,
                                                 HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters,
                                                 ICPTrajectoryPlannerParameters icpPlannerParameters, YoEnum<NewHighLevelControllerStates> requestedHighLevelControllerState,
                                                 EnumMap<NewHighLevelControllerStates, HighLevelControllerStateFactory> controllerStateFactories,
                                                 ArrayList<ControllerStateTransitionFactory<NewHighLevelControllerStates>> controllerTransitionFactories,
-                                                HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                                ControllerCoreOutputReadOnly controllerCoreOutput)
+                                                HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
+                                                CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator)
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
-      YoDouble yoTime = controllerToolbox.getYoTime();
-      this.controllerCoreOutput = controllerCoreOutput;
-      this.controllerCore = controllerCore;
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
       this.icpPlannerParameters = icpPlannerParameters;
+      this.controllerToolbox = controllerToolbox;
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
+      this.initialControllerState = initialControllerState;
+      this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
+
       this.requestedHighLevelControllerState.set(initialControllerState);
+      registry.addChild(controllerToolbox.getYoVariableRegistry());
 
-      this.stateMachine = setUpStateMachine(controllerStateFactories, controllerTransitionFactories, managerFactory, yoTime, registry);
-
+      stateMachine = setUpStateMachine(controllerStateFactories, controllerTransitionFactories, managerFactory, controllerToolbox.getYoTime(), registry);
       isListeningToHighLevelStateMessage.set(true);
-
       for (NewHighLevelControllerState highLevelControllerState : highLevelControllerStates.values())
       {
          this.registry.addChild(highLevelControllerState.getYoVariableRegistry());
       }
-      this.initialControllerState = initialControllerState;
-      this.controllerToolbox = controllerToolbox;
-      this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
-      this.registry.addChild(controllerToolbox.getYoVariableRegistry());
 
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controllerToolbox.getFullRobotModel().getOneDoFJoints(), registry);
 
@@ -140,7 +134,6 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
    @Override
    public void initialize()
    {
-      controllerCore.initialize();
       controllerToolbox.initialize();
       stateMachine.setCurrentState(initialControllerState);
    }
@@ -189,30 +182,16 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
     * Also warms up the controller core
     *
     * @param iterations number of times to run a single state
-    * @param walkingState
     */
-   public void warmup(int iterations, WalkingHighLevelHumanoidController walkingState)
+   public void warmup(int iterations)
    {
       PrintTools.info(this, "Starting JIT warmup routine");
-      ArrayList<WalkingStateEnum> states = new ArrayList<>();
-      controllerCore.initialize();
-      walkingState.doTransitionIntoAction();
-
-      walkingState.getOrderedWalkingStatesForWarmup(states);
-      for(WalkingStateEnum state : states)
+      for (NewHighLevelControllerState highLevelControllerState : highLevelControllerStates.values())
       {
-         PrintTools.info(this, "Warming up " + state);
-         for(int i = 0; i < iterations; i++)
-         {
-            walkingState.warmupStateIteration(state);
-            ControllerCoreCommand controllerCoreCommandList = walkingState.getControllerCoreCommand();
-            controllerCore.submitControllerCoreCommand(controllerCoreCommandList);
-            controllerCore.compute();
-         }
+         highLevelControllerState.doTransitionIntoAction();
+         highLevelControllerState.warmup(iterations);
+         highLevelControllerState.doTransitionOutOfAction();
       }
-
-      walkingState.doTransitionOutOfAction();
-      walkingState.getControllerCoreCommand().clear();
       PrintTools.info(this, "Finished JIT warmup routine");
    }
 
@@ -230,8 +209,7 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
          // set the controller core output
          NewHighLevelControllerState highLevelControllerState = controllerStateFactory.getOrCreateControllerState(controllerStateFactories, controllerToolbox, highLevelControllerParameters,
                                                                                                                   commandInputManager, statusMessageOutputManager, managerFactory,
-                                                                                                                  walkingControllerParameters, icpPlannerParameters, controllerCore);
-         highLevelControllerState.setControllerCoreOutput(controllerCoreOutput);
+                                                                                                                  walkingControllerParameters, icpPlannerParameters);
 
          // add the controller to the state machine
          highLevelStateMachine.addState(highLevelControllerState);

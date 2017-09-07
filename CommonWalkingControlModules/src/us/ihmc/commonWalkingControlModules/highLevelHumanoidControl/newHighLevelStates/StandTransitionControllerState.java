@@ -61,11 +61,6 @@ public class StandTransitionControllerState extends NewHighLevelControllerState
    }
 
    @Override
-   public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
-   {
-   }
-
-   @Override
    public void doTransitionIntoAction()
    {
       walkingControllerState.doTransitionIntoAction();
@@ -120,4 +115,8 @@ public class StandTransitionControllerState extends NewHighLevelControllerState
       return lowLevelOneDoFJointDesiredDataHolder;
    }
 
+   @Override
+   public void warmup(int iterations)
+   {
+   }
 }
