@@ -38,7 +38,10 @@ public class FullRobotModelCorruptor
 
       String chestName = "chest";
       final RigidBody chest = fullRobotModel.getChest();
-      createMassAndCoMOffsetCorruptors(namePrefix, chestName, chest);
+      if(chest != null)
+      {
+         createMassAndCoMOffsetCorruptors(namePrefix, chestName, chest);
+      }
 
       String pelvisName = "pelvis";
       final RigidBody pelvis = fullRobotModel.getPelvis();

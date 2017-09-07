@@ -96,9 +96,17 @@ public class WalkingCommandConsumer
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
 
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
-      ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
-
-      this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, trajectoryFrames);
+      
+      ReferenceFrame chestBodyFrame = null;
+      if(chest != null)
+      {
+         chestBodyFrame = chest.getBodyFixedFrame();
+         this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, trajectoryFrames);
+      }
+      else
+      {
+         chestManager = null;
+      }
 
       if (head != null)
       {
