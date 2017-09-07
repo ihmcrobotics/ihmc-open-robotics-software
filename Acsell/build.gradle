@@ -1,53 +1,31 @@
 buildscript {
    repositories {
-      maven {
-         url "https://plugins.gradle.org/m2/"
-      }
+      maven { url "https://plugins.gradle.org/m2/" }
+      mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
-      classpath "org.hidetake:gradle-ssh-plugin:2.1.1"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.7.4"
    }
 }
+plugins {
+   id "org.hidetake.ssh" version "2.9.0"
+}
+apply plugin: "us.ihmc.ihmc-build"
 
-apply plugin: "us.ihmc.gradle.ihmc-build"
-apply plugin: "org.hidetake.ssh"
-
-if (!rootProject.name.equals('IHMCOpenRoboticsSoftware'))
-{
-   evaluationDependsOn(':IHMCOpenRoboticsSoftware')
+ihmc {
+   loadProductProperties("../product.properties")
+   
+   configureDependencyResolution()
+   configurePublications()
 }
 
-sourceCompatibility = 1.8
-
-version = "${getOpenRoboticsSoftwareProject().version}"
-project.ext.fullVersion = "${getOpenRoboticsSoftwareProject().ext.fullVersion}"
-project.ext.vcsUrl = "${getOpenRoboticsSoftwareProject().ext.vcsUrl}"
-project.ext.licenseURL = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-project.ext.licenseName = "Apache License, Version 2.0"
-project.ext.bintrayLicenseName = "Apache-2.0"
-
-repositories ihmc.ihmcDefaultArtifactProxies()
-
-repositories {
-   mavenLocal()
-   jcenter()
-   mavenCentral()
-   maven {
-      url "http://artifactory.ihmc.us/artifactory/thirdparty/"
-   }
-   maven {
-      url "http://artifactory.ihmc.us/artifactory/releases/"
-   }
+testSuites {
+   def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
+   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "FLAKY", prefix + "VIDEO"]
+   disableBambooConfigurationCheck = true
 }
 
-def strings = ['ihmc', 'robotics']
-ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
-
-dependencies {
-   testCompile group: 'junit', name: 'junit', version: '4.11'
-   testCompile ihmc.getProjectTestDependency(":IHMCAvatarInterfaces")
-
+mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.8'
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.2'
@@ -58,71 +36,51 @@ dependencies {
    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
    compile group: 'org.bidib.jbidib.org.qbang.rxtx', name: 'rxtxcomm', version: '2.2'
+   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
+   compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-state-estimation", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "common-walking-control-modules", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-avatar-interfaces", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "model-file-loader", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "sensor-processing", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-perception", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robot-models", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robot-data-visualizer", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
+}
 
-    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
-
-   compile ihmc.getProjectDependency(":IHMCCommunication")
-   compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
-   compile ihmc.getProjectDependency(":IHMCStateEstimation")
-   compile ihmc.getProjectDependency(":CommonWalkingControlModules")
-   compile ihmc.getProjectDependency(":IHMCAvatarInterfaces")
-   compile ihmc.getProjectDependency(":IHMCJMonkeyEngineToolkit")
-   compile ihmc.getProjectDependency(":ModelFileLoader")
-   compile ihmc.getProjectDependency(":SensorProcessing")
-   compile ihmc.getProjectDependency(":SimulationConstructionSet")
-   compile ihmc.getProjectDependency(":IHMCRobotDataLogger")
-   compile ihmc.getProjectDependency(":IHMCPerception")
-   compile ihmc.getProjectDependency(":IHMCWholeBodyController")
-   compile ihmc.getProjectDependency(":IHMCJavaToolkit")
-    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
-    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.0-alpha'
-   compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-   compile ihmc.getProjectDependency(":IHMCRobotDescription")
-   compile ihmc.getProjectDependency(":IHMCRobotModels")
-   compile ihmc.getProjectDependency(":IHMCRobotDataVisualizer")
-   compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
-	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
-	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
-    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.0-alpha'
+testDependencies {
+   compile group: 'junit', name: 'junit', version: '4.11'
+   compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
+   compile group: "us.ihmc", name: "ihmc-avatar-interfaces-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: groupDependencyVersion
 }
 
 remotes {
    stepprController {
       host = '10.66.171.20' //CPU1
       // Set the username and password in ~/.gradle/gradle.properties.
-      user = project.hasProperty('steppr_username') ? "${steppr_username}" : "invalid"
-      password = project.hasProperty('steppr_password') ? "${steppr_password}" : "invalid"
+      user = steppr_username
+      password = steppr_password
       knownHosts = allowAnyHosts
    }
    wandererController {
       host = '10.66.171.21'
       // Set the username and password in ~/.gradle/gradle.properties.
-      user = project.hasProperty('wanderer_username') ? "${wanderer_username}" : "invalid"
-      password = project.hasProperty('wanderer_password') ? "${wanderer_password}" : "invalid"
+      user = wanderer_username
+      password = wanderer_password
       knownHosts = allowAnyHosts
-   }
-}
-
-jar {
-   List depend = []
-   configurations.runtime.each {
-      if (!it.name.contains("IHMCHumanoidOperatorInterface"))
-      {
-         depend.add('lib/' + it.name)
-      }
-   }
-   manifest {
-      attributes(
-              'Created-By': 'IHMC Gradle Build Script',
-              'Class-Path': depend.join(' '),
-              "Implementation-Title": project.name,
-              "Implementation-Version": project.version,
-              "Implementation-Vendor": "IHMC",
-
-              "Bundle-Name": project.name,
-              "Bundle-Version": project.version,
-              "Bundle-License": "${project.ext.licenseURL}",
-              "Bundle-Vendor": "IHMC")
    }
 }
 
@@ -131,40 +89,23 @@ task deploy(dependsOn: assemble) << {
    def scriptDir;
    def directory;
 
-   if (!project.hasProperty("robot"))
+   if (robot == "steppr")
    {
-      throw new GradleException("No robot passed in. Pass in -Probot=[robot].");
-   }
-   else if ("$robot" == "steppr")
-   {
-
-      if (!project.hasProperty('steppr_username') || !project.hasProperty('steppr_password'))
-      {
-         throw new GradleException("Please set stepper_username and steppr_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
-      }
-
       rep = remotes.stepprController
       scriptDir = new File("scripts/steppr");
       directory = "steppr"
-   }
-   else if ("$robot" == "wanderer")
+   } else if (robot == "wanderer")
    {
-      if (!project.hasProperty('wanderer_username') || !project.hasProperty('wanderer_password'))
-      {
-         throw new GradleException("Please set wanderer_username and wanderer_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
-      }
-
       rep = remotes.wandererController
       scriptDir = new File("scripts/wanderer");
       directory = "wanderer"
-   }
-   else
+   } else
    {
-      throw new GradleException("Invalid robot \"$robot\" passed in. Valid options are \"steppr\" and \"wanderer\"");
+      println("Invalid robot \"$robot\" passed in. Valid options are \"steppr\" and \"wanderer\"");
    }
 
    println "Trying ssh"
-   
+
    ssh.run {
       session(rep) {
          execute 'mkdir -p ' + directory + '/lib'
