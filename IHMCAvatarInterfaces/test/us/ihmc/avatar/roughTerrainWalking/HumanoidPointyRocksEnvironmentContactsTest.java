@@ -40,7 +40,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public abstract class HumanoidPointyRocksEnvironmentContactsTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private OffsetAndYawRobotInitialSetup location = new OffsetAndYawRobotInitialSetup(new Vector3D(0.0, 0.0, 0.0), 0.0);
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private YoBoolean doFootExplorationInTransferToStanding;
@@ -234,16 +233,9 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
 
       // create simulation test helper
       String className = getClass().getSimpleName();
-      DRCStartingLocation startingLocation = new DRCStartingLocation()
-      {
-         @Override
-         public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
-         {
-            return location;
-         }
-      };
       DRCRobotModel robotModel = getRobotModel(15, 8, onlyEdgeContacts);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(environment);
       drcSimulationTestHelper.createSimulation(className);
       drcSimulationTestHelper.getSimulationConstructionSet().hideAllYoGraphics();
 

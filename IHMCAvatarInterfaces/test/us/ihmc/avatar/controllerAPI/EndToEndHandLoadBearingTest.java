@@ -48,12 +48,12 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       String testName = getClass().getSimpleName();
       TestingEnvironment testingEnvironment = new TestingEnvironment();
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(testingEnvironment, selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(testingEnvironment);
       drcSimulationTestHelper.createSimulation(testName);
       double totalMass = fullRobotModel.getTotalMass();
       PushRobotController pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);

@@ -60,7 +60,8 @@ import us.ihmc.tools.thread.ThreadTools;
 
          DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ROCKS;
          
-         drcSimulationTestHelper = new DRCSimulationTestHelper(selectedLocation, simulationTestingParameters, getRobotModel());
+         drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+         drcSimulationTestHelper.setStartingLocation(selectedLocation);
          drcSimulationTestHelper.createSimulation("DRCWalkingOntoRocksTest");
 
          SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
