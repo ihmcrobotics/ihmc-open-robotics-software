@@ -24,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerData
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -315,6 +316,9 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
             double time = trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
 
+            PrintTools.info(""+ i+ " " + time+" "+desiredPosition +" "+desiredLinearVelocity);
+            
+            
             Graphics3DObject sphere = new Graphics3DObject();
             sphere.translate(desiredPosition);
             sphere.addSphere(0.01, new YoAppearanceRGBColor(FootstepListVisualizer.defaultFeetColors.get(robotSide), 0.0));

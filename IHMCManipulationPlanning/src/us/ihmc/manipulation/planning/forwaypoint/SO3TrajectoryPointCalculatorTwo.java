@@ -3,6 +3,7 @@ package us.ihmc.manipulation.planning.forwaypoint;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -76,11 +77,14 @@ public class SO3TrajectoryPointCalculatorTwo
       trajectoryPointsAngularVelocity.clear();
       for(int i=0;i<numberOfTrajectoryPoints;i++)
       {
-         Point3D desiredPosition = new Point3D();
-         Vector3D desiredLinearVelocity = new Vector3D();
+         Point3D orientationYawPitchRoll = new Point3D();
+         Vector3D angularVelocityYawPitchRoll = new Vector3D();
          
-         double time = trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
-         trajectoryPointsAngularVelocity.add(desiredLinearVelocity);
+         double time = trajectoryPoints.get(i).get(orientationYawPitchRoll, angularVelocityYawPitchRoll);
+         
+         PrintTools.info(""+i+" "+ orientationYawPitchRoll +" " + angularVelocityYawPitchRoll);
+         
+         trajectoryPointsAngularVelocity.add(angularVelocityYawPitchRoll);
       }
    }
    

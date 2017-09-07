@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import org.apache.commons.lang3.StringUtils;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
@@ -83,6 +84,7 @@ public class EuclideanTrajectoryPointCalculator
       newTrajectoryPoint.setTime(time);
       newTrajectoryPoint.setPosition(position);
       newTrajectoryPoint.setLinearVelocityToNaN();
+      PrintTools.info(""+time+" "+position);
    }
 
    public void appendTrajectoryPoint(double time, Point3D position, Vector3D linearVelocity)
@@ -118,11 +120,8 @@ public class EuclideanTrajectoryPointCalculator
    public void computeTrajectoryPointTimes(double firstTrajectoryPointTime, double[] trajectoryTimes)
    {
       int numberOfTrajectoryPoints = getNumberOfTrajectoryPoints();
-      
-      trajectoryPoints.get(0).setTime(firstTrajectoryPointTime);
-      trajectoryPoints.get(trajectoryPoints.size() - 1).setTime(firstTrajectoryPointTime + trajectoryTimes[numberOfTrajectoryPoints-1]);
-      
-      for (int i = 1; i < numberOfTrajectoryPoints - 1; i++)
+            
+      for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
          double time = 0;         
          time = firstTrajectoryPointTime + trajectoryTimes[i];
@@ -131,8 +130,9 @@ public class EuclideanTrajectoryPointCalculator
    }
    
    public void computeTrajectoryPointTimes(double firstTrajectoryPointTime, double trajectoryTime)
-   {
+   {      
       int numberOfTrajectoryPoints = getNumberOfTrajectoryPoints();
+            
       if (numberOfTrajectoryPoints == 0)
          throw new RuntimeException("There is no trajectory point.");
 
@@ -149,17 +149,26 @@ public class EuclideanTrajectoryPointCalculator
 
       for (int i = 0; i < numberOfTrajectoryPoints - 1; i++)
       {
+         
+         
          double subLength = trajectoryPoints.get(i).positionDistance(trajectoryPoints.get(i + 1));
          subLengths.add(subLength);
          totalLength += subLength;
          waypointDistanceFromStart.add(totalLength);
          if (DEBUG)
             System.out.println("Sub length: " + i + ": " + subLength);
+         
       }
 
       trajectoryPoints.get(0).setTime(firstTrajectoryPointTime);
       trajectoryPoints.get(trajectoryPoints.size() - 1).setTime(firstTrajectoryPointTime + trajectoryTime);
 
+      
+      
+      PrintTools.info(""+" " + trajectoryPoints.get(0));
+      PrintTools.info(""+" " + trajectoryPoints.get(1));
+      PrintTools.info(""+" " + trajectoryPoints.get(2));
+      
 
       if (useWeightMethod)
       {
@@ -259,19 +268,29 @@ public class EuclideanTrajectoryPointCalculator
          thirdTrajectoryPoint = trajectoryPoints.get(numberOfTrajectoryPoints - 1);
 
          computedLinearVelocity.setToZero(thirdTrajectoryPoint.getReferenceFrame());
+         PrintTools.info(""+firstTrajectoryPoint.getTime() +" "+secondTrajectoryPoint.getTime());
          computeTrajectoryPointVelocity(firstTrajectoryPoint, secondTrajectoryPoint, thirdTrajectoryPoint, TrajectoryPoint.THIRD, computedLinearVelocity);
          thirdTrajectoryPoint.setLinearVelocity(computedLinearVelocity);
       }
+      
+      
+//      PrintTools.info(""+" " + trajectoryPoints.get(0));
+//      PrintTools.info(""+" " + trajectoryPoints.get(1));
+//      PrintTools.info(""+" " + trajectoryPoints.get(2));
 
       for (int i = 1; i < numberOfTrajectoryPoints - 1; i++)
       {
+         PrintTools.info(""+i);         
          firstTrajectoryPoint = trajectoryPoints.get(i - 1);
          secondTrajectoryPoint = trajectoryPoints.get(i);
          thirdTrajectoryPoint = trajectoryPoints.get(i + 1);
+         
          computedLinearVelocity.setToZero(trajectoryPoints.get(i).getReferenceFrame());
+         
          computeTrajectoryPointVelocity(firstTrajectoryPoint, secondTrajectoryPoint, thirdTrajectoryPoint, TrajectoryPoint.SECOND, computedLinearVelocity);
          secondTrajectoryPoint.setLinearVelocity(computedLinearVelocity);
       }
+      
    }
 
    private final FramePoint3D tempFramePoint = new FramePoint3D();
@@ -348,7 +367,9 @@ public class EuclideanTrajectoryPointCalculator
          }
 
          linearVelocityToPack.set(direction, polynomial.getVelocity());
+         
       }
+      PrintTools.info(""+linearVelocityToPack );
    }
 
    public int getNumberOfTrajectoryPoints()
