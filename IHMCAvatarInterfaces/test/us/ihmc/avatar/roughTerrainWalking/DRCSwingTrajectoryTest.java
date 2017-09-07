@@ -146,9 +146,9 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       for (int i = 0; i < heights.length; i++)
       {
          double currentHeight = heights[i];
-         DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
          FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
-         drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, selectedLocation, simulationTestingParameters, getRobotModel());
+         drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+         drcSimulationTestHelper.setTestEnvironment(flatGroundEnvironment);
          drcSimulationTestHelper.createSimulation("DRCWalkingOverSmallPlatformTest");
          FullHumanoidRobotModel estimatorRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
          TestController testController = new TestController(estimatorRobotModel);
@@ -195,9 +195,9 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
 
       boolean success;
       double currentHeight = 0.6;
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGroundEnvironment);
       drcSimulationTestHelper.createSimulation("DRCWalkingOverSmallPlatformTest");
 
       ThreadTools.sleep(1000);
@@ -226,9 +226,9 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
 
       boolean success;
       double currentHeight = -0.1;
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGroundEnvironment);
       drcSimulationTestHelper.createSimulation("DRCWalkingOverSmallPlatformTest");
 
       ThreadTools.sleep(1000);

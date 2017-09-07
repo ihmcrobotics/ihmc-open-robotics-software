@@ -118,11 +118,11 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       }
 
       CommonAvatarEnvironmentInterface steppingStonesEnvironment = createSteppingStonesEnvironment();
-      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup();
 
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(steppingStonesEnvironment, startingLocation, simulationTestingParameters, robotModel,
-            networkModuleParameters);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(steppingStonesEnvironment);
+      drcSimulationTestHelper.setNetworkProcessorParameters(networkModuleParameters);
       drcSimulationTestHelper.createSimulation("steppingStonesTestHelper");
 
       toolboxCommunicator.connect();

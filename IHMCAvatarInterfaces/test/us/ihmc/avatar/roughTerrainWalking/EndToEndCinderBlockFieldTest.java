@@ -70,9 +70,8 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
       FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockFieldEnvironment.getCinderBlockPoses());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      simulationTestHelper = new DRCSimulationTestHelper(cinderBlockFieldEnvironment, selectedLocation, simulationTestingParameters, getRobotModel());
+      simulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      simulationTestHelper.setTestEnvironment(cinderBlockFieldEnvironment);
       simulationTestHelper.createSimulation("EndToEndCinderBlockFieldTest");
 
       ThreadTools.sleep(1000);

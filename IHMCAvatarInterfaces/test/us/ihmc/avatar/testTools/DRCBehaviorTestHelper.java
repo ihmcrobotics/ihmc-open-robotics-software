@@ -111,8 +111,10 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 	         String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
 	         DRCRobotModel robotModel, DRCNetworkModuleParameters networkModuleParameters, boolean automaticallySimulate)	   
    {
-      super(commonAvatarEnvironmentInterface, selectedLocation, simulationTestingParameters, robotModel, networkModuleParameters);
-
+      super(simulationTestingParameters, robotModel);
+      super.setTestEnvironment(commonAvatarEnvironmentInterface);
+      super.setStartingLocation(selectedLocation);
+      super.setNetworkProcessorParameters(networkModuleParameters);
       super.createSimulation(name, automaticallySimulate, true);
 
       yoTimeRobot = getRobot().getYoTime();

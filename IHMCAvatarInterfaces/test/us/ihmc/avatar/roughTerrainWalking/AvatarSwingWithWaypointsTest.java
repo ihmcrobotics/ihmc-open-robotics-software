@@ -43,9 +43,9 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
    {
       String className = getClass().getSimpleName();
       TestingEnvironment environment = new TestingEnvironment();
-      DRCStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(environment);
       drcSimulationTestHelper.createSimulation(className);
       ThreadTools.sleep(1000);
       drcSimulationTestHelper.getSimulationConstructionSet().setCameraPosition(8.0, -8.0, 5.0);
@@ -181,7 +181,9 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
       DRCStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper.setStartingLocation(startingLocation);
       drcSimulationTestHelper.createSimulation(className);
       ThreadTools.sleep(1000);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
