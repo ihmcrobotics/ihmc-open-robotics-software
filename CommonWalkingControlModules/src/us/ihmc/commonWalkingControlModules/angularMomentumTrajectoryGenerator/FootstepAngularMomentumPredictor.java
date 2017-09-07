@@ -340,7 +340,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
          desiredRotatum.setToZero();
       }
       getPredictedCenterOfMassPosition(currentTime);
-      getPredictedSwingFootPosition(currentTime);
+      getPredictedFeetPosition(currentTime);
    }
 
    @Override
@@ -640,24 +640,24 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       }
    }
 
-   public void getPredictedSwingFootPosition(double time)
+   public void getPredictedFeetPosition(double time)
    {
       if (DEBUG && computePredictedAngularMomentum.getBooleanValue())
       {
          activeSwingFootTrajectory.update(time - initialTime);
-         activeCoMTrajectory.getFramePosition(tempFramePoint1);
+         activeSwingFootTrajectory.getFramePosition(tempFramePoint1);
          swingFootPosDebug.set(tempFramePoint1);
-         activeCoMTrajectory.getFrameVelocity(tempFrameVector);
+         activeSwingFootTrajectory.getFrameVelocity(tempFrameVector);
          swingFootVelDebug.set(tempFrameVector);
-         activeCoMTrajectory.getFrameAcceleration(tempFrameVector);
+         activeSwingFootTrajectory.getFrameAcceleration(tempFrameVector);
          swingFootAccDebug.set(tempFrameVector);
 
          activeSupportFootTrajectory.update(time - initialTime);
-         activeCoMTrajectory.getFramePosition(tempFramePoint1);
+         activeSupportFootTrajectory.getFramePosition(tempFramePoint1);
          supportFootPosDebug.set(tempFramePoint1);
-         activeCoMTrajectory.getFrameVelocity(tempFrameVector);
+         activeSupportFootTrajectory.getFrameVelocity(tempFrameVector);
          supportFootVelDebug.set(tempFrameVector);
-         activeCoMTrajectory.getFrameAcceleration(tempFrameVector);
+         activeSupportFootTrajectory.getFrameAcceleration(tempFrameVector);
          supportFootAccDebug.set(tempFrameVector);
       }
    }
