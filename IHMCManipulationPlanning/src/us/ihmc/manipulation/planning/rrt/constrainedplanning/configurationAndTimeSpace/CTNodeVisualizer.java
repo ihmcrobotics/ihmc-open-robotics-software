@@ -81,8 +81,35 @@ public class CTNodeVisualizer
       updateCnt++;
    }
 
-   public void showUpPath(ArrayList<CTTaskNode> path)
+   private void updateVisualizer(CTTaskNode newNode, boolean isPath)
    {
+      String prefix = "" + configurationIndex + "" + updateCnt;
 
+      if (newNode.getParentNode() != null)
+      {
+         CTTaskNode parentNode = newNode.getParentNode();
+         LineArtifact lineArtifact = new LineArtifact(prefix + "_line",
+                                                      new Point2D(parentNode.getNormalizedNodeData(0), parentNode.getNormalizedNodeData(configurationIndex)),
+                                                      new Point2D(newNode.getNormalizedNodeData(0), newNode.getNormalizedNodeData(configurationIndex)));
+
+         lineArtifact.setColor(Color.green);
+         plotter.addArtifact(lineArtifact);
+      }
+
+      CircleArtifact nodeArtifact = new CircleArtifact(prefix + "_valid", newNode.getNormalizedNodeData(0), newNode.getNormalizedNodeData(configurationIndex),
+                                                       0.015, true);
+      nodeArtifact.setColor(Color.green);
+
+      plotter.addArtifact(nodeArtifact);
+
+      plotter.update();
+      updateCnt++;
+   }
+
+   public void updateVisualizer(ArrayList<CTTaskNode> path)
+   {
+      int size = path.size();
+      for(int i=0;i<size;i++)
+         updateVisualizer(path.get(i), true);
    }
 }

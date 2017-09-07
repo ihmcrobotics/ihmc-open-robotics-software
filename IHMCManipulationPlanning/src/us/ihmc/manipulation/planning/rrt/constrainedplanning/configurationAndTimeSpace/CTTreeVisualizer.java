@@ -35,4 +35,12 @@ public class CTTreeVisualizer
          nodeVisualizers.get(i).updateVisualizer(newNode);
       }
    }
+   
+   public void update(ArrayList<CTTaskNode> path)
+   {
+      for(int i=0;i<configurationDimension;i++)
+      {
+         nodeVisualizers.get(i).updateVisualizer(path);
+      }
+   }
 }

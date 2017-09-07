@@ -41,7 +41,7 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
 
    private boolean planningSuccess = false;
 
-   private double timeout = 60.0;
+   private double timeout = 120.0;
 
    private final SleepBehavior sleepBehavior;
 
@@ -53,6 +53,8 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
    private FullHumanoidRobotModel fullRobotModel;
 
    private ConstrainedWholeBodyPlanningToolboxOutputStatus cwbtoolboxOutputStatus;
+   
+   private long startTime; // computing time measure.
 
    public PlanConstrainedWholeBodyTrajectoryBehavior(String namePrefix, CommunicationBridgeInterface communicationBridge, FullHumanoidRobotModel fullRobotModel,
                                                      YoDouble yoTime)
@@ -126,6 +128,8 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
 
             sendPackageToPlanner(request);
             PrintTools.info("sendPackageToPlanner");
+            
+            startTime = System.currentTimeMillis();
          }
       };
 
@@ -161,6 +165,12 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
                   wholebodyTrajectoryMessage = cwbtoolboxOutputStatus.wholeBodyTrajectoryMessage;
                   
                   handTrajectories = cwbtoolboxOutputStatus.handTrajectories;
+                  
+                  long stopTime = System.currentTimeMillis();
+                  long elapsedTime = stopTime - startTime;
+                  System.out.println("===========================================");
+                  System.out.println("toolbox executing time is " + elapsedTime / 1000.0 + " seconds");
+                  System.out.println("===========================================");
                }
                else
                {
