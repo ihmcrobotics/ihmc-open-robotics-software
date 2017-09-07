@@ -472,7 +472,12 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       // windowGUIActions.setupGraphGroupsMenu(graphGroupList, viewportWindow);
       return viewportWindow;
    }
-   
+
+   public YoVariableSliderWindow createNewParameterSliderWindow(String viewportName, final int screenID, final boolean maximizeWindow)
+   {
+      return new YoVariableSliderWindow(selectedVariableHolder, closeableAndDisposableRegistry);
+   }
+
    public HeatmapWindow createNewHeatmapWindow(String name)
    {
       return new HeatmapWindow(name, rootRegistry, myGraphArrayPanel, selectedVariableHolder, myDataBuffer, myDataBuffer);

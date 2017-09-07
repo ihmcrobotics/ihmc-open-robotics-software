@@ -167,8 +167,8 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       this.communicationBridge = new CommunicationBridge(behaviorCommunicatorServer);
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(new DefaultCommonAvatarEnvironment(), getSimpleRobotName(),
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation(getSimpleRobotName());
 
       networkProcessor.attachPacketCommunicator(PacketDestination.CONTROLLER, drcSimulationTestHelper.getControllerCommunicator());
       networkProcessor.attachPacketCommunicator(PacketDestination.BEHAVIOR_MODULE, behaviorCommunicatorClient);

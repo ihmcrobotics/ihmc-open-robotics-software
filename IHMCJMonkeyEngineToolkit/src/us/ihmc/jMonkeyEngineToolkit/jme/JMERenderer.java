@@ -148,7 +148,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    private final Object graphicsConch = new Object();
 
    private JMEContextManager contextManager;
-   private JMEAssetLocator assetLocator;
 
    private ArrayList<JMEViewportAdapter> viewportAdapters = new ArrayList<JMEViewportAdapter>();
 
@@ -246,7 +245,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       synchronized (graphicsConch)
       {
-         JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode, assetLocator, this, closeableAndDisposableRegistry);
+         JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode, getAssetManager(), this, closeableAndDisposableRegistry);
 
          if (rootJoint == null)
          {
@@ -570,7 +569,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       zUpNode = new Node("zUpNode");
       zUpNode.setLocalRotation(JMEGeometryUtils.getRotationFromJMEToZupCoordinates());
       rootNode.attachChild(zUpNode);
-      assetLocator = new JMEAssetLocator(assetManager);
 
       setupLighting();
       disableMainViewport();
@@ -632,14 +630,14 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    private boolean shouldRepaint()
    {
       // We have to use reflection because JME does not provide a getter
-      try
-      {
-         Field field = Spatial.class.getDeclaredField("refreshFlags");
-         field.setAccessible(true);
-         int refresh = field.getInt(rootNode);
-         return refresh != 0;
-      }
-      catch (Exception ex)
+//      try
+//      {
+//         Field field = Spatial.class.getDeclaredField("refreshFlags");
+//         field.setAccessible(true);
+//         int refresh = field.getInt(rootNode);
+//         return refresh != 0;
+//      }
+//      catch (Exception ex)
       {
          return true; // In case of exceptions render always
       }
@@ -1356,7 +1354,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
          contextManager = null;
       }
 
-      assetLocator = null;
 
       if (jmeGraphicsNodes != null)
       {
@@ -1421,10 +1418,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       return contextManager;
    }
 
-   public JMEAssetLocator getAssetLocator()
-   {
-      return assetLocator;
-   }
 
    public RenderType getRenderType()
    {

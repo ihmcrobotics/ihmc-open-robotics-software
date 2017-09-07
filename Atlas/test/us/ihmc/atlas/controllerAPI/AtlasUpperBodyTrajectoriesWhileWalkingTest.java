@@ -76,9 +76,8 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
@@ -86,7 +85,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       fullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
-      YoVariableRegistry registry = drcSimulationTestHelper.getYovariableRegistry();
+      YoVariableRegistry registry = drcSimulationTestHelper.getYoVariableRegistry();
       double timeToCompleteWalking = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames, registry);
       sendArmTrajectoryMessageWithRandomPoints(random, robotModel, fullRobotModel);
 
@@ -102,9 +101,8 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.5);
       assertTrue(success);
 
@@ -112,7 +110,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       fullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
-      YoVariableRegistry registry = drcSimulationTestHelper.getYovariableRegistry();
+      YoVariableRegistry registry = drcSimulationTestHelper.getYoVariableRegistry();
       double timeToCompleteWalking = sendWalkingPacket(robotModel, fullRobotModel, referenceFrames, registry);
 
 

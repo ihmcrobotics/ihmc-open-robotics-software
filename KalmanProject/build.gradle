@@ -48,7 +48,7 @@ dependencies {
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.1'
+    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.2'
 	
 	testCompile ihmc.getProjectDependency(":SimulationConstructionSet")
     testCompile ihmc.getProjectDependency(":SimulationConstructionSetTools")

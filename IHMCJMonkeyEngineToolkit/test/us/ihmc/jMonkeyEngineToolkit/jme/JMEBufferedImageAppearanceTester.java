@@ -47,7 +47,7 @@ public class JMEBufferedImageAppearanceTester extends JMERenderer
 //      instruction = graphics.addModelFile(getClass().getResource("Models/LeftFootPathIcon.obj").getFile(), YoAppearance.Blue());
      
       footIconGeometryLeft = JME3DLoaderUtils.extractFirstGeometry(getClass().getResource("Models/LeftFootPathIcon.obj").getFile(),
-            new JMEAssetLocator(assetManager), Graphics3DNodeType.VISUALIZATION);
+            assetManager, Graphics3DNodeType.VISUALIZATION);
       
 //      JMEGraphicsObject jmeGraphicsObject = new JMEGraphicsObject(this, new JMEAssetLocator(assetManager), graphics);
       Node rotation = new Node();
@@ -104,7 +104,7 @@ public class JMEBufferedImageAppearanceTester extends JMERenderer
          g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
          g.drawString(text, 0, 0);
          g.dispose();
-         footIconGeometryLeft.setMaterial(JMEAppearanceMaterial.createMaterialFromBufferedImage(new JMEAssetLocator(assetManager), appearance));
+         footIconGeometryLeft.setMaterial(JMEAppearanceMaterial.createMaterialFromBufferedImage(assetManager, appearance));
          footIconGeometryLeft.setQueueBucket(RenderQueue.Bucket.Opaque);
          index++;
       }

@@ -68,11 +68,11 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
    public void testVariousHandstepsOnWalls() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       double wallMaxY = 3.5;
       WallWorldEnvironment environment = new WallWorldEnvironment(-1.0, wallMaxY);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "DRCWalkingUpToRampShortStepsTest", selectedLocation, simulationTestingParameters,
-              getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper.createSimulation("DRCWalkingUpToRampShortStepsTest");
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
       setupCameraForHandstepsOnWalls();
       ThreadTools.sleep(1000);

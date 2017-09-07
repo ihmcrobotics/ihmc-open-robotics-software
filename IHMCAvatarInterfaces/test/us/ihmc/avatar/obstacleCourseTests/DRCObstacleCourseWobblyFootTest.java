@@ -68,7 +68,9 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCStandingTest");
 
       setupCameraForWalkingUpToRamp();
 
@@ -101,8 +103,9 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpToRampShortStepsTest", selectedLocation, simulationTestingParameters,
-              getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCWalkingUpToRampShortStepsTest");
 
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
@@ -140,8 +143,10 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCTurningInPlaceAndPassingPITest", selectedLocation, simulationTestingParameters,
-              getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCTurningInPlaceAndPassingPITest");
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

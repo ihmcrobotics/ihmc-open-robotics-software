@@ -832,8 +832,10 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    private void setupSim(DRCObstacleCourseStartingLocation startingLocation, boolean useScript) throws SimulationExceededMaximumTimeException
    {
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "PelvisCorrectionTest",
-            startingLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGroundEnvironment);
+      drcSimulationTestHelper.setStartingLocation(startingLocation);
+      drcSimulationTestHelper.createSimulation("PelvisCorrectionTest");
       if (useScript)
       {
          String scriptName = simpleFlatGroundScriptName;

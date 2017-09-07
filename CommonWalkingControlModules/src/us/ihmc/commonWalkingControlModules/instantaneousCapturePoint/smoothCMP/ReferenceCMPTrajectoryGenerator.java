@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ReferenceCMPTrajectoryGenerator
 {
-   private static final boolean tryBySubtracting = true;
+   private static final boolean tryBySubtracting = false;
    private static final int maxNumberOfCoefficients = 10;
    private static final int maxNumberOfSegments = 5;
 

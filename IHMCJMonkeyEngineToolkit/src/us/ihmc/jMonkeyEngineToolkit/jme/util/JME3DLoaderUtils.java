@@ -2,6 +2,7 @@ package us.ihmc.jMonkeyEngineToolkit.jme.util;
 
 import java.util.ArrayList;
 
+import com.jme3.asset.AssetManager;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -12,7 +13,7 @@ import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphicsObject;
 
 public class JME3DLoaderUtils
 {
-   public static Spatial load3DModel(String modelPath, JMEAssetLocator assetManager, Graphics3DNodeType type)
+   public static Spatial load3DModel(String modelPath, AssetManager assetManager, Graphics3DNodeType type)
    {
       return JMEGraphicsObject.createGraphics3DObjectFromModel(modelPath, null, false, null, assetManager);
    }
@@ -25,7 +26,7 @@ public class JME3DLoaderUtils
       return geom;
    }
 
-   public static Geometry extractFirstGeometry(String modelPath, JMEAssetLocator assetManager, Graphics3DNodeType type)
+   public static Geometry extractFirstGeometry(String modelPath, AssetManager assetManager, Graphics3DNodeType type)
    {
       Spatial tmp = load3DModel(modelPath, assetManager, type);
 

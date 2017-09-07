@@ -81,7 +81,9 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_TOP;
       
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingDownRampWithMediumSteps", selectedLocation,  simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCWalkingDownRampWithMediumSteps");
       
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -175,7 +177,9 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
    {
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_BOTTOM;
       
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpRampTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCWalkingUpRampTest");
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

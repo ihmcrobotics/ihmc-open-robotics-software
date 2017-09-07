@@ -82,8 +82,12 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
       simulationTestingParameters.setRunMultiThreaded(false);
       
-      DRCSimulationTestHelper drcSimulationTestHelper1 = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation,  simulationTestingParameters, getRobotModel());
-      DRCSimulationTestHelper drcSimulationTestHelper2 = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation,  simulationTestingParameters, getRobotModel());
+      DRCSimulationTestHelper drcSimulationTestHelper1 = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper1.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper1.createSimulation("DRCWalkingOverSmallPlatformTest");
+      DRCSimulationTestHelper drcSimulationTestHelper2 = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper2.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper2.createSimulation("DRCWalkingOverSmallPlatformTest");
       
       ArrayList<String> exceptions = DRCSimulationTestHelper.createVariableNamesStringsToIgnore();
       
@@ -159,7 +163,9 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation,  simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCWalkingOverSmallPlatformTest");
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -202,7 +208,9 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM_TURNED;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation,  simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCWalkingOverSmallPlatformTest");
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
 
@@ -237,7 +245,9 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_WALL;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation,  simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCWalkingOverSmallPlatformTest");
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
 
@@ -272,7 +282,9 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", selectedLocation,  simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCWalkingOverSmallPlatformTest");
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -319,7 +331,9 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.MEDIUM_PLATFORM;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", selectedLocation,  simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCWalkingOntoMediumPlatformToesTouchingTest");
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -356,7 +370,9 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", selectedLocation,  simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper( simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCWalkingOntoMediumPlatformToesTouchingTest");
    
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -393,7 +409,9 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 	   BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 	   
 	   DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM;
-	   drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", selectedLocation,  simulationTestingParameters, getRobotModel());
+	   drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+	   drcSimulationTestHelper.setStartingLocation(selectedLocation);
+	   drcSimulationTestHelper.createSimulation("DRCWalkingOntoMediumPlatformToesTouchingTest");
 
 	   SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
 	   ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

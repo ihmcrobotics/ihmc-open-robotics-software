@@ -44,9 +44,8 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
 
       Random random = new Random(564654L);
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);

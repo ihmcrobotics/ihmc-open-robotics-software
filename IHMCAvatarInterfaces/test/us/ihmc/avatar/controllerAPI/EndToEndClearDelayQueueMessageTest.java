@@ -42,7 +42,10 @@ public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTe
    public void testClearingQueue() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, "Test", location, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper.setStartingLocation(location);
+      drcSimulationTestHelper.createSimulation("Test");
       setupCamera(drcSimulationTestHelper);
       ThreadTools.sleep(1000);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));

@@ -73,7 +73,9 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCObstacleCourseTrialsCinderBlocksTest");
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.01);
       FramePoint3D pelvisHeight = new FramePoint3D(fullRobotModel.getRootJoint().getFrameAfterJoint());
@@ -114,7 +116,9 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCObstacleCourseTrialsCinderBlocksTest");
       setupCameraForWalkingOverCinderBlocks();
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
@@ -176,7 +180,9 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCObstacleCourseTrialsCinderBlocksTest");
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.001);
       InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
