@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.EnumMap;
 
@@ -27,7 +29,8 @@ public class FinishedControllerStateTransitionFactory<E extends Enum<E>> impleme
    }
 
    @Override
-   public StateTransition<E> getOrCreateStateTransition(EnumMap<E, ? extends FinishableState<E>> stateMap)
+   public StateTransition<E> getOrCreateStateTransition(EnumMap<E, ? extends FinishableState<E>> stateMap, ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                                        double totalMass, double gravityZ, YoVariableRegistry parentRegistry)
    {
       if (stateTransition == null)
          stateTransition = StateMachineTools.buildFinishedStateTransition(stateMap.get(currentStateEnum), nextStateEnum);

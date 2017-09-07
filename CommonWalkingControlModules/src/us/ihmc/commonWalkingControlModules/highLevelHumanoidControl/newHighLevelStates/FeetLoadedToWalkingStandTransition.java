@@ -9,6 +9,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -17,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
 {
-   private final NewHighLevelControllerState currentState;
+   private final FinishableState<NewHighLevelControllerStates> currentState;
    private final NewHighLevelControllerStates nextStateEnum;
    private final YoEnum<NewHighLevelControllerStates> requestedState;
 
@@ -25,11 +26,11 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
 
    private final YoDouble minimumTimeInState;
 
-   public FeetLoadedToWalkingStandTransition(NewHighLevelControllerState currentState, NewHighLevelControllerStates nextStateEnum, YoEnum<NewHighLevelControllerStates> requestedState,
-                                             ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetContactSensors,
-                                             HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters, YoVariableRegistry parentRegistry)
+   public FeetLoadedToWalkingStandTransition(FinishableState<NewHighLevelControllerStates> currentState, NewHighLevelControllerStates nextStateEnum,
+                                             YoEnum<NewHighLevelControllerStates> requestedState, ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetContactSensors,
+                                             double controlDT, double totalMass, double gravityZ, HighLevelControllerParameters highLevelControllerParameters, YoVariableRegistry parentRegistry)
    {
-      super(forceSensorDataHolder, feetContactSensors, controllerToolbox, parentRegistry);
+      super(forceSensorDataHolder, feetContactSensors, controlDT, totalMass, gravityZ, parentRegistry);
 
       this.currentState = currentState;
       this.nextStateEnum = nextStateEnum;

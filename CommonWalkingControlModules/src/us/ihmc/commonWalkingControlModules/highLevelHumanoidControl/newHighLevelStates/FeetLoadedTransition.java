@@ -30,14 +30,10 @@ public class FeetLoadedTransition implements StateTransitionCondition
    private final SimpleMovingAverageFilteredYoVariable prepRightFootFzAverage;
 
    public FeetLoadedTransition(ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetContactSensors,
-                               HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+                               double controlDT, double gravityZ, double totalMass, YoVariableRegistry parentRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
          footSensors.put(robotSide, forceSensorDataHolder.getByName(feetContactSensors.get(robotSide)));
-
-      double controlDT = controllerToolbox.getControlDT();
-      double gravityZ = controllerToolbox.getGravityZ();
-      double totalMass = controllerToolbox.getFullRobotModel().getTotalMass();
 
       int windowSize = (int) Math.floor(TIME_WINDOW / controlDT);
 
