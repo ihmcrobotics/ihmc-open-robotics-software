@@ -43,7 +43,7 @@ mainDependencies {
    compile "org.boofcv:geo:0.19"
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "kalman-project", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-kalman-project", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion

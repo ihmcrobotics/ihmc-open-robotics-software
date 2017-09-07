@@ -57,7 +57,7 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robot-description", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "parameter-optimization", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-parameter-optimization", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion

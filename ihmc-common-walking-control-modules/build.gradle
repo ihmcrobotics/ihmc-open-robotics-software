@@ -37,9 +37,9 @@ mainDependencies {
    compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-robot-models", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "sensor-processing", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-sensor-processing", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "convex-optimization-adapter", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
@@ -56,7 +56,7 @@ testDependencies {
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "convex-optimization-adapter-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter-test", version: groupDependencyVersion
 }
 
 visualizersDependencies {

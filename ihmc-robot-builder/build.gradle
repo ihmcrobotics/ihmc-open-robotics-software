@@ -27,7 +27,7 @@ mainDependencies {
    compile group: 'io.javaslang', name: 'javaslang', version: '2.0.3'
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robot-description", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "model-file-loader", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-model-file-loader", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: groupDependencyVersion
 }

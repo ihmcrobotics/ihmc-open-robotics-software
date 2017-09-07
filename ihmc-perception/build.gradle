@@ -57,7 +57,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-ros-tools", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "sensor-processing", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-sensor-processing", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robot-models", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion

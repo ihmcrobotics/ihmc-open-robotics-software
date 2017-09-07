@@ -57,8 +57,8 @@ mainDependencies {
    compile "org.boofcv:recognition:0.24.1"
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-humanoid-behaviors", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "vicon", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "common-walking-control-modules", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-mocap", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: groupDependencyVersion
@@ -71,8 +71,8 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: groupDependencyVersion
    compile group: "us.ihmc", name: "robotiq-hand-drivers", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "model-file-loader", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "sensor-processing", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-model-file-loader", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-sensor-processing", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
@@ -90,10 +90,10 @@ testDependencies {
    compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "common-walking-control-modules-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics-test", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "sensor-processing-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-sensor-processing-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-simulation-toolkit-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: groupDependencyVersion
 }
