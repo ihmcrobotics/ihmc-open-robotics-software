@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import com.jme3.app.Application;
+import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.Quaternion;
@@ -61,7 +62,7 @@ import us.ihmc.jMonkeyEngineToolkit.tralala.ShapeUtilities;
 public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 {
 
-   private final JMEAssetLocator jmeAssetLocator;
+   private final AssetManager assetManager;
    private final Application application;
 
    private Node rootNode = new Node();
@@ -73,10 +74,10 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 
    private static final boolean DEBUG = false;
 
-   public JMEGraphicsObject(Application application, JMEAssetLocator jmeAssetLocator, Graphics3DObject graphics3dObject)
+   public JMEGraphicsObject(SimpleApplication application, AssetManager jmeAssetLocator, Graphics3DObject graphics3dObject)
    {
       this.application = application;
-      this.jmeAssetLocator = jmeAssetLocator;
+      this.assetManager = jmeAssetLocator;
       immutable = !graphics3dObject.isChangeable();
 
       currentNode = this.rootNode;
@@ -90,7 +91,7 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
    }
 
    public static Spatial createGraphics3DObjectFromModel(String fileName, String submesh, boolean centerSubmesh, AppearanceDefinition appearanceDefinition,
-         JMEAssetLocator jmeAssetLocator)
+                                                         AssetManager jmeAssetLocator)
    {
       Spatial spatial;
 
@@ -210,7 +211,7 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 
 //      jmeAssetLocator.registerAssetDirectories(graphics3dObjectAddModelFile.getResourceDirectories());
       Spatial spatial = createGraphics3DObjectFromModel(graphics3dObjectAddModelFile.getFileName(), graphics3dObjectAddModelFile.getSubmesh(),
-            graphics3dObjectAddModelFile.centerSubmesh(), graphics3dObjectAddModelFile.getAppearance(), jmeAssetLocator);
+            graphics3dObjectAddModelFile.centerSubmesh(), graphics3dObjectAddModelFile.getAppearance(), assetManager);
       currentNode.attachChild(spatial);
       if (graphics3dObjectAddModelFile.getAppearance() != null)
       {
@@ -282,10 +283,10 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 
    private void setGeometryMaterialBasedOnAppearance(Spatial geometry, AppearanceDefinition appearance)
    {
-      setGeometryMaterialBasedOnAppearance(geometry, appearance, jmeAssetLocator);
+      setGeometryMaterialBasedOnAppearance(geometry, appearance, assetManager);
    }
 
-   private static void setGeometryMaterialBasedOnAppearance(Spatial geometry, AppearanceDefinition appearance, JMEAssetLocator jmeAssetLocator)
+   private static void setGeometryMaterialBasedOnAppearance(Spatial geometry, AppearanceDefinition appearance, AssetManager jmeAssetLocator)
    {
 	   Material jmeAppearance;
 	   try
@@ -398,10 +399,9 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
       Material material = null;
       if (appearanceDefinition != null)
       {
-         material = JMEAppearanceMaterial.createMaterial(jmeAssetLocator, appearanceDefinition);
+         material = JMEAppearanceMaterial.createMaterial(assetManager, appearanceDefinition);
       }
 
-      AssetManager assetManager = this.jmeAssetLocator.getAssetManager();
       JMEHeightMapTerrain jmeTerrain = new JMEHeightMapTerrain(heightMap, assetManager, material);
 
       Node terrainNode = jmeTerrain.getTerrain();

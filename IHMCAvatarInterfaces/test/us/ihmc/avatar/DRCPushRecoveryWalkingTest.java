@@ -227,8 +227,9 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    private void setupTest() throws SimulationExceededMaximumTimeException
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();

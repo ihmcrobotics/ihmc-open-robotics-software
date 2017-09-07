@@ -107,8 +107,9 @@ public abstract class AvatarDynamicReachabilityCalculatorTest
    private void setupTest(String scriptName, ReferenceFrame yawReferenceFrame) throws SimulationExceededMaximumTimeException
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       totalMass = fullRobotModel.getTotalMass();
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();

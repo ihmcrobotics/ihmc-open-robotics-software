@@ -100,8 +100,6 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, true);
    }
    
-   
-   
    public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface,
          String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
          DRCRobotModel robotModel, boolean automaticallySimulate)
@@ -113,7 +111,11 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 	         String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
 	         DRCRobotModel robotModel, DRCNetworkModuleParameters networkModuleParameters, boolean automaticallySimulate)	   
    {
-      super(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, networkModuleParameters, automaticallySimulate);
+      super(simulationTestingParameters, robotModel);
+      super.setTestEnvironment(commonAvatarEnvironmentInterface);
+      super.setStartingLocation(selectedLocation);
+      super.setNetworkProcessorParameters(networkModuleParameters);
+      super.createSimulation(name, automaticallySimulate, true);
 
       yoTimeRobot = getRobot().getYoTime();
       yoTimeBehaviorDispatcher = new YoDouble("yoTimeBehaviorDispatcher", registry);

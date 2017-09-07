@@ -24,7 +24,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -38,8 +37,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
-   private static final boolean VISUALIZE = true;
-   private static final boolean debug = true;
+   private static final boolean VISUALIZE = false;
+   private static final boolean debug = false;
 
    private static final double ZERO_TIME = 0.0;
 
@@ -172,10 +171,10 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       if (debug)
       {
-         YoGraphicPosition referenceCMPPositionViz = new YoGraphicPosition("Reference CMP", desiredCMPPosition, 0.015, YoAppearance.Green(),
-                                                                           GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition referenceCoPPositionViz = new YoGraphicPosition("Reference CoP", desiredCoPPosition, 0.015, YoAppearance.Purple(),
-                                                                           GraphicType.BALL_WITH_ROTATED_CROSS);
+         YoGraphicPosition referenceCMPPositionViz = new YoGraphicPosition("Reference CMP", desiredCMPPosition, 0.005, YoAppearance.Purple(),
+                                                                           GraphicType.SOLID_BALL);
+         YoGraphicPosition referenceCoPPositionViz = new YoGraphicPosition("Reference CoP", desiredCoPPosition, 0.005, YoAppearance.Green(),
+                                                                           GraphicType.SOLID_BALL);
 
          yoGraphicsList.add(referenceCMPPositionViz);
          yoGraphicsList.add(referenceCoPPositionViz);

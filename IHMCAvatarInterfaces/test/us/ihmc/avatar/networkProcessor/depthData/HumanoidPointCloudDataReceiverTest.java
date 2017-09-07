@@ -98,8 +98,11 @@ public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTe
 
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new WallAtDistanceEnvironment(WALL_DISTANCE);
-      testHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, getClass().getSimpleName(), startingLocation, simulationTestingParameters,
-            getRobotModel(), drcNetworkModuleParameters, null, null, false, false, false, true, null);
+      testHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      testHelper.setTestEnvironment(commonAvatarEnvironmentInterface);
+      testHelper.setStartingLocation(startingLocation);
+      testHelper.setNetworkProcessorParameters(drcNetworkModuleParameters);
+      testHelper.createSimulation(getClass().getSimpleName());
       testHelper.setupCameraForUnitTest(new Point3D(1.8375, -0.16, 0.89), new Point3D(1.10, 8.30, 1.37));
 
       testHelper.simulateAndBlockAndCatchExceptions(1.1); // Wait for sim to initialize
