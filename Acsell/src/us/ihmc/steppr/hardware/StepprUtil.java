@@ -5,6 +5,8 @@ import java.util.EnumMap;
 import java.util.List;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 
 public class StepprUtil
 {
@@ -28,4 +30,23 @@ public class StepprUtil
       }
       return stepprJoints;
    }
+
+   public static EnumMap<StepprJoint, LowLevelJointData> createOutputMap(LowLevelOneDoFJointDesiredDataHolderList lowLevelOutuput)
+   {
+      EnumMap<StepprJoint, LowLevelJointData> stepprJoints = new EnumMap<>(StepprJoint.class);
+      for (int i = 0; i < lowLevelOutuput.getNumberOfJointsWithLowLevelData(); i++)
+      {
+         for (StepprJoint joint : StepprJoint.values)
+         {
+            if (joint.getSdfName().equals(lowLevelOutuput.getJointName(i)))
+            {
+               stepprJoints.put(joint, lowLevelOutuput.getLowLevelJointData(i));
+            }
+         }
+      }
+      return stepprJoints;
+   }
+   
+   
+   
 }

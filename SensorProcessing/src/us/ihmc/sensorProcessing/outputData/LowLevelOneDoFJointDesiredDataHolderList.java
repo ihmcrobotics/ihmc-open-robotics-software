@@ -49,17 +49,39 @@ public class LowLevelOneDoFJointDesiredDataHolderList implements LowLevelOneDoFJ
    {
       return jointsAndData.second(index);
    }
-
-   public void updateFromModel()
+   
+   public String getJointName(int index)
    {
+      return jointsAndData.first(index).getName();
+   }
 
+//   public void updateFromModel()
+//   {
+//
+//      for (int i = 0; i < jointsAndData.size(); i++)
+//      {
+//
+//         OneDoFJoint joint = jointsAndData.first(i);
+//         LowLevelJointData data = jointsAndData.second(i);
+//
+//         data.setDesiredsFromOneDoFJoint(joint);
+//      }
+//   }
+
+   public void overwriteWith(LowLevelOneDoFJointDesiredDataHolderReadOnly other)
+   {
       for (int i = 0; i < jointsAndData.size(); i++)
       {
 
          OneDoFJoint joint = jointsAndData.first(i);
          LowLevelJointData data = jointsAndData.second(i);
 
-         data.setDesiredsFromOneDoFJoint(joint);
+         LowLevelJointDataReadOnly otherData = other.getLowLevelJointData(joint);
+         if (otherData != null)
+         {
+            data.set(otherData);
+         }
+
       }
    }
 }

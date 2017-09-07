@@ -130,8 +130,8 @@ public class WandererControllerFactory
       estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer,
             drcOutputWriter, dataProducer, yoVariableServer, gravity, robotModel.getEstimatorDT());
-      WandererOutputProcessor outputProcessor = new WandererOutputProcessor(threadDataSynchronizer.getControllerFullRobotModel());
-      controllerThread.addOutputProcessorToController(outputProcessor);
+//      WandererOutputProcessor outputProcessor = new WandererOutputProcessor(threadDataSynchronizer.getControllerFullRobotModel());
+//      controllerThread.addOutputProcessorToController(outputProcessor);
 
       MultiThreadedRealTimeRobotController robotController = new MultiThreadedRealTimeRobotController(estimatorThread);
       if (wandererAffinity.setAffinity())
