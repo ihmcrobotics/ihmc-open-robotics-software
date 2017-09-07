@@ -340,7 +340,9 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(0.0, 0.0, 0.8), new Point3D(-7.0, -9.0, 4.0));
       ThreadTools.sleep(1000);

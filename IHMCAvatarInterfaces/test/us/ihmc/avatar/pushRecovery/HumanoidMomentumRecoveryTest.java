@@ -36,7 +36,6 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private OffsetAndYawRobotInitialSetup location = new OffsetAndYawRobotInitialSetup(new Vector3D(0.0, 0.0, 0.0), 0.0);
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private PushRobotController pushController;
 
@@ -233,16 +232,9 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       // create simulation test helper
       FlatGroundEnvironment emptyEnvironment = new FlatGroundEnvironment();
       String className = getClass().getSimpleName();
-      DRCStartingLocation startingLocation = new DRCStartingLocation()
-      {
-         @Override
-         public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
-         {
-            return location;
-         }
-      };
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(emptyEnvironment, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
       drcSimulationTestHelper.createSimulation(className);
       Vector3D forcePointOffset = new Vector3D(0.0, 0.0, 0.1);
       pushController = new PushRobotController(drcSimulationTestHelper.getRobot(), drcSimulationTestHelper.getRobot().getRootJoint().getName(), forcePointOffset);

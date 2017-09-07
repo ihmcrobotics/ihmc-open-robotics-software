@@ -130,7 +130,9 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       ThreadTools.sleep(1000);
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();

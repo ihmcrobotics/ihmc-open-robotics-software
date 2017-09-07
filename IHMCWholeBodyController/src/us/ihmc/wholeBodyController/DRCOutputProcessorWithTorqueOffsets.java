@@ -1,17 +1,17 @@
 package us.ihmc.wholeBodyController;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-
-import com.esotericsoftware.kryo.io.Output;
+import java.util.HashMap;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 
 public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, JointTorqueOffsetProcessor
 {
@@ -23,8 +23,8 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
 
    private final YoBoolean resetTorqueOffsets = new YoBoolean("resetTorqueOffsets", registry);
 
-   private ArrayList<OneDoFJoint> oneDoFJoints;
-   private LinkedHashMap<OneDoFJoint, YoDouble> torqueOffsetMap;
+   private PairList<LowLevelJointData, YoDouble> torqueOffsetList;
+   private HashMap<OneDoFJoint, YoDouble> torqueOffsetMap;
 
    private final double updateDT;
 
@@ -50,12 +50,14 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
    @Override
    public void processAfterController(long timestamp)
    {
-      for (int i = 0; i < oneDoFJoints.size(); i++)
+      for (int i = 0; i < torqueOffsetList.size(); i++)
       {
-         OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
-         double desiredAcceleration = oneDoFJoint.getQddDesired();
+         LowLevelJointData jointData = torqueOffsetList.first(i);
+         YoDouble torqueOffsetVariable = torqueOffsetList.second(i);
+         
+         
+         double desiredAcceleration = jointData.getDesiredAcceleration();
 
-         YoDouble torqueOffsetVariable = torqueOffsetMap.get(oneDoFJoint);
          if (resetTorqueOffsets.getBooleanValue())
             torqueOffsetVariable.set(0.0);
 
@@ -65,7 +67,7 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
          double alpha = alphaTorqueOffset.getDoubleValue();
          offsetTorque = alpha * (offsetTorque + desiredAcceleration * updateDT) + (1.0 - alpha) * offsetTorque;
          torqueOffsetVariable.set(offsetTorque);
-         oneDoFJoint.setTau(oneDoFJoint.getTau() + offsetTorque + ditherTorque);
+         jointData.setDesiredTorque(jointData.getDesiredTorque() + offsetTorque + ditherTorque);
       }
 
       if(drcOutputWriter != null)
@@ -75,24 +77,23 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
    }
 
    @Override
-   public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerCoreOutput, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       if(drcOutputWriter != null)
       {
-         drcOutputWriter.setFullRobotModel(controllerModel, rawJointSensorDataHolderMap);
+         drcOutputWriter.setLowLevelControllerCoreOutput(controllerRobotModel, lowLevelControllerCoreOutput, rawJointSensorDataHolderMap);
       }
 
-      oneDoFJoints = new ArrayList<OneDoFJoint>();
-      controllerModel.getOneDoFJoints(oneDoFJoints);
+      torqueOffsetList = new PairList<>();
+      torqueOffsetMap = new HashMap<>();
 
-      torqueOffsetMap = new LinkedHashMap<OneDoFJoint, YoDouble>();
-
-      for (int i = 0; i < oneDoFJoints.size(); i++)
+      for (int i = 0; i < lowLevelControllerCoreOutput.getNumberOfJointsWithLowLevelData(); i++)
       {
-         final OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
-         final YoDouble torqueOffset = new YoDouble("tauOffset_" + oneDoFJoint.getName(), registry);
+         LowLevelJointData jointData = lowLevelControllerCoreOutput.getLowLevelJointData(i);
+         final YoDouble torqueOffset = new YoDouble("tauOffset_" + lowLevelControllerCoreOutput.getJointName(i), registry);
 
-         torqueOffsetMap.put(oneDoFJoint, torqueOffset);
+         torqueOffsetList.add(jointData, torqueOffset);
+         torqueOffsetMap.put(lowLevelControllerCoreOutput.getOneDoFJoint(i), torqueOffset);
       }
 
    }

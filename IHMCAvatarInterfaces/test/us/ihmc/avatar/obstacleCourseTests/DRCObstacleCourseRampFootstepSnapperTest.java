@@ -104,7 +104,8 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
    {
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_BOTTOM;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation("DRCRampSnapFootstepsTest");
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -170,7 +171,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
 
       BoundingBox2D footstepContainer = new BoundingBox2D(boundingBoxMin, boundingBoxMax);
 
-      us.ihmc.graphicsDescription.HeightMap inputHeightMap = drcSimulationTestHelper.getTestEnviroment().getTerrainObject3D().getHeightMapIfAvailable();
+      us.ihmc.graphicsDescription.HeightMap inputHeightMap = drcSimulationTestHelper.getTestEnvironment().getTerrainObject3D().getHeightMapIfAvailable();
       double resolution = 0.02;
       double heightThreshold = 0.002;
       double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;

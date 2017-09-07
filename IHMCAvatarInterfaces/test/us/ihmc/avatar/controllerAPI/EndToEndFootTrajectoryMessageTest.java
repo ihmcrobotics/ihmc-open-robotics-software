@@ -79,9 +79,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
       Random random = new Random(564574L);
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(environment);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(0.0, 0.0, 0.5), new Point3D(6.0, 2.0, 2.0));
 
@@ -152,12 +151,14 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       DRCRobotModel robotModel = getRobotModel();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_BOTTOM;
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, selectedLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(4.0, 0.0, 0.0), new Point3D(10.0, 0.0, -0.1));
       ThreadTools.sleep(1000);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
-
+      
       RobotSide robotSide = RobotSide.LEFT;
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -207,9 +208,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(environment);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(0.0, 0.0, 0.5), new Point3D(6.0, 2.0, 2.0));
 
@@ -352,9 +352,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(environment);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(0.0, 0.0, 0.5), new Point3D(6.0, 2.0, 2.0));
 
@@ -537,9 +536,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(environment);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(0.0, 0.0, 0.5), new Point3D(6.0, 2.0, 2.0));
 
@@ -681,9 +679,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(environment);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(0.0, 0.0, 0.5), new Point3D(6.0, 2.0, 2.0));
 

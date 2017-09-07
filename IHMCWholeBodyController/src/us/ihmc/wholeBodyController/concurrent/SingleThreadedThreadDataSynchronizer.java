@@ -64,7 +64,7 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
       estimatorRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(estimatorFullRobotModel);
       estimatorContactSensorHolder = new ContactSensorHolder(Arrays.asList(estimatorFullRobotModel.getContactSensorDefinitions()));
       estimatorRobotMotionStatusHolder = new RobotMotionStatusHolder();
-      estimatorDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolderList(estimatorFullRobotModel.getOneDoFJoints());
+      estimatorDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolderList(estimatorFullRobotModel.getControllableOneDoFJoints());
 
       LinkedHashMap<RigidBody, ReferenceFrame> soleFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
       for(RobotSide robotSide : RobotSide.values)
@@ -199,7 +199,6 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    @Override
    public void publishControllerData()
    {
-      controllerDesiredJointDataHolder.updateFromModel();
    }
 
    @Override

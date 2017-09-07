@@ -9,8 +9,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
@@ -120,11 +118,11 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       }
 
       CommonAvatarEnvironmentInterface steppingStonesEnvironment = createSteppingStonesEnvironment();
-      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup();
 
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(steppingStonesEnvironment, startingLocation, simulationTestingParameters, robotModel,
-            networkModuleParameters);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(steppingStonesEnvironment);
+      drcSimulationTestHelper.setNetworkProcessorParameters(networkModuleParameters);
       drcSimulationTestHelper.createSimulation("steppingStonesTestHelper");
 
       toolboxCommunicator.connect();
@@ -228,10 +226,10 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
       YoGraphicsList graphicsList = new YoGraphicsList("testViz");
 
-      YoFramePose yoInitialStancePose = new YoFramePose("initialStancePose", initialStancePose.getReferenceFrame(), drcSimulationTestHelper.getYovariableRegistry());
+      YoFramePose yoInitialStancePose = new YoFramePose("initialStancePose", initialStancePose.getReferenceFrame(), drcSimulationTestHelper.getYoVariableRegistry());
       yoInitialStancePose.set(initialStancePose);
 
-      YoFramePose yoGoalPose = new YoFramePose("goalStancePose", goalPose.getReferenceFrame(), drcSimulationTestHelper.getYovariableRegistry());
+      YoFramePose yoGoalPose = new YoFramePose("goalStancePose", goalPose.getReferenceFrame(), drcSimulationTestHelper.getYoVariableRegistry());
       yoGoalPose.set(goalPose);
 
       YoGraphicCoordinateSystem startPoseGraphics = new YoGraphicCoordinateSystem("startPose", yoInitialStancePose, 13.0);

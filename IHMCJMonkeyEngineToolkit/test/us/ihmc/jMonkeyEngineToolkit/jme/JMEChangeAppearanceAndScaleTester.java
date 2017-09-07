@@ -19,23 +19,25 @@ public class JMEChangeAppearanceAndScaleTester extends SimpleApplication
    Graphics3DScaleInstruction scale;
    int counter = 0;
    private Node node;
+
    @Override
    public void simpleInitApp()
    {
-      
+
       Graphics3DObject graphics = new Graphics3DObject();
       graphics.setChangeable(true);
-      graphics.rotate(Math.PI/2.0, Axis.Z);
+      graphics.rotate(Math.PI / 2.0, Axis.Z);
       scale = graphics.scale(1.0);
       instruction = graphics.addEllipsoid(1.0, 1.0, 1.0, YoAppearance.Red());
-      JMEGraphicsObject graphicsObject = new JMEGraphicsObject(this, new JMEAssetLocator(assetManager), graphics);
+      JMEGraphicsObject graphicsObject = new JMEGraphicsObject(this, assetManager, graphics);
 
       node = graphicsObject.getNode();
       rootNode.attachChild(node);
-      
+
       flyCam.setDragToRotate(true);
       setupLighting();
    }
+
    private DirectionalLight setupDirectionalLight(Vector3f direction)
    {
       DirectionalLight d2 = new DirectionalLight();
@@ -65,11 +67,11 @@ public class JMEChangeAppearanceAndScaleTester extends SimpleApplication
       rootNode.addLight(a1);
 
    }
-   
+
    @Override
    public void simpleUpdate(float tpf)
    {
-      if(counter % 1000 == 0)
+      if (counter % 1000 == 0)
       {
          instruction.setAppearance(YoAppearance.Yellow());
          scale.setScale(0.5);
@@ -81,7 +83,7 @@ public class JMEChangeAppearanceAndScaleTester extends SimpleApplication
       }
       counter++;
    }
-   
+
    public static void main(String[] args)
    {
       JMEChangeAppearanceAndScaleTester jmeChangeAppearanceTester = new JMEChangeAppearanceAndScaleTester();

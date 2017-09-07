@@ -47,7 +47,9 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
    public void testQueuing() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, location, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper.setStartingLocation(location);
       drcSimulationTestHelper.createSimulation("Test");
       setupCamera(drcSimulationTestHelper);
       ThreadTools.sleep(1000);

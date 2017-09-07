@@ -2,7 +2,6 @@ package us.ihmc.atlas;
 
 import org.junit.Test;
 
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
