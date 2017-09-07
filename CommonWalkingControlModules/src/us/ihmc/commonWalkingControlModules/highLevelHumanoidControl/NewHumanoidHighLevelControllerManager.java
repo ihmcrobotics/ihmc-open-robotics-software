@@ -30,6 +30,7 @@ import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.*;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
@@ -57,6 +58,7 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
    private final YoEnum<NewHighLevelControllerStates> requestedHighLevelControllerState;
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
 
+   private final ForceSensorDataHolderReadOnly forceSensorDataHolder;
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
@@ -74,13 +76,13 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
    private final ExecutionTimer highLevelControllerTimer = new ExecutionTimer("activeHighLevelControllerTimer", 1.0, registry);
 
    public NewHumanoidHighLevelControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
-                                                NewHighLevelControllerStates initialControllerState,
-                                                HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters,
-                                                ICPTrajectoryPlannerParameters icpPlannerParameters, YoEnum<NewHighLevelControllerStates> requestedHighLevelControllerState,
+                                                NewHighLevelControllerStates initialControllerState, HighLevelControllerParameters highLevelControllerParameters,
+                                                WalkingControllerParameters walkingControllerParameters, ICPTrajectoryPlannerParameters icpPlannerParameters,
+                                                YoEnum<NewHighLevelControllerStates> requestedHighLevelControllerState,
                                                 EnumMap<NewHighLevelControllerStates, HighLevelControllerStateFactory> controllerStateFactories,
                                                 ArrayList<ControllerStateTransitionFactory<NewHighLevelControllerStates>> controllerTransitionFactories,
                                                 HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                                CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator)
+                                                CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, ForceSensorDataHolderReadOnly forceSensorDataHolder)
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
@@ -91,6 +93,7 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
       this.initialControllerState = initialControllerState;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
+      this.forceSensorDataHolder = forceSensorDataHolder;
 
       this.requestedHighLevelControllerState.set(initialControllerState);
       registry.addChild(controllerToolbox.getYoVariableRegistry());
@@ -220,7 +223,9 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
       // create controller transitions
       for (ControllerStateTransitionFactory<NewHighLevelControllerStates> controllerStateTransitionFactory : controllerTransitionFactories)
       {
-         StateTransition<NewHighLevelControllerStates> stateTransition = controllerStateTransitionFactory.getOrCreateStateTransition(highLevelControllerStates);
+         StateTransition<NewHighLevelControllerStates> stateTransition = controllerStateTransitionFactory.getOrCreateStateTransition(highLevelControllerStates,
+                                                                                                                                     forceSensorDataHolder, controllerToolbox.getFullRobotModel().getTotalMass(),
+                                                                                                                                     controllerToolbox.getGravityZ(), registry);
 
          NewHighLevelControllerState state = highLevelControllerStates.get(controllerStateTransitionFactory.getStateToAttachEnum());
          state.addStateTransition(stateTransition);

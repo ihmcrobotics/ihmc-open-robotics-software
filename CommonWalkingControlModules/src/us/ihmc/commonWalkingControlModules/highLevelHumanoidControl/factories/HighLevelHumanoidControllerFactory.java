@@ -382,8 +382,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the HighLevelHumanoidControllerToolbox /////////////////////////////////////////////
-      MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
-      JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
       double omega0 = walkingControllerParameters.getOmega0();
       controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, centerOfMassDataHolder, wristForceSensors,
                                                                  yoTime, gravityZ, omega0, feet, controlDT, updatables, contactablePlaneBodies, yoGraphicsListRegistry, jointsToIgnore);
@@ -414,7 +412,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                                                            walkingControllerParameters, icpPlannerParameters,
                                                                                                                            requestedHighLevelControllerState, controllerFactoriesMap,
                                                                                                                            stateTransitionFactories, managerFactory, controllerToolbox,
-                                                                                                                           centerOfPressureDataHolderForEstimator);
+                                                                                                                           centerOfPressureDataHolderForEstimator,
+                                                                                                                           forceSensorDataHolder);
       highLevelHumanoidControllerManager.addYoVariableRegistry(registry);
       return highLevelHumanoidControllerManager;
    }

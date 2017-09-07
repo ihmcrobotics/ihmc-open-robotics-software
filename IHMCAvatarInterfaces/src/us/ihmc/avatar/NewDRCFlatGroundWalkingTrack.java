@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.FeetLoadedToWalkingStandTransitionFactory;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
@@ -76,6 +77,8 @@ public abstract class NewDRCFlatGroundWalkingTrack
 
       controllerFactory.addRequestableTransition(STAND_TRANSITION_STATE, FREEZE_STATE);
       controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING_STATE);
+      controllerFactory.addCustomStateTransition(new FeetLoadedToWalkingStandTransitionFactory(STAND_TRANSITION_STATE, WALKING_STATE, controllerFactory.getRequestedControlStateEnum(),
+                                                                                               feetContactSensorNames, model.getControllerDT(), highLevelControllerParameters));
 
       controllerFactory.addRequestableTransition(WALKING_STATE, FREEZE_STATE);
 
