@@ -58,9 +58,12 @@ public class StandingState extends WalkingState
          for (RobotSide robotSide : RobotSide.values)
          {
             RigidBody hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
-            ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
-            RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, trajectoryFrames);
-            handManagers.put(robotSide, handManager);
+            if(hand != null)
+            {
+               ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
+               RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, trajectoryFrames);
+               handManagers.put(robotSide, handManager);
+            }
          }
       }
 
