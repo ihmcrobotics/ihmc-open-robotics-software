@@ -13,7 +13,7 @@ import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class NewHoldPositionControllerState extends NewHighLevelControllerState
+public class HoldPositionControllerState extends NewHighLevelControllerState
 {
    private final YoVariableRegistry registry;
 
@@ -23,8 +23,8 @@ public class NewHoldPositionControllerState extends NewHighLevelControllerState
 
    private final YoDouble masterGain;
 
-   public NewHoldPositionControllerState(NewHighLevelControllerStates stateEnum, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                         PositionControlParameters positionControlParameters)
+   public HoldPositionControllerState(NewHighLevelControllerStates stateEnum, HighLevelHumanoidControllerToolbox controllerToolbox,
+                                      PositionControlParameters positionControlParameters)
    {
       super(stateEnum);
 

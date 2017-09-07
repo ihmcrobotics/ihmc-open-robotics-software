@@ -6,11 +6,11 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelCo
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
 
-public class NewFreezeControllerState extends NewHoldPositionControllerState
+public class StandReadyControllerState extends HoldPositionControllerState
 {
-   private static final NewHighLevelControllerStates controllerState = NewHighLevelControllerStates.FREEZE_STATE;
+   private static final NewHighLevelControllerStates controllerState = NewHighLevelControllerStates.STAND_READY;
 
-   public NewFreezeControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
+   public StandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
    {
       super(controllerState, controllerToolbox, highLevelControllerParameters.getPositionControlParameters());
 

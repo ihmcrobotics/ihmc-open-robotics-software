@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLeve
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.jointControlCalculator.JointControlCalculator;
@@ -20,7 +18,7 @@ import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class NewStandPrepControllerState extends NewHighLevelControllerState
+public class StandPrepControllerState extends NewHighLevelControllerState
 {
    private static final NewHighLevelControllerStates controllerState = NewHighLevelControllerStates.STAND_PREP_STATE;
    private static final double MINIMUM_TIME_DONE_WITH_STAND_PREP = 0.0;
@@ -35,13 +33,13 @@ public class NewStandPrepControllerState extends NewHighLevelControllerState
    private final YoDouble minimumTimeDoneWithStandPrep = new YoDouble("minimumTimeDoneWithStandPrep", registry);
    private final YoDouble masterGain = new YoDouble("standPrepMasterGain", registry);
 
-   public NewStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
+   public StandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
    {
       this(controllerToolbox, highLevelControllerParameters, MINIMUM_TIME_DONE_WITH_STAND_PREP);
    }
 
-   public NewStandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
-                                      double minimumTimeDoneWithStandPrep)
+   public StandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
+                                   double minimumTimeDoneWithStandPrep)
    {
       super(controllerState);
 
