@@ -22,7 +22,7 @@ public class NewDoNothingControllerStateFactory implements HighLevelControllerSt
                                                                  HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
                                                                  CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                                                  HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters, WholeBodyControllerCore controllerCore)
+                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters)
    {
       if (doNothingControllerState == null)
          doNothingControllerState = new NewDoNothingControllerState(controllerToolbox, highLevelControllerParameters);

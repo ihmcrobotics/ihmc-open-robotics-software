@@ -23,7 +23,7 @@ public class StandReadyControllerStateFactory implements HighLevelControllerStat
                                                                  HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
                                                                  CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                                                  HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters, WholeBodyControllerCore controllerCore)
+                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters)
    {
       if (standReadyControllerState == null)
          standReadyControllerState = new StandReadyControllerState(controllerToolbox, highLevelControllerParameters);

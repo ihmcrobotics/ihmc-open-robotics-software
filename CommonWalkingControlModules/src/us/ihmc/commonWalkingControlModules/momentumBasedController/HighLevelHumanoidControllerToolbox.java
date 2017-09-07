@@ -820,6 +820,11 @@ public class HighLevelHumanoidControllerToolbox
       return feet;
    }
 
+   public List<? extends ContactablePlaneBody> getContactablePlaneBodies()
+   {
+      return contactableBodies;
+   }
+
    public ContactablePlaneBody getContactableBody(RigidBody body)
    {
       for (ContactablePlaneBody contactableBody : contactableBodies)
