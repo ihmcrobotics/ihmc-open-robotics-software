@@ -287,8 +287,8 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       System.out.println("Behavior Dispatch");
       drcBehaviorTestHelper.dispatchBehavior(planningBehavior);
 
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(9.0);
-      System.out.println("Go Motion");
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(15.0);
+      System.out.println("Go Motion " + drcBehaviorTestHelper.getYoTime());
       
       PrintTools.info("planningResult "+ planningBehavior.getConstrainedWholeBodyPlanningToolboxOutputStatus().planningResult);
       

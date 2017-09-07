@@ -267,7 +267,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       for (int j = 0; j < revertedPathSize - 1; j++)
       {
          int i = revertedPathSize - 1 - j;
-//         double generalizedTimeGap = revertedPath.get(i - 1).getNormalizedNodeData(0) - revertedPath.get(i).getNormalizedNodeData(0);
          
          double generalizedTimeGap = revertedPath.get(i - 1).getNormalizedNodeData(0) - tree.getPath().get(currentIndex).getNormalizedNodeData(0);
 
@@ -276,7 +275,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
             tree.addNodeOnPath(revertedPath.get(i - 1));
             currentIndex++;
          }
-
       }
 
       PrintTools.info("the size of the path is " + tree.getPath().size() + " before dismissing " + revertedPathSize);
