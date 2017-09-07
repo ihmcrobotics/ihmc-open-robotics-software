@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.corruptors;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -38,10 +39,7 @@ public class FullRobotModelCorruptor
 
       String chestName = "chest";
       final RigidBody chest = fullRobotModel.getChest();
-      if(chest != null)
-      {
-         createMassAndCoMOffsetCorruptors(namePrefix, chestName, chest);
-      }
+      createMassAndCoMOffsetCorruptors(namePrefix, chestName, chest);
 
       String pelvisName = "pelvis";
       final RigidBody pelvis = fullRobotModel.getPelvis();
@@ -150,6 +148,11 @@ public class FullRobotModelCorruptor
 
    private void createMassAndCoMOffsetCorruptors(String namePrefix, String name, final RigidBody rigidBody)
    {
+      if(rigidBody == null)
+      {
+         return;
+      }
+      
       name = FormattingTools.addPrefixAndKeepCamelCase(namePrefix, name);
       final YoDouble massVariable = new YoDouble(name + "Mass", registry);
       massVariable.set(rigidBody.getInertia().getMass());
