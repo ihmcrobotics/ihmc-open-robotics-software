@@ -122,8 +122,8 @@ public class StepprControllerFactory
       estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer,
             drcOutputWriter, dataProducer, yoVariableServer, gravity, robotModel.getEstimatorDT());
-      StepprOutputProcessor outputProcessor = new StepprOutputProcessor(threadDataSynchronizer.getControllerFullRobotModel());
-      controllerThread.addOutputProcessorToController(outputProcessor);
+//      StepprOutputProcessor outputProcessor = new StepprOutputProcessor(threadDataSynchronizer.getControllerFullRobotModel());
+//      controllerThread.addOutputProcessorToController(outputProcessor);
 
       MultiThreadedRealTimeRobotController robotController = new MultiThreadedRealTimeRobotController(estimatorThread);
       if (stepprAffinity.setAffinity())

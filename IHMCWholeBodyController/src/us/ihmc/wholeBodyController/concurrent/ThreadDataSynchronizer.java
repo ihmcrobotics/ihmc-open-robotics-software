@@ -55,7 +55,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
       estimatorRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(estimatorFullRobotModel);
       estimatorContactSensorHolder = new ContactSensorHolder(Arrays.asList(estimatorFullRobotModel.getContactSensorDefinitions()));
       estimatorRobotMotionStatusHolder = new RobotMotionStatusHolder();
-      estimatorDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolderList(estimatorFullRobotModel.getOneDoFJoints());
+      estimatorDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolderList(estimatorFullRobotModel.getControllableOneDoFJoints());
 
       Map<RigidBody, ReferenceFrame> estimatorFeetFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
       for(RobotSide robotSide : RobotSide.values)
@@ -70,7 +70,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
       controllerContactSensorHolder = new ContactSensorHolder(Arrays.asList(controllerFullRobotModel.getContactSensorDefinitions()));
       controllerRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(controllerFullRobotModel);
       controllerRobotMotionStatusHolder = new RobotMotionStatusHolder();
-      controllerDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolderList(controllerFullRobotModel.getOneDoFJoints());
+      controllerDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolderList(controllerFullRobotModel.getControllableOneDoFJoints());
 
       Map<RigidBody, ReferenceFrame> controllerFeetFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
       for(RobotSide robotSide : RobotSide.values)

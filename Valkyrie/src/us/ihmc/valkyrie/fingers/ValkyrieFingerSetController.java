@@ -6,12 +6,6 @@ import java.util.LinkedHashMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -20,6 +14,14 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class ValkyrieFingerSetController implements RobotController
 {
@@ -49,12 +51,13 @@ public class ValkyrieFingerSetController implements RobotController
 
    private final EnumMap<ValkyrieRealRobotFingerJoint, YoDouble> realRobotControlVariables = new EnumMap<>(ValkyrieRealRobotFingerJoint.class);
    private final EnumMap<ValkyrieSimulatedFingerJoint, RevoluteJoint> revoluteJointMap = new EnumMap<>(ValkyrieSimulatedFingerJoint.class);
+   private final EnumMap<ValkyrieSimulatedFingerJoint, LowLevelJointData> desiredOutputMap = new EnumMap<>(ValkyrieSimulatedFingerJoint.class);
 
    private final YoEnum<HandConfiguration> handConfiguration;
    private final YoEnum<HandConfiguration> handDesiredConfiguration;
    private StateMachine<GraspState> stateMachine;
 
-   public ValkyrieFingerSetController(RobotSide robotSide, YoDouble yoTime, YoDouble trajectoryTime, FullRobotModel fullRobotModel, boolean runningOnRealRobot, YoVariableRegistry parentRegistry,  YoVariableRegistry controllerRegistry)
+   public ValkyrieFingerSetController(RobotSide robotSide, YoDouble yoTime, YoDouble trajectoryTime, FullRobotModel fullRobotModel, LowLevelOneDoFJointDesiredDataHolderList lowLevelDesiredJointData, boolean runningOnRealRobot, YoVariableRegistry parentRegistry,  YoVariableRegistry controllerRegistry)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       this.controllerRegistry = controllerRegistry;
@@ -64,7 +67,7 @@ public class ValkyrieFingerSetController implements RobotController
       this.yoTime = yoTime;
       this.runningOnRealRobot = runningOnRealRobot;
 
-      mapJointsAndVariables(fullRobotModel);
+      mapJointsAndVariables(fullRobotModel, lowLevelDesiredJointData);
 
       startTrajectoryTime = new YoDouble(sidePrefix + "StartTrajectoryTime", registry);
       currentTrajectoryTime = new YoDouble(sidePrefix + "CurrentTrajectoryTime", registry);
@@ -93,7 +96,7 @@ public class ValkyrieFingerSetController implements RobotController
       setupStateMachine();
    }
 
-   private void mapJointsAndVariables(FullRobotModel fullRobotModel)
+   private void mapJointsAndVariables(FullRobotModel fullRobotModel, LowLevelOneDoFJointDesiredDataHolderList lowLevelDesiredJointData)
    {
       for (ValkyrieRealRobotFingerJoint jointEnum : ValkyrieRealRobotFingerJoint.values)
       {
@@ -111,6 +114,8 @@ public class ValkyrieFingerSetController implements RobotController
       for (ValkyrieSimulatedFingerJoint simulatedFingerJoint : ValkyrieSimulatedFingerJoint.values)
       {
          revoluteJointMap.put(simulatedFingerJoint, simulatedFingerJoint.getRelatedRevoluteJoint(robotSide, fullRobotModel));
+         desiredOutputMap.put(simulatedFingerJoint, lowLevelDesiredJointData.getLowLevelJointData(revoluteJointMap.get(simulatedFingerJoint)));
+         
       }
 
       if (runningOnRealRobot)
@@ -279,27 +284,27 @@ public class ValkyrieFingerSetController implements RobotController
          switch (controllableJoint)
          {
          case ThumbRoll:
-            revoluteJointMap.get(ValkyrieSimulatedFingerJoint.ThumbRoll).setqDesired(desiredValue);
+            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.ThumbRoll).setDesiredPosition(desiredValue);
             break;
          case Thumb:
-            revoluteJointMap.get(ValkyrieSimulatedFingerJoint.ThumbPitch1).setqDesired(desiredValue / 3.0);
-            revoluteJointMap.get(ValkyrieSimulatedFingerJoint.ThumbPitch2).setqDesired(desiredValue / 3.0);
-            revoluteJointMap.get(ValkyrieSimulatedFingerJoint.ThumbPitch3).setqDesired(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.ThumbPitch1).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.ThumbPitch2).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.ThumbPitch3).setDesiredPosition(desiredValue / 3.0);
             break;
          case Index:
-            revoluteJointMap.get(ValkyrieSimulatedFingerJoint.IndexFingerPitch1).setqDesired(desiredValue / 3.0);
-            revoluteJointMap.get(ValkyrieSimulatedFingerJoint.IndexFingerPitch2).setqDesired(desiredValue / 3.0);
-            revoluteJointMap.get(ValkyrieSimulatedFingerJoint.IndexFingerPitch3).setqDesired(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.IndexFingerPitch1).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.IndexFingerPitch2).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.IndexFingerPitch3).setDesiredPosition(desiredValue / 3.0);
             break;
          case Middle:
-            revoluteJointMap.get(ValkyrieSimulatedFingerJoint.MiddleFingerPitch1).setqDesired(desiredValue / 3.0);
-            revoluteJointMap.get(ValkyrieSimulatedFingerJoint.MiddleFingerPitch2).setqDesired(desiredValue / 3.0);
-            revoluteJointMap.get(ValkyrieSimulatedFingerJoint.MiddleFingerPitch3).setqDesired(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.MiddleFingerPitch1).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.MiddleFingerPitch2).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.MiddleFingerPitch3).setDesiredPosition(desiredValue / 3.0);
             break;
          case Pinky:
-            revoluteJointMap.get(ValkyrieSimulatedFingerJoint.PinkyPitch1).setqDesired(desiredValue / 3.0);
-            revoluteJointMap.get(ValkyrieSimulatedFingerJoint.PinkyPitch2).setqDesired(desiredValue / 3.0);
-            revoluteJointMap.get(ValkyrieSimulatedFingerJoint.PinkyPitch3).setqDesired(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.PinkyPitch1).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.PinkyPitch2).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.PinkyPitch3).setDesiredPosition(desiredValue / 3.0);
             break;
          }
       }

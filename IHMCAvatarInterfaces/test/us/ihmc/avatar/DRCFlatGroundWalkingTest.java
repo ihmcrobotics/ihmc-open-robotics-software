@@ -89,10 +89,13 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, selectedLocation,
-            simulationTestingParameters, getRobotModel(), true, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, getWalkingScriptParameters());
-     drcSimulationTestHelper.createSimulation(robotModel.getSimpleRobotName() + "FlatGroundWalking");
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.setAddFootstepMessageGenerator(true);
+      drcSimulationTestHelper.setUseHeadingAndVelocityScript(useVelocityAndHeadingScript);
+      drcSimulationTestHelper.setCheatWithGroundHeightAtFootstep(cheatWithGroundHeightAtForFootstep);
+      drcSimulationTestHelper.setWalkingScriptParameters(getWalkingScriptParameters());
+      drcSimulationTestHelper.createSimulation(robotModel.getSimpleRobotName() + "FlatGroundWalking");
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForUnitTest(scs);

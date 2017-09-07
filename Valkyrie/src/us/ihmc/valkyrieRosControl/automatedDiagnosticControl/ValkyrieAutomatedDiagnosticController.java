@@ -151,10 +151,11 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
        */
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      estimatorDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolderList(fullRobotModel.getOneDoFJoints());
 
       ValkyrieDiagnosticParameters diagnosticParameters = new ValkyrieDiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER, robotModel, true);
       DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters,
-            stateEstimatorParameters);
+            stateEstimatorParameters, estimatorDesiredJointDataHolder);
 
       HashMap<String, PositionJointHandle> emptyPositionJointHandles = new HashMap<>();
       HashMap<String, JointStateHandle> emptyJointStateHandles = new HashMap<>();
@@ -166,7 +167,6 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       ForceSensorDefinition[] forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
       ContactSensorHolder contactSensorHolder = new ContactSensorHolder(Arrays.asList(fullRobotModel.getContactSensorDefinitions()));
       RawJointSensorDataHolderMap rawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(fullRobotModel);
-      estimatorDesiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolderList(fullRobotModel.getOneDoFJoints());
       sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, contactSensorHolder, rawJointSensorDataHolderMap,
             estimatorDesiredJointDataHolder, registry);
       sensorReader = sensorReaderFactory.getSensorReader();
@@ -183,7 +183,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
        * Create diagnostic controller
        */
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      DiagnosticControllerToolbox toolbox = new DiagnosticControllerToolbox(fullRobotModel, sensorOutputMap, diagnosticParameters, walkingControllerParameters,
+      DiagnosticControllerToolbox toolbox = new DiagnosticControllerToolbox(fullRobotModel, estimatorDesiredJointDataHolder, sensorOutputMap, diagnosticParameters, walkingControllerParameters,
             diagnosticControllerTime, diagnosticControllerDT, diagnosticSensorProcessingConfiguration, registry);
 
       InputStream gainStream = getClass().getClassLoader().getResourceAsStream(diagnosticGainsFilePath);
@@ -230,7 +230,6 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       }
 
       diagnosticController.doControl();
-      estimatorDesiredJointDataHolder.updateFromModel();
       sensorReader.writeCommandsToRobot();
       
       diagnosticControllerTime.set(Conversions.nanosecondsToSeconds(time - startTime.getLongValue()));

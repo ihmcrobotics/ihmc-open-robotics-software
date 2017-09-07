@@ -56,6 +56,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -105,6 +106,13 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final OneDoFJoint[] oneDoFJoints;
    private final Map<Long, OneDoFJoint> jointNameBasedHashCodeMap = new HashMap<>();
+   
+   
+   /**
+    * List holding the low level output of the controller core.
+    */
+   private final LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput;
+   
    /**
     * Mostly used here for obtaining the center of mass frame. This holds on various useful frames
     * such as the center of frame.
@@ -291,6 +299,7 @@ public class KinematicsToolboxController extends ToolboxController
       this.commandInputManager = commandInputManager;
 
       this.desiredFullRobotModel = desiredFullRobotModel;
+      this.lowLevelControllerOutput = new LowLevelOneDoFJointDesiredDataHolderList(desiredFullRobotModel.getOneDoFJoints());
 
       referenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
       rootBody = desiredFullRobotModel.getElevator();
@@ -389,7 +398,7 @@ public class KinematicsToolboxController extends ToolboxController
       toolbox.setupForInverseKinematicsSolver();
       FeedbackControlCommandList controllerCoreTemplate = createControllerCoreTemplate();
       controllerCoreTemplate.addCommand(new CenterOfMassFeedbackControlCommand());
-      return new WholeBodyControllerCore(toolbox, controllerCoreTemplate, registry);
+      return new WholeBodyControllerCore(toolbox, controllerCoreTemplate, lowLevelControllerOutput, registry);
    }
 
    /**

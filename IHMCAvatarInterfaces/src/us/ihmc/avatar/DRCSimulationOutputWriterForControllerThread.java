@@ -1,37 +1,44 @@
 package us.ihmc.avatar;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.filters.DelayedYoDouble;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RawOutputWriter;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-public class DRCSimulationOutputWriterForControllerThread extends PerfectSimulatedOutputWriter implements DRCOutputProcessor
+public class DRCSimulationOutputWriterForControllerThread implements DRCOutputProcessor
 {
    private static final int TICKS_TO_DELAY = 0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final LinkedHashMap<OneDoFJoint, YoDouble> rawJointTorques = new LinkedHashMap<>();
-   private final LinkedHashMap<OneDoFJoint, DelayedYoDouble> delayedJointTorques = new LinkedHashMap<>();
+   private final FloatingRootJointRobot robot;
+   private final ArrayList<OutputDataSet> revoluteJoints = new ArrayList<>();
+
 
    private final ArrayList<RawOutputWriter> rawOutputWriters = new ArrayList<RawOutputWriter>();
 
+   private class OutputDataSet
+   {
+      private OneDegreeOfFreedomJoint simulatedJoint;
+      private LowLevelJointData jointData;
+      private YoDouble rawJointTorque;
+      private DelayedYoDouble delayedJointTorque;
+   }
+   
    public DRCSimulationOutputWriterForControllerThread(FloatingRootJointRobot robot)
    {
-      super(robot);
+      this.robot = robot;
+
    }
 
    @Override
@@ -39,14 +46,17 @@ public class DRCSimulationOutputWriterForControllerThread extends PerfectSimulat
    {
       for (int i = 0; i < revoluteJoints.size(); i++)
       {
-         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = revoluteJoints.get(i);
 
-         OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
-         OneDoFJoint revoluteJoint = jointPair.getRight();
+         OutputDataSet data = revoluteJoints.get(i);
 
-         double tau = revoluteJoint.getTau();
-         YoDouble rawJointTorque = rawJointTorques.get(revoluteJoint);
-         DelayedYoDouble delayedJointTorque = delayedJointTorques.get(revoluteJoint);
+         double tau = 0.0;
+         
+         if(data.jointData.hasDesiredTorque())
+         {
+            tau = data.jointData.getDesiredTorque();
+         }
+         YoDouble rawJointTorque = data.rawJointTorque;
+         DelayedYoDouble delayedJointTorque = data.delayedJointTorque;
 
          if (rawJointTorque != null)
          {
@@ -55,11 +65,24 @@ public class DRCSimulationOutputWriterForControllerThread extends PerfectSimulat
             tau = delayedJointTorque.getDoubleValue();
          }
 
-         pinJoint.setTau(tau);
-         pinJoint.setKp(revoluteJoint.getKp());
-         pinJoint.setKd(revoluteJoint.getKd());
-         pinJoint.setqDesired(revoluteJoint.getqDesired());
-         pinJoint.setQdDesired(revoluteJoint.getQdDesired());
+         
+         data.simulatedJoint.setTau(tau);
+         if(data.jointData.hasKp())
+         {
+            data.simulatedJoint.setKp(data.jointData.getKp());
+         }
+         if(data.jointData.hasKd())
+         {
+            data.simulatedJoint.setKd(data.jointData.getKd());            
+         }
+         if(data.jointData.hasDesiredPosition())
+         {
+            data.simulatedJoint.setqDesired(data.jointData.getDesiredPosition());
+         }
+         if(data.jointData.hasDesiredVelocity())
+         {
+            data.simulatedJoint.setQdDesired(data.jointData.getDesiredVelocity());
+         }
 
       }
 
@@ -70,21 +93,23 @@ public class DRCSimulationOutputWriterForControllerThread extends PerfectSimulat
    }
 
    @Override
-   public void setFullRobotModel(FullHumanoidRobotModel fullRobotModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
-      super.setFullRobotModel(fullRobotModel);
 
-      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
-      for (int i = 0; i < joints.length; i++)
+      for (int i = 0; i < lowLevelControllerOutput.getNumberOfJointsWithLowLevelData(); i++)
       {
-         OneDoFJoint oneDoFJoint = joints[i];
-         String jointName = oneDoFJoint.getName();
+         String jointName = lowLevelControllerOutput.getJointName(i);
 
-         YoDouble rawJointTorque = new YoDouble("tau_desired_" + jointName, registry);
-         rawJointTorques.put(oneDoFJoint, rawJointTorque);
+         OutputDataSet data = new OutputDataSet();
+         data.rawJointTorque = new YoDouble("tau_desired_" + jointName, registry);
+         
 
-         DelayedYoDouble delayedJointTorque = new DelayedYoDouble("tau_delayed_" + jointName, "", rawJointTorque, TICKS_TO_DELAY, registry);
-         delayedJointTorques.put(oneDoFJoint, delayedJointTorque);
+         data.delayedJointTorque = new DelayedYoDouble("tau_delayed_" + jointName, "", data.rawJointTorque, TICKS_TO_DELAY, registry);
+         
+         data.simulatedJoint = robot.getOneDegreeOfFreedomJoint(jointName);
+         data.jointData = lowLevelControllerOutput.getLowLevelJointData(i);
+         
+         revoluteJoints.add(data);
       }
    }
 
@@ -102,5 +127,11 @@ public class DRCSimulationOutputWriterForControllerThread extends PerfectSimulat
    public YoVariableRegistry getControllerYoVariableRegistry()
    {
       return registry;
+   }
+
+   @Override
+   public void initialize()
+   {
+      
    }
 }

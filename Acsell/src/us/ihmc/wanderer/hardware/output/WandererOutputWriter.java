@@ -20,6 +20,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.wanderer.hardware.WandererJoint;
@@ -44,7 +46,8 @@ public class WandererOutputWriter implements DRCOutputProcessor, ControllerState
 
    private final WandererCommand command = new WandererCommand(registry);
 
-   private EnumMap<WandererJoint, OneDoFJoint> wholeBodyControlJoints;
+   private EnumMap<WandererJoint, OneDoFJoint> wholeBodyControlStates;
+   private EnumMap<WandererJoint, LowLevelJointData> wholeBodyControlJoints;
    private EnumMap<WandererJoint, YoDouble> tauControllerOutput;
    private final EnumMap<WandererJoint, OneDoFJoint> standPrepJoints;
    private final WandererStandPrep standPrep = new WandererStandPrep();
@@ -206,7 +209,7 @@ public class WandererOutputWriter implements DRCOutputProcessor, ControllerState
           */
          for (WandererJoint joint : WandererJoint.values)
          {
-            OneDoFJoint wholeBodyControlJoint = wholeBodyControlJoints.get(joint);
+            OneDoFJoint wholeBodyControlJoint = wholeBodyControlStates.get(joint);
             OneDoFJoint standPrepJoint = standPrepJoints.get(joint);
             RawJointSensorDataHolder rawSensorData = rawJointSensorDataHolderMap.get(wholeBodyControlJoint);
 
@@ -221,24 +224,25 @@ public class WandererOutputWriter implements DRCOutputProcessor, ControllerState
           */
          for (WandererJoint joint : WandererJoint.values)
          {
-            OneDoFJoint wholeBodyControlJoint = wholeBodyControlJoints.get(joint);
+            OneDoFJoint wholeBodyControlState = wholeBodyControlStates.get(joint);
+            LowLevelJointData wholeBodyControlJoint = wholeBodyControlJoints.get(joint);
             OneDoFJoint standPrepJoint = standPrepJoints.get(joint);
             RawJointSensorDataHolder rawSensorData = rawJointSensorDataHolderMap.get(wholeBodyControlJoint);
 
             double controlRatio = getControlRatioByJointControlMode(joint);
 
-            double desiredAcceleration = wholeBodyControlJoint.getQddDesired();
+            double desiredAcceleration = wholeBodyControlJoint.getDesiredAcceleration();
             double motorReflectedInertia = yoReflectedMotorInertia.get(joint).getDoubleValue();
             double motorInertiaTorque = motorReflectedInertia * desiredAcceleration;
             double desiredQddFeedForwardTorque = desiredQddFeedForwardGain.get(joint).getDoubleValue()*desiredAcceleration;
             yoTauInertiaViz.get(joint).set(motorInertiaTorque);
 
             double kd = (wholeBodyControlJoint.getKd()+masterMotorDamping.getDoubleValue()*yoMotorDamping.get(joint).getDoubleValue()) * controlRatio + standPrepJoint.getKd() * (1.0 - controlRatio);
-            double tau = (wholeBodyControlJoint.getTau()+ motorInertiaTorque+desiredQddFeedForwardTorque) * controlRatio + standPrepJoint.getTau() * (1.0 - controlRatio);
+            double tau = (wholeBodyControlJoint.getDesiredTorque()+ motorInertiaTorque+desiredQddFeedForwardTorque) * controlRatio + standPrepJoint.getTau() * (1.0 - controlRatio);
 
             AcsellJointCommand jointCommand = command.getAcsellJointCommand(joint);
 
-            desiredJointQ.get(joint).set(wholeBodyControlJoint.getqDesired());
+            desiredJointQ.get(joint).set(wholeBodyControlJoint.getDesiredPosition());
 
             tauControllerOutput.get(joint).set(tau);
             double tauSpring = 0;
@@ -248,12 +252,12 @@ public class WandererOutputWriter implements DRCOutputProcessor, ControllerState
                yoTauSpringCorrection.get(joint).set(tauSpring);
                yoTauTotal.get(joint).set(tau);
             }
-            jointCommand.setTauDesired(tau - tauSpring, wholeBodyControlJoint.getQddDesired(), rawSensorData);
+            jointCommand.setTauDesired(tau - tauSpring, wholeBodyControlJoint.getDesiredVelocity(), rawSensorData);
 
             jointCommand.setDamping(kd);
 
             // Slightly hackish but won't change any ATLAS code.
-            wholeBodyControlJoint.setTau(tau);
+            wholeBodyControlJoint.setDesiredTorque(tau);
 
          }
    }
@@ -342,9 +346,10 @@ public class WandererOutputWriter implements DRCOutputProcessor, ControllerState
    }
 
    @Override
-   public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerCoreOutput, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
-      wholeBodyControlJoints = WandererUtil.createJointMap(controllerModel.getOneDoFJoints());
+      wholeBodyControlStates = WandererUtil.createJointMap(controllerRobotModel.getOneDoFJoints());
+      wholeBodyControlJoints = WandererUtil.createOutputMap(lowLevelControllerCoreOutput);
       this.rawJointSensorDataHolderMap = rawJointSensorDataHolderMap;
    }
 

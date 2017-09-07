@@ -1,16 +1,16 @@
 package us.ihmc.wholeBodyController;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -20,8 +20,8 @@ public class DRCOutputProcessorWithStateChangeSmoother implements DRCOutputProce
 
    private final YoDouble alphaForJointTorqueForStateChanges = new YoDouble("alphaJointTorqueForStateChanges", registry);
 
-   private final ArrayList<OneDoFJoint> allJoints = new ArrayList<>();
-   private final LinkedHashMap<OneDoFJoint, AlphaFilteredYoVariable> jointTorquesSmoothedAtStateChange = new LinkedHashMap<>();
+   private final PairList<LowLevelJointData, AlphaFilteredYoVariable> jointTorquesSmoothedAtStateChange = new PairList<>();
+//   private final LinkedHashMap<LowLevelJointData, AlphaFilteredYoVariable> jointTorquesSmoothedAtStateChange = new LinkedHashMap<>();
 
    private final AtomicBoolean hasHighLevelControllerStateChanged = new AtomicBoolean(false);
    private final YoDouble timeAtHighLevelControllerStateChange = new YoDouble("timeAtControllerStateChange", registry);
@@ -72,13 +72,13 @@ public class DRCOutputProcessorWithStateChangeSmoother implements DRCOutputProce
          alphaForJointTorqueForStateChanges.set(0.0);
       }
 
-      for (int i = 0; i < allJoints.size(); i++)
+      for (int i = 0; i < jointTorquesSmoothedAtStateChange.size(); i++)
       {
-         OneDoFJoint oneDoFJoint = allJoints.get(i);
-         double tau = oneDoFJoint.getTau();
-         AlphaFilteredYoVariable smoothedJointTorque = jointTorquesSmoothedAtStateChange.get(oneDoFJoint);
+         LowLevelJointData jointData = jointTorquesSmoothedAtStateChange.first(i);
+         double tau = jointData.getDesiredTorque();
+         AlphaFilteredYoVariable smoothedJointTorque = jointTorquesSmoothedAtStateChange.second(i);
          smoothedJointTorque.update(tau);
-         oneDoFJoint.setTau(smoothedJointTorque.getDoubleValue());
+         jointData.setDesiredTorque(smoothedJointTorque.getDoubleValue());
       }
 
       if(drcOutputProcessor != null)
@@ -102,22 +102,21 @@ public class DRCOutputProcessorWithStateChangeSmoother implements DRCOutputProce
    }
 
    @Override
-   public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerCoreOutput, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       if(drcOutputProcessor != null)
       {
-         drcOutputProcessor.setFullRobotModel(controllerModel, rawJointSensorDataHolderMap);
+         drcOutputProcessor.setLowLevelControllerCoreOutput(controllerRobotModel, lowLevelControllerCoreOutput, rawJointSensorDataHolderMap);
       }
 
-      OneDoFJoint[] joints = controllerModel.getOneDoFJoints();
-      for (int i = 0; i < joints.length; i++)
+      
+      for (int i = 0; i < lowLevelControllerCoreOutput.getNumberOfJointsWithLowLevelData(); i++)
       {
-         OneDoFJoint oneDoFJoint = joints[i];
-         String jointName = oneDoFJoint.getName();
-         allJoints.add(oneDoFJoint);
+         LowLevelJointData jointData = lowLevelControllerCoreOutput.getLowLevelJointData(i);
+         String jointName = lowLevelControllerCoreOutput.getOneDoFJoint(i).getName();
 
          AlphaFilteredYoVariable jointTorqueSmoothedAtStateChange = new AlphaFilteredYoVariable("smoothed_tau_" + jointName, registry, alphaForJointTorqueForStateChanges);
-         jointTorquesSmoothedAtStateChange.put(oneDoFJoint, jointTorqueSmoothedAtStateChange);
+         jointTorquesSmoothedAtStateChange.add(jointData, jointTorqueSmoothedAtStateChange);
       }
    }
 

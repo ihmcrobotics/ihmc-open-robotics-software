@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import com.jme3.asset.AssetLocator;
+import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.material.MaterialList;
 import com.jme3.material.RenderState.BlendMode;
@@ -60,9 +62,9 @@ public class JMEAppearanceMaterial
       return false;
    }
 
-   private static Material createMaterialFromHeightBasedTerrainBlend(JMEAssetLocator assetLocator, HeightBasedTerrainBlend appearanceDefinition)
+   private static Material createMaterialFromHeightBasedTerrainBlend(AssetManager assetLocator, HeightBasedTerrainBlend appearanceDefinition)
    {
-      Material material = new Material(assetLocator.getAssetManager(), "Common/MatDefs/Terrain/TerrainLighting.j3md");
+      Material material = new Material(assetLocator, "Common/MatDefs/Terrain/TerrainLighting.j3md");
 
       ArrayList<ImmutablePair<Double, Double>> blendMap = appearanceDefinition.getBlends();
       if (blendMap.size() > 4)
@@ -155,7 +157,7 @@ public class JMEAppearanceMaterial
       return material;
    }
 
-   private static void updateOgreMaterials(File file, MaterialList materials, JMEAssetLocator contentMan)
+   private static void updateOgreMaterials(File file, MaterialList materials, AssetManager contentMan)
    {
       String matPath = null;
       try
@@ -173,7 +175,7 @@ public class JMEAppearanceMaterial
          {
             matPath = stripDiskRootFromPath(matPath);
          }
-         materials.putAll(contentMan.loadOgreAsset(matPath));
+         materials.putAll(JMEAssetLocator.loadOgreAsset(matPath, contentMan));
       }
       else
       {
@@ -185,7 +187,7 @@ public class JMEAppearanceMaterial
                {
                   matPath = stripDiskRootFromPath(matPath);
                }
-               materials.putAll(contentMan.loadOgreAsset(subFile.getPath()));
+               materials.putAll(JMEAssetLocator.loadOgreAsset(subFile.getPath(),contentMan));
             }
             else if (subFile.isDirectory())
             {
@@ -195,7 +197,7 @@ public class JMEAppearanceMaterial
       }
    }
 
-   public static Material createMaterialFromSDFAppearance(JMEAssetLocator contentMan, SDFAppearance appearanceDefinition)
+   public static Material createMaterialFromSDFAppearance(AssetManager contentMan, SDFAppearance appearanceDefinition)
    {
       MaterialList materials = new MaterialList();
 
@@ -289,9 +291,9 @@ public class JMEAppearanceMaterial
       if (DEBUG) System.out.println(string);
    }
 
-   public static Material createMaterialFromBufferedImage(JMEAssetLocator contentMan, BufferedImage bufferedImage)
+   public static Material createMaterialFromBufferedImage(AssetManager contentMan, BufferedImage bufferedImage)
    {
-      Material material = new Material(contentMan.getAssetManager(), PHONG_ILLUMINATED_JME_MAT);
+      Material material = new Material(contentMan, PHONG_ILLUMINATED_JME_MAT);
       Image image = awtLoader.load(bufferedImage, true);
       Texture texture = new Texture2D(image);
       material.setTexture("DiffuseMap", texture);
@@ -305,16 +307,16 @@ public class JMEAppearanceMaterial
       return material;
    }
 
-   public static Material createMaterialFromFileURL(JMEAssetLocator contentMan, String path)
+   public static Material createMaterialFromFileURL(AssetManager contentMan, String path)
    {
-      Material material = new Material(contentMan.getAssetManager(), PHONG_ILLUMINATED_JME_MAT);
+      Material material = new Material(contentMan, PHONG_ILLUMINATED_JME_MAT);
       Texture texture = contentMan.loadTexture(path);
       material.setTexture("DiffuseMap", texture);
       //      material.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
       return material;
    }
 
-   public static Material createMaterialFromYoAppearanceTexture(JMEAssetLocator contentMan, YoAppearanceTexture appearanceDefinition)
+   public static Material createMaterialFromYoAppearanceTexture(AssetManager contentMan, YoAppearanceTexture appearanceDefinition)
    {
       Material material;
       if (appearanceDefinition.getPath() != null)
@@ -331,23 +333,23 @@ public class JMEAppearanceMaterial
 
    }
 
-   public static Material createMaterialFromYoAppearanceRGBColor(JMEAssetLocator contentMan, YoAppearanceRGBColor appearanceDefinition)
+   public static Material createMaterialFromYoAppearanceRGBColor(AssetManager contentMan, YoAppearanceRGBColor appearanceDefinition)
    {
       MutableColor rgb = appearanceDefinition.getColor();
 
       return createMaterialFromProperties(contentMan, rgb, rgb, rgb, 0.0, appearanceDefinition.getTransparency());
    }
 
-   public static Material createMaterialFromYoAppearanceMaterial(JMEAssetLocator contentMan, YoAppearanceMaterial appearanceMaterial)
+   public static Material createMaterialFromYoAppearanceMaterial(AssetManager contentMan, YoAppearanceMaterial appearanceMaterial)
    {
       return createMaterialFromProperties(contentMan, appearanceMaterial.getDiffuseColor(), appearanceMaterial.getAmbientColor(),
             appearanceMaterial.getSpecularColor(), appearanceMaterial.getShininess(), appearanceMaterial.getTransparency());
    }
 
-   public static Material createMaterialFromProperties(JMEAssetLocator contentMan, MutableColor diffuse, MutableColor ambient, MutableColor specular, double shininess,
+   public static Material createMaterialFromProperties(AssetManager contentMan, MutableColor diffuse, MutableColor ambient, MutableColor specular, double shininess,
          double transparancy)
    {
-      Material material = new Material(contentMan.getAssetManager(), PHONG_ILLUMINATED_JME_MAT);
+      Material material = new Material(contentMan, PHONG_ILLUMINATED_JME_MAT);
 
       double alpha = 1.0 - transparancy;
 
@@ -367,7 +369,7 @@ public class JMEAppearanceMaterial
       return material;
    }
 
-   public static Material createMaterial(JMEAssetLocator assetManager, AppearanceDefinition appearanceDefinition)
+   public static Material createMaterial(AssetManager assetManager, AppearanceDefinition appearanceDefinition)
    {
       if (appearanceDefinition instanceof YoAppearanceMaterial)
       {
