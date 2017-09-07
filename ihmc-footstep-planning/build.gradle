@@ -29,7 +29,7 @@ mainDependencies {
    compile "org.ejml:dense64:0.30"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "convex-optimization-adapter", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: groupDependencyVersion
 }
 
 testDependencies {
