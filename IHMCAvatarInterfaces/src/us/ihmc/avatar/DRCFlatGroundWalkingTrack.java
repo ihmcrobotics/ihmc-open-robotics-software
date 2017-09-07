@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndV
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
@@ -56,7 +55,7 @@ public class DRCFlatGroundWalkingTrack
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
-            feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, capturePointPlannerParameters, HighLevelState.WALKING);
+                                                                                                    feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, capturePointPlannerParameters, HighLevelState.WALKING);
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
 
 
@@ -92,7 +91,11 @@ public class DRCFlatGroundWalkingTrack
 
    public void attachControllerFailureListener(ControllerFailureListener listener)
    {
-      avatarSimulation.getMomentumBasedControllerFactory().attachControllerFailureListener(listener);
+      if (avatarSimulation.getMomentumBasedControllerFactory() != null)
+         avatarSimulation.getMomentumBasedControllerFactory().attachControllerFailureListener(listener);
+      else
+         avatarSimulation.getHighLevelHumanoidControllerFactory().attachControllerFailureListener(listener);
+
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()

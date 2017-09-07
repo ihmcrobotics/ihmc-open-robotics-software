@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.jointControlCalculator.JointControlBlender;
@@ -17,7 +15,7 @@ import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class NewStandTransitionControllerState extends NewHighLevelControllerState
+public class StandTransitionControllerState extends NewHighLevelControllerState
 {
    private static final NewHighLevelControllerStates controllerState = NewHighLevelControllerStates.STAND_TRANSITION_STATE;
    private static final double TIME_TO_RAMP_UP_CONTROL = 0.7;
@@ -30,18 +28,18 @@ public class NewStandTransitionControllerState extends NewHighLevelControllerSta
    private final PairList<OneDoFJoint, JointControlBlender> jointCommandBlenders = new PairList<>();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   private final NewStandReadyControllerState standReadyControllerState;
-   private final NewWalkingControllerState walkingControllerState;
+   private final NewHighLevelControllerState standReadyControllerState;
+   private final NewHighLevelControllerState walkingControllerState;
 
-   public NewStandTransitionControllerState(NewStandReadyControllerState standReadyControllerState, NewWalkingControllerState walkingControllerState,
-                                            HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
+   public StandTransitionControllerState(NewHighLevelControllerState standReadyControllerState, NewHighLevelControllerState walkingControllerState,
+                                         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
    {
       this(standReadyControllerState, walkingControllerState, controllerToolbox, highLevelControllerParameters, TIME_TO_RAMP_UP_CONTROL);
    }
 
-   public NewStandTransitionControllerState(NewStandReadyControllerState standReadyControllerState, NewWalkingControllerState walkingControllerState,
-                                            HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
-                                            double standTransitionDuration)
+   public StandTransitionControllerState(NewHighLevelControllerState standReadyControllerState, NewHighLevelControllerState walkingControllerState,
+                                         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
+                                         double standTransitionDuration)
    {
       super(controllerState);
 

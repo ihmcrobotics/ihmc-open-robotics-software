@@ -3,7 +3,7 @@ package us.ihmc.avatar.factory;
 import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.AbstractMomentumBasedControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -21,7 +21,8 @@ import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 public class AvatarSimulation
 {
    private SimulationConstructionSet simulationConstructionSet;
-   private AbstractMomentumBasedControllerFactory momentumBasedControllerFactory;
+   private HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
+   private MomentumBasedControllerFactory momentumBasedControllerFactory;
    private YoVariableServer yoVariableServer;
    private AbstractThreadedRobotController threadedRobotController;
    private HumanoidGlobalDataProducer humanoidGlobalDataProducer;
@@ -111,7 +112,12 @@ public class AvatarSimulation
       return simulationConstructionSet;
    }
 
-   public AbstractMomentumBasedControllerFactory getMomentumBasedControllerFactory()
+   public HighLevelHumanoidControllerFactory getHighLevelHumanoidControllerFactory()
+   {
+      return highLevelHumanoidControllerFactory;
+   }
+
+   public MomentumBasedControllerFactory getMomentumBasedControllerFactory()
    {
       return momentumBasedControllerFactory;
    }
@@ -136,7 +142,12 @@ public class AvatarSimulation
       this.simulationConstructionSet = simulationConstructionSet;
    }
 
-   public void setMomentumBasedControllerFactory(AbstractMomentumBasedControllerFactory momentumBasedControllerFactory)
+   public void setMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory momentumBasedControllerFactory)
+   {
+      this.highLevelHumanoidControllerFactory = momentumBasedControllerFactory;
+   }
+
+   public void setMomentumBasedControllerFactory(MomentumBasedControllerFactory momentumBasedControllerFactory)
    {
       this.momentumBasedControllerFactory = momentumBasedControllerFactory;
    }

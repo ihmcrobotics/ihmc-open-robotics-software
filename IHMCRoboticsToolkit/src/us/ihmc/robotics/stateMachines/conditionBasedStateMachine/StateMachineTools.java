@@ -90,8 +90,8 @@ public class StateMachineTools
    }
 
    public static <T extends Enum<T>> StateTransition<T> buildFinishedStateTransition(final FinishableState<T> initialState,
-                                                                                        List<? extends StateTransitionAction> stateTransitionActions,
-                                                                                        final T finalStateEnum)
+                                                                                     List<? extends StateTransitionAction> stateTransitionActions,
+                                                                                     final T finalStateEnum)
    {
       List<StateTransitionAction> stateTransitionActionsCopy = new ArrayList<>(stateTransitionActions);
       StateTransitionCondition stateTransitionCondition = new FinishedStateTransitionCondition<>(initialState, finalStateEnum);

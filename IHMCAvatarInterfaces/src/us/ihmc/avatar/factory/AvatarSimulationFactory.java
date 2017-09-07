@@ -13,8 +13,8 @@ import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.sensors.DRCSimulatedIMUPublisher;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.AbstractMomentumBasedControllerFactory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -68,7 +68,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class AvatarSimulationFactory
 {
    private final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
-   private final RequiredFactoryField<AbstractMomentumBasedControllerFactory> momentumBasedControllerFactory = new RequiredFactoryField<>("momentumBasedControllerFactory");
+   private final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
+   private final RequiredFactoryField<MomentumBasedControllerFactory> momentumBasedControllerFactory = new RequiredFactoryField<>("momentumBasedControllerFactory");
    private final RequiredFactoryField<CommonAvatarEnvironmentInterface> commonAvatarEnvironment = new RequiredFactoryField<>("commonAvatarEnvironmentInterface");
    private final RequiredFactoryField<DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new RequiredFactoryField<>("robotInitialSetup");
    private final RequiredFactoryField<DRCSCSInitialSetup> scsInitialSetup = new RequiredFactoryField<>("scsInitialSetup");
@@ -161,11 +162,11 @@ public class AvatarSimulationFactory
                                                                                   robotModel.get().getStateEstimatorParameters());
       }
    }
-   
+
    private void setupSimulationOutputWriter()
    {
       simulationOutputWriter = robotModel.get().getCustomSimulationOutputWriter(new SimulatedLowLevelOutputWriter(humanoidFloatingRootJointRobot, true));
-      
+
    }
 
    private void setupSimulationOutputProcessor()
@@ -176,8 +177,11 @@ public class AvatarSimulationFactory
       if (doSmoothJointTorquesAtControllerStateChanges.get())
       {
          DRCOutputProcessorWithStateChangeSmoother drcOutputWriterWithStateChangeSmoother = new DRCOutputProcessorWithStateChangeSmoother(simulationOutputProcessor);
-         momentumBasedControllerFactory.get()
-                                       .attachControllerStateChangedListener(drcOutputWriterWithStateChangeSmoother.createControllerStateChangedListener());
+         if (momentumBasedControllerFactory.get() != null)
+            momentumBasedControllerFactory.get().attachControllerStateChangedListener(drcOutputWriterWithStateChangeSmoother.createControllerStateChangedListener());
+         else
+            highLevelHumanoidControllerFactory.get().attachControllerStateChangedListener(drcOutputWriterWithStateChangeSmoother.createControllerStateChangedListener());
+
          simulationOutputProcessor = drcOutputWriterWithStateChangeSmoother;
       }
 
@@ -210,9 +214,18 @@ public class AvatarSimulationFactory
 
    private void setupControllerThread()
    {
-      controllerThread = new DRCControllerThread(robotModel.get(), robotModel.get().getSensorInformation(), momentumBasedControllerFactory.get(),
-                                                 threadDataSynchronizer, simulationOutputProcessor, humanoidGlobalDataProducer.get(), yoVariableServer,
-                                                 gravity.get(), robotModel.get().getEstimatorDT());
+      if (momentumBasedControllerFactory.get() != null)
+      {
+         controllerThread = new DRCControllerThread(robotModel.get(), robotModel.get().getSensorInformation(), momentumBasedControllerFactory.get(),
+                                                    threadDataSynchronizer, simulationOutputProcessor, humanoidGlobalDataProducer.get(), yoVariableServer,
+                                                    gravity.get(), robotModel.get().getEstimatorDT());
+      }
+      else
+      {
+         controllerThread = new DRCControllerThread(robotModel.get(), robotModel.get().getSensorInformation(), highLevelHumanoidControllerFactory.get(),
+                                                    threadDataSynchronizer, simulationOutputProcessor, humanoidGlobalDataProducer.get(), yoVariableServer,
+                                                    gravity.get(), robotModel.get().getEstimatorDT());
+      }
    }
 
    private void createClosableAndDisposableRegistry()
@@ -452,12 +465,12 @@ public class AvatarSimulationFactory
       this.robotModel.set(robotModel);
    }
 
-   public void setMomentumBasedControllerFactory(MomentumBasedControllerFactory momentumBasedControllerFactory)
+   public void setMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory)
    {
-      this.momentumBasedControllerFactory.set(momentumBasedControllerFactory);
+      this.highLevelHumanoidControllerFactory.set(highLevelHumanoidControllerFactory);
    }
 
-   public void setMomentumBasedControllerFactory(AbstractMomentumBasedControllerFactory momentumBasedControllerFactory)
+   public void setMomentumBasedControllerFactory(MomentumBasedControllerFactory momentumBasedControllerFactory)
    {
       this.momentumBasedControllerFactory.set(momentumBasedControllerFactory);
    }
