@@ -166,7 +166,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    protected void updateInternal() throws InterruptedException, ExecutionException
    {
       updateCount.increment();
-      PrintTools.info("" + updateCount.getIntegerValue() + " " + state);
+      //      PrintTools.info("" + updateCount.getIntegerValue() + " " + state);
 
       // ************************************************************************************************************** //      
       switch (state)
@@ -230,7 +230,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
          ctTaskNodeWholeBodyTrajectoryMessageFactory.setCTTaskNodePath(tree.getPath(), constrainedEndEffectorTrajectory);
 
-         ConstrainedWholeBodyPlanningToolboxOutputStatus packResult = packResult(ctTaskNodeWholeBodyTrajectoryMessageFactory.getWholeBodyTrajectoryMessage(), 4);
+         ConstrainedWholeBodyPlanningToolboxOutputStatus packResult = packResult(ctTaskNodeWholeBodyTrajectoryMessageFactory.getWholeBodyTrajectoryMessage(),
+                                                                                 4);
          packResult(packResult, tree.getPath());
          reportMessage(packResult);
          PrintTools.info("packResult");
@@ -250,20 +251,33 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       {
          currentNode = currentNode.getParentNode();
          if (currentNode != null)
-         {
             revertedPath.add(currentNode);
-         }
          else
             break;
       }
 
       int revertedPathSize = revertedPath.size();
 
-      tree.getPath().clear();
-      for (int j = 0; j < revertedPathSize; j++)
-         tree.addNodeOnPath(revertedPath.get(revertedPathSize - 1 - j));
+      PrintTools.info("" + revertedPathSize);
 
-      PrintTools.info("the size of the path is " + tree.getPath().size());
+      tree.getPath().clear();
+      
+      for (int j = 0; j < revertedPathSize-1; j++)
+      {
+         int i = revertedPathSize - 1 - j;
+         double generalizedTimeGap = revertedPath.get(i-1).getNormalizedNodeData(0)
+               - revertedPath.get(i).getNormalizedNodeData(0);
+
+         if (generalizedTimeGap > tree.dismissableTimeGap)
+         {
+            tree.addNodeOnPath(revertedPath.get(revertedPathSize - 1 - j));
+         }
+
+      }
+
+      tree.addNodeOnPath(revertedPath.get(0));
+      
+      PrintTools.info("the size of the path is " + tree.getPath().size() + " before dismissing " + revertedPathSize);
 
       numberOfMotionPath = tree.getPath().size();
       /*
@@ -472,7 +486,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       ConstrainedWholeBodyPlanningToolboxOutputStatus result = new ConstrainedWholeBodyPlanningToolboxOutputStatus();
 
       if (wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT) == null
-            || wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT) == null)      
+            || wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT) == null)
       {
          result.wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
          PrintTools.info("no message");
@@ -480,39 +494,37 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       else
       {
          result.wholeBodyTrajectoryMessage = wholebodyTrajectoryMessage;
-         PrintTools.info("message " +wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT).getTrajectoryTime());
+         PrintTools.info("message " + wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT).getTrajectoryTime());
       }
 
       result.planningResult = planningResult;
 
       return result;
    }
-   
+
    private void packResult(ConstrainedWholeBodyPlanningToolboxOutputStatus result, ArrayList<CTTaskNode> path)
    {
       SideDependentList<ArrayList<Pose3D>> handTrajectories = new SideDependentList<>();
-      
-      for(RobotSide robotSide : RobotSide.values)
+
+      for (RobotSide robotSide : RobotSide.values)
       {
          handTrajectories.put(robotSide, new ArrayList<Pose3D>());
       }
-      
-      for(int i=0;i<path.size();i++)
+
+      for (int i = 0; i < path.size(); i++)
       {
          CTTaskNode node = path.get(i);
-         
-         for(RobotSide robotSide : RobotSide.values)
-         {  
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
             ConfigurationSpace configurationSpace = CTTreeTools.getConfigurationSpace(node, robotSide);
 
             Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(node.getNodeData(0), robotSide, configurationSpace);
-            
+
             handTrajectories.get(robotSide).add(desiredPose);
-         }   
+         }
       }
-      
-      
-      
+
       result.handTrajectories = handTrajectories;
    }
 

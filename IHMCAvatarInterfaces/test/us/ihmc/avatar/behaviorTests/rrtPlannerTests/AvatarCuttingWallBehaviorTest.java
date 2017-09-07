@@ -272,7 +272,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
                                                                                                                    sdfFullRobotModel,
                                                                                                                    drcBehaviorTestHelper.getYoTime());
 
-      ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
+      ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(20.0);
       PrintTools.info(""+endeffectorTrajectory.getTrajectoryTime());
       
       planningBehavior.setInputs(endeffectorTrajectory, sdfFullRobotModel);      
@@ -287,14 +287,14 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       System.out.println("Behavior Dispatch");
       drcBehaviorTestHelper.dispatchBehavior(planningBehavior);
 
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(9.0);
       System.out.println("Go Motion");
       
       PrintTools.info("planningResult "+ planningBehavior.getConstrainedWholeBodyPlanningToolboxOutputStatus().planningResult);
       
       ArrayList<Pose3D> handTrajectories = planningBehavior.getHandTrajectories(RobotSide.LEFT);
       int numberOfPath = handTrajectories.size();
-      for(int i=0;i<numberOfPath - 10;i++)
+      for(int i=0;i<numberOfPath - 2;i++)
       {
          Pose3D pose = handTrajectories.get(i);
          scs.addStaticLinkGraphics(getXYZAxis(pose));
@@ -302,7 +302,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       
       System.out.println("Send " + drcBehaviorTestHelper.getYoTime());
       drcBehaviorTestHelper.send(planningBehavior.getWholebodyTrajectoryMessage());
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(planningBehavior.getWholebodyTrajectoryMessage().getHandTrajectoryMessage(RobotSide.LEFT).getTrajectoryTime());
       
             
       

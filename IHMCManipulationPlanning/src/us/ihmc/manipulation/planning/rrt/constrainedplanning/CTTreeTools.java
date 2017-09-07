@@ -8,8 +8,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class CTTreeTools
 {
-   /**
-    * seed 50 is tested to avoid invalid zone better.
+   /*
+    * 50 okay . why 1 has problem?
+    * angular velocity problem on chest.
     */
    static Random randomManager = new Random(1);
    
