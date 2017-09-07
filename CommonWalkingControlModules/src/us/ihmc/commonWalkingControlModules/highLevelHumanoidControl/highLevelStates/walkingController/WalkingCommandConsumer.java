@@ -229,7 +229,13 @@ public class WalkingCommandConsumer
          for (RobotSide robotSide : RobotSide.values)
          {
             if (command.getRequest(robotSide, BodyPart.ARM))
-               handManagers.get(robotSide).goHome(command.getTrajectoryTime());
+            {
+               RigidBodyControlManager handManager = handManagers.get(robotSide);
+               if(handManager != null)
+               {
+                  handManager.goHome(command.getTrajectoryTime());
+               }
+            }
          }
 
          if (command.getRequest(BodyPart.PELVIS))
