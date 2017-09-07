@@ -468,11 +468,13 @@ public class AvatarSimulationFactory
    public void setMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory)
    {
       this.highLevelHumanoidControllerFactory.set(highLevelHumanoidControllerFactory);
+      this.momentumBasedControllerFactory.set(null);
    }
 
    public void setMomentumBasedControllerFactory(MomentumBasedControllerFactory momentumBasedControllerFactory)
    {
       this.momentumBasedControllerFactory.set(momentumBasedControllerFactory);
+      this.highLevelHumanoidControllerFactory.set(null);
    }
 
    public void setCommonAvatarEnvironment(CommonAvatarEnvironmentInterface commonAvatarEnvironment)
