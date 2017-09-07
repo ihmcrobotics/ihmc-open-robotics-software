@@ -20,6 +20,10 @@ import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
+
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates.*;
+
+
 public abstract class NewDRCFlatGroundWalkingTrack
 {
    // looking for CREATE_YOVARIABLE_WALKING_PROVIDERS ?  use the second constructor and pass in WalkingProvider = YOVARIABLE_PROVIDER
@@ -58,8 +62,24 @@ public abstract class NewDRCFlatGroundWalkingTrack
                                                                                                     wristForceSensorNames, highLevelControllerParameters,
                                                                                                     walkingControllerParameters, capturePointPlannerParameters);
       controllerFactory.useDefaultDoNothingControlState();
+      controllerFactory.useDefaultStandPrepControlState();
+      controllerFactory.useDefaultStandReadyControlState();
+      controllerFactory.useDefaultStandTransitionControlState();
       controllerFactory.useDefaultWalkingControlState();
-      controllerFactory.setInitialState(NewHighLevelControllerStates.WALKING_STATE);
+      controllerFactory.useDefaultFreezeControlState();
+
+      controllerFactory.addRequestableTransition(STAND_PREP_STATE, FREEZE_STATE);
+      controllerFactory.addFinishedTransition(STAND_PREP_STATE, STAND_READY);
+
+      controllerFactory.addRequestableTransition(STAND_READY, FREEZE_STATE);
+      controllerFactory.addRequestableTransition(STAND_READY, STAND_TRANSITION_STATE);
+
+      controllerFactory.addRequestableTransition(STAND_TRANSITION_STATE, FREEZE_STATE);
+      controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING_STATE);
+
+      controllerFactory.addRequestableTransition(WALKING_STATE, FREEZE_STATE);
+
+      controllerFactory.setInitialState(STAND_PREP_STATE);
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
 
 
