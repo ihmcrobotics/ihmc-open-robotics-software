@@ -6,6 +6,7 @@
 /target
 /pit-reports
 /install
+/src/*/bin
 
 # Top level directories in sub-projects
 */classes
@@ -16,6 +17,7 @@
 */pit-reports
 */install
 */src/*/bin
+
 
 # directories to always ignore
 **/.gradle
@@ -38,7 +40,6 @@
 **/.LSOverride
 **/.AppleDouble
 **/pitest
-**/generated-src2
 
 
 # File types to ignore
@@ -82,7 +83,10 @@
 **/Network Trash Folder
 **/Temporary Items
 **/.apdisk
-**/rebel.xml
+**/gradle-wrapper.jar
+**/gradle-wrapper.properties
+**/gradlew
+**/gradlew.bat
 **/generatedTestSuites/*TestSuite.java
 
-!gradle/wrapper/gradle-wrapper.jar
+!**/gradle-wrapper.jar
