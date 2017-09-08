@@ -21,17 +21,18 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<CuttingWallBehaviorState> implements CoactiveDataListenerInterface
 {
-
    private HandTrajectoryBehavior leftHandTrajectoryBehavior;
    private HandTrajectoryBehavior rightHandTrajectoryBehavior;
 
    private WholeBodyTrajectoryBehavior wholebodyTrajectoryBehavior;
 
    private CommunicationBridge communicationBridge;
+   
+   private YoDouble yoTime;
 
    public enum CuttingWallBehaviorState
    {
-      WAITING, PLANNING, CUTTING
+      PLANNING, WAITING_CONFIRM, MOTION
    }
 
    public CuttingWallBehaviorStateMachine(CommunicationBridge communicationBridge, YoDouble yoTime, FullHumanoidRobotModel fullRobotModel,
@@ -47,36 +48,20 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
 
       this.wholebodyTrajectoryBehavior = new WholeBodyTrajectoryBehavior(communicationBridge, yoTime);
 
+      this.yoTime = yoTime;
+      
       setupStateMachine();
    }
 
    private void setupStateMachine()
    {
-      BehaviorAction<CuttingWallBehaviorState> waiting = new BehaviorAction<CuttingWallBehaviorState>(CuttingWallBehaviorState.WAITING,
-                                                                                                      leftHandTrajectoryBehavior, rightHandTrajectoryBehavior)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            PrintTools.info("setBehaviorInput WAITING");
-
-            HandTrajectoryMessage leftHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.5, 0.4, 1.0), new Quaternion(),
-                                                                                        ReferenceFrame.getWorldFrame());
-            HandTrajectoryMessage rightHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 3.0, new Point3D(0.5, -0.4, 1.0), new Quaternion(),
-                                                                                         ReferenceFrame.getWorldFrame());
-
-            leftHandTrajectoryBehavior.setInput(leftHandTrajectoryMessage);
-            rightHandTrajectoryBehavior.setInput(rightHandTrajectoryMessage);
-         }
-      };
-
       BehaviorAction<CuttingWallBehaviorState> planning = new BehaviorAction<CuttingWallBehaviorState>(CuttingWallBehaviorState.PLANNING,
                                                                                                        leftHandTrajectoryBehavior, rightHandTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            PrintTools.info("setBehaviorInput PLANNING");
+            PrintTools.info("setBehaviorInput PLANNING " + yoTime.getDoubleValue());
 
             HandTrajectoryMessage leftHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.6, 0.4, 1.0), new Quaternion(),
                                                                                         ReferenceFrame.getWorldFrame());
@@ -85,18 +70,17 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
 
             leftHandTrajectoryBehavior.setInput(leftHandTrajectoryMessage);
             rightHandTrajectoryBehavior.setInput(rightHandTrajectoryMessage);
-            
-            
+
          }
       };
 
-      BehaviorAction<CuttingWallBehaviorState> cutting = new BehaviorAction<CuttingWallBehaviorState>(CuttingWallBehaviorState.CUTTING,
+      BehaviorAction<CuttingWallBehaviorState> waiting = new BehaviorAction<CuttingWallBehaviorState>(CuttingWallBehaviorState.WAITING_CONFIRM,
                                                                                                       leftHandTrajectoryBehavior, rightHandTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            PrintTools.info("setBehaviorInput CUTTING");
+            PrintTools.info("setBehaviorInput WAITING " + yoTime.getDoubleValue());
 
             HandTrajectoryMessage leftHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.5, 0.4, 1.0), new Quaternion(),
                                                                                         ReferenceFrame.getWorldFrame());
@@ -108,11 +92,29 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
          }
       };
 
-      statemachine.addStateWithDoneTransition(waiting, CuttingWallBehaviorState.PLANNING);
-      statemachine.addStateWithDoneTransition(planning, CuttingWallBehaviorState.CUTTING);
+      BehaviorAction<CuttingWallBehaviorState> motion = new BehaviorAction<CuttingWallBehaviorState>(CuttingWallBehaviorState.MOTION,
+                                                                                                      leftHandTrajectoryBehavior, rightHandTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            PrintTools.info("setBehaviorInput MOTION " + yoTime.getDoubleValue());
 
-      statemachine.addState(cutting);
-      statemachine.setStartState(CuttingWallBehaviorState.WAITING);
+            HandTrajectoryMessage leftHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.6, 0.4, 1.0), new Quaternion(),
+                                                                                        ReferenceFrame.getWorldFrame());
+            HandTrajectoryMessage rightHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 3.0, new Point3D(0.6, -0.4, 1.0), new Quaternion(),
+                                                                                         ReferenceFrame.getWorldFrame());
+
+            leftHandTrajectoryBehavior.setInput(leftHandTrajectoryMessage);
+            rightHandTrajectoryBehavior.setInput(rightHandTrajectoryMessage);
+         }
+      };
+
+      statemachine.addStateWithDoneTransition(planning, CuttingWallBehaviorState.WAITING_CONFIRM);
+      statemachine.addStateWithDoneTransition(waiting, CuttingWallBehaviorState.MOTION);
+
+      statemachine.addState(motion);
+      statemachine.setStartState(CuttingWallBehaviorState.PLANNING);
    }
 
    @Override

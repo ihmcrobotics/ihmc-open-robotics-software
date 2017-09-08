@@ -199,7 +199,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
 
    }
 
-   //   @Test
+      @Test
    public void testForCuttingWallBehavior() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -231,7 +231,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
 
    }
 
-   @Test
+//   @Test
    public void testForCWBPlanningBehavior() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -248,21 +248,23 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       /*
        * reaching initial configuration
        */
-//      Quaternion initialOrientation = new Quaternion();
-//      initialOrientation.appendRollRotation(Math.PI * 0.5);
-//      initialOrientation.appendYawRotation(Math.PI * 0.5);
-//      initialOrientation.appendPitchRotation(-Math.PI * 0.4);
-//      HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, new Point3D(0.6, 0.35, 1.0), initialOrientation,
-//                                                                               referenceFrames.getMidFootZUpGroundFrame());
-//      drcBehaviorTestHelper.send(lhandTrajectoryMessage);
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
-//
-//      initialOrientation = new Quaternion();
-//      initialOrientation.appendPitchRotation(Math.PI * 0.4);
-//      HandTrajectoryMessage rhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2.0, new Point3D(-0.1, -0.5, 0.7), initialOrientation,
-//                                                                               referenceFrames.getMidFootZUpGroundFrame());
-//      drcBehaviorTestHelper.send(rhandTrajectoryMessage);
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+      /*
+         Quaternion initialOrientation = new Quaternion();
+         initialOrientation.appendRollRotation(Math.PI * 0.5);
+         initialOrientation.appendYawRotation(Math.PI * 0.5);
+         initialOrientation.appendPitchRotation(-Math.PI * 0.4);
+         HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, new Point3D(0.6, 0.35, 1.0), initialOrientation,
+                                                                                  referenceFrames.getMidFootZUpGroundFrame());
+         drcBehaviorTestHelper.send(lhandTrajectoryMessage);
+         drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+   
+         initialOrientation = new Quaternion();
+         initialOrientation.appendPitchRotation(Math.PI * 0.4);
+         HandTrajectoryMessage rhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2.0, new Point3D(-0.1, -0.5, 0.7), initialOrientation,
+                                                                                  referenceFrames.getMidFootZUpGroundFrame());
+         drcBehaviorTestHelper.send(rhandTrajectoryMessage);
+         drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+      */
       
       /*
        * Behavior create.
@@ -309,10 +311,6 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       
       System.out.println("End " + drcBehaviorTestHelper.getYoTime());
       
-      
-      
-      
-
    }
 
    //   @Test
