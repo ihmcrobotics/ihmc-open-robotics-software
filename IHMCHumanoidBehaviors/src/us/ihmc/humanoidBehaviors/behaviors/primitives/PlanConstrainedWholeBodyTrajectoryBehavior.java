@@ -121,7 +121,7 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
             ConstrainedWholeBodyPlanningRequestPacket request = new ConstrainedWholeBodyPlanningRequestPacket();
 
             request.setNumberOfFindInitialGuess(280);
-            request.setNumberOfExpanding(600);
+            request.setNumberOfExpanding(700);
             request.setInitialRobotConfigration(fullRobotModel);
 
             request.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
@@ -169,7 +169,7 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
                   long stopTime = System.currentTimeMillis();
                   long elapsedTime = stopTime - startTime;
                   System.out.println("===========================================");
-                  System.out.println("toolbox executing time is " + elapsedTime / 1000.0 + " seconds");
+                  System.out.println("planning time is " + elapsedTime / 1000.0 + " seconds");
                   System.out.println("===========================================");
                }
                else

@@ -82,7 +82,7 @@ public class SO3TrajectoryPointCalculatorTwo
          
          double time = trajectoryPoints.get(i).get(orientationYawPitchRoll, angularVelocityYawPitchRoll);
          
-         PrintTools.info(""+i+" "+ orientationYawPitchRoll +" " + angularVelocityYawPitchRoll);
+//         PrintTools.info(""+i+" "+ orientationYawPitchRoll +" " + angularVelocityYawPitchRoll);
          
          trajectoryPointsAngularVelocity.add(angularVelocityYawPitchRoll);
       }

@@ -12,7 +12,7 @@ public class CTTreeTools
     * 50 okay . why 1 has problem?
     * angular velocity problem on chest.
     */
-   static Random randomManager = new Random(1);
+   static Random randomManager = new Random(2);
    
    public static void setRandomNormalizedNodeData(CTTaskNode node, boolean isUniform, double treeReachingTime)
    {
