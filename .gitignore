@@ -18,7 +18,6 @@
 */install
 */src/*/bin
 
-
 # directories to always ignore
 **/.gradle
 **/.project
@@ -40,6 +39,7 @@
 **/.LSOverride
 **/.AppleDouble
 **/pitest
+**/generated-src2
 
 
 # File types to ignore
@@ -83,10 +83,7 @@
 **/Network Trash Folder
 **/Temporary Items
 **/.apdisk
-**/gradle-wrapper.jar
-**/gradle-wrapper.properties
-**/gradlew
-**/gradlew.bat
+**/rebel.xml
 **/generatedTestSuites/*TestSuite.java
 
-!**/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.jar
