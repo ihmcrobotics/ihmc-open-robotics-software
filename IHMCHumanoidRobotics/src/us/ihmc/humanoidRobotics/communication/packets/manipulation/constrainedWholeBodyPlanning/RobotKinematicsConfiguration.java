@@ -10,11 +10,8 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class RobotKinematicsConfiguration
 {
-   /**
-    * see OneDoFJoint names without fingers.
-    */
    private int jointConfigurationHash;
-   private double[] jointConfiguration;
+   public double[] jointConfiguration;
 
    public Vector3D rootTranslation = new Vector3D();
    public Quaternion rootOrientation = new Quaternion();

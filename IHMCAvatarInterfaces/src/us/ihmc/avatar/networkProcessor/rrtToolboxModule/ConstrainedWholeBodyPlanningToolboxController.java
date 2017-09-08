@@ -422,6 +422,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       constrainedEndEffectorTrajectory = PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory;
 
+//      PrintTools.info(""+initialConfiguration.jointConfiguration[22]);
+      
       /*
        * initialize kinematicsSolver.
        */
