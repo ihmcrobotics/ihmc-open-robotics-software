@@ -8,7 +8,9 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.CuttingWallBehaviorS
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationPlannedBehavior.WalkToLocationStates;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
@@ -21,6 +23,7 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTim
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<CuttingWallBehaviorState> implements CoactiveDataListenerInterface
@@ -40,7 +43,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
 
    public enum CuttingWallBehaviorState
    {
-      PLANNING, WAITING_CONFIRM, MOTION, PLAN_FALIED
+      PLANNING, WAITING_CONFIRM, MOTION, PLAN_FALIED, DONE
    }
 
    public CuttingWallBehaviorStateMachine(CommunicationBridge communicationBridge, YoDouble yoTime, FullHumanoidRobotModel fullRobotModel,
@@ -99,20 +102,13 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
       //      };
 
       BehaviorAction<CuttingWallBehaviorState> waiting = new BehaviorAction<CuttingWallBehaviorState>(CuttingWallBehaviorState.WAITING_CONFIRM,
-                                                                                                      leftHandTrajectoryBehavior, rightHandTrajectoryBehavior)
+                                                                                                      new SimpleDoNothingBehavior(communicationBridge))
       {
          @Override
          protected void setBehaviorInput()
          {
             PrintTools.info("setBehaviorInput WAITING " + yoTime.getDoubleValue());
 
-            HandTrajectoryMessage leftHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.5, 0.4, 1.0), new Quaternion(),
-                                                                                        ReferenceFrame.getWorldFrame());
-            HandTrajectoryMessage rightHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 3.0, new Point3D(0.5, -0.4, 1.0), new Quaternion(),
-                                                                                         ReferenceFrame.getWorldFrame());
-
-            leftHandTrajectoryBehavior.setInput(leftHandTrajectoryMessage);
-            rightHandTrajectoryBehavior.setInput(rightHandTrajectoryMessage);
          }
       };
 
@@ -126,22 +122,78 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
 
             WholeBodyTrajectoryMessage wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
 
-            HandTrajectoryMessage leftHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.6, 0.4, 1.0), new Quaternion(),
-                                                                                        ReferenceFrame.getWorldFrame());
-            HandTrajectoryMessage rightHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 3.0, new Point3D(0.7, -0.4, 1.0), new Quaternion(),
-                                                                                         ReferenceFrame.getWorldFrame());
-
-            wholebodyTrajectoryMessage.setHandTrajectoryMessage(rightHandTrajectoryMessage);
-            wholebodyTrajectoryMessage.setHandTrajectoryMessage(leftHandTrajectoryMessage);
+//            HandTrajectoryMessage leftHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 3.0, new Point3D(0.6, 0.4, 1.0), new Quaternion(),
+//                                                                                        ReferenceFrame.getWorldFrame());
+//            HandTrajectoryMessage rightHandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 3.0, new Point3D(0.7, -0.4, 1.0), new Quaternion(),
+//                                                                                         ReferenceFrame.getWorldFrame());
+//
+//            wholebodyTrajectoryMessage.setHandTrajectoryMessage(rightHandTrajectoryMessage);
+//            wholebodyTrajectoryMessage.setHandTrajectoryMessage(leftHandTrajectoryMessage);
+            
+            wholebodyTrajectoryMessage = planConstrainedWholeBodyTrajectoryBehavior.getWholebodyTrajectoryMessage();
 
             wholebodyTrajectoryBehavior.setInput(wholebodyTrajectoryMessage);
          }
       };
 
-      statemachine.addStateWithDoneTransition(planning, CuttingWallBehaviorState.WAITING_CONFIRM);
-      statemachine.addStateWithDoneTransition(waiting, CuttingWallBehaviorState.MOTION);
+      StateTransitionCondition planFailedCondition = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            boolean condition = planConstrainedWholeBodyTrajectoryBehavior.isDone() && !planConstrainedWholeBodyTrajectoryBehavior.planSuccess(); 
+            if(condition)
+               PrintTools.info("planFailedCondition condition okay");;
+            return condition;
+         }
+      };
 
-      statemachine.addState(motion);
+      StateTransitionCondition planSuccededCondition = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            boolean condition = planConstrainedWholeBodyTrajectoryBehavior.isDone() && planConstrainedWholeBodyTrajectoryBehavior.planSuccess(); 
+            if(condition)
+               PrintTools.info("planSuccededCondition condition okay");;
+            return condition;
+         }
+      };
+
+      BehaviorAction<CuttingWallBehaviorState> planFailedState = new BehaviorAction<CuttingWallBehaviorState>(CuttingWallBehaviorState.PLAN_FALIED,
+                                                                                                              new SimpleDoNothingBehavior(communicationBridge))
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            PrintTools.info("setBehaviorInput PLAN_FALIED " + yoTime.getDoubleValue());
+            
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Plan Failed");
+            sendPacket(p1);
+         }
+      };
+
+      BehaviorAction<CuttingWallBehaviorState> doneState = new BehaviorAction<CuttingWallBehaviorState>(CuttingWallBehaviorState.DONE,
+                                                                                                        new SimpleDoNothingBehavior(communicationBridge))
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            PrintTools.info("setBehaviorInput DONE " + yoTime.getDoubleValue());
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Finished Walking");
+            sendPacket(p1);
+         }
+      };
+
+      statemachine.addState(planning);
+      planning.addStateTransition(CuttingWallBehaviorState.WAITING_CONFIRM, planSuccededCondition);
+      planning.addStateTransition(CuttingWallBehaviorState.PLAN_FALIED, planFailedCondition);
+
+      statemachine.addStateWithDoneTransition(waiting, CuttingWallBehaviorState.MOTION);
+      statemachine.addStateWithDoneTransition(planFailedState, CuttingWallBehaviorState.DONE);
+      statemachine.addStateWithDoneTransition(motion, CuttingWallBehaviorState.DONE);
+
+      statemachine.addState(doneState);
       statemachine.setStartState(CuttingWallBehaviorState.PLANNING);
    }
 

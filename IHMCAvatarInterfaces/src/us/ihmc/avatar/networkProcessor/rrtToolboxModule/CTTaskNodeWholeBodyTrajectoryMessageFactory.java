@@ -168,7 +168,7 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
 //         Vector3D desiredAngularVelocity = new Vector3D();
          Vector3D desiredAngularVelocity = orientationCalculator.getTrajectoryPointsAngularVelocity().get(i);
          
-         PrintTools.info(""+i+" "+ time +" "+desiredOrientation +" " + desiredAngularVelocity);
+//         PrintTools.info(""+i+" "+ time +" "+desiredOrientation +" " + desiredAngularVelocity);
          chestTrajectoryMessage.setTrajectoryPoint(i, time, desiredOrientation, desiredAngularVelocity, worldFrame);
       }
    }
@@ -223,7 +223,7 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
          
          pelvisTrajectoryMessage.setTrajectoryPoint(i, time, pelvisPosition, orientation, pelvisLinearVelocity, angularVelocity, worldFrame);         
          
-         PrintTools.info(""+ i+" "+pelvisPosition +" "+pelvisLinearVelocity);
+//         PrintTools.info(""+ i+" "+pelvisPosition +" "+pelvisLinearVelocity);
       }
    }
    

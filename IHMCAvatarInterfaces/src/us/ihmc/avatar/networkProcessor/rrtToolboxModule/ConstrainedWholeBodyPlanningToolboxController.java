@@ -336,10 +336,9 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       {
          if (tree.getTreeReachingTime() != 1.0)
          {
-            packResult(null, 2);
-            terminateToolboxController();
-
             PrintTools.info("Fail to reach end.");
+            
+            terminateToolboxController();
          }
          else
          {
@@ -381,7 +380,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
          if (rootNode.getValidity() == false)
          {
-            packResult(null, 1);
+            // packResult(null, 1);
             terminateToolboxController();
          }
          else
@@ -421,9 +420,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       initialConfiguration = request.initialConfiguration;
 
       constrainedEndEffectorTrajectory = PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory;
-
-//      PrintTools.info(""+initialConfiguration.jointConfiguration[22]);
-      
+     
       /*
        * initialize kinematicsSolver.
        */
@@ -465,7 +462,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       long stopTime = System.currentTimeMillis();
       long elapsedTime = stopTime - startTime;
       System.out.println("===========================================");
-      System.out.println("toolbox executing time is " + elapsedTime / 1000.0 + " seconds");
+      System.out.println("toolbox executing time is " + elapsedTime / 1000.0 + " seconds " +updateCount.getIntegerValue());
       System.out.println("===========================================");
 
       isDone.set(true);

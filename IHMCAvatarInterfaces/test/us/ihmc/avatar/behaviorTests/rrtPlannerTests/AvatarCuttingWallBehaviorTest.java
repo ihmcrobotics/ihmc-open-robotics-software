@@ -240,7 +240,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       System.out.println("Behavior Dispatch");
       drcBehaviorTestHelper.dispatchBehavior(cuttingWallBehaviorStateMachine);
 
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(30.0);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(40.0);
 
       System.out.println("End");
 
