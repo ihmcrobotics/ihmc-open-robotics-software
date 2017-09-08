@@ -56,6 +56,7 @@ testDependencies {
    compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules-test", version: groupDependencyVersion
