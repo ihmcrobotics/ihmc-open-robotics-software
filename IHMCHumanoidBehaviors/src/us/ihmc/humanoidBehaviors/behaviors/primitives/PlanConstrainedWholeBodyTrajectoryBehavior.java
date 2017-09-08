@@ -232,7 +232,8 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
       setupPipeline();
       planningSuccess = false;
       cwbtoolboxOutputStatus = null;
-      cwbtoolboxOutputStatusQueue.clear();
+      cwbtoolboxOutputStatusQueue.clear();      
+
    }
 
    @Override
