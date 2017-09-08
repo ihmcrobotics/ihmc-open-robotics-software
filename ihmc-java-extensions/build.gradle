@@ -1,0 +1,37 @@
+buildscript {
+   repositories {
+      maven { url "https://plugins.gradle.org/m2/" }
+      mavenLocal()
+   }
+   dependencies {
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.7.7"
+   }
+}
+apply plugin: "us.ihmc.ihmc-build"
+
+ihmc {
+   loadProductProperties("../product.properties")
+   
+   configureDependencyResolution()
+   configurePublications()
+}
+
+testSuites {
+   def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
+   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "FLAKY", prefix + "VIDEO"]
+   disableBambooConfigurationCheck = true
+}
+
+mainDependencies {
+   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+   compile group: 'commons-io', name: 'commons-io', version: '2.4'
+   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
+}
+
+testDependencies {
+   compile group: 'junit', name: 'junit', version: '4.11'
+   compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+   compile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
+   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
+}
