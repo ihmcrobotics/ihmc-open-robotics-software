@@ -15,6 +15,7 @@
 */build
 */pit-reports
 */install
+*/src/*/bin
 
 # directories to always ignore
 **/.gradle
