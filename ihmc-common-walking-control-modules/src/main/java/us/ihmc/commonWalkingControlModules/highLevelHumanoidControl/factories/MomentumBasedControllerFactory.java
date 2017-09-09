@@ -39,7 +39,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -61,7 +60,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.util.PeriodicThreadScheduler;
@@ -294,9 +293,9 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
    }
 
    public RobotController getController(FullHumanoidRobotModel fullRobotModel, double controlDT, double gravity, YoDouble yoTime,
-                                        YoGraphicsListRegistry yoGraphicsListRegistry, DRCRobotSensorInformation sensorInformation,
-                                        ForceSensorDataHolderReadOnly forceSensorDataHolder, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
-                                        ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+                                        YoGraphicsListRegistry yoGraphicsListRegistry, ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                        CenterOfMassDataHolderReadOnly centerOfMassDataHolder, ContactSensorHolder contactSensorHolder,
+                                        CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput,
                                         InverseDynamicsJoint... jointsToIgnore)
    {
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -377,7 +376,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
          toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controlledBodies, contactablePlaneBodies);
       }
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
-      WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, template, registry);
+      WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
 
       /////////////////////////////////////////////////////////////////////////////////////////////
@@ -551,11 +550,6 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
    public HighLevelState getCurrentHighLevelState()
    {
       return highLevelHumanoidControllerManager.getCurrentHighLevelState();
-   }
-
-   public NewHighLevelControllerStates getCurrentNewHighLevelControllerState()
-   {
-      return null;
    }
 
    public CommandInputManager getCommandInputManager()
