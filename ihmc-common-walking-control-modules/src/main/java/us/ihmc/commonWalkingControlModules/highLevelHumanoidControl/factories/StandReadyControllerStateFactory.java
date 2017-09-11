@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -23,7 +24,8 @@ public class StandReadyControllerStateFactory implements HighLevelControllerStat
                                                                  HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
                                                                  CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                                                  HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters)
+                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters,
+                                                                 LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
    {
       if (standReadyControllerState == null)
          standReadyControllerState = new StandReadyControllerState(controllerToolbox, highLevelControllerParameters);

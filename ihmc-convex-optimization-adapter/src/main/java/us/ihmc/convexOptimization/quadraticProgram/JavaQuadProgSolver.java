@@ -9,6 +9,7 @@ import org.ejml.interfaces.decomposition.CholeskyDecomposition;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
@@ -69,6 +70,7 @@ public class JavaQuadProgSolver implements ActiveSetQPSolver
 
    private final CholeskyDecomposition<DenseMatrix64F> decomposer = DecompositionFactory.chol(defaultSize, false);
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(defaultSize);
+   //private final DampedLeastSquaresSolver solver = new DampedLeastSquaresSolver(defaultSize, 1e-6);
 
    private final DenseMatrix64F quadraticCostQMatrix = new DenseMatrix64F(defaultSize, defaultSize);
    private final DenseMatrix64F decomposedQuadraticCostQMatrix = new DenseMatrix64F(defaultSize, defaultSize);

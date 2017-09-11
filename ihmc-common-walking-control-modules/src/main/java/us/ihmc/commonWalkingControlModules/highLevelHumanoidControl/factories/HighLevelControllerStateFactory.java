@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 
 import java.util.EnumMap;
 
@@ -18,7 +19,8 @@ public interface HighLevelControllerStateFactory
                                                           HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
                                                           CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                                           HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                                          ICPTrajectoryPlannerParameters capturePointPlannerParameters);
+                                                          ICPTrajectoryPlannerParameters capturePointPlannerParameters,
+                                                          LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput);
 
    NewHighLevelControllerStates getStateEnum();
 }

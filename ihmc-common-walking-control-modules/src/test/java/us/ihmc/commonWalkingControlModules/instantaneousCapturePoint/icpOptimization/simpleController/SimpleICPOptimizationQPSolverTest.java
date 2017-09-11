@@ -556,7 +556,7 @@ public class SimpleICPOptimizationQPSolverTest
          double feedbackGainX = 3.61466302555;
          double feedbackGainY = 3.88533697445;
          solver.resetFeedbackConditions();
-         solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGainX, feedbackGainY, 10000.0);
+         solver.setFeedbackConditions(scaledFeedbackWeight.getX(), scaledFeedbackWeight.getY(), feedbackGainX, feedbackGainY, 100000.0);
          solver.setMaxCMPDistanceFromEdge(0.06);
          solver.setCopSafeDistanceToEdge(0.002);
          solver.setFeedbackRegularizationWeight(0.0025);
@@ -612,7 +612,7 @@ public class SimpleICPOptimizationQPSolverTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 1000000000) //21000)
    public void testSimpleNoExceptions() throws Exception
    {
       SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);

@@ -3,6 +3,7 @@ package us.ihmc.wholeBodyController;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.commons.Conversions;
@@ -169,6 +170,73 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       }
    }
 
+   public DRCControllerThread(WholeBodyControllerParameters robotModel, DRCRobotSensorInformation sensorInformation, HighLevelHumanoidControllerFactory controllerFactory,
+                              ThreadDataSynchronizerInterface threadDataSynchronizer, DRCOutputProcessor outputProcessor,
+                              GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity, double estimatorDT)
+   {
+      this.threadDataSynchronizer = threadDataSynchronizer;
+      this.outputProcessor = outputProcessor;
+      this.robotVisualizer = robotVisualizer;
+      this.controlDTInNS = Conversions.secondsToNanoseconds(robotModel.getControllerDT());
+      this.estimatorDTInNS = Conversions.secondsToNanoseconds(estimatorDT);
+      this.estimatorTicksPerControlTick = this.controlDTInNS / this.estimatorDTInNS;
+      this.controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
+      this.rootFrame = this.controllerFullRobotModel.getRootJoint().getFrameAfterJoint();
+      this.globalDataProducer = dataProducer;
+
+      closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerFactory);
+
+      if (ALLOW_MODEL_CORRUPTION)
+      {
+         fullRobotModelCorruptor = new FullRobotModelCorruptor(controllerFullRobotModel, registry);
+      }
+      else
+      {
+         fullRobotModelCorruptor = null;
+      }
+
+      forceSensorDataHolderForController = threadDataSynchronizer.getControllerForceSensorDataHolder();
+      if (robotModel.getWalkingControllerParameters().useCenterOfMassVelocityFromEstimator())
+      {
+         centerOfMassDataHolderForController = threadDataSynchronizer.getControllerCenterOfMassDataHolder();
+      }
+      else
+      {
+         centerOfMassDataHolderForController = null;
+      }
+
+      centerOfPressureDataHolderForEstimator = threadDataSynchronizer.getControllerCenterOfPressureDataHolder();
+
+
+
+      InverseDynamicsJoint[] arrayOfJointsToIgnore = createListOfJointsToIgnore(controllerFullRobotModel, robotModel, sensorInformation);
+
+      robotController = createMomentumBasedController(controllerFullRobotModel, controllerFactory, controllerTime, robotModel.getControllerDT(), gravity,
+                                                      forceSensorDataHolderForController, centerOfMassDataHolderForController,
+                                                      threadDataSynchronizer.getControllerContactSensorHolder(), centerOfPressureDataHolderForEstimator,
+                                                      sensorInformation, threadDataSynchronizer.getControllerDesiredJointDataHolder(), yoGraphicsListRegistry,
+                                                      registry,  arrayOfJointsToIgnore);
+
+      createControllerRobotMotionStatusUpdater(controllerFactory, threadDataSynchronizer.getControllerRobotMotionStatusHolder());
+
+      firstTick.set(true);
+      registry.addChild(robotController.getYoVariableRegistry());
+      if(outputProcessor != null)
+      {
+         outputProcessor.setLowLevelControllerCoreOutput(controllerFullRobotModel, threadDataSynchronizer.getControllerDesiredJointDataHolder(), threadDataSynchronizer.getControllerRawJointSensorDataHolderMap());
+         outputProcessor.setForceSensorDataHolderForController(forceSensorDataHolderForController);
+         registry.addChild(outputProcessor.getControllerYoVariableRegistry());
+      }
+
+      lastEstimatorStartTime.set(Long.MIN_VALUE);
+      expectedEstimatorTick.set(estimatorDTInNS);
+
+      if (robotVisualizer != null)
+      {
+         robotVisualizer.addRegistry(registry, yoGraphicsListRegistry);
+      }
+   }
+
    public static InverseDynamicsJoint[] createListOfJointsToIgnore(FullHumanoidRobotModel controllerFullRobotModel, WholeBodyControllerParameters robotModel, DRCRobotSensorInformation sensorInformation)
    {
       ArrayList<InverseDynamicsJoint> listOfJointsToIgnore = new ArrayList<>();
@@ -193,6 +261,21 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    private void createControllerRobotMotionStatusUpdater(MomentumBasedControllerFactory controllerFactory,
          final RobotMotionStatusHolder controllerRobotMotionStatusHolder)
+   {
+      RobotMotionStatusChangedListener controllerRobotMotionStatusUpdater = new RobotMotionStatusChangedListener()
+      {
+         @Override
+         public void robotMotionStatusHasChanged(RobotMotionStatus newStatus, double time)
+         {
+            controllerRobotMotionStatusHolder.setCurrentRobotMotionStatus(newStatus);
+         }
+      };
+
+      controllerFactory.attachRobotMotionStatusChangedListener(controllerRobotMotionStatusUpdater);
+   }
+
+   private void createControllerRobotMotionStatusUpdater(HighLevelHumanoidControllerFactory controllerFactory,
+                                                         final RobotMotionStatusHolder controllerRobotMotionStatusHolder)
    {
       RobotMotionStatusChangedListener controllerRobotMotionStatusUpdater = new RobotMotionStatusChangedListener()
       {
@@ -244,6 +327,67 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          {
             CommonInertiaEllipsoidsVisualizer commonInertiaElipsoidsVisualizer = new CommonInertiaEllipsoidsVisualizer(controllerModel.getElevator(),
                   yoGraphicsListRegistry);
+            modularRobotController.addRobotController(commonInertiaElipsoidsVisualizer);
+         }
+
+         if (SHOW_REFERENCE_FRAMES)
+         {
+            InverseDynamicsMechanismReferenceFrameVisualizer inverseDynamicsMechanismReferenceFrameVisualizer = new InverseDynamicsMechanismReferenceFrameVisualizer(
+                  controllerModel.getElevator(), yoGraphicsListRegistry, 0.5);
+            modularRobotController.addRobotController(inverseDynamicsMechanismReferenceFrameVisualizer);
+         }
+
+         if (SHOW_JOINTAXIS_ZALIGN_FRAMES)
+         {
+            JointAxisVisualizer jointAxisVisualizer = new JointAxisVisualizer(controllerModel.getElevator(), yoGraphicsListRegistry, 0.3);
+            modularRobotController.addRobotController(jointAxisVisualizer);
+         }
+      }
+
+      if (CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR)
+      {
+         RobotController dynamicallyConsistentNullspaceEvaluator = new ConstrainedCenterOfMassJacobianEvaluator(controllerModel);
+         modularRobotController.addRobotController(dynamicallyConsistentNullspaceEvaluator);
+      }
+
+      return modularRobotController;
+   }
+
+   private ModularRobotController createMomentumBasedController(FullHumanoidRobotModel controllerModel, HighLevelHumanoidControllerFactory controllerFactory,
+                                                                YoDouble yoTime, double controlDT, double gravity,
+                                                                ForceSensorDataHolderReadOnly forceSensorDataHolderForController, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
+                                                                ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+                                                                DRCRobotSensorInformation sensorInformation, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput,
+                                                                YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
+                                                                InverseDynamicsJoint... jointsToIgnore)
+   {
+      if (CREATE_COM_CALIBRATION_TOOL)
+      {
+         try
+         {
+            CenterOfMassCalibrationTool centerOfMassCalibrationTool = new CenterOfMassCalibrationTool(controllerModel, forceSensorDataHolderForController,
+                                                                                                      yoGraphicsListRegistry, registry);
+            controllerFactory.addUpdatable(centerOfMassCalibrationTool);
+         }
+         catch (Exception e)
+         {
+            System.err.println("Couldn't create CenterOfMassCalibrationTool");
+         }
+      }
+
+      RobotController robotController = controllerFactory.getController(controllerModel, controlDT, gravity, yoTime, yoGraphicsListRegistry, sensorInformation,
+                                                                        forceSensorDataHolderForController, centerOfMassDataHolder, contactSensorHolder,
+                                                                        centerOfPressureDataHolderForEstimator, lowLevelControllerOutput, jointsToIgnore);
+
+      ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
+      modularRobotController.addRobotController(robotController);
+
+      if (yoGraphicsListRegistry != null)
+      {
+         if (SHOW_INERTIA_GRAPHICS)
+         {
+            CommonInertiaEllipsoidsVisualizer commonInertiaElipsoidsVisualizer = new CommonInertiaEllipsoidsVisualizer(controllerModel.getElevator(),
+                                                                                                                       yoGraphicsListRegistry);
             modularRobotController.addRobotController(commonInertiaElipsoidsVisualizer);
          }
 

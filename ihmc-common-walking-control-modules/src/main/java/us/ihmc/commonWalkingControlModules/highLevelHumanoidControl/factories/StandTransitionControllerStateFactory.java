@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 
 import java.util.EnumMap;
 
@@ -22,7 +23,8 @@ public class StandTransitionControllerStateFactory implements HighLevelControlle
                                                                  HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
                                                                  CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                                                  HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters)
+                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters,
+                                                                 LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
    {
       if (standTransitionControllerState == null)
       {
@@ -31,10 +33,10 @@ public class StandTransitionControllerStateFactory implements HighLevelControlle
 
          NewHighLevelControllerState standReadyControllerState = standReadyControllerStateFactory.getOrCreateControllerState(controllerFactoriesMap, controllerToolbox, highLevelControllerParameters,
                                                                                                                              commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
-                                                                                                                             capturePointPlannerParameters);
+                                                                                                                             capturePointPlannerParameters, lowLevelControllerOutput);
          NewHighLevelControllerState walkingControllerState = walkingControllerStateFactory.getOrCreateControllerState(controllerFactoriesMap, controllerToolbox, highLevelControllerParameters,
                                                                                                                        commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
-                                                                                                                       capturePointPlannerParameters);
+                                                                                                                       capturePointPlannerParameters, lowLevelControllerOutput);
 
          standTransitionControllerState = new  StandTransitionControllerState(standReadyControllerState, walkingControllerState, controllerToolbox, highLevelControllerParameters);
       }
