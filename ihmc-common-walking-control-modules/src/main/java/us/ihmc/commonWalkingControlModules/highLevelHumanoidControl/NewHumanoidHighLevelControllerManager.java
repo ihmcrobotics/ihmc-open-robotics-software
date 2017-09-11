@@ -34,6 +34,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.*;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -60,6 +61,7 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
 
    private final ForceSensorDataHolderReadOnly forceSensorDataHolder;
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
+   private final LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput;
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
 
@@ -82,7 +84,8 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
                                                 EnumMap<NewHighLevelControllerStates, HighLevelControllerStateFactory> controllerStateFactories,
                                                 ArrayList<ControllerStateTransitionFactory<NewHighLevelControllerStates>> controllerTransitionFactories,
                                                 HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                                CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, ForceSensorDataHolderReadOnly forceSensorDataHolder)
+                                                CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                                LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
@@ -93,6 +96,7 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
       this.initialControllerState = initialControllerState;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
+      this.lowLevelControllerOutput = lowLevelControllerOutput;
       this.forceSensorDataHolder = forceSensorDataHolder;
 
       this.requestedHighLevelControllerState.set(initialControllerState);
@@ -212,7 +216,7 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
          // set the controller core output
          NewHighLevelControllerState highLevelControllerState = controllerStateFactory.getOrCreateControllerState(controllerStateFactories, controllerToolbox, highLevelControllerParameters,
                                                                                                                   commandInputManager, statusMessageOutputManager, managerFactory,
-                                                                                                                  walkingControllerParameters, icpPlannerParameters);
+                                                                                                                  walkingControllerParameters, icpPlannerParameters, lowLevelControllerOutput);
 
          // add the controller to the state machine
          highLevelStateMachine.addState(highLevelControllerState);

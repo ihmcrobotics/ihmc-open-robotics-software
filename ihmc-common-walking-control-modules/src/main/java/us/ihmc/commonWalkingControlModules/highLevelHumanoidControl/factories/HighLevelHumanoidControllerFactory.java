@@ -51,6 +51,7 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
@@ -361,7 +362,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                         YoGraphicsListRegistry yoGraphicsListRegistry, DRCRobotSensorInformation sensorInformation,
                                         ForceSensorDataHolderReadOnly forceSensorDataHolder, CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
                                         ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                        InverseDynamicsJoint... jointsToIgnore)
+                                        LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput, InverseDynamicsJoint... jointsToIgnore)
    {
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
@@ -413,7 +414,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                                                            requestedHighLevelControllerState, controllerFactoriesMap,
                                                                                                                            stateTransitionFactories, managerFactory, controllerToolbox,
                                                                                                                            centerOfPressureDataHolderForEstimator,
-                                                                                                                           forceSensorDataHolder);
+                                                                                                                           forceSensorDataHolder, lowLevelControllerOutput);
       highLevelHumanoidControllerManager.addYoVariableRegistry(registry);
       return highLevelHumanoidControllerManager;
    }

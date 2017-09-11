@@ -28,6 +28,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -50,7 +51,8 @@ public class NewWalkingControllerState extends NewHighLevelControllerState
 
    public NewWalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, HighLevelControlManagerFactory managerFactory,
                                     HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
-                                    ICPTrajectoryPlannerParameters capturePointPlannerParameters, WalkingControllerParameters walkingControllerParameters)
+                                    ICPTrajectoryPlannerParameters capturePointPlannerParameters, WalkingControllerParameters walkingControllerParameters,
+                                    LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
    {
       super(controllerState);
 
@@ -81,7 +83,7 @@ public class NewWalkingControllerState extends NewHighLevelControllerState
          toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controlledBodies, controllerToolbox.getContactablePlaneBodies());
       }
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
-      controllerCore = new WholeBodyControllerCore(toolbox, template, registry);
+      controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
       walkingController.setControllerCoreOutput(controllerCoreOutput);
 
