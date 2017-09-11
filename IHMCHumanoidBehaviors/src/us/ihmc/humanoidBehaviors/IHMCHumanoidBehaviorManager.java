@@ -12,6 +12,7 @@ import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBeha
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ObjectDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicPipeLineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicStateMachineBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.CuttingWallBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.FireFighterStanceBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickUpBallBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
@@ -293,6 +294,13 @@ public class IHMCHumanoidBehaviorManager
 
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(behaviorCommunicationBridge, fullRobotModel, yoTime);
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
+      
+      
+      
+      
+      
+      CuttingWallBehaviorStateMachine cuttingWallBehavior = new CuttingWallBehaviorStateMachine(behaviorCommunicationBridge, yoTime, fullRobotModel, referenceFrames);
+      dispatcher.addBehavior(HumanoidBehaviorType.CUTTING_WALL, cuttingWallBehavior);
 
    }
 
