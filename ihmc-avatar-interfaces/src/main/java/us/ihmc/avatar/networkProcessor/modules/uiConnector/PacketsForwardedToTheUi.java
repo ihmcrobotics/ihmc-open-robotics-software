@@ -48,6 +48,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajec
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
@@ -104,7 +105,8 @@ public class PacketsForwardedToTheUi
       HeightQuadTreeMessage.class,
       LidarScanMessage.class,
       HeatMapPacket.class,
-      BoundingBoxesPacket.class
+      BoundingBoxesPacket.class,
+      WalkingStatusMessage.class     
    };
 
    public static final HashMap<Class<?>, Long> PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS = new HashMap<Class<?>, Long>();
