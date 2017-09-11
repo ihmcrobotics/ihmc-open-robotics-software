@@ -22,13 +22,12 @@ public class NewWalkingControllerStateFactory implements HighLevelControllerStat
                                                                  HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
                                                                  CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                                                  HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters,
-                                                                 LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
+                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters)
    {
       if (walkingControllerState == null)
       {
          walkingControllerState = new NewWalkingControllerState(commandInputManager, statusOutputManager, managerFactory, controllerToolbox, highLevelControllerParameters,
-                                                                capturePointPlannerParameters, walkingControllerParameters, lowLevelControllerOutput);
+                                                                capturePointPlannerParameters, walkingControllerParameters);
       }
 
       return walkingControllerState;

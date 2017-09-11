@@ -23,8 +23,7 @@ public class FreezeControllerStateFactory implements HighLevelControllerStateFac
                                                                  HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
                                                                  CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                                                  HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters,
-                                                                 LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
+                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters)
    {
       if (freezeControllerState == null)
          freezeControllerState = new FreezeControllerState(controllerToolbox, highLevelControllerParameters);

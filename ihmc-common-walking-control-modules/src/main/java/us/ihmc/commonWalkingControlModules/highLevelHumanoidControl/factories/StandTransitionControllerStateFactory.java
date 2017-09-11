@@ -23,8 +23,7 @@ public class StandTransitionControllerStateFactory implements HighLevelControlle
                                                                  HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
                                                                  CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                                                  HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters,
-                                                                 LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
+                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters)
    {
       if (standTransitionControllerState == null)
       {
@@ -33,10 +32,10 @@ public class StandTransitionControllerStateFactory implements HighLevelControlle
 
          NewHighLevelControllerState standReadyControllerState = standReadyControllerStateFactory.getOrCreateControllerState(controllerFactoriesMap, controllerToolbox, highLevelControllerParameters,
                                                                                                                              commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
-                                                                                                                             capturePointPlannerParameters, lowLevelControllerOutput);
+                                                                                                                             capturePointPlannerParameters);
          NewHighLevelControllerState walkingControllerState = walkingControllerStateFactory.getOrCreateControllerState(controllerFactoriesMap, controllerToolbox, highLevelControllerParameters,
                                                                                                                        commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
-                                                                                                                       capturePointPlannerParameters, lowLevelControllerOutput);
+                                                                                                                       capturePointPlannerParameters);
 
          standTransitionControllerState = new  StandTransitionControllerState(standReadyControllerState, walkingControllerState, controllerToolbox, highLevelControllerParameters);
       }

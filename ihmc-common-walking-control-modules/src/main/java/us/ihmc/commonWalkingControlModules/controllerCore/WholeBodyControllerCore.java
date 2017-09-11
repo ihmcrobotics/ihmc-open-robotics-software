@@ -42,7 +42,8 @@ public class WholeBodyControllerCore
    private final ExecutionTimer controllerCoreComputeTimer = new ExecutionTimer("controllerCoreComputeTimer", 1.0, registry);
    private final ExecutionTimer controllerCoreSubmitTimer = new ExecutionTimer("controllerCoreSubmitTimer", 1.0, registry);
 
-   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput, YoVariableRegistry parentRegistry)
+   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands,
+                                  LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput, YoVariableRegistry parentRegistry)
    {
       feedbackController = new WholeBodyFeedbackController(toolbox, allPossibleCommands, registry);
 

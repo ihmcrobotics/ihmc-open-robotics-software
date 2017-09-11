@@ -51,8 +51,7 @@ public class NewWalkingControllerState extends NewHighLevelControllerState
 
    public NewWalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, HighLevelControlManagerFactory managerFactory,
                                     HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
-                                    ICPTrajectoryPlannerParameters capturePointPlannerParameters, WalkingControllerParameters walkingControllerParameters,
-                                    LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
+                                    ICPTrajectoryPlannerParameters capturePointPlannerParameters, WalkingControllerParameters walkingControllerParameters)
    {
       super(controllerState);
 
@@ -83,6 +82,7 @@ public class NewWalkingControllerState extends NewHighLevelControllerState
          toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controlledBodies, controllerToolbox.getContactablePlaneBodies());
       }
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
+      LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput = new LowLevelOneDoFJointDesiredDataHolderList(controllerToolbox.getFullRobotModel().getOneDoFJoints());
       controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
       walkingController.setControllerCoreOutput(controllerCoreOutput);
