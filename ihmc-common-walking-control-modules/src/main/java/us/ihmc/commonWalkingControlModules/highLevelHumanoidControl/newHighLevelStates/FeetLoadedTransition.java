@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -29,11 +28,11 @@ public class FeetLoadedTransition implements StateTransitionCondition
    private final SimpleMovingAverageFilteredYoVariable prepLeftFootFzAverage;
    private final SimpleMovingAverageFilteredYoVariable prepRightFootFzAverage;
 
-   public FeetLoadedTransition(ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetContactSensors,
+   public FeetLoadedTransition(ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetForceSensors,
                                double controlDT, double gravityZ, double totalMass, YoVariableRegistry parentRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
-         footSensors.put(robotSide, forceSensorDataHolder.getByName(feetContactSensors.get(robotSide)));
+         footSensors.put(robotSide, forceSensorDataHolder.getByName(feetForceSensors.get(robotSide)));
 
       int windowSize = (int) Math.floor(TIME_WINDOW / controlDT);
 
