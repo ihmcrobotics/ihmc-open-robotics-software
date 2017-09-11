@@ -38,7 +38,6 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -58,7 +57,6 @@ public class WalkingMessageHandler
 
    private final YoBoolean hasNewFootstepAdjustment = new YoBoolean("hasNewFootstepAdjustement", registry);
    private final AdjustFootstepCommand requestedFootstepAdjustment = new AdjustFootstepCommand();
-   private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private final SideDependentList<Footstep> footstepsAtCurrentLocation = new SideDependentList<>();
    private final SideDependentList<Footstep> lastDesiredFootsteps = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
@@ -103,7 +101,6 @@ public class WalkingMessageHandler
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          StatusMessageOutputManager statusOutputManager, YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this.contactableFeet = contactableFeet;
       this.statusOutputManager = statusOutputManager;
 
       this.yoTime = yoTime;
@@ -117,8 +114,7 @@ public class WalkingMessageHandler
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
-         RigidBody endEffector = contactableFoot.getRigidBody();
-         Footstep footstepAtCurrentLocation = new Footstep(endEffector, robotSide);
+         Footstep footstepAtCurrentLocation = new Footstep(robotSide);
          footstepsAtCurrentLocation.put(robotSide, footstepAtCurrentLocation);
          soleFrames.put(robotSide, contactableFoot.getSoleFrame());
 
@@ -614,10 +610,7 @@ public class WalkingMessageHandler
       RobotSide robotSide = footstepData.getRobotSide();
       TrajectoryType trajectoryType = footstepData.getTrajectoryType();
 
-      ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
-      RigidBody rigidBody = contactableFoot.getRigidBody();
-
-      Footstep footstep = new Footstep(rigidBody, robotSide, footstepPose, trustHeight, contactPoints);
+      Footstep footstep = new Footstep(robotSide, footstepPose, trustHeight, contactPoints);
 
       if (trajectoryType == TrajectoryType.CUSTOM)
       {

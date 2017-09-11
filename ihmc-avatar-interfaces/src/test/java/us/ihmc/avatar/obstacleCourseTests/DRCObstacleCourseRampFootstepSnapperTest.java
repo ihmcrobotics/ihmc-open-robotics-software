@@ -29,8 +29,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.BasicFootstepMask;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.GenericFootstepSnappingParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -40,7 +40,6 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -144,10 +143,9 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       {
          FootstepDataMessage footstepData = corruptedFootstepDataList.getDataList().get(i);
          RobotSide robotSide = footstepData.getRobotSide();
-         RigidBody endEffector = fullRobotModel.getFoot(robotSide);
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
          pose.setPose(footstepData.getLocation(), footstepData.getOrientation());
-         corruptedFootstepList.add(new Footstep(endEffector, robotSide, pose));
+         corruptedFootstepList.add(new Footstep(robotSide, pose));
       }
 
       // Build the BoundingBox2D containing all the footsteps

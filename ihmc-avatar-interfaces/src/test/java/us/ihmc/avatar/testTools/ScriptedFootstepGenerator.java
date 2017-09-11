@@ -73,8 +73,7 @@ public class ScriptedFootstepGenerator
 
    private Footstep generateFootstepFromLocationAndOrientation(RobotSide robotSide, double[] positionArray, double[] orientationArray)
    {
-      RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
-      Footstep footstep = new Footstep(foot, robotSide);
+      Footstep footstep = new Footstep(robotSide);
 
       Point3D position = new Point3D(positionArray);
       Quaternion orientation = new Quaternion(orientationArray);

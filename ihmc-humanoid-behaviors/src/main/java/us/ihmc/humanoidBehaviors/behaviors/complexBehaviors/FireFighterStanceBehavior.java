@@ -87,14 +87,14 @@ public class FireFighterStanceBehavior extends AbstractBehavior
             {
                FramePose desiredFootPose = new FramePose(referenceFrames.getSoleFrame(RobotSide.LEFT), new Pose3D(.2, .1, 0, 0, 0, 0));
                desiredFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-               Footstep desiredFootStep = new Footstep(fullRobotModel.getFoot(RobotSide.LEFT), RobotSide.LEFT, desiredFootPose);
+               Footstep desiredFootStep = new Footstep(RobotSide.LEFT, desiredFootPose);
                desiredFootsteps.add(desiredFootStep);
             }
             {
                FramePose desiredFootPose = new FramePose(referenceFrames.getSoleFrame(RobotSide.RIGHT), new Pose3D(-.2, -.1, 0, Math.toRadians(-45), 0, 0));
                desiredFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-               Footstep desiredFootStep = new Footstep(fullRobotModel.getFoot(RobotSide.RIGHT), RobotSide.RIGHT, desiredFootPose);
+               Footstep desiredFootStep = new Footstep(RobotSide.RIGHT, desiredFootPose);
                desiredFootsteps.add(desiredFootStep);
             }
 
@@ -118,14 +118,14 @@ public class FireFighterStanceBehavior extends AbstractBehavior
             {
                FramePose desiredFootPose = new FramePose(referenceFrames.getSoleFrame(RobotSide.LEFT), new Pose3D(.2, .1, 0, 0, 0, 0));
                desiredFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-               Footstep desiredFootStep = new Footstep(fullRobotModel.getFoot(RobotSide.LEFT), RobotSide.LEFT, desiredFootPose);
+               Footstep desiredFootStep = new Footstep(RobotSide.LEFT, desiredFootPose);
                desiredFootsteps.add(desiredFootStep);
             }
             {
                FramePose desiredFootPose = new FramePose(referenceFrames.getSoleFrame(RobotSide.LEFT), new Pose3D(-.2, -.3, 0, Math.toRadians(-45), 0, 0));
                desiredFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-               Footstep desiredFootStep = new Footstep(fullRobotModel.getFoot(RobotSide.RIGHT), RobotSide.RIGHT, desiredFootPose);
+               Footstep desiredFootStep = new Footstep(RobotSide.RIGHT, desiredFootPose);
                desiredFootsteps.add(desiredFootStep);
             }
 
@@ -286,7 +286,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      
+
       return pipeLine.isDone();
    }
 
@@ -319,7 +319,7 @@ public class FireFighterStanceBehavior extends AbstractBehavior
    {
 
          currentState = BasicStates.DONE;
-  
+
       TextToSpeechPacket p1 = new TextToSpeechPacket("Ready To Fight Fires");
       sendPacket(p1);
    }

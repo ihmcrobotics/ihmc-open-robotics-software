@@ -11,7 +11,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -21,13 +20,10 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -37,9 +33,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessag
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
@@ -65,7 +58,7 @@ public class DesiredFootstepTest
 
    /**
     * This test verifies that FootstepData can be sent and received using our current message passing utilities
-    * @throws IOException 
+    * @throws IOException
     */
 
    @ContinuousIntegrationTest(estimatedDuration = 1.6, categoriesOverride = IntegrationCategory.FLAKY)
@@ -331,14 +324,11 @@ public class DesiredFootstepTest
 
       for (int footstepNumber = 0; footstepNumber < number; footstepNumber++)
       {
-         RigidBody endEffector = createRigidBody(robotSide);
-         ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createRandomContactablePlaneBodyForTests(random, endEffector);
-
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(footstepNumber, 0.0, 0.0),
                new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), robotSide, pose, trustHeight);
+         Footstep footstep = new Footstep(robotSide, pose, trustHeight);
          footsteps.add(footstep);
       }
 
@@ -389,14 +379,10 @@ public class DesiredFootstepTest
       @Override
       public void receivedPacket(FootstepDataMessage packet)
       {
-         RigidBody endEffector = createRigidBody(packet.getRobotSide());
-         ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector,
-               ReferenceFrame.getWorldFrame());
-
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), packet.getLocation(), packet.getOrientation());
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), packet.getRobotSide(), pose, trustHeight);
+         Footstep footstep = new Footstep(packet.getRobotSide(), pose, trustHeight);
          reconstructedFootsteps.add(footstep);
       }
 
@@ -415,13 +401,12 @@ public class DesiredFootstepTest
       {
          for (FootstepDataMessage footstepData : packet)
          {
-            RigidBody endEffector = createRigidBody(footstepData.getRobotSide());
             List<Point2D> contactPoints = footstepData.getPredictedContactPoints();
             if (contactPoints != null && contactPoints.size() == 0)
                contactPoints = null;
             FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
 
-            Footstep footstep = new Footstep(endEffector, robotSide, footstepPose, true, contactPoints);
+            Footstep footstep = new Footstep(robotSide, footstepPose, true, contactPoints);
             footstep.setTrajectoryType(footstepData.getTrajectoryType());
             footstep.setSwingHeight(footstepData.getSwingHeight());
             reconstructedFootstepPath.add(footstep);
@@ -432,18 +417,6 @@ public class DesiredFootstepTest
       {
          return reconstructedFootstepPath;
       }
-   }
-
-   private RigidBody createRigidBody(RobotSide robotSide)
-   {
-      return createRigidBody(robotSide.getCamelCaseNameForStartOfExpression() + "Foot");
-   }
-
-   private RigidBody createRigidBody(String name)
-   {
-      RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
-      SixDoFJoint joint = new SixDoFJoint("joint", elevator);
-      return ScrewTools.addRigidBody(name, joint, new Matrix3D(), 0.0, new Vector3D());
    }
 
    private class PauseConsumer implements PacketConsumer<PauseWalkingMessage>
