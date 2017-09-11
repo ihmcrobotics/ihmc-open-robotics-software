@@ -24,8 +24,7 @@ public class StandPrepControllerStateFactory implements HighLevelControllerState
                                                                  HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
                                                                  CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                                                  HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters,
-                                                                 LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
+                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters)
    {
       if (standPrepControllerState == null)
          standPrepControllerState = new StandPrepControllerState(controllerToolbox, highLevelControllerParameters);

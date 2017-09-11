@@ -19,8 +19,7 @@ public interface HighLevelControllerStateFactory
                                                           HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
                                                           CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                                           HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                                          ICPTrajectoryPlannerParameters capturePointPlannerParameters,
-                                                          LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput);
+                                                          ICPTrajectoryPlannerParameters capturePointPlannerParameters);
 
    NewHighLevelControllerStates getStateEnum();
 }

@@ -216,7 +216,7 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
          // set the controller core output
          NewHighLevelControllerState highLevelControllerState = controllerStateFactory.getOrCreateControllerState(controllerStateFactories, controllerToolbox, highLevelControllerParameters,
                                                                                                                   commandInputManager, statusMessageOutputManager, managerFactory,
-                                                                                                                  walkingControllerParameters, icpPlannerParameters, lowLevelControllerOutput);
+                                                                                                                  walkingControllerParameters, icpPlannerParameters);
 
          // add the controller to the state machine
          highLevelStateMachine.addState(highLevelControllerState);
@@ -273,6 +273,7 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
          if (!lowLevelJointData.hasControlMode())
             throw new NullPointerException("Joint: " + controlledJoint.getName() + " has no control mode.");
 
+         /*
          if (lowLevelJointData.hasDesiredPosition())
             controlledJoint.setqDesired(lowLevelJointData.getDesiredPosition());
 
@@ -284,9 +285,17 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
 
          if (lowLevelJointData.hasDesiredTorque())
             controlledJoint.setTau(lowLevelJointData.getDesiredTorque());
+            */
+
+         // Zero out joint for testing purposes
+         controlledJoint.setqDesired(Double.NaN);
+         controlledJoint.setQdDesired(Double.NaN);
+         controlledJoint.setQddDesired(Double.NaN);
+         controlledJoint.setTau(Double.NaN);
       }
 
       yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
+      lowLevelControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
    }
 
 
