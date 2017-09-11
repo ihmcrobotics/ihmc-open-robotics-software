@@ -30,7 +30,7 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
    
    private ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
    
-   private double firstTrajectoryPointTime = 5.0;
+   private double firstTrajectoryPointTime = 6.0;
    private double trajectoryTime;
 
    private WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
