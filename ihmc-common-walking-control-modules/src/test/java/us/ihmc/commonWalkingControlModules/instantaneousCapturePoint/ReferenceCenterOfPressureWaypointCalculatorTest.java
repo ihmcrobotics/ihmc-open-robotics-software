@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.configurations.CoPSupportPolygonNames
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.ReferenceCoPTrajectoryGenerator;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -92,7 +91,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
          contactPoints.add(point3);
          Point2D point4 = new Point2D(rearContactX, side.negateIfRightSide(side2ContactY));
          contactPoints.add(point4);
-         ContactableFoot contactableFoot = new ListOfPointsContactableFoot(null, (ReferenceFrame) soleFrame, contactPoints, point1,
+         ContactableFoot contactableFoot = new ListOfPointsContactableFoot(null, soleFrame, contactPoints, point1,
                                                                            new LineSegment2D(point1, point2));
          contactableFeet.put(side, contactableFoot);
          RigidBody feetBody = new RigidBody(side.toString() + "Feet", ReferenceFrame.getWorldFrame());
@@ -161,7 +160,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       FrameOrientation footstepOrientation = new FrameOrientation();
       for (int i = 1; i < numberOfFootstepsToPlan + 1; i++)
       {
-         Footstep footstep = new Footstep(feetBodies.get(robotSide), robotSide);
+         Footstep footstep = new Footstep(robotSide);
          footstepLocation.set(i * stepLength, robotSide.negateIfRightSide(stepWidth), 0.0);
          footstep.setPose(footstepLocation, footstepOrientation);
          FootstepTiming timing = new FootstepTiming(swingTime, transferTime);
@@ -188,7 +187,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
          assertTrue(startCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, 0.0), EPSILON));
          assertTrue(zeroStep.getCoPPointList().get(0) == CoPPointName.START_COP);
       }
-      
+
       CoPPointsInFoot firstStep = copList.get(1);
       {
          CoPTrajectoryPoint midStanceCoP = firstStep.get(0);
@@ -276,7 +275,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
          assertTrue(startCoP.epsilonEquals(new FramePoint2D(worldFrame, 0.0, 0.180), EPSILON));
          assertTrue(zeroStep.getCoPPointList().get(0) == exitCoPName);
       }
-      
+
       // check first step
       CoPPointsInFoot firstStep = copList.get(1);
       {
@@ -433,7 +432,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
          assertTrue(thirdStep.getCoPPointList().get(0) == CoPPointName.MIDFEET_COP);
       }
    }
-   
+
    private class TestSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
    {
       public TestSmoothCMPPlannerParameters()

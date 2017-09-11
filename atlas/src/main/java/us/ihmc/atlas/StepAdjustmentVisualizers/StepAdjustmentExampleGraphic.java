@@ -181,8 +181,8 @@ public class StepAdjustmentExampleGraphic
       {
          currentSide = currentSide.getOppositeSide();
 
-         plannedFootsteps.add(new Footstep(contactableFeet.get(currentSide).getRigidBody(), currentSide));
-         footstepSolutions.add(new Footstep(contactableFeet.get(currentSide).getRigidBody(), currentSide));
+         plannedFootsteps.add(new Footstep(currentSide));
+         footstepSolutions.add(new Footstep(currentSide));
       }
 
 
