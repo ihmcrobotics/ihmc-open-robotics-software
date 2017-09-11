@@ -280,7 +280,7 @@ public class WholeBodyControllerCore
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
          OneDoFJoint joint = controlledOneDoFJoints[i];
-         System.out.println("Checking " + joint.getName());
+//         System.out.println("Checking " + joint.getName());
 
          // Zero out joint for testing purposes
          joint.setqDesired(Double.NaN);
