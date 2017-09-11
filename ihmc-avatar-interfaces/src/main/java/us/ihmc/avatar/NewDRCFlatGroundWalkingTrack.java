@@ -78,7 +78,7 @@ public abstract class NewDRCFlatGroundWalkingTrack
       controllerFactory.addRequestableTransition(STAND_TRANSITION_STATE, FREEZE_STATE);
       controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING_STATE);
       controllerFactory.addCustomStateTransition(new FeetLoadedToWalkingStandTransitionFactory(STAND_TRANSITION_STATE, WALKING_STATE, controllerFactory.getRequestedControlStateEnum(),
-                                                                                               feetContactSensorNames, model.getControllerDT(), highLevelControllerParameters));
+                                                                                               feetForceSensorNames, model.getControllerDT(), highLevelControllerParameters));
 
       controllerFactory.addRequestableTransition(WALKING_STATE, FREEZE_STATE);
 

@@ -27,10 +27,10 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
    private final YoDouble minimumTimeInState;
 
    public FeetLoadedToWalkingStandTransition(FinishableState<NewHighLevelControllerStates> currentState, NewHighLevelControllerStates nextStateEnum,
-                                             YoEnum<NewHighLevelControllerStates> requestedState, ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetContactSensors,
+                                             YoEnum<NewHighLevelControllerStates> requestedState, ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetForceSensors,
                                              double controlDT, double totalMass, double gravityZ, HighLevelControllerParameters highLevelControllerParameters, YoVariableRegistry parentRegistry)
    {
-      super(forceSensorDataHolder, feetContactSensors, controlDT, totalMass, gravityZ, parentRegistry);
+      super(forceSensorDataHolder, feetForceSensors, controlDT, totalMass, gravityZ, parentRegistry);
 
       this.currentState = currentState;
       this.nextStateEnum = nextStateEnum;
