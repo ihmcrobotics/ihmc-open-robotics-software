@@ -27,7 +27,8 @@ public enum HumanoidBehaviorType
    SOLARPANEL_BEHAVIOR,
    PUSH_AND_WALK,
    COLLABORATIVE_TASK,
-   FIRE_FIGHTING;
+   FIRE_FIGHTING,
+   CUTTING_WALL;
 
    public static final HumanoidBehaviorType[] values = values();
 }

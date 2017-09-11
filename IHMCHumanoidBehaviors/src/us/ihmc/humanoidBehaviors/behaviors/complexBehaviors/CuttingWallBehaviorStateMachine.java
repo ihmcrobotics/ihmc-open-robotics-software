@@ -14,7 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBe
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CuttingWallTrajectory;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
@@ -75,12 +75,12 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
          {
             PrintTools.info("setBehaviorInput PLANNING " + yoTime.getDoubleValue());
 
-//             ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(20.0);
+             ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(20.0);
 
             // FramePose centerFramePose = new FramePose();
             // centerFramePose.changeFrame(midZUpFrame);
             
-            ConstrainedEndEffectorTrajectory endeffectorTrajectory = new CuttingWallTrajectory(centerFramePose, 0.35, 20.0);
+//            ConstrainedEndEffectorTrajectory endeffectorTrajectory = new CuttingWallTrajectory(centerFramePose, 0.35, 20.0);
 
             planConstrainedWholeBodyTrajectoryBehavior.setInputs(endeffectorTrajectory, fullRobotModel);
             PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;

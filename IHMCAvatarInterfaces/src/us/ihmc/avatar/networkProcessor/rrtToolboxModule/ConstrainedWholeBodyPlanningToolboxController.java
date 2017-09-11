@@ -166,7 +166,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    protected void updateInternal() throws InterruptedException, ExecutionException
    {
       updateCount.increment();
-      //      PrintTools.info("" + updateCount.getIntegerValue() + " " + state);
+      PrintTools.info("" + updateCount.getIntegerValue() + " " + state);
 
       // ************************************************************************************************************** //      
       switch (state)
@@ -267,7 +267,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       for (int j = 0; j < revertedPathSize - 1; j++)
       {
          int i = revertedPathSize - 1 - j;
-         
+
          double generalizedTimeGap = revertedPath.get(i - 1).getNormalizedNodeData(0) - tree.getPath().get(currentIndex).getNormalizedNodeData(0);
 
          if (generalizedTimeGap > tree.dismissableTimeGap)
@@ -337,7 +337,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          if (tree.getTreeReachingTime() != 1.0)
          {
             PrintTools.info("Fail to reach end.");
-            
+
             terminateToolboxController();
          }
          else
@@ -420,7 +420,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       initialConfiguration = request.initialConfiguration;
 
       constrainedEndEffectorTrajectory = PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory;
-     
+
       /*
        * initialize kinematicsSolver.
        */
@@ -462,7 +462,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       long stopTime = System.currentTimeMillis();
       long elapsedTime = stopTime - startTime;
       System.out.println("===========================================");
-      System.out.println("toolbox executing time is " + elapsedTime / 1000.0 + " seconds " +updateCount.getIntegerValue());
+      System.out.println("toolbox executing time is " + elapsedTime / 1000.0 + " seconds " + updateCount.getIntegerValue());
       System.out.println("===========================================");
 
       isDone.set(true);
