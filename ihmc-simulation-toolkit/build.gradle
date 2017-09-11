@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.7.12"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.7.14"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -18,7 +18,7 @@ ihmc {
 
 testSuites {
    def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
-   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "FLAKY", prefix + "VIDEO"]
+   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
    disableBambooConfigurationCheck = true
 }
 
