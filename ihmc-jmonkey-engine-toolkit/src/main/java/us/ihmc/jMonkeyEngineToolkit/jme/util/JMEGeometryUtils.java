@@ -1,13 +1,20 @@
 package us.ihmc.jMonkeyEngineToolkit.jme.util;
 
+import com.jme3.app.SimpleApplication;
+import com.jme3.asset.AssetManager;
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DNode;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
 public class JMEGeometryUtils
 {
@@ -189,6 +196,30 @@ public class JMEGeometryUtils
       RigidBodyTransform B = jmeTransformToTransform3D(b);
       return A.epsilonEquals(B, epsilon);    
    }
+   
+   public static JMEGraphics3DNode addNodesRecursively(Graphics3DNode graphics3dNode, Node parentNode, SimpleApplication simpleApplication)
+   {
+     
+      
+         JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode,simpleApplication.getAssetManager(), simpleApplication, null);
+
+         jmeNode.update();
+
+         Graphics3DNodeType nodeType = graphics3dNode.getNodeType();
+
+         jmeNode.setType(nodeType);
+
+         parentNode.attachChild(jmeNode);
+
+         for (Graphics3DNode child : graphics3dNode.getChildrenNodes())
+         {
+            addNodesRecursively(child, jmeNode, simpleApplication);
+         }
+
+         return jmeNode;
+      
+   }
+
 
    public static void main(String[] args)
    {
