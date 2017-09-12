@@ -35,7 +35,7 @@ public class CTTaskNodeTree
 
    private double maximumDisplacementOfStep = 0.06;
    private double maximumTimeGapOfStep = 0.05;
-   public static double dismissableTimeGap = 0.01;
+   public static double dismissibleTimeGap = 0.01;
 
    private int dimensionOfTask;
 

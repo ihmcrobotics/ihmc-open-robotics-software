@@ -166,7 +166,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    protected void updateInternal() throws InterruptedException, ExecutionException
    {
       updateCount.increment();
-      PrintTools.info("" + updateCount.getIntegerValue() + " " + state);
+      // PrintTools.info("" + updateCount.getIntegerValue() + " " + state);
 
       // ************************************************************************************************************** //      
       switch (state)
@@ -260,8 +260,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       int revertedPathSize = revertedPath.size();
 
-      PrintTools.info("" + revertedPathSize);
-
       tree.addNodeOnPath(revertedPath.get(revertedPathSize - 1));
       int currentIndex = 0;
       for (int j = 0; j < revertedPathSize - 1; j++)
@@ -270,7 +268,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
          double generalizedTimeGap = revertedPath.get(i - 1).getNormalizedNodeData(0) - tree.getPath().get(currentIndex).getNormalizedNodeData(0);
 
-         if (generalizedTimeGap > tree.dismissableTimeGap)
+         if (generalizedTimeGap > tree.dismissibleTimeGap)
          {
             tree.addNodeOnPath(revertedPath.get(i - 1));
             currentIndex++;

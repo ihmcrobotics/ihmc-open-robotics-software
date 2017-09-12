@@ -9,6 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
@@ -188,7 +189,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
 
       CommonAvatarEnvironmentInterface environment = new FlatGroundEnvironment();
 
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(environment, getSimpleRobotName(), null, simulationTestingParameters, getRobotModel());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(environment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
 
       setupCWBPlanningToolboxModule();
    }
@@ -238,14 +239,14 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
                                                                                                             sdfFullRobotModel, referenceFrames);
 
       referenceFrames.updateFrames();
-      
+
       Point3D centerPosition = new Point3D(0.53, 0.0, 1.2);
       Quaternion centerOrientation = new Quaternion();
       FramePose centerFramePose = new FramePose(referenceFrames.getMidFootZUpGroundFrame(), centerPosition, centerOrientation);
-      
-      PrintTools.info(""+centerFramePose);
+
+      PrintTools.info("" + centerFramePose);
       cuttingWallBehaviorStateMachine.setCenterFramePose(centerFramePose);
-      
+
       System.out.println("Behavior Dispatch");
       drcBehaviorTestHelper.dispatchBehavior(cuttingWallBehaviorStateMachine);
 
@@ -272,25 +273,21 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       /*
        * reaching initial configuration
        */
-      /*
-       * Quaternion initialOrientation = new Quaternion();
-       * initialOrientation.appendRollRotation(Math.PI * 0.5);
-       * initialOrientation.appendYawRotation(Math.PI * 0.5);
-       * initialOrientation.appendPitchRotation(-Math.PI * 0.4);
-       * HandTrajectoryMessage lhandTrajectoryMessage = new
-       * HandTrajectoryMessage(RobotSide.LEFT, 2.0, new Point3D(0.6, 0.35, 1.0),
-       * initialOrientation, referenceFrames.getMidFootZUpGroundFrame());
-       * drcBehaviorTestHelper.send(lhandTrajectoryMessage);
-       * drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel(
-       * ).getControllerDT()); initialOrientation = new Quaternion();
-       * initialOrientation.appendPitchRotation(Math.PI * 0.4);
-       * HandTrajectoryMessage rhandTrajectoryMessage = new
-       * HandTrajectoryMessage(RobotSide.RIGHT, 2.0, new Point3D(-0.1, -0.5,
-       * 0.7), initialOrientation, referenceFrames.getMidFootZUpGroundFrame());
-       * drcBehaviorTestHelper.send(rhandTrajectoryMessage);
-       * drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(4.0);
-       */
+      Quaternion initialOrientation = new Quaternion();
+      initialOrientation.appendRollRotation(Math.PI * 0.5);
+      initialOrientation.appendYawRotation(Math.PI * 0.5);
+      initialOrientation.appendPitchRotation(-Math.PI * 0.4);
+      HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, new Point3D(0.6, 0.35, 1.0), initialOrientation,
+                                                                               referenceFrames.getMidFootZUpGroundFrame());
+      drcBehaviorTestHelper.send(lhandTrajectoryMessage);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
 
+      initialOrientation = new Quaternion();
+      initialOrientation.appendPitchRotation(Math.PI * 0.4);
+      HandTrajectoryMessage rhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2.0, new Point3D(-0.1, -0.5, 0.7), initialOrientation,
+                                                                               referenceFrames.getMidFootZUpGroundFrame());
+      drcBehaviorTestHelper.send(rhandTrajectoryMessage);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(4.0);
       /*
        * Behavior create.
        */
