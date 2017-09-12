@@ -71,7 +71,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
    {
       // can only snap footsteps in world frame
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      
+
       FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
 
       //set to the sole pose
@@ -189,10 +189,10 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
    {
       // can only snap footsteps in world frame
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      
+
       FramePose footstepPose = new FramePose();
       footstep.getPose(footstepPose);
-      
+
       Point3D position = new Point3D(footstepPose.getPosition());
       double yaw = footstep.getFootstepPose().getYaw();
 
@@ -214,7 +214,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
       RotationTools.computeQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
 
       FramePose solePose = new FramePose(ReferenceFrame.getWorldFrame(), position, orientation);
-      Footstep footstep = new Footstep(foot, robotSide, solePose);
+      Footstep footstep = new Footstep(robotSide, solePose);
 
       return footstep;
    }

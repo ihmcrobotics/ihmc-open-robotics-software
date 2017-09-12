@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.7.8"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.8.2"
    }
 }
 
@@ -16,5 +16,5 @@ ihmcSettingsConfigurator.configureAsGroupOfProjects() // isProjectGroup = true
 
 if (Boolean.valueOf(includeBuildsFromWorkspace))
 {
-   ihmcSettingsConfigurator.includeAllChildProjects() // Include all children with build.gradles
+   ihmcSettingsConfigurator.findAndIncludeCompositeBuilds() // Search workspace and `includeBuild` matches
 }

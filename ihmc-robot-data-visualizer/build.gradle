@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.7.8"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.8.2"
    }
 }
 plugins {
@@ -22,7 +22,7 @@ ihmc {
 
 testSuites {
    def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
-   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "FLAKY", prefix + "VIDEO"]
+   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
    disableBambooConfigurationCheck = true
 }
 
@@ -57,16 +57,16 @@ task viewerStartScripts(type: CreateStartScripts) {
    outputDir = file("build/scripts")
    mainClassName = "us.ihmc.robotDataVisualizer.gui.GUICaptureViewer"
    applicationName = "IHMCGUICaptureViewer"
-   classpath = project.configurations.runtime + jar.outputs.files
+   //classpath = project.configurations.runtime + jar.outputs.files
 }
 
 distributions {
    guiCaptureViewer {
       baseName = "IHMCGUICaptureViewer"
       contents {
-         into('lib') {
-            from project.configurations.runtime + jar.outputs.files
-         }
+         //into('lib') {
+         //   from project.configurations.runtime + jar.outputs.files
+         //}
 
          into('bin') {
             from viewerStartScripts

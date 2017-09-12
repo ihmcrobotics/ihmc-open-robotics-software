@@ -10,12 +10,6 @@ import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
@@ -28,6 +22,11 @@ import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * The FootRotationCalculator is a tool to detect if the foot is rotating around a steady line of rotation.
@@ -77,8 +76,6 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
    /** Amount that the foot drops or lifts around the axis of rotation */
    private final YoDouble yoFootDropOrLift;
 
-   private final Footstep currentDesiredFootstep;
-
    /** Threshold on the yaw rate of the line of rotation to determine whether or not the line of rotation is stable. */
    private final YoDouble yoStableLoRAngularVelocityThreshold;
    private final YoBoolean yoIsLoRStable;
@@ -127,8 +124,6 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       this.rotatingBody = rotatingFoot;
       this.soleFrame = rotatingFoot.getSoleFrame();
       this.controllerDt = dt;
-
-      currentDesiredFootstep = new Footstep(rotatingFoot.getRigidBody(), null);
 
       footPolygonInSoleFrame.setIncludingFrameAndUpdate(rotatingFoot.getContactPoints2d());
 
@@ -196,11 +191,6 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
          lineOfRotationArtifact.setVisible(false);
          yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), lineOfRotationArtifact);
       }
-   }
-
-   public void setCurrentDesiredFootstep(Footstep currentDesiredFootstep)
-   {
-      this.currentDesiredFootstep.setPose(currentDesiredFootstep);
    }
 
    @SuppressWarnings("unused")

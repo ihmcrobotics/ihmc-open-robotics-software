@@ -38,7 +38,7 @@ public class FootstepUtils
       footFramePose.changeFrame(worldFrame);
       boolean trustHeight = false;
 
-      Footstep footstep = new Footstep(endEffector.getRigidBody(), side, footFramePose, trustHeight);
+      Footstep footstep = new Footstep(side, footFramePose, trustHeight);
 
       return footstep;
    }
@@ -49,7 +49,7 @@ public class FootstepUtils
       footFramePose.changeFrame(worldFrame);
       boolean trustHeight = false;
 
-      Footstep footstep = new Footstep(foot, side, footFramePose, trustHeight);
+      Footstep footstep = new Footstep(side, footFramePose, trustHeight);
 
       return footstep;
    }
@@ -70,11 +70,11 @@ public class FootstepUtils
 
       return stanceCenter;
    }
-   
+
    public static FramePoint3D getCenterOfPredictedContactPointsInFootstep(Footstep footstep, RobotSide side, double centimetersForwardFromCenter, double centimetersInFromCenter)
    {
       Point2D footstepCenter;
-      
+
       List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();
       if (predictedContactPoints != null)
       {
@@ -85,10 +85,10 @@ public class FootstepUtils
       {
          footstepCenter = new Point2D();
       }
-      
+
       footstepCenter.setX(footstepCenter.getX() + centimetersForwardFromCenter);
       footstepCenter.setY(footstepCenter.getY() + side.negateIfLeftSide(centimetersInFromCenter));
-      
+
       FramePoint3D footstepCenter3d = new FramePoint3D(footstep.getSoleReferenceFrame(), footstepCenter.getX(), footstepCenter.getY(), 0.0);
       footstepCenter3d.changeFrame(worldFrame);
 
@@ -152,24 +152,5 @@ public class FootstepUtils
       double theta = Math.atan2(sinTheta, cosTheta);
 
       return theta;
-   }
-
-   public static List<FramePoint3D> calculateExpectedContactPoints(Footstep atFootstep, ContactablePlaneBody foot)
-   {
-      if (!atFootstep.getBody().getName().equals(foot.getRigidBody().getName()))
-         throw new RuntimeException("The RigidBodies are not the same.");
-      
-      List<FramePoint3D> ret = foot.getContactPointsCopy();
-      
-      ReferenceFrame soleFrame = atFootstep.getSoleReferenceFrame();
-      
-      for (int i = 0; i < ret.size(); i++)
-      {
-         FramePoint3D contactPoint = ret.get(i);
-         contactPoint.checkReferenceFrameMatch(foot.getSoleFrame());
-         contactPoint.setIncludingFrame(soleFrame, contactPoint.getPoint());
-      }
-
-      return ret;
    }
 }

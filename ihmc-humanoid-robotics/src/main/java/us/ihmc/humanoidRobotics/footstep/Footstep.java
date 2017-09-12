@@ -16,7 +16,6 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public class Footstep
@@ -25,9 +24,6 @@ public class Footstep
 
    public static final int maxNumberOfSwingWaypoints = 100;
 
-   private static int counter = 0;
-   private final String id;
-   private final RigidBody endEffector;
    private RobotSide robotSide;
    private FootstepType footstepType = FootstepType.FULL_FOOTSTEP;
 
@@ -35,6 +31,9 @@ public class Footstep
 
    private final FramePose tempPose = new FramePose();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+
+   // TODO: nuke this.
+   private static int counter = 0;
    private final PoseReferenceFrame footstepSoleFrame;
 
    private final List<Point2D> predictedContactPoints = new ArrayList<>();
@@ -50,56 +49,45 @@ public class Footstep
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
    public double swingHeight = 0;
 
-   public Footstep(RigidBody endEffector, RobotSide robotSide, FramePose footstepPose, boolean trustHeight)
+   public Footstep(RobotSide robotSide, FramePose footstepPose, boolean trustHeight)
    {
-      this(createAutomaticID(endEffector), endEffector, robotSide, footstepPose, trustHeight);
+      this(robotSide, footstepPose, trustHeight, null);
    }
 
-   public Footstep(String id, RigidBody endEffector, RobotSide robotSide, FramePose footstepPose, boolean trustHeight)
+   public Footstep(RobotSide robotSide)
    {
-      this(id, endEffector, robotSide, footstepPose, trustHeight, null);
+      this(robotSide, new FramePose());
    }
 
-   public Footstep(RigidBody endEffector, RobotSide robotSide)
+   public Footstep(RobotSide robotSide, FramePose footstepPose)
    {
-      this(endEffector, robotSide, new FramePose());
-   }
-
-   public Footstep(RigidBody endEffector, RobotSide robotSide, FramePose footstepPose)
-   {
-      this(createAutomaticID(endEffector), endEffector, robotSide, footstepPose, true);
+      this(robotSide, footstepPose, true);
    }
 
    public Footstep(Footstep footstep)
    {
-      this(footstep.endEffector, footstep.robotSide, footstep.footstepPose, footstep.trustHeight);
+      this(footstep.robotSide, footstep.footstepPose, footstep.trustHeight);
       this.trajectoryType = footstep.trajectoryType;
       this.swingHeight = footstep.swingHeight;
       this.swingTrajectoryBlendDuration = footstep.swingTrajectoryBlendDuration;
    }
 
-   public Footstep(RigidBody endEffector, RobotSide robotSide, FramePose footstepPose, boolean trustHeight, List<Point2D> predictedContactPoints)
+   public Footstep(RobotSide robotSide, FramePose footstepPose, boolean trustHeight, List<Point2D> predictedContactPoints)
    {
-      this(createAutomaticID(endEffector), endEffector, robotSide, footstepPose, trustHeight, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
+      this(robotSide, footstepPose, trustHeight, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
    }
 
-   public Footstep(String id, RigidBody endEffector, RobotSide robotSide, FramePose footstepPose, boolean trustHeight, List<Point2D> predictedContactPoints)
-   {
-      this(id, endEffector, robotSide, footstepPose, trustHeight, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
-   }
-
-   public Footstep(String id, RigidBody endEffector, RobotSide robotSide, FramePose footstepPose, boolean trustHeight, List<Point2D> predictedContactPoints,
+   public Footstep(RobotSide robotSide, FramePose footstepPose, boolean trustHeight, List<Point2D> predictedContactPoints,
                    TrajectoryType trajectoryType, double swingHeight)
    {
-      this.id = id;
-      this.endEffector = endEffector;
       this.robotSide = robotSide;
       this.trustHeight = trustHeight;
       this.footstepPose.setIncludingFrame(footstepPose);
       setPredictedContactPointsFromPoint2ds(predictedContactPoints);
       this.trajectoryType = trajectoryType;
       this.swingHeight = swingHeight;
-      footstepSoleFrame = new PoseReferenceFrame(id + "_FootstepSoleFrame", ReferenceFrame.getWorldFrame());
+
+      footstepSoleFrame = new PoseReferenceFrame(counter++ + "_FootstepSoleFrame", ReferenceFrame.getWorldFrame());
    }
 
    public TrajectoryType getTrajectoryType()
@@ -240,11 +228,6 @@ public class Footstep
       }
    }
 
-   private static String createAutomaticID(RigidBody endEffector)
-   {
-      return endEffector.getName() + "_" + counter++;
-   }
-
    public List<Point2D> getPredictedContactPoints()
    {
       if (predictedContactPoints.isEmpty())
@@ -312,19 +295,9 @@ public class Footstep
       setY(position2d.getY());
    }
 
-   public String getId()
-   {
-      return id;
-   }
-
    public boolean getTrustHeight()
    {
       return trustHeight;
-   }
-
-   public RigidBody getBody()
-   {
-      return endEffector;
    }
 
    public RobotSide getRobotSide()
@@ -395,7 +368,6 @@ public class Footstep
    public boolean epsilonEquals(Footstep otherFootstep, double epsilon)
    {
       boolean arePosesEqual = footstepPose.epsilonEquals(otherFootstep.footstepPose, epsilon);
-      boolean bodiesHaveTheSameName = endEffector.getName().equals(otherFootstep.endEffector.getName());
       boolean sameRobotSide = robotSide == otherFootstep.robotSide;
       boolean isTrustHeightTheSame = trustHeight == otherFootstep.trustHeight;
 
@@ -412,15 +384,17 @@ public class Footstep
 
       boolean sameBlendDuration = MathTools.epsilonEquals(swingTrajectoryBlendDuration, otherFootstep.swingTrajectoryBlendDuration, epsilon);
 
-      return arePosesEqual && bodiesHaveTheSameName && sameRobotSide && isTrustHeightTheSame && sameWaypoints && sameBlendDuration;
+      return arePosesEqual && sameRobotSide && isTrustHeightTheSame && sameWaypoints && sameBlendDuration;
    }
 
    @Override
    public String toString()
    {
-      return "id: " + id + " - pose: " + footstepPose + " - trustHeight = " + trustHeight;
+      return "pose: " + footstepPose + " - trustHeight = " + trustHeight;
    }
 
+   // Going to be removed soon. Is duplicate information.
+   @Deprecated
    public ReferenceFrame getSoleReferenceFrame()
    {
       tempPose.setIncludingFrame(footstepPose);
