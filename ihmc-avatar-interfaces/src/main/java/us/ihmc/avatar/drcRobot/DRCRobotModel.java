@@ -2,6 +2,7 @@ package us.ihmc.avatar.drcRobot;
 
 import com.jme3.math.Transform;
 
+import us.ihmc.avatar.SimulatedLowLevelOutputWriter;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
@@ -85,9 +86,9 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
     *
     * @return the custom output writer.
     */
-   public default LowLevelOutputWriter getCustomSimulationOutputWriter(LowLevelOutputWriter outputWriter)
+   public default LowLevelOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
    {
-      return outputWriter;
+      return new SimulatedLowLevelOutputWriter(humanoidFloatingRootJointRobot, true);
    }
 
    /**
