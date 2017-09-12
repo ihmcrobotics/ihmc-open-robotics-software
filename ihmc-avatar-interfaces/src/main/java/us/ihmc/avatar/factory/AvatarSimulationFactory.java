@@ -27,6 +27,8 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.outputData.LowLevelOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
@@ -329,6 +331,8 @@ public class AvatarSimulationFactory
             OneDegreeOfFreedomJoint simulatedJoint = humanoidFloatingRootJointRobot.getOneDegreeOfFreedomJoint(positionControlledJointName);
             FullRobotModel controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
             OneDoFJoint controllerJoint = controllerFullRobotModel.getOneDoFJointByName(positionControlledJointName);
+            LowLevelOneDoFJointDesiredDataHolderList controllerLowLevelDataList = threadDataSynchronizer.getControllerDesiredJointDataHolder();
+            LowLevelJointData controllerLowLevelJointData = controllerLowLevelDataList.getLowLevelJointData(controllerJoint);
 
             JointRole jointRole = robotModel.get().getJointMap().getJointRole(positionControlledJointName);
             boolean isUpperBodyJoint = ((jointRole != JointRole.LEG) && (jointRole != JointRole.SPINE));
@@ -338,6 +342,7 @@ public class AvatarSimulationFactory
                continue;
 
             JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint,
+                                                                                                                       controllerLowLevelJointData,
                                                                                                                        isUpperBodyJoint, isBackJoint, false,
                                                                                                                        robotModel.get().getSimulateDT());
             humanoidFloatingRootJointRobot.setController(positionControlSimulator);
