@@ -33,6 +33,7 @@ import javax.swing.JTextField;
 import com.jme3.renderer.Camera;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
@@ -4565,5 +4566,49 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void setParameterRootPath(YoVariableRegistry registry)
    {
       this.parameterRootPath = registry.getNameSpace();
+   }
+   
+   
+   /**
+    * Clear all directional lights from the 3D render
+    */
+   public void clearLights()
+   {
+      if (myGUI != null)
+      {
+         myGUI.clearLights();
+      }
+   }
+   
+   /**
+    * Add a directional light to the 3D render.
+    * 
+    * The fist light added to the renderer is considered the primary light. By default, a primary light 
+    * is created. Use clearLights() to remove all lights.
+    * 
+    * @param color Light color. To change the intensity, scale all values (r,g,b,a) with a factor of 0.0 - 1.0.
+    * @param direction direction of the light
+    */
+   public void addDirectionalLight(Color color, Vector3D direction)
+   {
+      if (myGUI != null)
+      {
+         myGUI.addDirectionalLight(color, direction);
+      }
+   }
+   
+   /**
+    * Set the ambient light color and intensity.
+    * 
+    * Set to new Color(0,0,0,0) to disable.
+    * 
+    * @param color Light color. To change the intensity, scale all values (r,g,b,a) with a factor of 0.0 - 1.0.
+    */
+   public void setAmbientLight(Color color)
+   {
+      if (myGUI != null)
+      {
+         myGUI.setAmbientLight(color);
+      }
    }
 }

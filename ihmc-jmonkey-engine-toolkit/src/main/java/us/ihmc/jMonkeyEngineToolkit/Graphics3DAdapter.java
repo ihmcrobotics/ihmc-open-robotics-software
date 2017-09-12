@@ -1,8 +1,10 @@
 package us.ihmc.jMonkeyEngineToolkit;
 
+import java.awt.Color;
 import java.awt.GraphicsDevice;
 import java.net.URL;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
@@ -67,4 +69,14 @@ public interface Graphics3DAdapter
    public void play();
 
    public void pause();
+   
+   
+   
+   public void addDirectionalLight(Color color, Vector3D direction);
+   
+   void clearLights();
+   
+   void setAmbientLight(Color color);
+
+   
 }

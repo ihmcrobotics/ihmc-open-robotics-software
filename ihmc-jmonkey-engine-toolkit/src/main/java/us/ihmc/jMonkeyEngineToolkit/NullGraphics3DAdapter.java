@@ -1,6 +1,7 @@
 package us.ihmc.jMonkeyEngineToolkit;
 
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.GraphicsDevice;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -8,6 +9,7 @@ import java.net.URL;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -275,14 +277,30 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
    @Override
    public void setupSky(String skyBox)
    {
-      // TODO Auto-generated method stub
+      
+   }
+   
+   @Override
+   public void setupSky(String west, String east, String north, String south, String up, String down)
+   {
       
    }
 
    @Override
-   public void setupSky(String west, String east, String north, String south, String up, String down)
+   public void addDirectionalLight(Color color, Vector3D direction)
    {
-      // TODO Auto-generated method stub
+      
+   }
+
+   @Override
+   public void clearLights()
+   {
+      
+   }
+
+   @Override
+   public void setAmbientLight(Color color)
+   {
       
    }
 }
