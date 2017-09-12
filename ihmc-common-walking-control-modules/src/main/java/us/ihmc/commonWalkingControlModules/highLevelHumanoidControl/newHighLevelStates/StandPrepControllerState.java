@@ -22,6 +22,7 @@ public class StandPrepControllerState extends NewHighLevelControllerState
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final PairList<OneDoFJoint, ImmutableTriple<YoDouble, YoPolynomial, YoDouble>> jointsData = new PairList<>();
@@ -39,6 +40,7 @@ public class StandPrepControllerState extends NewHighLevelControllerState
    {
       super(controllerState);
 
+      this.controllerToolbox = controllerToolbox;
       this.timeToPrepareForStanding.set(highLevelControllerParameters.getTimeToMoveInStandPrep());
       this.minimumTimeDoneWithStandPrep.set(minimumTimeDoneWithStandPrep);
 
@@ -88,6 +90,8 @@ public class StandPrepControllerState extends NewHighLevelControllerState
    @Override
    public void doAction()
    {
+      controllerToolbox.update();
+
       double timeInTrajectory = MathTools.clamp(getTimeInCurrentState(), 0.0, timeToPrepareForStanding.getDoubleValue());
 
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)

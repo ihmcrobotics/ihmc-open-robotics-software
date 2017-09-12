@@ -55,18 +55,29 @@ public class JointControlBlender
       if (ENABLE_TAU_SCALE)
          forceControlBlendingFactor *= tauScale.getDoubleValue();
 
-      double standPrepPosition = (1.0 - forceControlBlendingFactor) * positionControllerDesireds.getDesiredTorque();
-      double controllerPosition = forceControlBlendingFactor * walkingControllerDesireds.getDesiredTorque();
+      double holdPosition = (1.0 - forceControlBlendingFactor) * positionControllerDesireds.getDesiredPosition();
+      double controllerPosition = forceControlBlendingFactor * walkingControllerDesireds.getDesiredPosition();
+
+      double holdVelocity = (1.0 - forceControlBlendingFactor) * positionControllerDesireds.getDesiredVelocity();
+      double controllerVelocity = forceControlBlendingFactor * walkingControllerDesireds.getDesiredVelocity();
+
+      double holdAcceleration = (1.0 - forceControlBlendingFactor) * positionControllerDesireds.getDesiredAcceleration();
+      double controllerAcceleration = forceControlBlendingFactor * walkingControllerDesireds.getDesiredAcceleration();
+
       double positionControlTau = (1.0 - forceControlBlendingFactor) * positionControllerDesireds.getDesiredTorque();
       double walkingControlTau = forceControlBlendingFactor * walkingControllerDesireds.getDesiredTorque();
 
-      double desiredPosition = standPrepPosition + controllerPosition;
+      double desiredPosition = holdPosition + controllerPosition;
+      double desiredVelocity = holdVelocity + controllerVelocity;
+      double desiredAcceleration = holdAcceleration + controllerAcceleration;
       double controlTorque = positionControlTau + walkingControlTau;
 
       double currentJointAngle = oneDoFJoint.getQ();
       positionStepSizeLimiter.updateOutput(currentJointAngle, desiredPosition);
 
       outputDataToPack.setDesiredPosition(positionStepSizeLimiter.getDoubleValue());
+      outputDataToPack.setDesiredVelocity(desiredVelocity);
+      outputDataToPack.setDesiredAcceleration(desiredAcceleration);
       outputDataToPack.setDesiredTorque(controlTorque);
    }
 }

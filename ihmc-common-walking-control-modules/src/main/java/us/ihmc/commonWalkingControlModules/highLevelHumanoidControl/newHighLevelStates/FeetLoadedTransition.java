@@ -15,18 +15,16 @@ public class FeetLoadedTransition implements StateTransitionCondition
 {
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private static final double MINIMUM_WEIGHT_FRACTION = 1.0 / 4.0;
-   private static final double TIME_WINDOW = 5.0;
+   private static final double MINIMUM_WEIGHT_FRACTION = 1.0 / 6.0;
+   private static final double TIME_WINDOW = 3.0;
 
    private final SideDependentList<ForceSensorDataReadOnly> footSensors = new SideDependentList<>();
 
    private final YoBoolean areFeetLoaded;
    private final YoDouble weightPerFootForLoaded;
 
-   private final YoDouble prepLeftFootFz;
-   private final YoDouble prepRightFootFz;
-   private final SimpleMovingAverageFilteredYoVariable prepLeftFootFzAverage;
-   private final SimpleMovingAverageFilteredYoVariable prepRightFootFzAverage;
+   private final SideDependentList<YoDouble> prepFootFzs = new SideDependentList<>();
+   private final SideDependentList<SimpleMovingAverageFilteredYoVariable> prepFootFzAverages = new SideDependentList<>();
 
    public FeetLoadedTransition(ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetForceSensors,
                                double controlDT, double gravityZ, double totalMass, YoVariableRegistry parentRegistry)
@@ -40,10 +38,14 @@ public class FeetLoadedTransition implements StateTransitionCondition
       weightPerFootForLoaded = new YoDouble("weightPerFootForLoaded", registry);
       weightPerFootForLoaded.set(gravityZ * totalMass * MINIMUM_WEIGHT_FRACTION);
 
-      prepLeftFootFz = new YoDouble("prepLeftFootFz", registry);
-      prepRightFootFz = new YoDouble("prepRightFootFz", registry);
-      prepLeftFootFzAverage = new SimpleMovingAverageFilteredYoVariable("prepLeftFootFzAverage", windowSize, prepLeftFootFz, registry);
-      prepRightFootFzAverage = new SimpleMovingAverageFilteredYoVariable("prepRightFootFzAverage", windowSize, prepRightFootFz, registry);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         YoDouble prepFootFz = new YoDouble("prep" + robotSide.getCamelCaseName() + "FootFz", registry);
+         SimpleMovingAverageFilteredYoVariable prepFootFzAverage = new SimpleMovingAverageFilteredYoVariable("prep" + robotSide.getCamelCaseName() + "FootFzAverage", windowSize, prepFootFz, registry);
+
+         prepFootFzs.put(robotSide, prepFootFz);
+         prepFootFzAverages.put(robotSide, prepFootFzAverage);
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -52,13 +54,19 @@ public class FeetLoadedTransition implements StateTransitionCondition
 
    private boolean areFeetLoaded()
    {
-      footSensors.get(RobotSide.LEFT).getWrench(temporaryFootWrench);
-      prepLeftFootFz.set(temporaryFootWrench.getLinearPartZ());
-      footSensors.get(RobotSide.RIGHT).getWrench(temporaryFootWrench);
-      prepRightFootFz.set(temporaryFootWrench.getLinearPartZ());
-      prepLeftFootFzAverage.update();
-      prepRightFootFzAverage.update();
-      areFeetLoaded.set((prepLeftFootFzAverage.getDoubleValue() + prepRightFootFzAverage.getDoubleValue() > 2.0 * weightPerFootForLoaded.getDoubleValue()));
+      double averageWeight = 0.0;
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         YoDouble prepFootFz = prepFootFzs.get(robotSide);
+         SimpleMovingAverageFilteredYoVariable prepFootFzAverage = prepFootFzAverages.get(robotSide);
+
+         footSensors.get(robotSide).getWrench(temporaryFootWrench);
+         prepFootFz.set(temporaryFootWrench.getLinearPartZ());
+         prepFootFzAverage.update();
+
+         averageWeight += prepFootFzAverage.getDoubleValue();
+      }
+      areFeetLoaded.set((averageWeight > 2.0 * weightPerFootForLoaded.getDoubleValue()));
 
       return areFeetLoaded.getBooleanValue();
    }

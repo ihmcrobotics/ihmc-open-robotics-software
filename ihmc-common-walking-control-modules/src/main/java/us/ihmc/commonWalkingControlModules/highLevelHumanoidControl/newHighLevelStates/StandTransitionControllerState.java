@@ -18,7 +18,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class StandTransitionControllerState extends NewHighLevelControllerState
 {
    private static final NewHighLevelControllerStates controllerState = NewHighLevelControllerStates.STAND_TRANSITION_STATE;
-   private static final double TIME_TO_RAMP_UP_CONTROL = 0.7;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -34,18 +33,11 @@ public class StandTransitionControllerState extends NewHighLevelControllerState
    public StandTransitionControllerState(NewHighLevelControllerState standReadyControllerState, NewHighLevelControllerState walkingControllerState,
                                          HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
    {
-      this(standReadyControllerState, walkingControllerState, controllerToolbox, highLevelControllerParameters, TIME_TO_RAMP_UP_CONTROL);
-   }
-
-   public StandTransitionControllerState(NewHighLevelControllerState standReadyControllerState, NewHighLevelControllerState walkingControllerState,
-                                         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
-                                         double standTransitionDuration)
-   {
       super(controllerState);
 
       this.standReadyControllerState = standReadyControllerState;
       this.walkingControllerState = walkingControllerState;
-      this.standTransitionDuration.set(standTransitionDuration);
+      this.standTransitionDuration.set(highLevelControllerParameters.getTimeInStandTransition());
 
       OneDoFJoint[] controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);

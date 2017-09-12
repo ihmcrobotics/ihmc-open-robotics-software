@@ -22,8 +22,6 @@ public class NewDoNothingControllerState extends NewHighLevelControllerState
    private static final NewHighLevelControllerStates controllerState = NewHighLevelControllerStates.DO_NOTHING_STATE;
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
-   private final BipedSupportPolygons bipedSupportPolygons;
-   private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
 
    private final OneDoFJoint[] allRobotJoints;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
@@ -32,14 +30,8 @@ public class NewDoNothingControllerState extends NewHighLevelControllerState
    {
       super(controllerState);
 
-      this.bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
       this.controllerToolbox = controllerToolbox;
       allRobotJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         footContactStates.put(robotSide, controllerToolbox.getFootContactState(robotSide));
-      }
 
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(allRobotJoints.length);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(allRobotJoints);
@@ -55,7 +47,6 @@ public class NewDoNothingControllerState extends NewHighLevelControllerState
    @Override
    public void doAction()
    {
-      bipedSupportPolygons.updateUsingContactStates(footContactStates);
       controllerToolbox.update();
       for (int i = 0; i < allRobotJoints.length; i++)
       {

@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.PositionControlParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandPrepParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
@@ -18,4 +17,5 @@ public interface HighLevelControllerParameters
 
    double getTimeToMoveInStandPrep();
    double getMinimumTimeInStandReady();
+   double getTimeInStandTransition();
 }
