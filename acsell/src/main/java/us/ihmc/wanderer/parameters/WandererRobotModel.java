@@ -281,7 +281,7 @@ public class WandererRobotModel implements DRCRobotModel
    }
    
    @Override
-   public LowLevelOutputWriter getCustomSimulationOutputWriter(LowLevelOutputWriter outputWriter)
+   public LowLevelOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
    {
       return null;
    }
