@@ -46,7 +46,7 @@ public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
    @Override
    public boolean checkCondition()
    {
-      if (super.checkCondition())
+      if (!super.checkCondition())
          return false;
 
       if (currentState.getTimeInCurrentState() < minimumTimeInState.getDoubleValue())
