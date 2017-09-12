@@ -4,10 +4,10 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class GeneralizedRigidBodyInertia
 {

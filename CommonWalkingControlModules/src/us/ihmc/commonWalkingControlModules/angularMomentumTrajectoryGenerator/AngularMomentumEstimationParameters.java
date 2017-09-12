@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 
 public class AngularMomentumEstimationParameters
 {
@@ -19,11 +19,11 @@ public class AngularMomentumEstimationParameters
     * Defines the percentage of the total robot mass that is to be considered as the support leg
     */
    private final SmoothCMPPlannerParameters copPlannerParameters;
-   private final FullHumanoidRobotModel robotModel;
+   private final FullRobotModel robotModel;
    
    private final boolean computePredictedAngularMomentum;
 
-   public AngularMomentumEstimationParameters(FullHumanoidRobotModel robotModel, SmoothCMPPlannerParameters cmpPlannerParameters, boolean computePredictedAngularMomentum, double gravityZ)
+   public AngularMomentumEstimationParameters(FullRobotModel robotModel, SmoothCMPPlannerParameters cmpPlannerParameters, boolean computePredictedAngularMomentum, double gravityZ)
    {
       this.copPlannerParameters = cmpPlannerParameters;
       this.robotModel = robotModel;
@@ -105,11 +105,6 @@ public class AngularMomentumEstimationParameters
       return this.copPlannerParameters;
    }
 
-   public CoPPointName[] getCoPPointList()
-   {
-      return copPlannerParameters.getCoPPointsToPlan();
-   }
-
    public double getSwingFootMaxLift()
    {
       return 0.10;
@@ -117,12 +112,12 @@ public class AngularMomentumEstimationParameters
 
    public int getNumberOfPointsToSampleForTransfer()
    {
-      return 20;
+      return 2;
    }
 
    public int getNumberOfPointsToSampleForSwing()
    {
-      return 20;
+      return 2;
    }
 
    public AngularMomentumSplineType getSplineType()

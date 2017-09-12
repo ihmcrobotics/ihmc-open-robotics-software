@@ -1,7 +1,16 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.*;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.*;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.ANGULAR_ACCELERATION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.ANGULAR_VELOCITY;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.ROTATION_VECTOR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ACHIEVED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.CURRENT;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.DESIRED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR_CUMULATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR_INTEGRATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDBACK;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDFORWARD;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -9,14 +18,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -79,8 +88,8 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
    private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
 
-   private final YoOrientationPIDGainsInterface gains;
-   private final Matrix3DReadOnly kp, kd, ki;
+   private final YoPID3DGains gains;
+   private final Matrix3D tempGainMatrix = new Matrix3D();
 
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
@@ -104,9 +113,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       registry = new YoVariableRegistry(endEffectorName + "OrientationFBController");
       dt = toolbox.getControlDT();
       gains = feedbackControllerToolbox.getOrientationGains(endEffector);
-      kp = gains.createProportionalGainMatrix();
-      kd = gains.createDerivativeGainMatrix();
-      ki = gains.createIntegralGainMatrix();
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       endEffectorFrame = endEffector.getBodyFixedFrame();
@@ -231,7 +237,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularAcceleration.setIncludingFrame(proportionalFeedback);
       desiredAngularAcceleration.add(derivativeFeedback);
       desiredAngularAcceleration.add(integralFeedback);
-      desiredAngularAcceleration.limitLength(gains.getMaximumFeedback());
+      desiredAngularAcceleration.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackAngularAcceleration.setAndMatchFrame(desiredAngularAcceleration);
       rateLimitedFeedbackAngularAcceleration.update();
       rateLimitedFeedbackAngularAcceleration.getFrameTupleIncludingFrame(desiredAngularAcceleration);
@@ -258,7 +264,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       desiredAngularVelocity.setIncludingFrame(proportionalFeedback);
       desiredAngularVelocity.add(integralFeedback);
-      desiredAngularVelocity.limitLength(gains.getMaximumFeedback());
+      desiredAngularVelocity.clipToMaxLength(gains.getMaximumFeedback());
       yoFeedbackAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
       rateLimitedFeedbackAngularVelocity.update();
       rateLimitedFeedbackAngularVelocity.getFrameTupleIncludingFrame(desiredAngularVelocity);
@@ -299,7 +305,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
     * This method also updates {@link #yoCurrentOrientation}, {@link #yoCurrentRotationVector}, and
     * {@link #yoErrorPosition}.
     * </p>
-    * 
+    *
     * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified.
     */
    private void computeProportionalTerm(FrameVector3D feedbackTermToPack)
@@ -315,7 +321,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredOrientation.normalizeAndLimitToPiMinusPi();
       desiredOrientation.getRotationVectorIncludingFrame(feedbackTermToPack);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
-      feedbackTermToPack.limitLength(gains.getMaximumProportionalError());
+      feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
       yoErrorRotationVector.setAndMatchFrame(feedbackTermToPack);
       yoErrorOrientation.setRotationVector(yoErrorRotationVector);
 
@@ -324,7 +330,8 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       else
          feedbackTermToPack.changeFrame(endEffectorFrame);
 
-      kp.transform(feedbackTermToPack.getVector());
+      gains.getProportionalGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(feedbackTermToPack.getVector());
 
       feedbackTermToPack.changeFrame(endEffectorFrame);
    }
@@ -340,7 +347,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
     * This method also updates {@link #yoCurrentAngularVelocity} and
     * {@link #yoErrorAngularVelocity}.
     * </p>
-    * 
+    *
     * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified.
     */
    public void computeDerivativeTerm(FrameVector3D feedbackTermToPack)
@@ -355,7 +362,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       feedbackTermToPack.setToZero(worldFrame);
       feedbackTermToPack.sub(desiredAngularVelocity, currentAngularVelocity);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
-      feedbackTermToPack.limitLength(gains.getMaximumDerivativeError());
+      feedbackTermToPack.clipToMaxLength(gains.getMaximumDerivativeError());
       yoErrorAngularVelocity.set(feedbackTermToPack);
 
       if (angularGainsFrame != null)
@@ -363,7 +370,8 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       else
          feedbackTermToPack.changeFrame(endEffectorFrame);
 
-      kd.transform(feedbackTermToPack.getVector());
+      gains.getDerivativeGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(feedbackTermToPack.getVector());
 
       feedbackTermToPack.changeFrame(endEffectorFrame);
    }
@@ -379,7 +387,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
     * This method also updates {@link #yoErrorOrientationCumulated} and
     * {@link #yoErrorRotationVectorIntegrated}.
     * </p>
-    * 
+    *
     * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified.
     */
    public void computeIntegralTerm(FrameVector3D feedbackTermToPack)
@@ -402,7 +410,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       errorOrientationCumulated.getRotationVectorIncludingFrame(feedbackTermToPack);
       feedbackTermToPack.scale(dt);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
-      feedbackTermToPack.limitLength(maximumIntegralError);
+      feedbackTermToPack.clipToMaxLength(maximumIntegralError);
       yoErrorRotationVectorIntegrated.set(feedbackTermToPack);
 
       if (angularGainsFrame != null)
@@ -410,7 +418,8 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       else
          feedbackTermToPack.changeFrame(endEffectorFrame);
 
-      ki.transform(feedbackTermToPack.getVector());
+      gains.getIntegralGainMatrix(tempGainMatrix);
+      tempGainMatrix.transform(feedbackTermToPack.getVector());
 
       feedbackTermToPack.changeFrame(endEffectorFrame);
    }

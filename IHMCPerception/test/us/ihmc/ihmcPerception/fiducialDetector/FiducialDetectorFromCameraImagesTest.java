@@ -7,6 +7,7 @@ import org.junit.Test;
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.producers.VideoDataServer;
+import us.ihmc.communication.producers.VideoDataServerImageCallback;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -128,7 +129,7 @@ public class FiducialDetectorFromCameraImagesTest
       TimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
       int framesPerSecond = 10;
 
-      scsForDetecting.startStreamingVideoData(cameraConfiguration, width, height, videoDataServer, timestampProvider, framesPerSecond);
+      scsForDetecting.startStreamingVideoData(cameraConfiguration, width, height, new VideoDataServerImageCallback(videoDataServer), timestampProvider, framesPerSecond);
 
       GoalOrientedTestConductor testConductor = new GoalOrientedTestConductor(scsForDetecting, simulationTestingParameters);
 

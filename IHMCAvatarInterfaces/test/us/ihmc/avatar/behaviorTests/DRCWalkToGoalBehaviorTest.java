@@ -23,6 +23,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -36,7 +37,6 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
@@ -100,8 +100,6 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
    private final double ORIENTATION_THRESHOLD = 0.05;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
-   private final DefaultCommonAvatarEnvironment testEnvironment = new DefaultCommonAvatarEnvironment();
-
    private YoDouble yoTime;
 
    private ForceSensorDataHolder forceSensorDataHolder;
@@ -132,8 +130,8 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       {
          throw new RuntimeException(e);
       }
-      drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, getSimpleRobotName(),
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation(getSimpleRobotName());
 
       Robot robotToTest = drcSimulationTestHelper.getRobot();
       yoTime = robotToTest.getYoTime();

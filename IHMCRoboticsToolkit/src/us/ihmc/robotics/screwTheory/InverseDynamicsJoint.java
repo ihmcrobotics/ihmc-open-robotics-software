@@ -2,8 +2,8 @@ package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.utils.NameBasedHashCodeHolder;
 import us.ihmc.robotics.kinematics.CommonJoint;
-import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeHolder;
 
 /**
  * Base interface that describes the basic API for the joints composing a kinematic chain/tree
@@ -450,5 +450,4 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
 
    public abstract void calculateJointStateChecksum(GenericCRC32 checksum);
 
-   public abstract void calculateJointDesiredChecksum(GenericCRC32 checksum);
 }

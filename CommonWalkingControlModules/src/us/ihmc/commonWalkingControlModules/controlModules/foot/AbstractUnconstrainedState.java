@@ -6,20 +6,20 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint3D;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.FormattingTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * The unconstrained state is used if the foot is moved free in space without constrains. Depending on the type of trajectory
@@ -50,9 +50,9 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final ReferenceFrame ankleFrame;
    private final PoseReferenceFrame controlFrame;
 
-   private final YoSE3PIDGainsInterface gains;
+   private final YoPIDSE3Gains gains;
 
-   public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains,
+   public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, YoPIDSE3Gains gains,
          YoVariableRegistry registry)
    {
       super(constraintType, footControlHelper);
@@ -134,7 +134,12 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    public void doTransitionIntoAction()
    {
       super.doTransitionIntoAction();
-      legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
+
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      {
+         legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
+      }
+
       spatialFeedbackControlCommand.resetSecondaryTaskJointWeightScale();
 
       initializeTrajectory();
@@ -156,15 +161,18 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
                desiredLinearAcceleration, desiredAngularAcceleration);
       }
 
-      desiredPose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
-      changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
-      desiredPose.getPositionIncludingFrame(desiredAnklePosition);
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      {
+         desiredPose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
+         changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
+         desiredPose.getPositionIncludingFrame(desiredAnklePosition);
 
-      legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+         legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
 
-      desiredPose.setPosition(desiredAnklePosition);
-      changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
-      desiredPose.getPositionIncludingFrame(desiredPosition);
+         desiredPose.setPosition(desiredAnklePosition);
+         changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
+         desiredPose.getPositionIncludingFrame(desiredPosition);
+      }
 
       if (yoSetDesiredVelocityToZero.getBooleanValue())
       {

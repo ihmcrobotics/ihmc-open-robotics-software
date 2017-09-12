@@ -1,8 +1,8 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
 
 public class MovingMidFootZUpGroundFrame extends MovingReferenceFrame
 {

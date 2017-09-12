@@ -9,6 +9,7 @@ import us.ihmc.acsell.springs.LinearSpringCalculator;
 import us.ihmc.acsell.springs.SpringCalculator;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
@@ -17,9 +18,10 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.wanderer.hardware.WandererJoint;
@@ -31,9 +33,9 @@ import us.ihmc.wanderer.hardware.configuration.WandererNetworkParameters;
 import us.ihmc.wanderer.hardware.configuration.WandererRightAnkleSpringProperties;
 import us.ihmc.wanderer.hardware.configuration.WandererRightHipXSpringProperties;
 import us.ihmc.wanderer.hardware.controllers.WandererStandPrep;
-import us.ihmc.wholeBodyController.DRCOutputWriter;
+import us.ihmc.wholeBodyController.DRCOutputProcessor;
 
-public class WandererOutputWriter implements DRCOutputWriter, ControllerStateChangedListener,  ControllerFailureListener
+public class WandererOutputWriter implements DRCOutputProcessor, ControllerStateChangedListener,  ControllerFailureListener
 {
    boolean USE_LEFT_HIP_X_SPRING = true;
    boolean USE_RIGHT_HIP_X_SPRING = true;
@@ -44,7 +46,8 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
 
    private final WandererCommand command = new WandererCommand(registry);
 
-   private EnumMap<WandererJoint, OneDoFJoint> wholeBodyControlJoints;
+   private EnumMap<WandererJoint, OneDoFJoint> wholeBodyControlStates;
+   private EnumMap<WandererJoint, LowLevelJointData> wholeBodyControlJoints;
    private EnumMap<WandererJoint, YoDouble> tauControllerOutput;
    private final EnumMap<WandererJoint, OneDoFJoint> standPrepJoints;
    private final WandererStandPrep standPrep = new WandererStandPrep();
@@ -170,7 +173,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    }
 
    @Override
-   public void writeAfterController(long timestamp)
+   public void processAfterController(long timestamp)
    {
       if (!outputEnabled)
       {
@@ -206,7 +209,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
           */
          for (WandererJoint joint : WandererJoint.values)
          {
-            OneDoFJoint wholeBodyControlJoint = wholeBodyControlJoints.get(joint);
+            OneDoFJoint wholeBodyControlJoint = wholeBodyControlStates.get(joint);
             OneDoFJoint standPrepJoint = standPrepJoints.get(joint);
             RawJointSensorDataHolder rawSensorData = rawJointSensorDataHolderMap.get(wholeBodyControlJoint);
 
@@ -221,24 +224,25 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
           */
          for (WandererJoint joint : WandererJoint.values)
          {
-            OneDoFJoint wholeBodyControlJoint = wholeBodyControlJoints.get(joint);
+            OneDoFJoint wholeBodyControlState = wholeBodyControlStates.get(joint);
+            LowLevelJointData wholeBodyControlJoint = wholeBodyControlJoints.get(joint);
             OneDoFJoint standPrepJoint = standPrepJoints.get(joint);
             RawJointSensorDataHolder rawSensorData = rawJointSensorDataHolderMap.get(wholeBodyControlJoint);
 
             double controlRatio = getControlRatioByJointControlMode(joint);
 
-            double desiredAcceleration = wholeBodyControlJoint.getQddDesired();
+            double desiredAcceleration = wholeBodyControlJoint.getDesiredAcceleration();
             double motorReflectedInertia = yoReflectedMotorInertia.get(joint).getDoubleValue();
             double motorInertiaTorque = motorReflectedInertia * desiredAcceleration;
             double desiredQddFeedForwardTorque = desiredQddFeedForwardGain.get(joint).getDoubleValue()*desiredAcceleration;
             yoTauInertiaViz.get(joint).set(motorInertiaTorque);
 
             double kd = (wholeBodyControlJoint.getKd()+masterMotorDamping.getDoubleValue()*yoMotorDamping.get(joint).getDoubleValue()) * controlRatio + standPrepJoint.getKd() * (1.0 - controlRatio);
-            double tau = (wholeBodyControlJoint.getTau()+ motorInertiaTorque+desiredQddFeedForwardTorque) * controlRatio + standPrepJoint.getTau() * (1.0 - controlRatio);
+            double tau = (wholeBodyControlJoint.getDesiredTorque()+ motorInertiaTorque+desiredQddFeedForwardTorque) * controlRatio + standPrepJoint.getTau() * (1.0 - controlRatio);
 
             AcsellJointCommand jointCommand = command.getAcsellJointCommand(joint);
 
-            desiredJointQ.get(joint).set(wholeBodyControlJoint.getqDesired());
+            desiredJointQ.get(joint).set(wholeBodyControlJoint.getDesiredPosition());
 
             tauControllerOutput.get(joint).set(tau);
             double tauSpring = 0;
@@ -248,12 +252,12 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
                yoTauSpringCorrection.get(joint).set(tauSpring);
                yoTauTotal.get(joint).set(tau);
             }
-            jointCommand.setTauDesired(tau - tauSpring, wholeBodyControlJoint.getQddDesired(), rawSensorData);
+            jointCommand.setTauDesired(tau - tauSpring, wholeBodyControlJoint.getDesiredVelocity(), rawSensorData);
 
             jointCommand.setDamping(kd);
 
             // Slightly hackish but won't change any ATLAS code.
-            wholeBodyControlJoint.setTau(tau);
+            wholeBodyControlJoint.setDesiredTorque(tau);
 
          }
    }
@@ -342,9 +346,10 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    }
 
    @Override
-   public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerCoreOutput, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
-      wholeBodyControlJoints = WandererUtil.createJointMap(controllerModel.getOneDoFJoints());
+      wholeBodyControlStates = WandererUtil.createJointMap(controllerRobotModel.getOneDoFJoints());
+      wholeBodyControlJoints = WandererUtil.createOutputMap(lowLevelControllerCoreOutput);
       this.rawJointSensorDataHolderMap = rawJointSensorDataHolderMap;
    }
 

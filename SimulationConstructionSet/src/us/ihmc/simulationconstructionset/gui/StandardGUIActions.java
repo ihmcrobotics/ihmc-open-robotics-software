@@ -24,33 +24,7 @@ import us.ihmc.simulationconstructionset.commands.SelectGUIConfigFromFileCommand
 import us.ihmc.simulationconstructionset.commands.SelectGraphConfigurationCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.ViewportSelectorCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.ZoomGraphCommandExecutor;
-import us.ihmc.simulationconstructionset.gui.actions.AddCameraKeyAction;
-import us.ihmc.simulationconstructionset.gui.actions.AddKeyPointAction;
-import us.ihmc.simulationconstructionset.gui.actions.CreateNewGraphWindowAction;
-import us.ihmc.simulationconstructionset.gui.actions.CreateNewViewportWindowAction;
-import us.ihmc.simulationconstructionset.gui.actions.CropBufferAction;
-import us.ihmc.simulationconstructionset.gui.actions.CutBufferAction;
-import us.ihmc.simulationconstructionset.gui.actions.GotoInPointAction;
-import us.ihmc.simulationconstructionset.gui.actions.GotoOutPointAction;
-import us.ihmc.simulationconstructionset.gui.actions.HideShowViewportAction;
-import us.ihmc.simulationconstructionset.gui.actions.NextCameraKeyAction;
-import us.ihmc.simulationconstructionset.gui.actions.PackBufferAction;
-import us.ihmc.simulationconstructionset.gui.actions.PlayAction;
-import us.ihmc.simulationconstructionset.gui.actions.PreviousCameraKeyAction;
-import us.ihmc.simulationconstructionset.gui.actions.RemoveCameraKeyAction;
-import us.ihmc.simulationconstructionset.gui.actions.SelectCameraAction;
-import us.ihmc.simulationconstructionset.gui.actions.SelectGUIConfigFromFileAction;
-import us.ihmc.simulationconstructionset.gui.actions.SetInPointAction;
-import us.ihmc.simulationconstructionset.gui.actions.SetOutPointAction;
-import us.ihmc.simulationconstructionset.gui.actions.SimulateAction;
-import us.ihmc.simulationconstructionset.gui.actions.StepBackwardAction;
-import us.ihmc.simulationconstructionset.gui.actions.StepForwardAction;
-import us.ihmc.simulationconstructionset.gui.actions.StopAction;
-import us.ihmc.simulationconstructionset.gui.actions.ThinBufferAction;
-import us.ihmc.simulationconstructionset.gui.actions.ToggleCameraKeyModeAction;
-import us.ihmc.simulationconstructionset.gui.actions.ToggleKeyPointModeAction;
-import us.ihmc.simulationconstructionset.gui.actions.ZoomInAction;
-import us.ihmc.simulationconstructionset.gui.actions.ZoomOutAction;
+import us.ihmc.simulationconstructionset.gui.actions.*;
 import us.ihmc.simulationconstructionset.gui.actions.configActions.SelectGraphConfigurationAction;
 import us.ihmc.simulationconstructionset.gui.actions.configActions.SelectGraphGroupAction;
 import us.ihmc.simulationconstructionset.gui.actions.configActions.SelectVarGroupAction;
@@ -65,6 +39,7 @@ import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ExportSnapsho
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ImportDataAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.LoadConfigurationAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.LoadGraphGroupAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.LoadParametersAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.MediaCaptureAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.OpenH264LicenseAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.PlaybackPropertiesAction;
@@ -72,6 +47,7 @@ import us.ihmc.simulationconstructionset.gui.actions.dialogActions.PrintGraphsAc
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.ResizeViewportAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.SaveConfigurationAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.SaveGraphConfigurationAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.SaveParametersAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.SaveRobotConfigurationAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.SelectEntryBoxGroupAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.SelectExtraPanelAction;
@@ -120,6 +96,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    private JMenu configurationMenu;
    private CreateNewGraphWindowAction createNewGraphWindowAction;
    private CreateNewViewportWindowAction createNewViewportWindowAction;
+   private CreateYoVariableSliderWindowAction createYoVariableSliderWindowAction;
    private CropBufferAction cropBufferAction;
    private PackBufferAction packBufferAction;
    private CutBufferAction cutBufferAction;
@@ -151,6 +128,9 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    private ExportGraphsToFileAction exportGraphsToFileAction;
    private ResizeViewportAction resizeViewportAction;
    private JMenu runMenu;
+   
+   private SaveParametersAction saveParametersAction;
+   private LoadParametersAction loadParametersAction;
 
    private SetInPointAction setInPointAction;
    private AddKeyPointAction setKeyAction;
@@ -201,6 +181,12 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       ExportSnapshotDialogConstructor exportSnapshotDialogConstructor = allDialogConstructorsHolder.getExportSnapshotDialogConstructor();
       exportSnapshotAction = new ExportSnapshotAction(exportSnapshotDialogConstructor);
       guiActions.add(exportSnapshotAction);
+      
+      saveParametersAction = new SaveParametersAction(allDialogConstructorsHolder.getSaveParametersConstructor());
+      guiActions.add(saveParametersAction);
+      
+      loadParametersAction = new LoadParametersAction(allDialogConstructorsHolder.getLoadParametersConstructor());
+      guiActions.add(loadParametersAction);
 
       // Run Menu Items:
       simulateAction = new SimulateAction(allCommandsExecutor);
@@ -266,8 +252,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       
       exportGraphsToFileAction = new ExportGraphsToFileAction(allDialogConstructorsHolder.getExportGraphsToFileConstructor());
       guiActions.add(exportGraphsToFileAction);
-      
-      
+
 
       // DataBuffer Menu Items:
       cropBufferAction = new CropBufferAction(allCommandsExecutor);
@@ -311,6 +296,9 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
 
       createNewViewportWindowAction = new CreateNewViewportWindowAction(allCommandsExecutor);
       guiActions.add(createNewViewportWindowAction);
+
+      createYoVariableSliderWindowAction = new CreateYoVariableSliderWindowAction(allCommandsExecutor);
+      guiActions.add(createYoVariableSliderWindowAction);
 
       // Help Menu Items:
       AboutDialogConstructor aboutDialogConstructor = allDialogConstructorsHolder.getAboutDialogConstructor();
@@ -392,6 +380,14 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       createNewViewportWindowAction = actions.createNewViewportWindowAction;
       guiActions.add(createNewViewportWindowAction);
 
+      // Parameter menu items:
+      loadParametersAction = actions.loadParametersAction;
+      guiActions.add(loadParametersAction);
+      
+      saveParametersAction = actions.saveParametersAction;
+      guiActions.add(saveParametersAction);
+
+      
       // Help Menu Items: None
    }
 
@@ -447,6 +443,8 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       guiActions.add(exportAction);
       importDataAction = actions.importDataAction;
       guiActions.add(importDataAction);
+      
+      
 
       // Run Menu Items:
       simulateAction = actions.simulateAction;
@@ -512,6 +510,13 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       guiActions.add(createNewGraphWindowAction);
       createNewViewportWindowAction = actions.createNewViewportWindowAction;
       guiActions.add(createNewViewportWindowAction);
+      
+      // Parameter menu items:
+      loadParametersAction = actions.loadParametersAction;
+      guiActions.add(loadParametersAction);
+      
+      saveParametersAction = actions.saveParametersAction;
+      guiActions.add(saveParametersAction);
    }
 
    protected JPanel createWindowButtons(Action[][] allActions, JToolBar[] toolBars, boolean trackAndDolly)
@@ -569,6 +574,18 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
 
       // System.out.println(allActions.length);
       return createWindowButtons(allActions, toolBars, true);
+   }
+   
+   private JMenu createParameterMenu()
+   {
+      JMenu parameterMenu = new JMenu("Parameters");
+      parameterMenu.setName("Parameters");
+      parameterMenu.setMnemonic('p');
+      
+      parameterMenu.add(saveParametersAction);
+      parameterMenu.add(loadParametersAction);
+      
+      return parameterMenu;
    }
 
    protected JMenuBar createMainWindowMenus(final ExitActionListenerNotifier exitActionListenerNotifier)
@@ -714,8 +731,11 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
 
       windowMenu.add(createNewGraphWindowAction);
       windowMenu.add(createNewViewportWindowAction);
+      windowMenu.add(createYoVariableSliderWindowAction);
       menuBar.add(windowMenu);
-
+      
+      menuBar.add(createParameterMenu());
+      
       // Help Menu:
       JMenu helpMenu = new JMenu("Help");
       helpMenu.setName("Help");
@@ -825,6 +845,8 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       windowMenu.add(createNewGraphWindowAction);
       windowMenu.add(createNewViewportWindowAction);
       menuBar.add(windowMenu);
+      
+      menuBar.add(createParameterMenu());
 
       return menuBar;
    }
@@ -922,6 +944,8 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       windowMenu.add(createNewGraphWindowAction);
       windowMenu.add(createNewViewportWindowAction);
 
+      menuBar.add(createParameterMenu());
+      
       return menuBar;
    }
 

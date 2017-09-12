@@ -21,6 +21,10 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlP
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPAdjustmentOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -34,19 +38,15 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.PDGains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -201,7 +201,7 @@ public class StepAdjustmentExampleGraphic
       Graphics3DObject footstepGraphics = new Graphics3DObject();
       List<Point2D> contactPoints = new ArrayList<>();
       for (FramePoint2D point : contactableFeet.get(RobotSide.LEFT).getContactPoints2d())
-         contactPoints.add(point.getPointCopy());
+         contactPoints.add(new Point2D(point));
       footstepGraphics.addExtrudedPolygon(contactPoints, 0.02, YoAppearance.Color(Color.blue));
 
       YoGraphicShape nextFootstepViz = new YoGraphicShape("nextFootstep", footstepGraphics, yoNextFootstepPose, 1.0);
@@ -616,7 +616,7 @@ public class StepAdjustmentExampleGraphic
          icpPlanner.compute(currentTime);
          icpPlanner.getDesiredCapturePointPosition(desiredICP);
          icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
-         desiredICP3d.setXY(desiredICP);
+         desiredICP3d.set(desiredICP, 0.0);
          bagOfBalls.setBall(desiredICP3d, i);
       }
 
@@ -728,25 +728,25 @@ public class StepAdjustmentExampleGraphic
          }
 
          @Override
-         public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
+         public PDGains getCoMHeightControlGains()
          {
             return null;
          }
 
          @Override
-         public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
+         public PIDSE3Gains getSwingFootControlGains()
          {
             return null;
          }
 
          @Override
-         public YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry)
+         public PIDSE3Gains getHoldPositionFootControlGains()
          {
             return null;
          }
 
          @Override
-         public YoSE3PIDGainsInterface createToeOffFootControlGains(YoVariableRegistry registry)
+         public PIDSE3Gains getToeOffFootControlGains()
          {
             return null;
          }

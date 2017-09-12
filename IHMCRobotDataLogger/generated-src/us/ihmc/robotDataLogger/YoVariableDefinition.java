@@ -27,6 +27,7 @@ public class YoVariableDefinition
         	registry_ = other.registry_;
         	enumType_ = other.enumType_;
         	allowNullValues_ = other.allowNullValues_;
+        	isParameter_ = other.isParameter_;
 
     }
 
@@ -91,6 +92,17 @@ public class YoVariableDefinition
     }
 
         
+    public void setIsParameter(boolean isParameter)
+    {
+        isParameter_ = isParameter;
+    }
+
+    public boolean getIsParameter()
+    {
+        return isParameter_;
+    }
+
+        
 
 
 
@@ -116,6 +128,9 @@ public class YoVariableDefinition
 
                 
         returnedValue &= this.allowNullValues_ == otherMyClass.allowNullValues_;
+
+                
+        returnedValue &= this.isParameter_ == otherMyClass.isParameter_;
 
                 
 
@@ -147,6 +162,10 @@ public class YoVariableDefinition
         builder.append("allowNullValues=");
         builder.append(this.allowNullValues_);
 
+                builder.append(", ");
+        builder.append("isParameter=");
+        builder.append(this.isParameter_);
+
                 
         builder.append("}");
 		return builder.toString();
@@ -157,5 +176,6 @@ public class YoVariableDefinition
     private int registry_; 
     private int enumType_; 
     private boolean allowNullValues_; 
+    private boolean isParameter_; 
 
 }

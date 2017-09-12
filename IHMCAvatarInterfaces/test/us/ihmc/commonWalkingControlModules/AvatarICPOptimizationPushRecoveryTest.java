@@ -15,12 +15,12 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
@@ -131,13 +131,13 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       setupTest(getSlowstepScript());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      // push timing:
+      // push timing:t
       StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
       double delay = 0.5 * swingTime;
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double percentWeight = 0.13;
+      double percentWeight = 0.11;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -246,7 +246,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(xDirection, yDirection, 0.0);
-      double percentWeight = 0.20;
+      double percentWeight = 0.18;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -270,7 +270,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
-      double percentWeight = 0.08;
+      double percentWeight = 0.07;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.7 * swingTime;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -519,8 +519,9 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
    private void setupTest(String scriptName, ReferenceFrame yawReferenceFrame) throws SimulationExceededMaximumTimeException
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       totalMass = fullRobotModel.getTotalMass();
 //      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);

@@ -5,17 +5,17 @@ import java.util.List;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -61,7 +61,7 @@ public class FootSpoof implements ContactablePlaneBody
       {
          FramePoint3D point = new FramePoint3D(soleFrame, contactPointInSoleFrame.getX(), contactPointInSoleFrame.getY(), 0.0);
          contactPoints.add(point);
-         contactPoints2d.add(point.toFramePoint2d());
+         contactPoints2d.add(new FramePoint2D(point));
       }
 
       totalNumberOfContactPoints = contactPoints.size();
@@ -91,10 +91,10 @@ public class FootSpoof implements ContactablePlaneBody
       contactPoints.add(point2);
       contactPoints.add(point3);
       contactPoints.add(point4);
-      contactPoints2d.add(point1.toFramePoint2d());
-      contactPoints2d.add(point2.toFramePoint2d());
-      contactPoints2d.add(point3.toFramePoint2d());
-      contactPoints2d.add(point4.toFramePoint2d());
+      contactPoints2d.add(new FramePoint2D(point1));
+      contactPoints2d.add(new FramePoint2D(point2));
+      contactPoints2d.add(new FramePoint2D(point3));
+      contactPoints2d.add(new FramePoint2D(point4));
 
       totalNumberOfContactPoints = contactPoints.size();
 

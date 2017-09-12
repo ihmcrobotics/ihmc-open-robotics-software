@@ -12,6 +12,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -21,13 +25,9 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.PDController;
-import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -47,13 +47,13 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    private final PointFeedbackControlCommand pointFeedbackCommand = new PointFeedbackControlCommand();
    private final SelectionMatrix6D linearZSelectionMatrix = new SelectionMatrix6D();
    private final WeightMatrix6D linearZWeightMatrix = new WeightMatrix6D();
-   
+
    /** When we handle the PelvisTrajectoryCommand we pull out the z component and pack it into another PelvisTrajectoryCommand**/
    private final PelvisTrajectoryCommand tempPelvisTrajectoryCommand = new PelvisTrajectoryCommand();
 
    /** handles the trajectory and the queuing**/
    private final RigidBodyTaskspaceControlState taskspaceControlState;
-   
+
    private final RigidBody pelvis;
    private final MovingReferenceFrame pelvisFrame;
    private final ReferenceFrame baseFrame;
@@ -61,16 +61,16 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    private final FramePose tempPose = new FramePose();
    private final Point3D tempPoint = new Point3D();
    private final RigidBodyTransform controlFrame = new RigidBodyTransform();
-   
+
    private final PDController linearMomentumZPDController;
    private final YoSE3OffsetFrame yoControlFrame;
-   
+
    private final YoDouble currentPelvisHeightInWorld;
    private final YoDouble desiredPelvisHeightInWorld;
    private final YoDouble desiredPelvisVelocityInWorld;
    private final YoDouble currentPelvisVelocityInWorld;
-   
-   public PelvisHeightControlState(YoPositionPIDGainsInterface gains, HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
+
+   public PelvisHeightControlState(YoPID3DGains gains, HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
    {
       super(PelvisHeightControlMode.USER);
@@ -83,7 +83,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       baseFrame = elevator.getBodyFixedFrame();//referenceFrames.getMidFootZUpGroundFrame();
       YoDouble yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      
+
       linearMomentumZPDController = new PDController("pelvisHeightControlState_linearMomentumZPDController", registry);
       linearMomentumZPDController.setProportionalGain(gains.getProportionalGains()[2]);
       linearMomentumZPDController.setDerivativeGain(gains.getDerivativeGains()[2]);
@@ -91,21 +91,21 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
 
       taskspaceControlState = new RigidBodyTaskspaceControlState("Height", pelvis, elevator, elevator, trajectoryFrames, pelvisFrame, baseFrame, yoTime, null, graphicsListRegistry, registry);
       taskspaceControlState.setGains(null, gains);
-      
+
       // the nominalHeightAboveAnkle is from the ankle to the pelvis, we need to add the ankle to sole frame to get the proper home height
       double soleToAnkleZHeight = computeSoleToAnkleMeanZHeight(controllerToolbox, fullRobotModel);
       defaultHeightAboveAnkleForHome = new YoDouble(getClass().getSimpleName() + "DefaultHeightAboveAnkleForHome", registry);
       defaultHeightAboveAnkleForHome.set(walkingControllerParameters.nominalHeightAboveAnkle() + soleToAnkleZHeight);
-      
-      
+
+
       currentPelvisHeightInWorld = new YoDouble("currentPelvisHeightInWorld", registry);
-      desiredPelvisHeightInWorld = new YoDouble("desiredPelvisHeightInWorld", registry);  
+      desiredPelvisHeightInWorld = new YoDouble("desiredPelvisHeightInWorld", registry);
       desiredPelvisVelocityInWorld = new YoDouble("desiredPelvisVelocityInWorld", registry);
       currentPelvisVelocityInWorld = new YoDouble("currentPelvisVelocityInWorld", registry);
-      
+
       parentRegistry.addChild(registry);
    }
-   
+
    /**
     * the nominalHeightAboveAnkle is from the ankle to the pelvis, we need to add the ankle to sole frame to get the proper home height
     * @param controllerToolbox
@@ -127,7 +127,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       zHeight /= 2.0;
       return zHeight;
    }
-   
+
    /**
     * set the qp weights for the taskspace linear z command
     * @param linearWeight
@@ -142,7 +142,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    {
       taskspaceControlState.doAction();
    }
-   
+
    public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command, FramePose initialPose)
    {
       if (command.useCustomControlFrame())
@@ -154,18 +154,18 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       {
          taskspaceControlState.setDefaultControlFrame();
       }
-      
+
       //convert the initial point to be consistent with the control frame
       ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
       tempPose.setToZero(pelvisFrame);
       tempPose.changeFrame(controlFrame);
       tempPose.getPosition(tempPoint);
-      
+
       initialPose.prependTranslation(tempPoint);
-      
+
       return taskspaceControlState.handleEuclideanTrajectoryCommand(command, initialPose);
    }
-   
+
    /**
     * check that the command is valid and queue the trajectory
     * @param command
@@ -177,7 +177,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       // We have to remove the orientation and xy components of the command, and adjust the selection matrix;
       // We do this to break up the pelvis control, it reduces the complexity of each manager at the expense of these little hacks.
       tempPelvisTrajectoryCommand.set(command);
-      
+
       //set the selection matrix to z only
       SelectionMatrix6D commandSelectionMatrix = tempPelvisTrajectoryCommand.getSelectionMatrix();
       if(commandSelectionMatrix != null)
@@ -194,12 +194,12 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       {
          linearZSelectionMatrix.clearLinearSelection();
       }
-      
+
       linearZSelectionMatrix.clearAngularSelection();
       linearZSelectionMatrix.setLinearAxisSelection(false, false, true);
       linearZSelectionMatrix.setSelectionFrame(ReferenceFrame.getWorldFrame());
       tempPelvisTrajectoryCommand.setSelectionMatrix(linearZSelectionMatrix);
-      
+
       //set the weight matrix to z only
       WeightMatrix6D commanedWeightMatrix = tempPelvisTrajectoryCommand.getWeightMatrix();
       if(commanedWeightMatrix != null)
@@ -221,7 +221,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       linearZWeightMatrix.setLinearWeights(0.0, 0.0, weightLinearPart.getZAxisWeight());
       linearZWeightMatrix.setWeightFrame(ReferenceFrame.getWorldFrame());
       tempPelvisTrajectoryCommand.setWeightMatrix(linearZWeightMatrix);
-      
+
       if (command.useCustomControlFrame())
       {
          tempPelvisTrajectoryCommand.getControlFramePose(controlFrame);
@@ -231,15 +231,15 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       {
          taskspaceControlState.setDefaultControlFrame();
       }
-      
+
       //convert the initial point to be consistent with the control frame
       ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
       tempPose.setToZero(pelvisFrame);
       tempPose.changeFrame(controlFrame);
       tempPose.getPosition(tempPoint);
-      
+
       initialPose.prependTranslation(tempPoint);
-      
+
       if(!taskspaceControlState.handlePoseTrajectoryCommand(tempPelvisTrajectoryCommand, initialPose))
       {
          taskspaceControlState.clear();
@@ -247,7 +247,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       }
       return true;
    }
-   
+
    /**
     * returns the control frame which is fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
     * @return
@@ -256,7 +256,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    {
       return taskspaceControlState.getControlFrame();
    }
-   
+
    /**
     * Packs positionToPack with the current desired height, The parameter's frame will be set to the trajectory frame
     */
@@ -265,12 +265,12 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
    {
       taskspaceControlState.getDesiredPose(tempPose);
       tempPose.getPositionIncludingFrame(positionToPack);
-      
+
       ReferenceFrame controlFrame = taskspaceControlState.getControlFrame();
       tempPose.setToZero(controlFrame);
       tempPose.changeFrame(pelvisFrame);
       tempPose.getPosition(tempPoint);
-      
+
       positionToPack.add(tempPoint);
    }
 
@@ -333,7 +333,7 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       pointFeedbackCommand.setGainsFrame(baseFrame);
       spatialFeedbackControlCommand.getControlFramePoseIncludingFrame(controlPosition, controlOrientation);
       pointFeedbackCommand.setBodyFixedPointToControl(controlPosition);
-      
+
       return pointFeedbackCommand;
 //      return null;
    }
@@ -349,19 +349,19 @@ public class PelvisHeightControlState extends PelvisAndCenterOfMassHeightControl
       spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       spatialFeedbackControlCommand.getControlFramePoseIncludingFrame(controlPosition, controlOrientation);
       controlPosition.changeFrame(pelvis.getBodyFixedFrame());
-      
+
       yoControlFrame.setOffsetToParentToTranslationOnly(controlPosition);
       yoControlFrame.getTwistRelativeToOther(baseFrame, twist);
       twist.getLinearPart(currentLinearVelocity);
       currentLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
-      
+
       controlPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      
-      currentPelvisHeightInWorld.set(controlPosition.getZ());  
-      desiredPelvisHeightInWorld.set(desiredPosition.getZ());  
+
+      currentPelvisHeightInWorld.set(controlPosition.getZ());
+      desiredPelvisHeightInWorld.set(desiredPosition.getZ());
       desiredPelvisVelocityInWorld.set(desiredLinearVelocity.getZ());
       currentPelvisVelocityInWorld.set(currentLinearVelocity.getZ());
-   
+
       double acceleration = linearMomentumZPDController.compute(controlPosition.getZ(), desiredPosition.getZ(), currentLinearVelocity.getZ(), desiredLinearVelocity.getZ());
       return acceleration;
    }

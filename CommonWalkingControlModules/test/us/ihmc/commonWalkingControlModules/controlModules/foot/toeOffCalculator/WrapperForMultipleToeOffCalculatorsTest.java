@@ -18,14 +18,14 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlG
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
-import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
+import us.ihmc.robotics.controllers.PDGains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -242,25 +242,25 @@ public class WrapperForMultipleToeOffCalculatorsTest
          }
 
          @Override
-         public YoPDGains createCoMHeightControlGains(YoVariableRegistry registry)
+         public PDGains getCoMHeightControlGains()
          {
             return null;
          }
 
          @Override
-         public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
+         public PIDSE3Gains getSwingFootControlGains()
          {
             return null;
          }
 
          @Override
-         public YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry)
+         public PIDSE3Gains getHoldPositionFootControlGains()
          {
             return null;
          }
 
          @Override
-         public YoSE3PIDGainsInterface createToeOffFootControlGains(YoVariableRegistry registry)
+         public PIDSE3Gains getToeOffFootControlGains()
          {
             return null;
          }

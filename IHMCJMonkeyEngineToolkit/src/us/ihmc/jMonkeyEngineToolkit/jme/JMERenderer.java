@@ -69,6 +69,13 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.input.keyboard.KeyListener;
+import us.ihmc.graphicsDescription.input.keyboard.KeyListenerHolder;
+import us.ihmc.graphicsDescription.input.mouse.Mouse3DInterface;
+import us.ihmc.graphicsDescription.input.mouse.Mouse3DListener;
+import us.ihmc.graphicsDescription.input.mouse.Mouse3DListenerHolder;
+import us.ihmc.graphicsDescription.input.mouse.MouseListener;
+import us.ihmc.graphicsDescription.input.mouse.MouseListenerHolder;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.jMonkeyEngineToolkit.GPULidarListener;
@@ -91,13 +98,6 @@ import us.ihmc.jMonkeyEngineToolkit.stlLoader.STLLoader;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.tools.inputDevices.keyboard.KeyListener;
-import us.ihmc.tools.inputDevices.keyboard.KeyListenerHolder;
-import us.ihmc.tools.inputDevices.mouse.MouseListener;
-import us.ihmc.tools.inputDevices.mouse.MouseListenerHolder;
-import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DJoystick;
-import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
-import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListenerHolder;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
@@ -148,7 +148,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    private final Object graphicsConch = new Object();
 
    private JMEContextManager contextManager;
-   private JMEAssetLocator assetLocator;
 
    private ArrayList<JMEViewportAdapter> viewportAdapters = new ArrayList<JMEViewportAdapter>();
 
@@ -157,7 +156,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    private boolean isTerrainVisible = true;
 
-   private Mouse3DJoystick mouse3DJoystick = new Mouse3DJoystick();
+   private Mouse3DInterface mouse3DJoystick;
 
    private SelectedListenerHolder selectedListenerHolder = new SelectedListenerHolder();
    private KeyListenerHolder keyListenerHolder = new KeyListenerHolder();
@@ -178,8 +177,14 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    public JMERenderer(RenderType renderType)
    {
+      this(renderType, null);
+   }
+   
+   public JMERenderer(RenderType renderType, Mouse3DInterface mouse3dJoystick)
+   {
       super();
       this.renderType = renderType;
+      this.mouse3DJoystick = mouse3dJoystick;
 
       changeJMELoggerLevelToSevere();
 
@@ -203,6 +208,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
             throw new RuntimeException("Loading interrupted");
          }
       }
+      
 
    }
 
@@ -239,7 +245,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       synchronized (graphicsConch)
       {
-         JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode, assetLocator, this, closeableAndDisposableRegistry);
+         JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode, getAssetManager(), this, closeableAndDisposableRegistry);
 
          if (rootJoint == null)
          {
@@ -563,7 +569,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       zUpNode = new Node("zUpNode");
       zUpNode.setLocalRotation(JMEGeometryUtils.getRotationFromJMEToZupCoordinates());
       rootNode.attachChild(zUpNode);
-      assetLocator = new JMEAssetLocator(assetManager);
 
       setupLighting();
       disableMainViewport();
@@ -625,14 +630,14 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    private boolean shouldRepaint()
    {
       // We have to use reflection because JME does not provide a getter
-      try
-      {
-         Field field = Spatial.class.getDeclaredField("refreshFlags");
-         field.setAccessible(true);
-         int refresh = field.getInt(rootNode);
-         return refresh != 0;
-      }
-      catch (Exception ex)
+//      try
+//      {
+//         Field field = Spatial.class.getDeclaredField("refreshFlags");
+//         field.setAccessible(true);
+//         int refresh = field.getInt(rootNode);
+//         return refresh != 0;
+//      }
+//      catch (Exception ex)
       {
          return true; // In case of exceptions render always
       }
@@ -1274,7 +1279,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       return mouse3DListenerHolder;
    }
 
-   public Mouse3DJoystick getMouse3DJoystick()
+   public Mouse3DInterface getMouse3DJoystick()
    {
       return mouse3DJoystick;
    }
@@ -1349,7 +1354,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
          contextManager = null;
       }
 
-      assetLocator = null;
 
       if (jmeGraphicsNodes != null)
       {
@@ -1374,7 +1378,11 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       mouseListenerHolder = null;
       mouse3DListenerHolder = null;
 
-      mouse3DJoystick.stopPolling();
+      if(mouse3DJoystick != null)
+      {
+         mouse3DJoystick.stopPolling();
+         mouse3DJoystick = null;
+      }
 
       rootJoint = null;
       terrain = null;
@@ -1410,10 +1418,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       return contextManager;
    }
 
-   public JMEAssetLocator getAssetLocator()
-   {
-      return assetLocator;
-   }
 
    public RenderType getRenderType()
    {

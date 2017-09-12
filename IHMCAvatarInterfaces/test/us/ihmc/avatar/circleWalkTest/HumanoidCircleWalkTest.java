@@ -15,6 +15,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -27,7 +28,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -212,7 +212,10 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       robotModel = getRobotModel();
       fullRobotModel = robotModel.createFullRobotModel();
       simulationTestingParameters.setKeepSCSUp(keepSCSUp());
-      drcSimulationTestHelper = new DRCSimulationTestHelper(emptyEnvironment, className, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setStartingLocation(startingLocation);
+      drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
+      drcSimulationTestHelper.createSimulation(className);
       ThreadTools.sleep(1000);
    }
 

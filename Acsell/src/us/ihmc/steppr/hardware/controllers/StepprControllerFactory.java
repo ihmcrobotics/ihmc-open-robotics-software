@@ -38,8 +38,8 @@ import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.wholeBodyController.DRCControllerThread;
-import us.ihmc.wholeBodyController.DRCOutputWriter;
-import us.ihmc.wholeBodyController.DRCOutputWriterWithAccelerationIntegration;
+import us.ihmc.wholeBodyController.DRCOutputProcessor;
+import us.ihmc.wholeBodyController.DRCOutputProcessorWithAccelerationIntegration;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerFactory;
@@ -93,12 +93,12 @@ public class StepprControllerFactory
       StepprOutputWriter stepprOutputWriter = new StepprOutputWriter(robotModel);
       controllerFactory.attachControllerStateChangedListener(stepprOutputWriter);
       controllerFactory.attachControllerFailureListener(stepprOutputWriter);
-      DRCOutputWriter drcOutputWriter = stepprOutputWriter;
+      DRCOutputProcessor drcOutputWriter = stepprOutputWriter;
 
       boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = true;
       if (INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
       {
-         DRCOutputWriterWithAccelerationIntegration stepprOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(
+         DRCOutputProcessorWithAccelerationIntegration stepprOutputWriterWithAccelerationIntegration = new DRCOutputProcessorWithAccelerationIntegration(
                drcOutputWriter, new LegJointName[] { LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH }, null, null, robotModel.getControllerDT(), true);
          stepprOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.0, 0.0);
          stepprOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
@@ -118,12 +118,12 @@ public class StepprControllerFactory
        */
       ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(robotModel);
       DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSensorInformation(), robotModel.getContactPointParameters(),
-            robotModel.getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer, new PeriodicRealtimeThreadScheduler(poseCommunicatorPriority), dataProducer, yoVariableServer, gravity);
+            robotModel.getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer, new PeriodicRealtimeThreadScheduler(poseCommunicatorPriority), dataProducer, null, yoVariableServer, gravity);
       estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer,
             drcOutputWriter, dataProducer, yoVariableServer, gravity, robotModel.getEstimatorDT());
-      StepprOutputProcessor outputProcessor = new StepprOutputProcessor(threadDataSynchronizer.getControllerFullRobotModel());
-      controllerThread.addOutputProcessorToController(outputProcessor);
+//      StepprOutputProcessor outputProcessor = new StepprOutputProcessor(threadDataSynchronizer.getControllerFullRobotModel());
+//      controllerThread.addOutputProcessorToController(outputProcessor);
 
       MultiThreadedRealTimeRobotController robotController = new MultiThreadedRealTimeRobotController(estimatorThread);
       if (stepprAffinity.setAffinity())

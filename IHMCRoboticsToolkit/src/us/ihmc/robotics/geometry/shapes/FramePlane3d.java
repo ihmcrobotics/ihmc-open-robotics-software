@@ -1,19 +1,19 @@
 package us.ihmc.robotics.geometry.shapes;
 
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
-import us.ihmc.robotics.geometry.FrameLine;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.geometry.FrameLine3D;
 
-public class FramePlane3d extends AbstractReferenceFrameHolder
+public class FramePlane3d implements ReferenceFrameHolder
 {
    private ReferenceFrame referenceFrame;
    private Plane3D plane3d;
@@ -264,13 +264,13 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       plane3d.setNormal(normalX, normalY, normalZ);
    }
    
-   public void getIntersectionWithLine(FramePoint3D pointToPack, FrameLine line)
+   public void getIntersectionWithLine(FramePoint3D pointToPack, FrameLine3D line)
    {
 	   checkReferenceFrameMatch(line.getReferenceFrame());
 	   checkReferenceFrameMatch(pointToPack.getReferenceFrame());
 	   
 	   Point3D intersectionToPack = new Point3D();
-	   plane3d.intersectionWith(intersectionToPack, line.getPoint(), line.getNormalizedVector());
+	   plane3d.intersectionWith(intersectionToPack, line.getPoint(), line.getDirection());
 	   pointToPack.set(intersectionToPack);
    }
 

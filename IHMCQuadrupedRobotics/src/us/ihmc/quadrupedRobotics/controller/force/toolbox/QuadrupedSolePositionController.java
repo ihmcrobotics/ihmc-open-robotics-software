@@ -1,14 +1,16 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.EuclideanPositionController;
-import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedSolePositionController
 {
@@ -59,7 +61,7 @@ public class QuadrupedSolePositionController
    private final RobotQuadrant robotQuadrant;
    private final ReferenceFrame soleFrame;
    private final EuclideanPositionController solePositionController;
-   private final YoEuclideanPositionGains solePositionControllerGains;
+   private final YoPID3DGains solePositionControllerGains;
    private final YoFramePoint yoSolePositionSetpoint;
    private final YoFrameVector yoSoleLinearVelocitySetpoint;
    private final YoFrameVector yoSoleForceFeedforwardSetpoint;
@@ -72,7 +74,7 @@ public class QuadrupedSolePositionController
       this.robotQuadrant = robotQuadrant;
       this.soleFrame = soleFrame;
       this.solePositionController = new EuclideanPositionController(prefix + "SolePosition", soleFrame, controlDT, registry);
-      this.solePositionControllerGains = new YoEuclideanPositionGains(prefix + "SolePosition", registry);
+      this.solePositionControllerGains = new DefaultYoPID3DGains(prefix + "SolePosition", GainCoupling.NONE, true, registry);
       this.yoSolePositionSetpoint = new YoFramePoint(prefix + "SolePositionSetpoint", worldFrame, registry);
       this.yoSoleLinearVelocitySetpoint = new YoFrameVector(prefix + "SoleLinearVelocitySetpoint", worldFrame, registry);
       this.yoSoleForceFeedforwardSetpoint = new YoFrameVector(prefix + "SoleForceFeedforwardSetpoint", worldFrame, registry);
@@ -83,7 +85,7 @@ public class QuadrupedSolePositionController
       return soleFrame;
    }
 
-   public YoEuclideanPositionGains getGains()
+   public YoPID3DGains getGains()
    {
       return solePositionControllerGains;
    }

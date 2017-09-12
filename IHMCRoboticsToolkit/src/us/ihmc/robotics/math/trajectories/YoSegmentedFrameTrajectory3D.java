@@ -5,9 +5,9 @@ import java.util.List;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -23,7 +23,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * <li> currentSegmentIndex: YoInteger indicating the segment index that is used for computation 
  * <li> currentSegment: Reference to the current segment used for computation
  */
-public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInterface
+public abstract class YoSegmentedFrameTrajectory3D //implements YoSegmentedFrameTrajectory3DInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    protected final String name;
@@ -64,6 +64,17 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
       numberOfSegments.set(0);
    }
 
+   public void set(SegmentedFrameTrajectory3D trajToCopy)
+   {
+      if(getMaxNumberOfSegments() < trajToCopy.getNumberOfSegments())
+         throw new RuntimeException("Insufficient segments to copy trajectory, needed: " + trajToCopy.getNumberOfSegments() + " available: " + getMaxNumberOfSegments());
+      for(int i = 0; i < trajToCopy.getNumberOfSegments(); i++)
+      {
+         segments.get(i).set(trajToCopy.getSegment(i));
+         numberOfSegments.increment();
+      }
+   }
+   
    public void update(double timeInState)
    {
       setCurrentSegmentIndexFromStateTime(timeInState);
@@ -86,6 +97,21 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
    public void update(double timeInState, FramePoint3D desiredPositonToPack, FrameVector3D desiredVelocityToPack, FrameVector3D desiredAccelerationToPack)
    {
       update(timeInState, desiredPositonToPack, desiredVelocityToPack);
+      currentSegment.getFrameAcceleration(desiredAccelerationToPack);
+   }
+
+   public void getFramePosition(FramePoint3D desiredPositionToPack)
+   {
+      currentSegment.getFramePosition(desiredPositionToPack);
+   }
+
+   public void getFrameVelocity(FrameVector3D desiredVelocityToPack)
+   {
+      currentSegment.getFrameVelocity(desiredVelocityToPack);
+   }
+
+   public void getFrameAcceleration(FrameVector3D desiredAccelerationToPack)
+   {
       currentSegment.getFrameAcceleration(desiredAccelerationToPack);
    }
 
@@ -142,7 +168,7 @@ public abstract class YoSegmentedFrameTrajectory3D implements SegmentedFrameTraj
       int i;
       for (i = 0; i < getNumberOfSegments(); i++)
          nodeTime[i + 1] = segments.get(i).getFinalTime();
-      for (; i < maxNumberOfSegments + 1; i++)
+      for (; i < maxNumberOfSegments; i++)
          nodeTime[i + 1] = Double.NaN;
       return nodeTime;
    }

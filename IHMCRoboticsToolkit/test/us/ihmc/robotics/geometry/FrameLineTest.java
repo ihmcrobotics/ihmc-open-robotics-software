@@ -8,10 +8,12 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameLineTest
 {
@@ -23,7 +25,7 @@ public class FrameLineTest
       Random random = new Random(1776L);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      FrameLine lWorld = new FrameLine(ReferenceFrame.getWorldFrame(), new Point3D(-1.0, -2.0, -3.0), new Vector3D(1.0, 2.0, 3.0));
+      FrameLine3D lWorld = new FrameLine3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.0, -2.0, -3.0), new Vector3D(1.0, 2.0, 3.0));
 
       ArrayList<ReferenceFrame> frames = new ArrayList<ReferenceFrame>();
       frames.add(worldFrame);
@@ -38,7 +40,7 @@ public class FrameLineTest
          parentFrame = frame;
       }
 
-      ArrayList<FrameLine> resultLines = new ArrayList<FrameLine>();
+      ArrayList<FrameLine3D> resultLines = new ArrayList<FrameLine3D>();
       resultLines.add(lWorld);
 
       // Choose random paths and move the vectors around those paths:
@@ -48,12 +50,12 @@ public class FrameLineTest
       {
          int pathLength = random.nextInt(20);
 
-         FrameLine line = lWorld;
+         FrameLine3D line = lWorld;
 
          for (int j = 0; j < pathLength; j++)
          {
             int frameIndex = random.nextInt(frames.size());
-            line = new FrameLine(line);
+            line = new FrameLine3D(line);
             line.changeFrame(frames.get(frameIndex));
          }
 
@@ -61,11 +63,11 @@ public class FrameLineTest
       }
 
       // Now compare all sets of 2 vectors. If they are in the same frame, they should have the same values
-      for (FrameLine resultLine1 : resultLines)
+      for (FrameLine3D resultLine1 : resultLines)
       {
          // Print out the vectors:
 
-         for (FrameLine resultLine2 : resultLines)
+         for (FrameLine3D resultLine2 : resultLines)
          {
             if (resultLine1.getReferenceFrame() == resultLine2.getReferenceFrame())
             {
@@ -89,7 +91,7 @@ public class FrameLineTest
       Point3D origin = new Point3D();
       Vector3D direction = new Vector3D(1.0, 2.0, 3.0);
 
-      FrameLine line = new FrameLine(world, origin, direction);
+      FrameLine3D line = new FrameLine3D(world, origin, direction);
       FrameVector3D vector = new FrameVector3D(world, direction);
       vector.normalize();
 
@@ -119,7 +121,7 @@ public class FrameLineTest
       Point3D origin = new Point3D(1.0, 2.0, 3.0);
       Vector3D direction = new Vector3D(2.0, 1.0, 4.0);
 
-      FrameLine line = new FrameLine(world, origin, direction);
+      FrameLine3D line = new FrameLine3D(world, origin, direction);
       FrameVector3D vector = new FrameVector3D(world, direction);
       vector.normalize();
 
@@ -143,7 +145,7 @@ public class FrameLineTest
       FramePoint3D origin = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 2.0, 3.0);
       FrameVector3D direction = new FrameVector3D(createRandomFrame(ReferenceFrame.getWorldFrame(), new Random(1231L)), 4.0, 5.0, 6.0);
 
-      new FrameLine(origin, direction);
+      new FrameLine3D(origin, direction);
    }
 
    private ReferenceFrame createRandomFrame(ReferenceFrame parentFrame, Random random)
@@ -161,7 +163,7 @@ public class FrameLineTest
       return min + random.nextDouble() * (max - min);
    }
 
-   private void checkEquals(FrameLine v1, FrameLine v2)
+   private void checkEquals(FrameLine3D v1, FrameLine3D v2)
    {
       if (!v1.epsilonEquals(v2, 1e-7))
       {

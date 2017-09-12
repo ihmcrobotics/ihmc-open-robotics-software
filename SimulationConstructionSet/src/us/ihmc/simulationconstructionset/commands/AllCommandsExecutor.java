@@ -10,6 +10,6 @@ public interface AllCommandsExecutor
                 NextCameraKeyCommandExecutor, PreviousCameraKeyCommandExecutor, RemoveCameraKeyCommandExecutor,
                 SelectGUIConfigFromFileCommandExecutor, SetInPointCommandExecutor, SetOutPointCommandExecutor, StepBackwardCommandExecutor, StepForwardCommandExecutor,
                 ToggleCameraKeyModeCommandExecutor, ToggleKeyPointModeCommandExecutor, ViewportSelectorCommandExecutor,
-                ZoomGraphCommandExecutor, ExportSnapshotCommandExecutor, GUIEnablerAndDisabler
+                ZoomGraphCommandExecutor, ExportSnapshotCommandExecutor, GUIEnablerAndDisabler, CreateNewYoVariableSliderWindowCommandExecutor
 {
 }

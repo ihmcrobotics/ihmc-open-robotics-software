@@ -4,20 +4,20 @@ import java.awt.Color;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Class provides a CenterOfPressureCommand for the QP that is used to explore the foothold by shifting the
@@ -56,7 +56,7 @@ public class ExplorationHelper
       yoCurrentCorner = new YoInteger(prefix + "CurrentCornerExplored", registry);
 
       centerOfPressureCommand.setContactingRigidBody(contactableFoot.getRigidBody());
-      explorationParameters = footControlHelper.getWalkingControllerParameters().getOrCreateExplorationParameters(registry);
+      explorationParameters = footControlHelper.getExplorationParameters();
       if (explorationParameters != null)
          copCommandWeight = explorationParameters.getCopCommandWeight();
       else
@@ -125,7 +125,7 @@ public class ExplorationHelper
       double timeToStayAtCorner = explorationParameters.getTimeToStayInCorner().getDoubleValue();
 
       double timeToExploreCorner = timeToGoToCorner + timeToStayAtCorner;
-      double timeExploring = time - lastShrunkTime + (double)lastCornerCropped * timeToExploreCorner;
+      double timeExploring = time - lastShrunkTime + lastCornerCropped * timeToExploreCorner;
 
       partialFootholdControlModule.getSupportPolygon(supportPolygon);
       int corners = supportPolygon.getNumberOfVertices();
@@ -140,7 +140,7 @@ public class ExplorationHelper
       centroid.changeFrame(soleFrame);
       desiredCenterOfPressure.setToZero(soleFrame);
 
-      double timeExploringCurrentCorner = timeExploring - (double)currentCornerIdx * timeToExploreCorner;
+      double timeExploringCurrentCorner = timeExploring - currentCornerIdx * timeToExploreCorner;
       if (timeExploringCurrentCorner <= timeToGoToCorner)
       {
          double percent = timeExploringCurrentCorner / timeToGoToCorner;

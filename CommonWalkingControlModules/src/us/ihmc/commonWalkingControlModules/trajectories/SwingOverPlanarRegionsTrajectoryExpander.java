@@ -9,14 +9,16 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.algorithms.SphereWithConvexPolygonIntersector;
@@ -25,7 +27,6 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.YoCounter;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -54,7 +55,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final RecyclingArrayList<FramePoint3D> adjustedWaypoints;
    private final double minimumSwingHeight;
    private final double maximumSwingHeight;
-   private final double soleToToeLength;
+   private double collisionSphereRadius;
 
    private final SphereWithConvexPolygonIntersector sphereWithConvexPolygonIntersector;
    private final Map<SwingOverPlanarRegionsTrajectoryCollisionType, FramePoint3D> closestPolygonPointMap;
@@ -106,8 +107,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
             walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot(), parentRegistry, graphicsListRegistry);
       minimumSwingHeight = walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot();
       maximumSwingHeight = walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot();
-      soleToToeLength = walkingControllerParameters.getSteppingParameters().getActualFootLength() / 2.0;
-      System.out.println("soltotoelength: " + soleToToeLength);
+      collisionSphereRadius = walkingControllerParameters.getSteppingParameters().getActualFootLength() / 2.0;
 
       numberOfCheckpoints = new YoInteger(namePrefix + "NumberOfCheckpoints", parentRegistry);
       numberOfTriesCounter = new YoCounter(namePrefix + "NumberOfTriesCounter", parentRegistry);
@@ -201,12 +201,12 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       tempPlaneNormal.sub(swingEndPosition.getPoint(), swingStartPosition.getPoint());
       tempPlaneNormal.normalize();
-      tempPointOnPlane.scaleAdd(soleToToeLength, tempPlaneNormal, swingStartPosition.getPoint());
+      tempPointOnPlane.scaleAdd(collisionSphereRadius, tempPlaneNormal, swingStartPosition.getPoint());
       swingStartToeFacingSwingEndPlane.set(tempPointOnPlane, tempPlaneNormal);
 
       tempPlaneNormal.sub(swingStartPosition.getPoint(), swingEndPosition.getPoint());
       tempPlaneNormal.normalize();
-      tempPointOnPlane.scaleAdd(soleToToeLength, tempPlaneNormal, swingEndPosition.getPoint());
+      tempPointOnPlane.scaleAdd(collisionSphereRadius, tempPlaneNormal, swingEndPosition.getPoint());
       swingEndHeelFacingSwingStartPlane.set(tempPointOnPlane, tempPlaneNormal);
 
       status.set(SwingOverPlanarRegionsTrajectoryExpansionStatus.SEARCHING_FOR_SOLUTION);
@@ -244,7 +244,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
          solePoseReferenceFrame.setPositionAndUpdate(trajectoryPosition.getFrameTuple());
 
          footCollisionSphere.setToZero(WORLD);
-         footCollisionSphere.setRadius(soleToToeLength);
+         footCollisionSphere.setRadius(collisionSphereRadius);
          footCollisionSphere.getSphere3d().setPosition(solePoseReferenceFrame.getPosition());
 
          footCollisionSphere.changeFrame(WORLD);
@@ -313,6 +313,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       }
 
       return SwingOverPlanarRegionsTrajectoryExpansionStatus.SOLUTION_FOUND;
+   }
+
+   public void setCollisionSphereRadius(double collisionSphereRadius)
+   {
+      this.collisionSphereRadius = Math.max(0.0, collisionSphereRadius);
    }
 
    private void updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsTrajectoryCollisionType collisionType)

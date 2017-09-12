@@ -40,7 +40,7 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
-    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.5'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
     compile group: 'org.ejml', name: 'core', version: '0.30'
     compile group: 'org.ejml', name: 'simple', version: '0.30'
     compile group: 'org.ejml', name: 'dense64', version: '0.30'
@@ -48,7 +48,7 @@ dependencies {
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
-    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.1.0'
+    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.2'
 	
 	testCompile ihmc.getProjectDependency(":SimulationConstructionSet")
     testCompile ihmc.getProjectDependency(":SimulationConstructionSetTools")

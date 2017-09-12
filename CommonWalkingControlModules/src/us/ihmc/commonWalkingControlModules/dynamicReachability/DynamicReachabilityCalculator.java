@@ -9,6 +9,10 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.LineSegment1D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -18,23 +22,18 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class DynamicReachabilityCalculator
 {
@@ -46,7 +45,7 @@ public class DynamicReachabilityCalculator
    private static final boolean VISUALIZE_REACHABILITY = false;
 
    private static final double epsilon = 0.005;
-   private static final double stanceLegLengthToeOffFactor = 1.1;
+   private static final double stanceLegLengthToeOffFactor = 1.02;
 
    private static final double gradientThresholdForConsideration = 0.005;
 
@@ -1034,7 +1033,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      currentInitialTransferGradient.setByProjectionOntoXYPlane(tempGradient);
+      currentInitialTransferGradient.set(tempGradient);
 
       // compute end transfer duration gradient
       variation = -transferTwiddleSizeDuration * currentEndTransferDuration;
@@ -1044,7 +1043,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      currentEndTransferGradient.setByProjectionOntoXYPlane(tempGradient);
+      currentEndTransferGradient.set(tempGradient);
 
       // reset timing
       submitTransferTiming(stepNumber, currentTransferDuration, currentTransferDurationAlpha);
@@ -1075,7 +1074,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      nextInitialTransferGradient.setByProjectionOntoXYPlane(tempGradient);
+      nextInitialTransferGradient.set(tempGradient);
 
       // compute end transfer duration gradient
       variation = -transferTwiddleSizeDuration * nextEndTransferDuration;
@@ -1085,7 +1084,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      nextEndTransferGradient.setByProjectionOntoXYPlane(tempGradient);
+      nextEndTransferGradient.set(tempGradient);
 
       // reset timing
       submitTransferTiming(stepNumber, nextTransferDuration, nextTransferDurationAlpha);
@@ -1100,7 +1099,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      higherTransferGradients.get(stepIndex - 2).setByProjectionOntoXYPlane(tempGradient);
+      higherTransferGradients.get(stepIndex - 2).set(tempGradient);
 
       // reset timing
       submitTransferTiming(stepIndex, originalDuration, -1.0);
@@ -1124,7 +1123,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      currentInitialSwingGradient.setByProjectionOntoXYPlane(tempGradient);
+      currentInitialSwingGradient.set(tempGradient);
 
       // compute end swing duration gradient
       variation = -swingTwiddleSizeDuration * currentEndSwingDuration;
@@ -1134,7 +1133,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      currentEndSwingGradient.setByProjectionOntoXYPlane(tempGradient);
+      currentEndSwingGradient.set(tempGradient);
 
       // reset timing
       submitSwingTiming(stepNumber, currentSwingDuration, currentSwingDurationAlpha);
@@ -1149,7 +1148,7 @@ public class DynamicReachabilityCalculator
       applyVariation(adjustedCoMPosition);
 
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      higherSwingGradients.get(stepIndex - 1).setByProjectionOntoXYPlane(tempGradient);
+      higherSwingGradients.get(stepIndex - 1).set(tempGradient);
 
       //reset timing
       submitSwingTiming(stepIndex, duration, -1.0);
@@ -1286,7 +1285,7 @@ public class DynamicReachabilityCalculator
    private void extractGradient(FrameVector2D gradientToExtract, RobotSide stanceSide, FrameVector3D gradientToPack)
    {
       gradientToPack.setToZero(worldFrame);
-      gradientToPack.setXY(gradientToExtract);
+      gradientToPack.set(gradientToExtract);
       gradientToPack.changeFrame(stepDirectionFrames.get(stanceSide));
    }
 
@@ -1311,7 +1310,7 @@ public class DynamicReachabilityCalculator
       public void setXAxis(FrameVector3D xAxis)
       {
          xAxis.changeFrame(parentFrame);
-         this.xAxis.setByProjectionOntoXYPlane(xAxis);
+         this.xAxis.set(xAxis);
          this.xAxis.normalize();
          update();
       }

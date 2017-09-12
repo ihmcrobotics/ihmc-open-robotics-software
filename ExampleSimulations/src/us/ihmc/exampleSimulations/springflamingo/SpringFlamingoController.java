@@ -5,8 +5,6 @@ import java.awt.Container;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -17,6 +15,10 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJP
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * <p>Title: SpringFlamingoController</p>
@@ -45,41 +47,41 @@ public class SpringFlamingoController implements RobotController
    private final SideDependentList<StateMachine<States>> stateMachines;
 
    // Control Parameters:
-   private final YoDouble stand_gain = new YoDouble("stand_gain", "Gain for torquing the support ankle based on an error in desired x", registry);
-   private final YoDouble x_d = new YoDouble("x_d", "Desired x location. Controlled with stand_gain", registry);
+   private final DoubleParameter stand_gain = new DoubleParameter("stand_gain", "Gain for torquing the support ankle based on an error in desired x", registry, 0.0);
+   private final DoubleParameter x_d = new DoubleParameter("x_d", "Desired x location. Controlled with stand_gain", registry, 0.0);
 
-   private final YoDouble v_nom = new YoDouble("v_nom", "Nominal velocity", registry);
-   private final YoDouble vtp_gain = new YoDouble("vtp_gain", "Gain on velocity error to support ankle torque.", registry);
-   private final YoDouble desiredBodyPitch = new YoDouble("t_d", "Desired body pitch", registry);
-   private final YoDouble t_gain = new YoDouble("t_gain", "Gain on Pitch angle to hip torque", registry);
-   private final YoDouble t_damp = new YoDouble("t_damp", "Hip damping", registry);
+   private final DoubleParameter v_nom = new DoubleParameter("v_nom", "Nominal velocity", registry, -0.4);
+   private final DoubleParameter vtp_gain = new DoubleParameter("vtp_gain", "Gain on velocity error to support ankle torque.", registry, 0.0);
+   private final DoubleParameter desiredBodyPitch = new DoubleParameter("t_d", "Desired body pitch", registry, 0.0);
+   private final DoubleParameter t_gain = new DoubleParameter("t_gain", "Gain on Pitch angle to hip torque", registry, 100.0);
+   private final DoubleParameter t_damp = new DoubleParameter("t_damp", "Hip damping", registry, 20.0);
 
-   private final YoDouble knee_d = new YoDouble("knee_d", registry);
-   private final YoDouble knee_gain = new YoDouble("knee_gain", registry);
-   private final YoDouble knee_damp = new YoDouble("knee_damp", registry);
-   private final YoDouble hip_d = new YoDouble("hip_d", registry);
-   private final YoDouble hip_gain = new YoDouble("hip_gain", registry);
-   private final YoDouble hip_damp = new YoDouble("hip_damp", registry);
-   private final YoDouble hip_hold = new YoDouble("hip_hold", registry);
-   private final YoDouble swing_gain_knee = new YoDouble("swing_gain_knee", registry);
-   private final YoDouble swing_damp_knee = new YoDouble("swing_damp_knee", registry);
-   private final YoDouble force_thresh = new YoDouble("force_thresh", registry);
+   private final DoubleParameter knee_d = new DoubleParameter("knee_d", registry, 0.0);
+   private final DoubleParameter knee_gain = new DoubleParameter("knee_gain", registry, 30.0);
+   private final DoubleParameter knee_damp = new DoubleParameter("knee_damp", registry, 10.0);
+   private final DoubleParameter hip_d = new DoubleParameter("hip_d", registry, 0.587059);
+   private final DoubleParameter hip_gain = new DoubleParameter("hip_gain", registry, 15.9804);
+   private final DoubleParameter hip_damp = new DoubleParameter("hip_damp", registry, 2.01177);
+   private final DoubleParameter hip_hold = new DoubleParameter("hip_hold", registry, 0.358627);
+   private final DoubleParameter swing_gain_knee = new DoubleParameter("swing_gain_knee", registry, 1.81176);
+   private final DoubleParameter swing_damp_knee = new DoubleParameter("swing_damp_knee", registry, 0.403529);
+   private final DoubleParameter force_thresh = new DoubleParameter("force_thresh", registry, 13.6078);
 
-   private final YoDouble min_support_time = new YoDouble("min_support_time", registry);
-   private final YoDouble swing_time = new YoDouble("swing_time", registry);
-   private final YoDouble toe_off_time = new YoDouble("toe_off_time", registry);
-   private final YoDouble ankle_d = new YoDouble("ankle_d", "Swing ankle desired pitch", registry);
-   private final YoDouble ankle_gain = new YoDouble("ankle_gain", "Gain on ankle ankle to ankle torque", registry);
-   private final YoDouble ankle_damp = new YoDouble("ankle_damp", "Gain on ankle velocity to ankle torque", registry);
+   private final DoubleParameter min_support_time = new DoubleParameter("min_support_time", registry, 0.2);
+   private final DoubleParameter swing_time = new DoubleParameter("swing_time", registry, 0.418039);
+   private final DoubleParameter toe_off_time = new DoubleParameter("toe_off_time", registry, 0.05);
+   private final DoubleParameter ankle_d = new DoubleParameter("ankle_d", "Swing ankle desired pitch", registry, 0.0);
+   private final DoubleParameter ankle_gain = new DoubleParameter("ankle_gain", "Gain on ankle ankle to ankle torque", registry, 4.0);
+   private final DoubleParameter ankle_damp = new DoubleParameter("ankle_damp", "Gain on ankle velocity to ankle torque", registry, 1.0);
 
-   private final YoDouble ankle_limit_set = new YoDouble("ankle_limit_set", registry);
-   private final YoDouble ankle_limit_gain = new YoDouble("ankle_limit_gain", registry);
+   private final DoubleParameter ankle_limit_set = new DoubleParameter("ankle_limit_set", registry, 0.0);
+   private final DoubleParameter ankle_limit_gain = new DoubleParameter("ankle_limit_gain", registry, 250.98);
 
-   private final YoDouble push_set = new YoDouble("push_set", "Ankle angle to toe off to", registry);
-   private final YoDouble push_gain = new YoDouble("push_gain", "Gain on ankle angle to ankle torque when toeing off", registry);
-   private final YoDouble push_damp = new YoDouble("push_damp", "Damping on ankle angle to ankle torque when toeing off", registry);
+   private final DoubleParameter push_set = new DoubleParameter("push_set", "Ankle angle to toe off to", registry, -0.236471);
+   private final DoubleParameter push_gain = new DoubleParameter("push_gain", "Gain on ankle angle to ankle torque when toeing off", registry, 9.56078);
+   private final DoubleParameter push_damp = new DoubleParameter("push_damp", "Damping on ankle angle to ankle torque when toeing off", registry, 0.0);
 
-   private final YoDouble knee_collapse = new YoDouble("knee_collapse", registry);
+   private final DoubleParameter knee_collapse = new DoubleParameter("knee_collapse", registry, 0.0);
 
    // Active and Passive Torques:
    private final YoDouble act_lh = new YoDouble("act_lh", registry);
@@ -234,31 +236,6 @@ public class SpringFlamingoController implements RobotController
       robot.initializeForBallisticWalking();
 
       vel.set(0.0);
-      stand_gain.set(0.0);
-      x_d.set(0.0);
-      v_nom.set(-0.4);
-      vtp_gain.set(0.0);
-      desiredBodyPitch.set(0.0);
-      t_gain.set(100.0);
-      t_damp.set(20.0);
-      knee_d.set(0.0);
-      knee_gain.set(30.0);      
-      knee_damp.set(10.0);
-      hip_d.set(0.587059);
-      hip_gain.set(15.9804);
-      hip_damp.set(2.01177);
-      hip_hold.set(0.358627);
-      swing_gain_knee.set(1.81176);
-      swing_damp_knee.set(0.403529);
-      force_thresh.set(13.6078);
-      min_support_time.set(0.2);
-      swing_time.set(0.418039);
-      toe_off_time.set(0.05);
-      ankle_d.set(0.0);
-      ankle_gain.set(4.0);
-      ankle_damp.set(1.0);
-      ankle_limit_set.set(0.0);
-      ankle_limit_gain.set(250.98);
 
       left_force.set(0.0);
       left_cop.set(0.5);
@@ -270,11 +247,11 @@ public class SpringFlamingoController implements RobotController
       right_hip_set.set(0.358627);
 
       right_heel.set(-0.231515);
-      push_gain.set(9.56078);
-      knee_collapse.set(0.0);
-      push_set.set(-0.236471);
-      push_damp.set(0.0);
       max_hip_torque.set(0.0);
+      
+      
+      DefaultParameterReader defaultParameterReader = new DefaultParameterReader();
+      defaultParameterReader.readParametersInRegistry(registry);
 
    }
 
@@ -294,15 +271,15 @@ public class SpringFlamingoController implements RobotController
 
    private double passive_ankle_torques(double pos, double vel)
    {
-       if (pos > ankle_limit_set.getDoubleValue())
-         return (ankle_limit_gain.getDoubleValue() * (ankle_limit_set.getDoubleValue() - pos));
+       if (pos > ankle_limit_set.getValue())
+         return (ankle_limit_gain.getValue() * (ankle_limit_set.getValue() - pos));
        else
           return (0.0);
    }   
    
    private double toe_off_ankle_torques(double pos, double vel)
    {
-      return (push_gain.getDoubleValue() * (push_set.getDoubleValue() - pos) - push_damp.getDoubleValue() * vel);
+      return (push_gain.getValue() * (push_set.getValue() - pos) - push_damp.getValue() * vel);
    }
 
    private void setupStateMachines()
@@ -389,16 +366,16 @@ public class SpringFlamingoController implements RobotController
       {
          // Use hip to servo pitch
          if (force.get(robotSide).getDoubleValue() > 20.0)
-            actHip.get(robotSide).set(-t_gain.getDoubleValue() * (desiredBodyPitch.getDoubleValue() - robot.q_pitch.getDoubleValue())
-                  + t_damp.getDoubleValue() * robot.qd_pitch.getDoubleValue());
+            actHip.get(robotSide).set(-t_gain.getValue() * (desiredBodyPitch.getValue() - robot.q_pitch.getDoubleValue())
+                  + t_damp.getValue() * robot.qd_pitch.getDoubleValue());
 
          // Keep knee straight
-         actKnee.get(robotSide).set(knee_gain.getDoubleValue() * (knee_d.getDoubleValue() - qKnee.get(robotSide).getDoubleValue())
-               - knee_damp.getDoubleValue() * qdKnee.get(robotSide).getDoubleValue());
+         actKnee.get(robotSide).set(knee_gain.getValue() * (knee_d.getValue() - qKnee.get(robotSide).getDoubleValue())
+               - knee_damp.getValue() * qdKnee.get(robotSide).getValue());
 
          // Use ankle to servo speed, position
-         actAnkle.get(robotSide).set(-stand_gain.getDoubleValue() * (x_d.getDoubleValue() - robot.q_x.getDoubleValue())
-               - vtp_gain.getDoubleValue() * (v_nom.getDoubleValue() - robot.qd_x.getDoubleValue()));
+         actAnkle.get(robotSide).set(-stand_gain.getValue() * (x_d.getValue() - robot.q_x.getDoubleValue())
+               - vtp_gain.getValue() * (v_nom.getValue() - robot.qd_x.getDoubleValue()));
 
          // Ankle limit to go on toes and maintain cop
          pasAnkle.get(robotSide).set(passive_ankle_torques(qAnkle.get(robotSide).getDoubleValue(), qdAnkle.get(robotSide).getDoubleValue()));
@@ -426,16 +403,16 @@ public class SpringFlamingoController implements RobotController
       public void doAction()
       {
          // Use hip to servo pitch
-         actHip.get(robotSide).set(-t_gain.getDoubleValue() * (desiredBodyPitch.getDoubleValue() - robot.q_pitch.getDoubleValue())
-               + t_damp.getDoubleValue() * robot.qd_pitch.getDoubleValue());
+         actHip.get(robotSide).set(-t_gain.getValue() * (desiredBodyPitch.getValue() - robot.q_pitch.getDoubleValue())
+               + t_damp.getValue() * robot.qd_pitch.getDoubleValue());
 
          // Keep knee straight
-         actKnee.get(robotSide).set(knee_gain.getDoubleValue() * (knee_d.getDoubleValue() - qKnee.get(robotSide).getDoubleValue())
-               - knee_damp.getDoubleValue() * qdKnee.get(robotSide).getDoubleValue());
+         actKnee.get(robotSide).set(knee_gain.getValue() * (knee_d.getValue() - qKnee.get(robotSide).getDoubleValue())
+               - knee_damp.getValue() * qdKnee.get(robotSide).getDoubleValue());
 
          // Use ankle to servo speed, position
-         actAnkle.get(robotSide).set(-stand_gain.getDoubleValue() * (x_d.getDoubleValue() - robot.q_x.getDoubleValue())
-               - vtp_gain.getDoubleValue() * (v_nom.getDoubleValue() - robot.qd_x.getDoubleValue()));
+         actAnkle.get(robotSide).set(-stand_gain.getValue() * (x_d.getValue() - robot.q_x.getDoubleValue())
+               - vtp_gain.getValue() * (v_nom.getValue() - robot.qd_x.getDoubleValue()));
 
          // Ankle limit to go on toes and maintain cop
          pasAnkle.get(robotSide).set(passive_ankle_torques(qAnkle.get(robotSide).getDoubleValue(), qdAnkle.get(robotSide).getDoubleValue()));
@@ -467,17 +444,17 @@ public class SpringFlamingoController implements RobotController
       public void doAction()
       {
          // Servo hip up
-         hipSet.get(robotSide).set(hip_d.getDoubleValue());
-         actHip.get(robotSide).set(hip_gain.getDoubleValue() * (hipSet.get(robotSide).getDoubleValue() - qHip.get(robotSide).getDoubleValue())
-               - hip_damp.getDoubleValue() * qdHip.get(robotSide).getDoubleValue());
+         hipSet.get(robotSide).set(hip_d.getValue());
+         actHip.get(robotSide).set(hip_gain.getValue() * (hipSet.get(robotSide).getDoubleValue() - qHip.get(robotSide).getDoubleValue())
+               - hip_damp.getValue() * qdHip.get(robotSide).getDoubleValue());
 
          // Damp the knee
-         actKnee.get(robotSide).set(-swing_damp_knee.getDoubleValue() * qdKnee.get(robotSide).getDoubleValue());
+         actKnee.get(robotSide).set(-swing_damp_knee.getValue() * qdKnee.get(robotSide).getDoubleValue());
 
          // act_lk.val = 0.0;
 
          // Damp and Toggle the knee:
-         actKnee.get(robotSide).set(actKnee.get(robotSide).getDoubleValue() + knee_collapse.getDoubleValue());
+         actKnee.get(robotSide).set(actKnee.get(robotSide).getDoubleValue() + knee_collapse.getValue());
 
          // Continue toe off until toe leaves ground
          if (gcToe_fs.get(robotSide).getDoubleValue() > 0.1)
@@ -489,8 +466,8 @@ public class SpringFlamingoController implements RobotController
          {
             // Servo ankle level to the ground
             heel.get(robotSide).set(-robot.q_pitch.getDoubleValue() - qHip.get(robotSide).getDoubleValue() - qKnee.get(robotSide).getDoubleValue() - qAnkle.get(robotSide).getDoubleValue());
-            actAnkle.get(robotSide).set(-ankle_gain.getDoubleValue() * (ankle_d.getDoubleValue() - heel.get(robotSide).getDoubleValue())
-                  - ankle_damp.getDoubleValue() * qdAnkle.get(robotSide).getDoubleValue());
+            actAnkle.get(robotSide).set(-ankle_gain.getValue() * (ankle_d.getValue() - heel.get(robotSide).getDoubleValue())
+                  - ankle_damp.getValue() * qdAnkle.get(robotSide).getDoubleValue());
          }
       }
 
@@ -516,18 +493,18 @@ public class SpringFlamingoController implements RobotController
       public void doAction()
       {
          // Servo hip to a more shallow angle
-         hipSet.get(robotSide).set(hip_hold.getDoubleValue());
-         actHip.get(robotSide).set(hip_gain.getDoubleValue() * (hipSet.get(robotSide).getDoubleValue() - qHip.get(robotSide).getDoubleValue())
-               - hip_damp.getDoubleValue() * qdHip.get(robotSide).getDoubleValue());
+         hipSet.get(robotSide).set(hip_hold.getValue());
+         actHip.get(robotSide).set(hip_gain.getValue() * (hipSet.get(robotSide).getDoubleValue() - qHip.get(robotSide).getDoubleValue())
+               - hip_damp.getValue() * qdHip.get(robotSide).getDoubleValue());
 
          // Keep knee straight
-         actKnee.get(robotSide).set(swing_gain_knee.getDoubleValue() * (knee_d.getDoubleValue() - qKnee.get(robotSide).getDoubleValue())
-               - swing_damp_knee.getDoubleValue() * qdKnee.get(robotSide).getDoubleValue());
+         actKnee.get(robotSide).set(swing_gain_knee.getValue() * (knee_d.getValue() - qKnee.get(robotSide).getDoubleValue())
+               - swing_damp_knee.getValue() * qdKnee.get(robotSide).getDoubleValue());
 
          // Servo ankle level to the ground
          heel.get(robotSide).set(-robot.q_pitch.getDoubleValue() - qHip.get(robotSide).getDoubleValue() - qKnee.get(robotSide).getDoubleValue() - qAnkle.get(robotSide).getDoubleValue());
-         actAnkle.get(robotSide).set(-ankle_gain.getDoubleValue() * (ankle_d.getDoubleValue() - heel.get(robotSide).getDoubleValue())
-               - ankle_damp.getDoubleValue() * qdAnkle.get(robotSide).getDoubleValue());
+         actAnkle.get(robotSide).set(-ankle_gain.getValue() * (ankle_d.getValue() - heel.get(robotSide).getDoubleValue())
+               - ankle_damp.getValue() * qdAnkle.get(robotSide).getDoubleValue());
       }
 
       public void doTransitionIntoAction()
@@ -593,7 +570,7 @@ public class SpringFlamingoController implements RobotController
       }
       public boolean checkCondition()
       {      
-         return (gcHeel_fz.get(robotSide).getDoubleValue() < force_thresh.getDoubleValue())
+         return (gcHeel_fz.get(robotSide).getDoubleValue() < force_thresh.getValue())
                && ((robot.qd_x.getDoubleValue() < 0.0) && (gcHeel_x.get(robotSide).getDoubleValue() > robot.q_x.getDoubleValue()))
                && (gcHeel_x.get(robotSide).getDoubleValue() >   gcHeel_x.get(robotSide.getOppositeSide()).getDoubleValue());
       }
@@ -610,7 +587,7 @@ public class SpringFlamingoController implements RobotController
 
       public boolean checkCondition()
       {
-         return (force.get(robotSide).getDoubleValue() < force_thresh.getDoubleValue());
+         return (force.get(robotSide).getDoubleValue() < force_thresh.getValue());
       }
    }
 

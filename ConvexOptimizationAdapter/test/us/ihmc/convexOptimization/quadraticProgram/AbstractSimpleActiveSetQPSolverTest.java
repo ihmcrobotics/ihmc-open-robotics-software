@@ -1297,7 +1297,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
          // Verify objective is minimized by comparing to small perturbation:
          for (int i = 0; i < numberOfVariables; i++)
          {
-            solutionWithSmallPerturbation[i] = solution.get(i, 0) + RandomNumbers.nextDouble(random, 1e-4);
+            solutionWithSmallPerturbation[i] = solution.get(i, 0) + RandomNumbers.nextDouble(random, 5e-3);
          }
 
          solution.zero();
