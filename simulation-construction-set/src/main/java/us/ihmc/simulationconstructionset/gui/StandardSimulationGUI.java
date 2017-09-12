@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -46,6 +47,7 @@ import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 
 import javafx.animation.AnimationTimer;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
@@ -3341,4 +3343,18 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       mainPanel.add(viewportPanel); //TODO: Why is this here? 
    }
 
+   public void clearLights()
+   {
+      graphics3dAdapter.clearLights();
+   }
+   
+   public void addDirectionalLight(Color color, Vector3D direction)
+   {
+      graphics3dAdapter.addDirectionalLight(color, direction);
+   }
+   
+   public void setAmbientLight(Color color)
+   {
+      graphics3dAdapter.setAmbientLight(color);
+   }
 }
