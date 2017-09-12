@@ -280,7 +280,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
    
    @Override
-   public LowLevelOutputWriter getCustomSimulationOutputWriter(LowLevelOutputWriter outputWriter)
+   public LowLevelOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
    {
       return null;
    }

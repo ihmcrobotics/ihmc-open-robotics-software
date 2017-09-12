@@ -180,10 +180,14 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
-      ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
-
-      RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame,trajectoryFrames);
-      bodyManagers.add(chestManager);
+      
+      ReferenceFrame chestBodyFrame = null;
+      if(chest != null)
+      {
+         chestBodyFrame = chest.getBodyFixedFrame();
+         RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame,trajectoryFrames);
+         bodyManagers.add(chestManager);
+      }
 
       if (head != null)
       {

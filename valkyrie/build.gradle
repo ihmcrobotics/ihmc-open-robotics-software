@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.7.8"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.8.2"
    }
 }
 plugins {
@@ -23,7 +23,7 @@ ihmc {
 
 testSuites {
    def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
-   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "FLAKY", prefix + "VIDEO"]
+   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
    disableBambooConfigurationCheck = true
 }
 
@@ -151,16 +151,16 @@ task deployLocal(dependsOn: jar) {
       lib.deleteDir();
       lib.mkdirs();
 
-      configurations.runtime.each {
-         if (!it.name.contains("IHMCHumanoidOperatorInterface"))
-         {
-            def src = file(it)
-            copy {
-               from src
-               into lib
-            }
-         }
-      }
+      //configurations.runtime.each {
+      //   if (!it.name.contains("IHMCHumanoidOperatorInterface"))
+      //   {
+      //      def src = file(it)
+      //      copy {
+      //         from src
+      //         into lib
+      //      }
+      //   }
+      //}
 
       copy {
          from jar.archivePath
@@ -191,9 +191,9 @@ task deploy(dependsOn: ['jar']) {
             execute("mkdir -p " + directory + "/lib")
             execute("mkdir -p " + directory + "/Configurations")
 
-            configurations.runtime.each {
-               put it, directory + '/lib'
-            }
+            //configurations.runtime.each {
+            //   put it, directory + '/lib'
+            //}
 
             put jar.archivePath, directory + '/ValkyrieController.jar'
 

@@ -391,7 +391,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       RotationTools.computeQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
 
       FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), position, orientation);
-      Footstep footstep = new Footstep(foot, robotSide, footstepPose);
+      Footstep footstep = new Footstep(robotSide, footstepPose);
 
       return footstep;
    }
