@@ -151,16 +151,16 @@ task deployLocal(dependsOn: jar) {
       lib.deleteDir();
       lib.mkdirs();
 
-      configurations.runtime.each {
-         if (!it.name.contains("IHMCHumanoidOperatorInterface"))
-         {
-            def src = file(it)
-            copy {
-               from src
-               into lib
-            }
-         }
-      }
+      //configurations.runtime.each {
+      //   if (!it.name.contains("IHMCHumanoidOperatorInterface"))
+      //   {
+      //      def src = file(it)
+      //      copy {
+      //         from src
+      //         into lib
+      //      }
+      //   }
+      //}
 
       copy {
          from jar.archivePath
@@ -191,9 +191,9 @@ task deploy(dependsOn: ['jar']) {
             execute("mkdir -p " + directory + "/lib")
             execute("mkdir -p " + directory + "/Configurations")
 
-            configurations.runtime.each {
-               put it, directory + '/lib'
-            }
+            //configurations.runtime.each {
+            //   put it, directory + '/lib'
+            //}
 
             put jar.archivePath, directory + '/ValkyrieController.jar'
 

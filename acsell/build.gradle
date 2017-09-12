@@ -110,9 +110,9 @@ task deploy(dependsOn: assemble) << {
       session(rep) {
          execute 'mkdir -p ' + directory + '/lib'
          println "Adding Jars"
-         configurations.runtime.each {
-            put it, directory + '/lib'
-         }
+         //configurations.runtime.each {
+         //   put it, directory + '/lib'
+         //}
 
          put jar.archivePath, directory + '/AcsellController.jar'
 
