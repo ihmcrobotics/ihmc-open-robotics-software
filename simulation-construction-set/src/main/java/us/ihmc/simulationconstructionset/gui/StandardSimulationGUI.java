@@ -1124,6 +1124,16 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    {
       graphics3dAdapter.setGroundAppearance(app);
    }
+   
+   public void setupSky(String skyBox)
+   {
+      graphics3dAdapter.setupSky(skyBox);
+   }
+   
+   public void setupSky(String west, String east, String north, String south, String up, String down)
+   {
+      graphics3dAdapter.setupSky(west, east, north, south, up, down);
+   }
 
    public void setGroundVisible(boolean isVisible)
    {
