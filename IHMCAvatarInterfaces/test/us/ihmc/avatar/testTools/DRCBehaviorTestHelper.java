@@ -114,6 +114,11 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       super(simulationTestingParameters, robotModel);
       super.setTestEnvironment(commonAvatarEnvironmentInterface);
       super.setStartingLocation(selectedLocation);
+      if (networkModuleParameters == null)
+      {
+         networkModuleParameters = new DRCNetworkModuleParameters();
+         networkModuleParameters.enableNetworkProcessor(false);
+      }
       super.setNetworkProcessorParameters(networkModuleParameters);
       super.createSimulation(name, automaticallySimulate, true);
 
