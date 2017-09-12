@@ -9,8 +9,6 @@ public interface HighLevelControllerParameters
 {
    StandPrepParameters getStandPrepParameters();
 
-   PositionControlParameters getPositionControlParameters();
-
    LowLevelJointControlMode getLowLevelJointControlMode(String joint, NewHighLevelControllerStates state);
 
    NewHighLevelControllerStates getDefaultInitialControllerState();

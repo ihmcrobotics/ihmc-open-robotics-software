@@ -5,14 +5,16 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 
 public class FreezeControllerState extends HoldPositionControllerState
 {
    private static final NewHighLevelControllerStates controllerState = NewHighLevelControllerStates.FREEZE_STATE;
 
-   public FreezeControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
+   public FreezeControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
+                                LowLevelOneDoFJointDesiredDataHolderList highLevelControllerOutput)
    {
-      super(controllerState, controllerToolbox, highLevelControllerParameters.getPositionControlParameters());
+      super(controllerState, controllerToolbox, highLevelControllerOutput);
 
       OneDoFJoint[] oneDoFJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
       for (OneDoFJoint joint : oneDoFJoints)

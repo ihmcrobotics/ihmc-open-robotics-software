@@ -69,6 +69,8 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
    private final WalkingControllerParameters walkingControllerParameters;
    private final ICPTrajectoryPlannerParameters icpPlannerParameters;
 
+   private final HighLevelControllerFactoryHelper controllerFactoryHelper;
+
    private final EnumMap<NewHighLevelControllerStates, NewHighLevelControllerState> highLevelControllerStates = new EnumMap<>(NewHighLevelControllerStates.class);
 
    private final AtomicReference<NewHighLevelControllerStates> fallbackControllerForFailureReference = new AtomicReference<>();
@@ -101,6 +103,13 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
 
       this.requestedHighLevelControllerState.set(initialControllerState);
       registry.addChild(controllerToolbox.getYoVariableRegistry());
+
+      controllerFactoryHelper = new HighLevelControllerFactoryHelper();
+      controllerFactoryHelper.setCommandInputManager(commandInputManager);
+      controllerFactoryHelper.setStatusMessageOutputManager(statusMessageOutputManager);
+      controllerFactoryHelper.setParameters(highLevelControllerParameters, walkingControllerParameters, icpPlannerParameters);
+      controllerFactoryHelper.setHighLevelHumanoidControllerToolbox(controllerToolbox);
+      controllerFactoryHelper.setLowLevelControllerOutput(lowLevelControllerOutput);
 
       stateMachine = setUpStateMachine(controllerStateFactories, controllerTransitionFactories, managerFactory, controllerToolbox.getYoTime(), registry);
       isListeningToHighLevelStateMessage.set(true);
@@ -206,6 +215,9 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
                                                                                                             ArrayList<ControllerStateTransitionFactory<NewHighLevelControllerStates>> controllerTransitionFactories,
                                                                                                             HighLevelControlManagerFactory managerFactory, YoDouble yoTime, YoVariableRegistry registry)
    {
+      controllerFactoryHelper.setControllerFactories(controllerStateFactories);
+      controllerFactoryHelper.setHighLevelControlManagerFactory(managerFactory);
+
       GenericStateMachine<NewHighLevelControllerStates, NewHighLevelControllerState> highLevelStateMachine = new GenericStateMachine<>("highLevelControllerState", "switchTimeName",
                                                                                                                                        NewHighLevelControllerStates.class, yoTime, registry);
 
@@ -214,9 +226,7 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
       for (HighLevelControllerStateFactory controllerStateFactory : controllerStateFactories.values())
       {
          // set the controller core output
-         NewHighLevelControllerState highLevelControllerState = controllerStateFactory.getOrCreateControllerState(controllerStateFactories, controllerToolbox, highLevelControllerParameters,
-                                                                                                                  commandInputManager, statusMessageOutputManager, managerFactory,
-                                                                                                                  walkingControllerParameters, icpPlannerParameters);
+         NewHighLevelControllerState highLevelControllerState = controllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
 
          // add the controller to the state machine
          highLevelStateMachine.addState(highLevelControllerState);

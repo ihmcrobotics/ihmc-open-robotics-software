@@ -1,33 +1,23 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewHighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewWalkingControllerState;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
-
-import java.util.EnumMap;
 
 public class NewWalkingControllerStateFactory implements HighLevelControllerStateFactory
 {
    private NewWalkingControllerState walkingControllerState;
 
    @Override
-   public NewHighLevelControllerState getOrCreateControllerState(EnumMap<NewHighLevelControllerStates, HighLevelControllerStateFactory> controllerFactoriesMap,
-                                                                 HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
-                                                                 CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                                                 HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                                                 ICPTrajectoryPlannerParameters capturePointPlannerParameters)
+   public NewHighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
       if (walkingControllerState == null)
       {
-         walkingControllerState = new NewWalkingControllerState(commandInputManager, statusOutputManager, managerFactory, controllerToolbox, highLevelControllerParameters,
-                                                                capturePointPlannerParameters, walkingControllerParameters);
+         walkingControllerState = new NewWalkingControllerState(controllerFactoryHelper.getCommandInputManager(), controllerFactoryHelper.getStatusMessageOutputManager(),
+                                                                controllerFactoryHelper.getManagerFactory(), controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
+                                                                controllerFactoryHelper.getHighLevelControllerParameters(), controllerFactoryHelper.getIcpPlannerParameters(),
+                                                                controllerFactoryHelper.getWalkingControllerParameters());
       }
 
       return walkingControllerState;
