@@ -805,7 +805,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
    
    @Override
-   public LowLevelOutputWriter getCustomSimulationOutputWriter(LowLevelOutputWriter outputWriter)
+   public LowLevelOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
    {
       return null;
    }
