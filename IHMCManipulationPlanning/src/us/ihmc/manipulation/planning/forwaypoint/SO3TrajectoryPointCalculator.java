@@ -1,119 +1,150 @@
 package us.ihmc.manipulation.planning.forwaypoint;
 
-import us.ihmc.commons.PrintTools;
+import java.util.ArrayList;
+import java.util.List;
+
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SO3TrajectoryPointCalculator
 {
-   private final RecyclingArrayList<FrameSO3TrajectoryPoint> trajectoryPoints = new RecyclingArrayList<>(20, FrameSO3TrajectoryPoint.class);
-   private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-   
+   public double firstTrajectoryPointTime;
+
+   public List<Quaternion> trajectoryPointsOrientation = new ArrayList<>();
+   public List<Double> trajectoryPointsTime = new ArrayList<>();
+
+   public List<Vector3D> trajectoryPointsAngularVelocity = new ArrayList<>();
+
    public SO3TrajectoryPointCalculator()
    {
-      
+
    }
-   
-   public void appendTrajectoryPoint(Quaternion orientation)
+
+   public void clear()
    {
-      FrameSO3TrajectoryPoint aTrajectoryQuaternion = trajectoryPoints.add();
-      aTrajectoryQuaternion.setToZero(referenceFrame);
-      aTrajectoryQuaternion.setTimeToNaN();
-      aTrajectoryQuaternion.setOrientation(orientation);
-      aTrajectoryQuaternion.setAngularVelocityToNaN();
+      trajectoryPointsOrientation.clear();
+      trajectoryPointsTime.clear();
    }
-   
-   public void appendTrajectoryPoint(Quaternion orientation, Vector3D angularVelocity)
-   {    
-      FrameSO3TrajectoryPoint aTrajectoryQuaternion = trajectoryPoints.add();
-      aTrajectoryQuaternion.setToZero(referenceFrame);
-      aTrajectoryQuaternion.setTimeToNaN();
-      aTrajectoryQuaternion.setOrientation(orientation);
-      aTrajectoryQuaternion.setAngularVelocity(angularVelocity);      
-   }
-   
-   public void setTrajectoryPointAngularVelocity(int index, Vector3D angularVelocity)
+
+   public void setFirstTrajectoryPointTime(double firstTrajectoryPointTime)
    {
-      trajectoryPoints.get(index).setAngularVelocity(angularVelocity);
+      this.firstTrajectoryPointTime = firstTrajectoryPointTime;
    }
-   
-   public void setTrajectoryPointOrientation(int index, Quaternion orientation)
+
+   public void appendTrajectoryPointOrientation(double time, Quaternion quaternion)
    {
-      trajectoryPoints.get(index).setOrientation(orientation);
+      trajectoryPointsOrientation.add(quaternion);
+      trajectoryPointsTime.add(time);
    }
-   
-   public void setTrajectoryPoint(int index, Quaternion orientation, Vector3D angularVelocity)
+
+   public void compute()
    {
-      setTrajectoryPointOrientation(index, orientation);
-      setTrajectoryPointAngularVelocity(index, angularVelocity);
-   }
-   
-   // public void ChangeFrame should be added after making FrameEulideanTrajectoryQuaternion extending GeometricObject.
-   
-   public RecyclingArrayList<FrameSO3TrajectoryPoint> getTrajectoryPoints()
-   {
-      return trajectoryPoints;
-   }
-   
-   public int getNumberOfTrajectoryPoints()
-   {
-      return trajectoryPoints.size();
-   }
-   
-   public double getTime(int index)
-   {
-      return getTrajectoryPoints().get(index).getTime();
-   }
-   
-   public void setTrajectoryPointTimes(RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints)
-   {
-      for(int i =0;i<trajectoryPoints.size();i++)
+      EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
+
+      int numberOfTrajectoryPoints = trajectoryPointsOrientation.size();
+      for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
-         double time = trajectoryPoints.get(i).getTime();
-         this.trajectoryPoints.get(i).setTime(time);
+         Vector3D orientation = new Vector3D();
+         YawPitchRollConversion.convertQuaternionToYawPitchRoll(trajectoryPointsOrientation.get(i), orientation);
+
+         euclideanTrajectoryPointCalculator.appendTrajectoryPoint(new Point3D(orientation));
+      }
+
+      double[] trajectoryTimes = new double[numberOfTrajectoryPoints];
+
+      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+      {
+         trajectoryTimes[i] = trajectoryPointsTime.get(i);
+      }
+
+      euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTimes);
+      euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
+
+      RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
+
+      trajectoryPointsAngularVelocity.clear();
+      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+      {
+         Point3D orientationYawPitchRoll = new Point3D();
+         Vector3D angularVelocityYawPitchRoll = new Vector3D();
+
+         double time = trajectoryPoints.get(i).get(orientationYawPitchRoll, angularVelocityYawPitchRoll);
+
+         //         PrintTools.info(""+i+" "+ orientationYawPitchRoll +" " + angularVelocityYawPitchRoll);
+
+         trajectoryPointsAngularVelocity.add(angularVelocityYawPitchRoll);
       }
    }
-   
-   // This is temporary equation for obtaining angular velocity. /17.03.17/ 
-   // w = log(qi-1 ^(-1) * qi)
-   // The B-Spline proposed by KimKimShin should be added.
-   public void computeTrajectoryPoints()
-   {  
+
+   public List<Vector3D> getTrajectoryPointsAngularVelocity()
+   {
+      return trajectoryPointsAngularVelocity;
+   }
+
+   public Vector3D getAngularVelocity(double time)
+   {
       Vector3D angularVelocity = new Vector3D();
-      
-      for(int i =0;i<getNumberOfTrajectoryPoints()-1;i++)
-      {         
-         Quaternion quaternionOne = new Quaternion();
-         trajectoryPoints.get(i).getOrientation(quaternionOne);
-         Quaternion quaternionOneInv = new Quaternion(quaternionOne);
-         Quaternion quaternionTwo = new Quaternion();
-         trajectoryPoints.get(i+1).getOrientation(quaternionTwo);
-         Quaternion quaternionToGo = new Quaternion();
-         
-         quaternionOneInv.inverse();
-         quaternionToGo.multiply(quaternionOneInv, quaternionTwo);
-         
-         double alpha = Math.acos(quaternionToGo.getS());
-         
-         angularVelocity.setToZero();   
-         angularVelocity.setX(quaternionToGo.getX() / Math.sin(alpha) * alpha);
-         angularVelocity.setY(quaternionToGo.getY() / Math.sin(alpha) * alpha);
-         angularVelocity.setZ(quaternionToGo.getZ() / Math.sin(alpha) * alpha);
-         
-         if(Double.isNaN(angularVelocity.getX()) == true || Double.isNaN(angularVelocity.getY()) == true || Double.isNaN(angularVelocity.getZ()) == true)
-         {
-            angularVelocity.setToZero();
-         }
-      
-         PrintTools.info("aVel ["+i+"] "+angularVelocity.getX()+" "+angularVelocity.getY()+" "+angularVelocity.getZ());
-         trajectoryPoints.get(i).setAngularVelocity(angularVelocity);
+
+      /*
+       * For debug in SO3TrajectoryPointCalculatorVisualizer
+       */
+
+      return angularVelocity;
+   }
+
+   public Quaternion getOrientation(double time)
+   {
+      int arrayIndex = 0;
+
+      int numberOfTrajectoryPoints = trajectoryPointsTime.size();
+      for (int i = 0; i < numberOfTrajectoryPoints - 1; i++)
+      {
+         if (trajectoryPointsTime.get(i) <= time && time <= trajectoryPointsTime.get(i + 1))
+            arrayIndex = i;
       }
-            
-      angularVelocity.setToZero();
-      trajectoryPoints.get(getNumberOfTrajectoryPoints()-1).setAngularVelocity(angularVelocity);
+
+      double localStartTime = trajectoryPointsTime.get(arrayIndex);
+      double localEndTime = trajectoryPointsTime.get(arrayIndex + 1);
+
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      FrameOrientation initialOrientation = new FrameOrientation(worldFrame, trajectoryPointsOrientation.get(arrayIndex));
+      FrameVector3D initialAngularVelocity = new FrameVector3D(worldFrame, trajectoryPointsAngularVelocity.get(arrayIndex));
+      FrameOrientation finalOrientation = new FrameOrientation(worldFrame, trajectoryPointsOrientation.get(arrayIndex + 1));
+      FrameVector3D finalAngularVelocity = new FrameVector3D(worldFrame, trajectoryPointsAngularVelocity.get(arrayIndex + 1));
+
+      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      HermiteCurveBasedOrientationTrajectoryGenerator traj1 = new HermiteCurveBasedOrientationTrajectoryGenerator("traj1", worldFrame, registry);
+      traj1.setInitialConditions(initialOrientation, initialAngularVelocity);
+      traj1.setFinalConditions(finalOrientation, finalAngularVelocity);
+      traj1.setTrajectoryTime(localEndTime - localStartTime);
+      traj1.setNumberOfRevolutions(0);
+      traj1.initialize();
+
+      traj1.compute(time - localStartTime);
+      FrameOrientation interpolatedOrientation = new FrameOrientation(worldFrame);
+      traj1.getOrientation(interpolatedOrientation);
+
+      Quaternion orientation = new Quaternion(interpolatedOrientation.getQuaternion());
+
+      return orientation;
+   }
+
+   public Vector3D getOrientationYawPitchRoll(double time)
+   {
+      Vector3D angularVelocity = new Vector3D();
+      YawPitchRollConversion.convertQuaternionToYawPitchRoll(getOrientation(time), angularVelocity);
+
+      return angularVelocity;
    }
 }

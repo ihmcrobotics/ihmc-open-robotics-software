@@ -2,8 +2,8 @@ package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 
 import java.util.ArrayList;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -13,13 +13,12 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWh
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
-import us.ihmc.manipulation.planning.forwaypoint.SO3TrajectoryPointCalculatorTwo;
+import us.ihmc.manipulation.planning.forwaypoint.SO3TrajectoryPointCalculator;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.CTTreeTools;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -132,7 +131,7 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
       chestTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
       chestTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
       
-      SO3TrajectoryPointCalculatorTwo orientationCalculator = new SO3TrajectoryPointCalculatorTwo();
+      SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
       orientationCalculator.clear();
       orientationCalculator.setFirstTrajectoryPointTime(firstTrajectoryPointTime);
       
@@ -169,7 +168,7 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
          Vector3D desiredAngularVelocity = orientationCalculator.getTrajectoryPointsAngularVelocity().get(i);
          
 //         PrintTools.info(""+i+" "+ time +" "+desiredOrientation +" " + desiredAngularVelocity);
-         chestTrajectoryMessage.setTrajectoryPoint(i, time, desiredOrientation, desiredAngularVelocity, worldFrame);
+			chestTrajectoryMessage.setTrajectoryPoint(i, time, desiredOrientation, desiredAngularVelocity, worldFrame);
       }
    }
    
