@@ -10,6 +10,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -25,6 +26,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -78,11 +80,11 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
       simulationTestingParameters.setRunMultiThreaded(false);
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCPelvisFlippingOutBugTest", selectedLocation, simulationTestingParameters,
-              robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.createSimulation("DRCPelvisFlippingOutBugTest");
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
 
@@ -109,8 +111,12 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
 
       simulationConstructionSet.setSimulateDoneCriterion(checkPelvisOrientationError);
 
-      YoDouble kpPelvisOrientation = (YoDouble) simulationConstructionSet.getVariable(getKpPelvisOrientationName());
-      YoDouble zetaPelvisOrientation = (YoDouble) simulationConstructionSet.getVariable(getZetaPelvisOrientationName());
+      String namespace = HighLevelControlManagerFactory.class.getSimpleName();
+      YoBoolean updatePelvisDampingFromRatio = (YoBoolean) simulationConstructionSet.getVariable(namespace, "UpdateFromDampingRatioPelvisOrientation");
+      updatePelvisDampingFromRatio.set(true);
+
+      YoDouble kpPelvisOrientation = (YoDouble) simulationConstructionSet.getVariable(namespace, "kpXYPelvisOrientation");
+      YoDouble zetaPelvisOrientation = (YoDouble) simulationConstructionSet.getVariable(namespace, "zetaXYPelvisOrientation");
 
       // kp = 20.0, zeta = 0.7 causes problems when running multithreaded. kp = 1.0, zeta = 0.7 causes problems when running single threaded.
       kpPelvisOrientation.set(1.0);
@@ -130,9 +136,6 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-
-   public abstract String getZetaPelvisOrientationName();
-   public abstract String getKpPelvisOrientationName();
 
    private void setupCameraForElvisPelvis()
    {

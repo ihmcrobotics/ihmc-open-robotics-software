@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -16,7 +17,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FlamingoStanceState extends SingleSupportState
@@ -49,7 +49,7 @@ public class FlamingoStanceState extends SingleSupportState
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
-      legConfigurationManager = managerFactory.getOrCreateKneeAngleManager();
+      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       String namePrefix = supportSide.getOppositeSide().getLowerCaseName();
       loadFoot = new YoBoolean(namePrefix + "LoadFoot", registry);

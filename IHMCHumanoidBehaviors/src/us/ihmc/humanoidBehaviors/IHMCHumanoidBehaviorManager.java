@@ -12,7 +12,6 @@ import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBeha
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ObjectDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicPipeLineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicStateMachineBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.CuttingWallBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.FireFighterStanceBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickUpBallBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
@@ -21,6 +20,7 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehav
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.PartialFootholdBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestICPOptimizationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.debug.TestSmoothICPPlannerBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
@@ -30,6 +30,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.CollaborativeBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.PushAndWalkBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.rrtPlanner.CleaningMotionStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
@@ -71,7 +72,7 @@ public class IHMCHumanoidBehaviorManager
    private static double runAutomaticDiagnosticTimeToWait = Double.NaN;
 
    private final PacketCommunicator behaviorPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT,
-                                                                                                                         new IHMCCommunicationKryoNetClassList());
+         new IHMCCommunicationKryoNetClassList());
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoDouble yoTime = new YoDouble("yoTime", registry);
@@ -118,9 +119,8 @@ public class IHMCHumanoidBehaviorManager
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
 
       BehaviorDispatcher<HumanoidBehaviorType> dispatcher = new BehaviorDispatcher<>(yoTime, robotDataReceiver, desiredBehaviorControlSubscriber,
-                                                                                     desiredBehaviorSubscriber, communicationBridge, yoVariableServer,
-                                                                                     HumanoidBehaviorType.class, HumanoidBehaviorType.STOP, registry,
-                                                                                     yoGraphicsListRegistry);
+            desiredBehaviorSubscriber, communicationBridge, yoVariableServer, HumanoidBehaviorType.class, HumanoidBehaviorType.STOP, registry,
+            yoGraphicsListRegistry);
 
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
       behaviorPacketCommunicator.attachListener(CapturabilityBasedStatus.class, capturabilityBasedStatusSubsrciber);
@@ -138,9 +138,7 @@ public class IHMCHumanoidBehaviorManager
          for (RobotSide robotSide : RobotSide.values)
          {
             WristForceSensorFilteredUpdatable wristSensorUpdatable = new WristForceSensorFilteredUpdatable(robotSide, fullRobotModel, sensorInfo,
-                                                                                                           forceSensorDataHolder,
-                                                                                                           BEHAVIOR_YO_VARIABLE_SERVER_DT,
-                                                                                                           behaviorPacketCommunicator, registry);
+                  forceSensorDataHolder, BEHAVIOR_YO_VARIABLE_SERVER_DT, behaviorPacketCommunicator, registry);
             wristSensorUpdatables.put(robotSide, wristSensorUpdatable);
             dispatcher.addUpdatable(wristSensorUpdatable);
          }
@@ -182,11 +180,11 @@ public class IHMCHumanoidBehaviorManager
     * @param wholeBodyControllerParameters
     * @param forceSensorDataHolder Holds the force sensor data
     */
-   private void createAndRegisterBehaviors(BehaviorDispatcher<HumanoidBehaviorType> dispatcher, LogModelProvider logModelProvider,
-                                           FullHumanoidRobotModel fullRobotModel, FullHumanoidRobotModelFactory robotModelFactory,
-                                           SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames,
-                                           YoDouble yoTime, CommunicationBridge behaviorCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                           CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters)
+   private void createAndRegisterBehaviors(BehaviorDispatcher<HumanoidBehaviorType> dispatcher,
+         LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel, FullHumanoidRobotModelFactory robotModelFactory,
+         SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames, YoDouble yoTime,
+         CommunicationBridge behaviorCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry, CapturePointUpdatable capturePointUpdatable,
+         WholeBodyControllerParameters wholeBodyControllerParameters)
    {
 
       WalkingControllerParameters walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
@@ -197,8 +195,7 @@ public class IHMCHumanoidBehaviorManager
       YoFrameConvexPolygon2d yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
 
       // CREATE SERVICES
-      FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(behaviorCommunicationBridge,
-                                                                                                            yoGraphicsListRegistry);
+      FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(behaviorCommunicationBridge, yoGraphicsListRegistry);
       fiducialDetectorBehaviorService.setTargetIDToLocate(50);
       dispatcher.addBehaviorService(fiducialDetectorBehaviorService);
 
@@ -215,47 +212,48 @@ public class IHMCHumanoidBehaviorManager
       }
 
       //      dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
-      //            new PickUpBallBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters));
+//            new PickUpBallBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters));
 
       dispatcher.addBehavior(HumanoidBehaviorType.FIRE_FIGHTING,
-                             new FireFighterStanceBehavior("fireFighting", yoTime, behaviorCommunicationBridge, fullRobotModel, referenceFrames,
-                                                           wholeBodyControllerParameters, atlasPrimitiveActions));
+            new FireFighterStanceBehavior("fireFighting", yoTime,behaviorCommunicationBridge, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions));
 
+      
       dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
-                             new PickUpBallBehaviorStateMachine(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
-                                                                wholeBodyControllerParameters, atlasPrimitiveActions));
+            new PickUpBallBehaviorStateMachine(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions));
 
-      dispatcher.addBehavior(HumanoidBehaviorType.RESET_ROBOT, new ResetRobotBehavior(behaviorCommunicationBridge, yoTime));
+      dispatcher.addBehavior(HumanoidBehaviorType.RESET_ROBOT,
+            new ResetRobotBehavior(behaviorCommunicationBridge, yoTime));
+
 
       dispatcher.addBehavior(HumanoidBehaviorType.TURN_VALVE,
-                             new TurnValveBehaviorStateMachine(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
-                                                               wholeBodyControllerParameters, atlasPrimitiveActions));
+            new TurnValveBehaviorStateMachine(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions));
 
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR,
-                             new WalkThroughDoorBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames,
-                                                         wholeBodyControllerParameters, atlasPrimitiveActions));
+            new WalkThroughDoorBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions));
 
-      dispatcher.addBehavior(HumanoidBehaviorType.DEBUG_PARTIAL_FOOTHOLDS, new PartialFootholdBehavior(behaviorCommunicationBridge));
+      dispatcher.addBehavior(HumanoidBehaviorType.DEBUG_PARTIAL_FOOTHOLDS,
+            new PartialFootholdBehavior(behaviorCommunicationBridge));
 
-      dispatcher.addBehavior(HumanoidBehaviorType.TEST_ICP_OPTIMIZATION, new TestICPOptimizationBehavior(behaviorCommunicationBridge, referenceFrames, yoTime));
+      dispatcher.addBehavior(HumanoidBehaviorType.TEST_ICP_OPTIMIZATION,
+            new TestICPOptimizationBehavior(behaviorCommunicationBridge, referenceFrames, yoTime));
+      
+      dispatcher.addBehavior(HumanoidBehaviorType.TEST_SMOOTH_ICP_PLANNER,
+                             new TestSmoothICPPlannerBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters, atlasPrimitiveActions));
 
-      dispatcher.addBehavior(HumanoidBehaviorType.PUSH_AND_WALK, new PushAndWalkBehavior(behaviorCommunicationBridge, referenceFrames, fullRobotModel,
-                                                                                         walkingControllerParameters, yoGraphicsListRegistry));
+      dispatcher.addBehavior(HumanoidBehaviorType.PUSH_AND_WALK,
+                             new PushAndWalkBehavior(behaviorCommunicationBridge, referenceFrames, fullRobotModel, walkingControllerParameters, yoGraphicsListRegistry));
 
       DRCRobotSensorInformation sensorInformation = wholeBodyControllerParameters.getSensorInformation();
-      dispatcher.addBehavior(HumanoidBehaviorType.COLLABORATIVE_TASK,
-                             new CollaborativeBehavior(behaviorCommunicationBridge, referenceFrames, fullRobotModel, sensorInformation,
-                                                       walkingControllerParameters, yoGraphicsListRegistry));
+      dispatcher.addBehavior(HumanoidBehaviorType.COLLABORATIVE_TASK, new CollaborativeBehavior(behaviorCommunicationBridge, referenceFrames, fullRobotModel, sensorInformation, walkingControllerParameters, yoGraphicsListRegistry));
 
       dispatcher.addBehavior(HumanoidBehaviorType.EXAMPLE_BEHAVIOR,
-                             new ExampleComplexBehaviorStateMachine(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions));
+            new ExampleComplexBehaviorStateMachine(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions));
 
       dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_FIDUCIAL, new LocateGoalBehavior(behaviorCommunicationBridge, fiducialDetectorBehaviorService));
-      dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50,
-                             new FollowFiducialBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService));
-      dispatcher.addBehavior(HumanoidBehaviorType.WAlK_OVER_TERRAIN,
-                             new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, logModelProvider,
-                                                                     fullRobotModel, referenceFrames, fiducialDetectorBehaviorService));
+      dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50, new FollowFiducialBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService));
+      dispatcher.addBehavior(HumanoidBehaviorType.WAlK_OVER_TERRAIN, new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, logModelProvider, fullRobotModel, referenceFrames,
+                                                                                                             fiducialDetectorBehaviorService));
+      dispatcher.addBehavior(HumanoidBehaviorType.SOLARPANEL_BEHAVIOR, new CleaningMotionStateMachineBehavior(behaviorCommunicationBridge, yoTime, robotModelFactory, fullRobotModel, referenceFrames));
 
       if (objectDetectorBehaviorService != null)
       {
@@ -263,60 +261,52 @@ public class IHMCHumanoidBehaviorManager
          dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_VALVE,
                                 new FollowFiducialBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames, objectDetectorBehaviorService));
          dispatcher.addBehavior(HumanoidBehaviorType.WALK_OVER_TERRAIN_TO_VALVE,
-                                new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, logModelProvider,
-                                                                        fullRobotModel, referenceFrames, objectDetectorBehaviorService));
+                                new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, atlasPrimitiveActions, logModelProvider, fullRobotModel,
+                                                                        referenceFrames, objectDetectorBehaviorService));
       }
 
-      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION,
-                             new WalkToLocationBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters));
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_LOCATION, new WalkToLocationBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames,
+            walkingControllerParameters));
 
-      dispatcher.addBehavior(HumanoidBehaviorType.TEST_PIPELINE, new BasicPipeLineBehavior("pipelineTest", yoTime, behaviorCommunicationBridge, fullRobotModel,
-                                                                                           referenceFrames, wholeBodyControllerParameters));
+      dispatcher.addBehavior(HumanoidBehaviorType.TEST_PIPELINE,
+            new BasicPipeLineBehavior("pipelineTest", yoTime, behaviorCommunicationBridge, fullRobotModel, referenceFrames, wholeBodyControllerParameters));
 
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_STATEMACHINE,
-                             new BasicStateMachineBehavior("StateMachineTest", yoTime, behaviorCommunicationBridge, atlasPrimitiveActions));
+            new BasicStateMachineBehavior("StateMachineTest", yoTime, behaviorCommunicationBridge, atlasPrimitiveActions));
 
       // 04/24/2017 GW: removed since this caused trouble with opencv: "Cannot load org/opencv/opencv_java320"
-      //      BlobFilteredSphereDetectionBehavior blobFilteredSphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(behaviorCommunicationBridge,
-      //            referenceFrames, fullRobotModel);
-      //      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_ORANGE_BALL);
-      //      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_BLUE_BALL);
-      //      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_RED_BALL);
-      //      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_YELLOW_BALL);
-      //      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_GREEN_BALL);
-      //      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.SIMULATED_BALL);
-      //      dispatcher.addBehavior(HumanoidBehaviorType.BALL_DETECTION, blobFilteredSphereDetectionBehavior);
+//      BlobFilteredSphereDetectionBehavior blobFilteredSphereDetectionBehavior = new BlobFilteredSphereDetectionBehavior(behaviorCommunicationBridge,
+//            referenceFrames, fullRobotModel);
+//      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_ORANGE_BALL);
+//      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_BLUE_BALL);
+//      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_RED_BALL);
+//      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_YELLOW_BALL);
+//      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.USGAMES_GREEN_BALL);
+//      blobFilteredSphereDetectionBehavior.addHSVRange(HSVRange.SIMULATED_BALL);
+//      dispatcher.addBehavior(HumanoidBehaviorType.BALL_DETECTION, blobFilteredSphereDetectionBehavior);
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
-                                                                     behaviorCommunicationBridge, wholeBodyControllerParameters, yoSupportPolygon,
-                                                                     yoGraphicsListRegistry);
+            behaviorCommunicationBridge, wholeBodyControllerParameters, yoSupportPolygon, yoGraphicsListRegistry);
       dispatcher.addBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
 
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(behaviorCommunicationBridge, fullRobotModel, yoTime);
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
-      
-      
-      
-      
-      
+
       CuttingWallBehaviorStateMachine cuttingWallBehavior = new CuttingWallBehaviorStateMachine(behaviorCommunicationBridge, yoTime, fullRobotModel, referenceFrames);
       dispatcher.addBehavior(HumanoidBehaviorType.CUTTING_WALL, cuttingWallBehavior);
-
    }
 
    private void createAndRegisterAutomaticDiagnostic(BehaviorDispatcher<HumanoidBehaviorType> dispatcher, FullHumanoidRobotModel fullRobotModel,
-                                                     HumanoidReferenceFrames referenceFrames, YoDouble yoTime,
-                                                     CommunicationBridgeInterface outgoingCommunicationBridge, CapturePointUpdatable capturePointUpdatable,
-                                                     WholeBodyControllerParameters wholeBodyControllerParameters, double timeToWait,
-                                                     YoGraphicsListRegistry yoGraphicsListRegistry)
+         HumanoidReferenceFrames referenceFrames, YoDouble yoTime, CommunicationBridgeInterface outgoingCommunicationBridge,
+         CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters, double timeToWait,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       YoBoolean yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
       YoEnum<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
       YoFrameConvexPolygon2d yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
-                                                                     outgoingCommunicationBridge, wholeBodyControllerParameters, yoSupportPolygon,
-                                                                     yoGraphicsListRegistry);
+            outgoingCommunicationBridge, wholeBodyControllerParameters, yoSupportPolygon, yoGraphicsListRegistry);
       diagnosticBehavior.setupForAutomaticDiagnostic(timeToWait);
       dispatcher.addBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
       dispatcher.requestBehavior(HumanoidBehaviorType.DIAGNOSTIC);

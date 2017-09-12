@@ -113,6 +113,8 @@ public class LogVisualizer
 
       YoVariableHandshakeParser parser = YoVariableHandshakeParser.create(logProperties.getVariables().getHandshakeFileType());
       parser.parseFrom(handshakeData);
+      
+      System.out.println("This log contains " + parser.getNumberOfVariables() + " YoVariables");
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = null;
       List<JointState> jointStates = parser.getJointStates();
@@ -178,6 +180,7 @@ public class LogVisualizer
       simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
       simulationOverheadPlotterFactory.createOverheadPlotter();
       scs.getRootRegistry().addChild(parser.getRootRegistry());
+      scs.setParameterRootPath(parser.getRootRegistry());
       scs.setGroundVisible(false);
 
       MultiVideoDataPlayer players = null;

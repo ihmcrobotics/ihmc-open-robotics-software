@@ -1,16 +1,17 @@
 package us.ihmc.valkyrieRosControl;
 
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.wholeBodyController.DRCOutputWriter;
+import us.ihmc.wholeBodyController.DRCOutputProcessor;
 
-public class ValkyrieRosControlOutputWriter implements DRCOutputWriter, ControllerStateChangedListener, ControllerFailureListener
+public class ValkyrieRosControlOutputWriter implements DRCOutputProcessor, ControllerStateChangedListener, ControllerFailureListener
 {
 
    public ValkyrieRosControlOutputWriter(ValkyrieRobotModel robotModel)
@@ -26,14 +27,14 @@ public class ValkyrieRosControlOutputWriter implements DRCOutputWriter, Controll
    }
 
    @Override
-   public void writeAfterController(long timestamp)
+   public void processAfterController(long timestamp)
    {
       // TODO Auto-generated method stub
       
    }
 
    @Override
-   public void setFullRobotModel(FullHumanoidRobotModel controllerModel, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
+   public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerCoreOutput, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
       // TODO Auto-generated method stub
       

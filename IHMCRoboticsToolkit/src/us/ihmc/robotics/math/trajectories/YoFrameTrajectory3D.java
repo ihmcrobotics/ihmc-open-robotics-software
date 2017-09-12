@@ -6,13 +6,13 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameTuple3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.ReferenceFrameHolder;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFrameHolder
@@ -478,27 +478,14 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
                                            zIntermediate0.getPoint(), zIntermediate1.getPoint(), zf.getPoint(), zdf.getVector(), zddf.getVector());
    }
 
-   public void setPentic(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0, FramePoint3D zFinal, FrameVector3D zdFinal,
-                         FrameVector3D zddFinal)
-   {
-      z0.checkReferenceFrameMatch(referenceFrame);
-      zd0.checkReferenceFrameMatch(referenceFrame);
-      zdd0.checkReferenceFrameMatch(referenceFrame);
-      zFinal.checkReferenceFrameMatch(referenceFrame);
-      zdFinal.checkReferenceFrameMatch(referenceFrame);
-      zddFinal.checkReferenceFrameMatch(referenceFrame);
-
-      setPentic(t0, tFinal, z0.getPoint(), zd0.getVector(), zdd0.getVector(), zFinal.getPoint(), zdFinal.getVector(), zddFinal.getVector());
-   }
-
-   public void setPenticWithZeroTerminalAcceleration(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zFinal, FrameVector3D zdFinal)
+   public void setQuinticWithZeroTerminalAcceleration(double t0, double tFinal, FramePoint3D z0, FrameVector3D zd0, FramePoint3D zFinal, FrameVector3D zdFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
       zFinal.checkReferenceFrameMatch(referenceFrame);
       zdFinal.checkReferenceFrameMatch(referenceFrame);
 
-      setPenticWithZeroTerminalAcceleration(t0, tFinal, z0.getPoint(), zd0.getVector(), zFinal.getPoint(), zdFinal.getVector());
+      setQuinticWithZeroTerminalAcceleration(t0, tFinal, z0.getPoint(), zd0.getVector(), zFinal.getPoint(), zdFinal.getVector());
    }
 
    public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, FramePoint3D z0, FrameVector3D zd0, FrameVector3D zdd0,
@@ -634,5 +621,16 @@ public class YoFrameTrajectory3D extends YoTrajectory3D implements ReferenceFram
    {
       positionToPack.setToZero(referenceFrame);
       super.getEndPoint(positionToPack.getPoint());
+   }
+   
+   public boolean isValidTrajectory()
+   {
+      return super.isValidTrajectory();
+   }
+   
+   public void set(FrameTrajectory3D trajToCopy)
+   {
+      checkReferenceFrameMatch(trajToCopy);
+      super.set(trajToCopy);
    }
 }

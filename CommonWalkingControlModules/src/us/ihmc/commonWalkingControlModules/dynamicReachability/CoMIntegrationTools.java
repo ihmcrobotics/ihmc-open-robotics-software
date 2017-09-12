@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CoMIntegrationTools
 {

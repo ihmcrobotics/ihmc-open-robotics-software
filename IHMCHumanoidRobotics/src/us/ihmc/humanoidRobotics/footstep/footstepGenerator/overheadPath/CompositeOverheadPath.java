@@ -3,8 +3,8 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CompositeOverheadPath extends OverheadPath
 {

@@ -1,10 +1,19 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController;
 
+import java.util.ArrayList;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.*;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationCoPConstraintHandler;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationControllerHelper;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationReachabilityConstraintHandler;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -12,14 +21,8 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -30,8 +33,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.util.ArrayList;
-
 public abstract class AbstractSimpleICPOptimizationController implements ICPOptimizationController
 {
    protected static final boolean VISUALIZE = true;
@@ -39,7 +40,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
    protected static final boolean COMPUTE_COST_TO_GO = false;
 
    private static final double footstepAdjustmentSafetyFactor = 1.0;
-   private static final double transferSplitFraction = 0.5;
+   private static final double transferSplitFraction = 0.3;
 
    private static final boolean useAngularMomentumIntegrator = true;
    private static final double angularMomentumIntegratorGain = 50.0;
@@ -141,7 +142,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
 
    protected final FramePoint2D currentICP = new FramePoint2D();
    protected final FramePoint2D desiredICP = new FramePoint2D();
-   protected final FramePoint2D perfectCMP = new FramePoint2D();
+   private final FramePoint2D perfectCMP = new FramePoint2D();
    protected final FrameVector2D desiredICPVelocity = new FrameVector2D();
 
    protected final SimpleICPOptimizationQPSolver solver;
@@ -506,6 +507,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
          double recursionMultiplier = Math.exp(-omega0 * recursionTime);
          this.footstepMultiplier.set(recursionMultiplier);
 
+         yoPerfectCMP.getFrameTuple2d(perfectCMP);
          predictedEndOfStateICP.set(desiredICP);
          predictedEndOfStateICP.sub(perfectCMP);
          predictedEndOfStateICP.scale(Math.exp(omega0 * timeRemainingInState.getDoubleValue()));
@@ -525,6 +527,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       NoConvergenceException noConvergenceException = null;
       try
       {
+         yoPerfectCMP.getFrameTuple2d(perfectCMP);
          solver.compute(icpError, perfectCMP);
       }
       catch (NoConvergenceException e)
@@ -572,7 +575,7 @@ public abstract class AbstractSimpleICPOptimizationController implements ICPOpti
       feedbackCMPDelta.set(feedbackCoPDelta);
       feedbackCMPDelta.add(cmpCoPDifferenceSolution);
 
-      yoPerfectCMP.set(perfectCMP);
+      yoPerfectCMP.getFrameTuple2d(perfectCMP);
       feedbackCMP.set(perfectCMP);
       feedbackCMP.add(feedbackCMPDelta);
 

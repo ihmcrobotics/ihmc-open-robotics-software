@@ -14,16 +14,16 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2D;
+import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
@@ -66,8 +66,8 @@ public class FootControlModule
    private final YoBoolean resetFootPolygon;
 
    public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
-         YoSE3PIDGainsInterface swingFootControlGains, YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
-         HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+         YoPIDSE3Gains swingFootControlGains, YoPIDSE3Gains holdPositionFootControlGains, YoPIDSE3Gains toeOffFootControlGains,
+         HighLevelHumanoidControllerToolbox controllerToolbox, ExplorationParameters explorationParameters, YoVariableRegistry parentRegistry)
    {
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction);
@@ -78,7 +78,7 @@ public class FootControlModule
       String namePrefix = sidePrefix + "Foot";
       registry = new YoVariableRegistry(sidePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
-      footControlHelper = new FootControlHelper(robotSide, walkingControllerParameters, controllerToolbox, registry);
+      footControlHelper = new FootControlHelper(robotSide, walkingControllerParameters, controllerToolbox, explorationParameters, registry);
 
       this.controllerToolbox = controllerToolbox;
       this.robotSide = robotSide;
@@ -223,7 +223,11 @@ public class FootControlModule
 
    public void doControl()
    {
-      legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      {
+         legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
+      }
+
       footControlHelper.update();
 
       if (resetFootPolygon.getBooleanValue())
@@ -284,26 +288,40 @@ public class FootControlModule
 
    public void updateLegSingularityModule()
    {
-      legSingularityAndKneeCollapseAvoidanceControlModule.update();
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      {
+         legSingularityAndKneeCollapseAvoidanceControlModule.update();
+      }
    }
 
    public void correctCoMHeightTrajectoryForSingularityAvoidance(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,
-         double zCurrent, ReferenceFrame pelvisZUpFrame)
+                                                                 double zCurrent, ReferenceFrame pelvisZUpFrame)
    {
-      legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,
-            pelvisZUpFrame, getCurrentConstraintType());
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      {
+         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,
+                                                                                                               pelvisZUpFrame, getCurrentConstraintType());
+      }
    }
 
    public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
-         ReferenceFrame pelvisZUpFrame, double footLoadPercentage)
+                                                              ReferenceFrame pelvisZUpFrame, double footLoadPercentage)
    {
-      legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForCollapseAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,
-            pelvisZUpFrame, footLoadPercentage, getCurrentConstraintType());
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      {
+         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForCollapseAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,
+                                                                                                            pelvisZUpFrame, footLoadPercentage,
+                                                                                                            getCurrentConstraintType());
+      }
    }
 
    public void correctCoMHeightTrajectoryForUnreachableFootStep(CoMHeightTimeDerivativesData comHeightDataToCorrect)
    {
-      legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect, getCurrentConstraintType());
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      {
+         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect,
+                                                                                                              getCurrentConstraintType());
+      }
    }
 
    public void setFootstep(Footstep footstep, double swingTime)
@@ -318,7 +336,10 @@ public class FootControlModule
 
    public void resetHeightCorrectionParametersForSingularityAvoidance()
    {
-      legSingularityAndKneeCollapseAvoidanceControlModule.resetHeightCorrectionParameters();
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      {
+         legSingularityAndKneeCollapseAvoidanceControlModule.resetHeightCorrectionParameters();
+      }
    }
 
    /**

@@ -5,6 +5,9 @@ import java.util.EnumMap;
 import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -14,8 +17,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -24,7 +25,6 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.waypoints.PolynomialOrder;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizer;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * This class is a wrapper for the TrajectoryPointOptimizer. It was made for trajectories in 3d
@@ -229,10 +229,10 @@ public class PositionOptimizedTrajectoryGenerator
 
       for (Direction axis : Direction.values)
       {
-         initialPositionArray.set(axis.getIndex(), this.initialPosition.get(axis));
-         initialVelocityArray.set(axis.getIndex(), this.initialVelocity.get(axis));
-         finalPositionArray.set(axis.getIndex(), this.finalPosition.get(axis));
-         finalVelocityArray.set(axis.getIndex(), this.finalVelocity.get(axis));
+         initialPositionArray.set(axis.getIndex(), this.initialPosition.getElement(axis.getIndex()));
+         initialVelocityArray.set(axis.getIndex(), this.initialVelocity.getElement(axis.getIndex()));
+         finalPositionArray.set(axis.getIndex(), this.finalPosition.getElement(axis.getIndex()));
+         finalVelocityArray.set(axis.getIndex(), this.finalVelocity.getElement(axis.getIndex()));
       }
 
       optimizer.setEndPoints(initialPositionArray, initialVelocityArray, finalPositionArray, finalVelocityArray);
@@ -258,7 +258,7 @@ public class PositionOptimizedTrajectoryGenerator
          waypointPosition.changeFrame(trajectoryFrame);
          TDoubleArrayList waypoint = this.waypointPositions.add();
          for (Direction axis : Direction.values)
-            waypoint.set(axis.getIndex(), this.waypointPosition.get(axis));
+            waypoint.set(axis.getIndex(), this.waypointPosition.getElement(axis.getIndex()));
          coefficients.add();
       }
 
@@ -376,9 +376,9 @@ public class PositionOptimizedTrajectoryGenerator
          Direction axis = Direction.values[dimension];
          YoPolynomial polynomial = trajectories.get(axis).get(activeSegment);
          polynomial.compute(time);
-         desiredPosition.set(axis, polynomial.getPosition());
-         desiredVelocity.set(axis, polynomial.getVelocity());
-         desiredAcceleration.set(axis, polynomial.getAcceleration());
+         desiredPosition.setElement(dimension, polynomial.getPosition());
+         desiredVelocity.setElement(dimension, polynomial.getVelocity());
+         desiredAcceleration.setElement(dimension, polynomial.getAcceleration());
       }
    }
 
@@ -406,7 +406,7 @@ public class PositionOptimizedTrajectoryGenerator
       optimizer.getWaypointVelocity(this.waypointVelocity, waypointIndex);
       waypointVelocityToPack.setToZero(trajectoryFrame);
       for (int d = 0; d < Direction.values.length; d++)
-         waypointVelocityToPack.set(Direction.values[d], this.waypointVelocity.get(d));
+         waypointVelocityToPack.setElement(d, this.waypointVelocity.get(d));
    }
 
    public boolean isDone()

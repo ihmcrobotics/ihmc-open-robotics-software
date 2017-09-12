@@ -5,10 +5,11 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 
 public class ValkyrieTorqueHysteresisCompensator
 {
@@ -46,8 +47,9 @@ public class ValkyrieTorqueHysteresisCompensator
          if (!shouldProcessJoint(jointName))
             continue;
 
+         LowLevelJointDataReadOnly lowLevelJointData = jointHandle.getDesiredJointData();
          processedJointHandles.add(jointHandle);
-         TorqueHysteresisCompensatorYoVariable hysteresisCompensator = new TorqueHysteresisCompensatorYoVariable("tau_offHyst_", joint, torqueHysteresisAmplitude, jointAccelerationMin, jointVelocityMax, rampUpTime, rampDownTime, yoTime, registry);
+         TorqueHysteresisCompensatorYoVariable hysteresisCompensator = new TorqueHysteresisCompensatorYoVariable("tau_offHyst_", joint, lowLevelJointData, torqueHysteresisAmplitude, jointAccelerationMin, jointVelocityMax, rampUpTime, rampDownTime, yoTime, registry);
          hysteresisCompensator.enable();
          hysteresisCompensators.add(hysteresisCompensator);
       }
@@ -60,7 +62,7 @@ public class ValkyrieTorqueHysteresisCompensator
          TorqueHysteresisCompensatorYoVariable hysteresisCompensator = hysteresisCompensators.get(i);
          YoEffortJointHandleHolder jointHandle = processedJointHandles.get(i);
          
-         jointHandle.getOneDoFJoint().setQddDesired(jointHandle.getControllerQddDesired());
+         jointHandle.getDesiredJointData().setDesiredAcceleration(jointHandle.getControllerQddDesired());
          hysteresisCompensator.update();
          
          jointHandle.addOffetControllerTauDesired(hysteresisCompensator.getDoubleValue());

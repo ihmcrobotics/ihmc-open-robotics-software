@@ -12,6 +12,11 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
@@ -19,11 +24,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.YoPDGains;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
@@ -68,8 +68,8 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    private final double gravity;
    private final RigidBody pelvis;
 
-   public CenterOfMassHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
-         YoVariableRegistry parentRegistry)
+   public CenterOfMassHeightControlState(YoPDGains comHeightGains, HighLevelHumanoidControllerToolbox controllerToolbox,
+                                         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       super(PelvisHeightControlMode.WALKING_CONTROLLER);
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -85,11 +85,10 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
       // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
       controlPelvisHeightInsteadOfCoMHeight.set(true);
 
-      YoPDGains comHeightControlGains = walkingControllerParameters.createCoMHeightControlGains(registry);
-      YoDouble kpCoMHeight = comHeightControlGains.getYoKp();
-      YoDouble kdCoMHeight = comHeightControlGains.getYoKd();
-      YoDouble maxCoMHeightAcceleration = comHeightControlGains.getYoMaximumFeedback();
-      YoDouble maxCoMHeightJerk = comHeightControlGains.getYoMaximumFeedbackRate();
+      YoDouble kpCoMHeight = comHeightGains.getYoKp();
+      YoDouble kdCoMHeight = comHeightGains.getYoKd();
+      YoDouble maxCoMHeightAcceleration = comHeightGains.getYoMaximumFeedback();
+      YoDouble maxCoMHeightJerk = comHeightGains.getYoMaximumFeedbackRate();
 
       double controlDT = controllerToolbox.getControlDT();
       // TODO Need to extract the maximum velocity parameter.
@@ -195,7 +194,7 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    private final FramePoint3D pelvisPosition = new FramePoint3D();
    private final FramePoint2D comPositionAsFramePoint2d = new FramePoint2D();
    private final Twist currentPelvisTwist = new Twist();
-   
+
    private boolean desiredCMPcontainedNaN = false;
 
    @Override
@@ -240,7 +239,7 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
       comXYAcceleration.scale(omega0); // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
 
       // FrameVector2d comd2dSquared = new FrameVector2d(comXYVelocity.getReferenceFrame(), comXYVelocity.getX() * comXYVelocity.getX(), comXYVelocity.getY() * comXYVelocity.getY());
-      comPosition.getFramePoint2d(comPositionAsFramePoint2d);
+      comPositionAsFramePoint2d.setIncludingFrame(comPosition);
       comXYTimeDerivatives.setCoMXYPosition(comPositionAsFramePoint2d);
       comXYTimeDerivatives.setCoMXYVelocity(comXYVelocity);
       comXYTimeDerivatives.setCoMXYAcceleration(comXYAcceleration);

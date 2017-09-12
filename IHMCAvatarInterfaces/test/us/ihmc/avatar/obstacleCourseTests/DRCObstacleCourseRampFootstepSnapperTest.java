@@ -18,6 +18,8 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -34,11 +36,9 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -104,7 +104,9 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
    {
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_BOTTOM;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCRampSnapFootstepsTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCRampSnapFootstepsTest");
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
@@ -169,7 +171,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
 
       BoundingBox2D footstepContainer = new BoundingBox2D(boundingBoxMin, boundingBoxMax);
 
-      us.ihmc.graphicsDescription.HeightMap inputHeightMap = drcSimulationTestHelper.getTestEnviroment().getTerrainObject3D().getHeightMapIfAvailable();
+      us.ihmc.graphicsDescription.HeightMap inputHeightMap = drcSimulationTestHelper.getTestEnvironment().getTerrainObject3D().getHeightMapIfAvailable();
       double resolution = 0.02;
       double heightThreshold = 0.002;
       double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;

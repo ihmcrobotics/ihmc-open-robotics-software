@@ -16,6 +16,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -43,7 +44,6 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
@@ -100,8 +100,6 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, true);
    }
    
-   
-   
    public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface,
          String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
          DRCRobotModel robotModel, boolean automaticallySimulate)
@@ -113,7 +111,11 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 	         String name, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
 	         DRCRobotModel robotModel, DRCNetworkModuleParameters networkModuleParameters, boolean automaticallySimulate)	   
    {
-      super(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, networkModuleParameters, automaticallySimulate);
+      super(simulationTestingParameters, robotModel);
+      super.setTestEnvironment(commonAvatarEnvironmentInterface);
+      super.setStartingLocation(selectedLocation);
+      super.setNetworkProcessorParameters(networkModuleParameters);
+      super.createSimulation(name, automaticallySimulate, true);
 
       yoTimeRobot = getRobot().getYoTime();
       yoTimeBehaviorDispatcher = new YoDouble("yoTimeBehaviorDispatcher", registry);

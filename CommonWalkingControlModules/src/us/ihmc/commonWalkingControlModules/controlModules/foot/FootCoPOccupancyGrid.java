@@ -3,6 +3,11 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -11,13 +16,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.linearAlgebra.PrincipalComponentAnalysis3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -62,9 +63,9 @@ public class FootCoPOccupancyGrid
    private final YoDouble decayRate;
    private final YoBoolean resetGridToEmpty;
 
-   public FootCoPOccupancyGrid(String namePrefix, ReferenceFrame soleFrame, int nLengthSubdivisions,
-         int nWidthSubdivisions, WalkingControllerParameters walkingControllerParameters,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+   public FootCoPOccupancyGrid(String namePrefix, ReferenceFrame soleFrame, int nLengthSubdivisions, int nWidthSubdivisions,
+                               WalkingControllerParameters walkingControllerParameters, ExplorationParameters explorationParameters,
+                               YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.footLength = walkingControllerParameters.getSteppingParameters().getFootLength();
       this.footWidth = walkingControllerParameters.getSteppingParameters().getFootWidth();
@@ -86,7 +87,6 @@ public class FootCoPOccupancyGrid
       this.nWidthSubdivisions = new YoInteger(namePrefix + "NWidthSubdivisions", registry);
       this.nWidthSubdivisions.set(nWidthSubdivisions);
 
-      ExplorationParameters explorationParameters = walkingControllerParameters.getOrCreateExplorationParameters(registry);
       if (explorationParameters != null)
       {
          thresholdForCellActivation = explorationParameters.getCopGridThresholdForOccupancy();
@@ -219,7 +219,7 @@ public class FootCoPOccupancyGrid
             if (VISUALIZE)
             {
                getCellCenter(cellCenter, xIndex, yIndex);
-               cellPosition.setXYIncludingFrame(cellCenter);
+               cellPosition.setIncludingFrame(cellCenter, 0.0);
                cellViz[xIndex][yIndex].setAndMatchFrame(cellPosition);
             }
 
@@ -326,7 +326,7 @@ public class FootCoPOccupancyGrid
 
       // The shiftingVector is used to shift the line.
       // We first make it perpendicular to the line, normal, and pointing towards the sideToLookAt.
-      shiftingVector.rotate90();
+      EuclidGeometryTools.perpendicularVector2D(shiftingVector, shiftingVector);
       if (sideToLookAt == RobotSide.RIGHT)
       {
          shiftingVector.negate();
@@ -377,7 +377,7 @@ public class FootCoPOccupancyGrid
 
       // The shiftingVector is used to shift the line.
       // We first make it perpendicular to the line, normal, and pointing towards the sideToLookAt.
-      shiftingVector.rotate90();
+      EuclidGeometryTools.perpendicularVector2D(shiftingVector, shiftingVector);
       if (sideToLookAt == RobotSide.RIGHT)
       {
          shiftingVector.negate();
@@ -510,7 +510,7 @@ public class FootCoPOccupancyGrid
                if (isCellOccupied(xIndex, yIndex))
                {
                   getCellCenter(cellCenter, xIndex, yIndex);
-                  cellPosition.setXYIncludingFrame(cellCenter);
+                  cellPosition.setIncludingFrame(cellCenter, 0.0);
                   cellViz[xIndex][yIndex].setAndMatchFrame(cellPosition);
                }
                else

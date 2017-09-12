@@ -10,13 +10,13 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -69,7 +69,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
-      legConfigurationManager = managerFactory.getOrCreateKneeAngleManager();
+      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       fractionOfSwingToStraightenSwingLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfSwingToStraightenLeg());
       fractionOfSwingToCollapseStanceLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfSwingToCollapseStanceLeg());
@@ -316,7 +316,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    /**
-    * Request the swing trajectory to speed up using {@link us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2D)}.
+    * Request the swing trajectory to speed up using {@link us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2d)}.
     * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
     * @return the current swing time remaining for the swing foot trajectory
     */

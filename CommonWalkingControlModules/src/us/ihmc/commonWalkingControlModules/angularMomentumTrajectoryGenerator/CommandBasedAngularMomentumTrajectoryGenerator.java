@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -43,7 +43,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private FramePoint3D tempFramePoint1 = new FramePoint3D(worldFrame);
    private FramePoint3D tempFramePoint2 = new FramePoint3D(worldFrame);
    private double planTime;
-   
+
    public CommandBasedAngularMomentumTrajectoryGenerator(String namePrefix, AngularMomentumEstimationParameters trajectoryGenerationParameters,
                                                          WalkingMessageHandler handler, YoVariableRegistry registry)
    {
@@ -75,7 +75,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
 
       for (int i = 0; i < numberOfFootstepsToPlan.getIntegerValue() + 1; i++)
       {
-         TransferAngularMomentumTrajectory transferTrajectory = new TransferAngularMomentumTrajectory(namePrefix, i, registry, worldFrame,
+         TransferAngularMomentumTrajectory transferTrajectory = new TransferAngularMomentumTrajectory(i, worldFrame,
                                                                                                       numberOfWaypointsToUseForTransfer.getIntegerValue() - 1,
                                                                                                       trajectoryType.getEnumValue().getNumberOfCoefficients());
          YoDouble transferDuration = new YoDouble(namePrefix + "TransferDurationStep" + i, registry);
@@ -84,7 +84,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       }
       for (int i = 0; i < numberOfFootstepsToPlan.getIntegerValue(); i++)
       {
-         SwingAngularMomentumTrajectory swingTrajectory = new SwingAngularMomentumTrajectory(namePrefix, i, registry, worldFrame,
+         SwingAngularMomentumTrajectory swingTrajectory = new SwingAngularMomentumTrajectory(i, worldFrame,
                                                                                              numberOfWaypointsToUseForSwing.getIntegerValue() - 1,
                                                                                              trajectoryType.getEnumValue().getNumberOfCoefficients());
          YoDouble swingDuration = new YoDouble(namePrefix + "SwingDurationStep" + i, registry);
@@ -193,16 +193,16 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    {
       computeTrajectories();
    }
-   
+
    public void computeTrajectories()
    {
       planTime = time.getDoubleValue();
       for (int i = 0; i < numberOfFootstepsToPlan.getIntegerValue() + 1; i++)
       {
-         if(i >= transferDurations.size() || transferDurations.get(i).isNaN())
+         if (i >= transferDurations.size() || transferDurations.get(i).isNaN())
             break;
          planTime = computeTransferTrajectoryForFootstep(i, planTime);
-         if(i >= swingDurations.size() || swingDurations.get(i).isNaN())
+         if (i >= swingDurations.size() || swingDurations.get(i).isNaN())
             break;
          planTime = computeSwingTrajectoryForFootstep(i, planTime);
       }
@@ -210,16 +210,14 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
 
    private double computeTransferTrajectoryForFootstep(int footstepIndex, double startTime)
    {
-      computeAngularMomentumTrajectoryForState(footstepIndex, startTime,
-                                               transferDurations.get(footstepIndex).getDoubleValue(),
+      computeAngularMomentumTrajectoryForState(footstepIndex, startTime, transferDurations.get(footstepIndex).getDoubleValue(),
                                                numberOfWaypointsToUseForTransfer.getIntegerValue());
       return startTime + transferDurations.get(footstepIndex).getDoubleValue();
    }
 
    private double computeSwingTrajectoryForFootstep(int footstepIndex, double startTime)
    {
-      computeAngularMomentumTrajectoryForState(footstepIndex, startTime,
-                                               swingDurations.get(footstepIndex).getDoubleValue(),
+      computeAngularMomentumTrajectoryForState(footstepIndex, startTime, swingDurations.get(footstepIndex).getDoubleValue(),
                                                numberOfWaypointsToUseForSwing.getIntegerValue());
       return startTime + swingDurations.get(footstepIndex).getDoubleValue();
    }

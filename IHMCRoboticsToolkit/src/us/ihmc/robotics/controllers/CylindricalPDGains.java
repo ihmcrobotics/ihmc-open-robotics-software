@@ -1,5 +1,6 @@
 package us.ihmc.robotics.controllers;
 
+import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 
 /**
  * @author twan

@@ -39,8 +39,8 @@ import us.ihmc.wanderer.hardware.output.WandererOutputWriter;
 import us.ihmc.wanderer.hardware.sensorReader.WandererSensorReaderFactory;
 import us.ihmc.wanderer.parameters.WandererRobotModel;
 import us.ihmc.wholeBodyController.DRCControllerThread;
-import us.ihmc.wholeBodyController.DRCOutputWriter;
-import us.ihmc.wholeBodyController.DRCOutputWriterWithAccelerationIntegration;
+import us.ihmc.wholeBodyController.DRCOutputProcessor;
+import us.ihmc.wholeBodyController.DRCOutputProcessorWithAccelerationIntegration;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerFactory;
@@ -101,12 +101,12 @@ public class WandererControllerFactory
       WandererOutputWriter wandererOutputWriter = new WandererOutputWriter(robotModel);
       controllerFactory.attachControllerStateChangedListener(wandererOutputWriter);
       controllerFactory.attachControllerFailureListener(wandererOutputWriter);
-      DRCOutputWriter drcOutputWriter = wandererOutputWriter;
+      DRCOutputProcessor drcOutputWriter = wandererOutputWriter;
 
       boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = true;
       if (INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
       {
-         DRCOutputWriterWithAccelerationIntegration wandererOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(
+         DRCOutputProcessorWithAccelerationIntegration wandererOutputWriterWithAccelerationIntegration = new DRCOutputProcessorWithAccelerationIntegration(
                drcOutputWriter, new LegJointName[] { LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH }, null, null, robotModel.getControllerDT(), true);
          wandererOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.0, 0.0);
          wandererOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
@@ -126,12 +126,12 @@ public class WandererControllerFactory
        */
       ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(robotModel);
       DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSensorInformation(), robotModel.getContactPointParameters(),
-            robotModel.getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer, new PeriodicRealtimeThreadScheduler(poseCommunicatorPriority), dataProducer, costOfTransportCalculator, gravity);
+            robotModel.getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer, new PeriodicRealtimeThreadScheduler(poseCommunicatorPriority), dataProducer, null, costOfTransportCalculator, gravity);
       estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer,
             drcOutputWriter, dataProducer, yoVariableServer, gravity, robotModel.getEstimatorDT());
-      WandererOutputProcessor outputProcessor = new WandererOutputProcessor(threadDataSynchronizer.getControllerFullRobotModel());
-      controllerThread.addOutputProcessorToController(outputProcessor);
+//      WandererOutputProcessor outputProcessor = new WandererOutputProcessor(threadDataSynchronizer.getControllerFullRobotModel());
+//      controllerThread.addOutputProcessorToController(outputProcessor);
 
       MultiThreadedRealTimeRobotController robotController = new MultiThreadedRealTimeRobotController(estimatorThread);
       if (wandererAffinity.setAffinity())

@@ -11,15 +11,13 @@ import us.ihmc.acsell.hardware.state.AcsellXSensState;
 import us.ihmc.acsell.hardware.state.UDPAcsellStateReader;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
-import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
@@ -29,6 +27,8 @@ import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> implements SensorReader
 {
@@ -52,12 +52,12 @@ public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> impleme
 
    private final YoLong corruptedPackets;
    
-   private final DesiredJointDataHolder estimatorDesiredJointDataHolder;
+   private final LowLevelOneDoFJointDesiredDataHolderList estimatorDesiredJointDataHolder;
 
    public AcsellSensorReader(AcsellState<?, JOINT> state, JOINT[] jointNames, EnumMap<JOINT, OneDoFJoint> acsellJoints,
          StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, RawJointSensorDataHolderMap rawJointSensorDataHolderMap,
          DRCRobotSensorInformation sensorInformation, StateEstimatorParameters stateEstimatorParameters,
-         DesiredJointDataHolder estimatorDesiredJointDataHolder, YoVariableRegistry sensorReaderRegistry)
+         LowLevelOneDoFJointDesiredDataHolderList estimatorDesiredJointDataHolder, YoVariableRegistry sensorReaderRegistry)
    {
       this.state = state;
       reader = new UDPAcsellStateReader(state);
@@ -118,7 +118,7 @@ public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> impleme
 //            sensorProcessing.setJointTauSensorValue(joint, jointState.getTau());
             
             // TODO: Test me!!!!
-            sensorProcessing.setJointTauSensorValue(joint, estimatorDesiredJointDataHolder.get(joint).getTauDesired());
+            sensorProcessing.setJointTauSensorValue(joint, estimatorDesiredJointDataHolder.getLowLevelJointData(joint).getDesiredTorque());
             
             sensorProcessing.setJointVelocitySensorValue(joint, jointState.getQd());
          }

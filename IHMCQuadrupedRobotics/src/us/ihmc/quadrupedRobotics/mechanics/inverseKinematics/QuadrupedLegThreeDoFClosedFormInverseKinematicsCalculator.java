@@ -1,14 +1,14 @@
 package us.ihmc.quadrupedRobotics.mechanics.inverseKinematics;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 /**
@@ -85,7 +85,7 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
       FramePoint3D offsetFromHipRollToHipPitch = new FramePoint3D(frameBeforeHipPitch);
       offsetFromHipRollToHipPitch.changeFrame(legAttachmentFrame);
 
-      return new QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator(offsetFromHipRollToHipPitch.getVectorCopy(), referenceFrames, robotQuadrant);
+      return new QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator(new Vector3D(offsetFromHipRollToHipPitch), referenceFrames, robotQuadrant);
    }
 
    public static QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator createFromHipRollFrame(RobotQuadrant robotQuadrant, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties)
@@ -100,7 +100,7 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
       FramePoint3D offsetFromHipRollToHipPitch = new FramePoint3D(frameBeforeHipPitch);
       offsetFromHipRollToHipPitch.changeFrame(frameAfterHipRoll);
 
-      return new QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator(offsetFromHipRollToHipPitch.getVectorCopy(), referenceFrames, robotQuadrant);
+      return new QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator(new Vector3D(offsetFromHipRollToHipPitch), referenceFrames, robotQuadrant);
    }
 
    public void setBendKneesIn(boolean bendKneesIn)

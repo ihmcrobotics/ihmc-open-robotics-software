@@ -9,19 +9,27 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.Assertions;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class GeometryToolsTest
 {
@@ -381,6 +389,243 @@ public class GeometryToolsTest
          assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(-x, y, -z), epsilon));
          assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(-x, -y, z), epsilon));
          assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(-x, -y, -z), epsilon));
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @Test(timeout = 30000)
+   public void testConstructFrameFromPointAndAxis()
+   {
+      Random random = new Random(1776L);
+
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      FramePoint3D randomPoint = new FramePoint3D(worldFrame);
+
+      FrameVector3D randomVector = new FrameVector3D(worldFrame);
+
+      int numberOfTests = 100000;
+
+      for (int i = 0; i < numberOfTests; i++)
+      {
+         randomPoint.setIncludingFrame(EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 10.0, 10.0, 10.0));
+         randomVector.setIncludingFrame(EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0));
+
+         ReferenceFrame frameA = GeometryTools.constructReferenceFrameFromPointAndZAxis("frameA", randomPoint, randomVector);
+         ReferenceFrame frameB = GeometryTools.constructReferenceFrameFromPointAndAxis("frameB", randomPoint, Axis.Z, randomVector);
+
+         EuclidCoreTestTools.assertRigidBodyTransformEquals(frameA.getTransformToRoot(), frameB.getTransformToRoot(), 1.0e-2);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testYawAboutPointRegression()
+   {
+      double epsilon = 1e-10;
+      // Do not change value! For regression.
+      Random r = new Random(2899234L);
+
+      ReferenceFrame referenceFrame;
+      FramePoint3D pointToYawAbout;
+      FramePoint3D point;
+      double yaw;
+      FramePoint3D result;
+
+      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      pointToYawAbout = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      yaw = randomAngle(r);
+      result = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      GeometryTools.yawAboutPoint(point, pointToYawAbout, yaw, result);
+      System.out.println(result);
+      assertEquals("not equal", -2681.624165883151, result.getX(), epsilon);
+      assertEquals("not equal", -1528.2007328131492, result.getY(), epsilon);
+      assertEquals("not equal", 2998.298763316407, result.getZ(), epsilon);
+
+      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      pointToYawAbout = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      yaw = randomAngle(r);
+      result = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      GeometryTools.yawAboutPoint(point, pointToYawAbout, yaw, result);
+      System.out.println(result);
+      assertEquals("not equal", 2868.1077772133904, result.getX(), epsilon);
+      assertEquals("not equal", -3773.703916968001, result.getY(), epsilon);
+      assertEquals("not equal", -3313.247345650209, result.getZ(), epsilon);
+
+      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      pointToYawAbout = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      yaw = randomAngle(r);
+      result = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      GeometryTools.yawAboutPoint(point, pointToYawAbout, yaw, result);
+      System.out.println(result);
+      assertEquals("not equal", 9865.290784196699, result.getX(), epsilon);
+      assertEquals("not equal", 1276.040690119471, result.getY(), epsilon);
+      assertEquals("not equal", -3096.5574256022164, result.getZ(), epsilon);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testPitchAboutPointRegression()
+   {
+      double epsilon = 1e-10;
+      // Do not change value! For regression.
+      Random r = new Random(689291994L);
+
+      ReferenceFrame referenceFrame;
+      FramePoint3D pointToPitchAbout;
+      FramePoint3D point;
+      double pitch;
+      FramePoint3D result;
+
+      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      pointToPitchAbout = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      pitch = randomAngle(r);
+      result = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      GeometryTools.pitchAboutPoint(point, pointToPitchAbout, pitch, result);
+      System.out.println(result);
+      assertEquals("not equal", -256.24551976827297, result.getX(), epsilon);
+      assertEquals("not equal", 1443.7013411938358, result.getY(), epsilon);
+      assertEquals("not equal", 11103.259343203952, result.getZ(), epsilon);
+
+      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      pointToPitchAbout = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      pitch = randomAngle(r);
+      result = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      GeometryTools.pitchAboutPoint(point, pointToPitchAbout, pitch, result);
+      System.out.println(result);
+      assertEquals("not equal", -2273.346187036131, result.getX(), epsilon);
+      assertEquals("not equal", 3010.5651766598717, result.getY(), epsilon);
+      assertEquals("not equal", -3513.344540982049, result.getZ(), epsilon);
+
+      referenceFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
+      pointToPitchAbout = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      point = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      pitch = randomAngle(r);
+      result = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
+      GeometryTools.pitchAboutPoint(point, pointToPitchAbout, pitch, result);
+      System.out.println(result);
+      assertEquals("not equal", 3978.4131392851787, result.getX(), epsilon);
+      assertEquals("not equal", 682.5708442089929, result.getY(), epsilon);
+      assertEquals("not equal", 8214.605434738955, result.getZ(), epsilon);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testYawAboutPoint()
+   {
+      ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
+      double epsilon = 1e-10;
+      final FramePoint3D pointToYawAboutException = new FramePoint3D(theFrame, 0.0, 0.0, 0.0);
+      final FramePoint3D pointException = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
+      final FramePoint3D resultException = new FramePoint3D();
+      final double yawException = Math.PI;
+      Assertions.assertExceptionThrown(ReferenceFrameMismatchException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            GeometryTools.yawAboutPoint(pointException, pointToYawAboutException, yawException, resultException);
+         }
+      });
+
+      FramePoint3D pointToYawAbout = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
+      FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
+      double yaw = Math.PI;
+
+      FramePoint3D result = new FramePoint3D();
+      GeometryTools.yawAboutPoint(point, pointToYawAbout, yaw, result);
+      //      System.out.println(result);
+      assertEquals("These should be equal", -1.0, result.getX(), epsilon);
+      assertEquals("These should be equal", -1.0, result.getY(), epsilon);
+      assertEquals("These should be equal", 1.0, result.getZ(), epsilon);
+
+      //Check for reference frame mismatch
+      FramePoint3D point2 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
+      GeometryTools.yawAboutPoint(point, pointToYawAbout, yaw, point2);
+
+      pointToYawAbout = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
+      point = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 0.0, 1.0);
+      yaw = Math.PI / 2;
+
+      result = new FramePoint3D();
+      GeometryTools.yawAboutPoint(point, pointToYawAbout, yaw, result);
+      //      System.out.println(result);
+      assertEquals("These should be equal", 0.0, result.getX(), epsilon);
+      assertEquals("These should be equal", 1.0, result.getY(), epsilon);
+      assertEquals("These should be equal", 1.0, result.getZ(), epsilon);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testPitchAboutPoint()
+   {
+      ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
+      double epsilon = 1e-10;
+      final FramePoint3D pointToPitchAboutException = new FramePoint3D(theFrame, 0.0, 0.0, 0.0);
+      final FramePoint3D pointException = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
+      final FramePoint3D resultException = new FramePoint3D();
+      final double pitchException = Math.PI;
+      Assertions.assertExceptionThrown(ReferenceFrameMismatchException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            GeometryTools.yawAboutPoint(pointException, pointToPitchAboutException, pitchException, resultException);
+         }
+      });
+
+      FramePoint3D pointToPitchAbout = new FramePoint3D(theFrame, 0, 0, 0);
+      FramePoint3D point = new FramePoint3D(theFrame, 1, 1, 1);
+      double pitch = Math.PI;
+
+      FramePoint3D result = new FramePoint3D();
+      GeometryTools.pitchAboutPoint(point, pointToPitchAbout, pitch, result);
+      //      System.out.println(result);
+      assertEquals("These should be equal", -1.0, result.getX(), epsilon);
+      assertEquals("These should be equal", 1.0, result.getY(), epsilon);
+      assertEquals("These should be equal", -1.0, result.getZ(), epsilon);
+   }
+
+   private double randomScalar(Random random)
+   {
+      return (random.nextDouble() - 0.5) * 10000.0;
+   }
+
+   private double randomAngle(Random random)
+   {
+      return (random.nextDouble() - 0.5) * 2.0 * Math.PI;
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testYawAboutPoint_FramePoint2d_double()
+   {
+      ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
+      ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame");
+      double epsilon = 1e-10;
+
+      FramePoint2D original = new FramePoint2D(theFrame, 5.0, 7.0);
+      FramePoint2D pointToYawAbout = new FramePoint2D(theFrame);
+      double yaw = Math.PI;
+
+      FramePoint2D result = new FramePoint2D(theFrame);
+      GeometryTools.yawAboutPoint(original, pointToYawAbout, yaw, result);
+      assertEquals("Should be equal", result.getX(), -original.getX(), epsilon);
+      assertEquals("Should be equal", result.getY(), -original.getY(), epsilon);
+      try
+      {
+         FramePoint2D pointToYawAbout2 = new FramePoint2D(aFrame);
+         GeometryTools.yawAboutPoint(original, pointToYawAbout2, yaw, result);
+         fail("Should have thrown ReferenceFrameMismatchException");
+      }
+      catch (ReferenceFrameMismatchException rfme)
+      {
+         //Good
       }
    }
 

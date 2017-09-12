@@ -6,17 +6,17 @@ import org.apache.commons.lang3.StringUtils;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * This multi waypoint trajectory generator helper will generate velocities at intermediate way points of a trajectory which will result in a smooth path trough
@@ -84,7 +84,6 @@ public class EuclideanTrajectoryPointCalculator
       newTrajectoryPoint.setTime(time);
       newTrajectoryPoint.setPosition(position);
       newTrajectoryPoint.setLinearVelocityToNaN();
-      PrintTools.info(""+time+" "+position);
    }
 
    public void appendTrajectoryPoint(double time, Point3D position, Vector3D linearVelocity)
@@ -149,26 +148,17 @@ public class EuclideanTrajectoryPointCalculator
 
       for (int i = 0; i < numberOfTrajectoryPoints - 1; i++)
       {
-         
-         
          double subLength = trajectoryPoints.get(i).positionDistance(trajectoryPoints.get(i + 1));
          subLengths.add(subLength);
          totalLength += subLength;
          waypointDistanceFromStart.add(totalLength);
          if (DEBUG)
             System.out.println("Sub length: " + i + ": " + subLength);
-         
       }
 
       trajectoryPoints.get(0).setTime(firstTrajectoryPointTime);
       trajectoryPoints.get(trajectoryPoints.size() - 1).setTime(firstTrajectoryPointTime + trajectoryTime);
 
-      
-      
-      PrintTools.info(""+" " + trajectoryPoints.get(0));
-      PrintTools.info(""+" " + trajectoryPoints.get(1));
-      PrintTools.info(""+" " + trajectoryPoints.get(2));
-      
 
       if (useWeightMethod)
       {

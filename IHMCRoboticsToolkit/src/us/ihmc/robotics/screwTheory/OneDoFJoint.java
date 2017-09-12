@@ -2,9 +2,9 @@ package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameVector3D;
 
 public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
 {
@@ -21,6 +21,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    private double qdd;
    private double tauMeasured;
    private double qddDesired;
+   
    private double tau;
 
    private double effortLimitLower = Double.NEGATIVE_INFINITY;
@@ -35,19 +36,26 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    /*
     * VRC HACKS
     */
+   @Deprecated
    private boolean integrateDesiredAccelerations = true; // Hack even more...
+   @Deprecated
    private boolean resetDesiredAccelerationIntegrator = false; // Hack even more more...
 
+   @Deprecated
    private boolean resetIntegrator = false;
 
    private double qDesired;
    private double qdDesired;
+   @Deprecated
    private double kp;
+   @Deprecated
    private double kd;
 
-
+   @Deprecated
    private boolean isUnderPositionControl = false;
+
    private boolean enabled = true;
+   @Deprecated
    private boolean useFeedBackForceControl = true;
 
    /**
@@ -215,21 +223,25 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.qdd = qdd;
    }
 
+   
    public double getQddDesired()
    {
       return qddDesired;
    }
 
+  
    public void setQddDesired(double qddDesired)
    {
       this.qddDesired = qddDesired;
    }
 
+   
    public double getTau()
    {
       return tau;
    }
 
+   
    public void setTau(double tau)
    {
       this.tau = tau;
@@ -374,16 +386,19 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       return effortLimitUpper;
    }
 
+   @Deprecated
    public boolean getIntegrateDesiredAccelerations()
    {
       return integrateDesiredAccelerations;
    }
 
+   @Deprecated
    public void setIntegrateDesiredAccelerations(boolean integrateDesiredAccelerations)
    {
       this.integrateDesiredAccelerations = integrateDesiredAccelerations;
    }
 
+   @Deprecated
    public boolean getResetDesiredAccelerationIntegrator()
    {
       boolean ret = resetDesiredAccelerationIntegrator;
@@ -391,11 +406,13 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       return ret;
    }
 
+   @Deprecated
    public void resetDesiredAccelerationIntegrator()
    {
       resetDesiredAccelerationIntegrator = true;
    }
 
+   @Deprecated
    public boolean getResetIntegrator()
    {
       boolean ret = resetIntegrator;
@@ -403,26 +420,31 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       return ret;
    }
 
+   @Deprecated
    public void resetIntegrator()
    {
       resetIntegrator = true;
    }
 
+   
    public double getqDesired()
    {
       return qDesired;
    }
 
+   
    public double getQdDesired()
    {
       return qdDesired;
    }
 
+   @Deprecated
    public double getKp()
    {
       return kp;
    }
 
+   @Deprecated
    public double getKd()
    {
       return kd;
@@ -444,11 +466,13 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.qdDesired = qdDesired;
    }
 
+   @Deprecated
    public void setKp(double kp)
    {
       this.kp = kp;
    }
 
+   @Deprecated
    public void setKd(double kd)
    {
       this.kd = kd;
@@ -462,11 +486,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       checksum.update(qdd);
    }
 
-   @Override
-   public void calculateJointDesiredChecksum(GenericCRC32 checksum)
-   {
-      checksum.update(qddDesired);
-   }
 
    public abstract FrameVector3D getJointAxis();
 
@@ -474,11 +493,13 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
 
    // DRC Hack
 
+   @Deprecated
    public boolean isUnderPositionControl()
    {
       return isUnderPositionControl;
    }
 
+   @Deprecated
    public void setUnderPositionControl(boolean val)
    {
       isUnderPositionControl = val;
@@ -514,11 +535,13 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.isOnline = isOnline;
    }
 
+   @Deprecated
    public boolean isUseFeedBackForceControl()
    {
       return useFeedBackForceControl;
    }
 
+   @Deprecated
    public void setUseFeedBackForceControl(boolean useFeedBackForceControl)
    {
       this.useFeedBackForceControl = useFeedBackForceControl;

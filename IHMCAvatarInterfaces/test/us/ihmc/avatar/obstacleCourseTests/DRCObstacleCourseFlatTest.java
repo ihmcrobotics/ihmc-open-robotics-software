@@ -23,6 +23,8 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -35,11 +37,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -101,9 +101,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("DRCStandingTest");
 
       setupCameraForWalkingUpToRamp();
 
@@ -132,9 +131,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("DRCStandingTest");
 
       setupCameraForWalkingUpToRamp();
 
@@ -176,9 +174,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       String name = "DRCSimpleFlatGroundScriptTest";
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.createSimulation(name);
       HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
       setupCameraForWalkingUpToRamp();
       SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(robot, 1002L);
@@ -219,9 +217,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      String name = "DRCSimpleScriptsTest";
 
 	      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-	      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-	      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, selectedLocation, simulationTestingParameters, getRobotModel());
+         drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+         drcSimulationTestHelper.setTestEnvironment(flatGround);
+	      drcSimulationTestHelper.createSimulation(name);
 	      setupCameraForWalkingUpToRamp();
 
 	      ThreadTools.sleep(1000);
@@ -282,9 +280,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      String name = "DRCQueuedControllerCommandTest";
 
 	      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-	      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-	      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, selectedLocation, simulationTestingParameters, getRobotModel());
+         drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+         drcSimulationTestHelper.setTestEnvironment(flatGround);
+	      drcSimulationTestHelper.createSimulation(name);
 	      ConcurrentLinkedQueue<Command<?, ?>> queuedControllerCommands = drcSimulationTestHelper.getQueuedControllerCommands();
 
 	      setupCameraForWalkingUpToRamp();
@@ -383,9 +381,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         String name = "DRCQueuedControllerCommandTest";
 
         FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-        DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-        drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, selectedLocation, simulationTestingParameters, getRobotModel());
+        drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+        drcSimulationTestHelper.setTestEnvironment(flatGround);
+        drcSimulationTestHelper.createSimulation(name);
         ConcurrentLinkedQueue<Command<?, ?>> queuedControllerCommands = drcSimulationTestHelper.getQueuedControllerCommands();
 
         setupCameraForWalkingUpToRamp();
@@ -494,9 +492,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         String name = "DRCQueuedControllerCommandTest";
 
         FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-        DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-        drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, selectedLocation, simulationTestingParameters, getRobotModel());
+        drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+        drcSimulationTestHelper.setTestEnvironment(flatGround);
+        drcSimulationTestHelper.createSimulation(name);
         ConcurrentLinkedQueue<Command<?, ?>> queuedControllerCommands = drcSimulationTestHelper.getQueuedControllerCommands();
 
         setupCameraForWalkingUpToRamp();
@@ -558,9 +556,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
       setupCameraForWalkingUpToRamp();
@@ -615,9 +613,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
       setupCameraForWalkingUpToRamp();
@@ -659,9 +657,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCLongStepsMaxHeightPauseAndRestartTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.createSimulation("DRCLongStepsMaxHeightPauseAndRestartTest");
       setupCameraForWalkingUpToRamp();
 
       ThreadTools.sleep(1000);
@@ -694,9 +692,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCLongStepsMaxHeightPauseAndRestartTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.createSimulation("DRCLongStepsMaxHeightPauseAndRestartTest");
 
       HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
 
@@ -739,9 +737,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
 
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSideStepsWithSlippingTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.createSimulation("DRCSideStepsWithSlippingTest");
 
       HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
 
@@ -787,7 +785,9 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.TOP_OF_SLOPES;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCStandingTest");
 
       Point3D cameraFix = new Point3D(3.25, 3.25, 1.02);
       Point3D cameraPosition = new Point3D(6.35, 0.18, 0.97);
@@ -829,8 +829,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCRotatedStepsInTheAirTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("DRCRotatedStepsInTheAirTest");
 
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
@@ -858,9 +858,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingUpToRampShortStepsTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("DRCWalkingUpToRampShortStepsTest");
 
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
@@ -892,9 +891,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOccasionallyStraightKneesTest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation("DRCWalkingOccasionallyStraightKneesTest");
 
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
@@ -934,7 +932,10 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCTurningInPlaceAndPassingPITest", selectedLocation, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCTurningInPlaceAndPassingPITest");
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();

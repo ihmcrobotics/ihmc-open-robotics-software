@@ -15,6 +15,7 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -23,7 +24,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectory
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -40,7 +40,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public abstract class HumanoidPointyRocksEnvironmentContactsTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private OffsetAndYawRobotInitialSetup location = new OffsetAndYawRobotInitialSetup(new Vector3D(0.0, 0.0, 0.0), 0.0);
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private YoBoolean doFootExplorationInTransferToStanding;
@@ -116,7 +115,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
-         Point3D position = stepLocations.get(i).getPointCopy();
+         Point3D position = new Point3D(stepLocations.get(i));
          RobotSide robotSide = position.getY() > 0.0 ? RobotSide.LEFT : RobotSide.RIGHT;
          footstepData.setLocation(position);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
@@ -187,7 +186,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
-         Point3D position = stepLocations.get(i).getPointCopy();
+         Point3D position = new Point3D(stepLocations.get(i));
          RobotSide robotSide = position.getY() > 0.0 ? RobotSide.LEFT : RobotSide.RIGHT;
          footstepData.setLocation(position);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
@@ -234,16 +233,10 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
 
       // create simulation test helper
       String className = getClass().getSimpleName();
-      DRCStartingLocation startingLocation = new DRCStartingLocation()
-      {
-         @Override
-         public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
-         {
-            return location;
-         }
-      };
       DRCRobotModel robotModel = getRobotModel(15, 8, onlyEdgeContacts);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, className, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(environment);
+      drcSimulationTestHelper.createSimulation(className);
       drcSimulationTestHelper.getSimulationConstructionSet().hideAllYoGraphics();
 
       // increase ankle damping to match the real robot better

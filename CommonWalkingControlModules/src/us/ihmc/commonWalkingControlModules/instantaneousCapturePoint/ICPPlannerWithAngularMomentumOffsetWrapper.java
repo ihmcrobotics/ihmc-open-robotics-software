@@ -3,17 +3,16 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -160,8 +159,8 @@ public class ICPPlannerWithAngularMomentumOffsetWrapper extends ICPPlannerWithTi
 
    private void estimateCurrentTimeWithModifiedCMP(FramePoint3D desiredCoPFromAngularMomentum)
    {
-      double copCMPDistance = desiredCMPPosition.getXYPlaneDistance(desiredCoPFromAngularMomentum);
-      double distanceFromCMP = desiredICPPosition.getXYPlaneDistance(modifiedCMPPosition.getFrameTuple());
+      double copCMPDistance = desiredCMPPosition.distanceXY(desiredCoPFromAngularMomentum);
+      double distanceFromCMP = desiredICPPosition.distanceXY(modifiedCMPPosition.getFrameTuple());
 
       double modifiedTimeInState = 1.0 / super.getOmega0() * Math.log(distanceFromCMP / copCMPDistance);
       modifiedTimeInCurrentState.set(modifiedTimeInState);

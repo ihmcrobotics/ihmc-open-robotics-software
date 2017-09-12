@@ -3,16 +3,20 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.DenseMatrixBool;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.*;
-import us.ihmc.convexOptimization.quadraticProgram.*;
+
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ConstraintToConvexRegion;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPEqualityConstraintInput;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPIndexHandler;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInput;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInputCalculator;
+import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 /**
@@ -295,7 +299,7 @@ public class ICPQPOptimizationSolver
    public void addSupportPolygonVertex(FramePoint2D vertexLocation, ReferenceFrame frame, double xBuffer, double yBuffer)
    {
       tmpPoint.setToZero(frame);
-      tmpPoint.setXY(vertexLocation);
+      tmpPoint.set(vertexLocation);
 
       if (tmpPoint.getX() > 0.0)
          tmpPoint.setX(tmpPoint.getX() + xBuffer);
@@ -344,7 +348,7 @@ public class ICPQPOptimizationSolver
    public void addReachabilityVertex(FramePoint2D vertexLocation, ReferenceFrame frame)
    {
       tmpPoint.setToZero(frame);
-      tmpPoint.setXY(vertexLocation);
+      tmpPoint.set(vertexLocation);
       tmpPoint.changeFrame(worldFrame);
 
       reachabilityConstraint.addVertex(tmpPoint);
@@ -407,8 +411,10 @@ public class ICPQPOptimizationSolver
       copLocationConstraint.setPolygon();
       cmpLocationConstraint.setPolygon();
       reachabilityConstraint.setPolygon();
-      numberOfInequalityConstraints = copLocationConstraint.getInequalityConstraintSize() + reachabilityConstraint.getInequalityConstraintSize();
 
+      numberOfInequalityConstraints = copLocationConstraint.getInequalityConstraintSize();
+      if (indexHandler.useStepAdjustment())
+         numberOfInequalityConstraints += reachabilityConstraint.getInequalityConstraintSize();
       if (indexHandler.useAngularMomentum() && Double.isFinite(cmpSafeDistanceFromEdge))
          numberOfInequalityConstraints += cmpLocationConstraint.getInequalityConstraintSize();
 
@@ -711,7 +717,7 @@ public class ICPQPOptimizationSolver
       if (Double.isFinite(cmpSafeDistanceFromEdge) && indexHandler.useAngularMomentum() && cmpLocationConstraint.getInequalityConstraintSize() > 0)
          addCMPLocationConstraint();
 
-      if (reachabilityConstraint.getInequalityConstraintSize() > 0)
+      if (indexHandler.useStepAdjustment() && reachabilityConstraint.getInequalityConstraintSize() > 0)
          addReachabilityConstraint();
 
       if (indexHandler.useStepAdjustment())

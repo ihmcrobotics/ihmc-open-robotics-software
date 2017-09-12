@@ -2,16 +2,20 @@ package us.ihmc.sensorProcessing.diagnostic;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
 
 public class OneDoFJointForceTrackingDelayEstimator implements DiagnosticUpdatable
 {
    private final YoVariableRegistry registry;
    private final OneDoFJoint joint;
+   private final LowLevelJointDataReadOnly output;
    private final DelayEstimatorBetweenTwoSignals delayEstimator;
 
-   public OneDoFJointForceTrackingDelayEstimator(OneDoFJoint joint, double dt, YoVariableRegistry parentRegistry)
+   public OneDoFJointForceTrackingDelayEstimator(OneDoFJoint joint, LowLevelJointDataReadOnly outputDataToCheck, double dt, YoVariableRegistry parentRegistry)
    {
       this.joint = joint;
+      this.output = outputDataToCheck;
       String jointName = joint.getName();
       registry = new YoVariableRegistry(jointName + "ForceTrackingDelayEstimator");
       delayEstimator = new DelayEstimatorBetweenTwoSignals(jointName + "ForceTracking", dt, registry);
@@ -32,7 +36,7 @@ public class OneDoFJointForceTrackingDelayEstimator implements DiagnosticUpdatab
    @Override
    public void update()
    {
-      delayEstimator.update(joint.getTau(), joint.getTauMeasured());
+      delayEstimator.update(output.getDesiredTorque(), joint.getTauMeasured());
    }
 
    public void setAlphaFilterBreakFrequency(double delayEstimatorFilterBreakFrequency)

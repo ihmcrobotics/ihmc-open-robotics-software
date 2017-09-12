@@ -1,28 +1,28 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 
 public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
 {
    private final CenterOfPressureDataHolder centerOfPressureDataHolder;
    private final FrameVector3D linearMomentumRate = new FrameVector3D(ReferenceFrame.getWorldFrame());
    private final RootJointDesiredConfigurationData rootJointDesiredConfigurationData = new RootJointDesiredConfigurationData();
-   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
+   private final LowLevelOneDoFJointDesiredDataHolderList lowLevelOneDoFJointDesiredDataHolder;
 
-   public ControllerCoreOutput(CenterOfPressureDataHolder centerOfPressureDataHolder, OneDoFJoint[] controlledOneDoFJoints)
+   public ControllerCoreOutput(CenterOfPressureDataHolder centerOfPressureDataHolder, OneDoFJoint[] controlledOneDoFJoints, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
    {
       this.centerOfPressureDataHolder = centerOfPressureDataHolder;
       linearMomentumRate.setToNaN(ReferenceFrame.getWorldFrame());
-      lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
+      lowLevelOneDoFJointDesiredDataHolder = lowLevelControllerOutput;
    }
 
    public void setDesiredCenterOfPressure(FramePoint2D cop, RigidBody rigidBody)

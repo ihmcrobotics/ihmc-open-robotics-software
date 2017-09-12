@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -9,18 +9,18 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FramePointTest;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class CapturePointToolsTest
@@ -66,8 +66,8 @@ public class CapturePointToolsTest
       CapturePointTools.computeConstantCMPs(arrayToPack, footstepList, 0, lastFootstepIndex, startStanding, endStanding);
 
       Point3D pointBetweenFeet = new Point3D();
-      pointBetweenFeet.set(footstepList.get(0).getPointCopy());
-      pointBetweenFeet.add(footstepList.get(1).getPointCopy());
+      pointBetweenFeet.set(new Point3D(footstepList.get(0)));
+      pointBetweenFeet.add(new Point3D(footstepList.get(1)));
       pointBetweenFeet.scale(0.5);
 
       for (int i = 0; i < footstepList.size(); i++)
@@ -111,11 +111,11 @@ public class CapturePointToolsTest
       CapturePointTools.computeConstantCMPs(arrayToPack, footstepList, 0, lastFootstepIndex, startStanding, endStanding);
 
       Point3D pointBetweenFeet = new Point3D();
-      pointBetweenFeet.set(footstepList.get(0).getPointCopy());
-      pointBetweenFeet.add(footstepList.get(1).getPointCopy());
+      pointBetweenFeet.set(new Point3D(footstepList.get(0)));
+      pointBetweenFeet.add(new Point3D(footstepList.get(1)));
       pointBetweenFeet.scale(0.5);
 
-      EuclidCoreTestTools.assertTuple3DEquals("", footstepList.get(0).getPointCopy(), arrayToPack.get(0).getPoint3dCopy(), 1e-10);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Point3D(footstepList.get(0)), arrayToPack.get(0).getPoint3dCopy(), 1e-10);
 
       for (int i = 1; i < footstepList.size(); i++)
       {
@@ -159,7 +159,7 @@ public class CapturePointToolsTest
 
          for (int i = 0; i < arrayToPack.size(); i++)
          {
-            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), new Point3D(footstepList.get(i)), 1e-10);
          }
       }
    }
@@ -202,13 +202,13 @@ public class CapturePointToolsTest
          CapturePointTools.computeConstantCMPs(arrayToPack, footstepList, 0, lastFootstepIndex, startStanding, endStanding);
 
          Point3D copPos1 = new Point3D();
-         copPos1.set(footstepList.get(0).getPointCopy());
-         copPos1.add(footstepList.get(1).getPointCopy());
+         copPos1.set(new Point3D(footstepList.get(0)));
+         copPos1.add(new Point3D(footstepList.get(1)));
          copPos1.scale(0.5);
          EuclidCoreTestTools.assertTuple3DEquals("", copPos1, arrayToPack.get(0).getPoint3dCopy(), 1e-10);
          for (int i = 1; i < arrayToPack.size() - 1; i++)
          {
-            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), new Point3D(footstepList.get(i)), 1e-10);
          }
       }
    }
@@ -251,13 +251,13 @@ public class CapturePointToolsTest
          CapturePointTools.computeConstantCMPs(arrayToPack, footstepList, 0, lastFootstepIndex, startStanding, endStanding);
 
          Point3D copPos1 = new Point3D();
-         copPos1.set(footstepList.get(numberFootstepsToConsider - 1).getPointCopy());
-         copPos1.add(footstepList.get(numberFootstepsToConsider - 2).getPointCopy());
+         copPos1.set(new Point3D(footstepList.get(numberFootstepsToConsider - 1)));
+         copPos1.add(new Point3D(footstepList.get(numberFootstepsToConsider - 2)));
          copPos1.scale(0.5);
          EuclidCoreTestTools.assertTuple3DEquals("", copPos1, arrayToPack.get(numberFootstepsToConsider - 1).getPoint3dCopy(), 1e-10);
          for (int i = 0; i < arrayToPack.size() - 2; i++)
          {
-            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), new Point3D(footstepList.get(i)), 1e-10);
          }
       }
    }
@@ -300,19 +300,19 @@ public class CapturePointToolsTest
          CapturePointTools.computeConstantCMPs(arrayToPack, footstepList, 0, lastFootstepIndex, startStanding, endStanding);
 
          Point3D copPos1 = new Point3D();
-         copPos1.set(footstepList.get(numberFootstepsToConsider - 1).getPointCopy());
-         copPos1.add(footstepList.get(numberFootstepsToConsider - 2).getPointCopy());
+         copPos1.set(new Point3D(footstepList.get(numberFootstepsToConsider - 1)));
+         copPos1.add(new Point3D(footstepList.get(numberFootstepsToConsider - 2)));
          copPos1.scale(0.5);
          EuclidCoreTestTools.assertTuple3DEquals("", copPos1, arrayToPack.get(numberFootstepsToConsider - 1).getPoint3dCopy(), 1e-10);
 
-         copPos1.set(footstepList.get(0).getPointCopy());
-         copPos1.add(footstepList.get(1).getPointCopy());
+         copPos1.set(new Point3D(footstepList.get(0)));
+         copPos1.add(new Point3D(footstepList.get(1)));
          copPos1.scale(0.5);
          EuclidCoreTestTools.assertTuple3DEquals("", copPos1, arrayToPack.get(0).getPoint3dCopy(), 1e-10);
 
          for (int i = 1; i < arrayToPack.size() - 2; i++)
          {
-            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), footstepList.get(i).getPointCopy(), 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("", arrayToPack.get(i).getPoint3dCopy(), new Point3D(footstepList.get(i)), 1e-10);
          }
       }
    }
@@ -368,13 +368,14 @@ public class CapturePointToolsTest
 
          CapturePointTools.computeDesiredCapturePointPosition(omega0, 0, capturePointsToPack.get(0), constantCentersOfPressures.get(0), icpToCheck);
 
-         FramePointTest.assertFramePointEquals(capturePointsToPack.get(0).getFramePointCopy(), icpToCheck.getFramePointCopy(), 1e-8);
+         
+         EuclidFrameTestTools.assertFrameTuple3DEquals(capturePointsToPack.get(0).getFramePointCopy(), icpToCheck.getFramePointCopy(), 1e-8);
 
          for (int i = 0; i < constantCentersOfPressures.size() - 2; i++)
          {
             p1.set(constantCentersOfPressures.get(i).getFramePoint2dCopy());
             p2.set(capturePointsToPack.get(i).getFramePoint2dCopy());
-            Line2D line = new Line2D(p1.getPointCopy(), p2.getPointCopy());
+            Line2D line = new Line2D(p1, p2);
             p1.set(capturePointsToPack.get(i + 1).getFramePoint2dCopy());
             boolean isPointOnLine = line.isPointOnLine(p1.getPoint());
             assertTrue(isPointOnLine);
@@ -439,7 +440,7 @@ public class CapturePointToolsTest
 
             p1.set(constantCentersOfPressures.get(i).getFramePoint2dCopy());
             p2.set(capturePointsToPack.get(i).getFramePoint2dCopy());
-            Line2D line = new Line2D(p1.getPointCopy(), p2.getPointCopy());
+            Line2D line = new Line2D(p1, p2);
             p1.set(desiredICP.getFramePoint2dCopy());
             boolean isPointOnLine = line.isPointOnLine(p1.getPoint());
             assertTrue(isPointOnLine);
@@ -536,7 +537,7 @@ public class CapturePointToolsTest
 
          p1.set(initialICP.getFramePoint2dCopy());
          p2.set(finalDesiredICP.getFramePoint2dCopy());
-         Line2D line = new Line2D(p1.getPointCopy(), p2.getPointCopy());
+         Line2D line = new Line2D(p1, p2);
          p1.set(constantCenterOfPressure.getFramePoint2dCopy());
          boolean isPointOnLine = line.isPointOnLine(p1.getPoint());
          assertTrue(isPointOnLine);

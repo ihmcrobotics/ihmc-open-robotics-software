@@ -1,21 +1,32 @@
 package us.ihmc.atlas.parameters;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.wholeBodyController.DRCHandType;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class AtlasContactPointParameters extends RobotContactPointParameters
 {
+   public static final boolean USE_SIX_CONTACT_POINTS = false;
    private final int numberOfContactableBodies;
 
    private boolean handContactPointsHaveBeenCreated = false;
@@ -33,10 +44,18 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
       this.atlasVersion = atlasVersion;
       if (createFootContactPoints)
       {
-         if (footContactPoints == null)
-            createDefaultFootContactPoints();
-         else
+         if (footContactPoints != null)
+         {
             createFootContactPoints(footContactPoints);
+         }
+         else if(USE_SIX_CONTACT_POINTS)
+         {
+            createFootContactPoints(new AtlasSixContactFoot());
+         }
+         else
+         {
+            createDefaultFootContactPoints();
+         }
       }
 
       int totalContacts = 2;
@@ -207,5 +226,121 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
    public int getNumberOfContactableBodies()
    {
       return numberOfContactableBodies;
+   }
+   
+   private class AtlasSixContactFoot implements FootContactPoints
+   {
+      @Override
+      public Map<String, List<Tuple3DBasics>> getSimulationContactPoints(double footLength, double footWidth, double toeWidth, DRCRobotJointMap jointMap,
+            SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms)
+      {
+         HashMap<String, List<Tuple3DBasics>> ret = new HashMap<>();
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            ArrayList<Tuple3DBasics> footContactPoints = new ArrayList<>();
+            String parentJointName = jointMap.getJointBeforeFootName(robotSide);
+
+            RigidBodyTransform transformToParentJointFrame = soleToAnkleFrameTransforms.get(robotSide);
+            Point3D hindLeftContactPoint = new Point3D(-footLength / 2.0, footWidth / 2.0, 0.0);
+            transformToParentJointFrame.transform(hindLeftContactPoint);
+            footContactPoints.add(hindLeftContactPoint);
+
+            Point3D hindRightContactPoint = new Point3D(-footLength / 2.0, -footWidth / 2.0, 0.0);
+            transformToParentJointFrame.transform(hindRightContactPoint);
+            footContactPoints.add(hindRightContactPoint);
+
+            Point3D frontLeftContactPoint = new Point3D(footLength / 2.0, toeWidth / 2.0, 0.0);
+            transformToParentJointFrame.transform(frontLeftContactPoint);
+            footContactPoints.add(frontLeftContactPoint);
+
+            Point3D frontRightContactPoint = new Point3D(footLength / 2.0, -toeWidth / 2.0, 0.0);
+            transformToParentJointFrame.transform(frontRightContactPoint);
+            footContactPoints.add(frontRightContactPoint);
+            
+            for (RobotSide footSide : RobotSide.values)
+            {
+               Point3D extraContactPoint = new Point3D(0.0, footSide.negateIfRightSide(footWidth / 2.0), 0.0);
+               transformToParentJointFrame.transform(extraContactPoint);
+               footContactPoints.add(extraContactPoint);
+            }
+
+            ret.put(parentJointName, footContactPoints);
+         }
+         return ret;
+      }
+
+      @Override
+      public boolean useSoftContactPointParameters()
+      {
+         return false;
+      }
+
+      @Override
+      public SideDependentList<List<Tuple2DBasics>> getControllerContactPoints(double footLength, double footWidth, double toeWidth)
+      {
+         SideDependentList<List<Tuple2DBasics>> ret = new SideDependentList<List<Tuple2DBasics>>();
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            ArrayList<Tuple2DBasics> footContactPoints = new ArrayList<>();
+
+            double scale = 0.95;
+            Point2D hindLeftContactPoint = new Point2D(-footLength / 2.0 * scale, footWidth / 2.0 * scale);
+            footContactPoints.add(hindLeftContactPoint);
+
+            Point2D hindRightContactPoint = new Point2D(-footLength / 2.0 * scale, -footWidth / 2.0 * scale);
+            footContactPoints.add(hindRightContactPoint);
+
+            Point2D frontLeftContactPoint = new Point2D(footLength / 2.0 * scale, toeWidth / 2.0 * scale);
+            footContactPoints.add(frontLeftContactPoint);
+
+            Point2D frontRightContactPoint = new Point2D(footLength / 2.0 * scale, -toeWidth / 2.0 * scale);
+            footContactPoints.add(frontRightContactPoint);
+
+            for (RobotSide footSide : RobotSide.values)
+            {
+               Point2D extraContactPoint = new Point2D(0.0, footSide.negateIfRightSide(footWidth / 2.0));
+               extraContactPoint.scale(scale);
+               footContactPoints.add(extraContactPoint);
+            }
+
+            ret.put(robotSide, footContactPoints);
+         }
+         return ret;
+      }
+
+      @Override
+      public SideDependentList<Tuple2DBasics> getToeOffContactPoints(double footLength, double footWidth, double toeWidth)
+      {
+         SideDependentList<Tuple2DBasics> ret = new SideDependentList<Tuple2DBasics>();
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            Point2D frontLeftContactPoint = new Point2D(footLength / 2.0, toeWidth);
+
+            Point2D frontRightContactPoint = new Point2D(footLength / 2.0, -toeWidth);
+
+            Point2D toeContactPoint = new Point2D();
+            toeContactPoint.interpolate(frontLeftContactPoint, frontRightContactPoint, 0.5);
+            ret.put(robotSide, toeContactPoint);
+         }
+         return ret;
+      }
+
+      @Override
+      public SideDependentList<LineSegment2D> getToeOffContactLines(double footLength, double footWidth, double toeWidth)
+      {
+         SideDependentList<LineSegment2D> ret = new SideDependentList<>();
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            Point2D frontLeftContactPoint = new Point2D(footLength / 2.0, toeWidth);
+            Point2D frontRightContactPoint = new Point2D(footLength / 2.0, -toeWidth);
+            ret.put(robotSide, new LineSegment2D(frontLeftContactPoint, frontRightContactPoint));
+         }
+
+         return ret;
+      }
    }
 }

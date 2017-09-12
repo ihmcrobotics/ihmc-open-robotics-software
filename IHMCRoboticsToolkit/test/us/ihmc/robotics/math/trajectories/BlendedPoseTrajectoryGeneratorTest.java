@@ -1,21 +1,22 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -68,12 +69,12 @@ public class BlendedPoseTrajectoryGeneratorTest
       public PoseTrajectoryState(Random random, double time, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
       {
          this.time = time;
-         this.position = FramePoint3D.generateRandomFramePoint(random, expressedInFrame, 1.0, 1.0, 1.0);
+         this.position = EuclidFrameRandomTools.generateRandomFramePoint3D(random, expressedInFrame, 1.0, 1.0, 1.0);
          this.orientation = FrameOrientation.generateRandomFrameOrientation(random, expressedInFrame);
-         this.linearVelocity = FrameVector3D.generateRandomFrameVector(random, expressedInFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
-         this.angularVelocity = FrameVector3D.generateRandomFrameVector(random, expressedInFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
-         this.linearAcceleration = FrameVector3D.generateRandomFrameVector(random, expressedInFrame, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
-         this.angularAcceleration = FrameVector3D.generateRandomFrameVector(random, expressedInFrame, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
+         this.linearVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, expressedInFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         this.angularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, expressedInFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         this.linearAcceleration = EuclidFrameRandomTools.generateRandomFrameVector3D(random, expressedInFrame, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
+         this.angularAcceleration = EuclidFrameRandomTools.generateRandomFrameVector3D(random, expressedInFrame, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
          this.bodyFrame = bodyFrame;
          this.baseFrame = baseFrame;
          this.expressedInFrame = expressedInFrame;

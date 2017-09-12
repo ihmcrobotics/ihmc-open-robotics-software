@@ -16,21 +16,17 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
 import us.ihmc.robotDataLogger.handshake.LogHandshake;
 import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.jointState.JointState;
+import us.ihmc.simulationconstructionset.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.simulationconstructionset.ExitActionListener;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.PlaybackListener;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 
 /**
@@ -213,9 +209,18 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       Robot robot = new Robot("DummyRobot");
       if (handshake.getModelLoaderClass() != null)
       {
-         SDFModelLoader modelLoader = new SDFModelLoader();
+         LogModelLoader modelLoader;
+         try
+         {
+            modelLoader = (LogModelLoader) Class.forName(handshake.getModelLoaderClass()).newInstance();
+         }
+         catch (Exception e)
+         {
+            System.err.println("Could not instantiate LogModelLoader: " + handshake.getModelLoaderClass() + ". Defaulting to SDFModelLoader.");
+            modelLoader = new SDFModelLoader();
+         }
          modelLoader.load(handshake.getModelName(), handshake.getModel(), handshake.getResourceDirectories(), handshake.getResourceZip(), null);
-         robot = new FloatingRootJointRobot(modelLoader.createRobot());
+         robot = new RobotFromDescription(modelLoader.createRobot());
       }
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
@@ -263,7 +268,8 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       YoVariableRegistry yoVariableRegistry = handshakeParser.getRootRegistry();
       this.registry.addChild(yoVariableRegistry);
       this.registry.addChild(yoVariableClient.getDebugRegistry());
-
+      scs.setParameterRootPath(yoVariableRegistry);
+      
       List<JointState> jointStates = handshakeParser.getJointStates();
       JointUpdater.getJointUpdaterList(robot.getRootJoints(), jointStates, jointUpdaters);
 

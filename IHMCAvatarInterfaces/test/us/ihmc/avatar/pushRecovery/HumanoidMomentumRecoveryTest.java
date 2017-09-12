@@ -13,14 +13,14 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
@@ -36,7 +36,6 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private OffsetAndYawRobotInitialSetup location = new OffsetAndYawRobotInitialSetup(new Vector3D(0.0, 0.0, 0.0), 0.0);
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private PushRobotController pushController;
 
@@ -199,7 +198,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       FramePoint3D placeToStepInWorld = new FramePoint3D(soleFrame, 0.3, 0.0, 0.0);
       placeToStepInWorld.changeFrame(worldFrame);
 
-      footstepData.setLocation(placeToStepInWorld.getPointCopy());
+      footstepData.setLocation(placeToStepInWorld);
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(stepSide);
       message.add(footstepData);
@@ -233,16 +232,10 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       // create simulation test helper
       FlatGroundEnvironment emptyEnvironment = new FlatGroundEnvironment();
       String className = getClass().getSimpleName();
-      DRCStartingLocation startingLocation = new DRCStartingLocation()
-      {
-         @Override
-         public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
-         {
-            return location;
-         }
-      };
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(emptyEnvironment, className, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
+      drcSimulationTestHelper.createSimulation(className);
       Vector3D forcePointOffset = new Vector3D(0.0, 0.0, 0.1);
       pushController = new PushRobotController(drcSimulationTestHelper.getRobot(), drcSimulationTestHelper.getRobot().getRootJoint().getName(), forcePointOffset);
 

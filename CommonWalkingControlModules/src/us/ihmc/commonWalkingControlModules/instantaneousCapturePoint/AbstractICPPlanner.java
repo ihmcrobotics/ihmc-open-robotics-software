@@ -5,18 +5,20 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
+import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
-import us.ihmc.robotics.geometry.FrameVector3D;
-import us.ihmc.robotics.geometry.FrameVector2D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -34,7 +36,6 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    protected final YoInteger numberFootstepsToConsider = new YoInteger(namePrefix + "NumberFootstepsToConsider", registry);
    protected final YoBoolean isStanding = new YoBoolean(namePrefix + "IsStanding", registry);
-   protected final YoBoolean useDecoupled = new YoBoolean(namePrefix + "useDecoupled", registry);
    protected final YoBoolean isInitialTransfer = new YoBoolean(namePrefix + "IsInitialTransfer", registry);
    protected final YoBoolean isDoubleSupport = new YoBoolean(namePrefix + "IsDoubleSupport", registry);
 
@@ -165,7 +166,6 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    public AbstractICPPlanner(BipedSupportPolygons bipedSupportPolygons, int numberOfFootstepsToConsider)
    {
       isStanding.set(true);
-      useDecoupled.set(false);
 
       finalTransferDuration.setToNaN();
 
@@ -220,7 +220,6 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       velocityDecayDurationWhenDone.set(parameters.getVelocityDecayDurationWhenDone());
       velocityReductionFactor.set(Double.NaN);
    }
-
 
    @Override
    /** {@inheritDoc} */
@@ -597,6 +596,8 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    /** {@inheritDoc} */
    public void setFinalTransferDuration(double duration)
    {
+      if(duration < Epsilons.ONE_HUNDREDTH)
+         return;
       defaultFinalTransferDuration.set(duration);
    }
 

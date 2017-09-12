@@ -1,6 +1,6 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -23,6 +23,9 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -38,11 +41,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -64,7 +64,6 @@ import us.ihmc.yoVariables.variable.YoEnum;
 public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private OffsetAndYawRobotInitialSetup location = new OffsetAndYawRobotInitialSetup(new Vector3D(0.0, 0.0, 0.0), 0.0);
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("PointyRocksTest");
@@ -131,7 +130,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          placeToStepInWorld.changeFrame(worldFrame);
          placeToStepInWorld.setX(0.3 * i);
 
-         footstepData.setLocation(placeToStepInWorld.getPointCopy());
+         footstepData.setLocation(placeToStepInWorld);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide);
          message.add(footstepData);
@@ -184,7 +183,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          placeToStepInWorld.changeFrame(worldFrame);
          placeToStepInWorld.setX(0.3 * i);
 
-         footstepData.setLocation(placeToStepInWorld.getPointCopy());
+         footstepData.setLocation(placeToStepInWorld);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide);
          message.add(footstepData);
@@ -239,7 +238,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          placeToStepInWorld.changeFrame(worldFrame);
          placeToStepInWorld.setX(0.3 * i);
 
-         footstepData.setLocation(placeToStepInWorld.getPointCopy());
+         footstepData.setLocation(placeToStepInWorld);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide);
          message.add(footstepData);
@@ -344,16 +343,10 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       // create simulation test helper
       FlatGroundEnvironment emptyEnvironment = new FlatGroundEnvironment();
       String className = getClass().getSimpleName();
-      DRCStartingLocation startingLocation = new DRCStartingLocation()
-      {
-         @Override
-         public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
-         {
-            return location;
-         }
-      };
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(emptyEnvironment, className, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
+      drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
+      drcSimulationTestHelper.createSimulation(className);
 
       // increase ankle damping to match the real robot better
       YoDouble damping_l_akx = (YoDouble) drcSimulationTestHelper.getYoVariable("b_damp_l_leg_akx");
@@ -486,11 +479,11 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
 
             for (int i = 0; i < contactPoints.size(); i++)
             {
-               point3d.setXYIncludingFrame(ankleFrame, contactPoints.get(i));
+               point3d.setIncludingFrame(ankleFrame, contactPoints.get(i), 0.0);
                point3d.changeFrame(soleFrame);
                point3d.setZ(0.0);
                point3d.changeFrame(worldFrame);
-               point3d.getFramePoint2d(point);
+               point.setIncludingFrame(point3d);
                footSupport.addVertex(point.getPoint());
             }
 

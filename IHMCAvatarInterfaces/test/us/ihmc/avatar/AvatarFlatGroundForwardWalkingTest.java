@@ -5,8 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,40 +12,63 @@ import org.junit.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTestInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private OffsetAndYawRobotInitialSetup location = new OffsetAndYawRobotInitialSetup(new Vector3D(0.0, 0.0, 0.0), 0.0);
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private DRCRobotModel robotModel;
    private FullHumanoidRobotModel fullRobotModel;
    Random random = new Random();
+   
+   private PushRobotController pushRobotController;
+   private static final double GRAVITY = 9.81;
+   private SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
+   private SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
+   
+   private int numberOfSteps;
+   private double stepLength;
+   private double stepWidth;
+   private double totalMass;
+
+   private double delay1;
+   private double duration1;
+   private double percentWeight1;
+   private double magnitude1;
+   private Vector3D forceDirection1;
+   
+   private double delay2;
+   private double duration2;
+   private double percentWeight2;
+   private double magnitude2;
+   private Vector3D forceDirection2;
 
    protected int getNumberOfSteps()
    {
@@ -64,19 +85,107 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       return 0.08;
    }
 
+   protected double getTotalMass()
+   {
+      return fullRobotModel.getTotalMass();
+   }
+   
+   protected double getForceDelay1()
+   {
+      return 0.5 * robotModel.getWalkingControllerParameters().getDefaultSwingTime();
+   }
+   
+   protected double getForcePercentageOfWeight1()
+   {
+      return 0.13;
+   }
+   
+   protected double getForceDuration1()
+   {
+      return 0.1;
+   }
+   
+   protected Vector3D getForceDirection1()
+   {
+      return new Vector3D(0.0, -1.0, 0.0);
+   }
+   
+   protected double getForceDelay2()
+   {
+      return 2.5 * robotModel.getWalkingControllerParameters().getDefaultSwingTime();
+   }
+   
+   protected double getForcePercentageOfWeight2()
+   {
+      return 0.13;
+   }
+   
+   protected double getForceDuration2()
+   {
+      return 0.1;
+   }
+   
+   protected Vector3D getForceDirection2()
+   {
+      return new Vector3D(1.0, 0.0, 0.0);
+   }
+   
+   protected FootstepDataListMessage getFootstepDataListMessage()
+   {
+      return new FootstepDataListMessage();
+   }
+
    @Test
-   public void testCircleWalk() throws SimulationExceededMaximumTimeException
+   public void testForwardWalk() throws SimulationExceededMaximumTimeException
    {
       setupTest();
       setupCameraSideView();
-      
-      int numberOfSteps = getNumberOfSteps();
-      double stepLength = getStepLength();
-      double stepWidth = getStepWidth();
 
       RobotSide side = RobotSide.LEFT;
       
-      FootstepDataListMessage footMessage = new FootstepDataListMessage();
+      FootstepDataListMessage footMessage = getFootstepDataListMessage();
+      ArrayList<Point3D> rootLocations = new ArrayList<>();
+      
+      ControllerSpy controllerSpy = new ControllerSpy(drcSimulationTestHelper);
+      
+      for (int currentStep = 0; currentStep < numberOfSteps; currentStep++)
+      {
+         if (drcSimulationTestHelper.getQueuedControllerCommands().isEmpty())
+         {
+            Point3D footLocation = new Point3D(stepLength * currentStep, side.negateIfRightSide(stepWidth / 2), 0.0);
+            rootLocations.add(new Point3D(stepLength * currentStep, 0.0, 0.0));
+            Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
+            addFootstep(footLocation, footOrientation, side, footMessage);
+            side = side.getOppositeSide();
+         }
+      }
+      Point3D footLocation = new Point3D(stepLength * (numberOfSteps-1), side.negateIfRightSide(stepWidth / 2), 0.0);
+      rootLocations.add(new Point3D(stepLength * (numberOfSteps-1), 0.0, 0.0));
+      Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
+      addFootstep(footLocation, footOrientation, side, footMessage);
+
+      controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      drcSimulationTestHelper.send(footMessage);
+      double simulationTime = 1 * footMessage.footstepDataList.size() + 1.0;
+      
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      ArrayList<YoBoolean> footCheckPointFlags = controllerSpy.getFootCheckPointFlag();
+      for (int i = 0; i < footCheckPointFlags.size(); i++)
+      {
+         assertTrue(footCheckPointFlags.get(i).getBooleanValue());
+      }
+   }
+   
+   @Test
+   public void testForwardWalkWithForceDisturbances() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+      setupCameraSideView();
+
+      RobotSide side = RobotSide.LEFT;
+      
+      FootstepDataListMessage footMessage = getFootstepDataListMessage();
       ArrayList<Point3D> rootLocations = new ArrayList<>();
       
       ControllerSpy controllerSpy = new ControllerSpy(drcSimulationTestHelper);
@@ -102,7 +211,27 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       drcSimulationTestHelper.send(footMessage);
       double simulationTime = 1 * footMessage.footstepDataList.size() + 1.0;
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      boolean success;
+      // Push:
+      StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      StateTransitionCondition secondPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      assertTrue(success);
+      
+      magnitude1 = 40; //TODO: overwritten
+      PrintTools.info("Force magnitude = " + magnitude1 + "N along " + forceDirection1.toString());
+      pushRobotController.applyForceDelayed(firstPushCondition, delay1, forceDirection1, magnitude1, duration1);       
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      assertTrue(success);
+      
+      magnitude2 = 100; //TODO:overwritten
+      PrintTools.info("Force magnitude = " + magnitude2 + "N along " + forceDirection2.toString());
+      pushRobotController.applyForceDelayed(secondPushCondition, delay2, forceDirection2, magnitude2, duration2);    
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      assertTrue(success);
+      
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime - 6.0));
       ArrayList<YoBoolean> footCheckPointFlags = controllerSpy.getFootCheckPointFlag();
       for (int i = 0; i < footCheckPointFlags.size(); i++)
       {
@@ -117,28 +246,6 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       footstepData.setOrientation(orient);
       footstepData.setRobotSide(robotSide);
       message.add(footstepData);
-   }
-
-   private void setupTest()
-   {
-//      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
-      // create simulation test helper
-      FlatGroundEnvironment emptyEnvironment = new FlatGroundEnvironment();
-      String className = getClass().getSimpleName();
-      DRCStartingLocation startingLocation = new DRCStartingLocation()
-      {
-         @Override
-         public OffsetAndYawRobotInitialSetup getStartingLocationOffset()
-         {
-            return location;
-         }
-      };
-      robotModel = getRobotModel();
-      fullRobotModel = robotModel.createFullRobotModel();
-      simulationTestingParameters.setKeepSCSUp(keepSCSUp());
-      drcSimulationTestHelper = new DRCSimulationTestHelper(emptyEnvironment, className, startingLocation, simulationTestingParameters, robotModel);
-      ThreadTools.sleep(1000);
    }
 
    protected boolean keepSCSUp()
@@ -184,34 +291,123 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       simulationTestingParameters = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
+   
+   private void setupTest() throws SimulationExceededMaximumTimeException
+   {
+      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
+      String className = getClass().getSimpleName();
+
+      simulationTestingParameters.setKeepSCSUp(keepSCSUp());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper.createSimulation(className);
+      robotModel = getRobotModel();
+      fullRobotModel = robotModel.createFullRobotModel();
+      
+      numberOfSteps = getNumberOfSteps();
+      stepLength = getStepLength();
+      stepWidth = getStepWidth();
+      totalMass = getTotalMass();
+
+      delay1 = getForceDelay1();
+      duration1 = getForceDuration1();
+      percentWeight1 = getForcePercentageOfWeight1();
+      magnitude1 = percentWeight1 * totalMass * GRAVITY;
+      forceDirection1 = getForceDirection1();
+      
+      delay2 = getForceDelay2();
+      duration2 = getForceDuration2();
+      percentWeight2 = getForcePercentageOfWeight2();
+      magnitude2 = percentWeight2 * totalMass * GRAVITY;
+      forceDirection2 = getForceDirection2();
+      
+      double z = getForcePointOffsetZInChestFrame();
+      
+      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel.getChest().getParentJoint().getName(), new Vector3D(0, 0, z));
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      scs.addYoGraphic(pushRobotController.getForceVisualizer());
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+         String footPrefix = sidePrefix + "Foot";
+         @SuppressWarnings("unchecked")
+         final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
+               footPrefix + "State");
+         @SuppressWarnings("unchecked")
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
+               "walkingState");
+         singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
+         doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
+      }
+
+      ThreadTools.sleep(1000);
+   }
+   
+   protected double getForcePointOffsetZInChestFrame()
+   {
+      return 0.3;
+   }
+   
+   private class SingleSupportStartCondition implements StateTransitionCondition
+   {
+      private final YoEnum<ConstraintType> footConstraintType;
+
+      public SingleSupportStartCondition(YoEnum<ConstraintType> footConstraintType)
+      {
+         this.footConstraintType = footConstraintType;
+      }
+
+      @Override
+      public boolean checkCondition()
+      {
+         return footConstraintType.getEnumValue() == ConstraintType.SWING;
+      }
+   }
+
+   private class DoubleSupportStartCondition implements StateTransitionCondition
+   {
+      private final YoEnum<WalkingStateEnum> walkingState;
+
+      private final RobotSide side;
+
+      public DoubleSupportStartCondition(YoEnum<WalkingStateEnum> walkingState, RobotSide side)
+      {
+         this.walkingState = walkingState;
+         this.side = side;
+      }
+
+      @Override
+      public boolean checkCondition()
+      {
+         if (side == RobotSide.LEFT)
+         {
+            return (walkingState.getEnumValue() == WalkingStateEnum.TO_STANDING) || (walkingState.getEnumValue() == WalkingStateEnum.TO_WALKING_LEFT_SUPPORT);
+         }
+         else
+         {
+            return (walkingState.getEnumValue() == WalkingStateEnum.TO_STANDING) || (walkingState.getEnumValue() == WalkingStateEnum.TO_WALKING_RIGHT_SUPPORT);
+         }
+      }
+   }
 
    private class ControllerSpy extends SimpleRobotController
    {
       private final HumanoidFloatingRootJointRobot humanoidRobotModel;
-      private final DRCSimulationTestHelper drcSimTestHelper;
 
       private ArrayList<YoBoolean> footCheckPointFlag;
       private ArrayList<BoundingBox3D> footCheckPoint;
       private Point3D position;
       private int footStepCheckPointIndex;
 
-      private ArrayList<YoBoolean> armCheckPointFlag;
-      private ArrayList<OneDoFJointTrajectoryMessage> leftArmMessages;
-      private ArrayList<OneDoFJointTrajectoryMessage> rightArmMessages;
-      private int armJointCheckPointIndex;
       private YoVariableRegistry circleWalkRegistry;
-      private final double EPSILON = 1e-2;
 
       public ControllerSpy(DRCSimulationTestHelper drcSimulationTestHelper)
       {
          humanoidRobotModel = drcSimulationTestHelper.getRobot();
-         drcSimTestHelper = drcSimulationTestHelper;
-         drcSimulationTestHelper.addRobotControllerOnControllerThread(this);
          position = new Point3D();
          footStepCheckPointIndex = 0;
 
-         armCheckPointFlag = new ArrayList<>();
-         armJointCheckPointIndex = 0;
          circleWalkRegistry = new YoVariableRegistry("CircleWalkTest");
       }
 
@@ -219,11 +415,6 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       public void doControl()
       {
          checkFootCheckPoints();
-      }
-
-      public boolean isEqual(double d1, double d2, double EPSILON)
-      {
-         return Math.abs(d1 - d2) < EPSILON;
       }
 
       private void checkFootCheckPoints()
@@ -252,23 +443,6 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
             YoBoolean newFlag = new YoBoolean("FootstepCheckPointFlag" + Integer.toString(i), circleWalkRegistry);
             footCheckPointFlag.add(newFlag);
          }
-      }
-
-      public YoDouble getJointDesiredPosition(RobotSide side, OneDoFJoint joint)
-      {
-         String variable = "q_d_" + joint.getName();
-         return (YoDouble) humanoidRobotModel.getVariable(variable);
-      }
-
-      public YoDouble getJointDesiredPosition(RobotSide side, ArmJointName jointName)
-      {
-         String variable = "q_d_" + fullRobotModel.getArmJoint(side, jointName).getName();
-         return (YoDouble) humanoidRobotModel.getVariable(variable);
-      }
-
-      public boolean getFootCheckPointFlag(int index)
-      {
-         return footCheckPointFlag.get(index).getBooleanValue();
       }
 
       public ArrayList<YoBoolean> getFootCheckPointFlag()

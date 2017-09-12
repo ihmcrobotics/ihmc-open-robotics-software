@@ -12,6 +12,9 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.RequestLidarScanMessage;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -24,12 +27,9 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FramePoint2D;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -230,8 +230,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
       pointInWorld.checkReferenceFrameMatch(worldFrame);
 
       double z = getPlaneZGivenXY(planeFrame, pointInWorld.getX(), pointInWorld.getY());
-      pointProjectedOntoPlaneFrameToPack.setXYIncludingFrame(pointInWorld);
-      pointProjectedOntoPlaneFrameToPack.setZ(z);
+      pointProjectedOntoPlaneFrameToPack.setIncludingFrame(pointInWorld, z);
    }
 
    private double getPlaneZGivenXY(ReferenceFrame planeFrame, double xWorld, double yWorld)

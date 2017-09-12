@@ -17,24 +17,25 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
-import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
-import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.pidGains.PID3DGains;
+import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint3D;
-import us.ihmc.robotics.geometry.FrameVector3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 
 public class KinematicsToolboxHelper
 {
@@ -43,12 +44,12 @@ public class KinematicsToolboxHelper
    /**
     * Convenience method to create and setup a {@link CenterOfMassFeedbackControlCommand} from a
     * {@link KinematicsToolboxCenterOfMassCommand}.
-    * 
+    *
     * @param command the kinematics toolbox command to convert. Not modified.
     * @param gains the gains to use in the feedback controller. Not modified.
     * @return the feedback control command ready to be submitted to the controller core.
     */
-   static CenterOfMassFeedbackControlCommand consumeCenterOfMassCommand(KinematicsToolboxCenterOfMassCommand command, PositionPIDGainsInterface gains)
+   static CenterOfMassFeedbackControlCommand consumeCenterOfMassCommand(KinematicsToolboxCenterOfMassCommand command, PID3DGains gains)
    {
       CenterOfMassFeedbackControlCommand feedbackControlCommand = new CenterOfMassFeedbackControlCommand();
       feedbackControlCommand.setGains(gains);
@@ -61,13 +62,13 @@ public class KinematicsToolboxHelper
    /**
     * Convenience method to create and setup a {@link SpatialFeedbackControlCommand} from a
     * {@link KinematicsToolboxRigidBodyCommand}.
-    * 
+    *
     * @param command the kinematics toolbox command to convert. Not modified.
     * @param base the base used for the control.
     * @param gains the gains to use in the feedback controller. Not modified.
     * @return the feedback control command ready to be submitted to the controller core.
     */
-   static SpatialFeedbackControlCommand consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command, RigidBody base, SE3PIDGainsInterface gains)
+   static SpatialFeedbackControlCommand consumeRigidBodyCommand(KinematicsToolboxRigidBodyCommand command, RigidBody base, PIDSE3Gains gains)
    {
       SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
       feedbackControlCommand.set(base, command.getEndEffector());
@@ -82,7 +83,7 @@ public class KinematicsToolboxHelper
    /**
     * Convenience method that updates the robot state, i.e. configuration and velocity, from the
     * output of the controller core.
-    * 
+    *
     * @param controllerCoreOutput the output of the controller core from which the robot state is to
     *           be extracted. Not modified.
     * @param rootJoint the floating joint to update. Modified.
@@ -101,9 +102,11 @@ public class KinematicsToolboxHelper
       {
          if (output.hasDataForJoint(joint))
          {
-            joint.setQ(output.getDesiredJointPosition(joint));
-            joint.setqDesired(output.getDesiredJointPosition(joint));
-            joint.setQd(output.getDesiredJointVelocity(joint));
+            LowLevelJointDataReadOnly data = output.getLowLevelJointData(joint); 
+
+            joint.setQ(data.getDesiredPosition()); // ?????
+            joint.setqDesired(data.getDesiredPosition());
+            joint.setQd(data.getDesiredVelocity());
          }
       }
 
@@ -116,7 +119,7 @@ public class KinematicsToolboxHelper
     * <p>
     * Only the configuration is updated, the joint velocities are all set to zero.
     * </p>
-    * 
+    *
     * @param robotConfigurationData the configuration received from the walking controller from
     *           which the robot configuration is to be extracted. Not modified.
     * @param rootJoint the floating joint to update. Modified.
@@ -151,7 +154,7 @@ public class KinematicsToolboxHelper
     * <p>
     * Only the configuration is updated, the joint velocities are all set to zero.
     * </p>
-    * 
+    *
     * @param commandWithPrivilegedConfiguration command possibly holding a privileged configuration
     *           from which the robot configuration is to be extracted. Not modified.
     * @param rootJoint the floating joint to update. Modified.
@@ -209,7 +212,7 @@ public class KinematicsToolboxHelper
     * </ul>
     * The overall solution quality is then computed as the sum of each command quality.
     * </p>
-    * 
+    *
     * @param activeCommands the list of feedback control commands that have been submitted to the
     *           controller core this control tick. Not modified.
     * @param feedbackControllerDataHolder the data holder that belongs to the controller core to
@@ -244,7 +247,7 @@ public class KinematicsToolboxHelper
    /**
     * Calculates the quality based on the tracking of the given
     * {@link CenterOfMassFeedbackControlCommand}.
-    * 
+    *
     * @param command the command to compute the quality of. Not modified.
     * @param feedbackControllerDataHolder the data holder that belongs to the controller core to
     *           which the commands were submitted. It is used to find the tracking error for each
@@ -268,7 +271,7 @@ public class KinematicsToolboxHelper
    /**
     * Calculates the quality based on the tracking of the given
     * {@link SpatialFeedbackControlCommand}.
-    * 
+    *
     * @param accelerationCommand the command to compute the quality of. Not modified.
     * @param feedbackControllerDataHolder the data holder that belongs to the controller core to
     *           which the commands were submitted. It is used to find the tracking error for each
@@ -316,7 +319,7 @@ public class KinematicsToolboxHelper
 
    /**
     * This is actually where the calculation of the command quality is happening.
-    * 
+    *
     * @param error the 6-by-1 spatial error of the command. It has to be expressed in the control
     *           frame. Not modified.
     * @param weightVector the 6-by-1 weight vector of the command. Not modified.
