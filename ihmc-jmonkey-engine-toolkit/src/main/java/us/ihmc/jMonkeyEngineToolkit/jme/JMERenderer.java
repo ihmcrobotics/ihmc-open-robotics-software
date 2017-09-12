@@ -14,7 +14,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -175,6 +174,10 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    private ArrayList<Updatable> updatables = new ArrayList<Updatable>(); // things we want to move automatically
 
+   private Spatial sky = null;
+   private HeightMap heightMap = null;
+   private AppearanceDefinition terrainAppearance = null;
+   
    public JMERenderer(RenderType renderType)
    {
       this(renderType, null);
@@ -518,40 +521,76 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       rootNode.addLight(light);
    }
 
+
+   private void deleteSky()
+   {
+      if(sky != null)
+      {
+         rootNode.detachChild(sky);
+         sky = null;
+      }
+   }
+   
+   private void updateSky()
+   {
+      sky.setLocalScale(1000);
+      rootNode.attachChild(sky);
+      notifyRepaint();
+
+   }
+   
+   public void setupSky(String skyBox)
+   {
+      deleteSky();
+      sky = SkyFactory.createSky(assetManager, skyBox, EnvMapType.CubeMap);
+      updateSky();
+   }
+   
+   public void setupSky(String west, String east, String north, String south, String up, String down)
+   {
+      deleteSky();
+      Texture westTex = assetManager.loadTexture(new TextureKey(west, true));
+      Texture eastTex = assetManager.loadTexture(new TextureKey(east, true));
+      Texture northTex = assetManager.loadTexture(new TextureKey(north, true));
+      Texture southTex = assetManager.loadTexture(new TextureKey(south, true));
+      Texture upTex = assetManager.loadTexture(new TextureKey(up, true));
+      Texture downTex = assetManager.loadTexture(new TextureKey(down, true));
+      sky = SkyFactory.createSky(assetManager, westTex, eastTex, northTex, southTex, upTex, downTex);
+ 
+      updateSky();
+   }
+
+   
    @Override
    public void setupSky()
    {
       try
       {
-         Spatial sky = null;
          if (skyboxToUse == SkyboxToUse.BLUE_SKY)
          {
-            Texture west = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0005.bmp", true));
-            Texture east = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0002.bmp", true));
-            Texture north = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0001.bmp", true));
-            Texture south = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0004.bmp", true));
-            Texture up = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0003.bmp", true));
-            Texture down = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0007.bmp", true));
-            sky = SkyFactory.createSky(assetManager, west, east, north, south, up, down);
+            String west = "Textures/Sky/Bright/skyboxsun25degtest/skyrender0005.bmp";
+            String east = "Textures/Sky/Bright/skyboxsun25degtest/skyrender0002.bmp";
+            String north ="Textures/Sky/Bright/skyboxsun25degtest/skyrender0001.bmp";
+            String south ="Textures/Sky/Bright/skyboxsun25degtest/skyrender0004.bmp";
+            String up =   "Textures/Sky/Bright/skyboxsun25degtest/skyrender0003.bmp";
+            String down = "Textures/Sky/Bright/skyboxsun25degtest/skyrender0007.bmp";
+            setupSky(west, east, north, south, up, down);
          }
          else if (skyboxToUse == SkyboxToUse.DUSK_SKY)
          {
-            Texture west = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0005.bmp", true));
-            Texture east = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0002.bmp", true));
-            Texture north = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0001.bmp", true));
-            Texture south = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0004.bmp", true));
-            Texture up = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0003.bmp", true));
-            Texture down = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0006.bmp", true));
-            sky = SkyFactory.createSky(assetManager, west, east, north, south, up, down);
+            String west = "Textures/Sky/Bright/skyboxsun45deg/skyrender0005.bmp";
+            String east = "Textures/Sky/Bright/skyboxsun45deg/skyrender0002.bmp";
+            String north ="Textures/Sky/Bright/skyboxsun45deg/skyrender0001.bmp";
+            String south ="Textures/Sky/Bright/skyboxsun45deg/skyrender0004.bmp";
+            String up =   "Textures/Sky/Bright/skyboxsun45deg/skyrender0003.bmp";
+            String down = "Textures/Sky/Bright/skyboxsun45deg/skyrender0006.bmp";
+            setupSky(west, east, north, south, up, down);
          }
          else if (skyboxToUse == SkyboxToUse.JME_MOUNTAINS)
          {
-            sky = SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", EnvMapType.CubeMap);
+            setupSky("Textures/Sky/Bright/BrightSky.dds");
          }
 
-         sky.setLocalScale(1000);
-         rootNode.attachChild(sky);
-         notifyRepaint();
       }
       catch (Exception e)
       {
@@ -777,8 +816,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       notifyRepaint();
    }
 
-   @Override
-   public void setHeightMap(final HeightMap heightMap)
+   private void repaintTerrain()
    {
       enqueue(new Callable<JMEHeightMapTerrain>()
       {
@@ -790,7 +828,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
                terrain.removeFromParent();
             }
 
-            JMEHeightMapTerrain jmeTerrain = new JMEHeightMapTerrain(heightMap, assetManager);
+            JMEHeightMapTerrain jmeTerrain = new JMEHeightMapTerrain(heightMap, assetManager, terrainAppearance);
             terrain = jmeTerrain.getTerrain();
             terrain.setShadowMode(ShadowMode.Receive);
 
@@ -803,6 +841,14 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
          }
       });
       notifyRepaint();
+
+   }
+   
+   @Override
+   public void setHeightMap(final HeightMap heightMap)
+   {
+      this.heightMap = heightMap;
+      repaintTerrain();
    }
 
    public HashBiMap<Graphics3DNode, JMEGraphics3DNode> getJmeGraphicsNodes()
@@ -1236,9 +1282,11 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    @Override
    public void setGroundAppearance(AppearanceDefinition app)
    {
-      System.err.println(getClass().getSimpleName() + ": setGroundAppearance not implemented.");
-
-      // TODO
+      terrainAppearance = app;
+      if(heightMap != null)
+      {
+         repaintTerrain();
+      }
    }
 
    @Override

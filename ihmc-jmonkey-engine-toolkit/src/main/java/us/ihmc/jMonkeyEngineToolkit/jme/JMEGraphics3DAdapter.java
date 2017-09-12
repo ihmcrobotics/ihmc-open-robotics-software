@@ -187,4 +187,16 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
    {
       jmeRenderer.setAmbientLightBrightness(brightness);
    }
+
+   @Override
+   public void setupSky(String skyBox)
+   {
+      jmeRenderer.setupSky(skyBox);
+   }
+
+   @Override
+   public void setupSky(String west, String east, String north, String south, String up, String down)
+   {
+      jmeRenderer.setupSky(west, east, north, south, up, down);
+   }
 }
