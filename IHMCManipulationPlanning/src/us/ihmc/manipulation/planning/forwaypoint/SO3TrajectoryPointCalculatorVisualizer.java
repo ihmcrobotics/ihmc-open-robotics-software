@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -14,7 +15,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -91,7 +91,7 @@ public class SO3TrajectoryPointCalculatorVisualizer
       /*
        * calculate angular velocities.
        */
-      SO3TrajectoryPointCalculatorTwo calculator = new SO3TrajectoryPointCalculatorTwo();
+      SO3TrajectoryPointCalculator calculator = new SO3TrajectoryPointCalculator();
       calculator.setFirstTrajectoryPointTime(0.0);
       for (int i = 0; i < numberOfWayPoints; i++)
       {
