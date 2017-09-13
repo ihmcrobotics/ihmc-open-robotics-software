@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndV
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.FeetLoadedToWalkingStandTransitionFactory;
 import us.ihmc.graphicsDescription.HeightMap;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -62,30 +61,9 @@ public abstract class NewDRCFlatGroundWalkingTrack
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames,
                                                                                                     wristForceSensorNames, highLevelControllerParameters,
                                                                                                     walkingControllerParameters, capturePointPlannerParameters);
-      controllerFactory.useDefaultDoNothingControlState();
-      controllerFactory.useDefaultStandPrepControlState();
-      controllerFactory.useDefaultStandReadyControlState();
-      controllerFactory.useDefaultStandTransitionControlState();
-      controllerFactory.useDefaultWalkingControlState();
-      controllerFactory.useDefaultFreezeControlState();
-
-      controllerFactory.addRequestableTransition(STAND_PREP_STATE, FREEZE_STATE);
-      controllerFactory.addFinishedTransition(STAND_PREP_STATE, STAND_READY);
-
-      controllerFactory.addRequestableTransition(STAND_READY, FREEZE_STATE);
-      controllerFactory.addRequestableTransition(STAND_READY, STAND_TRANSITION_STATE);
-      controllerFactory.addCustomStateTransition(new FeetLoadedToWalkingStandTransitionFactory(STAND_READY, STAND_TRANSITION_STATE, controllerFactory.getRequestedControlStateEnum(),
-                                                                                               feetForceSensorNames));
-
-      controllerFactory.addRequestableTransition(STAND_TRANSITION_STATE, FREEZE_STATE);
-      controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING_STATE);
-
-      controllerFactory.addRequestableTransition(WALKING_STATE, FREEZE_STATE);
-
-      controllerFactory.setInitialState(STAND_PREP_STATE);
+      setupHighLevelStates(controllerFactory, feetForceSensorNames);
+      controllerFactory.setInitialState(highLevelControllerParameters.getDefaultInitialControllerState());
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
-
-
 
       HeightMap heightMapForFootstepZ = null;
       if (cheatWithGroundHeightAtForFootstep)
@@ -126,6 +104,15 @@ public abstract class NewDRCFlatGroundWalkingTrack
    {
       return new HighLevelHumanoidControllerFactory(contactableBodiesFactory, footForceSensorNames, footContactSensorNames, wristSensorNames, highLevelControllerParameters,
                                                     walkingControllerParameters, capturePointPlannerParameters);
+   }
+
+   public void setupHighLevelStates(HighLevelHumanoidControllerFactory controllerFactory, SideDependentList<String> feetForceSensorNames)
+   {
+      controllerFactory.useDefaultDoNothingControlState();
+      controllerFactory.useDefaultWalkingControlState();
+
+      controllerFactory.addRequestableTransition(DO_NOTHING_STATE, WALKING_STATE);
+      controllerFactory.addRequestableTransition(WALKING_STATE, DO_NOTHING_STATE);
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)
