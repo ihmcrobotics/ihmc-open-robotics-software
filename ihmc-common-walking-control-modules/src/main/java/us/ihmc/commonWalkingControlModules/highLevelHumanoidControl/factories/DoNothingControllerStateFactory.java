@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.NewDoNothingControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.NewDoNothingControllerState;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 
 public class DoNothingControllerStateFactory implements HighLevelControllerStateFactory

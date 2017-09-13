@@ -1,18 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
-import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.*;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
@@ -36,6 +25,11 @@ import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class HighLevelControlManagerFactory
 {

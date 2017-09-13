@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
@@ -22,19 +19,18 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
+import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.*;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.robotController.RobotController;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateChangedListener;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
-import us.ihmc.robotics.time.ExecutionTimer;
+
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class HighLevelHumanoidControllerManager implements RobotController
 {
