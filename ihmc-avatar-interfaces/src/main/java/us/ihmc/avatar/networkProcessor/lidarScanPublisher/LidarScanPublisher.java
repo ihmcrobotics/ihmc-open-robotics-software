@@ -1,8 +1,6 @@
 package us.ihmc.avatar.networkProcessor.lidarScanPublisher;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -307,40 +305,11 @@ public class LidarScanPublisher
                scanData.transform(transformToWorld);
             }
 
-            if (removeShadows)
-            {
-               lidarSensorFrame.getTransformToRoot().getTranslation(lidarPosition);
-
-               TIntHashSet indices = scanData.computeShadowPointIndices(lidarPosition, shadowAngleThreshold);
-
-               List<Point3D> filteredScanPoints = new ArrayList<>();
-
-               for (int i = scanData.numberOfScanPoints - 1; i >= 0; i--)
-               {
-                  if (!indices.contains(i))
-                  {
-                     filteredScanPoints.add(scanData.scanPoints[i]);
-                  }
-               }
-               scanData = new ScanData(scanData.timestamp, filteredScanPoints);
-            }
-
             collisionBoxNode.update();
+            lidarSensorFrame.getTransformToRoot().getTranslation(lidarPosition);
 
-            TIntHashSet indices = scanData.computeCollidingPointIndices(collisionBoxNode);
-
-            List<Point3D> filteredScanPoints = new ArrayList<>();
-
-            for (int i = scanData.numberOfScanPoints - 1; i >= 0; i--)
-            {
-               if (!indices.contains(i))
-               {
-                  filteredScanPoints.add(scanData.scanPoints[i]);
-               }
-            }
-            scanData = new ScanData(scanData.timestamp, filteredScanPoints);
-
-            float[] scanPointBuffer = scanData.getScanBuffer();
+            TIntHashSet shadowRemovalIndices = scanData.computeShadowPointIndices(lidarPosition, shadowAngleThreshold);
+            TIntHashSet selfCollisionRemovalIndices = scanData.computeCollidingPointIndices(collisionBoxNode);
 
             Point3D32 lidarPosition;
             Quaternion32 lidarOrientation;
@@ -358,27 +327,23 @@ public class LidarScanPublisher
                lidarOrientation = null;
             }
 
-            sendLidarScanMessageToListeners(robotTimestamp, lidarPosition, lidarOrientation, scanPointBuffer, listenerSet);
+            for (RequestLidarScanMessage requestLidarScanMessage : listenerSet)
+            {
+               lidarPosition = lidarPosition == null ? null : new Point3D32(lidarPosition);
+               lidarOrientation = lidarOrientation == null ? null : new Quaternion32(lidarOrientation);
+
+               float[] scanPointBuffer = scanData.getScanBuffer(shadowRemovalIndices, selfCollisionRemovalIndices);
+
+               LidarScanMessage message = new LidarScanMessage(robotTimestamp, lidarPosition, lidarOrientation, scanPointBuffer);
+
+               PacketDestination destination = PacketDestination.fromOrdinal(requestLidarScanMessage.getSource());
+               message.setDestination(destination);
+               packetCommunicator.send(message);
+            }
+
             listeners.clear();
          }
       };
-   }
-
-   private void sendLidarScanMessageToListeners(long timestamp, Point3D32 lidarPosition, Quaternion32 lidarOrientation, float[] scanPointBuffer,
-                                                Set<RequestLidarScanMessage> listeners)
-   {
-      for (RequestLidarScanMessage requestLidarScanMessage : listeners)
-      {
-         lidarPosition = lidarPosition == null ? null : new Point3D32(lidarPosition);
-         lidarOrientation = lidarOrientation == null ? null : new Quaternion32(lidarOrientation);
-         scanPointBuffer = Arrays.copyOf(scanPointBuffer, scanPointBuffer.length);
-         LidarScanMessage message = new LidarScanMessage(timestamp, lidarPosition, lidarOrientation, scanPointBuffer);
-
-         PacketDestination destination = PacketDestination.fromOrdinal(requestLidarScanMessage.getSource());
-         message.setDestination(destination);
-         packetCommunicator.send(message);
-
-      }
    }
 
    private PacketConsumer<RequestLidarScanMessage> createRequestLidarScanMessageConsumer()
@@ -474,7 +439,6 @@ public class LidarScanPublisher
          return shadowPointIndices;
       }
 
-
       public float[] getScanBuffer()
       {
          TFloatArrayList scanPointBuffer = new TFloatArrayList();
@@ -486,6 +450,35 @@ public class LidarScanPublisher
             scanPointBuffer.add((float) scanPoint.getX());
             scanPointBuffer.add((float) scanPoint.getY());
             scanPointBuffer.add((float) scanPoint.getZ());
+         }
+
+         return scanPointBuffer.toArray();
+      }
+
+      public float[] getScanBuffer(TIntHashSet... hashSetsWithIndicesToRemove)
+      {
+         TFloatArrayList scanPointBuffer = new TFloatArrayList();
+
+         for (int i = 0; i < numberOfScanPoints; i++)
+         {
+            Point3D scanPoint = scanPoints[i];
+            boolean ignorePoint = false;
+
+            for (TIntHashSet tIntHashSet : hashSetsWithIndicesToRemove)
+            {
+               if (tIntHashSet.contains(i))
+               {
+                  ignorePoint = true;
+                  break;
+               }
+            }
+
+            if (!ignorePoint)
+            {
+               scanPointBuffer.add((float) scanPoint.getX());
+               scanPointBuffer.add((float) scanPoint.getY());
+               scanPointBuffer.add((float) scanPoint.getZ());
+            }
          }
 
          return scanPointBuffer.toArray();
