@@ -65,10 +65,6 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
 
-   private final HighLevelControllerParameters highLevelControllerParameters;
-   private final WalkingControllerParameters walkingControllerParameters;
-   private final ICPTrajectoryPlannerParameters icpPlannerParameters;
-
    private final HighLevelControllerFactoryHelper controllerFactoryHelper;
 
    private final EnumMap<NewHighLevelControllerStates, NewHighLevelControllerState> highLevelControllerStates = new EnumMap<>(NewHighLevelControllerStates.class);
@@ -91,9 +87,6 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
-      this.highLevelControllerParameters = highLevelControllerParameters;
-      this.walkingControllerParameters = walkingControllerParameters;
-      this.icpPlannerParameters = icpPlannerParameters;
       this.controllerToolbox = controllerToolbox;
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
       this.initialControllerState = initialControllerState;
@@ -226,7 +219,7 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
       // create controller states
       for (HighLevelControllerStateFactory controllerStateFactory : controllerStateFactories.values())
       {
-         // set the controller core output
+         // create the individual state
          NewHighLevelControllerState highLevelControllerState = controllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
 
          // add the controller to the state machine
@@ -238,9 +231,8 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
       // create controller transitions
       for (ControllerStateTransitionFactory<NewHighLevelControllerStates> controllerStateTransitionFactory : controllerTransitionFactories)
       {
-         StateTransition<NewHighLevelControllerStates> stateTransition = controllerStateTransitionFactory.getOrCreateStateTransition(highLevelControllerStates,
-                                                                                                                                     forceSensorDataHolder, controllerToolbox.getFullRobotModel().getTotalMass(),
-                                                                                                                                     controllerToolbox.getGravityZ(), registry);
+         StateTransition<NewHighLevelControllerStates> stateTransition = controllerStateTransitionFactory.getOrCreateStateTransition(highLevelControllerStates, controllerFactoryHelper,
+                                                                                                                                     forceSensorDataHolder, registry);
 
          NewHighLevelControllerState state = highLevelControllerStates.get(controllerStateTransitionFactory.getStateToAttachEnum());
          state.addStateTransition(stateTransition);
