@@ -1,7 +1,10 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import com.fasterxml.jackson.databind.JsonMappingException.Reference;
+
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.CuttingWallBehaviorStateMachine.CuttingWallBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
@@ -9,12 +12,14 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
+import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CuttingWallTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
@@ -31,12 +36,16 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
    private YoDouble yoTime;
 
    private FullHumanoidRobotModel fullRobotModel;
-   
+
    private FramePose centerFramePose;
+
+   private final ConcurrentListeningQueue<WallPosePacket> queue = new ConcurrentListeningQueue<WallPosePacket>(5);
+
+   private final HumanoidReferenceFrames referenceFrames;
 
    public enum CuttingWallBehaviorState
    {
-      PLANNING, WAITING_CONFIRM, MOTION, PLAN_FALIED, DONE
+      WAITING_INPUT, PLANNING, WAITING_CONFIRM, MOTION, PLAN_FALIED, DONE
    }
 
    public CuttingWallBehaviorStateMachine(CommunicationBridge communicationBridge, YoDouble yoTime, FullHumanoidRobotModel fullRobotModel,
@@ -45,6 +54,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
       super("cuttingWallBehaviorState", CuttingWallBehaviorState.class, yoTime, communicationBridge);
 
       this.communicationBridge = communicationBridge;
+      this.referenceFrames = referenceFrames;
       communicationBridge.addListeners(this);
 
       this.wholebodyTrajectoryBehavior = new WholeBodyTrajectoryBehavior(communicationBridge, yoTime);
@@ -56,17 +66,36 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
 
       this.yoTime = yoTime;
 
+      attachNetworkListeningQueue(queue, WallPosePacket.class);
+
       setupStateMachine();
    }
-   
+
    public void setCenterFramePose(FramePose centerFramePose)
    {
-      PrintTools.info(""+centerFramePose);
+      PrintTools.info("" + centerFramePose);
       this.centerFramePose = centerFramePose;
    }
 
    private void setupStateMachine()
    {
+      BehaviorAction<CuttingWallBehaviorState> waiting_input = new BehaviorAction<CuttingWallBehaviorState>(CuttingWallBehaviorState.WAITING_INPUT,
+                                                                                                      new SimpleDoNothingBehavior(communicationBridge))
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            PrintTools.info("setBehaviorInput WAITING_INPUT " + yoTime.getDoubleValue());
+
+         }
+         
+         @Override
+         public boolean isDone()
+         {
+            return queue.isNewPacketAvailable();
+         }
+      };
+
       BehaviorAction<CuttingWallBehaviorState> planning = new BehaviorAction<CuttingWallBehaviorState>(CuttingWallBehaviorState.PLANNING,
                                                                                                        planConstrainedWholeBodyTrajectoryBehavior)
       {
@@ -75,12 +104,20 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
          {
             PrintTools.info("setBehaviorInput PLANNING " + yoTime.getDoubleValue());
 
-             ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(20.0);
-
-            // FramePose centerFramePose = new FramePose();
-            // centerFramePose.changeFrame(midZUpFrame);
+            //             ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(20.0);
             
-//            ConstrainedEndEffectorTrajectory endeffectorTrajectory = new CuttingWallTrajectory(centerFramePose, 0.35, 20.0);
+            FramePose centerFramePose = new FramePose();
+            WallPosePacket latestPacket = queue.getLatestPacket();
+            centerFramePose.setPosition(latestPacket.getCenterPosition());
+            centerFramePose.setOrientation(latestPacket.getCenterOrientation());
+            
+            PrintTools.info(""+centerFramePose);
+            
+            centerFramePose.changeFrame(referenceFrames.getMidFootZUpGroundFrame());
+            
+            PrintTools.info(""+centerFramePose);
+            
+            ConstrainedEndEffectorTrajectory endeffectorTrajectory = new CuttingWallTrajectory(centerFramePose, latestPacket.getCuttingRadius(), 20.0);
 
             planConstrainedWholeBodyTrajectoryBehavior.setInputs(endeffectorTrajectory, fullRobotModel);
             PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
@@ -169,12 +206,15 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
       planning.addStateTransition(CuttingWallBehaviorState.WAITING_CONFIRM, planSuccededCondition);
       planning.addStateTransition(CuttingWallBehaviorState.PLAN_FALIED, planFailedCondition);
 
+      statemachine.addStateWithDoneTransition(waiting_input, CuttingWallBehaviorState.PLANNING);
+      
       statemachine.addStateWithDoneTransition(waiting, CuttingWallBehaviorState.MOTION);
       statemachine.addStateWithDoneTransition(planFailedState, CuttingWallBehaviorState.DONE);
       statemachine.addStateWithDoneTransition(motion, CuttingWallBehaviorState.DONE);
 
       statemachine.addState(doneState);
-      statemachine.setStartState(CuttingWallBehaviorState.PLANNING);
+      
+      statemachine.setStartState(CuttingWallBehaviorState.WAITING_INPUT);
    }
 
    @Override

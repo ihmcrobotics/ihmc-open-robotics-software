@@ -42,5 +42,4 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
    {
       return true;
    }
-
 }
