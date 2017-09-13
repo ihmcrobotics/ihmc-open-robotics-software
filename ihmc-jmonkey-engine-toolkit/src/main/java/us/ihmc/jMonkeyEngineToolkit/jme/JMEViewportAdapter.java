@@ -4,7 +4,6 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Toolkit;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
@@ -18,10 +17,8 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.shadow.CompareMode;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.shadow.EdgeFilteringMode;
-import com.jme3.shadow.SpotLightShadowRenderer;
 import com.jme3.system.JmeContext;
 import com.jme3.system.awt.AwtPanel;
 import com.jme3.system.awt.AwtPanelsContext;
@@ -73,8 +70,6 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
    private final JMERenderer jmeRenderer;
 
    private Stopwatch frameTimer = new Stopwatch().start();
-   
-   private final HashMap<JMESpotLight, SpotLightShadowRenderer> spotlightShadows = new HashMap<>();
 
    public JMEViewportAdapter(JMERenderer jmeRenderer, Node rootNode, boolean isMainViewport, ViewportType viewportType)
    {
@@ -460,25 +455,5 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
    {
       // TODO Auto-generated method stub
 
-   }
-
-   public void addSpotLight(JMESpotLight jmeSpotLight)
-   {
-      
-      SpotLightShadowRenderer shadow = new SpotLightShadowRenderer(assetManager, 512);
-      shadow.setLight(jmeSpotLight);
-      shadow.setShadowCompareMode(CompareMode.Software);
-      viewPort.addProcessor(shadow);
-      
-      spotlightShadows.put(jmeSpotLight, shadow);
-   }
-
-   public void removeSpotLight(JMESpotLight spotLightToRemove)
-   {
-      SpotLightShadowRenderer shadowToRemove = spotlightShadows.remove(spotLightToRemove);
-      if(shadowToRemove != null)
-      {
-         viewPort.removeProcessor(shadowToRemove);
-      }
    }
 }

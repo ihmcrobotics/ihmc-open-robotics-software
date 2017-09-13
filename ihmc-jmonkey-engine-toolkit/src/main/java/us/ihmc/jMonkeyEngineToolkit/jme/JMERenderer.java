@@ -303,21 +303,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    public void registerViewport(JMEViewportAdapter viewportAdapter)
    {
       viewportAdapters.add(viewportAdapter);
-      
-      enqueue(new Callable<Object>()
-      {
-
-         @Override
-         public Object call() throws Exception
-         {
-            for(JMESpotLight spotLight : jmeSpotLightsView)
-            {
-               viewportAdapter.addSpotLight(spotLight);
-            }
-               
-            return null;
-         }
-      });
    }
 
    @Override
@@ -1697,11 +1682,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
             jmeSpotLights.put(spotLight, jmeSpotLight);
             rootNode.addLight(jmeSpotLight); 
             
-            for(JMEViewportAdapter viewport : viewportAdapters)
-            {
-               viewport.addSpotLight(jmeSpotLight);
-            }
-            
             return null;
          }
       });
@@ -1720,11 +1700,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
             if(spotLightToRemove != null)
             {
                rootNode.removeLight(spotLightToRemove);
-               
-               for(JMEViewportAdapter viewport : viewportAdapters)
-               {
-                  viewport.removeSpotLight(spotLightToRemove);
-               }
             }
             
             
