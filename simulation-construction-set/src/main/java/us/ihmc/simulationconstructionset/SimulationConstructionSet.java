@@ -36,6 +36,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.Graphics3DSpotLight;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -4572,11 +4573,11 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Clear all directional lights from the 3D render
     */
-   public void clearLights()
+   public void clearDirectionalLights()
    {
       if (myGUI != null)
       {
-         myGUI.clearLights();
+         myGUI.clearDirectionalLights();
       }
    }
    
@@ -4609,6 +4610,32 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       if (myGUI != null)
       {
          myGUI.setAmbientLight(color);
+      }
+   }
+   
+   /**
+    * Add a spotlight to the 3D render
+    * 
+    * @param spotLight
+    */
+   public void addSpotLight(Graphics3DSpotLight spotLight)
+   {
+      if (myGUI != null)
+      {
+         myGUI.addSpotLight(spotLight);
+      }
+   }
+
+   /**
+    * Remove a spotLight from the 3D render
+    * 
+    * @param spotLight
+    */
+   public void removeSpotLight(Graphics3DSpotLight spotLight)
+   {
+      if (myGUI != null)
+      {
+         myGUI.removeSpotLight(spotLight);         
       }
    }
 }

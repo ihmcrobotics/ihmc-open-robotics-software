@@ -11,6 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.Graphics3DSpotLight;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
@@ -293,13 +294,25 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
    }
 
    @Override
-   public void clearLights()
+   public void clearDirectionalLights()
    {
       
    }
 
    @Override
    public void setAmbientLight(Color color)
+   {
+      
+   }
+
+   @Override
+   public void addSpotLight(Graphics3DSpotLight spotLight)
+   {
+      
+   }
+
+   @Override
+   public void removeSpotLight(Graphics3DSpotLight spotLight)
    {
       
    }
