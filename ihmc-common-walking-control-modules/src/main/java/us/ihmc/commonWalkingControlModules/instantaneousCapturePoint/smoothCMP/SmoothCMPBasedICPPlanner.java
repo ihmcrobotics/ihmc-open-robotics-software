@@ -102,7 +102,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, numberFootstepsToConsider, registry);
 
       referenceICPGenerator = new ReferenceICPTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isStanding, isInitialTransfer, isDoubleSupport,
-                                                                  registry);
+                                                                  debug, registry);
 
       referenceCoMGenerator = new ReferenceCoMTrajectoryGenerator(namePrefix, omega0, numberFootstepsToConsider, isStanding, isInitialTransfer, isDoubleSupport,
                                                                   registry);
@@ -415,6 +415,8 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void compute(double time)
    {
+      timer.startMeasurement();
+
       timeInCurrentState.set(time - initialTime.getDoubleValue());
       timeInCurrentStateRemaining.set(getCurrentStateDuration() - timeInCurrentState.getDoubleValue());
 
@@ -433,9 +435,10 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       angularMomentumGenerator.getDesiredAngularMomentum(desiredCentroidalAngularMomentum, desiredCentroidalTorque);
       decayDesiredVelocityIfNeeded();
 
-      checkCoMDynamics(timeInCurrentState, desiredCoMVelocity.getFrameVectorCopy(), desiredICPPosition.getFramePointCopy(),
-                       desiredCoMPosition.getFramePointCopy());
+      if (debug)
+         checkCoMDynamics(desiredCoMVelocity.getFrameVectorCopy(), desiredICPPosition.getFramePointCopy(), desiredCoMPosition.getFramePointCopy());
 
+      timer.stopMeasurement();
       // done to account for the delayed velocity
       //computeDesiredCentroidalMomentumPivot(desiredICPPosition, desiredICPVelocity, omega0.getDoubleValue(), desiredCMPPosition);
       //computeDesiredCentroidalMomentumPivotVelocity(desiredICPVelocity, desiredICPAcceleration, omega0.getDoubleValue(), desiredCMPVelocity);
@@ -583,7 +586,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator.holdPosition(icpPositionToHold);
    }
 
-   private void checkCoMDynamics(double time, FrameVector3D comVelocityDesiredCurrent, FramePoint3D icpPositionDesiredCurrent,
+   private void checkCoMDynamics(FrameVector3D comVelocityDesiredCurrent, FramePoint3D icpPositionDesiredCurrent,
                                  FramePoint3D comPositionDesiredCurrent)
    {
       FrameTuple3D comVelocityDynamicsCurrent = icpPositionDesiredCurrent;

@@ -102,7 +102,7 @@ public class SmoothCapturePointToolbox
    public void computeDesiredCapturePointPosition(double omega0, double time, FramePoint3D finalCapturePoint, FrameTrajectory3D cmpPolynomial3D, 
                                                                   FramePoint3D desiredCapturePointToPack)
    {  
-      for(Direction dir : Direction.values())
+      for(Direction dir : Direction.values)
       {
          Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);    
          double icpPositionDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 0, cmpPolynomial, finalCapturePoint.getElement(dir.getIndex()));
@@ -121,7 +121,7 @@ public class SmoothCapturePointToolbox
    public void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint3D finalCapturePoint, FrameTrajectory3D cmpPolynomial3D,
                                                                   FrameVector3D desiredCapturePointVelocityToPack)
    {
-      for(Direction dir : Direction.values())
+      for(Direction dir : Direction.values)
       {
          Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);    
          double icpVelocityDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 1, cmpPolynomial, finalCapturePoint.getElement(dir.getIndex()));
@@ -140,7 +140,7 @@ public class SmoothCapturePointToolbox
    public void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint3D finalCapturePoint, FrameTrajectory3D cmpPolynomial3D,
                                                                       FrameVector3D desiredCapturePointAccelerationToPack)
    {
-      for(Direction dir : Direction.values())
+      for(Direction dir : Direction.values)
       {
          Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);    
          double icpAccelerationDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 2, cmpPolynomial, finalCapturePoint.getElement(dir.getIndex()));
@@ -263,7 +263,7 @@ public class SmoothCapturePointToolbox
    public void calculateGeneralizedAlphaPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedAlphaPrime, 
                                                                    int alphaDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
    {
-      for(Direction dir : Direction.values())
+      for(Direction dir : Direction.values)
       {
          Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
          
@@ -289,9 +289,10 @@ public class SmoothCapturePointToolbox
          tPowersDerivativeVector.zero();
          tPowersDerivativeVectorTranspose.zero();
          
-         tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i + alphaDerivativeOrder, time));
-         CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
-                  
+         //tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i + alphaDerivativeOrder, time));
+         //CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
+         tPowersDerivativeVectorTranspose.set(cmpPolynomial.getXPowersDerivativeVector(i + alphaDerivativeOrder, time));
+
          double scalar = Math.pow(omega0, -i);
          CommonOps.addEquals(generalizedAlphaPrimeRow, scalar, tPowersDerivativeVectorTranspose);
       }
@@ -311,7 +312,7 @@ public class SmoothCapturePointToolbox
    public void calculateGeneralizedBetaPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedBetaPrime, 
                                                                   int betaDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
    {                  
-      for(Direction dir : Direction.values())
+      for(Direction dir : Direction.values)
       {
          Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
          
@@ -338,9 +339,10 @@ public class SmoothCapturePointToolbox
          tPowersDerivativeVector.zero();
          tPowersDerivativeVectorTranspose.zero();
          
-         tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i, timeSegmentTotal));
-         CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
-                  
+         //tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i, timeSegmentTotal));
+         //CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
+         tPowersDerivativeVectorTranspose.set(cmpPolynomial.getXPowersDerivativeVector(i, timeSegmentTotal));
+
          double scalar = Math.pow(omega0, betaDerivativeOrder-i) * Math.exp(omega0*(time-timeSegmentTotal));
          CommonOps.addEquals(generalizedBetaPrimeRow, scalar, tPowersDerivativeVectorTranspose);
       }
@@ -423,7 +425,7 @@ public class SmoothCapturePointToolbox
    
    private void setPolynomialCoefficientVector3D(DenseMatrix64F polynomialCoefficientCombinedVector, FrameTrajectory3D cmpPolynomial3D)
    {
-      for(Direction dir : Direction.values())
+      for(Direction dir : Direction.values)
       {
          setPolynomialCoefficientVector1D(polynomialCoefficientVector, cmpPolynomial3D.getTrajectory(dir));
          
