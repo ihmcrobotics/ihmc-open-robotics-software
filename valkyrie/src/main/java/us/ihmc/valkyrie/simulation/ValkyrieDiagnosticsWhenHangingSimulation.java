@@ -13,6 +13,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerState;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
@@ -28,7 +29,7 @@ import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
 
 public class ValkyrieDiagnosticsWhenHangingSimulation
 {
-   private final DiagnosticsWhenHangingController diagnosticsWhenHangingController;
+   private final DiagnosticsWhenHangingControllerState diagnosticsWhenHangingController;
    private static final boolean computeTorqueOffsetsBasedOnAverages = true;
 
    public ValkyrieDiagnosticsWhenHangingSimulation()

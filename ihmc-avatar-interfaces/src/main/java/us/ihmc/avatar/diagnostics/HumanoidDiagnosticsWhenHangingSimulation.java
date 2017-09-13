@@ -12,14 +12,15 @@ import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
+import us.ihmc.wholeBodyController.diagnostics.*;
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -27,17 +28,15 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingController.DiagnosticsWhenHangingState;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerFactory;
-import us.ihmc.wholeBodyController.diagnostics.HumanoidDiagnosticsWhenHangingAnalyzer;
-import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
+
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState.*;
 
 public class HumanoidDiagnosticsWhenHangingSimulation
 {
    private final SimulationConstructionSet simulationConstructionSet;
    private final HumanoidDiagnosticsWhenHangingAnalyzer analyzer;
-   private final DiagnosticsWhenHangingController controller;
+   private final DiagnosticsWhenHangingControllerState controller;
    private final boolean computeTorqueOffsetsBasedOnAverages;
 
    public HumanoidDiagnosticsWhenHangingSimulation(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, DRCRobotModel model, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, boolean computeTorqueOffsetsBasedOnAverages)
@@ -55,21 +54,36 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       ContactableBodiesFactory contactableBodiesFactory = model.getContactPointParameters().getContactableBodiesFactory();
       DRCRobotSensorInformation sensorInformation = model.getSensorInformation();
       SideDependentList<String> footSensorNames = sensorInformation.getFeetForceSensorNames();
+      HighLevelControllerParameters highLevelControllerParameters = model.getHighLevelControllerParameters();
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
-      MomentumBasedControllerFactory momentumBasedControllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, footSensorNames,
-            feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, capturePointPlannerParameters, HighLevelState.DO_NOTHING_BEHAVIOR);
+
+      HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, footSensorNames,
+                                                                                                feetContactSensorNames, wristForceSensorNames,
+                                                                                                    highLevelControllerParameters, walkingControllerParameters,
+                                                                                                    capturePointPlannerParameters);
+      controllerFactory.useDefaultDoNothingControlState();
+      controllerFactory.useDefaultWalkingControlState();
+
+      controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);
+      controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
+
+      HighLevelControllerState fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
+      controllerFactory.addControllerFailureTransition(DO_NOTHING_BEHAVIOR, fallbackControllerState);
+      controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);
+      controllerFactory.setInitialState(HighLevelControllerState.DO_NOTHING_BEHAVIOR);
+
       DiagnosticsWhenHangingControllerFactory diagnosticsWhenHangingControllerFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, useArms, robotIsHanging, null);
       diagnosticsWhenHangingControllerFactory.setTransitionRequested(true);
-      momentumBasedControllerFactory.addHighLevelBehaviorFactory(diagnosticsWhenHangingControllerFactory);
+      controllerFactory.addCustomControlState(diagnosticsWhenHangingControllerFactory);
 
       HumanoidGlobalDataProducer globalDataProducer = null;
 
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(model);
-      avatarSimulationFactory.setMomentumBasedControllerFactory(momentumBasedControllerFactory);
+      avatarSimulationFactory.setMomentumBasedControllerFactory(controllerFactory);
       avatarSimulationFactory.setCommonAvatarEnvironment(environment);
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
@@ -116,7 +130,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       return simulationConstructionSet;
    }
 
-   public DiagnosticsWhenHangingController getDiagnosticsWhenHangingController()
+   public DiagnosticsWhenHangingControllerState getDiagnosticsWhenHangingController()
    {
       return controller;
    }

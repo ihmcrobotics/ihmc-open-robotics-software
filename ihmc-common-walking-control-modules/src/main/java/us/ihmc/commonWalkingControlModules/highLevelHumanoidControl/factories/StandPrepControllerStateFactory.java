@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewHighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandPrepControllerState;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
 
 public class StandPrepControllerStateFactory implements HighLevelControllerStateFactory
 {
@@ -20,8 +20,8 @@ public class StandPrepControllerStateFactory implements HighLevelControllerState
    }
 
    @Override
-   public NewHighLevelControllerStates getStateEnum()
+   public HighLevelControllerState getStateEnum()
    {
-      return NewHighLevelControllerStates.STAND_PREP_STATE;
+      return HighLevelControllerState.STAND_PREP_STATE;
    }
 }

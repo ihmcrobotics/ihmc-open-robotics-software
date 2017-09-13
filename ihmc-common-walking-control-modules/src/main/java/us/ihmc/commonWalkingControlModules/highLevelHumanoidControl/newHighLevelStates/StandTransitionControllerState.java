@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLeve
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StandTransitionControllerState extends NewHighLevelControllerState
 {
-   private static final NewHighLevelControllerStates controllerState = NewHighLevelControllerStates.STAND_TRANSITION_STATE;
+   private static final HighLevelControllerState controllerState = HighLevelControllerState.STAND_TRANSITION_STATE;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 

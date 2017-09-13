@@ -2,14 +2,14 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLeve
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 
 public class StandReadyControllerState extends HoldPositionControllerState
 {
-   private static final NewHighLevelControllerStates controllerState = NewHighLevelControllerStates.STAND_READY;
+   private static final HighLevelControllerState controllerState = HighLevelControllerState.STAND_READY;
 
    public StandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
                                     LowLevelOneDoFJointDesiredDataHolderList highLevelControllerOutput)

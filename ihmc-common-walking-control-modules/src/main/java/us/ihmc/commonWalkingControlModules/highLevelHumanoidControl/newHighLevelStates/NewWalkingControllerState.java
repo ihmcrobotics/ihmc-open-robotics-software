@@ -16,7 +16,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -33,7 +33,7 @@ import java.util.*;
 
 public class NewWalkingControllerState extends NewHighLevelControllerState
 {
-   private final static NewHighLevelControllerStates controllerState = NewHighLevelControllerStates.WALKING_STATE;
+   private final static HighLevelControllerState controllerState = HighLevelControllerState.WALKING;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -48,7 +48,7 @@ public class NewWalkingControllerState extends NewHighLevelControllerState
 
    public NewWalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, HighLevelControlManagerFactory managerFactory,
                                     HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
-                                    ICPTrajectoryPlannerParameters capturePointPlannerParameters, WalkingControllerParameters walkingControllerParameters)
+                                    WalkingControllerParameters walkingControllerParameters)
    {
       super(controllerState);
 
@@ -56,7 +56,7 @@ public class NewWalkingControllerState extends NewHighLevelControllerState
 
       // create walking controller
       walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
-                                                                 capturePointPlannerParameters, controllerToolbox);
+                                                                 controllerToolbox);
 
       // create controller core
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();

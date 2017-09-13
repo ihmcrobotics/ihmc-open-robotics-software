@@ -18,9 +18,9 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelStateCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelControllerStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
 import us.ihmc.humanoidRobotics.communication.packets.valkyrie.ValkyrieLowLevelControlModeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.robotics.MathTools;
@@ -76,9 +76,9 @@ public class ValkyrieRosControlLowLevelController
    private final ValkyrieAccelerationIntegration accelerationIntegration;
 
    private CommandInputManager commandInputManager;
-   private final AtomicReference<HighLevelState> currentHighLevelState = new AtomicReference<HighLevelState>(null);
+   private final AtomicReference<HighLevelControllerState> currentHighLevelState = new AtomicReference<HighLevelControllerState>(null);
 
-   private final HighLevelStateCommand highLevelStateCommand = new HighLevelStateCommand();
+   private final HighLevelControllerStateCommand highLevelControllerStateCommand = new HighLevelControllerStateCommand();
 
    private final TaskExecutor taskExecutor = new TaskExecutor();
    private final Task rampUpIHMCControlRatioTask;
@@ -286,16 +286,16 @@ public class ValkyrieRosControlLowLevelController
       switch (currentControlMode.getEnumValue())
       {
       case STAND_PREP:
-         if (doIHMCControlRatio.getDoubleValue() > 1.0 - 1.0e-3 && currentHighLevelState.get() == HighLevelState.WALKING)
+         if (doIHMCControlRatio.getDoubleValue() > 1.0 - 1.0e-3 && currentHighLevelState.get() == HighLevelControllerState.WALKING)
          {
             currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.HIGH_LEVEL_CONTROL);
             break;
          }
 
-         if (taskExecutor.isDone() && currentHighLevelState.get() != HighLevelState.DO_NOTHING_BEHAVIOR)
+         if (taskExecutor.isDone() && currentHighLevelState.get() != HighLevelControllerState.DO_NOTHING_BEHAVIOR)
          {
-            highLevelStateCommand.setHighLevelState(HighLevelState.DO_NOTHING_BEHAVIOR);
-            commandInputManager.submitCommand(highLevelStateCommand);
+            highLevelControllerStateCommand.setHighLevelControllerState(HighLevelControllerState.DO_NOTHING_BEHAVIOR);
+            commandInputManager.submitCommand(highLevelControllerStateCommand);
          }
 
          if (newRequest == null)
@@ -304,16 +304,16 @@ public class ValkyrieRosControlLowLevelController
          switch (newRequest)
          {
          case CALIBRATION:
-            highLevelStateCommand.setHighLevelState(HighLevelState.CALIBRATION);
-            commandInputManager.submitCommand(highLevelStateCommand);
+            highLevelControllerStateCommand.setHighLevelControllerState(HighLevelControllerState.CALIBRATION);
+            commandInputManager.submitCommand(highLevelControllerStateCommand);
             taskExecutor.submit(rampUpIHMCControlRatioTask);
             taskExecutor.submit(calibrationTask);
             taskExecutor.submit(rampDownIHMCControlRatioTask);
             currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.CALIBRATION);
             break;
          case HIGH_LEVEL_CONTROL:
-            highLevelStateCommand.setHighLevelState(HighLevelState.WALKING);
-            commandInputManager.submitCommand(highLevelStateCommand);
+            highLevelControllerStateCommand.setHighLevelControllerState(HighLevelControllerState.WALKING);
+            commandInputManager.submitCommand(highLevelControllerStateCommand);
             taskExecutor.submit(rampUpIHMCControlRatioTask);
             currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.HIGH_LEVEL_CONTROL);
             break;

@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Di
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -69,7 +69,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
 
    public JointTorqueOffsetEstimatorController(HighLevelHumanoidControllerToolbox highLevelControllerToolbox, TorqueOffsetPrinter torqueOffsetPrinter)
    {
-      super(HighLevelState.CALIBRATION);
+      super(HighLevelControllerState.CALIBRATION);
 
       this.bipedSupportPolygons = highLevelControllerToolbox.getBipedSupportPolygons();
       this.footContactStates = highLevelControllerToolbox.getFootContactStates();

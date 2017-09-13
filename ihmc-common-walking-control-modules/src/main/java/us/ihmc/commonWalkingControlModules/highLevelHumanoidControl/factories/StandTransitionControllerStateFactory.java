@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewHighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandTransitionControllerState;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
 
 import java.util.EnumMap;
 
@@ -16,9 +16,9 @@ public class StandTransitionControllerStateFactory implements HighLevelControlle
    {
       if (standTransitionControllerState == null)
       {
-         EnumMap<NewHighLevelControllerStates, HighLevelControllerStateFactory> controllerFactoriesMap = controllerFactoryHelper.getControllerFactories();
-         HighLevelControllerStateFactory standReadyControllerStateFactory = controllerFactoriesMap.get(NewHighLevelControllerStates.STAND_READY);
-         HighLevelControllerStateFactory walkingControllerStateFactory = controllerFactoriesMap.get(NewHighLevelControllerStates.WALKING_STATE);
+         EnumMap<HighLevelControllerState, HighLevelControllerStateFactory> controllerFactoriesMap = controllerFactoryHelper.getControllerFactories();
+         HighLevelControllerStateFactory standReadyControllerStateFactory = controllerFactoriesMap.get(HighLevelControllerState.STAND_READY);
+         HighLevelControllerStateFactory walkingControllerStateFactory = controllerFactoriesMap.get(HighLevelControllerState.WALKING);
 
          NewHighLevelControllerState standReadyControllerState = standReadyControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
          NewHighLevelControllerState walkingControllerState = walkingControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
@@ -32,8 +32,8 @@ public class StandTransitionControllerStateFactory implements HighLevelControlle
    }
 
    @Override
-   public NewHighLevelControllerStates getStateEnum()
+   public HighLevelControllerState getStateEnum()
    {
-      return NewHighLevelControllerStates.STAND_TRANSITION_STATE;
+      return HighLevelControllerState.STAND_TRANSITION_STATE;
    }
 }
