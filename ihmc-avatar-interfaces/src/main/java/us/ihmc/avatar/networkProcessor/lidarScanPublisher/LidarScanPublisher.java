@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.set.hash.TIntHashSet;
 import scan_to_cloud.PointCloud2WithSource;
 import sensor_msgs.PointCloud2;
 import us.ihmc.communication.net.ObjectCommunicator;
@@ -28,6 +29,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -254,9 +256,6 @@ public class LidarScanPublisher
    }
 
    // Temporary variables used to find shadows
-   private final Vector3D fromLidarToScanPoint = new Vector3D();
-   private final Vector3D currentToNextScanPoint = new Vector3D();
-   private final Vector3D previousToCurrentScanPoint = new Vector3D();
    private final Point3D lidarPosition = new Point3D();
 
    private Runnable createPublisherTask()
@@ -312,46 +311,36 @@ public class LidarScanPublisher
             {
                lidarSensorFrame.getTransformToRoot().getTranslation(lidarPosition);
 
+               TIntHashSet indices = scanData.computeShadowPointIndices(lidarPosition, shadowAngleThreshold);
+
                List<Point3D> filteredScanPoints = new ArrayList<>();
-               filteredScanPoints.add(scanData.scanPoints[0]);
 
-               for (int i = 1; i < scanData.numberOfScanPoints - 1; i++)
+               for (int i = scanData.numberOfScanPoints - 1; i >= 0; i--)
                {
-                  Point3D currentScanPoint = scanData.scanPoints[i];
-                  Point3D previousScanPoint = scanData.scanPoints[i - 1];
-                  fromLidarToScanPoint.sub(currentScanPoint, lidarPosition);
-                  previousToCurrentScanPoint.sub(currentScanPoint, previousScanPoint);
-
-                  if (fromLidarToScanPoint.dot(previousToCurrentScanPoint) < 0.0)
-                     previousToCurrentScanPoint.negate();
-                  if (fromLidarToScanPoint.angle(previousToCurrentScanPoint) < shadowAngleThreshold)
-                     continue;
-
-                  Point3D nextScanPoint = scanData.scanPoints[i + 1];
-                  currentToNextScanPoint.sub(nextScanPoint, currentScanPoint);
-
-                  if (fromLidarToScanPoint.dot(currentToNextScanPoint) < 0.0)
-                     currentToNextScanPoint.negate();
-                  if (fromLidarToScanPoint.angle(currentToNextScanPoint) < shadowAngleThreshold)
-                     continue;
-
-                  filteredScanPoints.add(currentScanPoint);
+                  if (!indices.contains(i))
+                  {
+                     filteredScanPoints.add(scanData.scanPoints[i]);
+                  }
                }
-               filteredScanPoints.add(scanData.scanPoints[scanData.numberOfScanPoints - 1]);
                scanData = new ScanData(scanData.timestamp, filteredScanPoints);
             }
 
-            float[] scanPointBuffer;
+            collisionBoxNode.update();
 
-            if (collisionBoxNode != null)
+            TIntHashSet indices = scanData.computeCollidingPointIndices(collisionBoxNode);
+
+            List<Point3D> filteredScanPoints = new ArrayList<>();
+
+            for (int i = scanData.numberOfScanPoints - 1; i >= 0; i--)
             {
-               collisionBoxNode.update();
-               scanPointBuffer = scanData.getFilteredScanBuffer(collisionBoxNode);
+               if (!indices.contains(i))
+               {
+                  filteredScanPoints.add(scanData.scanPoints[i]);
+               }
             }
-            else
-            {
-               scanPointBuffer = scanData.getScanBuffer();
-            }
+            scanData = new ScanData(scanData.timestamp, filteredScanPoints);
+
+            float[] scanPointBuffer = scanData.getScanBuffer();
 
             Point3D32 lidarPosition;
             Quaternion32 lidarOrientation;
@@ -436,24 +425,55 @@ public class LidarScanPublisher
             transform.transform(scanPoints[i]);
       }
 
-      public float[] getFilteredScanBuffer(CollisionShapeTester collisionShapeTester)
+      public TIntHashSet computeCollidingPointIndices(CollisionShapeTester collisionShapeTester)
       {
-         TFloatArrayList scanPointBuffer = new TFloatArrayList();
+         TIntHashSet collidingPointIndices = new TIntHashSet();
 
-         for (int i = 0; i < numberOfScanPoints; i++)
+         if (collisionShapeTester != null)
          {
-            Point3D scanPoint = scanPoints[i];
+            for (int i = 0; i < numberOfScanPoints; i++)
+            {
+               if (collisionShapeTester.contains(scanPoints[i]))
+                  collidingPointIndices.add(i);
+            }
+         }
+         return collidingPointIndices;
+      }
 
-            if (collisionShapeTester.contains(scanPoint))
+      public TIntHashSet computeShadowPointIndices(Tuple3DReadOnly lidarPosition, double shadowAngleThreshold)
+      {
+         TIntHashSet shadowPointIndices = new TIntHashSet();
+         Vector3D fromLidarToScanPoint = new Vector3D();
+         Vector3D currentToNextScanPoint = new Vector3D();
+         Vector3D previousToCurrentScanPoint = new Vector3D();
+
+         for (int i = 1; i < numberOfScanPoints - 1; i++)
+         {
+            Point3D currentScanPoint = scanPoints[i];
+            Point3D previousScanPoint = scanPoints[i - 1];
+            fromLidarToScanPoint.sub(currentScanPoint, lidarPosition);
+            previousToCurrentScanPoint.sub(currentScanPoint, previousScanPoint);
+
+            if (fromLidarToScanPoint.dot(previousToCurrentScanPoint) < 0.0)
+               previousToCurrentScanPoint.negate();
+            if (fromLidarToScanPoint.angle(previousToCurrentScanPoint) < shadowAngleThreshold)
+            {
+               shadowPointIndices.add(i);
                continue;
+            }
 
-            scanPointBuffer.add((float) scanPoint.getX());
-            scanPointBuffer.add((float) scanPoint.getY());
-            scanPointBuffer.add((float) scanPoint.getZ());
+            Point3D nextScanPoint = scanPoints[i + 1];
+            currentToNextScanPoint.sub(nextScanPoint, currentScanPoint);
+
+            if (fromLidarToScanPoint.dot(currentToNextScanPoint) < 0.0)
+               currentToNextScanPoint.negate();
+            if (fromLidarToScanPoint.angle(currentToNextScanPoint) < shadowAngleThreshold)
+               shadowPointIndices.add(i);
          }
 
-         return scanPointBuffer.toArray();
+         return shadowPointIndices;
       }
+
 
       public float[] getScanBuffer()
       {
