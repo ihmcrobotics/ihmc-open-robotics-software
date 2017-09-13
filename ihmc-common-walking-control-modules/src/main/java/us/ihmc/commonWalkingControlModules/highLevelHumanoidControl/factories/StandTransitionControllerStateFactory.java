@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewHighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandTransitionControllerState;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandTransitionControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 
 import java.util.EnumMap;
 
@@ -12,16 +12,16 @@ public class StandTransitionControllerStateFactory implements HighLevelControlle
    private StandTransitionControllerState standTransitionControllerState;
 
    @Override
-   public NewHighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
+   public HighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
       if (standTransitionControllerState == null)
       {
-         EnumMap<HighLevelControllerState, HighLevelControllerStateFactory> controllerFactoriesMap = controllerFactoryHelper.getControllerFactories();
-         HighLevelControllerStateFactory standReadyControllerStateFactory = controllerFactoriesMap.get(HighLevelControllerState.STAND_READY);
-         HighLevelControllerStateFactory walkingControllerStateFactory = controllerFactoriesMap.get(HighLevelControllerState.WALKING);
+         EnumMap<HighLevelController, HighLevelControllerStateFactory> controllerFactoriesMap = controllerFactoryHelper.getControllerFactories();
+         HighLevelControllerStateFactory standReadyControllerStateFactory = controllerFactoriesMap.get(HighLevelController.STAND_READY);
+         HighLevelControllerStateFactory walkingControllerStateFactory = controllerFactoriesMap.get(HighLevelController.WALKING);
 
-         NewHighLevelControllerState standReadyControllerState = standReadyControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
-         NewHighLevelControllerState walkingControllerState = walkingControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
+         HighLevelControllerState standReadyControllerState = standReadyControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
+         HighLevelControllerState walkingControllerState = walkingControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
 
          standTransitionControllerState = new  StandTransitionControllerState(standReadyControllerState, walkingControllerState,
                                                                               controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
@@ -32,8 +32,8 @@ public class StandTransitionControllerStateFactory implements HighLevelControlle
    }
 
    @Override
-   public HighLevelControllerState getStateEnum()
+   public HighLevelController getStateEnum()
    {
-      return HighLevelControllerState.STAND_TRANSITION_STATE;
+      return HighLevelController.STAND_TRANSITION_STATE;
    }
 }

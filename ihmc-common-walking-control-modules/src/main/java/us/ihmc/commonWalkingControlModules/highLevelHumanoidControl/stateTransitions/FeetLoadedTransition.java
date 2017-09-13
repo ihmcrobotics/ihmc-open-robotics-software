@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions;
 
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;

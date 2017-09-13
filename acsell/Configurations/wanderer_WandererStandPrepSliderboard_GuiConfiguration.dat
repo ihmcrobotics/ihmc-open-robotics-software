@@ -162,7 +162,7 @@ Tab1
 <Title>
 Tab2
 </Title>
-<Entry Boxes>requestedHighLevelControllerState,kpXYLinearSwingFoot,kdXYLinearSwingFoot,zetaLinearSwingFoot,kpZLinearSwingFoot,zetaXYAngularSwingFoot,zetaZAngularSwingFoot,torsoYActuatorMotorAngleOffset</Entry Boxes>
+<Entry Boxes>requestedHighLevelController,kpXYLinearSwingFoot,kdXYLinearSwingFoot,zetaLinearSwingFoot,kpZLinearSwingFoot,zetaXYAngularSwingFoot,zetaZAngularSwingFoot,torsoYActuatorMotorAngleOffset</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>

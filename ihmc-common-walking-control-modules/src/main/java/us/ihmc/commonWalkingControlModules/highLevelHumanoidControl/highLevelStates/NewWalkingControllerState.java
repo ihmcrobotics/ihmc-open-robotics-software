@@ -1,7 +1,6 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
@@ -9,14 +8,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -31,9 +29,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.*;
 
-public class NewWalkingControllerState extends NewHighLevelControllerState
+public class NewWalkingControllerState extends HighLevelControllerState
 {
-   private final static HighLevelControllerState controllerState = HighLevelControllerState.WALKING;
+   private final static HighLevelController controllerState = HighLevelController.WALKING;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;

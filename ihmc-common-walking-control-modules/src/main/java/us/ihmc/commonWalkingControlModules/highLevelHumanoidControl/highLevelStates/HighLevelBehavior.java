@@ -2,14 +2,14 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 
-public abstract class HighLevelBehavior extends FinishableState<HighLevelControllerState>
+public abstract class HighLevelBehavior extends FinishableState<HighLevelController>
 {
 
-   public HighLevelBehavior(HighLevelControllerState stateEnum)
+   public HighLevelBehavior(HighLevelController stateEnum)
    {
       super(stateEnum);
    }

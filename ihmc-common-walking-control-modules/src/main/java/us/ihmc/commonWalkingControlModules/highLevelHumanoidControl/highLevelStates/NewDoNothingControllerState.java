@@ -1,17 +1,17 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class NewDoNothingControllerState extends NewHighLevelControllerState
+public class NewDoNothingControllerState extends HighLevelControllerState
 {
-   private static final HighLevelControllerState controllerState = HighLevelControllerState.DO_NOTHING_BEHAVIOR;
+   private static final HighLevelController controllerState = HighLevelController.DO_NOTHING_BEHAVIOR;
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 

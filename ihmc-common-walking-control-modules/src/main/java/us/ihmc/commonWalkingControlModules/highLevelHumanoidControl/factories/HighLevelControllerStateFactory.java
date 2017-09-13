@@ -1,14 +1,14 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewHighLevelControllerState;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 
 public interface HighLevelControllerStateFactory
 {
-   NewHighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper);
+   HighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper);
 
-   HighLevelControllerState getStateEnum();
+   HighLevelController getStateEnum();
 
    default boolean isTransitionToControllerRequested()
    {

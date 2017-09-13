@@ -18,7 +18,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.wholeBodyController.diagnostics.*;
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
@@ -30,7 +30,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingController.DiagnosticsWhenHangingState;
 
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState.*;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController.*;
 
 public class HumanoidDiagnosticsWhenHangingSimulation
 {
@@ -70,10 +70,10 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);
       controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
 
-      HighLevelControllerState fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
+      HighLevelController fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
       controllerFactory.addControllerFailureTransition(DO_NOTHING_BEHAVIOR, fallbackControllerState);
       controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);
-      controllerFactory.setInitialState(HighLevelControllerState.DO_NOTHING_BEHAVIOR);
+      controllerFactory.setInitialState(HighLevelController.DO_NOTHING_BEHAVIOR);
 
       DiagnosticsWhenHangingControllerFactory diagnosticsWhenHangingControllerFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, useArms, robotIsHanging, null);
       diagnosticsWhenHangingControllerFactory.setTransitionRequested(true);

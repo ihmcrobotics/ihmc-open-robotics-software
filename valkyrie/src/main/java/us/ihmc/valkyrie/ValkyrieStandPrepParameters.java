@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie;
 
 import org.yaml.snakeyaml.Yaml;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandPrepParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap;
 
 import java.io.*;

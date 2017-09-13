@@ -5,7 +5,7 @@ import java.util.Random;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 
 @RosMessagePacket(documentation = "This message is used to switch the control scheme between force and position control.\n"
       + "WARNING: When in position control, the IHMC balance algorithms will be disabled and\n" + "it is up to the user to ensure stability.",
@@ -14,22 +14,22 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 public class HighLevelStateMessage extends Packet<HighLevelStateMessage>
 {
    @RosExportedField(documentation = "The enum value of the current high level state of the robot.")
-   public HighLevelControllerState highLevelControllerState;
+   public HighLevelController highLevelController;
 
    public HighLevelStateMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public HighLevelStateMessage(HighLevelControllerState highLevelControllerState)
+   public HighLevelStateMessage(HighLevelController highLevelController)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.highLevelControllerState = highLevelControllerState;
+      this.highLevelController = highLevelController;
    }
 
-   public HighLevelControllerState getHighLevelControllerState()
+   public HighLevelController getHighLevelController()
    {
-      return highLevelControllerState;
+      return highLevelController;
    }
 
    public boolean equals(Object obj)
@@ -39,24 +39,24 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage>
 
    public String toString()
    {
-      return "State= " + highLevelControllerState.toString();
+      return "State= " + highLevelController.toString();
    }
 
    @Override
    public boolean epsilonEquals(HighLevelStateMessage other, double epsilon)
    {
-      return this.getHighLevelControllerState().equals(other.getHighLevelControllerState());
+      return this.getHighLevelController().equals(other.getHighLevelController());
    }
 
    public HighLevelStateMessage(Random random)
    {
       double value = random.nextInt(3);
-      HighLevelControllerState highLevelControllerState = HighLevelControllerState.WALKING;
+      HighLevelController highLevelController = HighLevelController.WALKING;
       if (value == 1)
-         highLevelControllerState = HighLevelControllerState.DO_NOTHING_BEHAVIOR;
+         highLevelController = HighLevelController.DO_NOTHING_BEHAVIOR;
       else if (value == 2)
-         highLevelControllerState = HighLevelControllerState.DIAGNOSTICS;
+         highLevelController = HighLevelController.DIAGNOSTICS;
 
-      this.highLevelControllerState = highLevelControllerState;
+      this.highLevelController = highLevelController;
    }
 }

@@ -1,14 +1,14 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public abstract class NewHighLevelControllerState extends FinishableState<HighLevelControllerState>
+public abstract class HighLevelControllerState extends FinishableState<HighLevelController>
 {
 
-   public NewHighLevelControllerState(HighLevelControllerState stateEnum)
+   public HighLevelControllerState(HighLevelController stateEnum)
    {
       super(stateEnum);
    }

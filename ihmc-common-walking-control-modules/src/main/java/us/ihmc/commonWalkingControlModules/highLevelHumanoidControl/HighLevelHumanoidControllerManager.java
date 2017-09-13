@@ -18,7 +18,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelControllerStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
@@ -41,12 +41,12 @@ public class HighLevelHumanoidControllerManager implements RobotController
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final GenericStateMachine<HighLevelControllerState, HighLevelBehavior> stateMachine;
-   private final HighLevelControllerState initialBehavior;
+   private final GenericStateMachine<HighLevelController, HighLevelBehavior> stateMachine;
+   private final HighLevelController initialBehavior;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   private final YoEnum<HighLevelControllerState> requestedHighLevelState = new YoEnum<HighLevelControllerState>("requestedHighLevelState", registry,
-                                                                                                                 HighLevelControllerState.class, true);
+   private final YoEnum<HighLevelController> requestedHighLevelState = new YoEnum<HighLevelController>("requestedHighLevelState", registry,
+                                                                                                       HighLevelController.class, true);
 
    private final YoBoolean isListeningToHighLevelStateMessage = new YoBoolean("isListeningToHighLevelStateMessage", registry);
 
@@ -56,7 +56,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
    private final ControllerCoreOutputReadOnly controllerCoreOutput;
    private final WholeBodyControllerCore controllerCore;
 
-   private final AtomicReference<HighLevelControllerState> fallbackControllerForFailureReference = new AtomicReference<>();
+   private final AtomicReference<HighLevelController> fallbackControllerForFailureReference = new AtomicReference<>();
 
    private final HighLevelStateChangeStatusMessage highLevelStateChangeStatusMessage = new HighLevelStateChangeStatusMessage();
 
@@ -64,7 +64,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
 
    public HighLevelHumanoidControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
-                                             WholeBodyControllerCore controllerCore, HighLevelControllerState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors,
+                                             WholeBodyControllerCore controllerCore, HighLevelController initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors,
                                              HighLevelHumanoidControllerToolbox controllerToolbox, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                              ControllerCoreOutputReadOnly controllerCoreOutput)
    {
@@ -93,23 +93,23 @@ public class HighLevelHumanoidControllerManager implements RobotController
          @Override
          public void controllerFailed(FrameVector2D fallingDirection)
          {
-            HighLevelControllerState fallbackController = fallbackControllerForFailureReference.get();
+            HighLevelController fallbackController = fallbackControllerForFailureReference.get();
             if (fallbackController != null)
                requestedHighLevelState.set(fallbackController);
          }
       });
    }
 
-   public void setFallbackControllerForFailure(HighLevelControllerState fallbackController)
+   public void setFallbackControllerForFailure(HighLevelController fallbackController)
    {
       fallbackControllerForFailureReference.set(fallbackController);
    }
 
-   private GenericStateMachine<HighLevelControllerState, HighLevelBehavior> setUpStateMachine(ArrayList<HighLevelBehavior> highLevelBehaviors, YoDouble yoTime,
-                                                                                              YoVariableRegistry registry)
+   private GenericStateMachine<HighLevelController, HighLevelBehavior> setUpStateMachine(ArrayList<HighLevelBehavior> highLevelBehaviors, YoDouble yoTime,
+                                                                                         YoVariableRegistry registry)
    {
-      GenericStateMachine<HighLevelControllerState, HighLevelBehavior> highLevelStateMachine = new GenericStateMachine<>("highLevelControllerState", "switchTimeName",
-                                                                                                                         HighLevelControllerState.class, yoTime, registry);
+      GenericStateMachine<HighLevelController, HighLevelBehavior> highLevelStateMachine = new GenericStateMachine<>("highLevelController", "switchTimeName",
+                                                                                                                    HighLevelController.class, yoTime, registry);
 
       // Enable transition between every existing state of the state machine
       for (int i = 0; i < highLevelBehaviors.size(); i++)
@@ -131,10 +131,10 @@ public class HighLevelHumanoidControllerManager implements RobotController
          highLevelStateMachine.addState(highLevelBehaviors.get(i));
       }
 
-      highLevelStateMachine.attachStateChangedListener(new StateChangedListener<HighLevelControllerState>()
+      highLevelStateMachine.attachStateChangedListener(new StateChangedListener<HighLevelController>()
       {
          @Override
-         public void stateChanged(State<HighLevelControllerState> oldState, State<HighLevelControllerState> newState, double time)
+         public void stateChanged(State<HighLevelController> oldState, State<HighLevelController> newState, double time)
          {
             highLevelStateChangeStatusMessage.setStateChange(oldState.getStateEnum(), newState.getStateEnum());
             statusMessageOutputManager.reportStatusMessage(highLevelStateChangeStatusMessage);
@@ -149,9 +149,9 @@ public class HighLevelHumanoidControllerManager implements RobotController
       this.registry.addChild(registryToAdd);
    }
 
-   public void requestHighLevelState(HighLevelControllerState requestedHighLevelControllerState)
+   public void requestHighLevelState(HighLevelController requestedHighLevelController)
    {
-      this.requestedHighLevelState.set(requestedHighLevelControllerState);
+      this.requestedHighLevelState.set(requestedHighLevelController);
    }
 
    public void setListenToHighLevelStatePackets(boolean isListening)
@@ -172,7 +172,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
       {
          if (commandInputManager.isNewCommandAvailable(HighLevelControllerStateCommand.class))
          {
-            requestedHighLevelState.set(commandInputManager.pollNewestCommand(HighLevelControllerStateCommand.class).getHighLevelControllerState());
+            requestedHighLevelState.set(commandInputManager.pollNewestCommand(HighLevelControllerStateCommand.class).getHighLevelController());
          }
       }
 
@@ -206,9 +206,9 @@ public class HighLevelHumanoidControllerManager implements RobotController
       highLevelBehavior.setControllerCoreOutput(controllerCoreOutput);
 
       // Enable transition between every existing state of the state machine
-      for (HighLevelControllerState stateEnum : HighLevelControllerState.values)
+      for (HighLevelController stateEnum : HighLevelController.values)
       {
-         FinishableState<HighLevelControllerState> otherHighLevelState = stateMachine.getState(stateEnum);
+         FinishableState<HighLevelController> otherHighLevelState = stateMachine.getState(stateEnum);
          if (otherHighLevelState == null)
             continue;
 
@@ -223,7 +223,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
          requestedHighLevelState.set(highLevelBehavior.getStateEnum());
    }
 
-   public HighLevelControllerState getCurrentHighLevelState()
+   public HighLevelController getCurrentHighLevelState()
    {
       return stateMachine.getCurrentStateEnum();
    }

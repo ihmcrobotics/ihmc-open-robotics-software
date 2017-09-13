@@ -1,10 +1,8 @@
 package us.ihmc.valkyrie;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.PositionControlParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandPrepParameters;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepParameters;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
 
 public class ValkyrieHighLevelControllerParameters implements HighLevelControllerParameters
@@ -29,21 +27,21 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    }
 
    @Override
-   public LowLevelJointControlMode getLowLevelJointControlMode(String jointName, HighLevelControllerState state)
+   public LowLevelJointControlMode getLowLevelJointControlMode(String jointName, HighLevelController state)
    {
       throw new RuntimeException("None of the Valkyrie joint control modes have been set up yet.");
    }
 
    @Override
-   public HighLevelControllerState getDefaultInitialControllerState()
+   public HighLevelController getDefaultInitialControllerState()
    {
-      return HighLevelControllerState.WALKING;
+      return HighLevelController.WALKING;
    }
 
    @Override
-   public HighLevelControllerState getFallbackControllerState()
+   public HighLevelController getFallbackControllerState()
    {
-      return HighLevelControllerState.DO_NOTHING_BEHAVIOR;
+      return HighLevelController.DO_NOTHING_BEHAVIOR;
    }
 
    @Override
