@@ -39,7 +39,6 @@ import com.jme3.input.InputManager;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.light.Light;
-import com.jme3.light.SpotLight;
 import com.jme3.material.TechniqueDef;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -543,12 +542,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
       addDirectionalLight(ColorRGBA.White.mult(0.4f), new Vector3f(0.0f, -1.0f, 0.0f).normalizeLocal());
       
-      SpotLight spotLight = new SpotLight();
-      spotLight.setColor(ColorRGBA.White);
-      spotLight.setPosition(new Vector3f(0, 2, 0));
-      spotLight.setDirection(new Vector3f(0, -1, 0));
-      rootNode.addLight(spotLight);
-      
       renderManager.setPreferredLightMode(TechniqueDef.LightMode.SinglePass);
 
       rootNode.setShadowMode(ShadowMode.CastAndReceive);
@@ -595,23 +588,42 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    
    public void setupSky(String skyBox)
    {
-      deleteSky();
-      sky = SkyFactory.createSky(assetManager, skyBox, EnvMapType.CubeMap);
-      updateSky();
+      enqueue(new Callable<Object>()
+      {
+
+         @Override
+         public Object call() throws Exception
+         {
+            deleteSky();
+            sky = SkyFactory.createSky(assetManager, skyBox, EnvMapType.CubeMap);
+            updateSky();
+            return null;
+         }
+      });
    }
    
    public void setupSky(String west, String east, String north, String south, String up, String down)
    {
-      deleteSky();
+      
       Texture westTex = assetManager.loadTexture(new TextureKey(west, true));
       Texture eastTex = assetManager.loadTexture(new TextureKey(east, true));
       Texture northTex = assetManager.loadTexture(new TextureKey(north, true));
       Texture southTex = assetManager.loadTexture(new TextureKey(south, true));
       Texture upTex = assetManager.loadTexture(new TextureKey(up, true));
       Texture downTex = assetManager.loadTexture(new TextureKey(down, true));
-      sky = SkyFactory.createSky(assetManager, westTex, eastTex, northTex, southTex, upTex, downTex);
- 
-      updateSky();
+      enqueue(new Callable<Object>()
+      {
+
+         @Override
+         public Object call() throws Exception
+         {
+            deleteSky();
+            sky = SkyFactory.createSky(assetManager, westTex, eastTex, northTex, southTex, upTex, downTex);
+       
+            updateSky();
+            return null;
+         }
+      });
    }
 
    
