@@ -3,7 +3,7 @@ package us.ihmc.avatar.networkProcessor.lidarScanPublisher;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -56,11 +56,11 @@ public class LidarScanPublisher
 
    private final String name = getClass().getSimpleName();
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
-   
+
    private final AtomicReference<ScanData> scanDataToPublish = new AtomicReference<>(null);
 
    private final PacketCommunicator packetCommunicator;
-   private final ConcurrentLinkedDeque<PacketDestination> listeners = new ConcurrentLinkedDeque<>();
+   private final ConcurrentLinkedDeque<RequestLidarScanMessage> listeners = new ConcurrentLinkedDeque<>();
 
    private final String robotName;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -147,11 +147,12 @@ public class LidarScanPublisher
     * <p>
     * The rejection method is based on the observation that flying points always fall in line with
     * view direction of the laser ray. It compares the angle between the angle between the scanner
-    *  view direction and the line segment connecting outlier points with their scan line neighbors.
+    * view direction and the line segment connecting outlier points with their scan line neighbors.
     * </p>
     * <p>
-    * For more details, see <a href="http://groups.csail.mit.edu/robotics-center/public_papers/Marion16a.pdf">
-    * Pat Marion master thesis, section 2.2.1, page 25.</a> 
+    * For more details, see
+    * <a href="http://groups.csail.mit.edu/robotics-center/public_papers/Marion16a.pdf"> Pat Marion
+    * master thesis, section 2.2.1, page 25.</a>
     * </p>
     */
    public void enableShadowRemoval()
@@ -167,15 +168,16 @@ public class LidarScanPublisher
     * <p>
     * The rejection method is based on the observation that flying points always fall in line with
     * view direction of the laser ray. It compares the angle between the angle between the scanner
-    *  view direction and the line segment connecting outlier points with their scan line neighbors.
+    * view direction and the line segment connecting outlier points with their scan line neighbors.
     * </p>
     * <p>
-    * For more details, see <a href="http://groups.csail.mit.edu/robotics-center/public_papers/Marion16a.pdf">
-    * Pat Marion master thesis, section 2.2.1, page 25.</a> 
+    * For more details, see
+    * <a href="http://groups.csail.mit.edu/robotics-center/public_papers/Marion16a.pdf"> Pat Marion
+    * master thesis, section 2.2.1, page 25.</a>
     * </p>
     * 
-    * @param angleThreshold the angle threshold in radians used by the removal algorithm.
-    * Expecting a positive value close to zero, the default value is 0.21 radian (= 12 degrees).
+    * @param angleThreshold the angle threshold in radians used by the removal algorithm. Expecting
+    *           a positive value close to zero, the default value is 0.21 radian (= 12 degrees).
     */
    public void enableShadowRemoval(double angleThreshold)
    {
@@ -275,7 +277,7 @@ public class LidarScanPublisher
                return;
 
             int count = 0;
-            Set<PacketDestination> listenerSet = EnumSet.noneOf(PacketDestination.class);
+            Set<RequestLidarScanMessage> listenerSet = new HashSet<>();
 
             while (!listeners.isEmpty() && count < MAX_NUMBER_OF_LISTENERS)
             {
@@ -317,7 +319,7 @@ public class LidarScanPublisher
                for (int i = 1; i < scanData.numberOfScanPoints - 1; i++)
                {
                   Point3D currentScanPoint = scanData.scanPoints[i];
-                  Point3D previousScanPoint = scanData.scanPoints[i-1];
+                  Point3D previousScanPoint = scanData.scanPoints[i - 1];
                   fromLidarToScanPoint.sub(currentScanPoint, lidarPosition);
                   previousToCurrentScanPoint.sub(currentScanPoint, previousScanPoint);
 
@@ -326,7 +328,7 @@ public class LidarScanPublisher
                   if (fromLidarToScanPoint.angle(previousToCurrentScanPoint) < shadowAngleThreshold)
                      continue;
 
-                  Point3D nextScanPoint = scanData.scanPoints[i+1];
+                  Point3D nextScanPoint = scanData.scanPoints[i + 1];
                   currentToNextScanPoint.sub(nextScanPoint, currentScanPoint);
 
                   if (fromLidarToScanPoint.dot(currentToNextScanPoint) < 0.0)
@@ -334,7 +336,6 @@ public class LidarScanPublisher
                   if (fromLidarToScanPoint.angle(currentToNextScanPoint) < shadowAngleThreshold)
                      continue;
 
-                  
                   filteredScanPoints.add(currentScanPoint);
                }
                filteredScanPoints.add(scanData.scanPoints[scanData.numberOfScanPoints - 1]);
@@ -374,16 +375,18 @@ public class LidarScanPublisher
          }
       };
    }
-   
-   private void sendLidarScanMessageToListeners(long timestamp, Point3D32 lidarPosition, Quaternion32 lidarOrientation, float[] scanPointBuffer, Set<PacketDestination> listeners)
+
+   private void sendLidarScanMessageToListeners(long timestamp, Point3D32 lidarPosition, Quaternion32 lidarOrientation, float[] scanPointBuffer,
+                                                Set<RequestLidarScanMessage> listeners)
    {
       LidarScanMessage message = new LidarScanMessage(timestamp, lidarPosition, lidarOrientation, scanPointBuffer);
 
-      Iterator<PacketDestination> iterator = listeners.iterator();
+      Iterator<RequestLidarScanMessage> iterator = listeners.iterator();
 
       while (true)
       {
-         PacketDestination destination = iterator.next();
+         RequestLidarScanMessage request = iterator.next();
+         PacketDestination destination = PacketDestination.fromOrdinal(request.getSource());
          message.setDestination(destination);
          packetCommunicator.send(message);
 
@@ -405,7 +408,7 @@ public class LidarScanPublisher
          public void receivedPacket(RequestLidarScanMessage packet)
          {
             if (packet != null)
-               listeners.add(PacketDestination.fromOrdinal(packet.getSource()));
+               listeners.add(packet);
          }
       };
    }
