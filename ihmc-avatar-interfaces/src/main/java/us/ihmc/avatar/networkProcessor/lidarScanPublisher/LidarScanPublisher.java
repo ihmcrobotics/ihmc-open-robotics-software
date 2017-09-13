@@ -71,7 +71,6 @@ public class LidarScanPublisher
    private CollisionShapeTester collisionBoxNode = null;
    private PPSTimestampOffsetProvider ppsTimestampOffsetProvider = null;
 
-   private boolean removeShadows = false;
    private double shadowAngleThreshold = DEFAULT_SHADOW_ANGLE_THRESHOLD;
 
    public LidarScanPublisher(String lidarName, FullHumanoidRobotModelFactory modelFactory, PacketCommunicator packetCommunicator)
@@ -139,36 +138,6 @@ public class LidarScanPublisher
    }
 
    /**
-    * Attempt to remove flying LIDAR points, which, when present, result as objects having shadows.
-    * <p>
-    * Warning: The algorithm for removing shadows expects to be dealing with single LIDAR scans.
-    * </p>
-    * <p>
-    * The rejection method is based on the observation that flying points always fall in line with
-    * view direction of the laser ray. It compares the angle between the angle between the scanner
-    * view direction and the line segment connecting outlier points with their scan line neighbors.
-    * </p>
-    * <p>
-    * For more details, see
-    * <a href="http://groups.csail.mit.edu/robotics-center/public_papers/Marion16a.pdf"> Pat Marion
-    * master thesis, section 2.2.1, page 25.</a>
-    * </p>
-    */
-   public void enableShadowRemoval()
-   {
-      removeShadows = true;
-   }
-
-   /**
-    * Attempt to remove flying LIDAR points, which, when present, result as objects having shadows.
-    * <p>
-    * Warning: The algorithm for removing shadows expects to be dealing with single LIDAR scans.
-    * </p>
-    * <p>
-    * The rejection method is based on the observation that flying points always fall in line with
-    * view direction of the laser ray. It compares the angle between the angle between the scanner
-    * view direction and the line segment connecting outlier points with their scan line neighbors.
-    * </p>
     * <p>
     * For more details, see
     * <a href="http://groups.csail.mit.edu/robotics-center/public_papers/Marion16a.pdf"> Pat Marion
@@ -178,18 +147,9 @@ public class LidarScanPublisher
     * @param angleThreshold the angle threshold in radians used by the removal algorithm. Expecting
     *           a positive value close to zero, the default value is 0.21 radian (= 12 degrees).
     */
-   public void enableShadowRemoval(double angleThreshold)
+   public void setShadowThreshold(double angleThreshold)
    {
-      removeShadows = true;
       shadowAngleThreshold = angleThreshold;
-   }
-
-   /**
-    * Disables the shadow removal algorithm.
-    */
-   public void disableShadowRemoval()
-   {
-      removeShadows = false;
    }
 
    public void setPPSTimestampOffsetProvider(PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
@@ -405,6 +365,24 @@ public class LidarScanPublisher
          return collidingPointIndices;
       }
 
+      /**
+       * Attempt to remove flying LIDAR points, which, when present, result as objects having
+       * shadows.
+       * <p>
+       * Warning: The algorithm for removing shadows expects to be dealing with single LIDAR scans.
+       * </p>
+       * <p>
+       * The rejection method is based on the observation that flying points always fall in line
+       * with view direction of the laser ray. It compares the angle between the angle between the
+       * scanner view direction and the line segment connecting outlier points with their scan line
+       * neighbors.
+       * </p>
+       * <p>
+       * For more details, see
+       * <a href="http://groups.csail.mit.edu/robotics-center/public_papers/Marion16a.pdf"> Pat
+       * Marion master thesis, section 2.2.1, page 25.</a>
+       * </p>
+       */
       public TIntHashSet computeShadowPointIndices(Tuple3DReadOnly lidarPosition, double shadowAngleThreshold)
       {
          TIntHashSet shadowPointIndices = new TIntHashSet();
@@ -437,22 +415,6 @@ public class LidarScanPublisher
          }
 
          return shadowPointIndices;
-      }
-
-      public float[] getScanBuffer()
-      {
-         TFloatArrayList scanPointBuffer = new TFloatArrayList();
-
-         for (int i = 0; i < numberOfScanPoints; i++)
-         {
-            Point3D scanPoint = scanPoints[i];
-
-            scanPointBuffer.add((float) scanPoint.getX());
-            scanPointBuffer.add((float) scanPoint.getY());
-            scanPointBuffer.add((float) scanPoint.getZ());
-         }
-
-         return scanPointBuffer.toArray();
       }
 
       public float[] getScanBuffer(TIntHashSet... hashSetsWithIndicesToRemove)
