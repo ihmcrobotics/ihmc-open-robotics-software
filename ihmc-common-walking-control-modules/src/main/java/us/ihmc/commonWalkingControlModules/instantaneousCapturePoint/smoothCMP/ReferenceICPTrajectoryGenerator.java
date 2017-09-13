@@ -33,6 +33,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final static int defaultSize = 50;
 
+   private final boolean debug;
+
    private final List<FramePoint3D> cmpDesiredFinalPositions = new ArrayList<>();
    
    private final List<FramePoint3D> icpDesiredInitialPositions = new ArrayList<>();
@@ -78,14 +80,14 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox(icpToolbox);
 
    public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isStanding,
-                                          YoBoolean isInitialTransfer, YoBoolean isDoubleSupport,
-                                          YoVariableRegistry registry)
+                                          YoBoolean isInitialTransfer, YoBoolean isDoubleSupport, boolean debug, YoVariableRegistry registry)
    {
       this.omega0 = omega0;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
       this.isStanding = isStanding;
       this.isInitialTransfer = isInitialTransfer;
       this.isDoubleSupport = isDoubleSupport;
+      this.debug = debug;
 
       areICPDynamicsSatisfied = new YoBoolean(namePrefix + "AreICPDynamicsSatisfied", registry);
       areICPDynamicsSatisfied.set(false);
@@ -366,7 +368,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
          {
             setICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(), currentSegmentIndex.getIntegerValue()); // TODO: add controller dt for proper continuation
          }
-         checkICPDynamics(localTimeInCurrentPhase.getDoubleValue(), icpVelocityDesiredCurrent, icpPositionDesiredCurrent, cmpPolynomial3D);
+         if (debug)
+            checkICPDynamics(localTimeInCurrentPhase.getDoubleValue(), icpVelocityDesiredCurrent, icpPositionDesiredCurrent, cmpPolynomial3D);
       }
    }
 

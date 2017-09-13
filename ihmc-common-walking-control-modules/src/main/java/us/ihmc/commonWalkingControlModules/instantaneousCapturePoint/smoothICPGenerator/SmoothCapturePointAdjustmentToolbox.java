@@ -95,7 +95,7 @@ public class SmoothCapturePointAdjustmentToolbox
       FrameTrajectory3D cmpPolynomial3DSegment1 = copPolynomials3D.get(0);
       FrameTrajectory3D cmpPolynomial3DSegment2 = copPolynomials3D.get(1);
       FramePoint3D icpPositionFinalSegment2 = exitCornerPointsToPack.get(1);
-      for (Direction direction : Direction.values())
+      for (Direction direction : Direction.values)
       {
          Trajectory cmpPolynomialSegment1 = cmpPolynomial3DSegment1.getTrajectory(direction);
          Trajectory cmpPolynomialSegment2 = cmpPolynomial3DSegment2.getTrajectory(direction);
@@ -140,8 +140,6 @@ public class SmoothCapturePointAdjustmentToolbox
    private double generalizedBoundaryConditionValue = Double.NaN;
    private final DenseMatrix64F generalizedBoundaryConditionSubMatrix1 = new DenseMatrix64F(1, defaultSize);
    private final DenseMatrix64F generalizedBoundaryConditionSubMatrix2 = new DenseMatrix64F(1, defaultSize);
-   private final DenseMatrix64F generalizedBoundaryConditionSubMatrix1Transpose = new DenseMatrix64F(defaultSize, 1);
-   private final DenseMatrix64F generalizedBoundaryConditionSubMatrix2Transpose = new DenseMatrix64F(defaultSize, 1);
 
    private void setGeneralizedBoundaryConstraintICP0(int order, int numberOfCoefficients, int numberOfConstrainedDerivatives,
                                                      double icpQuantityInitialConditionScalar, double icpPositionFinalSegment2,
@@ -170,12 +168,10 @@ public class SmoothCapturePointAdjustmentToolbox
       generalizedBoundaryConditionValue = cmpPolynomialSegment1.getDerivative(order, tInitial1);
       boundaryConditionVector.set(order + numberOfConstrainedDerivatives, 0, generalizedBoundaryConditionValue);
 
-      generalizedBoundaryConditionSubMatrix1Transpose.set(cmpPolynomialSegment1.getXPowersDerivativeVector(order, tInitial1));
-      CommonOps.transpose(generalizedBoundaryConditionSubMatrix1Transpose, generalizedBoundaryConditionSubMatrix1);
+      generalizedBoundaryConditionSubMatrix1.set(cmpPolynomialSegment1.getXPowersDerivativeVector(order, tInitial1));
       CommonOps.insert(generalizedBoundaryConditionSubMatrix1, boundaryConditionMatrix, order + numberOfConstrainedDerivatives, 0);
 
-      generalizedBoundaryConditionSubMatrix2Transpose.zero();
-      CommonOps.transpose(generalizedBoundaryConditionSubMatrix2Transpose, generalizedBoundaryConditionSubMatrix2);
+      generalizedBoundaryConditionSubMatrix2.zero();
       CommonOps.insert(generalizedBoundaryConditionSubMatrix2, boundaryConditionMatrix, order + numberOfConstrainedDerivatives, numberOfCoefficients);
    }
 
@@ -190,13 +186,11 @@ public class SmoothCapturePointAdjustmentToolbox
       generalizedBoundaryConditionValue = 0.0;
       boundaryConditionVector.set(order + 2 * numberOfConstrainedDerivatives, 0, generalizedBoundaryConditionValue);
 
-      generalizedBoundaryConditionSubMatrix1Transpose.set(cmpPolynomialSegment1.getXPowersDerivativeVector(order, tFinal1));
-      CommonOps.transpose(generalizedBoundaryConditionSubMatrix1Transpose, generalizedBoundaryConditionSubMatrix1);
+      generalizedBoundaryConditionSubMatrix1.set(cmpPolynomialSegment1.getXPowersDerivativeVector(order, tFinal1));
       CommonOps.scale(-1.0, generalizedBoundaryConditionSubMatrix1);
       CommonOps.insert(generalizedBoundaryConditionSubMatrix1, boundaryConditionMatrix, order + 2 * numberOfConstrainedDerivatives, 0);
 
-      generalizedBoundaryConditionSubMatrix2Transpose.set(cmpPolynomialSegment2.getXPowersDerivativeVector(order, tInitial2));
-      CommonOps.transpose(generalizedBoundaryConditionSubMatrix2Transpose, generalizedBoundaryConditionSubMatrix2);
+      generalizedBoundaryConditionSubMatrix2.set(cmpPolynomialSegment2.getXPowersDerivativeVector(order, tInitial2));
       CommonOps.insert(generalizedBoundaryConditionSubMatrix2, boundaryConditionMatrix, order + 2 * numberOfConstrainedDerivatives, numberOfCoefficients);
    }
 
@@ -209,12 +203,10 @@ public class SmoothCapturePointAdjustmentToolbox
       generalizedBoundaryConditionValue = cmpPolynomialSegment2.getDerivative(order, tFinal2);
       boundaryConditionVector.set(order + 3 * numberOfConstrainedDerivatives, 0, generalizedBoundaryConditionValue);
 
-      generalizedBoundaryConditionSubMatrix1Transpose.zero();
-      CommonOps.transpose(generalizedBoundaryConditionSubMatrix1Transpose, generalizedBoundaryConditionSubMatrix1);
+      generalizedBoundaryConditionSubMatrix1.zero();
       CommonOps.insert(generalizedBoundaryConditionSubMatrix1, boundaryConditionMatrix, order + 3 * numberOfConstrainedDerivatives, 0);
 
-      generalizedBoundaryConditionSubMatrix2Transpose.set(cmpPolynomialSegment2.getXPowersDerivativeVector(order, tFinal2));
-      CommonOps.transpose(generalizedBoundaryConditionSubMatrix2Transpose, generalizedBoundaryConditionSubMatrix2);
+      generalizedBoundaryConditionSubMatrix2.set(cmpPolynomialSegment2.getXPowersDerivativeVector(order, tFinal2));
       CommonOps.insert(generalizedBoundaryConditionSubMatrix2, boundaryConditionMatrix, order + 3 * numberOfConstrainedDerivatives, numberOfCoefficients);
    }
 
@@ -267,9 +259,7 @@ public class SmoothCapturePointAdjustmentToolbox
       polynomialCoefficientVectorAdjustmentSegment2.reshape(numberOfCoefficients, 1);
 
       generalizedBoundaryConditionSubMatrix1.reshape(1, numberOfCoefficients);
-      generalizedBoundaryConditionSubMatrix1Transpose.reshape(numberOfCoefficients, 1);
       generalizedBoundaryConditionSubMatrix2.reshape(1, numberOfCoefficients);
-      generalizedBoundaryConditionSubMatrix2Transpose.reshape(numberOfCoefficients, 1);
 
       generalizedAlphaPrimeRowSegment1.reshape(1, numberOfCoefficients);
       generalizedBetaPrimeRowSegment1.reshape(1, numberOfCoefficients);
@@ -287,7 +277,5 @@ public class SmoothCapturePointAdjustmentToolbox
       generalizedBoundaryConditionValue = Double.NaN;
       generalizedBoundaryConditionSubMatrix1.zero();
       generalizedBoundaryConditionSubMatrix2.zero();
-      generalizedBoundaryConditionSubMatrix1Transpose.zero();
-      generalizedBoundaryConditionSubMatrix2Transpose.zero();
    }
 }

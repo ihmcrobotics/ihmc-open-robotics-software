@@ -433,6 +433,8 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void compute(double time)
    {
+      timer.startMeasurement();
+
       timeInCurrentState.set(time - initialTime.getDoubleValue());
       timeInCurrentStateRemaining.set(getCurrentStateDuration() - timeInCurrentState.getDoubleValue());
 
@@ -477,6 +479,8 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
       computeDesiredCentroidalMomentumPivot(desiredICPPosition, desiredICPVelocity, omega0, desiredCMPPosition);
       computeDesiredCentroidalMomentumPivotVelocity(desiredICPVelocity, desiredICPAcceleration, omega0, desiredCMPVelocity);
+
+      timer.stopMeasurement();
    }
 
    private void initializeTransferTrajectory(RobotSide transferToSide)

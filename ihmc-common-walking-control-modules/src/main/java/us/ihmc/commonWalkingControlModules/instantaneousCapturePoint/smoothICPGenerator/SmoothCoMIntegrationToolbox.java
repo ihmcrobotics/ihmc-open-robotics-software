@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.dynamicReachability;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
 
 import java.util.List;
 
@@ -299,7 +299,7 @@ public class SmoothCoMIntegrationToolbox
    public void calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedAlphaCoMPrime, 
                                                                       int alphaCoMDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
    {
-      for (Direction dir : Direction.values())
+      for (Direction dir : Direction.values)
       {
          Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
          
@@ -327,8 +327,9 @@ public class SmoothCoMIntegrationToolbox
             tPowersDerivativeVector.zero();
             tPowersDerivativeVectorTranspose.zero();
 
-            tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(j + alphaCoMDerivativeOrder, time));
-            CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
+            //tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(j + alphaCoMDerivativeOrder, time));
+            //CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
+            tPowersDerivativeVectorTranspose.set(cmpPolynomial.getXPowersDerivativeVector(j + alphaCoMDerivativeOrder, time));
 
             double scalar = Math.pow(-1.0, i) * Math.pow(omega0, -j);
             CommonOps.addEquals(generalizedAlphaCoMPrimeRow, scalar, tPowersDerivativeVectorTranspose);
@@ -351,7 +352,7 @@ public class SmoothCoMIntegrationToolbox
    public void calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedBetaCoMPrime, 
                                                                      int betaCoMDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
    {                  
-      for(Direction dir : Direction.values())
+      for(Direction dir : Direction.values)
       {
          Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
          
@@ -380,8 +381,9 @@ public class SmoothCoMIntegrationToolbox
             tPowersDerivativeVector.zero();
             tPowersDerivativeVectorTranspose.zero();
 
-            tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(j, timeSegmentInitial));
-            CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
+            //tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(j, timeSegmentInitial));
+            //CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
+            tPowersDerivativeVectorTranspose.set(cmpPolynomial.getXPowersDerivativeVector(j, timeSegmentInitial));
 
             double scalar = Math.pow(-1.0, i + betaCoMDerivativeOrder) * Math.pow(omega0, -j + betaCoMDerivativeOrder)
                   * Math.exp(omega0 * (timeSegmentInitial - time));
@@ -490,7 +492,7 @@ public class SmoothCoMIntegrationToolbox
    
    private void setPolynomialCoefficientVector3D(DenseMatrix64F polynomialCoefficientCombinedVector, FrameTrajectory3D cmpPolynomial3D)
    {
-      for (Direction dir : Direction.values())
+      for (Direction dir : Direction.values)
       {
          setPolynomialCoefficientVector1D(polynomialCoefficientVector, cmpPolynomial3D.getTrajectory(dir));
          

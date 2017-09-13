@@ -661,7 +661,7 @@ public class Trajectory
          this.coefficientVector.reshape(power + 1, 1);
          this.constraintMatrix.reshape(power + 1, power + 1);
          this.constraintVector.reshape(power + 1, 1);
-         this.xPowersDerivativeVector.reshape(power + 1, 1);
+         this.xPowersDerivativeVector.reshape(1, power + 1);
          numberOfCoefficients = power + 1;
       }
       coefficients[power] = coefficient;
@@ -810,7 +810,7 @@ public class Trajectory
       this.coefficientVector.reshape(numberOfCoefficientsRequired, 1);
       this.constraintMatrix.reshape(numberOfCoefficientsRequired, numberOfCoefficientsRequired);
       this.constraintVector.reshape(numberOfCoefficientsRequired, 1);
-      this.xPowersDerivativeVector.reshape(numberOfCoefficientsRequired, 1);
+      this.xPowersDerivativeVector.reshape(1, numberOfCoefficientsRequired);
       numberOfCoefficients = numberOfCoefficientsRequired;
 
       for (int i = numberOfCoefficientsRequired; i < maximumNumberOfCoefficients; i++)
