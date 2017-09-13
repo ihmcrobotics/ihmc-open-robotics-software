@@ -90,8 +90,6 @@ public class StandPrepControllerState extends NewHighLevelControllerState
    @Override
    public void doAction()
    {
-      controllerToolbox.update();
-
       double timeInTrajectory = MathTools.clamp(getTimeInCurrentState(), 0.0, timeToPrepareForStanding.getDoubleValue());
 
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)

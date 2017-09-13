@@ -15,7 +15,6 @@ public class HoldPositionControllerState extends NewHighLevelControllerState
 {
    private final YoVariableRegistry registry;
 
-   private HighLevelHumanoidControllerToolbox controllerToolbox;
    private final LowLevelOneDoFJointDesiredDataHolderList highLevelControllerOutput;
    protected final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
@@ -26,7 +25,6 @@ public class HoldPositionControllerState extends NewHighLevelControllerState
    {
       super(stateEnum);
 
-      this.controllerToolbox = controllerToolbox;
       this.highLevelControllerOutput = highLevelControllerOutput;
       String nameSuffix = stateEnum.name();
       registry = new YoVariableRegistry(nameSuffix + getClass().getSimpleName());
@@ -62,7 +60,6 @@ public class HoldPositionControllerState extends NewHighLevelControllerState
    @Override
    public void doAction()
    {
-      controllerToolbox.update();
       for (int jointIndex = 0; jointIndex < jointSetpoints.size(); jointIndex++)
       {
          OneDoFJoint joint = jointSetpoints.get(jointIndex).getLeft();
