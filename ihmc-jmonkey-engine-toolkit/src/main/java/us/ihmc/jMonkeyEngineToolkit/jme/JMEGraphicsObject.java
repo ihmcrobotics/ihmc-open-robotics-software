@@ -396,13 +396,8 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 
       AppearanceDefinition appearanceDefinition = graphics3dObjectAddHeightMap.getAppearance();
 
-      Material material = null;
-      if (appearanceDefinition != null)
-      {
-         material = JMEAppearanceMaterial.createMaterial(assetManager, appearanceDefinition);
-      }
 
-      JMEHeightMapTerrain jmeTerrain = new JMEHeightMapTerrain(heightMap, assetManager, material);
+      JMEHeightMapTerrain jmeTerrain = new JMEHeightMapTerrain(heightMap, assetManager, appearanceDefinition);
 
       Node terrainNode = jmeTerrain.getTerrain();
       currentNode.attachChild(terrainNode);

@@ -11,21 +11,26 @@ import com.jme3.texture.Texture.WrapMode;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMEAppearanceMaterial;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 
 public class JMEHeightMapTerrain
 {
-   private final int GRID_SIZE_POWER_OF_TWO = 9;
+   private static final int GRID_SIZE_POWER_OF_TWO = 9;
    
-   private final int gridSize = ((int) Math.pow(2, GRID_SIZE_POWER_OF_TWO)) + 1;
-   private final int patchSize = ((int) Math.pow(2, GRID_SIZE_POWER_OF_TWO/2)) + 1;
+   private static final int gridSize = ((int) Math.pow(2, GRID_SIZE_POWER_OF_TWO)) + 1;
+   private static final int patchSize = ((int) Math.pow(2, GRID_SIZE_POWER_OF_TWO/2)) + 1;
  
+   private String groundTexture = "Textures/gridGroundProfile.png";
    
    private final HeightMap heightMap;
    private final Node terrainNode = new Node("terrainNode");
    private final float xMin, xMax, yMin, yMax;
    private final float width, length;
    private final Vector3f scale = new Vector3f();
+   
    
    
    
@@ -46,7 +51,7 @@ public class JMEHeightMapTerrain
       this(heightMap, assetManager, null);
    }
    
-   public JMEHeightMapTerrain(HeightMap heightMap, AssetManager assetManager, Material material)
+   public JMEHeightMapTerrain(HeightMap heightMap, AssetManager assetManager, AppearanceDefinition appearance)
    {
       this.heightMap = heightMap;
       BoundingBox3D boundingBox = heightMap.getBoundingBox();
@@ -83,9 +88,34 @@ public class JMEHeightMapTerrain
 
       /** 4. We give the terrain its material, position & scale it, and attach it. */
      
-      if (material == null)
+
+      Material material = null;
+      if (appearance != null)
       {
-         material = loadTexture(assetManager, localScale);
+         if(appearance instanceof YoAppearanceTexture)         
+         {
+            Texture texture;
+            if (((YoAppearanceTexture) appearance).getPath() != null)
+            {
+               texture = assetManager.loadTexture(((YoAppearanceTexture) appearance).getPath());
+            }  
+            else
+            {
+               texture = JMEAppearanceMaterial.createTexture(((YoAppearanceTexture) appearance).getBufferedImage());
+            }
+            material = loadTexture(assetManager, localScale, texture);
+         }
+         else
+         {
+            material = JMEAppearanceMaterial.createMaterial(assetManager, appearance);
+         }
+         
+      }
+      else
+      {
+         Texture texture = assetManager.loadTexture(groundTexture);
+
+         material = loadTexture(assetManager, localScale, texture);
       }
       terrain.setMaterial(material);
       
@@ -103,14 +133,13 @@ public class JMEHeightMapTerrain
       rotation.attachChild(terrain);
    }
    
-   private Material loadTexture(AssetManager assetManager, Vector3f localScale)
+   private Material loadTexture(AssetManager assetManager, Vector3f localScale, Texture texture)
    {
       Material matTerrain;
 
       matTerrain = new Material(assetManager, "Terrain/ScalableTextureTerrain.j3md");
       matTerrain.setBoolean("useTriPlanarMapping", true);
 
-      Texture texture = assetManager.loadTexture("Textures/gridGroundProfile.png");
       texture.setWrap(WrapMode.Repeat);
       
       matTerrain.setTexture("Texture", texture);

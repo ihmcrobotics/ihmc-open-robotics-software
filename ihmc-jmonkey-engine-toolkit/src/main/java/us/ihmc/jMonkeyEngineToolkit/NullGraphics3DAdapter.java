@@ -271,4 +271,18 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
 	public void pause() {
 		
 	}
+
+   @Override
+   public void setupSky(String skyBox)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
+   @Override
+   public void setupSky(String west, String east, String north, String south, String up, String down)
+   {
+      // TODO Auto-generated method stub
+      
+   }
 }
