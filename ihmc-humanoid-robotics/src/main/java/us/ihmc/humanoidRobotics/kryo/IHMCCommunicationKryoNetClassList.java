@@ -86,7 +86,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliary
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingDirection;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.BlindWalkingSpeed;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.humanoidRobotics.communication.packets.driving.DrivingStatePacket;
 import us.ihmc.humanoidRobotics.communication.packets.driving.DrivingTrajectoryPacket;
 import us.ihmc.humanoidRobotics.communication.packets.driving.VehiclePosePacket;
@@ -407,7 +407,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // high levle state
       registerPacketClass(HighLevelStateMessage.class);
-      registerPacketClass(HighLevelControllerState.class);
+      registerPacketClass(HighLevelController.class);
       registerPacketClass(HighLevelStateChangeStatusMessage.class);
 
       // Recording

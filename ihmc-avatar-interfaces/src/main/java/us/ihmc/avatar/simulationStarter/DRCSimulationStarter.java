@@ -33,7 +33,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.humanoidRobotics.communication.producers.RawVideoDataServer;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -59,7 +59,7 @@ import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState.*;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController.*;
 
 public class DRCSimulationStarter implements SimulationStarterInterface
 {
@@ -109,7 +109,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private final Point3D scsCameraFix = new Point3D(-0.44, -0.17, 0.75);
 
    private final List<HighLevelControllerStateFactory> highLevelControllerFactories = new ArrayList<>();
-   private final List<ControllerStateTransitionFactory<HighLevelControllerState>> controllerTransitionFactories = new ArrayList<>();
+   private final List<ControllerStateTransitionFactory<HighLevelController>> controllerTransitionFactories = new ArrayList<>();
    private DRCNetworkProcessor networkProcessor;
 
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
@@ -417,6 +417,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames, wristForceSensorNames,
                                                                  highLevelControllerParameters, walkingControllerParameters, capturePointPlannerParameters);
       setupHighLevelStates(controllerFactory, feetForceSensorNames);
+
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
       if (setupControllerNetworkSubscriber)
          controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"),
@@ -426,6 +427,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          controllerFactory.addCustomControlState(highLevelControllerFactories.get(i));
       for (int i = 0; i < controllerTransitionFactories.size(); i++)
          controllerFactory.addCustomStateTransition(controllerTransitionFactories.get(i));
+
+      controllerFactory.setInitialState(HighLevelController.WALKING);
 
       if (deactivateWalkingFallDetector)
          controllerFactory.setFallbackControllerForFailure(null);

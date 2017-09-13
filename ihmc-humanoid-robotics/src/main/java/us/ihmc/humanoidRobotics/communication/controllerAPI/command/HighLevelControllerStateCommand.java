@@ -2,38 +2,38 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 
 public class HighLevelControllerStateCommand implements Command<HighLevelControllerStateCommand, HighLevelStateMessage>
 {
-   private HighLevelControllerState highLevelControllerState;
+   private HighLevelController highLevelController;
 
    @Override
    public void clear()
    {
-      highLevelControllerState = null;
+      highLevelController = null;
    }
 
    @Override
    public void set(HighLevelControllerStateCommand other)
    {
-      highLevelControllerState = other.getHighLevelControllerState();
+      highLevelController = other.getHighLevelController();
    }
 
    @Override
    public void set(HighLevelStateMessage message)
    {
-      highLevelControllerState = message.getHighLevelControllerState();
+      highLevelController = message.getHighLevelController();
    }
 
-   public void setHighLevelControllerState(HighLevelControllerState highLevelControllerState)
+   public void setHighLevelController(HighLevelController highLevelController)
    {
-      this.highLevelControllerState = highLevelControllerState;
+      this.highLevelController = highLevelController;
    }
 
-   public HighLevelControllerState getHighLevelControllerState()
+   public HighLevelController getHighLevelController()
    {
-      return highLevelControllerState;
+      return highLevelController;
    }
 
    @Override
@@ -45,6 +45,6 @@ public class HighLevelControllerStateCommand implements Command<HighLevelControl
    @Override
    public boolean isCommandValid()
    {
-      return highLevelControllerState != null;
+      return highLevelController != null;
    }
 }

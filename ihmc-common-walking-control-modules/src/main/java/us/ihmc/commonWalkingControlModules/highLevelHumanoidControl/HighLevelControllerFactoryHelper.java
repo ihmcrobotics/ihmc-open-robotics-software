@@ -3,14 +3,12 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewHighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -19,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class HighLevelControllerFactoryHelper
 {
-   private EnumMap<HighLevelControllerState, HighLevelControllerStateFactory> controllerFactories;
+   private EnumMap<HighLevelController, HighLevelControllerStateFactory> controllerFactories;
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private HighLevelControlManagerFactory managerFactory;
    private HighLevelControllerParameters highLevelControllerParameters;
@@ -28,15 +26,15 @@ public class HighLevelControllerFactoryHelper
    private CommandInputManager commandInputManager;
    private StatusMessageOutputManager statusMessageOutputManager;
    private LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput;
-   private YoEnum<HighLevelControllerState> requestedHighLevelControllerState;
-   private AtomicReference<HighLevelControllerState> fallbackControllerForFailure;
+   private YoEnum<HighLevelController> requestedHighLevelControllerState;
+   private AtomicReference<HighLevelController> fallbackControllerForFailure;
 
    public void setLowLevelControllerOutput(LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
    {
       this.lowLevelControllerOutput = lowLevelControllerOutput;
    }
 
-   public void setControllerFactories(EnumMap<HighLevelControllerState, HighLevelControllerStateFactory> controllerFactories)
+   public void setControllerFactories(EnumMap<HighLevelController, HighLevelControllerStateFactory> controllerFactories)
    {
       this.controllerFactories = controllerFactories;
    }
@@ -69,17 +67,17 @@ public class HighLevelControllerFactoryHelper
       this.statusMessageOutputManager = statusMessageOutputManager;
    }
 
-   public void setRequestedHighLevelControllerState(YoEnum<HighLevelControllerState> requestedHighLevelControllerState)
+   public void setRequestedHighLevelControllerState(YoEnum<HighLevelController> requestedHighLevelControllerState)
    {
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
    }
 
-   public void setFallbackControllerForFailure(AtomicReference<HighLevelControllerState> fallbackControllerForFailure)
+   public void setFallbackControllerForFailure(AtomicReference<HighLevelController> fallbackControllerForFailure)
    {
       this.fallbackControllerForFailure = fallbackControllerForFailure;
    }
 
-   public EnumMap<HighLevelControllerState, HighLevelControllerStateFactory> getControllerFactories()
+   public EnumMap<HighLevelController, HighLevelControllerStateFactory> getControllerFactories()
    {
       return controllerFactories;
    }
@@ -124,12 +122,12 @@ public class HighLevelControllerFactoryHelper
       return lowLevelControllerOutput;
    }
 
-   public YoEnum<HighLevelControllerState> getRequestedHighLevelControllerState()
+   public YoEnum<HighLevelController> getRequestedHighLevelControllerState()
    {
       return requestedHighLevelControllerState;
    }
 
-   public AtomicReference<HighLevelControllerState> getFallbackControllerForFailure()
+   public AtomicReference<HighLevelController> getFallbackControllerForFailure()
    {
       return fallbackControllerForFailure;
    }

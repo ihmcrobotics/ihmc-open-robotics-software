@@ -1,16 +1,16 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewHighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandReadyControllerState;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandReadyControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 
 public class StandReadyControllerStateFactory implements HighLevelControllerStateFactory
 {
    private StandReadyControllerState standReadyControllerState;
 
    @Override
-   public NewHighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
+   public HighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
       if (standReadyControllerState == null)
          standReadyControllerState = new StandReadyControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
@@ -21,8 +21,8 @@ public class StandReadyControllerStateFactory implements HighLevelControllerStat
    }
 
    @Override
-   public HighLevelControllerState getStateEnum()
+   public HighLevelController getStateEnum()
    {
-      return HighLevelControllerState.STAND_READY;
+      return HighLevelController.STAND_READY;
    }
 }

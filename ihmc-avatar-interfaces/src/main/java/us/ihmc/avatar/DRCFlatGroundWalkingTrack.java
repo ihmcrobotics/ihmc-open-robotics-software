@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.graphicsDescription.HeightMap;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -21,7 +21,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState.*;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController.*;
 
 
 public class DRCFlatGroundWalkingTrack
@@ -95,7 +95,7 @@ public class DRCFlatGroundWalkingTrack
    }
 
    public void setupHighLevelStates(HighLevelHumanoidControllerFactory controllerFactory, SideDependentList<String> feetForceSensorNames,
-                                    HighLevelControllerState fallbackControllerState)
+                                    HighLevelController fallbackControllerState)
    {
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();

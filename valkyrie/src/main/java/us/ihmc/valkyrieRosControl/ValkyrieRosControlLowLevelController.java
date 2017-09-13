@@ -20,7 +20,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelControllerStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.humanoidRobotics.communication.packets.valkyrie.ValkyrieLowLevelControlModeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.robotics.MathTools;
@@ -76,7 +76,7 @@ public class ValkyrieRosControlLowLevelController
    private final ValkyrieAccelerationIntegration accelerationIntegration;
 
    private CommandInputManager commandInputManager;
-   private final AtomicReference<HighLevelControllerState> currentHighLevelState = new AtomicReference<HighLevelControllerState>(null);
+   private final AtomicReference<HighLevelController> currentHighLevelState = new AtomicReference<HighLevelController>(null);
 
    private final HighLevelControllerStateCommand highLevelControllerStateCommand = new HighLevelControllerStateCommand();
 
@@ -286,15 +286,15 @@ public class ValkyrieRosControlLowLevelController
       switch (currentControlMode.getEnumValue())
       {
       case STAND_PREP:
-         if (doIHMCControlRatio.getDoubleValue() > 1.0 - 1.0e-3 && currentHighLevelState.get() == HighLevelControllerState.WALKING)
+         if (doIHMCControlRatio.getDoubleValue() > 1.0 - 1.0e-3 && currentHighLevelState.get() == HighLevelController.WALKING)
          {
             currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.HIGH_LEVEL_CONTROL);
             break;
          }
 
-         if (taskExecutor.isDone() && currentHighLevelState.get() != HighLevelControllerState.DO_NOTHING_BEHAVIOR)
+         if (taskExecutor.isDone() && currentHighLevelState.get() != HighLevelController.DO_NOTHING_BEHAVIOR)
          {
-            highLevelControllerStateCommand.setHighLevelControllerState(HighLevelControllerState.DO_NOTHING_BEHAVIOR);
+            highLevelControllerStateCommand.setHighLevelController(HighLevelController.DO_NOTHING_BEHAVIOR);
             commandInputManager.submitCommand(highLevelControllerStateCommand);
          }
 
@@ -304,7 +304,7 @@ public class ValkyrieRosControlLowLevelController
          switch (newRequest)
          {
          case CALIBRATION:
-            highLevelControllerStateCommand.setHighLevelControllerState(HighLevelControllerState.CALIBRATION);
+            highLevelControllerStateCommand.setHighLevelController(HighLevelController.CALIBRATION);
             commandInputManager.submitCommand(highLevelControllerStateCommand);
             taskExecutor.submit(rampUpIHMCControlRatioTask);
             taskExecutor.submit(calibrationTask);
@@ -312,7 +312,7 @@ public class ValkyrieRosControlLowLevelController
             currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.CALIBRATION);
             break;
          case HIGH_LEVEL_CONTROL:
-            highLevelControllerStateCommand.setHighLevelControllerState(HighLevelControllerState.WALKING);
+            highLevelControllerStateCommand.setHighLevelController(HighLevelController.WALKING);
             commandInputManager.submitCommand(highLevelControllerStateCommand);
             taskExecutor.submit(rampUpIHMCControlRatioTask);
             currentControlMode.set(ValkyrieLowLevelControlModeMessage.ControlMode.HIGH_LEVEL_CONTROL);

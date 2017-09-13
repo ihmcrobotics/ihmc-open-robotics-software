@@ -1,8 +1,8 @@
 package us.ihmc.wanderer.parameters;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandPrepParameters;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepParameters;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
 
 public class WandererHighLevelControllerParameters implements HighLevelControllerParameters
@@ -14,21 +14,21 @@ public class WandererHighLevelControllerParameters implements HighLevelControlle
    }
 
    @Override
-   public LowLevelJointControlMode getLowLevelJointControlMode(String joint, HighLevelControllerState state)
+   public LowLevelJointControlMode getLowLevelJointControlMode(String joint, HighLevelController state)
    {
       return LowLevelJointControlMode.FORCE_CONTROL;
    }
 
    @Override
-   public HighLevelControllerState getDefaultInitialControllerState()
+   public HighLevelController getDefaultInitialControllerState()
    {
-      return HighLevelControllerState.DO_NOTHING_BEHAVIOR;
+      return HighLevelController.DO_NOTHING_BEHAVIOR;
    }
 
    @Override
-   public HighLevelControllerState getFallbackControllerState()
+   public HighLevelController getFallbackControllerState()
    {
-      return HighLevelControllerState.DO_NOTHING_BEHAVIOR;
+      return HighLevelController.DO_NOTHING_BEHAVIOR;
    }
 
    @Override

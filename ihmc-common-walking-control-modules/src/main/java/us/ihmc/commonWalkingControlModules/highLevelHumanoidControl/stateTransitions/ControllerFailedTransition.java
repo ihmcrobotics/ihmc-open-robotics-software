@@ -1,8 +1,8 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -13,10 +13,10 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ControllerFailedTransition implements StateTransitionCondition
 {
    private final YoBoolean controllerFailed;
-   private final AtomicReference<HighLevelControllerState> fallbackControllerForFailure;
+   private final AtomicReference<HighLevelController> fallbackControllerForFailure;
 
-   public ControllerFailedTransition(HighLevelControllerState stateToAttachEnum, HighLevelControllerState constructedFallbackState,
-                                     AtomicReference<HighLevelControllerState> fallbackControllerForFailure, HighLevelHumanoidControllerToolbox controllerToolbox,
+   public ControllerFailedTransition(HighLevelController stateToAttachEnum, HighLevelController constructedFallbackState,
+                                     AtomicReference<HighLevelController> fallbackControllerForFailure, HighLevelHumanoidControllerToolbox controllerToolbox,
                                      YoVariableRegistry registry)
    {
       this.fallbackControllerForFailure = fallbackControllerForFailure;

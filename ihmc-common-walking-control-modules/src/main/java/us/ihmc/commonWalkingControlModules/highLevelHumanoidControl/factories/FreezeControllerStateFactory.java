@@ -1,16 +1,16 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.FreezeControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewHighLevelControllerState;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.FreezeControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 
 public class FreezeControllerStateFactory implements HighLevelControllerStateFactory
 {
    private FreezeControllerState freezeControllerState;
 
    @Override
-   public NewHighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
+   public HighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
       if (freezeControllerState == null)
          freezeControllerState = new FreezeControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
@@ -20,8 +20,8 @@ public class FreezeControllerStateFactory implements HighLevelControllerStateFac
    }
 
    @Override
-   public HighLevelControllerState getStateEnum()
+   public HighLevelController getStateEnum()
    {
-      return HighLevelControllerState.FREEZE_STATE;
+      return HighLevelController.FREEZE_STATE;
    }
 }

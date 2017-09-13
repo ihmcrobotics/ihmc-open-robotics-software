@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -17,7 +17,7 @@ import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
 
 public class DoNothingBehavior extends HighLevelBehavior
 {
-   private static final HighLevelControllerState controllerState = HighLevelControllerState.DO_NOTHING_BEHAVIOR;
+   private static final HighLevelController controllerState = HighLevelController.DO_NOTHING_BEHAVIOR;
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final BipedSupportPolygons bipedSupportPolygons;

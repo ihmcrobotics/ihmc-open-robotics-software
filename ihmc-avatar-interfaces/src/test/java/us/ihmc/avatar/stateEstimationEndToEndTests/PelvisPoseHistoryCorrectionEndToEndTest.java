@@ -29,7 +29,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -949,14 +949,14 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       private final LinkedHashMap<OneDegreeOfFreedomJoint, Double> qDesireds;
       private final ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints;
 
-      private final YoEnum<HighLevelControllerState> requestedHighLevelState;
+      private final YoEnum<HighLevelController> requestedHighLevelState;
 
 
       public StandStillDoNothingPelvisPoseHistoryCorrectorController()
       {
-         requestedHighLevelState = (YoEnum<HighLevelControllerState>) simulationConstructionSet.getVariable(
+         requestedHighLevelState = (YoEnum<HighLevelController>) simulationConstructionSet.getVariable(
                HighLevelHumanoidControllerManager.class.getSimpleName(), "requestedHighLevelState");
-         requestedHighLevelState.set(HighLevelControllerState.DO_NOTHING_BEHAVIOR);
+         requestedHighLevelState.set(HighLevelController.DO_NOTHING_BEHAVIOR);
 
          jointMap = getRobotModel().getJointMap();
 

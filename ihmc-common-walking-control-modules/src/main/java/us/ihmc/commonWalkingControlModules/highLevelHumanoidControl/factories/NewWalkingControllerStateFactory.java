@@ -1,16 +1,16 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewHighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewWalkingControllerState;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.NewWalkingControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 
 public class NewWalkingControllerStateFactory implements HighLevelControllerStateFactory
 {
    private NewWalkingControllerState walkingControllerState;
 
    @Override
-   public NewHighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
+   public HighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
       if (walkingControllerState == null)
       {
@@ -24,8 +24,8 @@ public class NewWalkingControllerStateFactory implements HighLevelControllerStat
    }
 
    @Override
-   public HighLevelControllerState getStateEnum()
+   public HighLevelController getStateEnum()
    {
-      return HighLevelControllerState.WALKING;
+      return HighLevelController.WALKING;
    }
 }

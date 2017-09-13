@@ -38,7 +38,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -85,7 +85,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
    private final WalkingControllerParameters walkingControllerParameters;
    private final ICPTrajectoryPlannerParameters capturePointPlannerParameters;
 
-   private final HighLevelControllerState initialBehavior;
+   private final HighLevelController initialBehavior;
 
    private HighLevelHumanoidControllerToolbox controllerToolbox = null;
 
@@ -120,7 +120,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
                                          SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
                                          WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters,
-                                         HighLevelControllerState initialBehavior)
+                                         HighLevelController initialBehavior)
    {
       this.footSensorNames = footForceSensorNames;
       this.footContactSensorNames = footContactSensorNames;
@@ -386,7 +386,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       highLevelHumanoidControllerManager = new HighLevelHumanoidControllerManager(commandInputManager, statusOutputManager, controllerCore, initialBehavior,
                                                                                   highLevelBehaviors, controllerToolbox, centerOfPressureDataHolderForEstimator,
                                                                                   controllerCoreOutput);
-      highLevelHumanoidControllerManager.setFallbackControllerForFailure(HighLevelControllerState.DO_NOTHING_BEHAVIOR);
+      highLevelHumanoidControllerManager.setFallbackControllerForFailure(HighLevelController.DO_NOTHING_BEHAVIOR);
       highLevelHumanoidControllerManager.addYoVariableRegistry(registry);
       highLevelHumanoidControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
 
@@ -471,7 +471,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
    public void reinitializeWalking(boolean keepPosition)
    {
-      highLevelHumanoidControllerManager.requestHighLevelState(HighLevelControllerState.WALKING);
+      highLevelHumanoidControllerManager.requestHighLevelState(HighLevelController.WALKING);
       if (keepPosition)
       {
          if (walkingBehavior != null)
@@ -542,12 +542,12 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       controllerToolbox.attachRobotMotionStatusChangedListener(listener);
    }
 
-   public void setFallbackControllerForFailure(HighLevelControllerState fallbackController)
+   public void setFallbackControllerForFailure(HighLevelController fallbackController)
    {
       highLevelHumanoidControllerManager.setFallbackControllerForFailure(fallbackController);
    }
 
-   public HighLevelControllerState getCurrentHighLevelState()
+   public HighLevelController getCurrentHighLevelState()
    {
       return highLevelHumanoidControllerManager.getCurrentHighLevelState();
    }

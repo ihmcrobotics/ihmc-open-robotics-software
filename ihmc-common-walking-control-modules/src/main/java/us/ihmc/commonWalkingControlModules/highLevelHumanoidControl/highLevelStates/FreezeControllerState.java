@@ -1,18 +1,18 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 
-public class StandReadyControllerState extends HoldPositionControllerState
+public class FreezeControllerState extends HoldPositionControllerState
 {
-   private static final HighLevelControllerState controllerState = HighLevelControllerState.STAND_READY;
+   private static final HighLevelController controllerState = HighLevelController.FREEZE_STATE;
 
-   public StandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
-                                    LowLevelOneDoFJointDesiredDataHolderList highLevelControllerOutput)
+   public FreezeControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
+                                LowLevelOneDoFJointDesiredDataHolderList highLevelControllerOutput)
    {
       super(controllerState, controllerToolbox, highLevelControllerOutput);
 

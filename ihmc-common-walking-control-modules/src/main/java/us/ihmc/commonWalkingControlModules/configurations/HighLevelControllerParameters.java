@@ -1,17 +1,17 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.StandPrepParameters;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepParameters;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
 
 public interface HighLevelControllerParameters
 {
    StandPrepParameters getStandPrepParameters();
 
-   LowLevelJointControlMode getLowLevelJointControlMode(String joint, HighLevelControllerState state);
+   LowLevelJointControlMode getLowLevelJointControlMode(String joint, HighLevelController state);
 
-   HighLevelControllerState getDefaultInitialControllerState();
-   HighLevelControllerState getFallbackControllerState();
+   HighLevelController getDefaultInitialControllerState();
+   HighLevelController getFallbackControllerState();
 
    boolean automaticallyTransitionToWalkingWhenReady();
 

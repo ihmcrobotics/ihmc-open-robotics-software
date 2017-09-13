@@ -1,8 +1,8 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
@@ -11,7 +11,7 @@ import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class HoldPositionControllerState extends NewHighLevelControllerState
+public class HoldPositionControllerState extends HighLevelControllerState
 {
    private final YoVariableRegistry registry;
 
@@ -20,7 +20,7 @@ public class HoldPositionControllerState extends NewHighLevelControllerState
 
    private final PairList<OneDoFJoint, YoDouble> jointSetpoints = new PairList<>();
 
-   public HoldPositionControllerState(HighLevelControllerState stateEnum, HighLevelHumanoidControllerToolbox controllerToolbox,
+   public HoldPositionControllerState(HighLevelController stateEnum, HighLevelHumanoidControllerToolbox controllerToolbox,
                                       LowLevelOneDoFJointDesiredDataHolderList highLevelControllerOutput)
    {
       super(stateEnum);

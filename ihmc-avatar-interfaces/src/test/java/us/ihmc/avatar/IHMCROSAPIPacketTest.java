@@ -33,7 +33,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataLogger.RobotVisualizer;
@@ -150,7 +150,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDegreeOfFreedomJoints();
 
       robotController.doControl();
-      controllerCommunicatorServer.send(new HighLevelStateMessage(HighLevelControllerState.WALKING));
+      controllerCommunicatorServer.send(new HighLevelStateMessage(HighLevelController.WALKING));
 
       new UiPacketToRosMsgRedirector(robotModel, rosUri, rosAPI_communicator_server, packetRouter, "/ihmc_ros/atlas");
 
@@ -248,7 +248,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDegreeOfFreedomJoints();
 
       robotController.doControl();
-      packetCommunicatorClient.send(new HighLevelStateMessage(HighLevelControllerState.WALKING));
+      packetCommunicatorClient.send(new HighLevelStateMessage(HighLevelController.WALKING));
 
       for (int i = 0; i < 100; i++)
       {
@@ -335,8 +335,8 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
-      final HighLevelControllerState initialBehavior;
-      initialBehavior = HighLevelControllerState.DO_NOTHING_BEHAVIOR; // HERE!!
+      final HighLevelController initialBehavior;
+      initialBehavior = HighLevelController.DO_NOTHING_BEHAVIOR; // HERE!!
 
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
