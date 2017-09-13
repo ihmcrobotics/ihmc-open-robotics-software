@@ -105,8 +105,5 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
-   public default HighLevelControllerParameters getHighLevelControllerParameters()
-   {
-      return null;
-   }
+   public HighLevelControllerParameters getHighLevelControllerParameters();
 }
