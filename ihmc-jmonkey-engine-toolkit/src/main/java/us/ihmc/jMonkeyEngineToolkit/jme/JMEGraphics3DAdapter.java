@@ -5,6 +5,7 @@ import java.awt.GraphicsDevice;
 import java.net.URL;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DSpotLight;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
@@ -190,9 +191,9 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
    }
 
    @Override
-   public void clearLights()
+   public void clearDirectionalLights()
    {
-      jmeRenderer.clearLights();
+      jmeRenderer.clearDirectionalLights();
    }
 
    @Override
@@ -211,5 +212,18 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
    public void setupSky(String west, String east, String north, String south, String up, String down)
    {
       jmeRenderer.setupSky(west, east, north, south, up, down);
+
+   }
+   
+   @Override
+   public void addSpotLight(Graphics3DSpotLight spotLight)
+   {
+      jmeRenderer.addSpotLight(spotLight);
+   }
+
+   @Override
+   public void removeSpotLight(Graphics3DSpotLight spotLight)
+   {
+      jmeRenderer.removeSpotLight(spotLight);
    }
 }

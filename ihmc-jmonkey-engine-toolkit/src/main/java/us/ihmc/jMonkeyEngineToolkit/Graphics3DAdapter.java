@@ -5,6 +5,7 @@ import java.awt.GraphicsDevice;
 import java.net.URL;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DSpotLight;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
@@ -70,11 +71,13 @@ public interface Graphics3DAdapter
 
    public void pause();
    
+   public void addSpotLight(Graphics3DSpotLight spotLight);
    
+   public void removeSpotLight(Graphics3DSpotLight spotLight);
    
    public void addDirectionalLight(Color color, Vector3D direction);
    
-   void clearLights();
+   void clearDirectionalLights();
    
    void setAmbientLight(Color color);
 

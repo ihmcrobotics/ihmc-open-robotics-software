@@ -39,6 +39,7 @@ import com.jme3.input.InputManager;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.light.Light;
+import com.jme3.light.SpotLight;
 import com.jme3.material.TechniqueDef;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -67,6 +68,7 @@ import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DSpotLight;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
@@ -155,6 +157,9 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    private HashBiMap<Graphics3DNode, JMEGraphics3DNode> jmeGraphicsNodes = HashBiMap.create();
    private Collection<JMEGraphics3DNode> jmeGraphicsNodesListView = jmeGraphicsNodes.values();
+   
+   private HashBiMap<Graphics3DSpotLight, JMESpotLight> jmeSpotLights = HashBiMap.create();
+   private Collection<JMESpotLight> jmeSpotLightsView = jmeSpotLights.values();
 
    private boolean isTerrainVisible = true;
 
@@ -299,6 +304,21 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    public void registerViewport(JMEViewportAdapter viewportAdapter)
    {
       viewportAdapters.add(viewportAdapter);
+      
+      enqueue(new Callable<Object>()
+      {
+
+         @Override
+         public Object call() throws Exception
+         {
+            for(JMESpotLight spotLight : jmeSpotLightsView)
+            {
+               viewportAdapter.addSpotLight(spotLight);
+            }
+               
+            return null;
+         }
+      });
    }
 
    @Override
@@ -523,6 +543,12 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
       addDirectionalLight(ColorRGBA.White.mult(0.4f), new Vector3f(0.0f, -1.0f, 0.0f).normalizeLocal());
       
+      SpotLight spotLight = new SpotLight();
+      spotLight.setColor(ColorRGBA.White);
+      spotLight.setPosition(new Vector3f(0, 2, 0));
+      spotLight.setDirection(new Vector3f(0, -1, 0));
+      rootNode.addLight(spotLight);
+      
       renderManager.setPreferredLightMode(TechniqueDef.LightMode.SinglePass);
 
       rootNode.setShadowMode(ShadowMode.CastAndReceive);
@@ -532,7 +558,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    private void addDirectionalLight(ColorRGBA color, Vector3f direction)
    {
       
-      System.out.println("ADDING LIGHT  "  + direction + color);
       if(lights.size() > 1)
       {
          DirectionalLight light = new DirectionalLight();
@@ -677,6 +702,9 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
          {
             jmeGraphicsNode.update();
          }
+         
+         updateSpotLights();
+         
          updateCameras();
       }
 
@@ -806,6 +834,14 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       // user code here..
    }
 
+   private void updateSpotLights()
+   {
+      for (JMESpotLight spotLight : jmeSpotLightsView)
+      {
+         spotLight.update();
+      }
+   }
+   
    private synchronized void updateCameras()
    {
       if (alreadyClosing)
@@ -1613,7 +1649,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    }
 
    @Override
-   public void clearLights()
+   public void clearDirectionalLights()
    {
       enqueue(new Callable<Object>()
       {
@@ -1626,6 +1662,60 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
                rootNode.removeLight(light);
             }
             lights.clear();
+            return null;
+         }
+      });
+   }
+
+   @Override
+   public void addSpotLight(Graphics3DSpotLight spotLight)
+   {
+      enqueue(new Callable<Object>()
+      {
+
+         @Override
+         public Object call() throws Exception
+         {
+            if(jmeSpotLights.containsKey(spotLight))
+            {
+               throw new RuntimeException("Spotlight is already added to graphic subsystem");
+            }
+            
+            JMESpotLight jmeSpotLight = new JMESpotLight(spotLight);
+            jmeSpotLights.put(spotLight, jmeSpotLight);
+            rootNode.addLight(jmeSpotLight); 
+            
+            for(JMEViewportAdapter viewport : viewportAdapters)
+            {
+               viewport.addSpotLight(jmeSpotLight);
+            }
+            
+            return null;
+         }
+      });
+   }
+
+   @Override
+   public void removeSpotLight(Graphics3DSpotLight spotLight)
+   {
+      enqueue(new Callable<Object>()
+      {
+
+         @Override
+         public Object call() throws Exception
+         {
+            JMESpotLight spotLightToRemove = jmeSpotLights.remove(spotLight);
+            if(spotLightToRemove != null)
+            {
+               rootNode.removeLight(spotLightToRemove);
+               
+               for(JMEViewportAdapter viewport : viewportAdapters)
+               {
+                  viewport.removeSpotLight(spotLightToRemove);
+               }
+            }
+            
+            
             return null;
          }
       });
