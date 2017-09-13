@@ -18,12 +18,7 @@ import us.ihmc.robotics.math.trajectories.Trajectory;
 
 public class SmoothCapturePointToolbox
 {
-   // private static final ThreadLocal<DenseMatrix64F> dummyName = new ThreadLocal<>();
-   
    private static final int defaultSize = 100;
-   
-   private final DenseMatrix64F tPowersDerivativeVector = new DenseMatrix64F(defaultSize, 1);
-   private final DenseMatrix64F tPowersDerivativeVectorTranspose = new DenseMatrix64F(defaultSize, 1);
    
    private final DenseMatrix64F generalizedAlphaPrimeRow = new DenseMatrix64F(1, defaultSize);
    private final DenseMatrix64F generalizedBetaPrimeRow = new DenseMatrix64F(1, defaultSize);
@@ -278,23 +273,13 @@ public class SmoothCapturePointToolbox
    {
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
       
-      tPowersDerivativeVector.reshape(numberOfCoefficients, 1);
-      tPowersDerivativeVectorTranspose.reshape(1, numberOfCoefficients);
-      
       generalizedAlphaPrimeRow.reshape(1, numberOfCoefficients);
       generalizedAlphaPrimeRow.zero();
       
       for(int i = 0; i < numberOfCoefficients; i++)
       {
-         tPowersDerivativeVector.zero();
-         tPowersDerivativeVectorTranspose.zero();
-         
-         //tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i + alphaDerivativeOrder, time));
-         //CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
-         tPowersDerivativeVectorTranspose.set(cmpPolynomial.getXPowersDerivativeVector(i + alphaDerivativeOrder, time));
-
          double scalar = Math.pow(omega0, -i);
-         CommonOps.addEquals(generalizedAlphaPrimeRow, scalar, tPowersDerivativeVectorTranspose);
+         CommonOps.addEquals(generalizedAlphaPrimeRow, scalar, cmpPolynomial.getXPowersDerivativeVector(i + alphaDerivativeOrder, time));
       }
    }
    
@@ -328,23 +313,13 @@ public class SmoothCapturePointToolbox
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
       double timeSegmentTotal = cmpPolynomial.getFinalTime();
       
-      tPowersDerivativeVector.reshape(numberOfCoefficients, 1);
-      tPowersDerivativeVectorTranspose.reshape(1, numberOfCoefficients);
-      
       generalizedBetaPrimeRow.reshape(1, numberOfCoefficients);
       generalizedBetaPrimeRow.zero();
       
       for(int i = 0; i < numberOfCoefficients; i++)
       {
-         tPowersDerivativeVector.zero();
-         tPowersDerivativeVectorTranspose.zero();
-         
-         //tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i, timeSegmentTotal));
-         //CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
-         tPowersDerivativeVectorTranspose.set(cmpPolynomial.getXPowersDerivativeVector(i, timeSegmentTotal));
-
          double scalar = Math.pow(omega0, betaDerivativeOrder-i) * Math.exp(omega0*(time-timeSegmentTotal));
-         CommonOps.addEquals(generalizedBetaPrimeRow, scalar, tPowersDerivativeVectorTranspose);
+         CommonOps.addEquals(generalizedBetaPrimeRow, scalar, cmpPolynomial.getXPowersDerivativeVector(i, timeSegmentTotal));
       }
    }
 
@@ -438,8 +413,6 @@ public class SmoothCapturePointToolbox
       double[] polynomialCoefficients = cmpPolynomial.getCoefficients();
       
       polynomialCoefficientVector.reshape(cmpPolynomial.getNumberOfCoefficients(), 1);
-      polynomialCoefficientVector.zero();
-      
       polynomialCoefficientVector.setData(polynomialCoefficients);
    }
 }

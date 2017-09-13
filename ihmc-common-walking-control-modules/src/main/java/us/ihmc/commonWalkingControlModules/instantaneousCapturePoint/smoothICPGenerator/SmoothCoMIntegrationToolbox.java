@@ -17,12 +17,8 @@ public class SmoothCoMIntegrationToolbox
 {
    private static final int defaultSize = 100;
 
-   private final DenseMatrix64F tPowersDerivativeVector = new DenseMatrix64F(defaultSize, 1);
-   private final DenseMatrix64F tPowersDerivativeVectorTranspose = new DenseMatrix64F(defaultSize, 1);
-
    private final DenseMatrix64F generalizedAlphaCoMPrimeRow = new DenseMatrix64F(1, defaultSize);
    private final DenseMatrix64F generalizedBetaCoMPrimeRow = new DenseMatrix64F(1, defaultSize);
-   private final DenseMatrix64F generalizedDeltaCoMPrimeRow = new DenseMatrix64F(1, defaultSize);
 
    private final DenseMatrix64F polynomialCoefficientCombinedVector = new DenseMatrix64F(defaultSize, defaultSize);
    private final DenseMatrix64F polynomialCoefficientVector = new DenseMatrix64F(defaultSize, 1);
@@ -67,7 +63,7 @@ public class SmoothCoMIntegrationToolbox
                                                              List<FramePoint3D> entryCoMCornerPointsToPack, List<FramePoint3D> exitCoMCornerPointsToPack,
                                                              List<FrameTrajectory3D> cmpPolynomials3D, FramePoint3D initialCenterOfMass, double omega0)
    {
-      FrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
+      FrameTrajectory3D cmpPolynomial3D;
       FramePoint3D previousExitCoMCornerPoint = initialCenterOfMass;
 
       for (int i = 0; i < cmpPolynomials3D.size(); i++)
@@ -91,7 +87,7 @@ public class SmoothCoMIntegrationToolbox
                                                           List<FrameVector3D> entryCoMCornerVelocitiesToPack, List<FrameVector3D> exitCoMCornerVelocitiesToPack,
                                                           List<FrameTrajectory3D> cmpPolynomials3D, FrameVector3D initialCenterOfMassVelocity, double omega0)
    {
-      FrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
+      FrameTrajectory3D cmpPolynomial3D;
       FrameVector3D previousExitCoMCornerVelocity = initialCenterOfMassVelocity;
 
       for (int i = 0; i < cmpPolynomials3D.size(); i++)
@@ -117,7 +113,7 @@ public class SmoothCoMIntegrationToolbox
                                                              List<FrameVector3D> exitCoMCornerAccelerationsToPack, List<FrameTrajectory3D> cmpPolynomials3D,
                                                              FrameVector3D initialCenterOfMassAcceleration, double omega0)
    {
-      FrameTrajectory3D cmpPolynomial3D = cmpPolynomials3D.get(0);
+      FrameTrajectory3D cmpPolynomial3D;
       FrameVector3D previousExitCoMCornerAcceleration = initialCenterOfMassAcceleration;
 
       for (int i = 0; i < cmpPolynomials3D.size(); i++)
@@ -314,9 +310,6 @@ public class SmoothCoMIntegrationToolbox
    {
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
 
-      tPowersDerivativeVector.reshape(numberOfCoefficients, 1);
-      tPowersDerivativeVectorTranspose.reshape(1, numberOfCoefficients);
-
       generalizedAlphaCoMPrimeRow.reshape(1, numberOfCoefficients);
       generalizedAlphaCoMPrimeRow.zero();
 
@@ -324,15 +317,8 @@ public class SmoothCoMIntegrationToolbox
       {
          for (int j = i; j < numberOfCoefficients; j++)
          {
-            tPowersDerivativeVector.zero();
-            tPowersDerivativeVectorTranspose.zero();
-
-            //tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(j + alphaCoMDerivativeOrder, time));
-            //CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
-            tPowersDerivativeVectorTranspose.set(cmpPolynomial.getXPowersDerivativeVector(j + alphaCoMDerivativeOrder, time));
-
             double scalar = Math.pow(-1.0, i) * Math.pow(omega0, -j);
-            CommonOps.addEquals(generalizedAlphaCoMPrimeRow, scalar, tPowersDerivativeVectorTranspose);
+            CommonOps.addEquals(generalizedAlphaCoMPrimeRow, scalar, cmpPolynomial.getXPowersDerivativeVector(j + alphaCoMDerivativeOrder, time));
          }
       }
    }
@@ -368,9 +354,6 @@ public class SmoothCoMIntegrationToolbox
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
       double timeSegmentInitial = cmpPolynomial.getInitialTime();
 
-      tPowersDerivativeVector.reshape(numberOfCoefficients, 1);
-      tPowersDerivativeVectorTranspose.reshape(1, numberOfCoefficients);
-
       generalizedBetaCoMPrimeRow.reshape(1, numberOfCoefficients);
       generalizedBetaCoMPrimeRow.zero();
 
@@ -378,16 +361,9 @@ public class SmoothCoMIntegrationToolbox
       {
          for (int j = i; j < numberOfCoefficients; j++)
          {
-            tPowersDerivativeVector.zero();
-            tPowersDerivativeVectorTranspose.zero();
-
-            //tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(j, timeSegmentInitial));
-            //CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
-            tPowersDerivativeVectorTranspose.set(cmpPolynomial.getXPowersDerivativeVector(j, timeSegmentInitial));
-
             double scalar = Math.pow(-1.0, i + betaCoMDerivativeOrder) * Math.pow(omega0, -j + betaCoMDerivativeOrder)
                   * Math.exp(omega0 * (timeSegmentInitial - time));
-            CommonOps.addEquals(generalizedBetaCoMPrimeRow, scalar, tPowersDerivativeVectorTranspose);
+            CommonOps.addEquals(generalizedBetaCoMPrimeRow, scalar, cmpPolynomial.getXPowersDerivativeVector(j, timeSegmentInitial));
          }
       }
    }
@@ -505,8 +481,6 @@ public class SmoothCoMIntegrationToolbox
       double[] polynomialCoefficients = cmpPolynomial.getCoefficients();
 
       polynomialCoefficientVector.reshape(cmpPolynomial.getNumberOfCoefficients(), 1);
-      polynomialCoefficientVector.zero();
-
       polynomialCoefficientVector.setData(polynomialCoefficients);
    }
 }
