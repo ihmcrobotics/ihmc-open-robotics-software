@@ -1,9 +1,10 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
@@ -24,7 +25,16 @@ public class CuttingWallTrajectory extends ConstrainedEndEffectorTrajectory
    {
       super(trajectoryTime);
       centerFramePose.getPose(centerPosition, centerOrientation);
-      PrintTools.info(""+centerFramePose);
+      this.cuttingRadius = radius;
+   }
+
+   public CuttingWallTrajectory(Point3DReadOnly centerPosition, QuaternionReadOnly centerOrientation, double radius, double trajectoryTime)
+   {
+      super(trajectoryTime);
+      System.out.println(centerPosition);
+      System.out.println(centerOrientation);
+      this.centerPosition.set(centerPosition);
+      this.centerOrientation.set(centerOrientation);
       this.cuttingRadius = radius;
    }
 
@@ -75,10 +85,11 @@ public class CuttingWallTrajectory extends ConstrainedEndEffectorTrajectory
 
       taskNodeRegion.setRandomRegion(0, 0.0, trajectoryTime);
 
-      taskNodeRegion.setRandomRegion(1, 0.75, 0.90);
+      
+      taskNodeRegion.setRandomRegion(1, 0.78, 0.80);
       taskNodeRegion.setRandomRegion(2, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
-      taskNodeRegion.setRandomRegion(3, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
-      taskNodeRegion.setRandomRegion(4, -3.0 / 180 * Math.PI, 3.0 / 180 * Math.PI);
+      taskNodeRegion.setRandomRegion(3, -0.0 / 180 * Math.PI, 0.0 / 180 * Math.PI);
+      taskNodeRegion.setRandomRegion(4, -0.0 / 180 * Math.PI, 0.0 / 180 * Math.PI);
 
       taskNodeRegion.setRandomRegion(5, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(6, 0.0, 0.0);
@@ -93,6 +104,25 @@ public class CuttingWallTrajectory extends ConstrainedEndEffectorTrajectory
       taskNodeRegion.setRandomRegion(14, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(15, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(16, 0.0, 0.0);
+      
+//      taskNodeRegion.setRandomRegion(1, 0.75, 0.90);
+//      taskNodeRegion.setRandomRegion(2, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
+//      taskNodeRegion.setRandomRegion(3, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
+//      taskNodeRegion.setRandomRegion(4, -3.0 / 180 * Math.PI, 3.0 / 180 * Math.PI);
+//
+//      taskNodeRegion.setRandomRegion(5, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(6, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(7, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(8, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(9, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(10, -160.0 / 180 * Math.PI, -20.0 / 180 * Math.PI);
+//
+//      taskNodeRegion.setRandomRegion(11, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(12, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(13, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(14, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(15, 0.0, 0.0);
+//      taskNodeRegion.setRandomRegion(16, 0.0, 0.0);
 
       return taskNodeRegion;
    }
@@ -104,7 +134,6 @@ public class CuttingWallTrajectory extends ConstrainedEndEffectorTrajectory
 
       Point3D arcCenterPoint = new Point3D(centerPosition);
       Quaternion arcCenterOrientation = new Quaternion(centerOrientation);
-      arcCenterOrientation.appendPitchRotation(-Math.PI * 0.5);
       RigidBodyTransform arcCenterRigidBodyController = new RigidBodyTransform(arcCenterOrientation, arcCenterPoint);
 
       arcCenterRigidBodyController.appendYawRotation(-arcAngle);
