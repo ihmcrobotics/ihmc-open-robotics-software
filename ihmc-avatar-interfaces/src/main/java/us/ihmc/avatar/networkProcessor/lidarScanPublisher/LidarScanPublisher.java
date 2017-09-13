@@ -1,8 +1,10 @@
 package us.ihmc.avatar.networkProcessor.lidarScanPublisher;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executors;
@@ -11,7 +13,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.set.hash.TIntHashSet;
 import scan_to_cloud.PointCloud2WithSource;
 import sensor_msgs.PointCloud2;
 import us.ihmc.communication.net.ObjectCommunicator;
@@ -268,8 +269,8 @@ public class LidarScanPublisher
             collisionBoxNode.update();
             lidarSensorFrame.getTransformToRoot().getTranslation(lidarPosition);
 
-            TIntHashSet shadowRemovalIndices = scanData.computeShadowPointIndices(lidarPosition, shadowAngleThreshold);
-            TIntHashSet selfCollisionRemovalIndices = scanData.computeCollidingPointIndices(collisionBoxNode);
+            List<Integer> shadowRemovalIndices = scanData.computeShadowPointIndices(lidarPosition, shadowAngleThreshold);
+            List<Integer> selfCollisionRemovalIndices = scanData.computeCollidingPointIndices(collisionBoxNode);
 
             Point3D32 lidarPosition;
             Quaternion32 lidarOrientation;
@@ -350,9 +351,9 @@ public class LidarScanPublisher
             transform.transform(scanPoints[i]);
       }
 
-      public TIntHashSet computeCollidingPointIndices(CollisionShapeTester collisionShapeTester)
+      public List<Integer> computeCollidingPointIndices(CollisionShapeTester collisionShapeTester)
       {
-         TIntHashSet collidingPointIndices = new TIntHashSet();
+         List<Integer> collidingPointIndices = new ArrayList<>();
 
          if (collisionShapeTester != null)
          {
@@ -383,9 +384,9 @@ public class LidarScanPublisher
        * Marion master thesis, section 2.2.1, page 25.</a>
        * </p>
        */
-      public TIntHashSet computeShadowPointIndices(Tuple3DReadOnly lidarPosition, double shadowAngleThreshold)
+      public List<Integer> computeShadowPointIndices(Tuple3DReadOnly lidarPosition, double shadowAngleThreshold)
       {
-         TIntHashSet shadowPointIndices = new TIntHashSet();
+         List<Integer> shadowPointIndices = new ArrayList<>();
          Vector3D fromLidarToScanPoint = new Vector3D();
          Vector3D currentToNextScanPoint = new Vector3D();
          Vector3D previousToCurrentScanPoint = new Vector3D();
@@ -417,29 +418,34 @@ public class LidarScanPublisher
          return shadowPointIndices;
       }
 
-      public float[] getScanBuffer(TIntHashSet... hashSetsWithIndicesToRemove)
+      public float[] getScanBuffer(List<Integer> firstListWithIndicesToRemove, List<Integer> secondListWithIndicesToRemove)
       {
+         PriorityQueue<Integer> indicesToRemove = new PriorityQueue<>();
+
+         if (firstListWithIndicesToRemove != null)
+         {
+            indicesToRemove.addAll(firstListWithIndicesToRemove);
+         }
+         if (secondListWithIndicesToRemove != null)
+         {
+            indicesToRemove.addAll(secondListWithIndicesToRemove);
+         }
+
          TFloatArrayList scanPointBuffer = new TFloatArrayList();
+         Integer nextIndexToIgnore = indicesToRemove.poll();
 
          for (int i = 0; i < numberOfScanPoints; i++)
          {
-            Point3D scanPoint = scanPoints[i];
-            boolean ignorePoint = false;
-
-            for (TIntHashSet tIntHashSet : hashSetsWithIndicesToRemove)
+            if (nextIndexToIgnore == null || i < nextIndexToIgnore)
             {
-               if (tIntHashSet.contains(i))
-               {
-                  ignorePoint = true;
-                  break;
-               }
-            }
-
-            if (!ignorePoint)
-            {
+               Point3D scanPoint = scanPoints[i];
                scanPointBuffer.add((float) scanPoint.getX());
                scanPointBuffer.add((float) scanPoint.getY());
                scanPointBuffer.add((float) scanPoint.getZ());
+            }
+            else
+            {
+               nextIndexToIgnore = indicesToRemove.poll();
             }
          }
 
