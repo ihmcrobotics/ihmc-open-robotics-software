@@ -47,7 +47,6 @@ public class NewDoNothingControllerState extends NewHighLevelControllerState
    @Override
    public void doAction()
    {
-      controllerToolbox.update();
       for (int i = 0; i < allRobotJoints.length; i++)
       {
          allRobotJoints[i].setTau(0.0);

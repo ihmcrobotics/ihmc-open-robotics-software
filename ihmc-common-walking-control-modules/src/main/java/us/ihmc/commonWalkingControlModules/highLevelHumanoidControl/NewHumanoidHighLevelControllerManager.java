@@ -165,13 +165,14 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
          }
       }
 
-      stateMachine.checkTransitionConditions();
       highLevelControllerTimer.startMeasurement();
+      controllerToolbox.update();
+      stateMachine.checkTransitionConditions();
       stateMachine.doAction();
       highLevelControllerTimer.stopMeasurement();
 
-      reportDesiredCenterOfPressureForEstimator();
       copyJointDesiredsToJoints();
+      reportDesiredCenterOfPressureForEstimator();
    }
 
    @Override
@@ -282,20 +283,6 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
 
          if (!lowLevelJointData.hasControlMode())
             throw new NullPointerException("Joint: " + controlledJoint.getName() + " has no control mode.");
-
-         /*
-         if (lowLevelJointData.hasDesiredPosition())
-            controlledJoint.setqDesired(lowLevelJointData.getDesiredPosition());
-
-         if (lowLevelJointData.hasDesiredVelocity())
-            controlledJoint.setQdDesired(lowLevelJointData.getDesiredVelocity());
-
-         if (lowLevelJointData.hasDesiredAcceleration())
-            controlledJoint.setQddDesired(lowLevelJointData.getDesiredAcceleration());
-
-         if (lowLevelJointData.hasDesiredTorque())
-            controlledJoint.setTau(lowLevelJointData.getDesiredTorque());
-            */
 
          // Zero out joint for testing purposes
          controlledJoint.setqDesired(Double.NaN);
