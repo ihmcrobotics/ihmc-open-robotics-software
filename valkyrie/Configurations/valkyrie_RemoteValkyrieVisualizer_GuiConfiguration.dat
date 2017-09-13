@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.ValkyrieRosControlLowLevelController.lowLevelControlMode,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.highLevelState</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.ValkyrieRosControlSensorReader.ValkyrieRosControlLowLevelController.lowLevelControlMode,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.highLevelControllerState</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -90,7 +90,7 @@
 <Title>
 Startup
 </Title>
-<Entry Boxes>root.sliderBoardMode,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.requestedHighLevelState,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.UserDesiredPelvisPoseControllerCommandGenerator.userDesiredPelvisPoseTrajectoryTime</Entry Boxes>
+<Entry Boxes>root.sliderBoardMode,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.requestedHighLevelControllerState,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.UserDesiredPelvisPoseControllerCommandGenerator.userDesiredPelvisPoseTrajectoryTime</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>

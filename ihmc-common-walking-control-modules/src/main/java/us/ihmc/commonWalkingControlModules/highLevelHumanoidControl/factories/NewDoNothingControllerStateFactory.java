@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewDoNothingControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewHighLevelControllerState;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.NewHighLevelControllerStates;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
 
 public class NewDoNothingControllerStateFactory implements HighLevelControllerStateFactory
 {
@@ -20,8 +20,8 @@ public class NewDoNothingControllerStateFactory implements HighLevelControllerSt
    }
 
    @Override
-   public NewHighLevelControllerStates getStateEnum()
+   public HighLevelControllerState getStateEnum()
    {
-      return NewHighLevelControllerStates.DO_NOTHING_STATE;
+      return HighLevelControllerState.DO_NOTHING_BEHAVIOR;
    }
 }

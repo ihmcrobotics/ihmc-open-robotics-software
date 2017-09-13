@@ -22,7 +22,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 public class HumanoidDiagnosticsWhenHangingAnalyzer
 {
    private final SimulationConstructionSet simulationConstructionSet;
-   private final DiagnosticsWhenHangingController controller;
+   private final DiagnosticsWhenHangingControllerState controller;
    private final FullRobotModelCorruptor fullRobotModelCorruptor;
 
    private final YoDouble q_qx, q_qy, q_qz, q_qs;
@@ -46,7 +46,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
    private final NumberFormat numberFormat;
    
    public HumanoidDiagnosticsWhenHangingAnalyzer(SimulationConstructionSet simulationConstructionSet,
-           DiagnosticsWhenHangingController controller, FullRobotModelCorruptor fullRobotModelCorruptor)
+           DiagnosticsWhenHangingControllerState controller, FullRobotModelCorruptor fullRobotModelCorruptor)
    {
       this.simulationConstructionSet = simulationConstructionSet;
       this.controller = controller;

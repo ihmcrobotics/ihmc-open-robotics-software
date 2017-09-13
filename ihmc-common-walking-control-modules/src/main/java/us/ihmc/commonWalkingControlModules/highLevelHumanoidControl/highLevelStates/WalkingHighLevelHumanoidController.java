@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
@@ -59,7 +58,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
@@ -82,7 +81,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 {
-   private final static HighLevelState controllerState = HighLevelState.WALKING;
+   private final static HighLevelControllerState controllerState = HighLevelControllerState.WALKING;
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -155,7 +154,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                             ICPTrajectoryPlannerParameters capturePointPlannerParameters, HighLevelHumanoidControllerToolbox controllerToolbox)
+                                             HighLevelHumanoidControllerToolbox controllerToolbox)
    {
       super(controllerState);
 
@@ -459,7 +458,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       });
    }
 
-   @Override
    public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
    {
       this.controllerCoreOutput = controllerCoreOutput;
@@ -553,7 +551,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
    private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
 
-   @Override
    public void doAction()
    {
       controllerToolbox.update();
@@ -749,7 +746,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       pelvisOrientationManager.initialize();
    }
 
-   @Override
    public void doTransitionIntoAction()
    {
       for (int i = 0; i < allOneDoFjoints.length; i++)
@@ -762,7 +758,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       initialize();
    }
 
-   @Override
    public void doTransitionOutOfAction()
    {
       for (int i = 0; i < allOneDoFjoints.length; i++)
@@ -773,13 +768,11 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       }
    }
 
-   @Override
    public ControllerCoreCommand getControllerCoreCommand()
    {
       return controllerCoreCommand;
    }
 
-   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;

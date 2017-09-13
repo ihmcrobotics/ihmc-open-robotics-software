@@ -3,14 +3,18 @@ package us.ihmc.wholeBodyController.diagnostics;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.NewHighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 
-public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehaviorFactory
+public class DiagnosticsWhenHangingControllerFactory implements HighLevelControllerStateFactory
 {
    private FullRobotModel fullRobotModel;
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
@@ -22,6 +26,7 @@ public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehavio
    private final TorqueOffsetPrinter torqueOffsetPrinter;
    
    private final HumanoidJointPoseList humanoidJointPoseList;
+   private DiagnosticsWhenHangingControllerState controller;
 
    public DiagnosticsWhenHangingControllerFactory(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, TorqueOffsetPrinter torqueOffsetPrinter)
    {
@@ -44,17 +49,17 @@ public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehavio
          this.jointTorqueOffsetProcessor = jointTorqueOffsetProcessor;
    }
 
-   private DiagnosticsWhenHangingController controller;
 
-   public DiagnosticsWhenHangingController getController()
+   public DiagnosticsWhenHangingControllerState getController()
    {
       return controller;
    }
 
    @Override
-   public HighLevelBehavior createHighLevelBehavior(HighLevelControlManagerFactory variousWalkingManagers, HighLevelHumanoidControllerToolbox controllerToolbox)
+   public NewHighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
-      controller = new DiagnosticsWhenHangingController(humanoidJointPoseList, useArms, robotIsHanging, controllerToolbox, this.torqueOffsetPrinter);
+      controller = new DiagnosticsWhenHangingControllerState(humanoidJointPoseList, useArms, robotIsHanging,
+                                                             controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(), this.torqueOffsetPrinter);
 
       controller.addUpdatables(updatables);
 
@@ -65,9 +70,15 @@ public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehavio
    }
 
    @Override
-   public boolean isTransitionToBehaviorRequested()
+   public boolean isTransitionToControllerRequested()
    {
       return transitionRequested;
+   }
+
+   @Override
+   public HighLevelControllerState getStateEnum()
+   {
+      return HighLevelControllerState.DIAGNOSTICS;
    }
 
    public void setTransitionRequested(boolean transitionRequested)

@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.simulation;
 
-import us.ihmc.avatar.NewDRCFlatGroundWalkingTrack;
+import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-public class NewValkyrieFlatGroundWalkingTrack extends NewDRCFlatGroundWalkingTrack
+public class NewValkyrieFlatGroundWalkingTrack extends DRCFlatGroundWalkingTrack
 {
 
    public NewValkyrieFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
@@ -46,9 +46,9 @@ public class NewValkyrieFlatGroundWalkingTrack extends NewDRCFlatGroundWalkingTr
       boolean cheatWithGroundHeightAtForFootstep = false;
       
       HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();
-      NewDRCFlatGroundWalkingTrack flatGroundWalkingTrack = new NewValkyrieFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
-                                                                                          useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel,
-                                                                                          WalkingProvider.VELOCITY_HEADING_COMPONENT, walkingScriptParameters);
+      DRCFlatGroundWalkingTrack flatGroundWalkingTrack = new NewValkyrieFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
+                                                                                               useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel,
+                                                                                               WalkingProvider.VELOCITY_HEADING_COMPONENT, walkingScriptParameters);
       
 //      SimulationConstructionSet scs = flatGroundWalkingTrack.getSimulationConstructionSet();
 //     

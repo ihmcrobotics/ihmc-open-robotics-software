@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Di
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerState;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
@@ -26,7 +27,7 @@ import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
 
 public class StepprDiagnosticsWhenHangingSimulation
 {
-   private final DiagnosticsWhenHangingController diagnosticsWhenHangingController;
+   private final DiagnosticsWhenHangingControllerState diagnosticsWhenHangingController;
    private static final boolean computeTorqueOffsetsBasedOnAverages = false;
 
    public StepprDiagnosticsWhenHangingSimulation()

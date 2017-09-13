@@ -17,7 +17,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
 import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -160,9 +160,9 @@ public class WandererDashboard extends JPanel implements PlaybackListener
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            requestedHighLevelState.set(HighLevelState.WALKING.ordinal());
+            requestedHighLevelState.set(HighLevelControllerState.WALKING.ordinal());
             ThreadTools.sleep(500);
-            requestedHighLevelState.set(HighLevelState.WALKING.ordinal());
+            requestedHighLevelState.set(HighLevelControllerState.WALKING.ordinal());
             ThreadTools.sleep(500);
             controlRatio.set(1.0);
          }

@@ -11,7 +11,9 @@ import us.ihmc.avatar.obstacleCourseTests.ForceSensorHysteresisCreator;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
@@ -26,6 +28,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerState;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
@@ -89,7 +92,8 @@ public class DRCSimulationTestHelper
    private boolean addFootstepMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = false;
    private boolean cheatWithGroundHeightAtFootstep = false;
-   private HighLevelBehaviorFactory highLevelBehaviorFactory = null;
+   private HighLevelControllerStateFactory controllerStateFactory = null;
+   private ControllerStateTransitionFactory<HighLevelControllerState> controllerStateTransitionFactory = null;
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = null;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = null;
    private final DRCGuiInitialSetup guiInitialSetup;
@@ -120,8 +124,10 @@ public class DRCSimulationTestHelper
       simulationStarter = new DRCSimulationStarter(robotModel, testEnvironment);
       simulationStarter.setRunMultiThreaded(simulationTestingParameters.getRunMultiThreaded());
       simulationStarter.setUsePerfectSensors(simulationTestingParameters.getUsePefectSensors());
-      if (highLevelBehaviorFactory != null)
-         simulationStarter.registerHighLevelController(highLevelBehaviorFactory);
+      if (controllerStateFactory != null)
+         simulationStarter.registerHighLevelControllerState(controllerStateFactory);
+      if (controllerStateTransitionFactory != null)
+         simulationStarter.registerControllerStateTransition(controllerStateTransitionFactory);
       if (initialSetup != null)
          simulationStarter.setRobotInitialSetup(initialSetup);
       simulationStarter.setStartingLocation(startingLocation);
@@ -498,9 +504,9 @@ public class DRCSimulationTestHelper
       this.cheatWithGroundHeightAtFootstep = cheatWithGroundHeightAtFootstep;
    }
 
-   public void setHighLevelBehaviorFactory(HighLevelBehaviorFactory highLevelBehaviorFactory)
+   public void setHighLevelControllerStateFactory(HighLevelControllerStateFactory controllerStateFactory)
    {
-      this.highLevelBehaviorFactory = highLevelBehaviorFactory;
+      this.controllerStateFactory = controllerStateFactory;
    }
 
    public void setInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup)

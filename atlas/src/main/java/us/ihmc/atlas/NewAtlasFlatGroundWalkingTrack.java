@@ -1,7 +1,7 @@
 package us.ihmc.atlas;
 
 import com.martiansoftware.jsap.JSAPException;
-import us.ihmc.avatar.NewDRCFlatGroundWalkingTrack;
+import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
@@ -17,7 +17,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 
-public class NewAtlasFlatGroundWalkingTrack extends NewDRCFlatGroundWalkingTrack
+public class NewAtlasFlatGroundWalkingTrack extends DRCFlatGroundWalkingTrack
 {
    private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
@@ -73,7 +73,7 @@ public class NewAtlasFlatGroundWalkingTrack extends NewDRCFlatGroundWalkingTrack
          createOscillateFeetPerturber(drcFlatGroundWalkingTrack);
    }
 
-   private static void createOscillateFeetPerturber(NewDRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack)
+   private static void createOscillateFeetPerturber(DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack)
    {
       SimulationConstructionSet simulationConstructionSet = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
       HumanoidFloatingRootJointRobot robot = drcFlatGroundWalkingTrack.getAvatarSimulation().getHumanoidFloatingRootJointRobot();
