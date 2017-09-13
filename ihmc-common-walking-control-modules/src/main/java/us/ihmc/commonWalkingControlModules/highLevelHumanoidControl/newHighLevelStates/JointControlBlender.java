@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates.jointControlCalculator;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.newHighLevelStates;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
