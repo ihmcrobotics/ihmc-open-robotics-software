@@ -293,7 +293,19 @@ public class LidarScanPublisher
                lidarPosition = lidarPosition == null ? null : new Point3D32(lidarPosition);
                lidarOrientation = lidarOrientation == null ? null : new Quaternion32(lidarOrientation);
 
-               float[] scanPointBuffer = scanData.getScanBuffer(shadowRemovalIndices, selfCollisionRemovalIndices);
+               PriorityQueue<Integer> indicesToRemove = new PriorityQueue<>();
+
+               if (requestLidarScanMessage.isRemoveSelfCollisions())
+               {
+                  indicesToRemove.addAll(selfCollisionRemovalIndices);
+               }
+
+               if (requestLidarScanMessage.isRemoveShadows())
+               {
+                  indicesToRemove.addAll(shadowRemovalIndices);
+               }
+
+               float[] scanPointBuffer = scanData.getScanBuffer(indicesToRemove);
 
                LidarScanMessage message = new LidarScanMessage(robotTimestamp, lidarPosition, lidarOrientation, scanPointBuffer);
 
@@ -418,19 +430,8 @@ public class LidarScanPublisher
          return shadowPointIndices;
       }
 
-      public float[] getScanBuffer(List<Integer> firstListWithIndicesToRemove, List<Integer> secondListWithIndicesToRemove)
+      public float[] getScanBuffer(PriorityQueue<Integer> indicesToRemove)
       {
-         PriorityQueue<Integer> indicesToRemove = new PriorityQueue<>();
-
-         if (firstListWithIndicesToRemove != null)
-         {
-            indicesToRemove.addAll(firstListWithIndicesToRemove);
-         }
-         if (secondListWithIndicesToRemove != null)
-         {
-            indicesToRemove.addAll(secondListWithIndicesToRemove);
-         }
-
          TFloatArrayList scanPointBuffer = new TFloatArrayList();
          Integer nextIndexToIgnore = indicesToRemove.poll();
 
