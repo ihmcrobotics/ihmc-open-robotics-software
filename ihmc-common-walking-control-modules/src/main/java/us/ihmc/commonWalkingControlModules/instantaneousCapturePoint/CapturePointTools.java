@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import java.util.List;
 
