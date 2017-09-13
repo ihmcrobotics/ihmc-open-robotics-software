@@ -41,7 +41,7 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
 
    private boolean planningSuccess = false;
 
-   private double timeout = 120.0;
+   private double timeout = 200.0;
 
    private final SleepBehavior sleepBehavior;
 
@@ -104,7 +104,10 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
                sendPacket(p1);
             }
             ToolboxStateMessage wakeUp = new ToolboxStateMessage(ToolboxState.WAKE_UP);
+            // ToolboxStateMessage wakeUp = new ToolboxStateMessage(ToolboxState.REINITIALIZE);
             sendPackageToPlanner(wakeUp);
+            
+            PrintTools.info("initialize Planner");
          }
       };
 
@@ -120,8 +123,8 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
             }
             ConstrainedWholeBodyPlanningRequestPacket request = new ConstrainedWholeBodyPlanningRequestPacket();
 
-            request.setNumberOfFindInitialGuess(280);
-            request.setNumberOfExpanding(700);
+            request.setNumberOfFindInitialGuess(320);
+            request.setNumberOfExpanding(1000);
             request.setInitialRobotConfigration(fullRobotModel);
 
             request.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
@@ -196,6 +199,7 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
                sendPacket(p1);
             }
 
+            PrintTools.info("set Input process plan");
          }
       };
 

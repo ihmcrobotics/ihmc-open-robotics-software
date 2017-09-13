@@ -17,6 +17,13 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
    public DrawingTrajectory(double trajectoryTime)
    {
       super(trajectoryTime);
+      
+      Point3D arcCenterPoint = new Point3D(0.53, 0.0, 1.2);
+      Quaternion arcCenterOrientation = new Quaternion();
+      arcCenterOrientation.appendPitchRotation(-Math.PI * 0.5);
+      
+      RigidBodyTransform wallRigidBodyTransform = new RigidBodyTransform(arcCenterOrientation, arcCenterPoint);
+      System.out.println(wallRigidBodyTransform);
    }
 
    @Override
@@ -73,6 +80,7 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
       Point3D arcCenterPoint = new Point3D(0.53, 0.0, 1.2);
       Quaternion arcCenterOrientation = new Quaternion();
       arcCenterOrientation.appendPitchRotation(-Math.PI * 0.5);
+      
       RigidBodyTransform arcCenterRigidBodyController = new RigidBodyTransform(arcCenterOrientation, arcCenterPoint);
 
       arcCenterRigidBodyController.appendYawRotation(-arcAngle);

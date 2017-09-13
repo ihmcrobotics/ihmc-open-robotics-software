@@ -1,10 +1,13 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import com.fasterxml.jackson.databind.JsonMappingException.Reference;
-
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.CuttingWallBehaviorStateMachine.CuttingWallBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
@@ -77,18 +80,63 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
       this.centerFramePose = centerFramePose;
    }
 
+   private Quaternion computeWallOrientation(QuaternionReadOnly quaternionReadOnly)
+   {
+      RotationMatrix wallRotationMatrix = new RotationMatrix(quaternionReadOnly);
+
+      System.out.println(wallRotationMatrix);
+
+      Vector3D cuttingWallVz = new Vector3D(wallRotationMatrix.getM02(), wallRotationMatrix.getM12(), wallRotationMatrix.getM22());
+
+      double xz = 0;
+      double xy = 0;
+      if(cuttingWallVz.getZ() == 0.0)
+      {
+         xz = 1.0;
+         xy = 0.0;
+      }
+      else if(cuttingWallVz.getY() == 0.0)
+      {
+         xz = 0.0;
+         xy = 1.0;
+      }
+      else
+      {
+         xz = Math.sqrt(1 / (1 + (cuttingWallVz.getZ() / cuttingWallVz.getY()) * (cuttingWallVz.getZ() / cuttingWallVz.getY())));
+         xy = -(cuttingWallVz.getZ()) / (cuttingWallVz.getY()) * xz;   
+      }
+      
+      
+
+      Vector3D cuttingWallVx = new Vector3D(0.0, xy, xz);
+
+      Vector3D cuttingWallVy = new Vector3D();
+      cuttingWallVy.cross(cuttingWallVz, cuttingWallVx);
+
+      RotationMatrix cuttingWallRotationMatrix = new RotationMatrix();
+      cuttingWallRotationMatrix.setColumns(cuttingWallVx, cuttingWallVy, cuttingWallVz);
+      cuttingWallRotationMatrix.normalize();
+
+      System.out.println(cuttingWallRotationMatrix);
+
+      Quaternion cuttingWallQuaternion = new Quaternion(cuttingWallRotationMatrix);
+
+      System.out.println(cuttingWallQuaternion);
+
+      return cuttingWallQuaternion;
+   }
+
    private void setupStateMachine()
    {
       BehaviorAction<CuttingWallBehaviorState> waiting_input = new BehaviorAction<CuttingWallBehaviorState>(CuttingWallBehaviorState.WAITING_INPUT,
-                                                                                                      new SimpleDoNothingBehavior(communicationBridge))
+                                                                                                            new SimpleDoNothingBehavior(communicationBridge))
       {
          @Override
          protected void setBehaviorInput()
          {
             PrintTools.info("setBehaviorInput WAITING_INPUT " + yoTime.getDoubleValue());
-
          }
-         
+
          @Override
          public boolean isDone()
          {
@@ -104,20 +152,29 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
          {
             PrintTools.info("setBehaviorInput PLANNING " + yoTime.getDoubleValue());
 
-            //             ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(20.0);
-            
             FramePose centerFramePose = new FramePose();
             WallPosePacket latestPacket = queue.getLatestPacket();
             centerFramePose.setPosition(latestPacket.getCenterPosition());
             centerFramePose.setOrientation(latestPacket.getCenterOrientation());
-            
-            PrintTools.info(""+centerFramePose);
-            
+
             centerFramePose.changeFrame(referenceFrames.getMidFootZUpGroundFrame());
+
+            PrintTools.info("received WallPosePacket " + centerFramePose);
+
+            RigidBodyTransform transform = new RigidBodyTransform(centerFramePose.getOrientation(), centerFramePose.getPosition());
+            PrintTools.info("transform ");
+            System.out.println(transform);
             
-            PrintTools.info(""+centerFramePose);
             
-            ConstrainedEndEffectorTrajectory endeffectorTrajectory = new CuttingWallTrajectory(centerFramePose, latestPacket.getCuttingRadius(), 20.0);
+            RigidBodyTransform transform1 = new RigidBodyTransform(new Quaternion(computeWallOrientation(centerFramePose.getOrientation())), new Point3D(centerFramePose.getPosition()));
+            PrintTools.info("transform ");
+            System.out.println(transform1);
+
+             // ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(20.0);
+            // ConstrainedEndEffectorTrajectory endeffectorTrajectory = new CuttingWallTrajectory(centerFramePose, latestPacket.getCuttingRadius(), 20.0);
+            ConstrainedEndEffectorTrajectory endeffectorTrajectory = new CuttingWallTrajectory(centerFramePose.getPosition(),
+                                                                                               computeWallOrientation(centerFramePose.getOrientation()),
+                                                                                               latestPacket.getCuttingRadius(), 20.0);
 
             planConstrainedWholeBodyTrajectoryBehavior.setInputs(endeffectorTrajectory, fullRobotModel);
             PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
@@ -207,13 +264,13 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
       planning.addStateTransition(CuttingWallBehaviorState.PLAN_FALIED, planFailedCondition);
 
       statemachine.addStateWithDoneTransition(waiting_input, CuttingWallBehaviorState.PLANNING);
-      
+
       statemachine.addStateWithDoneTransition(waiting, CuttingWallBehaviorState.MOTION);
       statemachine.addStateWithDoneTransition(planFailedState, CuttingWallBehaviorState.DONE);
       statemachine.addStateWithDoneTransition(motion, CuttingWallBehaviorState.DONE);
 
       statemachine.addState(doneState);
-      
+
       statemachine.setStartState(CuttingWallBehaviorState.WAITING_INPUT);
    }
 

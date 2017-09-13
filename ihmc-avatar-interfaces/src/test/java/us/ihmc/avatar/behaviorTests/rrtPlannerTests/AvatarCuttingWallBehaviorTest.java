@@ -30,13 +30,13 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.CuttingWallBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -240,15 +240,20 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
 
       referenceFrames.updateFrames();
 
-      Point3D centerPosition = new Point3D(0.53, 0.0, 1.2);
-      Quaternion centerOrientation = new Quaternion();
-      FramePose centerFramePose = new FramePose(referenceFrames.getMidFootZUpGroundFrame(), centerPosition, centerOrientation);
-
-      PrintTools.info("" + centerFramePose);
-      cuttingWallBehaviorStateMachine.setCenterFramePose(centerFramePose);
-
+      
       System.out.println("Behavior Dispatch");
       drcBehaviorTestHelper.dispatchBehavior(cuttingWallBehaviorStateMachine);
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+            
+      Point3D centerPosition = new Point3D(0.536, 0.013, 1.186);
+      Quaternion centerOrientation = new Quaternion();
+      centerOrientation.appendPitchRotation(-Math.PI*0.5);
+      WallPosePacket wallPosePacket = new WallPosePacket(0.35, centerPosition, centerOrientation);
+      
+      System.out.println("wallPosePacket Dispatch");
+      drcBehaviorTestHelper.getBehaviorCommunicationBridge().sendPacketToBehavior(wallPosePacket);
+      System.out.println("wallPosePacket Dispatch done");
 
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(40.0);
 

@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -51,6 +52,8 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
       {
          int numberOfTrajectoryPoints = path.size();
          
+         PrintTools.info(""+numberOfTrajectoryPoints);
+         
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
          
          handTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
@@ -94,7 +97,6 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
             
             
             
-            
             Point3D desiredPosition = new Point3D(desiredPose.getPosition());
             Vector3D desiredLinearVelocity = new Vector3D();
             Quaternion desiredOrientation = new Quaternion( desiredPose.getOrientation()  );
@@ -126,10 +128,15 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
    private void updateChestTrajectoryMessage()   
    {
       int numberOfTrajectoryPoints = path.size();
+
+      PrintTools.info(""+numberOfTrajectoryPoints);
       
       chestTrajectoryMessage = new ChestTrajectoryMessage(numberOfTrajectoryPoints);
       chestTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
       chestTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
+      
+      PrintTools.info(""+chestTrajectoryMessage.getNumberOfTrajectoryPoints()); 
+      
       
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
       orientationCalculator.clear();
@@ -164,10 +171,10 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
          desiredOrientation.appendPitchRotation(trajectoryNode.getNodeData(3));
          desiredOrientation.appendRollRotation(trajectoryNode.getNodeData(4));
          
-//         Vector3D desiredAngularVelocity = new Vector3D();
          Vector3D desiredAngularVelocity = orientationCalculator.getTrajectoryPointsAngularVelocity().get(i);
          
-//         PrintTools.info(""+i+" "+ time +" "+desiredOrientation +" " + desiredAngularVelocity);
+         PrintTools.info(""+i+" "+time);
+         
          chestTrajectoryMessage.setTrajectoryPoint(i, time, desiredOrientation, desiredAngularVelocity, worldFrame);
       }
    }
@@ -175,6 +182,8 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
    private void updatePelvisTrajectoryMessage()
    {
       int numberOfTrajectoryPoints = path.size();
+      
+      PrintTools.info(""+numberOfTrajectoryPoints);
       
       pelvisTrajectoryMessage = new PelvisTrajectoryMessage(numberOfTrajectoryPoints);
       pelvisTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);

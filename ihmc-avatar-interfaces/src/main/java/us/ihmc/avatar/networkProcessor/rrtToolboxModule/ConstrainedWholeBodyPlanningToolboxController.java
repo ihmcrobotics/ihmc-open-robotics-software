@@ -166,7 +166,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    protected void updateInternal() throws InterruptedException, ExecutionException
    {
       updateCount.increment();
-      PrintTools.info("" + updateCount.getIntegerValue() + " " + state);
+      // PrintTools.info("" + updateCount.getIntegerValue() + " " + state);
 
       // ************************************************************************************************************** //      
       switch (state)
@@ -220,6 +220,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       visualizedNode = node;
 
       numberOfMotionPath--;
+
       if (numberOfMotionPath == 0)
       {
          /*
@@ -229,7 +230,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          ctTaskNodeWholeBodyTrajectoryMessageFactory = new CTTaskNodeWholeBodyTrajectoryMessageFactory();
 
          ctTaskNodeWholeBodyTrajectoryMessageFactory.setCTTaskNodePath(tree.getPath(), constrainedEndEffectorTrajectory);
-
+         
          ConstrainedWholeBodyPlanningToolboxOutputStatus packResult = packResult(ctTaskNodeWholeBodyTrajectoryMessageFactory.getWholeBodyTrajectoryMessage(),
                                                                                  4);
          packResult(packResult, tree.getPath());
@@ -279,7 +280,9 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       numberOfMotionPath = tree.getPath().size();
 
-      treeVisualizer.update(tree.getPath());
+      //if(startYoVariableServer)
+      if(true)
+         treeVisualizer.update(tree.getPath());
       /*
        * terminate state
        */
@@ -621,7 +624,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
          currentIsValid.set(visualizedNode.getValidity());
          currentTrajectoryTime.set(visualizedNode.getNormalizedNodeData(0));
-         if (startYoVariableServer)
+         // if (startYoVariableServer)
+         if(true)
             treeVisualizer.update(visualizedNode);
       }
    }
