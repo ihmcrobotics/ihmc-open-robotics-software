@@ -9,6 +9,12 @@ public class RequestLidarScanMessage extends TrackablePacket<RequestLidarScanMes
    {
    }
 
+   public RequestLidarScanMessage(boolean removeShadows, boolean removeSelfCollisions)
+   {
+      this.removeShadows = removeShadows;
+      this.removeSelfCollisions = removeSelfCollisions;
+   }
+
    public boolean isRemoveShadows()
    {
       return removeShadows;
