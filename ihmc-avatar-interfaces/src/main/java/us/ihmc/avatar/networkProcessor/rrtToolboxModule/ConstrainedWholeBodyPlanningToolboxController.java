@@ -166,7 +166,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    protected void updateInternal() throws InterruptedException, ExecutionException
    {
       updateCount.increment();
-      // PrintTools.info("" + updateCount.getIntegerValue() + " " + state);
+      PrintTools.info("" + updateCount.getIntegerValue() + " " + state);
 
       // ************************************************************************************************************** //      
       switch (state)
@@ -443,7 +443,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
        * bring constrainedEndEffectorTrajectory
        */
       taskRegion = constrainedEndEffectorTrajectory.getTaskRegion();
-      if (startYoVariableServer)
+      // if (startYoVariableServer)
+      if(true)
       {
          treeVisualizer = new CTTreeVisualizer(tree);
          treeVisualizer.initialize();
