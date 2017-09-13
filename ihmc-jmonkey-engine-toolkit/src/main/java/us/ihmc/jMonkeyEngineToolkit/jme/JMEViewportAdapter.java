@@ -468,7 +468,6 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
       SpotLightShadowRenderer shadow = new SpotLightShadowRenderer(assetManager, 512);
       shadow.setLight(jmeSpotLight);
       shadow.setShadowCompareMode(CompareMode.Software);
-      System.out.println("Adding spotlight shadow");
       viewPort.addProcessor(shadow);
       
       spotlightShadows.put(jmeSpotLight, shadow);
