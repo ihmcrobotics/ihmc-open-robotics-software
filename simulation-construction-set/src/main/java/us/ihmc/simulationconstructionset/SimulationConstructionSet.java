@@ -2224,6 +2224,38 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    }
 
    /**
+    * Setup the skybox 
+    * 
+    * @param skyBox path to a skybox resource on the classpath
+    */
+   public void setupSky(String skyBox)
+   {
+      if (myGUI != null)
+      {
+         myGUI.setupSky(skyBox);
+      }
+   }
+   
+   /**
+    * Setup the skybox 
+    * 
+    * @param west path to a image resource on the classpath
+    * @param east path to a image resource on the classpath
+    * @param north path to a image resource on the classpath
+    * @param south path to a image resource on the classpath
+    * @param up path to a image resource on the classpath
+    * @param down path to a image resource on the classpath
+    */
+   public void setupSky(String west, String east, String north, String south, String up, String down)
+   {
+      if (myGUI != null)
+      {
+         myGUI.setupSky(west, east, north, south, up, down);
+      }
+   }
+
+   
+   /**
     * Sets the ground visibility.
     *
     * @param isVisible Specifies the visibility of the ground.

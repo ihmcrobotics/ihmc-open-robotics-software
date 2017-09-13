@@ -18,6 +18,10 @@ public interface Graphics3DAdapter
 {
    public void setupSky();
    
+   public void setupSky(String skyBox);
+   
+   public void setupSky(String west, String east, String north, String south, String up, String down);
+   
    public void addRootNode(Graphics3DNode rootNode);
 
    public void removeRootNode(Graphics3DNode rootNode);
