@@ -81,7 +81,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 public class WalkingControllerTest
 {
    private static final boolean profile = false;
-   private static final boolean showSCS = true;
+   private static final boolean showSCS = false;
    private static final double totalTime = 5.0;
 
    private static final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS, RobotTarget.SCS, false);
