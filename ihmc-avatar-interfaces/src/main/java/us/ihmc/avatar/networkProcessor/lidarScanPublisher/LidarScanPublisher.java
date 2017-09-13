@@ -4,7 +4,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -379,24 +378,17 @@ public class LidarScanPublisher
    private void sendLidarScanMessageToListeners(long timestamp, Point3D32 lidarPosition, Quaternion32 lidarOrientation, float[] scanPointBuffer,
                                                 Set<RequestLidarScanMessage> listeners)
    {
-      LidarScanMessage message = new LidarScanMessage(timestamp, lidarPosition, lidarOrientation, scanPointBuffer);
-
-      Iterator<RequestLidarScanMessage> iterator = listeners.iterator();
-
-      while (true)
+      for (RequestLidarScanMessage requestLidarScanMessage : listeners)
       {
-         RequestLidarScanMessage request = iterator.next();
-         PacketDestination destination = PacketDestination.fromOrdinal(request.getSource());
-         message.setDestination(destination);
-         packetCommunicator.send(message);
-
-         if (!iterator.hasNext())
-            break;
-
          lidarPosition = lidarPosition == null ? null : new Point3D32(lidarPosition);
          lidarOrientation = lidarOrientation == null ? null : new Quaternion32(lidarOrientation);
          scanPointBuffer = Arrays.copyOf(scanPointBuffer, scanPointBuffer.length);
-         message = new LidarScanMessage(timestamp, lidarPosition, lidarOrientation, scanPointBuffer);
+         LidarScanMessage message = new LidarScanMessage(timestamp, lidarPosition, lidarOrientation, scanPointBuffer);
+
+         PacketDestination destination = PacketDestination.fromOrdinal(requestLidarScanMessage.getSource());
+         message.setDestination(destination);
+         packetCommunicator.send(message);
+
       }
    }
 
