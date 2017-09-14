@@ -96,22 +96,10 @@ public class SmoothCoMIntegrationToolboxTest
          
          assertEquals(gammaCoMPrimeAutomatic, gammaCoMPrimeManual.get(0), EPSILON);
          
-         DenseMatrix64F deltaCoMPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
-         DenseMatrix64F deltaCoMPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
-    
-         comToolbox.calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(omega0, time, deltaCoMPrimeAutomatic, 0, linear3D);
-         calculateDeltaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, deltaCoMPrimeManual);
-       
-//         PrintTools.debug("D linear calc: " + deltaCoMPrimeAutomatic.toString());
-//         PrintTools.debug("D linear test: " + deltaCoMPrimeManual.toString());
-       
-         for(int j = 0; j < deltaCoMPrimeAutomatic.getNumCols(); j++)
-         {
-            for(int k = 0; k < deltaCoMPrimeAutomatic.getNumRows(); k++)
-            {
-               assertEquals(deltaCoMPrimeAutomatic.get(k, j), deltaCoMPrimeManual.get(k, j), EPSILON);
-            }
-         }
+         double deltaCoMPrimeAutomatic = comToolbox.calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(omega0, time, 0, linear3D);
+         double deltaCoMPrimeManual = calculateDeltaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal);
+
+         assertEquals(deltaCoMPrimeAutomatic, deltaCoMPrimeManual, EPSILON);
       }
    }
    
@@ -179,17 +167,14 @@ public class SmoothCoMIntegrationToolboxTest
 //         PrintTools.debug("dC linear test: " + dGammaCoMPrimeManual.toString());
          
          assertEquals(dGammaCoMPrimeAutomatic, dGammaCoMPrimeManual.get(0), EPSILON);
-         
-         DenseMatrix64F dDeltaCoMPrimeAutomatic = new DenseMatrix64F(1, 1);
-         DenseMatrix64F dDeltaCoMPrimeManual = new DenseMatrix64F(1, 1);
-      
-         comToolbox.calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(omega0, time, dDeltaCoMPrimeAutomatic, 1, linear3D);
-         calculateDDeltaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, dDeltaCoMPrimeManual);
+
+         double dDeltaCoMPrimeAutomatic = comToolbox.calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(omega0, time, 1, linear3D);
+         double dDeltaCoMPrimeManual = calculateDDeltaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal);
          
 //         PrintTools.debug("dD linear calc: " + dDeltaCoMPrimeAutomatic.toString());
 //         PrintTools.debug("dD linear test: " + dDeltaCoMPrimeManual.toString());
          
-         assertEquals(dDeltaCoMPrimeAutomatic.get(0), dDeltaCoMPrimeManual.get(0), EPSILON);
+         assertEquals(dDeltaCoMPrimeAutomatic, dDeltaCoMPrimeManual, EPSILON);
       }
    }
    
@@ -402,13 +387,13 @@ public class SmoothCoMIntegrationToolboxTest
       gammaCoMPrimeLinear.set(0, 0, -omega0 * Math.exp(omega0 * (timeInitial - time)));
    }
    
-   public static void calculateDeltaCoMPrime3DByHandLinear(double omega0, double time, double timeInitial, double timeTotal, DenseMatrix64F deltaCoMPrimeLinear)
+   public static double calculateDeltaCoMPrime3DByHandLinear(double omega0, double time, double timeInitial, double timeTotal)
    {
-      deltaCoMPrimeLinear.set(0, 0, 0.5 * Math.exp(omega0 * (timeInitial - timeTotal)) * (Math.exp(omega0 * (time - timeInitial)) - Math.exp(omega0 * (timeInitial - time))));
+      return 0.5 * Math.exp(omega0 * (timeInitial - timeTotal)) * (Math.exp(omega0 * (time - timeInitial)) - Math.exp(omega0 * (timeInitial - time)));
    }
    
-   public static void calculateDDeltaCoMPrime3DByHandLinear(double omega0, double time, double timeInitial, double timeTotal, DenseMatrix64F deltaCoMPrimeLinear)
+   public static double calculateDDeltaCoMPrime3DByHandLinear(double omega0, double time, double timeInitial, double timeTotal)
    {
-      deltaCoMPrimeLinear.set(0, 0, 0.5 * Math.exp(omega0 * (timeInitial - timeTotal)) * (omega0 * Math.exp(omega0 * (time - timeInitial)) + omega0 * Math.exp(omega0 * (timeInitial - time))));
+      return 0.5 * Math.exp(omega0 * (timeInitial - timeTotal)) * (omega0 * Math.exp(omega0 * (time - timeInitial)) + omega0 * Math.exp(omega0 * (timeInitial - time)));
    }
 }

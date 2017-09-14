@@ -27,8 +27,8 @@ public class SmoothCapturePointAdjustmentToolbox
 
    private final DenseMatrix64F alphaPrimeRowSegment = new DenseMatrix64F(1, defaultSize);
    private final DenseMatrix64F betaPrimeRowSegment = new DenseMatrix64F(1, defaultSize);
-   private final DenseMatrix64F gammaPrimeMatrixSegment = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F alphaBetaPrimeRowSegment = new DenseMatrix64F(1, defaultSize);
+   private final DenseMatrix64F gammaPrimeMatrixSegment2 = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F alphaBetaPrimeRowSegment2 = new DenseMatrix64F(1, defaultSize);
 
    private final DenseMatrix64F boundaryConditionMatrix = new DenseMatrix64F(defaultSize, defaultSize);
    private final DenseMatrix64F boundaryConditionMatrixInverse = new DenseMatrix64F(defaultSize, defaultSize);
@@ -212,7 +212,7 @@ public class SmoothCapturePointAdjustmentToolbox
    {
       double tInitial2 = cmpPolynomialSegment2.getInitialTime();
       icpToolbox.calculateGeneralizedMatricesPrimeOnCMPSegment1D(omega0, tInitial2, 0, cmpPolynomialSegment2, alphaPrimeRowSegment, betaPrimeRowSegment,
-                                                                 gammaPrimeMatrixSegment, alphaBetaPrimeRowSegment);
+                                                                 gammaPrimeMatrixSegment2, alphaBetaPrimeRowSegment2);
    }
 
    private void calculateGeneralizedICPMatricesOnCMPSegment1(double omega0, int derivativeOrder, Trajectory cmpPolynomialSegment1)
@@ -229,7 +229,7 @@ public class SmoothCapturePointAdjustmentToolbox
    {
       setGeneralizedBoundaryConstraintICP0(order, numberOfCoefficients, icpQuantityInitialConditionScalar, icpPositionFinalSegment2Scalar,
                                            generalizedAlphaBetaPrimeRowSegment, generalizedGammaPrimeMatrixSegment,
-                                           alphaBetaPrimeRowSegment, gammaPrimeMatrixSegment);
+                                           alphaBetaPrimeRowSegment2, gammaPrimeMatrixSegment2);
       setGeneralizedBoundaryConstraintCMP0(order, numberOfConstrainedDerivatives, cmpPolynomialSegment1);
       setGeneralizedBoundaryConstraintCMP1(order, numberOfCoefficients, numberOfConstrainedDerivatives, cmpPolynomialSegment1, cmpPolynomialSegment2);
       setGeneralizedBoundaryConstraintCMP2(order, numberOfCoefficients, numberOfConstrainedDerivatives, cmpPolynomialSegment2);
@@ -254,8 +254,8 @@ public class SmoothCapturePointAdjustmentToolbox
 
       alphaPrimeRowSegment.reshape(1, numberOfCoefficients);
       betaPrimeRowSegment.reshape(1, numberOfCoefficients);
-      gammaPrimeMatrixSegment.reshape(1, 1);
-      alphaBetaPrimeRowSegment.reshape(1, numberOfCoefficients);
+      gammaPrimeMatrixSegment2.reshape(1, 1);
+      alphaBetaPrimeRowSegment2.reshape(1, numberOfCoefficients);
    }
 
    private void resetGeneralizedBoundaryConditionContainers()
