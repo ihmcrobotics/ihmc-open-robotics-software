@@ -14,7 +14,7 @@ public class TrajectoryMathTools
    private final int maxNumberOfCoefficients;
    private final Trajectory tempTraj1;
    private final Trajectory tempTraj2;
-   private final Trajectory3D tempTraj3;
+   private final Trajectory3D tempTraj3D;
    private final TDoubleArrayList tempTimeList = new TDoubleArrayList(4);
    private final FastFourierTransform fft;
    private final ComplexNumber[] tempComplex1;
@@ -25,7 +25,7 @@ public class TrajectoryMathTools
       this.maxNumberOfCoefficients = (int) Math.pow(2, Math.ceil( Math.log(maxNumberOfCoefficients) / Math.log(2.0)) ); // Rounding up the nearest power of two
       this.tempTraj1 = new Trajectory(this.maxNumberOfCoefficients);
       this.tempTraj2 = new Trajectory(this.maxNumberOfCoefficients);
-      this.tempTraj3 = new Trajectory3D(this.maxNumberOfCoefficients);
+      this.tempTraj3D = new Trajectory3D(this.maxNumberOfCoefficients);
       this.fft = new FastFourierTransform(this.maxNumberOfCoefficients);
       this.tempComplex1 = ComplexNumber.getComplexArray(this.maxNumberOfCoefficients);
       this.tempComplex2 = ComplexNumber.getComplexArray(this.maxNumberOfCoefficients);
@@ -350,18 +350,18 @@ public class TrajectoryMathTools
     */
    public void crossProduct(Trajectory3D traj1, Trajectory3D traj2)
    {
-      multiply(tempTraj3.xTrajectory, traj1.yTrajectory, traj2.zTrajectory);
-      multiplySubtract(tempTraj3.xTrajectory, traj1.zTrajectory, traj2.yTrajectory);
+      multiply(tempTraj3D.xTrajectory, traj1.yTrajectory, traj2.zTrajectory);
+      multiplySubtract(tempTraj3D.xTrajectory, traj1.zTrajectory, traj2.yTrajectory);
 
-      multiply(tempTraj3.yTrajectory, traj1.zTrajectory, traj2.xTrajectory);
-      multiplySubtract(tempTraj3.yTrajectory, traj1.xTrajectory, traj2.zTrajectory);
+      multiply(tempTraj3D.yTrajectory, traj1.zTrajectory, traj2.xTrajectory);
+      multiplySubtract(tempTraj3D.yTrajectory, traj1.xTrajectory, traj2.zTrajectory);
 
-      multiply(tempTraj3.zTrajectory, traj1.xTrajectory, traj2.yTrajectory);
-      multiplySubtract(tempTraj3.zTrajectory, traj1.yTrajectory, traj2.xTrajectory);
+      multiply(tempTraj3D.zTrajectory, traj1.xTrajectory, traj2.yTrajectory);
+      multiplySubtract(tempTraj3D.zTrajectory, traj1.yTrajectory, traj2.xTrajectory);
 
-      traj1.xTrajectory.set(tempTraj3.xTrajectory);
-      traj1.yTrajectory.set(tempTraj3.yTrajectory);
-      traj1.zTrajectory.set(tempTraj3.zTrajectory);
+      traj1.xTrajectory.set(tempTraj3D.xTrajectory);
+      traj1.yTrajectory.set(tempTraj3D.yTrajectory);
+      traj1.zTrajectory.set(tempTraj3D.zTrajectory);
    }
 
    /*
