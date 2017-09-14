@@ -26,7 +26,7 @@ public class CTTaskNodeTree
     * If @param matricRatioTimeToTask is 0.3, the matric will be obtained as
     * much as (getNormalizedTimeGap*0.3 + getNormalizedTaskDisplacement*0.7).
     */   
-   private static double matricRatioTimeToTask = 0.1; // 0.4
+   private static double matricRatioTimeToTask = 0.05; // 0.4
 
    private double maximumDisplacementOfStep = 0.06;
    private double maximumTimeGapOfStep = 0.05;
