@@ -10,7 +10,6 @@ buildscript {
 }
 
 apply plugin: "org.hidetake.ssh"
-apply plugin: "org.ajoberstar.grgit"
 apply plugin: "application"
 apply plugin: "us.ihmc.ihmc-build"
 
