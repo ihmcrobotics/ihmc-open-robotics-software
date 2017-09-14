@@ -28,6 +28,8 @@ public class YoVariableDefinition
         	enumType_ = other.enumType_;
         	allowNullValues_ = other.allowNullValues_;
         	isParameter_ = other.isParameter_;
+        	min_ = other.min_;
+        	max_ = other.max_;
 
     }
 
@@ -103,6 +105,28 @@ public class YoVariableDefinition
     }
 
         
+    public void setMin(double min)
+    {
+        min_ = min;
+    }
+
+    public double getMin()
+    {
+        return min_;
+    }
+
+        
+    public void setMax(double max)
+    {
+        max_ = max;
+    }
+
+    public double getMax()
+    {
+        return max_;
+    }
+
+        
 
 
 
@@ -131,6 +155,12 @@ public class YoVariableDefinition
 
                 
         returnedValue &= this.isParameter_ == otherMyClass.isParameter_;
+
+                
+        returnedValue &= this.min_ == otherMyClass.min_;
+
+                
+        returnedValue &= this.max_ == otherMyClass.max_;
 
                 
 
@@ -166,6 +196,14 @@ public class YoVariableDefinition
         builder.append("isParameter=");
         builder.append(this.isParameter_);
 
+                builder.append(", ");
+        builder.append("min=");
+        builder.append(this.min_);
+
+                builder.append(", ");
+        builder.append("max=");
+        builder.append(this.max_);
+
                 
         builder.append("}");
 		return builder.toString();
@@ -177,5 +215,7 @@ public class YoVariableDefinition
     private int enumType_; 
     private boolean allowNullValues_; 
     private boolean isParameter_; 
+    private double min_; 
+    private double max_; 
 
 }
