@@ -524,4 +524,10 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       return new ValkyrieFootstepPlannerParameters();
    }
+
+   @Override
+   public InputStream getWholeBodyControllerParametersFile()
+   {
+      return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller.xml");
+   }
 }
