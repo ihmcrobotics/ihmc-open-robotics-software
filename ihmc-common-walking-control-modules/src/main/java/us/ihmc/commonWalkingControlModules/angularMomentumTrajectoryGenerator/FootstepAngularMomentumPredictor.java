@@ -531,17 +531,17 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       segmentCoMTrajectory.setQuintic(initialTime, finalTime, tempFramePoint1, comInitialVelocities.get(comIndex),
                                       comInitialAccelerations.get(comIndex), tempFramePoint2, comFinalVelocities.get(comIndex),
                                       comFinalAccelerations.get(comIndex));
-      trajectoryMathTools.getDerivative(segmentCoMVelocity, segmentCoMTrajectory);
+      TrajectoryMathTools.getDerivative(segmentCoMVelocity, segmentCoMTrajectory);
    }
 
    private void setFootTrajectoriesForSegment(double initialTime, double finalTime)
    {
       segmentSwingFootTrajectory.set(phaseSwingFootTrajectory);
       segmentSwingFootTrajectory.setTime(initialTime, finalTime);
-      trajectoryMathTools.getDerivative(swingFootVelocity, segmentSwingFootTrajectory);
+      TrajectoryMathTools.getDerivative(swingFootVelocity, segmentSwingFootTrajectory);
       segmentSupportFootTrajectory.set(phaseSupportFootTrajectory);
       segmentSupportFootTrajectory.setTime(initialTime, finalTime);
-      trajectoryMathTools.getDerivative(supportFootVelocity, segmentSupportFootTrajectory);
+      TrajectoryMathTools.getDerivative(supportFootVelocity, segmentSupportFootTrajectory);
    }
    
    private void setFootTrajectoriesForPhase(int footstepIndex, WalkingTrajectoryType phase)
@@ -587,17 +587,17 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
 
    private void calculateAngularMomentumTrajectory()
    {
-      trajectoryMathTools.subtract(segmentSwingFootTrajectory, segmentSwingFootTrajectory, segmentCoMTrajectory);
-      trajectoryMathTools.subtract(swingFootVelocity, swingFootVelocity, segmentCoMVelocity);
-      trajectoryMathTools.subtract(segmentSupportFootTrajectory, segmentSupportFootTrajectory, segmentCoMTrajectory);
-      trajectoryMathTools.subtract(supportFootVelocity, supportFootVelocity, segmentCoMVelocity);
+      TrajectoryMathTools.subtractEquals(segmentSwingFootTrajectory, segmentCoMTrajectory);
+      TrajectoryMathTools.subtractEquals(swingFootVelocity, segmentCoMVelocity);
+      TrajectoryMathTools.subtractEquals(segmentSupportFootTrajectory, segmentCoMTrajectory);
+      TrajectoryMathTools.subtractEquals(supportFootVelocity, segmentCoMVelocity);
 
-      trajectoryMathTools.crossProduct(segmentSwingFootTrajectory, segmentSwingFootTrajectory, swingFootVelocity);
-      trajectoryMathTools.scale(segmentSwingFootTrajectory, segmentSwingFootTrajectory, swingLegMass.getDoubleValue());
-      trajectoryMathTools.crossProduct(segmentSupportFootTrajectory, segmentSupportFootTrajectory, supportFootVelocity);
-      trajectoryMathTools.scale(segmentSupportFootTrajectory, segmentSupportFootTrajectory, supportLegMass.getDoubleValue());
+      trajectoryMathTools.crossProduct(segmentSwingFootTrajectory, swingFootVelocity);
+      TrajectoryMathTools.scale(swingLegMass.getDoubleValue(), segmentSwingFootTrajectory);
+      trajectoryMathTools.crossProduct(segmentSupportFootTrajectory, supportFootVelocity);
+      TrajectoryMathTools.scale(supportLegMass.getDoubleValue(), segmentSupportFootTrajectory);
 
-      trajectoryMathTools.add(estimatedAngularMomentumTrajectory, segmentSupportFootTrajectory, segmentSwingFootTrajectory);
+      TrajectoryMathTools.add(estimatedAngularMomentumTrajectory, segmentSupportFootTrajectory, segmentSwingFootTrajectory);
    }
 
    public void getPredictedCenterOfMassPosition(YoFramePoint pointToPack, double time)

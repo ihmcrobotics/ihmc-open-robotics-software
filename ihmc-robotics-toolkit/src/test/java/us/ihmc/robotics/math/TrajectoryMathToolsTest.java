@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -105,7 +106,7 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void testMultiTimeScaleOperation()
    {
-      List<Double> timeList = new ArrayList<>(Arrays.asList(0.0, 0.0, 0.0, 0.0));
+      TDoubleArrayList timeList = new TDoubleArrayList(4);
       Trajectory traj1 = new Trajectory(10);
       Trajectory traj2 = new Trajectory(10);
       traj1.setConstant(5, 10, 1);
@@ -463,11 +464,44 @@ public class TrajectoryMathToolsTest
    @Test(timeout = 30000)
    public void test3DTrajectorySubtraction()
    {
+      Trajectory3D resultingTrajectory = new Trajectory3D(3);
       Trajectory3D traj1 = new Trajectory3D(3);
       Trajectory3D traj2 = new Trajectory3D(3);
       traj1.setLinear(0, 1, new Point3D(0.1, 3.414, 1.87), new Point3D(2.09, 1.35, 5.35));
       traj2.setLinear(0, 1, new Point3D(3.14, 1.59, 12.9), new Point3D(4.51, 5.32, 1.12));
-      trajMath.subtract(traj1, traj1, traj2);
+      trajMath.subtract(resultingTrajectory, traj1, traj2);
+
+      Trajectory traj = resultingTrajectory.getTrajectoryX();
+      Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
+      Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
+      Assert.assertTrue(traj.getNumberOfCoefficients() == 2);
+      Assert.assertEquals(traj.getCoefficient(0), -3.04, epsilon);
+      Assert.assertEquals(traj.getCoefficient(1), 0.62, epsilon);
+
+      traj = resultingTrajectory.getTrajectoryY();
+      Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
+      Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
+      Assert.assertTrue(traj.getNumberOfCoefficients() == 2);
+      Assert.assertEquals(traj.getCoefficient(0), 1.824, epsilon);
+      Assert.assertEquals(traj.getCoefficient(1), -5.794, epsilon);
+
+      traj = resultingTrajectory.getTrajectoryZ();
+      Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
+      Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
+      Assert.assertTrue(traj.getNumberOfCoefficients() == 2);
+      Assert.assertEquals(traj.getCoefficient(0), -11.03, epsilon);
+      Assert.assertEquals(traj.getCoefficient(1), 15.26, epsilon);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void test3DTrajectorySubtractionEquals()
+   {
+      Trajectory3D traj1 = new Trajectory3D(3);
+      Trajectory3D traj2 = new Trajectory3D(3);
+      traj1.setLinear(0, 1, new Point3D(0.1, 3.414, 1.87), new Point3D(2.09, 1.35, 5.35));
+      traj2.setLinear(0, 1, new Point3D(3.14, 1.59, 12.9), new Point3D(4.51, 5.32, 1.12));
+      trajMath.subtractEquals(traj1, traj2);
 
       Trajectory traj = traj1.getTrajectoryX();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
@@ -532,9 +566,45 @@ public class TrajectoryMathToolsTest
    {
       Trajectory3D traj1 = new Trajectory3D(3);
       Trajectory3D traj2 = new Trajectory3D(3);
+      Trajectory3D resultingTrajectory = new Trajectory3D(3);
       traj1.setLinear(0, 1, new Point3D(1, 3, 5), new Point3D(6, 4, 2));
       traj2.setLinear(0, 1, new Point3D(2, 4, 6), new Point3D(5, 3, 1));
-      trajMath.crossProduct(traj1, traj1, traj2);
+      trajMath.crossProduct(resultingTrajectory, traj1, traj2);
+
+      Trajectory traj = resultingTrajectory.getTrajectoryX();
+      Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
+      Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
+      Assert.assertTrue(traj.getNumberOfCoefficients() == 3);
+      Assert.assertEquals(traj.getCoefficient(0), -2, epsilon);
+      Assert.assertEquals(traj.getCoefficient(1), 8, epsilon);
+      Assert.assertEquals(traj.getCoefficient(2), -8, epsilon);
+
+      traj = resultingTrajectory.getTrajectoryY();
+      Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
+      Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
+      Assert.assertTrue(traj.getNumberOfCoefficients() == 3);
+      Assert.assertEquals(traj.getCoefficient(0), 4, epsilon);
+      Assert.assertEquals(traj.getCoefficient(1), -16, epsilon);
+      Assert.assertEquals(traj.getCoefficient(2), 16, epsilon);
+
+      traj = resultingTrajectory.getTrajectoryZ();
+      Assert.assertEquals(traj.getInitialTime(), 0, epsilon);
+      Assert.assertEquals(traj.getFinalTime(), 1, epsilon);
+      Assert.assertTrue(traj.getNumberOfCoefficients() == 3);
+      Assert.assertEquals(traj.getCoefficient(0), -2, epsilon);
+      Assert.assertEquals(traj.getCoefficient(1), 8, epsilon);
+      Assert.assertEquals(traj.getCoefficient(2), -8, epsilon);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void test3DTrajectoryCrossProductStoreInSelf()
+   {
+      Trajectory3D traj1 = new Trajectory3D(3);
+      Trajectory3D traj2 = new Trajectory3D(3);
+      traj1.setLinear(0, 1, new Point3D(1, 3, 5), new Point3D(6, 4, 2));
+      traj2.setLinear(0, 1, new Point3D(2, 4, 6), new Point3D(5, 3, 1));
+      trajMath.crossProduct(traj1, traj2);
 
       Trajectory traj = traj1.getTrajectoryX();
       Assert.assertEquals(traj.getInitialTime(), 0, epsilon);

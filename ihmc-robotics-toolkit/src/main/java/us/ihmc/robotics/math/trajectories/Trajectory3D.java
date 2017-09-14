@@ -475,8 +475,11 @@ public class Trajectory3D
 
    public void setLinear(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zf)
    {
-      for (int index = 0; index < 3; index++)
+      for (Direction direction : Direction.values)
+      {
+         int index = direction.ordinal();
          getTrajectory(index).setLinear(t0, tFinal, z0.getElement(index), zf.getElement(index));
+      }
    }
 
    public void setNonic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0,
@@ -656,12 +659,14 @@ public class Trajectory3D
                                                              Vector3DReadOnly zdd0, Vector3DReadOnly zdIntermediate, Vector3DReadOnly zddIntermediate,
                                                              Point3DReadOnly zFinal, Vector3DReadOnly zdFinal)
    {
-      for (int index = 0; index < 3; index++)
+      for (Direction direction : Direction.values)
+      {
+         int index = direction.ordinal();
          getTrajectory(index).setSexticUsingWaypointVelocityAndAcceleration(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index),
                                                                               zdd0.getElement(index), zdIntermediate.getElement(index),
                                                                               zddIntermediate.getElement(index), zFinal.getElement(index),
                                                                               zdFinal.getElement(index));
-
+      }
    }
 
    @Override
@@ -682,8 +687,11 @@ public class Trajectory3D
 
    public void getDerivative(Trajectory3D dervTraj, int order)
    {
-      for (int index = 0; index < 3; index++)
+      for (Direction direction : Direction.values)
+      {
+         int index = direction.ordinal();
          getTrajectory(index).getDerivative(dervTraj.getTrajectory(index), order);
+      }
    }
 
    public void getStartPoint(Point3D positionToPack)
