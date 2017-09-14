@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 
 import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -12,16 +13,16 @@ public class TorqueTrajectory extends SegmentedFrameTrajectory3D
       super(maxNumberOfSegments, maxNumberOfCoefficients);
    }
 
-   public void setNext(AngularMomentumTrajectory angMomTraj)
+   public void setNext(AngularMomentumTrajectory angularMomentumTrajectory)
    {
       this.reset();
-      for(int i = 0; i < angMomTraj.getNumberOfSegments(); i++)
+      for(int i = 0; i < angularMomentumTrajectory.getNumberOfSegments(); i++)
       {
-         TrajectoryMathTools.getDerivative(segments.get(i).getTrajectoryY(), angMomTraj.getSegment(i).getTrajectoryX());
-         TrajectoryMathTools.scale(segments.get(i).getTrajectoryY(), -1.0);
-         TrajectoryMathTools.getDerivative(segments.get(i).getTrajectoryX(), angMomTraj.getSegment(i).getTrajectoryY());
-         segments.get(i).getTrajectoryZ().setConstant(segments.get(i).getInitialTime(Direction.X), segments.get(i).getFinalTime(Direction.X), 0.0);
-         numberOfSegments++;
+         FrameTrajectory3D segment = segments.add();
+         TrajectoryMathTools.getDerivative(segment.getTrajectoryY(), angularMomentumTrajectory.getSegment(i).getTrajectoryX());
+         TrajectoryMathTools.scale(segment.getTrajectoryY(), -1.0);
+         TrajectoryMathTools.getDerivative(segment.getTrajectoryX(), angularMomentumTrajectory.getSegment(i).getTrajectoryY());
+         segment.getTrajectoryZ().setConstant(segment.getInitialTime(Direction.X), segment.getFinalTime(Direction.X), 0.0);
       }
    }
    

@@ -58,13 +58,13 @@ public class AngularMomentumTrajectory extends SegmentedFrameTrajectory3D implem
    @Override
    public void set(FrameTrajectory3D computedAngularMomentumTrajectory)
    {
-      segments.get(getNumberOfSegments()).set(computedAngularMomentumTrajectory);
-      numberOfSegments++;
+      FrameTrajectory3D segment = segments.add();
+      segment.set(computedAngularMomentumTrajectory);
    }
 
    public void set(double t0, double tFinal, FramePoint3D z0, FramePoint3D zf)
    {
-      segments.get(getNumberOfSegments()).setLinear(t0, tFinal, z0, zf);
-      numberOfSegments++;
+      FrameTrajectory3D segment = segments.add();
+      segment.setLinear(t0, tFinal, z0, zf);
    }
 }

@@ -380,10 +380,13 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    }
 
    @Override
-   public void initializeForTransfer(double currentTime)
+   public void initializeForDoubleSupport(double currentTime, boolean isStanding)
    {
       initialTime = currentTime;
-      activeTrajectory = transferAngularMomentumTrajectories.get(0);
+
+      if (!isStanding)
+         activeTrajectory = transferAngularMomentumTrajectories.get(0);
+
       if (DEBUG)
       {
          activeCoMTrajectory = transferCoMTrajectories.get(0);
@@ -393,7 +396,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    }
 
    @Override
-   public void initializeForSwing(double currentTime)
+   public void initializeForSingleSupport(double currentTime)
    {
       initialTime = currentTime;
       activeTrajectory = swingAngularMomentumTrajectories.get(0);

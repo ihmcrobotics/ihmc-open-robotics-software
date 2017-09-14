@@ -175,14 +175,16 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    }
 
    @Override
-   public void initializeForTransfer(double currentTime)
+   public void initializeForDoubleSupport(double currentTime, boolean isStanding)
    {
       initialTime = currentTime;
-      activeTrajectory = transferTrajectories.get(0);
+
+      if (!isStanding)
+         activeTrajectory = transferTrajectories.get(0);
    }
 
    @Override
-   public void initializeForSwing(double currentTime)
+   public void initializeForSingleSupport(double currentTime)
    {
       initialTime = currentTime;
       activeTrajectory = swingTrajectories.get(0);
