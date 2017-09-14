@@ -12,31 +12,35 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 public class TestFootSwitch implements FootSwitchInterface
 {
    private final ContactableFoot foot;
+   private final ReferenceFrame opposideSoleZUp;
    private final double totalRobotWeight;
 
    private boolean hasFootHitGround = false;
    private final FramePoint3D solePoint = new FramePoint3D();
 
-   public static SideDependentList<TestFootSwitch> createFootSwitches(SideDependentList<ContactableFoot> feet, double totalRobotWeight)
+   public static SideDependentList<TestFootSwitch> createFootSwitches(SideDependentList<ContactableFoot> feet, double totalRobotWeight,
+                                                                      SideDependentList<? extends ReferenceFrame> soleZupFrames)
    {
       SideDependentList<TestFootSwitch> ret = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         ret.put(robotSide, new TestFootSwitch(feet.get(robotSide), totalRobotWeight));
+         ReferenceFrame opposideSole = soleZupFrames.get(robotSide.getOppositeSide());
+         ret.put(robotSide, new TestFootSwitch(feet.get(robotSide), totalRobotWeight, opposideSole));
       }
       return ret;
    }
 
-   public TestFootSwitch(ContactableFoot foot, double totalRobotWeight)
+   public TestFootSwitch(ContactableFoot foot, double totalRobotWeight, ReferenceFrame opposideSole)
    {
       this.foot = foot;
+      this.opposideSoleZUp = opposideSole;
       this.totalRobotWeight = totalRobotWeight;
    }
 
    public void update()
    {
       solePoint.setToZero(foot.getSoleFrame());
-      solePoint.changeFrame(ReferenceFrame.getWorldFrame());
+      solePoint.changeFrame(opposideSoleZUp);
       hasFootHitGround = solePoint.getZ() < 0.01;
    }
 

@@ -1,12 +1,7 @@
 package us.ihmc.atlas.commonWalkingControlModules;
 
-import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.After;
@@ -15,6 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -36,7 +32,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -48,14 +43,23 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -76,23 +80,35 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoLong;
 
 public class WalkingControllerTest
 {
    private static final boolean profile = false;
    private static final boolean showSCS = false;
-   private static final double totalTime = 5.0;
+   private static final double totalTime = 20.0;
 
-   private static final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS, RobotTarget.SCS, false);
+   private static final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_FOREARMS, RobotTarget.SCS, false)
+   {
+      @Override
+      public WalkingControllerParameters getWalkingControllerParameters()
+      {
+         return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
+         {
+            @Override
+            public boolean allowUpperBodyMotionDuringLocomotion()
+            {
+               return true;
+            };
+         };
+      };
+   };
    private static final double gravityZ = 9.81;
    private static final double controlDT = robotModel.getControllerDT();
+   private static final double velocityDecay = 0.98;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final YoDouble yoTime = new YoDouble("time", registry);
-
-   private final YoLong allocatedInTick = new YoLong("AllocatedBytesInTick", registry);
 
    private final StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
    private final CommandInputManager commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
@@ -112,30 +128,39 @@ public class WalkingControllerTest
    private WholeBodyControllerCore controllerCore;
    private LowLevelOneDoFJointDesiredDataHolderList controllerOutput;
 
-   @ContinuousIntegrationTest(estimatedDuration = 5.0)
    @Test
-   public void testForGarbage() throws MalformedObjectNameException
+   public void testForGarbage()
    {
       walkingController.doTransitionIntoAction();
 
-      // warm up and calibrate the allocation measurement
-      MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-      ObjectName name = new ObjectName(ManagementFactory.THREAD_MXBEAN_NAME);
-      for (int i = 0; i < 1000; i++)
-      {
-         threadAllocatedBytes(mBeanServer, name);
-      }
-      long callibrate = threadAllocatedBytes(mBeanServer, name);
-      long bytesUsedToMeasure = threadAllocatedBytes(mBeanServer, name) - callibrate;
-
       // measure multiple ticks
       PrintTools.info("Starting to loop.");
+      int tickCount = 0;
       while (yoTime.getDoubleValue() < totalTime || profile)
       {
-         long allocatedBytesBefore = threadAllocatedBytes(mBeanServer, name);
          doSingleTimeUpdate();
-         long allocatedBytesAfter = threadAllocatedBytes(mBeanServer, name);
-         allocatedInTick.set(allocatedBytesAfter - allocatedBytesBefore - bytesUsedToMeasure);
+
+         // send messages from time to time
+         if (tickCount > 0)
+         {
+            if (tickCount % (int) (4.0 / controlDT) == 0)
+            {
+               PrintTools.info("Sending Steps");
+               sendFootsteps();
+            }
+            if (tickCount % (int) (4.0 / controlDT) == (int) (2.0 / controlDT))
+            {
+               PrintTools.info("Sending Chest Trajectory");
+               sendChestTrajectory();
+            }
+            if (tickCount % (int) (4.0 / controlDT) == (int) (3.0 / controlDT))
+            {
+               PrintTools.info("Sending Arm Trajectory");
+               sendArmTrajectory();
+            }
+         }
+
+         tickCount++;
 
          if (showSCS)
          {
@@ -143,6 +168,60 @@ public class WalkingControllerTest
             scs.setTime(yoTime.getDoubleValue());
             scs.tickAndUpdate();
          }
+      }
+   }
+
+   private void sendFootsteps()
+   {
+      FootstepDataListMessage footsteps = new FootstepDataListMessage(0.3, 0.2);
+      MovingReferenceFrame stanceFrame = referenceFrames.getSoleZUpFrame(RobotSide.LEFT);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         MovingReferenceFrame soleFrame = referenceFrames.getSoleZUpFrame(robotSide);
+         FramePoint3D location = new FramePoint3D(soleFrame, 0.6, 0.0, 0.0);
+         FrameOrientation orientation = new FrameOrientation(soleFrame);
+
+         location.changeFrame(stanceFrame);
+         location.setZ(0.0);
+
+         location.changeFrame(ReferenceFrame.getWorldFrame());
+         orientation.changeFrame(ReferenceFrame.getWorldFrame());
+         FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location.getPoint(), orientation.getQuaternion());
+         footsteps.add(footstep);
+      }
+      commandInputManager.submitMessage(footsteps);
+   }
+
+   private void sendChestTrajectory()
+   {
+      ChestTrajectoryMessage message = new ChestTrajectoryMessage(2);
+      Quaternion orientation = new Quaternion();
+      orientation.appendYawRotation(Math.toRadians(-10.0));
+      orientation.appendRollRotation(Math.toRadians(10.0));
+      message.getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getPelvisZUpFrame());
+      message.setTrajectoryPoint(0, 0.5, orientation, new Vector3D(), referenceFrames.getPelvisZUpFrame());
+      message.setTrajectoryPoint(1, 1.0, new Quaternion(), new Vector3D(), referenceFrames.getPelvisZUpFrame());
+      commandInputManager.submitMessage(message);
+   }
+
+   private void sendArmTrajectory()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody chest = fullRobotModel.getChest();
+         RigidBody hand = fullRobotModel.getHand(robotSide);
+         OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(chest, hand);
+         ArmTrajectoryMessage message = new ArmTrajectoryMessage(robotSide, joints.length, 2);
+         for (int jointIdx = 0; jointIdx < joints.length; jointIdx++)
+         {
+            OneDoFJoint joint = joints[jointIdx];
+            double angle1 = MathTools.clamp(Math.toRadians(45.0), joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
+            double angle2 = MathTools.clamp(0.0, joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
+            message.setTrajectoryPoint(jointIdx, 0, 0.5, angle1, 0.0);
+            message.setTrajectoryPoint(jointIdx, 1, 1.0, angle2, 0.0);
+         }
+         commandInputManager.submitMessage(message);
       }
    }
 
@@ -169,23 +248,6 @@ public class WalkingControllerTest
       yoTime.add(robotModel.getControllerDT());
    }
 
-   private final String[] SIGNATURE = new String[]{long.class.getName()};
-   private final Object[] PARAMS = new Object[]{Thread.currentThread().getId()};
-   /**
-    * See http://www.rationaljava.com/2015/07/measuring-allocations-programmatically.html
-    */
-   private long threadAllocatedBytes(MBeanServer mBeanServer, ObjectName name)
-   {
-      try
-      {
-         return (long) mBeanServer.invoke(name, "getThreadAllocatedBytes", PARAMS, SIGNATURE);
-      }
-      catch (Exception e)
-      {
-         throw new IllegalArgumentException(e);
-      }
-   }
-
    private final Quaternion newOrientation = new Quaternion();
    private final Quaternion orientation = new Quaternion();
    private final Vector3D newAngularVelocity = new Vector3D();
@@ -207,11 +269,10 @@ public class WalkingControllerTest
    private void integrate()
    {
       // fix one foot to the ground:
-      RobotSide robotSide = finSideInFullSupport(footStates);
-      ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
-      solePosition.setToZero(soleFrame);
+      ReferenceFrame fixedFrame = findFrameToFix(footStates, referenceFrames);
+      solePosition.setToZero(fixedFrame);
       solePosition.changeFrame(ReferenceFrame.getWorldFrame());
-      double zCorrection = solePosition.getZ();
+      double zCorrection = 0.0;
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -228,7 +289,7 @@ public class WalkingControllerTest
             double qdNew = qd + controlDT * qdd;
 
             joint.setQ(qNew);
-            joint.setQd(qdNew);
+            joint.setQd(velocityDecay * qdNew);
          }
       }
 
@@ -263,11 +324,38 @@ public class WalkingControllerTest
       rootJoint.updateFramesRecursively();
       frameLinearVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), newLinearVelocity);
       frameAngularVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), newAngularVelocity);
+      frameLinearVelocity.scale(velocityDecay);
+      frameAngularVelocity.scale(velocityDecay);
       frameLinearVelocity.changeFrame(rootJoint.getFrameAfterJoint());
       frameAngularVelocity.changeFrame(rootJoint.getFrameAfterJoint());
       rootJointTwist.set(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(), frameLinearVelocity,
                          frameAngularVelocity);
       rootJoint.setJointTwist(rootJointTwist);
+   }
+
+   private ReferenceFrame findFrameToFix(SideDependentList<YoEnum<ConstraintType>> footStates, HumanoidReferenceFrames referenceFrames)
+   {
+      int sidesInDoubleSupport = 0;
+      RobotSide sideToFix = null;
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (footStates.get(robotSide).getEnumValue() == ConstraintType.FULL)
+         {
+            sidesInDoubleSupport++;
+            sideToFix = robotSide;
+         }
+      }
+
+      if (sidesInDoubleSupport == 2)
+      {
+         return referenceFrames.getMidFeetZUpFrame();
+      }
+      else if (sidesInDoubleSupport == 1)
+      {
+         return referenceFrames.getSoleZUpFrame(sideToFix);
+      }
+
+      throw new RuntimeException("One foot needs to be in full support at all times for this test.");
    }
 
    private void createControllerCore()
@@ -316,7 +404,7 @@ public class WalkingControllerTest
       contactableBodies.addAll(addidionalContacts);
 
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravityZ;
-      updatableFootSwitches = TestFootSwitch.createFootSwitches(feet, totalRobotWeight);
+      updatableFootSwitches = TestFootSwitch.createFootSwitches(feet, totalRobotWeight, referenceFrames.getSoleZUpFrames());
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<>(updatableFootSwitches);
 
       HighLevelHumanoidControllerToolbox controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, null,
@@ -336,18 +424,6 @@ public class WalkingControllerTest
 
       walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
                                                                  capturePointPlannerParameters, controllerToolbox);
-   }
-
-   private static RobotSide finSideInFullSupport(SideDependentList<YoEnum<ConstraintType>> footStates)
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         if (footStates.get(side).getEnumValue() == ConstraintType.FULL)
-         {
-            return side;
-         }
-      }
-      throw new RuntimeException("One foot needs to be in full support at all times for this test.");
    }
 
    @SuppressWarnings("unchecked")
@@ -392,7 +468,9 @@ public class WalkingControllerTest
          SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
          plotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
          plotterFactory.createOverheadPlotter();
+         scs.setCameraTracking(true, true, true, true);
          scs.addYoVariableRegistry(registry);
+         scs.setGroundVisible(false);
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
          scs.setTime(0.0);
          scs.tickAndUpdate();
@@ -434,6 +512,7 @@ public class WalkingControllerTest
          scs.setIndex(1);
          scs.setInPoint();
          scs.cropBuffer();
+         scs.play();
          scs.startOnAThread();
          ThreadTools.sleepForever();
       }
