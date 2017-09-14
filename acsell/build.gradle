@@ -5,11 +5,11 @@ buildscript {
    }
    dependencies {
       classpath "gradle.plugin.us.ihmc:ihmc-build:0.8.6"
+      classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
    }
 }
-plugins {
-   id "org.hidetake.ssh" version "2.9.0"
-}
+
+apply plugin: "org.hidetake.ssh"
 apply plugin: "us.ihmc.ihmc-build"
 
 ihmc {
