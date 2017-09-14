@@ -237,8 +237,17 @@ public class YoVariableHandShakeBuilder
       {
          YoVariableDefinition yoVariableDefinition = handshake.getVariables().add();
          yoVariableDefinition.setName(variable.getName());
+         
+         String description = variable.getDescription();
+         if(description.length() > 255)
+         {
+            description = description.substring(0, 255);
+         }
+         yoVariableDefinition.setDescription(description);
          yoVariableDefinition.setRegistry((short) registryID);
          yoVariableDefinition.setIsParameter(variable.isParameter());
+         yoVariableDefinition.setMin(variable.getManualScalingMin());
+         yoVariableDefinition.setMax(variable.getManualScalingMax());
          switch (variable.getYoVariableType())
          {
          case DOUBLE:

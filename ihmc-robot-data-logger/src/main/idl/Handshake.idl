@@ -26,6 +26,7 @@ module robotDataLogger{
 	struct YoVariableDefinition
 	{
 		string name;
+		string description;
 		YoType type;
 		unsigned short registry;
 		unsigned short enumType;

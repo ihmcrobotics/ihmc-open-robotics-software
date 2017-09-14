@@ -57,6 +57,8 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 	            
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
 
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
+
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
 	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
@@ -87,6 +89,8 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 	            
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
 
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getDescription().length() + 1;
+
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
 	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
@@ -112,6 +116,10 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 	    cdr.write_type_d(data.getName());else
 	        throw new RuntimeException("name field exceeds the maximum length");
 
+	    if(data.getDescription().length() <= 255)
+	    cdr.write_type_d(data.getDescription());else
+	        throw new RuntimeException("description field exceeds the maximum length");
+
 	    cdr.write_type_c(data.getType().ordinal());
 
 
@@ -132,6 +140,8 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
    {
 
 	    	cdr.read_type_d(data.getName());	
+
+	    	cdr.read_type_d(data.getDescription());	
 
 	    	data.setType(us.ihmc.robotDataLogger.YoType.values[cdr.read_type_c()]);
 	    	
@@ -160,6 +170,8 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 	{
 			    ser.write_type_d("name", data.getName());
 			    
+			    ser.write_type_d("description", data.getDescription());
+			    
 			    ser.write_type_c("type", data.getType());
 			    
 			    ser.write_type_3("registry", data.getRegistry());
@@ -180,6 +192,8 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 	public final void deserialize(InterchangeSerializer ser, us.ihmc.robotDataLogger.YoVariableDefinition data)
 	{
 	    			ser.read_type_d("name", data.getName());	
+	    	    
+	    			ser.read_type_d("description", data.getDescription());	
 	    	    
 	    			data.setType((us.ihmc.robotDataLogger.YoType)ser.read_type_c("type", us.ihmc.robotDataLogger.YoType.class));
 	    	
