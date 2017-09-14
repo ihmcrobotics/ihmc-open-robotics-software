@@ -15,6 +15,7 @@ public class YoVariableDefinition
     public YoVariableDefinition()
     {
         	name_ = new StringBuilder(255); 
+        	description_ = new StringBuilder(255); 
         
         
     }
@@ -23,6 +24,8 @@ public class YoVariableDefinition
     {
         	name_.setLength(0);
         	name_.append(other.name_);
+        	description_.setLength(0);
+        	description_.append(other.description_);
         	type_ = other.type_;
         	registry_ = other.registry_;
         	enumType_ = other.enumType_;
@@ -47,6 +50,23 @@ public class YoVariableDefinition
     public StringBuilder getName()
     {
         return name_;
+    }
+
+        
+        public void setDescription(String description)
+        {
+        	description_.setLength(0);
+        	description_.append(description);
+        }
+        
+        public String getDescriptionAsString()
+        {
+        	return getDescription().toString();
+        }
+
+    public StringBuilder getDescription()
+    {
+        return description_;
     }
 
         
@@ -142,6 +162,8 @@ public class YoVariableDefinition
 
         returnedValue &= us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_);
                 
+        returnedValue &= us.ihmc.idl.IDLTools.equals(this.description_, otherMyClass.description_);
+                
         returnedValue &= this.type_ == otherMyClass.type_;
 
                 
@@ -177,6 +199,10 @@ public class YoVariableDefinition
         builder.append(this.name_);
 
                 builder.append(", ");
+        builder.append("description=");
+        builder.append(this.description_);
+
+                builder.append(", ");
         builder.append("type=");
         builder.append(this.type_);
 
@@ -210,6 +236,7 @@ public class YoVariableDefinition
     }
 
     private StringBuilder name_; 
+    private StringBuilder description_; 
     private us.ihmc.robotDataLogger.YoType type_; 
     private int registry_; 
     private int enumType_; 
