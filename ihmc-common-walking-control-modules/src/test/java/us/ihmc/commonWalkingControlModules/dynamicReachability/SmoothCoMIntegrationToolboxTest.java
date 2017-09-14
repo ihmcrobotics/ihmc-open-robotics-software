@@ -86,16 +86,15 @@ public class SmoothCoMIntegrationToolboxTest
             }
          }
          
-         DenseMatrix64F gammaCoMPrimeAutomatic = new DenseMatrix64F(1, 1);
          DenseMatrix64F gammaCoMPrimeManual = new DenseMatrix64F(1, 1);
       
-         comToolbox.calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, gammaCoMPrimeAutomatic, 0, linear3D);
+         double gammaCoMPrimeAutomatic = comToolbox.calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, 0, linear3D);
          calculateGammaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, gammaCoMPrimeManual);
          
 //         PrintTools.debug("C linear calc: " + gammaCoMPrimeAutomatic.toString());
 //         PrintTools.debug("C linear test: " + gammaCoMPrimeManual.toString());
          
-         assertEquals(gammaCoMPrimeAutomatic.get(0), gammaCoMPrimeManual.get(0), EPSILON);
+         assertEquals(gammaCoMPrimeAutomatic, gammaCoMPrimeManual.get(0), EPSILON);
          
          DenseMatrix64F deltaCoMPrimeAutomatic = new DenseMatrix64F(3, 3 * numberOfCoefficients);
          DenseMatrix64F deltaCoMPrimeManual = new DenseMatrix64F(3, 3 * numberOfCoefficients);
@@ -171,16 +170,15 @@ public class SmoothCoMIntegrationToolboxTest
             }
          }
          
-         DenseMatrix64F dGammaCoMPrimeAutomatic = new DenseMatrix64F(1, 1);
          DenseMatrix64F dGammaCoMPrimeManual = new DenseMatrix64F(1, 1);
       
-         comToolbox.calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, dGammaCoMPrimeAutomatic, 1, linear3D);
+         double dGammaCoMPrimeAutomatic = comToolbox.calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, 1, linear3D);
          calculateDGammaCoMPrime3DByHandLinear(omega0 , time, t0, tFinal, dGammaCoMPrimeManual);
          
 //         PrintTools.debug("dC linear calc: " + dGammaCoMPrimeAutomatic.toString());
 //         PrintTools.debug("dC linear test: " + dGammaCoMPrimeManual.toString());
          
-         assertEquals(dGammaCoMPrimeAutomatic.get(0), dGammaCoMPrimeManual.get(0), EPSILON);
+         assertEquals(dGammaCoMPrimeAutomatic, dGammaCoMPrimeManual.get(0), EPSILON);
          
          DenseMatrix64F dDeltaCoMPrimeAutomatic = new DenseMatrix64F(1, 1);
          DenseMatrix64F dDeltaCoMPrimeManual = new DenseMatrix64F(1, 1);

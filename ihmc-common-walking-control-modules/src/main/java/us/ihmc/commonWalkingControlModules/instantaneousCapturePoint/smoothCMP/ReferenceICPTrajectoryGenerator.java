@@ -329,8 +329,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    
    public void setICPInitialConditionsForAdjustment(double time, int currentSwingSegment)
    {
-         icpAdjustmentToolbox.setICPInitialConditions(time, icpDesiredFinalPositionsFromCoPs, copTrajectories, currentSwingSegment, isInitialTransfer.getBooleanValue(),
-                                                      omega0.getDoubleValue());    
+         icpAdjustmentToolbox.setICPInitialConditions(time, icpDesiredFinalPositionsFromCoPs, copTrajectories, currentSwingSegment, omega0.getDoubleValue());
    }
 
    public void adjustDesiredTrajectoriesForInitialSmoothing()

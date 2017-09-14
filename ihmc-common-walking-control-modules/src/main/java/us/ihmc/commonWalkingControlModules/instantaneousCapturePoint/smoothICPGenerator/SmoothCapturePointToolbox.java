@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.Trajectory;
 
@@ -28,7 +29,6 @@ public class SmoothCapturePointToolbox
    
    private final DenseMatrix64F generalizedAlphaPrimeMatrix = new DenseMatrix64F(defaultSize, defaultSize);
    private final DenseMatrix64F generalizedBetaPrimeMatrix = new DenseMatrix64F(defaultSize, defaultSize);
-   private final DenseMatrix64F generalizedGammaPrimeMatrix = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F generalizedAlphaBetaPrimeMatrix = new DenseMatrix64F(defaultSize, defaultSize);
    
    private final DenseMatrix64F M1 = new DenseMatrix64F(defaultSize, defaultSize);
@@ -90,8 +90,7 @@ public class SmoothCapturePointToolbox
    public void computeDesiredCapturePointPosition3D(double omega0, double time, FramePoint3D finalCapturePoint, FrameTrajectory3D cmpPolynomial3D, 
                                                          FramePoint3D desiredCapturePointToPack)
    {         
-      calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, cmpPolynomial3D, finalCapturePoint, 
-                                                                                   desiredCapturePointToPack);
+      calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, cmpPolynomial3D, finalCapturePoint, desiredCapturePointToPack);
    }
    
    public void computeDesiredCapturePointPosition(double omega0, double time, FramePoint3D finalCapturePoint, FrameTrajectory3D cmpPolynomial3D, 
@@ -106,13 +105,6 @@ public class SmoothCapturePointToolbox
       }
    }  
    
-   public void computeDesiredCapturePointVelocity3D(double omega0, double time, FramePoint3D finalCapturePoint, FrameTrajectory3D cmpPolynomial3D,
-                                                         FrameVector3D desiredCapturePointVelocityToPack)
-   {
-      calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 1, cmpPolynomial3D, finalCapturePoint, 
-                                                                                   desiredCapturePointVelocityToPack);
-   }
-   
    public void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint3D finalCapturePoint, FrameTrajectory3D cmpPolynomial3D,
                                                                   FrameVector3D desiredCapturePointVelocityToPack)
    {
@@ -123,13 +115,6 @@ public class SmoothCapturePointToolbox
          
          desiredCapturePointVelocityToPack.setElement(dir.getIndex(), icpVelocityDesired);
       }
-   }
-   
-   public void computeDesiredCapturePointAcceleration3D(double omega0, double time, FramePoint3D finalCapturePoint, FrameTrajectory3D cmpPolynomial3D,
-                                                             FrameVector3D desiredCapturePointAccelerationToPack)
-   {
-      calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 2, cmpPolynomial3D, finalCapturePoint, 
-                                                                                   desiredCapturePointAccelerationToPack);
    }
    
    public void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint3D finalCapturePoint, FrameTrajectory3D cmpPolynomial3D,
@@ -156,10 +141,8 @@ public class SmoothCapturePointToolbox
     * @param time
     * @return
     */
-   public void calculateICPQuantityFromCorrespondingCMPPolynomial3D(double omega0, double time, int icpDerivativeOrder, 
-                                                                           FrameTrajectory3D cmpPolynomial3D, 
-                                                                           FrameTuple3D<?, ?> icpPositionDesiredFinal, 
-                                                                           FrameTuple3D<?, ?> icpQuantityDesired)
+   public void calculateICPQuantityFromCorrespondingCMPPolynomial3D(double omega0, double time, int icpDerivativeOrder, FrameTrajectory3D cmpPolynomial3D,
+                                                                    FrameTuple3D<?, ?> icpPositionDesiredFinal, FrameTuple3D<?, ?> icpQuantityDesired)
    {        
       int numberOfCoefficients = cmpPolynomial3D.getNumberOfCoefficients();
       if(numberOfCoefficients == -1)
@@ -173,10 +156,10 @@ public class SmoothCapturePointToolbox
 
       calculateGeneralizedAlphaPrimeOnCMPSegment3D(omega0, time, generalizedAlphaPrimeMatrix, icpDerivativeOrder, cmpPolynomial3D);
       calculateGeneralizedBetaPrimeOnCMPSegment3D(omega0, time, generalizedBetaPrimeMatrix, icpDerivativeOrder, cmpPolynomial3D);
-      calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, generalizedGammaPrimeMatrix, icpDerivativeOrder, cmpPolynomial3D);
+      double generalizedGammaPrime = calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, icpDerivativeOrder, cmpPolynomial3D);
       CommonOps.subtract(generalizedAlphaPrimeMatrix, generalizedBetaPrimeMatrix, generalizedAlphaBetaPrimeMatrix);
 
-      calculateICPQuantity3D(generalizedAlphaBetaPrimeMatrix, generalizedGammaPrimeMatrix, polynomialCoefficientCombinedVector, 
+      calculateICPQuantity3D(generalizedAlphaBetaPrimeMatrix, generalizedGammaPrime, polynomialCoefficientCombinedVector,
                              icpPositionDesiredFinal, icpQuantityDesired);
    }
    
@@ -189,10 +172,10 @@ public class SmoothCapturePointToolbox
    
       calculateGeneralizedAlphaPrimeOnCMPSegment1D(omega0, time, generalizedAlphaPrimeMatrix, icpDerivativeOrder, cmpPolynomial);
       calculateGeneralizedBetaPrimeOnCMPSegment1D(omega0, time, generalizedBetaPrimeMatrix, icpDerivativeOrder, cmpPolynomial);
-      calculateGeneralizedGammaPrimeOnCMPSegment1D(omega0, time, generalizedGammaPrimeMatrix, icpDerivativeOrder, cmpPolynomial);
+      double gammaPrimeDouble = calculateGeneralizedGammaPrimeOnCMPSegment1D(omega0, time, icpDerivativeOrder, cmpPolynomial);
       CommonOps.subtract(generalizedAlphaPrimeMatrix, generalizedBetaPrimeMatrix, generalizedAlphaBetaPrimeMatrix);
    
-      return calculateICPQuantity1D(generalizedAlphaBetaPrimeMatrix, generalizedGammaPrimeMatrix, polynomialCoefficientVector, icpPositionDesiredFinal);
+      return calculateICPQuantity1D(generalizedAlphaBetaPrimeMatrix, gammaPrimeDouble, polynomialCoefficientVector, icpPositionDesiredFinal);
    }
    
    /**
@@ -204,44 +187,44 @@ public class SmoothCapturePointToolbox
     *  + &gamma;<sup>(i)</sup><sub>ICP,&phi;</sub>(t<sub>&phi;</sub>) * &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>)
     * 
     * @param generalizedAlphaBetaPrimeMatrix
-    * @param generalizedGammaPrimeMatrix
+    * @param generalizedGammaPrime
     * @param polynomialCoefficientVector
     * @param icpPositionDesiredFinal
     * @return
     */
-   public void calculateICPQuantity3D(DenseMatrix64F generalizedAlphaBetaPrimeMatrix, DenseMatrix64F generalizedGammaPrimeMatrix,
+   // FIXME I bet this can be cleaner/faster
+   public void calculateICPQuantity3D(DenseMatrix64F generalizedAlphaBetaPrimeMatrix, double generalizedGammaPrime,
                                              DenseMatrix64F polynomialCoefficientCombinedVector, FrameTuple3D<?, ?> icpPositionDesiredFinal,
                                              FrameTuple3D<?, ?> icpQuantityDesired)
    {
-      M1.reshape(generalizedAlphaBetaPrimeMatrix.getNumRows(), polynomialCoefficientCombinedVector.getNumCols());
-      M1.zero();
+      int numRows = generalizedAlphaBetaPrimeMatrix.getNumRows();
+      M1.reshape(numRows, 1);
+      M2.reshape(numRows, 1);
 
       CommonOps.mult(generalizedAlphaBetaPrimeMatrix, polynomialCoefficientCombinedVector, M1);
       
-      M2.reshape(M1.getNumRows(),  M1.getNumCols());
-      M2.set(0, 0, generalizedGammaPrimeMatrix.get(0, 0) * icpPositionDesiredFinal.getX());
-      M2.set(1, 0, generalizedGammaPrimeMatrix.get(0, 0) * icpPositionDesiredFinal.getY());
-      M2.set(2, 0, generalizedGammaPrimeMatrix.get(0, 0) * icpPositionDesiredFinal.getZ());
+      M2.set(0, generalizedGammaPrime * icpPositionDesiredFinal.getX());
+      M2.set(1, generalizedGammaPrime * icpPositionDesiredFinal.getY());
+      M2.set(2, generalizedGammaPrime * icpPositionDesiredFinal.getZ());
             
       CommonOps.addEquals(M1, M2);
-      
-      icpQuantityDesired.set(M1.get(0, 0), M1.get(1, 0), M1.get(2, 0));
+      icpQuantityDesired.set(M1.get(0), M1.get(1), M1.get(2));
    }
-   
-   public double calculateICPQuantity1D(DenseMatrix64F generalizedAlphaBetaPrimeMatrix, DenseMatrix64F generalizedGammaPrimeMatrix,
+
+   // FIXME I bet this can be cleaner/faster
+   public double calculateICPQuantity1D(DenseMatrix64F generalizedAlphaBetaPrimeMatrix, double generalizedGammaPrime,
                                                DenseMatrix64F polynomialCoefficientVector, double icpPositionDesiredFinal)
    {
-      M1.reshape(generalizedAlphaBetaPrimeMatrix.getNumRows(), polynomialCoefficientVector.getNumCols());
-      M1.zero();
+      int numRows = generalizedAlphaBetaPrimeMatrix.getNumRows();
+      M1.reshape(numRows, 1);
+      M2.reshape(numRows, 1);
 
       CommonOps.mult(generalizedAlphaBetaPrimeMatrix, polynomialCoefficientVector, M1);
 
-      M2.reshape(M1.getNumRows(),  M1.getNumCols());
-      M2.set(0, 0, generalizedGammaPrimeMatrix.get(0, 0) * icpPositionDesiredFinal);
-            
+      M2.set(0, generalizedGammaPrime * icpPositionDesiredFinal);
       CommonOps.addEquals(M1, M2);
-      
-      return M1.get(0, 0);
+
+      return M1.get(0);
    }
    
    /**
@@ -264,7 +247,8 @@ public class SmoothCapturePointToolbox
          
          calculateGeneralizedAlphaPrimeOnCMPSegment1D(omega0, time, generalizedAlphaPrimeRow, alphaDerivativeOrder, cmpPolynomial);
          
-         CommonOps.insert(generalizedAlphaPrimeRow, generalizedAlphaPrime, dir.ordinal(), dir.ordinal() * generalizedAlphaPrimeRow.numCols);
+         MatrixTools.setMatrixBlock(generalizedAlphaPrime, dir.ordinal(), dir.ordinal() * generalizedAlphaPrimeRow.numCols, generalizedAlphaPrimeRow, 0, 0,
+                                    generalizedAlphaPrimeRow.numRows, generalizedAlphaPrimeRow.numCols, 1.0);
       }
    }
    
@@ -303,12 +287,13 @@ public class SmoothCapturePointToolbox
          
          calculateGeneralizedBetaPrimeOnCMPSegment1D(omega0, time, generalizedBetaPrimeRow, betaDerivativeOrder, cmpPolynomial);
          
-         CommonOps.insert(generalizedBetaPrimeRow, generalizedBetaPrime, dir.ordinal(), dir.ordinal() * generalizedBetaPrimeRow.numCols);
+         MatrixTools.setMatrixBlock(generalizedBetaPrime, dir.ordinal(), dir.ordinal() * generalizedBetaPrimeRow.numCols, generalizedBetaPrimeRow, 0, 0,
+                                    generalizedBetaPrimeRow.numRows, generalizedBetaPrimeRow.numCols, 1.0);
       }
    }
    
-   public void calculateGeneralizedBetaPrimeOnCMPSegment1D(double omega0, double time, DenseMatrix64F generalizedBetaPrimeRow, 
-                                                                  int betaDerivativeOrder, Trajectory cmpPolynomial)
+   public void calculateGeneralizedBetaPrimeOnCMPSegment1D(double omega0, double time, DenseMatrix64F generalizedBetaPrimeRow, int betaDerivativeOrder,
+                                                           Trajectory cmpPolynomial)
    {                  
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
       double timeSegmentTotal = cmpPolynomial.getFinalTime();
@@ -329,45 +314,43 @@ public class SmoothCapturePointToolbox
     * &gamma;<sup>(i)</sup><sub>ICP,&phi;</sub>(t<sub>&phi;</sub>) = &omega;<sub>0</sub><sup>i</sup> * 
     * e<sup>&omega;<sub>0</sub>(t<sub>&phi;</sub>-T<sub>&phi;</sub>)</sup>
     * 
-    * @param generalizedGammaPrime
     * @param gammaDerivativeOrder
     * @param cmpPolynomial3D
     * @param time
+    * @return generalizedGammaPrime
     */
-   public void calculateGeneralizedGammaPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedGammaPrime, 
-                                                                   int gammaDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
+   public double calculateGeneralizedGammaPrimeOnCMPSegment3D(double omega0, double time, int gammaDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
    {      
       double timeSegmentTotal = cmpPolynomial3D.getFinalTime();
-      double ddGamaPrimeValue = Math.pow(omega0, gammaDerivativeOrder)*Math.exp(omega0 * (time - timeSegmentTotal));
-      generalizedGammaPrime.set(0, 0, ddGamaPrimeValue);
+      return Math.pow(omega0, gammaDerivativeOrder) * Math.exp(omega0 * (time - timeSegmentTotal));
    }
-   
-   public void calculateGeneralizedGammaPrimeOnCMPSegment1D(double omega0, double time, DenseMatrix64F generalizedGammaPrime, 
+
+   public double calculateGeneralizedGammaPrimeOnCMPSegment1D(double omega0, double time, int gammaDerivativeOrder, Trajectory cmpPolynomial)
+   {
+      double timeSegmentTotal = cmpPolynomial.getFinalTime();
+      return Math.pow(omega0, gammaDerivativeOrder) * Math.exp(omega0 * (time - timeSegmentTotal));
+   }
+
+   public double calculateGeneralizedGammaPrimeOnCMPSegment1D(double omega0, double time, DenseMatrix64F generalizedGammaPrime,
                                                                    int gammaDerivativeOrder, Trajectory cmpPolynomial)
    {      
       double timeSegmentTotal = cmpPolynomial.getFinalTime();
       double ddGamaPrimeValue = Math.pow(omega0, gammaDerivativeOrder)*Math.exp(omega0 * (time - timeSegmentTotal));
       generalizedGammaPrime.set(0, 0, ddGamaPrimeValue);
+
+      return ddGamaPrimeValue;
    }
-   
-   public void calculateGeneralizedMatricesPrimeOnCMPSegment3D(double omega0, double time, int derivativeOrder, FrameTrajectory3D cmpPolynomial, 
-                                                               DenseMatrix64F generalizedAlphaPrime, DenseMatrix64F generalizedBetaPrime,
-                                                               DenseMatrix64F generalizedGammaPrime, DenseMatrix64F generalizedAlphaBetaPrime)
-   {
-      calculateGeneralizedAlphaPrimeOnCMPSegment3D(omega0, time, generalizedAlphaPrime, derivativeOrder, cmpPolynomial);
-      calculateGeneralizedBetaPrimeOnCMPSegment3D(omega0, time, generalizedBetaPrime, derivativeOrder, cmpPolynomial);
-      calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, generalizedGammaPrime, derivativeOrder, cmpPolynomial);
-      CommonOps.subtract(generalizedAlphaPrime, generalizedBetaPrime, generalizedAlphaBetaPrime);
-   }
-   
-   public void calculateGeneralizedMatricesPrimeOnCMPSegment1D(double omega0, double time, int derivativeOrder, Trajectory cmpPolynomial,
+
+   public double calculateGeneralizedMatricesPrimeOnCMPSegment1D(double omega0, double time, int derivativeOrder, Trajectory cmpPolynomial,
                                                                DenseMatrix64F generalizedAlphaPrime, DenseMatrix64F generalizedBetaPrime,
                                                                DenseMatrix64F generalizedGammaPrime, DenseMatrix64F generalizedAlphaBetaPrime)
    {
       calculateGeneralizedAlphaPrimeOnCMPSegment1D(omega0, time, generalizedAlphaPrime, derivativeOrder, cmpPolynomial);
       calculateGeneralizedBetaPrimeOnCMPSegment1D(omega0, time, generalizedBetaPrime, derivativeOrder, cmpPolynomial);
-      calculateGeneralizedGammaPrimeOnCMPSegment1D(omega0, time, generalizedGammaPrime, derivativeOrder, cmpPolynomial);
+      double gammaPrimeDouble = calculateGeneralizedGammaPrimeOnCMPSegment1D(omega0, time, generalizedGammaPrime, derivativeOrder, cmpPolynomial);
       CommonOps.subtract(generalizedAlphaPrime, generalizedBetaPrime, generalizedAlphaBetaPrime);
+
+      return gammaPrimeDouble;
    }
 
    private void initializeMatrices3D(int numberOfCoefficients)
@@ -393,9 +376,6 @@ public class SmoothCapturePointToolbox
       
       generalizedAlphaBetaPrimeMatrix.reshape(dimension, dimension * numberOfCoefficients);
       generalizedAlphaBetaPrimeMatrix.zero();
-      
-      generalizedGammaPrimeMatrix.reshape(1, 1);
-      generalizedGammaPrimeMatrix.zero();
    }
    
    private void setPolynomialCoefficientVector3D(DenseMatrix64F polynomialCoefficientCombinedVector, FrameTrajectory3D cmpPolynomial3D)
@@ -404,15 +384,16 @@ public class SmoothCapturePointToolbox
       {
          setPolynomialCoefficientVector1D(polynomialCoefficientVector, cmpPolynomial3D.getTrajectory(dir));
          
-         CommonOps.insert(polynomialCoefficientVector, polynomialCoefficientCombinedVector, dir.ordinal() * polynomialCoefficientVector.numRows, 0);
+         MatrixTools.setMatrixBlock(polynomialCoefficientCombinedVector, dir.ordinal() * polynomialCoefficientVector.numRows, 0, polynomialCoefficientVector,
+                                    0, 0, polynomialCoefficientVector.numRows, polynomialCoefficientVector.numCols, 1.0);
       }
    }
    
-   private void setPolynomialCoefficientVector1D(DenseMatrix64F polynomialCoefficientVector, Trajectory cmpPolynomial)
+   private static void setPolynomialCoefficientVector1D(DenseMatrix64F polynomialCoefficientVectorToPack, Trajectory cmpPolynomial)
    {
       double[] polynomialCoefficients = cmpPolynomial.getCoefficients();
       
-      polynomialCoefficientVector.reshape(cmpPolynomial.getNumberOfCoefficients(), 1);
-      polynomialCoefficientVector.setData(polynomialCoefficients);
+      polynomialCoefficientVectorToPack.reshape(cmpPolynomial.getNumberOfCoefficients(), 1);
+      polynomialCoefficientVectorToPack.setData(polynomialCoefficients);
    }
 }

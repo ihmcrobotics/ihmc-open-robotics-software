@@ -196,16 +196,15 @@ public class SmoothCapturePointToolboxTest
             }
          }
          
-         DenseMatrix64F gammaPrimeAutomatic = new DenseMatrix64F(1, 1);
          DenseMatrix64F gammaPrimeManual = new DenseMatrix64F(1, 1);
       
-         icpToolbox.calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, gammaPrimeAutomatic, 0, linear3D);
+         double gammaPrimeAutomatic = icpToolbox.calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, 0, linear3D);
          calculateGammaPrime3DByHandLinear(omega0 , time, tFinal, gammaPrimeManual);
          
 //         PrintTools.debug("C linear calc: " + gammaPrimeAutomatic.toString());
 //         PrintTools.debug("C linear test: " + gammaPrimeManual.toString());
          
-         assertEquals(gammaPrimeAutomatic.get(0), gammaPrimeManual.get(0), EPSILON);
+         assertEquals(gammaPrimeAutomatic, gammaPrimeManual.get(0), EPSILON);
       }
    }
    
@@ -267,16 +266,15 @@ public class SmoothCapturePointToolboxTest
             }
          }
          
-         DenseMatrix64F gammaPrimeAutomatic = new DenseMatrix64F(1, 1);
          DenseMatrix64F gammaPrimeManual = new DenseMatrix64F(1, 1);
       
-         icpToolbox.calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, gammaPrimeAutomatic, 0, cubic3D);
+         double gammaPrimeAutomatic = icpToolbox.calculateGeneralizedGammaPrimeOnCMPSegment3D(omega0, time, 0, cubic3D);
          calculateGammaPrime3DByHandCubic(omega0 , time, tFinal, gammaPrimeManual);
          
 //         PrintTools.debug("C cubic calc: " + gammaPrimeAutomatic.toString());
 //         PrintTools.debug("C cubic test: " + gammaPrimeManual.toString());
          
-         assertEquals(gammaPrimeAutomatic.get(0), gammaPrimeManual.get(0), EPSILON);
+         assertEquals(gammaPrimeAutomatic, gammaPrimeManual.get(0), EPSILON);
       }
    }
    
