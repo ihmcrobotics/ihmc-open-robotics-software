@@ -24,6 +24,8 @@ apply plugin: "application"
 apply plugin: "org.hidetake.ssh"
 apply plugin: "us.ihmc.ihmc-build"
 
+import org.gradle.api.GradleException
+
 ihmc {
    loadProductProperties("../product.properties")
 
