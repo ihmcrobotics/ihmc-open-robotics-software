@@ -11,9 +11,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class TransferState extends WalkingState
 {
@@ -81,11 +81,6 @@ public abstract class TransferState extends WalkingState
          return true;
       else
          return balanceManager.isTransitionToSingleSupportSafe(transferToSide);
-   }
-
-   public boolean isStopWalkingSafe()
-   {
-      return balanceManager.isTransitionToStandingSafe();
    }
 
    public void switchToToeOffIfPossible()

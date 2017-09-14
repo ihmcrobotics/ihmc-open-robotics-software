@@ -21,7 +21,7 @@ public class StopWalkingFromTransferCondition implements StateTransitionConditio
    {
       RobotSide trailingFootSide = transferState.getTransferToSide().getOppositeSide();
       boolean noFootstep = !walkingMessageHandler.isNextFootstepFor(trailingFootSide);
-      
-      return noFootstep && transferState.isStopWalkingSafe();
+
+      return noFootstep;
    }
 }
