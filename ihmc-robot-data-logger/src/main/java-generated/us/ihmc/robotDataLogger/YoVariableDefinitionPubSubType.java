@@ -67,6 +67,10 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 
 	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
 
+	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+
+	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+
 	
 	    return current_alignment - initial_alignment;
 	}
@@ -93,6 +97,10 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 
 	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
 
+	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+
+	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+
 	
 	    return current_alignment - initial_alignment;
 	}
@@ -114,6 +122,10 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 	    cdr.write_type_7(data.getAllowNullValues());
 
 	    cdr.write_type_7(data.getIsParameter());
+
+	    cdr.write_type_6(data.getMin());
+
+	    cdr.write_type_6(data.getMax());
    }
 
    public static void read(us.ihmc.robotDataLogger.YoVariableDefinition data, CDR cdr)
@@ -135,6 +147,12 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 
 	    	data.setIsParameter(cdr.read_type_7());
 	    	
+
+	    	data.setMin(cdr.read_type_6());
+	    	
+
+	    	data.setMax(cdr.read_type_6());
+	    	
    }
    
 	@Override
@@ -151,6 +169,10 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 			    ser.write_type_7("allowNullValues", data.getAllowNullValues());
 			    
 			    ser.write_type_7("isParameter", data.getIsParameter());
+			    
+			    ser.write_type_6("min", data.getMin());
+			    
+			    ser.write_type_6("max", data.getMax());
 			    
 	}
 	
@@ -169,6 +191,10 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 	    			data.setAllowNullValues(ser.read_type_7("allowNullValues"));	
 	    	    
 	    			data.setIsParameter(ser.read_type_7("isParameter"));	
+	    	    
+	    			data.setMin(ser.read_type_6("min"));	
+	    	    
+	    			data.setMax(ser.read_type_6("max"));	
 	    	    
 	}
 

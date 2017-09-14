@@ -31,6 +31,8 @@ module robotDataLogger{
 		unsigned short enumType;
 		boolean allowNullValues;
 		boolean isParameter;
+		double min;
+		double max;
 	};
 	
 	struct JointDefinition
