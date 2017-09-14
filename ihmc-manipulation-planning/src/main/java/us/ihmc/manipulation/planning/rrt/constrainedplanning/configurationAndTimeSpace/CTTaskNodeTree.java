@@ -22,16 +22,11 @@ public class CTTaskNodeTree
 
    private TaskRegion nodeRegion;// = CTTaskNode.constrainedEndEffectorTrajectory.getTaskRegion();
 
-   /*
+   /**
     * If @param matricRatioTimeToTask is 0.3, the matric will be obtained as
     * much as (getNormalizedTimeGap*0.3 + getNormalizedTaskDisplacement*0.7).
-    */
-//   private static double matricRatioTimeToTask = 0.4;
-//
-//   private double maximumDisplacementOfStep = 0.10;
-//   private double maximumTimeGapOfStep = 0.02;
-   
-   private static double matricRatioTimeToTask = 0.4;
+    */   
+   private static double matricRatioTimeToTask = 0.1; // 0.4
 
    private double maximumDisplacementOfStep = 0.06;
    private double maximumTimeGapOfStep = 0.05;
@@ -182,7 +177,7 @@ public class CTTaskNodeTree
       return nodeNew.getNormalizedNodeData(0) - nodeOld.getNormalizedNodeData(0);
    }
 
-   private double getMetric(CTTaskNode nodeOne, CTTaskNode nodeTwo)
+   public double getMetric(CTTaskNode nodeOne, CTTaskNode nodeTwo)
    {
       double normalizedtimeGap = getNormalizedTimeGap(nodeOne, nodeTwo);
       double normalizedTaskDisplacement = getNormalizedTaskDisplacement(nodeOne, nodeTwo);
@@ -195,8 +190,10 @@ public class CTTaskNodeTree
 
          matric = normalizedtimeGap * normalizedtimeGap * matricRatioTimeToTask
                + normalizedTaskDisplacement * normalizedTaskDisplacement * (1 - matricRatioTimeToTask);
+         matric = normalizedtimeGap * normalizedtimeGap * matricRatioTimeToTask
+               + normalizedTaskDisplacement * normalizedTaskDisplacement * 1.0;
          matric = Math.sqrt(matric);
-                  matric = getNormalizedDisplacement(nodeOne, nodeTwo);
+         // matric = getNormalizedDisplacement(nodeOne, nodeTwo);
          return matric;
       }
    }

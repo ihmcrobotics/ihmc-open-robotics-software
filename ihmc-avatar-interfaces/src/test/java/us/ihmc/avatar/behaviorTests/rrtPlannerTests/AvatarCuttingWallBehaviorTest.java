@@ -233,20 +233,18 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       /*
        * Behavior create.
        */
-
       CuttingWallBehaviorStateMachine cuttingWallBehaviorStateMachine = new CuttingWallBehaviorStateMachine(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
                                                                                                             drcBehaviorTestHelper.getYoTime(),
                                                                                                             sdfFullRobotModel, referenceFrames);
 
       referenceFrames.updateFrames();
-
       
       System.out.println("Behavior Dispatch");
       drcBehaviorTestHelper.dispatchBehavior(cuttingWallBehaviorStateMachine);
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
             
-      Point3D centerPosition = new Point3D(0.536, 0.013, 1.186);
+      Point3D centerPosition = new Point3D(0.544, -0.01, 1.1164);
       Quaternion centerOrientation = new Quaternion();
       centerOrientation.appendPitchRotation(-Math.PI*0.5);
       WallPosePacket wallPosePacket = new WallPosePacket(0.35, centerPosition, centerOrientation);
