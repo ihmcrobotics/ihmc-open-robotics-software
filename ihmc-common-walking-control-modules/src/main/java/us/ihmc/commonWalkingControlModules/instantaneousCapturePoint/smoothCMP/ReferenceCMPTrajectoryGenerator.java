@@ -151,6 +151,7 @@ public class ReferenceCMPTrajectoryGenerator
          copyCoPTrajectoriesToCMPTrajectories(transferCoPTrajectories, swingCoPTrajectories);
          return;
       }
+
       int numberOfFootstepsToSet = Math.min(numberOfFootstepsToConsider.getIntegerValue(), numberOfRegisteredSteps);
       int index = 0;
       if(phase == WalkingTrajectoryType.SWING)
