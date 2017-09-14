@@ -206,19 +206,15 @@ public class ReferenceCMPTrajectoryGenerator
       {
          CMPTrajectory cmpTrajectoryReference = transferCMPTrajectories.get(i);
          CoPTrajectory copTrajectoryReference = transferCoPTrajectories.get(i);
-         for (int j = 0; j < copTrajectoryReference.getNumberOfSegments(); j++)
-            cmpTrajectoryReference.getSegment(j).set(copTrajectoryReference.getSegments().get(j));
-         cmpTrajectoryReference.setNumberOfSegments(copTrajectoryReference.getNumberOfSegments());
+         cmpTrajectoryReference.setAll(copTrajectoryReference);
+
          cmpTrajectoryReference = swingCMPTrajectories.get(i);
          copTrajectoryReference = swingCoPTrajectories.get(i);
-         for (int j = 0; j < copTrajectoryReference.getNumberOfSegments(); j++)
-            cmpTrajectoryReference.getSegment(j).set(copTrajectoryReference.getSegments().get(j));
-         cmpTrajectoryReference.setNumberOfSegments(copTrajectoryReference.getNumberOfSegments());
+         cmpTrajectoryReference.setAll(copTrajectoryReference);
       }
+
       CMPTrajectory cmpTrajectoryReference = transferCMPTrajectories.get(numberOfFootstepsToCopy);
       CoPTrajectory copTrajectoryReference = transferCoPTrajectories.get(numberOfFootstepsToCopy);
-      for (int j = 0; j < copTrajectoryReference.getNumberOfSegments(); j++)
-         cmpTrajectoryReference.getSegment(j).set(copTrajectoryReference.getSegments().get(j));
-      cmpTrajectoryReference.setNumberOfSegments(copTrajectoryReference.getNumberOfSegments());
+      cmpTrajectoryReference.setAll(copTrajectoryReference);
    }
 }

@@ -644,23 +644,23 @@ public class TrajectoryMathTools
                                         double TIME_EPSILON)
    {
       double currentTime = Math.min(traj1.getSegment(0).getInitialTime(), traj2.getSegment(0).getInitialTime());
-      int k = 0;
-      for (int i = 0, j = 0; i < traj1.getNumberOfSegments() || j < traj2.getNumberOfSegments(); k++)
+      for (int i = 0, j = 0; i < traj1.getNumberOfSegments() || j < traj2.getNumberOfSegments();)
       {
          FrameTrajectory3D segmentTraj1, segmentTraj2;
+         FrameTrajectory3D currentTrajectoryToPack = trajToPack.add();
 
          // Select the one that is ahead or set if no intersection
          if (i >= traj1.getNumberOfSegments()
                || (j < traj2.getNumberOfSegments() && traj2.getSegment(j).getFinalTime() < traj1.getSegment(i).getInitialTime() - TIME_EPSILON))
          {
-            setCurrentSegmentPolynomial(trajToPack.getSegment(k), traj2.getSegment(j), currentTime, traj2.getSegment(j).getFinalTime(), TIME_EPSILON);
+            setCurrentSegmentPolynomial(currentTrajectoryToPack, traj2.getSegment(j), currentTime, traj2.getSegment(j).getFinalTime(), TIME_EPSILON);
             currentTime = traj2.getSegment(j++).getFinalTime();
             continue;
          }
          else if (j >= traj2.getNumberOfSegments()
                || (i < traj1.getNumberOfSegments() && traj1.getSegment(i).getFinalTime() < traj2.getSegment(j).getInitialTime() - TIME_EPSILON))
          {
-            setCurrentSegmentPolynomial(trajToPack.getSegment(k), traj1.getSegment(i), currentTime, traj1.getSegment(i).getFinalTime(), TIME_EPSILON);
+            setCurrentSegmentPolynomial(currentTrajectoryToPack, traj1.getSegment(i), currentTime, traj1.getSegment(i).getFinalTime(), TIME_EPSILON);
             currentTime = traj1.getSegment(i++).getFinalTime();
             continue;
          }
@@ -675,12 +675,13 @@ public class TrajectoryMathTools
             segmentTraj1 = traj2.getSegment(j);
          }
 
+         // FIXME why get the next one
          if (segmentTraj1.getInitialTime() < segmentTraj2.getInitialTime() - TIME_EPSILON && currentTime - TIME_EPSILON < segmentTraj1.getInitialTime())
          {
-            setCurrentSegmentPolynomial(trajToPack.getSegment(k++), segmentTraj1, currentTime, segmentTraj2.getInitialTime(), TIME_EPSILON);
+            setCurrentSegmentPolynomial(currentTrajectoryToPack, segmentTraj1, currentTime, segmentTraj2.getInitialTime(), TIME_EPSILON);
          }
 
-         addByTrimming(trajToPack.getSegment(k), segmentTraj1, segmentTraj2);
+         addByTrimming(currentTrajectoryToPack, segmentTraj1, segmentTraj2);
          currentTime = Math.min(segmentTraj1.getFinalTime(), segmentTraj2.getFinalTime());
          if (currentTime < traj2.getSegment(j).getFinalTime() - TIME_EPSILON)
             i++;
@@ -692,7 +693,6 @@ public class TrajectoryMathTools
             j++;
          }
       }
-      trajToPack.setNumberOfSegments(k);
    }
 
    public static void getDerivative(FrameTrajectory3D trajectoryToPack, FrameTrajectory3D trajectoryToDifferentiate)

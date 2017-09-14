@@ -1167,26 +1167,19 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       framePointToPack.changeFrame(worldFrame);
    }
 
-   private WalkingTrajectoryType trajectoryType = WalkingTrajectoryType.TRANSFER;
-   private double timeInState = 0.0;
-   private int transferTrajectoryIndex = -1;
-   private int swingTrajectoryIndex = -1;
-   private List<CoPPointName> copList;
-
    private void generateCoPTrajectoriesFromWayPoints()
    {
       //It is always guaranteed that the initial state will be transfer the way this code is written. This is needed for the angular momentum approximation to work
       tempFramePoint1.setToNaN(worldFrame);
-      trajectoryType = WalkingTrajectoryType.TRANSFER;
-      copList = null;
-      timeInState = 0.0;
-      transferTrajectoryIndex = -1;
-      swingTrajectoryIndex = -1;
+      WalkingTrajectoryType trajectoryType = WalkingTrajectoryType.TRANSFER;
+      double timeInState = 0.0;
+      int transferTrajectoryIndex = -1;
+      int swingTrajectoryIndex = -1;
 
       for (int waypointIndex = 0; waypointIndex < copLocationWaypoints.size()
             && !copLocationWaypoints.get(waypointIndex).getCoPPointList().isEmpty(); waypointIndex++)
       {
-         copList = copLocationWaypoints.get(waypointIndex).getCoPPointList();
+         List<CoPPointName> copList = copLocationWaypoints.get(waypointIndex).getCoPPointList();
          for (int segmentIndex = 0; segmentIndex < copList.size(); segmentIndex++)
          {
             CoPTrajectoryPoint currentPoint = copLocationWaypoints.get(waypointIndex).get(segmentIndex);
@@ -1194,12 +1187,12 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             {
                if (trajectoryType == WalkingTrajectoryType.SWING)
                {
-                  swingCoPTrajectories.get(swingTrajectoryIndex).setSegment(timeInState, timeInState + currentPoint.getTime(), tempFramePoint1,
+                  swingCoPTrajectories.get(swingTrajectoryIndex).setNextSegment(timeInState, timeInState + currentPoint.getTime(), tempFramePoint1,
                                                                             currentPoint.getPosition().getFrameTuple());
                }
                else
                {
-                  transferCoPTrajectories.get(transferTrajectoryIndex).setSegment(timeInState, timeInState + currentPoint.getTime(), tempFramePoint1,
+                  transferCoPTrajectories.get(transferTrajectoryIndex).setNextSegment(timeInState, timeInState + currentPoint.getTime(), tempFramePoint1,
                                                                                   currentPoint.getPosition().getFrameTuple());
                }
             }
@@ -1249,6 +1242,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    public double getCurrentStateFinalTime()
    {
-      return activeTrajectory.getNodeTimes()[activeTrajectory.getNumberOfSegments()];
+      if (activeTrajectory.getNumberOfSegments() == 0)
+         return 0.0;
+      else
+         return activeTrajectory.getNodeTimes()[activeTrajectory.getNumberOfSegments()];
    }
 }

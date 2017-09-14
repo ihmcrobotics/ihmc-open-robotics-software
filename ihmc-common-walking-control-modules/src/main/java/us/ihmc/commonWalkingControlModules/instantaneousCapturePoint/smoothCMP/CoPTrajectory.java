@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
 
 public class CoPTrajectory extends SegmentedFrameTrajectory3D implements CoPTrajectoryInterface
@@ -21,20 +22,18 @@ public class CoPTrajectory extends SegmentedFrameTrajectory3D implements CoPTraj
       this.stepNumber = stepNumber;
    }
 
-   public void setSegment(double initialTime, double finalTime, FramePoint3D initialPosition, FramePoint3D finalPosition)
+   public void setNextSegment(double initialTime, double finalTime, FramePoint3D initialPosition, FramePoint3D finalPosition)
    {
-      //PrintTools.debug("Step:" + stepNumber + " " + trajectoryType.toString() + " Trajectory " + numberOfSegments.getIntegerValue() + " , InitialTime: " + initialTime + " FinalTime: " + finalTime + " InitialPosition: "
-      //      + initialPosition.toString() + " FinalPosition: " + finalPosition.toString());
+      FrameTrajectory3D segment = segments.add();
       switch (this.splineType)
       {
       case CUBIC:
-         segments.get(numberOfSegments).setCubic(initialTime, finalTime, initialPosition, finalPosition);
+         segment.setCubic(initialTime, finalTime, initialPosition, finalPosition);
          break;
       default:
-         segments.get(numberOfSegments).setLinear(initialTime, finalTime, initialPosition, finalPosition);
+         segment.setLinear(initialTime, finalTime, initialPosition, finalPosition);
          break;
       }
-      numberOfSegments++;
    }
    
    public WalkingTrajectoryType getTrajectoryType()
