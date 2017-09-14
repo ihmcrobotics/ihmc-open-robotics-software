@@ -244,7 +244,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
             
-      Point3D centerPosition = new Point3D(0.544, -0.01, 1.1164);
+      Point3D centerPosition = new Point3D(0.544, -0.01, 1.0164);
       Quaternion centerOrientation = new Quaternion();
       centerOrientation.appendPitchRotation(-Math.PI*0.5);
       WallPosePacket wallPosePacket = new WallPosePacket(0.35, centerPosition, centerOrientation);
