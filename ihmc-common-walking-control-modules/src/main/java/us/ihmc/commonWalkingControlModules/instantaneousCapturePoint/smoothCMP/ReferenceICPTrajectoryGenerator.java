@@ -128,8 +128,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       totalNumberOfCMPSegments.set(0);
       localTimeInCurrentPhase.set(0.0);
       
-      icpPhaseEntryCornerPointIndices.clear();
-      icpPhaseExitCornerPointIndices.clear();
+      icpPhaseEntryCornerPointIndices.resetQuick();
+      icpPhaseExitCornerPointIndices.resetQuick();
    }
    
    public void resetCoPs()

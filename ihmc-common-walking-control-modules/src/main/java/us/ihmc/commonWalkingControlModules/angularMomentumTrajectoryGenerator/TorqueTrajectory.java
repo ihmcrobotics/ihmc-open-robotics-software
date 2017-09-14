@@ -11,7 +11,7 @@ public class TorqueTrajectory extends SegmentedFrameTrajectory3D
    {
       super(maxNumberOfSegments, maxNumberOfCoefficients);
    }
-   
+
    public void setNext(AngularMomentumTrajectory angMomTraj)
    {
       this.reset();
