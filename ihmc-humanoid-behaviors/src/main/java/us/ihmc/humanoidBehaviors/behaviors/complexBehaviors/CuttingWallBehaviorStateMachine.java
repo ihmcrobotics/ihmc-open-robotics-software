@@ -74,6 +74,15 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
       setupStateMachine();
    }
 
+   @Override
+   public void doControl()
+   {  
+      if (isPaused())
+         return;
+      
+      super.doControl();
+   }
+   
    public void setCenterFramePose(FramePose centerFramePose)
    {
       PrintTools.info("" + centerFramePose);
@@ -230,6 +239,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
             if (condition)
                PrintTools.info("planSuccededCondition condition okay");
             ;
+            // pause();
             return condition;
          }
       };

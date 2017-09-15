@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedW
 
 import java.util.ArrayList;
 
+import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
@@ -20,13 +21,20 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
    public int planningResult;
 
    public WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage;
-   
+
+   //TODO : will be get rid of.
    public SideDependentList<ArrayList<Pose3D>> handTrajectories = new SideDependentList<>();
+
+   public KinematicsToolboxOutputStatus[] robotConfigurations;
+
+   public double[] trajectoryTimes;
 
    public ConstrainedWholeBodyPlanningToolboxOutputStatus()
    {
       handTrajectories.put(RobotSide.LEFT, new ArrayList<Pose3D>());
       handTrajectories.put(RobotSide.RIGHT, new ArrayList<Pose3D>());
+
+      
    }
 
    @Override

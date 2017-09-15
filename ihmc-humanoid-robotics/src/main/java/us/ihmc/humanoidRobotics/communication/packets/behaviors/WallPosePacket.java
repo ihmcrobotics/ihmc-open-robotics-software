@@ -10,7 +10,7 @@ import us.ihmc.robotics.MathTools;
 
 public class WallPosePacket extends Packet<WallPosePacket>
 {
-   public double cuttingRadius = 0.35;
+   public double cuttingRadius = 0.20;
    public Point3D centerPosition;
    public Quaternion centerOrientation;
 
