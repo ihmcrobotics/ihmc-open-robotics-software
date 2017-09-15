@@ -9,9 +9,11 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.CTTreeTools;
 public class CTTaskNodeTree
 {
    private CTTaskNode rootNode;
+
    private CTTaskNode nearNode;
+
    private CTTaskNode newNode;
-   private CTTaskNode randomNode;
+   public CTTaskNode randomNode;
 
    private ArrayList<CTTaskNode> path = new ArrayList<CTTaskNode>();
 
@@ -20,13 +22,13 @@ public class CTTaskNodeTree
 
    private ArrayList<CTTaskNode> optimalPath = new ArrayList<CTTaskNode>();
 
-   private TaskRegion nodeRegion;// = CTTaskNode.constrainedEndEffectorTrajectory.getTaskRegion();
+   private TaskRegion nodeRegion;
 
    /**
     * If @param matricRatioTimeToTask is 0.3, the matric will be obtained as
-    * much as (getNormalizedTimeGap*0.3 + getNormalizedTaskDisplacement*0.7).
-    */   
-   private static double matricRatioTimeToTask = 0.05; // 0.4
+    * much as (getNormalizedTimeGap*0.3 + getNormalizedTaskDisplacement*1.0).
+    */
+   private static double matricRatioTimeToTask = 0.2; // 0.3
 
    private double maximumDisplacementOfStep = 0.06;
    private double maximumTimeGapOfStep = 0.05;
@@ -37,7 +39,7 @@ public class CTTaskNodeTree
    private ArrayList<String> taskNames;
 
    private double trajectoryTime;
-   
+
    private double treeReachingTime = 0.0;
 
    public CTTaskNodeTree(CTTaskNode rootNode)
@@ -51,7 +53,7 @@ public class CTTaskNodeTree
       this.taskNames.add("time");
       for (int i = 1; i < this.dimensionOfTask + 1; i++)
          this.taskNames.add("Task_" + i + "_");
-      
+
       this.treeReachingTime = 0.0;
    }
 
@@ -69,7 +71,7 @@ public class CTTaskNodeTree
       else
          for (int i = 1; i < this.dimensionOfTask + 1; i++)
             this.taskNames.add("Task_" + i + "_" + taskNames[i - 1]);
-      
+
       this.treeReachingTime = 0.0;
    }
 
@@ -99,51 +101,6 @@ public class CTTaskNodeTree
       matricRatioTimeToTask = ratio;
    }
 
-   //   public void expandTree(int numberOfExpanding)
-   //   {
-   //      this.rootNode.convertDataToNormalizedData(this.nodeRegion);
-   //
-   //      for (int i = 0; i < numberOfExpanding; i++)
-   //      {
-   //         PrintTools.info("expanding process " + i);
-   //         if (expandingTree())
-   //         {
-   //            PrintTools.info("expanding is done " + i);
-   //            ArrayList<CTTaskNode> revertedPath = new ArrayList<CTTaskNode>();
-   //            CTTaskNode currentNode = newNode;
-   //            revertedPath.add(currentNode);
-   //
-   //            while (true)
-   //            {
-   //               currentNode = currentNode.getParentNode();
-   //               if (currentNode != null)
-   //               {
-   //                  revertedPath.add(currentNode);
-   //               }
-   //               else
-   //                  break;
-   //            }
-   //
-   //            int revertedPathSize = revertedPath.size();
-   //
-   //            path.clear();
-   //            for (int j = 0; j < revertedPathSize; j++)
-   //               path.add(revertedPath.get(revertedPathSize - 1 - j));
-   //
-   //            PrintTools.info("Constructed Tree size is " + revertedPathSize);
-   //
-   ////            optimalPath.clear();
-   ////            for (int j = 0; j < path.size(); j++)
-   ////            {
-   ////               CTTaskNode node = path.get(i).createNodeCopy();
-   ////               optimalPath.add(node);
-   ////            }
-   //
-   //            break;
-   //         }
-   //      }
-   //   }
-
    private double getNormalizedTaskDisplacement(CTTaskNode nodeOne, CTTaskNode nodeTwo)
    {
       double squaredDisplacement = 0;
@@ -158,28 +115,24 @@ public class CTTaskNodeTree
       return Math.sqrt(squaredDisplacement);
    }
 
-   private double getNormalizedDisplacement(CTTaskNode nodeOne, CTTaskNode nodeTwo)
+   public double getMetricTaskOnly(CTTaskNode nodeOne, CTTaskNode nodeTwo)
    {
-      double squaredDisplacement = 0;
+      double normalizedtimeGap = nodeOne.getNormalizedTimeGap(nodeTwo);
+      double normalizedTaskDisplacement = getNormalizedTaskDisplacement(nodeOne, nodeTwo);
 
-      for (int i = 0; i < rootNode.getDimensionOfNodeData(); i++)
+      if (normalizedtimeGap <= 0)
+         return Double.MAX_VALUE;
+      else
       {
-         double nodeOneValue = nodeOne.getNormalizedNodeData(i);
-         double nodeTwoValue = nodeTwo.getNormalizedNodeData(i);
-         squaredDisplacement = squaredDisplacement + (nodeOneValue - nodeTwoValue) * (nodeOneValue - nodeTwoValue);
+         double matric = normalizedTaskDisplacement;
+
+         return matric;
       }
-
-      return Math.sqrt(squaredDisplacement);
    }
 
-   private double getNormalizedTimeGap(CTTaskNode nodeOld, CTTaskNode nodeNew)
+   public double getMetricTaskTime(CTTaskNode nodeOne, CTTaskNode nodeTwo)
    {
-      return nodeNew.getNormalizedNodeData(0) - nodeOld.getNormalizedNodeData(0);
-   }
-
-   public double getMetric(CTTaskNode nodeOne, CTTaskNode nodeTwo)
-   {
-      double normalizedtimeGap = getNormalizedTimeGap(nodeOne, nodeTwo);
+      double normalizedtimeGap = nodeOne.getNormalizedTimeGap(nodeTwo);
       double normalizedTaskDisplacement = getNormalizedTaskDisplacement(nodeOne, nodeTwo);
 
       if (normalizedtimeGap <= 0)
@@ -188,62 +141,39 @@ public class CTTaskNodeTree
       {
          double matric = 0;
 
-         matric = normalizedtimeGap * normalizedtimeGap * matricRatioTimeToTask
-               + normalizedTaskDisplacement * normalizedTaskDisplacement * (1 - matricRatioTimeToTask);
-         matric = normalizedtimeGap * normalizedtimeGap * matricRatioTimeToTask
-               + normalizedTaskDisplacement * normalizedTaskDisplacement * 1.0;
+         matric = normalizedtimeGap * normalizedtimeGap * matricRatioTimeToTask + normalizedTaskDisplacement * normalizedTaskDisplacement * 1.0;
          matric = Math.sqrt(matric);
-         // matric = getNormalizedDisplacement(nodeOne, nodeTwo);
          return matric;
       }
    }
 
-   private CTTaskNode createNode()
-   {
-      return new CTTaskNode(rootNode);
-   }
-
-   /*
-    * As long as the tree does not reach the trajectory time, this method
-    * returns false.
-    */
-   //   public boolean expandingTree()
-   //   {
-   //      updateRandomConfiguration();
-   //      updateNearestNode();
-   //      updateNewConfiguration();
-   //      if (connectNewConfiguration())
-   //      {
-   //         if (this.newNode.getTime() == getTrajectoryTime())
-   //            return true;
-   //         else
-   //            return false;
-   //      }
-   //      else
-   //      {
-   //         return false;
-   //      }
-   //   }
-
    public void updateRandomConfiguration()
    {
-      CTTaskNode randomNode = createNode();
+      CTTaskNode randomNode = new CTTaskNode(rootNode);
       CTTreeTools.setRandomNormalizedNodeData(randomNode, false, this.treeReachingTime);
+      
+      for(int i=0;i<rootNode.getDimensionOfNodeData();i++)
+      {
+         if(!nodeRegion.isEnable(i))
+            randomNode.setNormalizedNodeData(i, 0.0);
+      }
+      
       this.randomNode = randomNode;
    }
 
-   public void updateNearestNode()
+   public void updateNearestNodeTaskOnly()
    {
       CTTaskNode nearNode = this.rootNode;
       CTTaskNode curNode;
 
       double optMatric = Double.MAX_VALUE;
       double curMatric;
-
+      
       for (int i = 0; i < wholeNodes.size(); i++)
       {
          curNode = this.wholeNodes.get(i);
-         curMatric = getMetric(curNode, randomNode);
+         curMatric = getMetricTaskOnly(curNode, randomNode);
+         
          if (curMatric < optMatric)
          {
             optMatric = curMatric;
@@ -253,12 +183,34 @@ public class CTTaskNodeTree
 
       this.nearNode = nearNode;
    }
+   
+   public void updateNearestNodeTaskTime()
+   {
+      CTTaskNode nearNode = this.rootNode;
+      CTTaskNode curNode;
+
+      double optMatric = Double.MAX_VALUE;
+      double curMatric;
+      
+      for (int i = 0; i < wholeNodes.size(); i++)
+      {
+         curNode = this.wholeNodes.get(i);
+         curMatric = getMetricTaskTime(curNode, randomNode);
+         if (curMatric < optMatric)
+         {
+            optMatric = curMatric;
+            nearNode = curNode;
+         }
+      }
+      
+      this.nearNode = nearNode;
+   }
 
    public void updateNewConfiguration()
    {
-      CTTaskNode newNode = createNode();
+      CTTaskNode newNode = new CTTaskNode(rootNode);
 
-      double timeGap = getNormalizedTimeGap(this.nearNode, this.randomNode);
+      double timeGap = this.nearNode.getNormalizedTimeGap(this.randomNode);
       double displacement = getNormalizedTaskDisplacement(this.nearNode, this.randomNode);
 
       double expandedTime;
@@ -315,39 +267,14 @@ public class CTTaskNodeTree
       this.newNode = newNode;
    }
 
-   /*
-    * When the new configuration is valid, return true.
-    */
-   //   private boolean connectNewConfiguration()
-   //   {
-   //      this.newNode.convertNormalizedDataToData(nodeRegion);
-   //      this.newNode.setParentNode(this.nearNode);
-   //
-   //      if (this.newNode.isValidNode())
-   //      {
-   //         nearNode.addChildNode(this.newNode);
-   //         wholeNodes.add(newNode);
-   //         //         PrintTools.info("this new Configuration is added on tree");      
-   //
-   //         return true;
-   //      }
-   //      else
-   //      {
-   //         this.newNode.clearParentNode();
-   //         failNodes.add(this.newNode);
-   //         //         PrintTools.info("this new Configuration cannot be added on tree");
-   //         return false;
-   //      }
-   //   }
-
    public void connectNewNode(boolean connect)
    {
       if (connect)
       {
          this.nearNode.addChildNode(this.newNode);
          this.wholeNodes.add(this.newNode);
-         
-         if(this.newNode.getNormalizedNodeData(0) > this.treeReachingTime)
+
+         if (this.newNode.getNormalizedNodeData(0) > this.treeReachingTime)
             this.treeReachingTime = this.newNode.getNormalizedNodeData(0);
       }
       else
@@ -415,11 +342,103 @@ public class CTTaskNodeTree
    {
       return optimalPath;
    }
-   
+
    public double getTreeReachingTime()
    {
       return treeReachingTime;
    }
+
+   /*
+    * When the new configuration is valid, return true.
+    */
+   //   private boolean connectNewConfiguration()
+   //   {
+   //      this.newNode.convertNormalizedDataToData(nodeRegion);
+   //      this.newNode.setParentNode(this.nearNode);
+   //
+   //      if (this.newNode.isValidNode())
+   //      {
+   //         nearNode.addChildNode(this.newNode);
+   //         wholeNodes.add(newNode);
+   //         //         PrintTools.info("this new Configuration is added on tree");      
+   //
+   //         return true;
+   //      }
+   //      else
+   //      {
+   //         this.newNode.clearParentNode();
+   //         failNodes.add(this.newNode);
+   //         //         PrintTools.info("this new Configuration cannot be added on tree");
+   //         return false;
+   //      }
+   //   }
+
+   //   public void expandTree(int numberOfExpanding)
+   //   {
+   //      this.rootNode.convertDataToNormalizedData(this.nodeRegion);
+   //
+   //      for (int i = 0; i < numberOfExpanding; i++)
+   //      {
+   //         PrintTools.info("expanding process " + i);
+   //         if (expandingTree())
+   //         {
+   //            PrintTools.info("expanding is done " + i);
+   //            ArrayList<CTTaskNode> revertedPath = new ArrayList<CTTaskNode>();
+   //            CTTaskNode currentNode = newNode;
+   //            revertedPath.add(currentNode);
+   //
+   //            while (true)
+   //            {
+   //               currentNode = currentNode.getParentNode();
+   //               if (currentNode != null)
+   //               {
+   //                  revertedPath.add(currentNode);
+   //               }
+   //               else
+   //                  break;
+   //            }
+   //
+   //            int revertedPathSize = revertedPath.size();
+   //
+   //            path.clear();
+   //            for (int j = 0; j < revertedPathSize; j++)
+   //               path.add(revertedPath.get(revertedPathSize - 1 - j));
+   //
+   //            PrintTools.info("Constructed Tree size is " + revertedPathSize);
+   //
+   ////            optimalPath.clear();
+   ////            for (int j = 0; j < path.size(); j++)
+   ////            {
+   ////               CTTaskNode node = path.get(i).createNodeCopy();
+   ////               optimalPath.add(node);
+   ////            }
+   //
+   //            break;
+   //         }
+   //      }
+   //   }
+
+   /*
+    * As long as the tree does not reach the trajectory time, this method
+    * returns false.
+    */
+   //   public boolean expandingTree()
+   //   {
+   //      updateRandomConfiguration();
+   //      updateNearestNode();
+   //      updateNewConfiguration();
+   //      if (connectNewConfiguration())
+   //      {
+   //         if (this.newNode.getTime() == getTrajectoryTime())
+   //            return true;
+   //         else
+   //            return false;
+   //      }
+   //      else
+   //      {
+   //         return false;
+   //      }
+   //   }
    
    /*
     * public void saveNodes() { String fileName = "/home/shadylady/tree.txt";

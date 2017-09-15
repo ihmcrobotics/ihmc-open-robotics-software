@@ -86,7 +86,7 @@ public class CuttingWallTrajectory extends ConstrainedEndEffectorTrajectory
       taskNodeRegion.setRandomRegion(0, 0.0, trajectoryTime);
 
       
-//      taskNodeRegion.setRandomRegion(1, 0.78, 0.80);
+      taskNodeRegion.setRandomRegion(1, 0.75, 0.90);
 //      taskNodeRegion.setRandomRegion(2, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
 //      taskNodeRegion.setRandomRegion(3, -0.0 / 180 * Math.PI, 0.0 / 180 * Math.PI);
 //      taskNodeRegion.setRandomRegion(4, -0.0 / 180 * Math.PI, 0.0 / 180 * Math.PI);
@@ -105,10 +105,10 @@ public class CuttingWallTrajectory extends ConstrainedEndEffectorTrajectory
 //      taskNodeRegion.setRandomRegion(15, 0.0, 0.0);
 //      taskNodeRegion.setRandomRegion(16, 0.0, 0.0);
       
-      taskNodeRegion.setRandomRegion(1, 0.85, 0.90);
+      // taskNodeRegion.setRandomRegion(1, 0.85, 0.90);
       taskNodeRegion.setRandomRegion(2, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
       taskNodeRegion.setRandomRegion(3, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI);
-      taskNodeRegion.setRandomRegion(4, -3.0 / 180 * Math.PI, 3.0 / 180 * Math.PI);
+      taskNodeRegion.setRandomRegion(4, -10.0 / 180 * Math.PI, 10.0 / 180 * Math.PI);
 
       taskNodeRegion.setRandomRegion(5, 0.0, 0.0);
       taskNodeRegion.setRandomRegion(6, 0.0, 0.0);
