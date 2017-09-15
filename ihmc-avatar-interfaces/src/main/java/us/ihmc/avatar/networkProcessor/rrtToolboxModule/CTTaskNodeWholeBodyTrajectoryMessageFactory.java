@@ -257,7 +257,7 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
       
       
       wholeBodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
-//      wholeBodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);
+      wholeBodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);
       
 
       
