@@ -8,6 +8,7 @@ import us.ihmc.avatar.pushRecovery.HumanoidMomentumRecoveryTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class AtlasMomentumRecoveryTest extends HumanoidMomentumRecoveryTest
@@ -26,4 +27,33 @@ public class AtlasMomentumRecoveryTest extends HumanoidMomentumRecoveryTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
+   @Override
+   public void testPushDuringDoubleSupport() throws SimulationExceededMaximumTimeException
+   {
+      super.testPushDuringDoubleSupport();
+   }
+   
+   @Override
+   public void testPushDuringDoubleSupportExpectFall() throws SimulationExceededMaximumTimeException
+   {
+      super.testPushDuringDoubleSupportExpectFall();
+   }
+   
+   @Override
+   public void testPushDuringSwingExpectFall() throws SimulationExceededMaximumTimeException
+   {
+      super.testPushDuringSwingExpectFall();
+   }
+   
+   @Override
+   public void testRegularWalk() throws SimulationExceededMaximumTimeException
+   {
+      super.testRegularWalk();
+   }
+   
+   @Override
+   public void testPushDuringSwing() throws SimulationExceededMaximumTimeException
+   {
+      super.testPushDuringSwing();
+   }
 }
