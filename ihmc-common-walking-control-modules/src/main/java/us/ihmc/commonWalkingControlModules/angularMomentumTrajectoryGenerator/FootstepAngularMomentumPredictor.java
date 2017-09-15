@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.*;
@@ -53,8 +54,8 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    private final List<CoPPointsInFoot> upcomingCoPsInFootsteps;
    private final YoInteger numberOfRegisteredFootsteps;
 
-   private final List<SwingAngularMomentumTrajectory> swingAngularMomentumTrajectories;
-   private final List<TransferAngularMomentumTrajectory> transferAngularMomentumTrajectories;
+   private final List<AngularMomentumTrajectory> swingAngularMomentumTrajectories;
+   private final List<AngularMomentumTrajectory> transferAngularMomentumTrajectories;
 
    private final FrameVector3D desiredAngularMomentum = new FrameVector3D();
    private final FrameVector3D desiredTorque = new FrameVector3D();
@@ -164,14 +165,12 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       ReferenceFrame[] referenceFrames = {worldFrame};
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
-         SwingAngularMomentumTrajectory swingTrajectory = new SwingAngularMomentumTrajectory(i, worldFrame,
-                                                                                             numberOfSwingSegments, 2 * maxNumberOfTrajectoryCoefficients);
-         this.swingAngularMomentumTrajectories.add(swingTrajectory);
+         AngularMomentumTrajectory swingTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfSwingSegments, 2 * maxNumberOfTrajectoryCoefficients);
+         swingAngularMomentumTrajectories.add(swingTrajectory);
 
-         TransferAngularMomentumTrajectory transferTrajectory = new TransferAngularMomentumTrajectory(i, worldFrame,
-                                                                                                      numberOfTransferSegments,
-                                                                                                      2 * maxNumberOfTrajectoryCoefficients);
-         this.transferAngularMomentumTrajectories.add(transferTrajectory);
+         AngularMomentumTrajectory transferTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfTransferSegments, 2 * maxNumberOfTrajectoryCoefficients);
+         transferAngularMomentumTrajectories.add(transferTrajectory);
+
          CoPPointsInFoot copLocations = new CoPPointsInFoot(i, referenceFrames, registry);
          upcomingCoPsInFootsteps.add(copLocations);
 
@@ -197,14 +196,12 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
             transferSupportFootTrajectories.add(transferSupportFootTrajectory);
          }
       }
-      CoPPointsInFoot copLocations = new CoPPointsInFoot(maxNumberOfFootstepsToConsider, referenceFrames, registry);
-      upcomingCoPsInFootsteps.add(copLocations);
-      copLocations = new CoPPointsInFoot(maxNumberOfFootstepsToConsider + 1, referenceFrames, registry);
-      upcomingCoPsInFootsteps.add(copLocations);
-      TransferAngularMomentumTrajectory transferTrajectory = new TransferAngularMomentumTrajectory(maxNumberOfFootstepsToConsider,
-                                                                                                   worldFrame, numberOfTransferSegments,
-                                                                                                   2 * maxNumberOfTrajectoryCoefficients);
-      this.transferAngularMomentumTrajectories.add(transferTrajectory);
+      upcomingCoPsInFootsteps.add(new CoPPointsInFoot(maxNumberOfFootstepsToConsider, referenceFrames, registry));
+      upcomingCoPsInFootsteps.add(new CoPPointsInFoot(maxNumberOfFootstepsToConsider + 1, referenceFrames, registry));
+
+      AngularMomentumTrajectory transferTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfTransferSegments, 2 * maxNumberOfTrajectoryCoefficients);
+      transferAngularMomentumTrajectories.add(transferTrajectory);
+
       if (DEBUG)
       {
          TrajectoryDebug transferCoMTrajectory = new TrajectoryDebug("TransferCoMTrajDebug" + maxNumberOfFootstepsToConsider, numberOfTransferSegments,
@@ -280,14 +277,13 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    @Override
    public void clear()
    {
-      int numberOfSteps = Math.min(numberOfRegisteredFootsteps.getIntegerValue(), numberOfFootstepsToConsider.getIntegerValue());
-
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
          swingAngularMomentumTrajectories.get(i).reset();
          transferAngularMomentumTrajectories.get(i).reset();
       }
       transferAngularMomentumTrajectories.get(maxNumberOfFootstepsToConsider).reset();
+
       for (int i = 0; i < upcomingCoPsInFootsteps.size(); i++)
          upcomingCoPsInFootsteps.get(i).reset();
 
@@ -411,22 +407,21 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    @Override
    public void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop)
    {
-      int footstepIndex = 0;
-      setAngularMomentumTrajectoryForFootsteps(footstepIndex, WalkingTrajectoryType.TRANSFER);
+      setAngularMomentumTrajectoryForFootsteps(WalkingTrajectoryType.TRANSFER);
    }
 
    @Override
    public void computeReferenceAngularMomentumStartingFromSingleSupport()
    {
-      int footstepIndex = 0;
-      setAngularMomentumTrajectoryForFootsteps(footstepIndex, WalkingTrajectoryType.SWING);
+      setAngularMomentumTrajectoryForFootsteps(WalkingTrajectoryType.SWING);
    }
 
-   private void setAngularMomentumTrajectoryForFootsteps(int footstepIndex, WalkingTrajectoryType initialWalkingPhase)
+   private void setAngularMomentumTrajectoryForFootsteps(WalkingTrajectoryType initialWalkingPhase)
    {
       CoPPointsInFoot copPointsInFoot;
       double phaseTime = 0.0;
       int comIndex = 0;
+      int footstepIndex = 0;
       // handle the current swing, if in the swing state
       if(initialWalkingPhase == WalkingTrajectoryType.SWING)
       {
@@ -719,6 +714,15 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       {
          segments.get(getNumberOfSegments()).set(trajToCopy);
          numberOfSegments.increment();
+      }
+   }
+
+   private class AngularMomentumTrajectoryBuilder extends GenericTypeBuilder<AngularMomentumTrajectory>
+   {
+      @Override
+      public AngularMomentumTrajectory newInstance()
+      {
+         return new AngularMomentumTrajectory(worldFrame, numberOfTransferSegments, 2 * maxNumberOfTrajectoryCoefficients);
       }
    }
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CoPPointPlanningParameters;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
 public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParameters

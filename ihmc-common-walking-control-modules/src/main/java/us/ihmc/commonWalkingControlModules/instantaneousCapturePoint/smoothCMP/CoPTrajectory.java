@@ -8,18 +8,14 @@ import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
 
 public class CoPTrajectory extends SegmentedFrameTrajectory3D implements CoPTrajectoryInterface
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final CoPSplineType splineType;
    private final WalkingTrajectoryType trajectoryType;
-   private final int stepNumber;
 
-   public CoPTrajectory(int stepNumber, CoPSplineType splineType, int maxNumberOfSegments, WalkingTrajectoryType type)
+   public CoPTrajectory(CoPSplineType splineType, int maxNumberOfSegments, WalkingTrajectoryType type)
    {      
       super(maxNumberOfSegments, splineType.getNumberOfCoefficients());
       this.splineType = splineType;
       this.trajectoryType = type;
-      this.stepNumber = stepNumber;
    }
 
    public void setNextSegment(double initialTime, double finalTime, FramePoint3D initialPosition, FramePoint3D finalPosition)
@@ -39,10 +35,5 @@ public class CoPTrajectory extends SegmentedFrameTrajectory3D implements CoPTraj
    public WalkingTrajectoryType getTrajectoryType()
    {
       return trajectoryType;
-   }
-   
-   public int getStepNumber()
-   {
-      return stepNumber;
    }
 }
