@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.badlogic.gdx.graphics.g3d.particles.influencers.DynamicsModifier;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -32,8 +33,8 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private final List<YoDouble> transferDurations;
    private final List<YoDouble> swingDurations;
 
-   private final List<TransferAngularMomentumTrajectory> transferTrajectories;
-   private final List<SwingAngularMomentumTrajectory> swingTrajectories;
+   private final List<AngularMomentumTrajectory> transferTrajectories;
+   private final List<AngularMomentumTrajectory> swingTrajectories;
 
    private double initialTime;
    private AngularMomentumTrajectory activeTrajectory;
@@ -70,23 +71,21 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
 
       this.transferDurations = new ArrayList<>(numberOfFootstepsToPlan.getIntegerValue() + 1);
       this.swingDurations = new ArrayList<>(numberOfFootstepsToPlan.getIntegerValue());
-      this.transferTrajectories = new ArrayList<TransferAngularMomentumTrajectory>(numberOfFootstepsToPlan.getIntegerValue() + 1);
-      this.swingTrajectories = new ArrayList<SwingAngularMomentumTrajectory>(numberOfFootstepsToPlan.getIntegerValue());
+      this.transferTrajectories = new ArrayList<>(numberOfFootstepsToPlan.getIntegerValue() + 1);
+      this.swingTrajectories = new ArrayList<>(numberOfFootstepsToPlan.getIntegerValue());
 
       for (int i = 0; i < numberOfFootstepsToPlan.getIntegerValue() + 1; i++)
       {
-         TransferAngularMomentumTrajectory transferTrajectory = new TransferAngularMomentumTrajectory(i, worldFrame,
-                                                                                                      numberOfWaypointsToUseForTransfer.getIntegerValue() - 1,
-                                                                                                      trajectoryType.getEnumValue().getNumberOfCoefficients());
+         AngularMomentumTrajectory transferTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfWaypointsToUseForTransfer.getIntegerValue() - 1,
+                                                                                      trajectoryType.getEnumValue().getNumberOfCoefficients());
          YoDouble transferDuration = new YoDouble(namePrefix + "TransferDurationStep" + i, registry);
          transferTrajectories.add(transferTrajectory);
          transferDurations.add(transferDuration);
       }
       for (int i = 0; i < numberOfFootstepsToPlan.getIntegerValue(); i++)
       {
-         SwingAngularMomentumTrajectory swingTrajectory = new SwingAngularMomentumTrajectory(i, worldFrame,
-                                                                                             numberOfWaypointsToUseForSwing.getIntegerValue() - 1,
-                                                                                             trajectoryType.getEnumValue().getNumberOfCoefficients());
+         AngularMomentumTrajectory swingTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfWaypointsToUseForSwing.getIntegerValue() - 1,
+                                                                                   trajectoryType.getEnumValue().getNumberOfCoefficients());
          YoDouble swingDuration = new YoDouble(namePrefix + "SwingDurationStep" + i, registry);
          swingTrajectories.add(swingTrajectory);
          swingDurations.add(swingDuration);
