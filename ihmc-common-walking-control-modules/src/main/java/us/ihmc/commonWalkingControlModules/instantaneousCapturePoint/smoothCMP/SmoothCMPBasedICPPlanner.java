@@ -122,11 +122,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    public void initializeParameters(ICPPlannerParameters icpPlannerParameters)
    {
-      initializeParameters(icpPlannerParameters, true);
-   }
-
-   public void initializeParameters(ICPPlannerParameters icpPlannerParameters, boolean computePredictedAngularMomentum)
-   {
       super.initializeParameters((ICPTrajectoryPlannerParameters) icpPlannerParameters);
 
       if (icpPlannerParameters instanceof SmoothCMPPlannerParameters)
@@ -137,8 +132,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          referenceCMPGenerator.setGroundReaction(fullRobotModel.getTotalMass() * gravityZ);
          //FIXME have the angular momentum parameters be passed into or as part of the ICP Planner parameters to the trajectory generator
          angularMomentumGenerator.initializeParameters(new AngularMomentumEstimationParameters(fullRobotModel,
-                                                                                               (SmoothCMPPlannerParameters) icpPlannerParameters,
-                                                                                               computePredictedAngularMomentum, gravityZ));
+                                                                                               (SmoothCMPPlannerParameters) icpPlannerParameters, gravityZ));
          defaultSwingDurationShiftFraction.set(((SmoothCMPPlannerParameters) icpPlannerParameters).getSwingDurationShiftFraction());
       }
       else
