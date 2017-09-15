@@ -23,11 +23,11 @@ public class AngularMomentumEstimationParameters
    
    private final boolean computePredictedAngularMomentum;
 
-   public AngularMomentumEstimationParameters(FullRobotModel robotModel, SmoothCMPPlannerParameters cmpPlannerParameters, boolean computePredictedAngularMomentum, double gravityZ)
+   public AngularMomentumEstimationParameters(FullRobotModel robotModel, SmoothCMPPlannerParameters cmpPlannerParameters, double gravityZ)
    {
       this.copPlannerParameters = cmpPlannerParameters;
       this.robotModel = robotModel;
-      this.computePredictedAngularMomentum = computePredictedAngularMomentum;
+      this.computePredictedAngularMomentum = cmpPlannerParameters.planWithAngularMomentum();
       this.gravityZ = gravityZ;
    }
 
