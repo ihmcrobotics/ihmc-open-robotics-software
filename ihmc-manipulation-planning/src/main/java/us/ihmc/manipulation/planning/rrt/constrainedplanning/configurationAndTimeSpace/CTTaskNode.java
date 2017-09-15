@@ -63,6 +63,21 @@ public class CTTaskNode
    {
       return nodeData.distance(targetNode.nodeData);
    }
+   
+   public final double getNormailzedDistance(CTTaskNode targetNode)
+   {
+      return normalizedNodeData.distance(targetNode.normalizedNodeData);
+   }
+   
+   public final double getTimeGap(CTTaskNode targetNode)
+   {
+      return targetNode.getNodeData(0) - getNodeData(0);
+   }
+   
+   public final double getNormalizedTimeGap(CTTaskNode targetNode)
+   {
+      return targetNode.getNormalizedNodeData(0) - getNormalizedNodeData(0);
+   }
 
    public final void setNodeData(int index, double data)
    {

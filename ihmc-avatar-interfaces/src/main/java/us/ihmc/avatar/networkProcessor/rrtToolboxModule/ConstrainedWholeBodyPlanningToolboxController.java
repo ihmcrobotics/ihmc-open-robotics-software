@@ -34,6 +34,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -303,15 +304,17 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       expandingCount.increment();
 
       tree.updateRandomConfiguration();
-      tree.updateNearestNode();
+      
+      tree.updateNearestNodeTaskTime();
       tree.updateNewConfiguration();
       tree.getNewNode().convertNormalizedDataToData(taskRegion);
       tree.getNewNode().setParentNode(tree.getNearNode());
 
-      if (updateValidity(tree.getNewNode()))
+      updateValidity(tree.getNewNode());
+      if (tree.getNewNode().getValidity())
       {
          tree.connectNewNode(true);
-         if (tree.getNewNode().getTime() == constrainedEndEffectorTrajectory.getTrajectoryTime())
+         if (tree.getNewNode().getTime() == taskRegion.getTrajectoryTime())
          {
             PrintTools.info("terminate expanding");
             numberOfExpanding = 1; // for terminate
@@ -320,6 +323,24 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       else
       {
          tree.connectNewNode(false);
+                           
+//         tree.updateNearestNodeTaskOnly();
+//                  
+//         tree.updateNewConfiguration();         
+//         tree.getNewNode().convertNormalizedDataToData(taskRegion);
+//                  
+//         tree.getNewNode().setParentNode(tree.getNearNode());
+//
+//         updateValidity(tree.getNewNode());
+//         if (tree.getNewNode().getValidity())
+//         {            
+//            tree.connectNewNode(true);
+//            if (tree.getNewNode().getTime() == taskRegion.getTrajectoryTime())
+//            {
+//               PrintTools.info("terminate expanding");
+//               numberOfExpanding = 1; // for terminate
+//            }
+//         }
       }
 
       visualizedNode = tree.getNewNode().createNodeCopy();
@@ -381,7 +402,6 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
          if (rootNode.getValidity() == false)
          {
-            // packResult(null, 1);
             terminateToolboxController();
          }
          else
@@ -542,6 +562,9 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
     */
    private boolean updateValidity(CTTaskNode node)
    {
+      long astartTime = System.currentTimeMillis();
+            
+      
       if (node.getParentNode() != null)
       {
          kinematicsSolver.updateRobotConfigurationData(node.getParentNode().getConfiguration());
@@ -595,6 +618,13 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       cntKinematicSolver.set(kinematicsSolver.getCntForUpdateInternal());
 
+      
+
+      long stopTime = System.currentTimeMillis();
+      long elapsedTime = stopTime - astartTime;
+      
+      // System.out.println("a " + elapsedTime / 1000.0 + " seconds " + cntKinematicSolver.getIntegerValue());
+      
       return result;
    }
 

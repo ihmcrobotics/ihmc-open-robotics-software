@@ -22,6 +22,11 @@ public class CTTaskNodeTreeExploringTest
 
       for (int i = 1; i < numberOfTasks + 1; i++)
          rootNode.setNodeData(i, 0.5);
+      
+      
+      rootNode.setNodeData(1, 0.1);
+      rootNode.setNodeData(3, 0.9);
+      rootNode.setNodeData(4, 0.9);
 
       taskRegion = new TaskRegion(numberOfTasks + 1);
 
@@ -48,15 +53,13 @@ public class CTTaskNodeTreeExploringTest
             break;
          }  
       }
-
    }
 
    private void expandTree()
    {
       tree.updateRandomConfiguration();
 
-      tree.updateNearestNode();
-
+      tree.updateNearestNodeTaskTime();
       tree.updateNewConfiguration();
       tree.getNewNode().convertNormalizedDataToData(taskRegion);
       tree.getNewNode().setParentNode(tree.getNearNode());
@@ -67,12 +70,27 @@ public class CTTaskNodeTreeExploringTest
          tree.connectNewNode(true);
          if (tree.getNewNode().getTime() == taskRegion.getTrajectoryTime())
          {
-            // PrintTools.info("terminate expanding");
          }
       }
       else
-      {
+      {         
          tree.connectNewNode(false);
+                  
+         tree.updateNearestNodeTaskOnly();         
+         
+         tree.updateNewConfiguration();
+         tree.getNewNode().convertNormalizedDataToData(taskRegion);
+         
+         tree.getNewNode().setParentNode(tree.getNearNode());
+
+         updateValidity(tree.getNewNode());
+         if (tree.getNewNode().getValidity())
+         {            
+            tree.connectNewNode(true);
+            if (tree.getNewNode().getTime() == taskRegion.getTrajectoryTime())
+            {
+            }
+         }
       }
 
       treeVisualizer.update(tree.getNewNode());

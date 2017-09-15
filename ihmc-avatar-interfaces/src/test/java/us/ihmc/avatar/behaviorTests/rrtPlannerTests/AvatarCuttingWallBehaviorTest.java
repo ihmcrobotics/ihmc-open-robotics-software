@@ -30,13 +30,18 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.CuttingWallBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CuttingWallTrajectory;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -199,6 +204,68 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
    {
 
    }
+   
+   // @Test
+   public void testForReachability() throws SimulationExceededMaximumTimeException, IOException
+   {
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+      drcBehaviorTestHelper.getControllerFullRobotModel().updateFrames();
+
+      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
+      sdfFullRobotModel.updateFrames();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
+      referenceFrames.updateFrames();
+
+      Point3D centerPosition = new Point3D(0.52, -0.01, 1.0164);
+      Quaternion centerOrientation = new Quaternion();
+      centerOrientation.appendPitchRotation(-Math.PI*0.5);
+      
+
+      Point3D desiredPosition = new Point3D(centerPosition);
+      desiredPosition.addY(-0.35);
+      
+      Quaternion desiredOrientation = new Quaternion();
+      desiredOrientation.appendRollRotation(Math.PI * 0.5);
+      desiredOrientation.appendYawRotation(Math.PI * 0.5);
+      // desiredOrientation.appendPitchRotation(-Math.PI * 0.4);
+      desiredOrientation.appendPitchRotation(-Math.PI * 0.5);
+      
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+      scs.addStaticLinkGraphics(getXYZAxis(new Pose3D(desiredPosition, desiredOrientation)));
+      
+//      HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, desiredPosition, desiredOrientation,
+//                                                                               referenceFrames.getMidFootZUpGroundFrame());
+//      drcBehaviorTestHelper.send(lhandTrajectoryMessage);
+      
+      WholeBodyInverseKinematicsBehavior wholebodyBehavior = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
+                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                                     drcBehaviorTestHelper.getSDFFullRobotModel());
+      
+      FramePose handFramePose = new FramePose(referenceFrames.getMidFootZUpGroundFrame(), desiredPosition, desiredOrientation);
+      
+      wholebodyBehavior.setTrajectoryTime(5.0);
+      wholebodyBehavior.setDesiredHandPose(RobotSide.LEFT, handFramePose);
+      
+      drcBehaviorTestHelper.dispatchBehavior(wholebodyBehavior);
+
+      desiredOrientation = new Quaternion();
+      desiredOrientation.appendPitchRotation(Math.PI * 0.4);
+      HandTrajectoryMessage rhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2.0, new Point3D(-0.1, -0.5, 0.7), desiredOrientation,
+                                                                               referenceFrames.getMidFootZUpGroundFrame());
+      drcBehaviorTestHelper.send(rhandTrajectoryMessage);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+
+
+
+      
+      
+      
+      System.out.println("End");
+
+   }
 
    @Test
    public void testForCuttingWallBehavior() throws SimulationExceededMaximumTimeException, IOException
@@ -244,7 +311,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
             
-      Point3D centerPosition = new Point3D(0.544, -0.01, 1.0164);
+      Point3D centerPosition = new Point3D(0.52, -0.01, 1.0164);
       Quaternion centerOrientation = new Quaternion();
       centerOrientation.appendPitchRotation(-Math.PI*0.5);
       WallPosePacket wallPosePacket = new WallPosePacket(0.35, centerPosition, centerOrientation);
@@ -253,7 +320,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       drcBehaviorTestHelper.getBehaviorCommunicationBridge().sendPacketToBehavior(wallPosePacket);
       System.out.println("wallPosePacket Dispatch done");
 
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(40.0);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(60.0);
 
       System.out.println("End");
 
