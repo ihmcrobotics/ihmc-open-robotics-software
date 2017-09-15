@@ -4,14 +4,16 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.8.6"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.8.7"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
 
+import org.gradle.api.GradleException
+
 ihmc {
    loadProductProperties("../product.properties")
-   
+
    configureDependencyResolution()
    configurePublications()
 }
@@ -42,73 +44,56 @@ mainDependencies {
 }
 
 testDependencies {
-   compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.16.8"
    compile group: 'junit', name: 'junit', version: '4.11'
    compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: groupDependencyVersion
 }
 
-//// Do not disable/remove this block to make your compile work. It will break the Quarduped deployment infrastructure.
-//afterEvaluate {
-//   project.configurations.runtime.each {
-//      if (it.name.contains("SimulationConstructionSet") || it.name.contains("IHMCJMonkeyEngineToolkit"))
-//      {
-//         throw new GradleException("LLAQuardupedController cannot depend on SimulationConstructionSet in order to optimize Ahead-of-Time compilation. Please fix your dependency graph. Note that compile dependencies are fine.")
-//      }
-//   }
-//}
-//
-//jar {
-//   List depend = []
-//   configurations.runtime.each {
-//      depend.add('lib/' + it.name)
-//   }
-//
-//   manifest {
-//      attributes(
-//            "Created-By": "IHMC Gradle Build Script",
-//            "Implementation-Title": project.name,
-//            "Implementation-Version": project.version,
-//            "Implementation-Vendor": "IHMC",
-//
-//            "Bundle-Name": project.name,
-//            "Bundle-Version": project.version,
-//            "Bundle-License": ihmc.licenseURL,
-//            "Bundle-Vendor": "IHMC",
-//            'Class-Path': depend.join(' '))
-//   }
-//}
-//
-//task install(dependsOn: ['jar']) {
-//   doLast {
-//      def projectDir = project.buildscript.sourceFile.parent
-//
-//      File dest = new File(project.rootDir, 'install')
-//
-//      File libdest = new File(dest, 'lib')
-//      dest.mkdir();
-//      libdest.mkdir();
-//
-//
-//      configurations.runtime.each {
-//         def fileToCopy = it.toString()
-//         copy {
-//            from fileToCopy
-//            into libdest
-//         }
-//      }
-//
-//      copy {
-//         from jar.archivePath
-//         into dest
-//         rename(jar.archiveName, 'LLAQuadrupedController.jar')
-//      }
-//
-//      File scriptDir = new File(projectDir, "launchScripts/local")
-//      copy {
-//         from scriptDir
-//         into dest
-//      }
-//   }
-//}
+if (ihmc.isBuildRoot())
+{
+// Do not disable/remove this block to make your compile work. It will break the Quarduped deployment infrastructure.
+   afterEvaluate {
+      project.configurations.runtime.each {
+         if (it.name.contains("SimulationConstructionSet") || it.name.contains("IHMCJMonkeyEngineToolkit"))
+         {
+            throw new GradleException("LLAQuardupedController cannot depend on SimulationConstructionSet in order to optimize Ahead-of-Time compilation. Please fix your dependency graph. Note that compile dependencies are fine.")
+         }
+      }
+   }
+
+   task install(dependsOn: ['jar']) {
+      ihmc.jarWithLibFolder()
+
+      doLast {
+         def projectDir = project.buildscript.sourceFile.parent
+
+         File dest = new File(project.rootDir, 'install')
+
+         File libdest = new File(dest, 'lib')
+         dest.mkdir();
+         libdest.mkdir();
+
+         configurations.runtime.each {
+            def fileToCopy = it.toString()
+            copy {
+               from fileToCopy
+               into libdest
+            }
+         }
+
+         copy {
+            from jar.archivePath
+            into dest
+            rename(jar.archiveName, 'LLAQuadrupedController.jar')
+         }
+
+         File scriptDir = new File(projectDir, "launchScripts/local")
+         copy {
+            from scriptDir
+            into dest
+         }
+      }
+   }
+}

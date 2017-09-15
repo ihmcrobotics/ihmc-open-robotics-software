@@ -7,6 +7,7 @@ import us.ihmc.avatar.circleWalkTest.HumanoidCircleWalkTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasCircleWalkTest extends HumanoidCircleWalkTest{
 
@@ -14,6 +15,12 @@ public class AtlasCircleWalkTest extends HumanoidCircleWalkTest{
 	private final AtlasRobotModel robotModel = new AtlasRobotModel(version, RobotTarget.SCS, false);
 	private final AtlasJointMap jointMap = new AtlasJointMap(version, robotModel.getPhysicalProperties());
 
+	@Override
+   public void testCircleWalk() throws SimulationExceededMaximumTimeException
+   {
+      super.testCircleWalk();
+   }
+	
 	@Override
 	public DRCRobotModel getRobotModel()
 	{
