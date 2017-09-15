@@ -26,8 +26,6 @@ public class SmoothCoMIntegrationToolbox
 
    private final DenseMatrix64F generalizedAlphaCoMPrimeMatrix = new DenseMatrix64F(defaultSize, defaultSize);
    private final DenseMatrix64F generalizedBetaCoMPrimeMatrix = new DenseMatrix64F(defaultSize, defaultSize);
-   private final DenseMatrix64F generalizedGammaCoMPrimeMatrix = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F generalizedDeltaCoMPrimeMatrix = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F generalizedAlphaPrimeTerminalMatrix = new DenseMatrix64F(defaultSize, defaultSize);
    private final DenseMatrix64F generalizedAlphaBetaCoMPrimeMatrix = new DenseMatrix64F(defaultSize, defaultSize);
 
@@ -168,14 +166,14 @@ public class SmoothCoMIntegrationToolbox
 
       calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(omega0, time, generalizedAlphaCoMPrimeMatrix, comDerivativeOrder, cmpPolynomial3D);
       calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(omega0, time, generalizedBetaCoMPrimeMatrix, comDerivativeOrder, cmpPolynomial3D);
-      double generalizedGammaCoMPrimeDouble = calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, comDerivativeOrder, cmpPolynomial3D);
-      double generalizedDeltaCoMPrimeDouble = calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(omega0, time, comDerivativeOrder, cmpPolynomial3D);
+      double generalizedGammaCoMPrime = calculateGeneralizedGammaCoMPrimeOnCMPSegment3D(omega0, time, comDerivativeOrder, cmpPolynomial3D);
+      double generalizedDeltaCoMPrime = calculateGeneralizedDeltaCoMPrimeOnCMPSegment3D(omega0, time, comDerivativeOrder, cmpPolynomial3D);
       CommonOps.subtract(generalizedAlphaCoMPrimeMatrix, generalizedBetaCoMPrimeMatrix, generalizedAlphaBetaCoMPrimeMatrix);
 
       double timeSegmentTotal = cmpPolynomial3D.getFinalTime();
       icpToolbox.calculateGeneralizedAlphaPrimeOnCMPSegment3D(omega0, timeSegmentTotal, generalizedAlphaPrimeTerminalMatrix, 0, cmpPolynomial3D);
 
-      calculateCoMQuantity3D(generalizedAlphaBetaCoMPrimeMatrix, generalizedGammaCoMPrimeDouble, generalizedDeltaCoMPrimeDouble,
+      calculateCoMQuantity3D(generalizedAlphaBetaCoMPrimeMatrix, generalizedGammaCoMPrime, generalizedDeltaCoMPrime,
                              generalizedAlphaPrimeTerminalMatrix, polynomialCoefficientCombinedVector, icpPositionDesiredFinal, comPositionDesiredInitial,
                              comQuantityDesired);
    }
@@ -193,8 +191,8 @@ public class SmoothCoMIntegrationToolbox
     *   
     * @param generalizedAlphaBetaCoMPrimeMatrix = &alpha;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>)
     *  - &beta;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>)
-    * @param generalizedGammaCoMPrimeMatrix = &gamma;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>)
-    * @param generalizedDeltaCoMPrimeMatrix = &delta;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>)
+    * @param generalizedGammaCoMPrime = &gamma;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>)
+    * @param generalizedDeltaCoMPrime = &delta;<sup>(i)</sup><sub>CoM,&phi;</sub>(t<sub>&phi;</sub>)
     * @param generalizedAlphaPrimeTerminalMatrix = &alpha;<sup>(0)</sup><sub>ICP,&phi;</sub>(T<sub>&phi;</sub>)
     * @param polynomialCoefficientCombinedVector = p<sub>&phi;</sub>
     * @param icpPositionDesiredFinal = &xi;<sub>ref,&phi;</sub>(T<sub>&phi;</sub>)
@@ -202,7 +200,7 @@ public class SmoothCoMIntegrationToolbox
     * @param comQuantityDesired = x<sup>(i)</sup><sub>ref,&phi;</sub>(t<sub>&phi;</sub>)
     */
    // FIXME this can probably be more efficient
-   public void calculateCoMQuantity3D(DenseMatrix64F generalizedAlphaBetaCoMPrimeMatrix, double generalizedGammaCoMPrimeMatrix,
+   public void calculateCoMQuantity3D(DenseMatrix64F generalizedAlphaBetaCoMPrimeMatrix, double generalizedGammaCoMPrime,
                                       double generalizedDeltaCoMPrime, DenseMatrix64F generalizedAlphaPrimeTerminalMatrix,
                                       DenseMatrix64F polynomialCoefficientCombinedVector, FrameTuple3D<?, ?> icpPositionDesiredFinal,
                                       FrameTuple3D<?, ?> comPositionDesiredInitial, FrameTuple3D<?, ?> comQuantityDesired)
@@ -214,9 +212,9 @@ public class SmoothCoMIntegrationToolbox
 
       CommonOps.mult(generalizedAlphaBetaCoMPrimeMatrix, polynomialCoefficientCombinedVector, M1);
 
-      M2.set(0, generalizedGammaCoMPrimeMatrix * comPositionDesiredInitial.getX());
-      M2.set(1, generalizedGammaCoMPrimeMatrix * comPositionDesiredInitial.getY());
-      M2.set(2, generalizedGammaCoMPrimeMatrix * comPositionDesiredInitial.getZ());
+      M2.set(0, generalizedGammaCoMPrime * comPositionDesiredInitial.getX());
+      M2.set(1, generalizedGammaCoMPrime * comPositionDesiredInitial.getY());
+      M2.set(2, generalizedGammaCoMPrime * comPositionDesiredInitial.getZ());
 
       CommonOps.mult(generalizedAlphaPrimeTerminalMatrix, polynomialCoefficientCombinedVector, M3);
 
@@ -231,7 +229,7 @@ public class SmoothCoMIntegrationToolbox
    }
 
    // FIXME this can probably be more efficient
-   public double calculateCoMQuantity1D(DenseMatrix64F generalizedAlphaBetaCoMPrimeMatrix, double generalizedGammaCoMPrimeMatrix,
+   public double calculateCoMQuantity1D(DenseMatrix64F generalizedAlphaBetaCoMPrimeMatrix, double generalizedGammaCoMPrime,
                                         double generalizedDeltaCoMPrime, DenseMatrix64F generalizedAlphaPrimeTerminalMatrix,
                                         DenseMatrix64F polynomialCoefficientVector, double icpPositionDesiredFinal, double comPositionDesiredInitial)
    {
@@ -242,7 +240,7 @@ public class SmoothCoMIntegrationToolbox
 
       CommonOps.mult(generalizedAlphaBetaCoMPrimeMatrix, polynomialCoefficientVector, M1);
 
-      M2.set(0, generalizedGammaCoMPrimeMatrix * comPositionDesiredInitial);
+      M2.set(0, generalizedGammaCoMPrime * comPositionDesiredInitial);
       CommonOps.mult(generalizedAlphaPrimeTerminalMatrix, polynomialCoefficientVector, M3);
 
       M3.set(0, icpPositionDesiredFinal - M3.get(0));
@@ -399,12 +397,6 @@ public class SmoothCoMIntegrationToolbox
 
       generalizedAlphaBetaCoMPrimeMatrix.reshape(dimension, dimension * numberOfCoefficients);
       generalizedAlphaBetaCoMPrimeMatrix.zero();
-
-      generalizedGammaCoMPrimeMatrix.reshape(1, 1);
-      generalizedGammaCoMPrimeMatrix.zero();
-
-      generalizedDeltaCoMPrimeMatrix.reshape(1, 1);
-      generalizedDeltaCoMPrimeMatrix.zero();
 
       generalizedAlphaPrimeTerminalMatrix.reshape(dimension, dimension * numberOfCoefficients);
       generalizedAlphaPrimeTerminalMatrix.zero();

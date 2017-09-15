@@ -87,7 +87,7 @@ public class SmoothCapturePointToolbox
       calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, time, 0, cmpPolynomial3D, finalCapturePoint, desiredCapturePointToPack);
    }
    
-   public void computeDesiredCapturePointPosition(double omega0, double time, FramePoint3D finalCapturePoint, FrameTrajectory3D cmpPolynomial3D, 
+   public void computeDesiredCapturePointPosition(double omega0, double time, FramePoint3D finalCapturePoint, FrameTrajectory3D cmpPolynomial3D,
                                                                   FramePoint3D desiredCapturePointToPack)
    {  
       for(Direction dir : Direction.values)
@@ -199,7 +199,7 @@ public class SmoothCapturePointToolbox
       icpQuantityDesired.set(M1);
    }
 
-   public double calculateICPQuantity1D(DenseMatrix64F generalizedAlphaBetaPrimeMatrix, double generalizedGammaPrime,
+   public static double calculateICPQuantity1D(DenseMatrix64F generalizedAlphaBetaPrimeMatrix, double generalizedGammaPrime,
                                                DenseMatrix64F polynomialCoefficientVector, double icpPositionDesiredFinal)
    {
       return CommonOps.dot(generalizedAlphaBetaPrimeMatrix, polynomialCoefficientVector) + generalizedGammaPrime * icpPositionDesiredFinal;

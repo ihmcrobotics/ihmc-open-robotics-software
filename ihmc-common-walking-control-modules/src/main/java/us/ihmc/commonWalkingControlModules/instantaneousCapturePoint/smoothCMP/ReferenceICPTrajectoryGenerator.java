@@ -53,9 +53,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final FramePoint3D icpPositionDesiredFinalCurrentSegment = new FramePoint3D();
    private final FramePoint3D icpPositionDesiredTerminal = new FramePoint3D();
 
-   private final YoBoolean isStanding;
    private final YoBoolean isInitialTransfer;
-   private final YoBoolean isDoubleSupport;
 
    private final YoBoolean continuouslyAdjustForICPContinuity;
    private final YoBoolean areICPDynamicsSatisfied;
@@ -85,9 +83,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    {
       this.omega0 = omega0;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
-      this.isStanding = isStanding;
       this.isInitialTransfer = isInitialTransfer;
-      this.isDoubleSupport = isDoubleSupport;
       this.debug = debug;
 
       areICPDynamicsSatisfied = new YoBoolean(namePrefix + "AreICPDynamicsSatisfied", registry);
@@ -358,11 +354,11 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
          // ICP
          icpToolbox.computeDesiredCapturePointPosition(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(),
-                                                                icpPositionDesiredFinalCurrentSegment, cmpPolynomial3D, icpPositionDesiredCurrent);
+                                                       icpPositionDesiredFinalCurrentSegment, cmpPolynomial3D, icpPositionDesiredCurrent);
          icpToolbox.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(),
-                                                                icpPositionDesiredFinalCurrentSegment, cmpPolynomial3D, icpVelocityDesiredCurrent);
+                                                       icpPositionDesiredFinalCurrentSegment, cmpPolynomial3D, icpVelocityDesiredCurrent);
          icpToolbox.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(),
-                                                                    icpPositionDesiredFinalCurrentSegment, cmpPolynomial3D, icpAccelerationDesiredCurrent);
+                                                           icpPositionDesiredFinalCurrentSegment, cmpPolynomial3D, icpAccelerationDesiredCurrent);
          
          //if(!isDoubleSupport.getBooleanValue())
          {
