@@ -6,8 +6,10 @@ import us.ihmc.avatar.DRCPushRecoveryMultiStepTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
 public class AtlasPushRecoveryMultiStepTest extends DRCPushRecoveryMultiStepTest
@@ -36,5 +38,17 @@ public class AtlasPushRecoveryMultiStepTest extends DRCPushRecoveryMultiStepTest
    {
       forceMagnitude = -700.0;
       forceDuration = 0.2;
+   }
+   
+   @Override
+   public void testMultiStepBackwardAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   {
+      super.testMultiStepBackwardAndContinueWalking();
+   }
+   
+   @Override
+   public void testMultiStepForwardAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+   {
+      super.testMultiStepForwardAndContinueWalking();
    }
 }

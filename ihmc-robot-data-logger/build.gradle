@@ -15,18 +15,20 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.8.6"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.8.7"
+      classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
    }
 }
-plugins {
-   id "org.hidetake.ssh" version "2.9.0"
-   id "application"
-}
+
+apply plugin: "application"
+apply plugin: "org.hidetake.ssh"
 apply plugin: "us.ihmc.ihmc-build"
+
+import org.gradle.api.GradleException
 
 ihmc {
    loadProductProperties("../product.properties")
-   
+
    configureDependencyResolution()
    configurePublications()
 }
@@ -71,102 +73,105 @@ testDependencies {
 
 mainClassName = hasProperty('mainClass') ? mainClass : "us.ihmc.robotDataLogger.logger.YoVariableLoggerDispatcher"
 
-//task loggerStartScripts(type: CreateStartScripts) {
-//   outputDir = file("build/scripts")
-//   mainClassName = "us.ihmc.robotDataLogger.logger.YoVariableLoggerDispatcher"
-//   applicationName = "IHMCLogger"
-//   classpath = project.configurations.runtime + jar.outputs.files
-//}
-//
-//task compileIDL(type: us.ihmc.idl.generator.IDLGeneratorTask) {
-//   idlFiles = fileTree(dir: 'idl')
-//   includeDirs = files(".")
-//   targetDirectory = file("generated-src")
-//   packagePrefix = ""
-//}
-//
-//compileJava.dependsOn compileIDL
-//
-//distributions {
-//   logger {
-//      baseName = "IHMCLogger"
-//      contents {
-//         into('lib') {
-//            from project.configurations.runtime + jar.outputs.files
-//         }
-//
-//         into('bin') {
-//            from loggerStartScripts
-//            include "IHMCLogger*"
-//         }
-//      }
-//   }
-//}
-//
-//task setupDeployLoggerRemote << {
-//   def deployLoggerUserValue = project.hasProperty("deployLoggerUser") ? project.deployLoggerUser : "invalid"
-//   def deployLoggerPasswordValue = project.hasProperty("deployLoggerPassword") ? project.deployLoggerPassword : "invalid"
-//   def deployLoggerHostValue = project.hasProperty("deployLoggerHost") ? project.deployLoggerHost : "invalid"
-//
-//   remotes.create('deployLoggerTarget') {
-//      host = deployLoggerHostValue
-//      user = deployLoggerUserValue
-//      password = deployLoggerPasswordValue
-//      knownHosts = allowAnyHosts
-//   }
-//}
-//
-//task deployLogger(dependsOn: [loggerDistTar, setupDeployLoggerRemote]) << {
-//   ssh.run {
-//      session(remotes.deployLoggerTarget) {
-//         project.logger.lifecycle("Copying Logger distribution tarball to remote host")
-//         def distTarFile = loggerDistTar.outputs.files.singleFile
-//         put from: distTarFile, into: "."
-//
-//         project.logger.lifecycle("Untarring distribution on remote host")
-//         execute "tar xf ./${distTarFile.name}"
-//         project.logger.lifecycle("Removing tarball from remote host")
-//         execute "rm -f ./${distTarFile.name}"
-//         project.logger.lifecycle("Moving Logger distribution in to place")
-//         execute "mv ./${distTarFile.name.replace(".tar", "")} IHMCLogger"
-//         project.logger.lifecycle("Logger deployment to remote host complete!")
-//      }
-//   }
-//}
-//
-//task checkThatDistributionDoesntAlreadyExist(type: Exec) {
-//   def distTarFile = loggerDistTar.outputs.files.singleFile
-//   workingDir project.projectDir
-//   executable 'curl'
-//   args = ["--write-out", "%{http_code}", "--silent", "--output", "/dev/null", "--head", "https://dl.bintray.com/ihmcrobotics/distributions/${distTarFile.name}"]
-//   standardOutput = new ByteArrayOutputStream();
-//
-//   doLast {
-//      execResult.assertNormalExitValue()
-//      def output = standardOutput.toString()
-//      if (output.equals("200"))
-//      {
-//         throw new GradleException("Distribution ${distTarFile.name} already exists on Bintray. Distributions versions should not be overwritten. Did you mean to release a new version or hotfix?")
-//      }
-//   }
-//}
-//
-//task publishLoggerDistributionToBintray(type: Exec, dependsOn: [checkThatDistributionDoesntAlreadyExist, loggerDistTar]) {
-//   def distTarFile = loggerDistTar.outputs.files.singleFile
-//   def user = project.hasProperty("bintray_user") ? project.bintray_user : "invalid"
-//   def key = project.hasProperty("bintray_key") ? project.bintray_key : "invalid"
-//
-//   workingDir project.projectDir
-//   executable 'curl'
-//   args = ["--write-out", "%{http_code}", "--silent", "--output", "/dev/null", "-T", distTarFile.canonicalPath, "-u${user}:${key}", "https://api.bintray.com/content/ihmcrobotics/distributions/IHMCLogger/${project.version}/${distTarFile.name}?publish=1"]
-//   standardOutput = new ByteArrayOutputStream();
-//
-//   doLast {
-//      execResult.assertNormalExitValue()
-//      def output = standardOutput.toString()
-//      if (!output.equals("201"))
-//      {
-//         throw new GradleException("Upload failed! HTTP Response code: ${output}.")
-//      }
-//   }
-//}
+if (ihmc.isBuildRoot())
+{
+   task loggerStartScripts(type: CreateStartScripts) {
+      outputDir = file("build/scripts")
+      mainClassName = "us.ihmc.robotDataLogger.logger.YoVariableLoggerDispatcher"
+      applicationName = "IHMCLogger"
+      classpath = project.configurations.runtime + jar.outputs.files
+   }
+
+   task compileIDL(type: us.ihmc.idl.generator.IDLGeneratorTask) {
+      idlFiles = fileTree(dir: 'idl')
+      includeDirs = files(".")
+      targetDirectory = file("generated-src")
+      packagePrefix = ""
+   }
+
+   compileJava.dependsOn compileIDL
+
+   distributions {
+      logger {
+         baseName = "IHMCLogger"
+         contents {
+            into('lib') {
+               from project.configurations.runtime + jar.outputs.files
+            }
+
+            into('bin') {
+               from loggerStartScripts
+               include "IHMCLogger*"
+            }
+         }
+      }
+   }
+
+   task setupDeployLoggerRemote << {
+      def deployLoggerUserValue = project.hasProperty("deployLoggerUser") ? project.deployLoggerUser : "invalid"
+      def deployLoggerPasswordValue = project.hasProperty("deployLoggerPassword") ? project.deployLoggerPassword : "invalid"
+      def deployLoggerHostValue = project.hasProperty("deployLoggerHost") ? project.deployLoggerHost : "invalid"
+
+      remotes.create('deployLoggerTarget') {
+         host = deployLoggerHostValue
+         user = deployLoggerUserValue
+         password = deployLoggerPasswordValue
+         knownHosts = allowAnyHosts
+      }
+   }
+
+   task deployLogger(dependsOn: [loggerDistTar, setupDeployLoggerRemote]) << {
+      ssh.run {
+         session(remotes.deployLoggerTarget) {
+            project.logger.lifecycle("Copying Logger distribution tarball to remote host")
+            def distTarFile = loggerDistTar.outputs.files.singleFile
+            put from: distTarFile, into: "."
+
+            project.logger.lifecycle("Untarring distribution on remote host")
+            execute "tar xf ./${distTarFile.name}"
+            project.logger.lifecycle("Removing tarball from remote host")
+            execute "rm -f ./${distTarFile.name}"
+            project.logger.lifecycle("Moving Logger distribution in to place")
+            execute "mv ./${distTarFile.name.replace(".tar", "")} IHMCLogger"
+            project.logger.lifecycle("Logger deployment to remote host complete!")
+         }
+      }
+   }
+
+   task checkThatDistributionDoesntAlreadyExist(type: Exec) {
+      def distTarFile = loggerDistTar.outputs.files.singleFile
+      workingDir project.projectDir
+      executable 'curl'
+      args = ["--write-out", "%{http_code}", "--silent", "--output", "/dev/null", "--head", "https://dl.bintray.com/ihmcrobotics/distributions/${distTarFile.name}"]
+      standardOutput = new ByteArrayOutputStream();
+
+      doLast {
+         execResult.assertNormalExitValue()
+         def output = standardOutput.toString()
+         if (output.equals("200"))
+         {
+            throw new GradleException("Distribution ${distTarFile.name} already exists on Bintray. Distributions versions should not be overwritten. Did you mean to release a new version or hotfix?")
+         }
+      }
+   }
+
+   task publishLoggerDistributionToBintray(type: Exec, dependsOn: [checkThatDistributionDoesntAlreadyExist, loggerDistTar]) {
+      def distTarFile = loggerDistTar.outputs.files.singleFile
+      def user = project.hasProperty("bintray_user") ? project.bintray_user : "invalid"
+      def key = project.hasProperty("bintray_key") ? project.bintray_key : "invalid"
+
+      workingDir project.projectDir
+      executable 'curl'
+      args = ["--write-out", "%{http_code}", "--silent", "--output", "/dev/null", "-T", distTarFile.canonicalPath, "-u${user}:${key}", "https://api.bintray.com/content/ihmcrobotics/distributions/IHMCLogger/${project.version}/${distTarFile.name}?publish=1"]
+      standardOutput = new ByteArrayOutputStream();
+
+      doLast {
+         execResult.assertNormalExitValue()
+         def output = standardOutput.toString()
+         if (!output.equals("201"))
+         {
+            throw new GradleException("Upload failed! HTTP Response code: ${output}.")
+         }
+      }
+   }
+}

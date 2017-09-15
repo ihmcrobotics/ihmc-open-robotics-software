@@ -21,4 +21,46 @@ public class ValkyrieEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisT
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
+   
+   @Override
+   public void testHeightModeSwitchWhileWalking() throws Exception
+   {
+      super.testHeightModeSwitchWhileWalking();
+   }
+   
+   @Override
+   public void testHeightUsingMultipleWaypoints() throws Exception
+   {
+      super.testHeightUsingMultipleWaypoints();
+   }
+   
+   @Override
+   public void testHeightUsingMultipleWaypointsWhileWalking() throws Exception
+   {
+      super.testHeightUsingMultipleWaypointsWhileWalking();
+   }
+   
+   @Override
+   public void testMultipleWaypoints() throws Exception
+   {
+      super.testMultipleWaypoints();
+   }
+   
+   @Override
+   public void testSingleWaypoint() throws Exception
+   {
+      super.testSingleWaypoint();
+   }
+   
+   @Override
+   public void testSingleWaypointAndWalk() throws Exception
+   {
+      super.testSingleWaypointAndWalk();
+   }
+   
+   @Override
+   public void testStopAllTrajectory() throws Exception
+   {
+      super.testStopAllTrajectory();
+   }
 }

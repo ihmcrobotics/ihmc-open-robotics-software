@@ -1,11 +1,20 @@
 package us.ihmc.avatar.testTools;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.obstacleCourseTests.ForceSensorHysteresisCreator;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
@@ -51,15 +60,6 @@ import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
-
 public class DRCSimulationTestHelper
 {
    private SimulationConstructionSet scs;
@@ -85,7 +85,7 @@ public class DRCSimulationTestHelper
    private DRCSimulationStarter simulationStarter;
    private Exception caughtException;
 
-   private DRCStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+   private OffsetAndYawRobotInitialSetup startingLocation = new OffsetAndYawRobotInitialSetup();
    private boolean addFootstepMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = false;
    private boolean cheatWithGroundHeightAtFootstep = false;
@@ -124,7 +124,7 @@ public class DRCSimulationTestHelper
          simulationStarter.registerHighLevelController(highLevelBehaviorFactory);
       if (initialSetup != null)
          simulationStarter.setRobotInitialSetup(initialSetup);
-      simulationStarter.setStartingLocation(startingLocation);
+      simulationStarter.setStartingLocationOffset(startingLocation);
       simulationStarter.setGuiInitialSetup(guiInitialSetup);
       simulationStarter.setInitializeEstimatorToActual(true);
       simulationStarter.setFlatGroundWalkingScriptParameters(walkingScriptParameters);
@@ -479,6 +479,11 @@ public class DRCSimulationTestHelper
    }
 
    public void setStartingLocation(DRCStartingLocation startingLocation)
+   {
+      this.startingLocation = startingLocation.getStartingLocationOffset();
+   }
+   
+   public void setStartingLocation(OffsetAndYawRobotInitialSetup startingLocation)
    {
       this.startingLocation = startingLocation;
    }
