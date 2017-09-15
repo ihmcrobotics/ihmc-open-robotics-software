@@ -5,11 +5,8 @@ import java.util.List;
 
 import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.Matrix;
 import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -210,14 +207,14 @@ public class SmoothCapturePointAdjustmentToolbox
    private void calculateGeneralizedICPMatricesOnCMPSegment2(double omega0, Trajectory cmpPolynomialSegment2)
    {
       double tInitial2 = cmpPolynomialSegment2.getInitialTime();
-      generalizedGammaPrimeSegment2 = icpToolbox.calculateGeneralizedMatricesPrimeOnCMPSegment1D(omega0, tInitial2, 0, cmpPolynomialSegment2, generalizedAlphaPrimeRowSegment2, generalizedBetaPrimeRowSegment2,
+      generalizedGammaPrimeSegment2 = SmoothCapturePointToolbox.calculateGeneralizedMatricesPrimeOnCMPSegment1D(omega0, tInitial2, 0, cmpPolynomialSegment2, generalizedAlphaPrimeRowSegment2, generalizedBetaPrimeRowSegment2,
                                                                  generalizedAlphaBetaPrimeRowSegment2);
    }
 
    private void calculateGeneralizedICPMatricesOnCMPSegment1(double omega0, int derivativeOrder, Trajectory cmpPolynomialSegment1)
    {
       double tInitial1 = cmpPolynomialSegment1.getInitialTime();
-      generalizedGammaPrimeSegment1 = icpToolbox.calculateGeneralizedMatricesPrimeOnCMPSegment1D(omega0, tInitial1, derivativeOrder, cmpPolynomialSegment1, generalizedAlphaPrimeRowSegment1,
+      generalizedGammaPrimeSegment1 = SmoothCapturePointToolbox.calculateGeneralizedMatricesPrimeOnCMPSegment1D(omega0, tInitial1, derivativeOrder, cmpPolynomialSegment1, generalizedAlphaPrimeRowSegment1,
                                                                  generalizedBetaPrimeRowSegment1, generalizedAlphaBetaPrimeRowSegment1);
    }
 
