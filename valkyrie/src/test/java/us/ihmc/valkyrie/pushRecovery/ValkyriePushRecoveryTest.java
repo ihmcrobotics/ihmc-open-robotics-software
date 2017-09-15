@@ -112,4 +112,10 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    {
       super.testRecoveryWhileInFlamingoStance();
    }
+   
+   @Override
+   public void testPushICPOptimiWhileInSwing() throws SimulationExceededMaximumTimeException
+   {
+      super.testPushICPOptimiWhileInSwing();
+   }
 }
