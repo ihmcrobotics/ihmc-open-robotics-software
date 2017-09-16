@@ -674,6 +674,12 @@ public class SphereControlToolbox
          copOffsetBoundsInFootFrame.put(CoPPointName.BALL_COP, new Vector2D(0.0, 0.055));
          copOffsetBoundsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.08));
       }
+
+      @Override
+      public boolean planWithAngularMomentum()
+      {
+         return true;
+      }
    }
    
    public ICPOptimizationParameters createICPOptimizationParameters()
