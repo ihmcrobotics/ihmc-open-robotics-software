@@ -132,6 +132,19 @@ public class RecyclingArrayList<T> implements List<T>
    }
 
    /**
+    * Returns the first element of this list.
+    * If the list is empty, it returns {@code null}.
+    * @return the first element of this list
+    */
+   public T getFirst()
+   {
+      if (isEmpty())
+         return null;
+      else
+         return unsafeGet(0);
+   }
+
+   /**
     * Returns the last element of this list.
     * If the list is empty, it returns {@code null}.
     * @return the last element of this list

@@ -38,7 +38,6 @@ public class SmoothCapturePointAdjustmentToolboxTest
       // Linear polynomial: y(x) = a0 + a1*x
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
       
-      boolean isInitialTransfer = true;
       int numberOfCoefficients = 2;
       int numberOfSegments = 3;
       int numberOfSwingSegments = 0;
@@ -117,7 +116,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
             cmp2QuantitiesBefore.add(cmp2QuantityBC);
          }
 
-         icpAdjustmentToolbox.setICPInitialConditions(cmpPolynomials3D.get(0).getInitialTime(), exitCornerPoints, cmpPolynomials3D, numberOfSwingSegments, isInitialTransfer, omega0);
+         icpAdjustmentToolbox.setICPInitialConditions(cmpPolynomials3D.get(0).getInitialTime(), exitCornerPoints, cmpPolynomials3D, numberOfSwingSegments, omega0);
          icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(entryCornerPoints, exitCornerPoints, cmpPolynomials3D, omega0);
 
          for(int j = 0; j < numberOfCoefficients / 2; j++)
@@ -150,7 +149,6 @@ public class SmoothCapturePointAdjustmentToolboxTest
       // Linear polynomial: y(x) = a0 + a1*x
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
       
-      boolean isInitialTransfer = false;
       int numberOfCoefficients = 2;
       int numberOfSegments = 4;
       int numberOfSwingSegments = 1;
@@ -251,7 +249,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
             cmp3QuantitiesBefore.add(cmp3QuantityBC);
          }
 
-         icpAdjustmentToolbox.setICPInitialConditions(cmpPolynomials3DSwing.get(0).getFinalTime(), exitCornerPointsSwing, cmpPolynomials3DSwing, numberOfSwingSegments, isInitialTransfer, omega0);
+         icpAdjustmentToolbox.setICPInitialConditions(cmpPolynomials3DSwing.get(0).getFinalTime(), exitCornerPointsSwing, cmpPolynomials3DSwing, numberOfSwingSegments, omega0);
          
          icpToolbox.computeDesiredCornerPoints3D(entryCornerPointsTransfer, exitCornerPointsTransfer, cmpPolynomials3DTransfer, omega0);
          icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(entryCornerPointsTransfer, exitCornerPointsTransfer, cmpPolynomials3DTransfer, omega0);
@@ -286,7 +284,6 @@ public class SmoothCapturePointAdjustmentToolboxTest
       // Linear polynomial: y(x) = a0 + a1*x
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
       
-      boolean isInitialTransfer = false;
       int numberOfCoefficients = 2;
       int numberOfSegments = 4;
       int numberOfSwingSegments = 1;
@@ -417,7 +414,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
             cmp3QuantitiesBefore.add(cmp3QuantityBC);
          }
 
-         icpAdjustmentToolbox.setICPInitialConditions(cmpPolynomials3DSwing.get(0).getFinalTime() - endTimeOffset, exitCornerPointsSwing, cmpPolynomials3DSwing, numberOfSwingSegments - 1, isInitialTransfer, omega0);
+         icpAdjustmentToolbox.setICPInitialConditions(cmpPolynomials3DSwing.get(0).getFinalTime() - endTimeOffset, exitCornerPointsSwing, cmpPolynomials3DSwing, numberOfSwingSegments - 1, omega0);
          
          icpToolbox.computeDesiredCornerPoints3D(entryCornerPointsTransferUpdated, exitCornerPointsTransferUpdated, cmpPolynomials3DTransferUpdated, omega0);
          icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(entryCornerPointsTransferUpdated, exitCornerPointsTransferUpdated, cmpPolynomials3DTransferUpdated, omega0);
@@ -452,7 +449,6 @@ public class SmoothCapturePointAdjustmentToolboxTest
       // Linear polynomial: y(x) = a0 + a1*x + a2*x + a3*x
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
       
-      boolean isInitialTransfer = true;
       int numberOfCoefficients = 4;
       int numberOfSegments = 3;
       int numberOfSwingSegments = 0;
@@ -531,7 +527,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
             cmp2QuantitiesBefore.add(cmp2QuantityBC);
          }
 
-         icpAdjustmentToolbox.setICPInitialConditions(cmpPolynomials3D.get(0).getInitialTime(),exitCornerPoints, cmpPolynomials3D, numberOfSwingSegments, isInitialTransfer, omega0);
+         icpAdjustmentToolbox.setICPInitialConditions(cmpPolynomials3D.get(0).getInitialTime(),exitCornerPoints, cmpPolynomials3D, numberOfSwingSegments, omega0);
          icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(entryCornerPoints, exitCornerPoints, cmpPolynomials3D, omega0);
 
          for(int j = 0; j < numberOfCoefficients / 2; j++)
@@ -564,7 +560,6 @@ public class SmoothCapturePointAdjustmentToolboxTest
       // Linear polynomial: y(x) = a0 + a1*x + a2*x + a3*x
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
       
-      boolean isInitialTransfer = false;
       int numberOfCoefficients = 4;
       int numberOfSegments = 4;
       int numberOfSwingSegments = 1;
@@ -663,7 +658,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
             cmp3QuantitiesBefore.add(cmp3QuantityBC);
          }
 
-         icpAdjustmentToolbox.setICPInitialConditions(cmpPolynomials3DSwing.get(0).getFinalTime(), exitCornerPointsSwing, cmpPolynomials3DSwing, numberOfSwingSegments, isInitialTransfer, omega0);
+         icpAdjustmentToolbox.setICPInitialConditions(cmpPolynomials3DSwing.get(0).getFinalTime(), exitCornerPointsSwing, cmpPolynomials3DSwing, numberOfSwingSegments, omega0);
          
          icpToolbox.computeDesiredCornerPoints3D(entryCornerPointsTransfer, exitCornerPointsTransfer, cmpPolynomials3DTransfer, omega0);
          icpAdjustmentToolbox.adjustDesiredTrajectoriesForInitialSmoothing(entryCornerPointsTransfer, exitCornerPointsTransfer, cmpPolynomials3DTransfer, omega0);

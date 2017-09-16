@@ -6,7 +6,6 @@ import java.util.List;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointAdjustmentToolbox;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.SmoothCapturePointToolbox;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -33,6 +32,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final static int defaultSize = 50;
 
+   private final boolean debug;
+
    private final List<FramePoint3D> cmpDesiredFinalPositions = new ArrayList<>();
    
    private final List<FramePoint3D> icpDesiredInitialPositions = new ArrayList<>();
@@ -50,9 +51,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final FramePoint3D icpPositionDesiredFinalCurrentSegment = new FramePoint3D();
    private final FramePoint3D icpPositionDesiredTerminal = new FramePoint3D();
 
-   private final YoBoolean isStanding;
    private final YoBoolean isInitialTransfer;
-   private final YoBoolean isDoubleSupport;
 
    private final YoBoolean continuouslyAdjustForICPContinuity;
    private final YoBoolean areICPDynamicsSatisfied;
@@ -78,14 +77,12 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox(icpToolbox);
 
    public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isStanding,
-                                          YoBoolean isInitialTransfer, YoBoolean isDoubleSupport,
-                                          YoVariableRegistry registry)
+                                          YoBoolean isInitialTransfer, YoBoolean isDoubleSupport, boolean debug, YoVariableRegistry registry)
    {
       this.omega0 = omega0;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
-      this.isStanding = isStanding;
       this.isInitialTransfer = isInitialTransfer;
-      this.isDoubleSupport = isDoubleSupport;
+      this.debug = debug;
 
       areICPDynamicsSatisfied = new YoBoolean(namePrefix + "AreICPDynamicsSatisfied", registry);
       areICPDynamicsSatisfied.set(false);
@@ -126,8 +123,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
       totalNumberOfCMPSegments.set(0);
       localTimeInCurrentPhase.set(0.0);
       
-      icpPhaseEntryCornerPointIndices.clear();
-      icpPhaseExitCornerPointIndices.clear();
+      icpPhaseEntryCornerPointIndices.resetQuick();
+      icpPhaseExitCornerPointIndices.resetQuick();
    }
    
    public void resetCoPs()
@@ -327,8 +324,7 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
    
    public void setICPInitialConditionsForAdjustment(double time, int currentSwingSegment)
    {
-         icpAdjustmentToolbox.setICPInitialConditions(time, icpDesiredFinalPositionsFromCoPs, copTrajectories, currentSwingSegment, isInitialTransfer.getBooleanValue(),
-                                                      omega0.getDoubleValue());    
+         icpAdjustmentToolbox.setICPInitialConditions(time, icpDesiredFinalPositionsFromCoPs, copTrajectories, currentSwingSegment, omega0.getDoubleValue());
    }
 
    public void adjustDesiredTrajectoriesForInitialSmoothing()
@@ -356,17 +352,18 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
          // ICP
          icpToolbox.computeDesiredCapturePointPosition(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(),
-                                                                icpPositionDesiredFinalCurrentSegment, cmpPolynomial3D, icpPositionDesiredCurrent);
+                                                       icpPositionDesiredFinalCurrentSegment, cmpPolynomial3D, icpPositionDesiredCurrent);
          icpToolbox.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(),
-                                                                icpPositionDesiredFinalCurrentSegment, cmpPolynomial3D, icpVelocityDesiredCurrent);
+                                                       icpPositionDesiredFinalCurrentSegment, cmpPolynomial3D, icpVelocityDesiredCurrent);
          icpToolbox.computeDesiredCapturePointAcceleration(omega0.getDoubleValue(), localTimeInCurrentPhase.getDoubleValue(),
-                                                                    icpPositionDesiredFinalCurrentSegment, cmpPolynomial3D, icpAccelerationDesiredCurrent);
+                                                           icpPositionDesiredFinalCurrentSegment, cmpPolynomial3D, icpAccelerationDesiredCurrent);
          
          //if(!isDoubleSupport.getBooleanValue())
          {
             setICPInitialConditionsForAdjustment(localTimeInCurrentPhase.getDoubleValue(), currentSegmentIndex.getIntegerValue()); // TODO: add controller dt for proper continuation
          }
-         checkICPDynamics(localTimeInCurrentPhase.getDoubleValue(), icpVelocityDesiredCurrent, icpPositionDesiredCurrent, cmpPolynomial3D);
+         if (debug)
+            checkICPDynamics(localTimeInCurrentPhase.getDoubleValue(), icpVelocityDesiredCurrent, icpPositionDesiredCurrent, cmpPolynomial3D);
       }
    }
 

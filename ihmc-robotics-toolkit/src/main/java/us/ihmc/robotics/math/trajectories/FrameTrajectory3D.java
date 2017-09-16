@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -546,7 +545,6 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
    public void getFramePositionInitial(FramePoint3D positionToPack)
    {
       compute(xTrajectory.getInitialTime());
-      PrintTools.debug("Initial time = " + xTrajectory.getInitialTime());
       positionToPack.setToZero(referenceFrame);
       positionToPack.set(getPosition());
    }
@@ -554,7 +552,6 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
    public void getFramePositionFinal(FramePoint3D positionToPack)
    {
       compute(xTrajectory.getFinalTime());
-      PrintTools.debug("Final time = " + xTrajectory.getFinalTime());
       positionToPack.setToZero(referenceFrame);
       positionToPack.set(getPosition());
    }

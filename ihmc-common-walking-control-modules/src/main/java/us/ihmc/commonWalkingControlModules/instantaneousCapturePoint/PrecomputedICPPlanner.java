@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.*;
+import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePointTools.*;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.CenterOfMassTrajectoryHandler;

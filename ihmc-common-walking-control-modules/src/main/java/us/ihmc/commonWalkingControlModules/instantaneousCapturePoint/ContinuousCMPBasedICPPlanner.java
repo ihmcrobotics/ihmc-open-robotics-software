@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.*;
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.*;
+import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePointTools.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -433,6 +433,8 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void compute(double time)
    {
+      timer.startMeasurement();
+
       timeInCurrentState.set(time - initialTime.getDoubleValue());
       timeInCurrentStateRemaining.set(getCurrentStateDuration() - timeInCurrentState.getDoubleValue());
 
@@ -477,6 +479,8 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
       computeDesiredCentroidalMomentumPivot(desiredICPPosition, desiredICPVelocity, omega0, desiredCMPPosition);
       computeDesiredCentroidalMomentumPivotVelocity(desiredICPVelocity, desiredICPAcceleration, omega0, desiredCMPVelocity);
+
+      timer.stopMeasurement();
    }
 
    private void initializeTransferTrajectory(RobotSide transferToSide)

@@ -1,6 +1,6 @@
 package us.ihmc.atlas.StepAdjustmentVisualizers;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePointTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
