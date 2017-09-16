@@ -377,4 +377,8 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
       return CoPSplineType.LINEAR;
    }
 
+   public AngularMomentumEstimationParameters getAngularMomentumEstimationParameters()
+   {
+      return new AngularMomentumEstimationParameters();
+   }
 }

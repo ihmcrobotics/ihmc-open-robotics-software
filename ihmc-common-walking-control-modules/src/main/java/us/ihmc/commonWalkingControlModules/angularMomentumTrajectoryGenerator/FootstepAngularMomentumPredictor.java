@@ -3,7 +3,9 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.configurations.AngularMomentumEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
+import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.CoPPointsInFoot;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.WalkingTrajectoryType;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -251,15 +253,16 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       parentRegistry.addChild(registry);
    }
 
-   public void initializeParameters(AngularMomentumEstimationParameters angularMomentumParameters)
+   public void initializeParameters(SmoothCMPPlannerParameters smoothCMPPlannerParameters, double totalMass, double gravityZ)
    {
-      this.computePredictedAngularMomentum.set(angularMomentumParameters.computePredictedAngularMomentum());
-      this.numberOfFootstepsToConsider.set(angularMomentumParameters.getNumberOfFootstepsToConsider());
-      this.entryCoPName = angularMomentumParameters.getEntryCoPName();
-      this.swingLegMass.set(angularMomentumParameters.getSwingLegMass());
-      this.supportLegMass.set(angularMomentumParameters.getSupportLegMass());
+      AngularMomentumEstimationParameters angularMomentumParameters = smoothCMPPlannerParameters.getAngularMomentumEstimationParameters();
+      this.computePredictedAngularMomentum.set(smoothCMPPlannerParameters.planWithAngularMomentum());
+      this.numberOfFootstepsToConsider.set(smoothCMPPlannerParameters.getNumberOfFootstepsToConsider());
+      this.entryCoPName = smoothCMPPlannerParameters.getEntryCoPName();
+      this.swingLegMass.set(totalMass * angularMomentumParameters.getPercentageSwingLegMass());
+      this.supportLegMass.set(totalMass * angularMomentumParameters.getPercentageSupportLegMass());
       this.swingFootMaxHeight.set(angularMomentumParameters.getSwingFootMaxLift());
-      this.gravityZ.set(angularMomentumParameters.getGravityZ());
+      this.gravityZ.set(gravityZ);
    }
 
    @Override
