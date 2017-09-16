@@ -33,16 +33,9 @@ public class CoPPointsInFoot
 
    private final YoFramePointInMultipleFrames swingFootCentroid;
    private final YoFramePointInMultipleFrames supportFootCentroid;
-   private final int stepNumber;
 
    public CoPPointsInFoot(int stepNumber, ReferenceFrame[] framesToRegister, YoVariableRegistry registry)
    {
-      this(stepNumber, 6, framesToRegister, registry);
-   }
-
-   public CoPPointsInFoot(int stepNumber, int size, ReferenceFrame[] framesToRegister, YoVariableRegistry registry)
-   {
-      this.stepNumber = stepNumber;
       for (int i = 0; i < maxNumberOfTrajectoryPoints; i++)
       {
          CoPTrajectoryPoint constantCoP = new CoPTrajectoryPoint("step" + stepNumber + "CoP" + i, "", registry, framesToRegister);
@@ -136,20 +129,13 @@ public class CoPPointsInFoot
       copLocations.get(waypointIndex).setToNaN();
    }
 
-   public void addWayPoints(CoPPointName[] copPointNames)
-   {
-      for (int i = 0; i < copPointNames.length; i++)
-         this.copPointsList.add(copPointNames[i]);
-   }
-
    public void setIncludingFrame(CoPPointsInFoot other)
    {
       this.swingFootCentroid.setIncludingFrame(other.swingFootCentroid);
       this.supportFootCentroid.setIncludingFrame(other.supportFootCentroid);
       for (int i = 0; i < other.copPointsList.size(); i++)
          this.copLocations.get(i).setIncludingFrame(other.get(i));
-      for(int i = 0; i < other.copPointsList.size(); i++)
-         this.copPointsList.add(other.copPointsList.get(i));
+      this.copPointsList.addAll(other.copPointsList);
    }
 
    public CoPTrajectoryPoint get(int copPointIndex)
@@ -225,32 +211,6 @@ public class CoPPointsInFoot
    {
       setSwingFootLocation(swingFootLocation);
       setSupportFootLocation(supportFootLocation);
-   }
-   
-   public String toString()
-   {
-      String output = "SwingFootstepLocation: " + swingFootCentroid.toString() + "\n";
-      output += "SupportFootstepLocation: " + supportFootCentroid.toString() + "\n";
-      for (int i = 0; i < maxNumberOfTrajectoryPoints; i++)
-      {
-         if( i < copPointsList.size())
-            output += copPointsList.get(i).toString() + " : " + copLocations.get(i) + "\n";
-         else
-            output += "Null" + " : " + copLocations.get(i) + "\n";
-      }
-      for (int i = 0; i < copPointsList.size(); i++)
-         output += copPointsList.get(i).toString() + "\t";
-      output += "\n";
-      return output;
-   }
-
-   public String toString2()
-   {
-      String output = "FootstepLocation: " + swingFootCentroid.toString() + "\n";
-      output += "SupportFootstepLocation: " + supportFootCentroid.toString() + "\n";
-      for (int i = 0; i < copPointsList.size(); i++)
-         output += copPointsList.get(i).toString() + " : " + copLocations.get(i).toString() + "\n";
-      return output;
    }
 
    public List<CoPPointName> getCoPPointList()

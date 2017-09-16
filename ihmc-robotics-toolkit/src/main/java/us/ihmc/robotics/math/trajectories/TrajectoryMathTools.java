@@ -1,14 +1,12 @@
 package us.ihmc.robotics.math.trajectories;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.robotics.dataStructures.Polynomial;
 import us.ihmc.robotics.math.FastFourierTransform;
 
 public class TrajectoryMathTools
@@ -16,33 +14,33 @@ public class TrajectoryMathTools
    private final int maxNumberOfCoefficients;
    private final Trajectory tempTraj1;
    private final Trajectory tempTraj2;
-   private final Trajectory3D tempTraj3;
-   private final List<Double> tempTimeList;
+   private final Trajectory3D tempTraj3D;
+   private final TDoubleArrayList tempTimeList = new TDoubleArrayList(4);
    private final FastFourierTransform fft;
    private final ComplexNumber[] tempComplex1;
    private final ComplexNumber[] tempComplex2;
-   
-   private ComplexNumber[] tempComplexReference;
-   private FrameTrajectory3D segmentTraj1, segmentTraj2;
-   private int tempTimeArrayLength;
-   
+
    public TrajectoryMathTools(int maxNumberOfCoefficients)
    {
       this.maxNumberOfCoefficients = (int) Math.pow(2, Math.ceil( Math.log(maxNumberOfCoefficients) / Math.log(2.0)) ); // Rounding up the nearest power of two
       this.tempTraj1 = new Trajectory(this.maxNumberOfCoefficients);
       this.tempTraj2 = new Trajectory(this.maxNumberOfCoefficients);
-      this.tempTraj3 = new Trajectory3D(this.maxNumberOfCoefficients);
-      this.tempTimeList = new ArrayList<>(Arrays.asList(0.0, 0.0, 0.0, 0.0));
-      this.tempTimeArrayLength = 4;
+      this.tempTraj3D = new Trajectory3D(this.maxNumberOfCoefficients);
       this.fft = new FastFourierTransform(this.maxNumberOfCoefficients);
       this.tempComplex1 = ComplexNumber.getComplexArray(this.maxNumberOfCoefficients);
       this.tempComplex2 = ComplexNumber.getComplexArray(this.maxNumberOfCoefficients);
    }
 
-   public void scale(Trajectory scaledTrajectoryToPack, Trajectory trajectoryToScale, double scalar)
+   public static void scale(Trajectory scaledTrajectoryToPack, Trajectory trajectoryToScale, double scalar)
    {
       for (int i = 0; i < trajectoryToScale.getNumberOfCoefficients(); i++)
          scaledTrajectoryToPack.setDirectlyFast(i, trajectoryToScale.getCoefficient(i) * scalar);
+   }
+
+   public static void scale(Trajectory trajectoryToScale, double scalar)
+   {
+      for (int i = 0; i < trajectoryToScale.getNumberOfCoefficients(); i++)
+         trajectoryToScale.setDirectlyFast(i, trajectoryToScale.getCoefficient(i) * scalar);
    }
 
    /**
@@ -52,7 +50,7 @@ public class TrajectoryMathTools
     * @param traj1
     * @param traj2
     */
-   public void add(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
+   public static void add(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
    {
       validatePackingTrajectoryForLinearCombination(trajToPack, traj1, traj2);
       validateTrajectoryTimes(traj1, traj2);
@@ -67,14 +65,14 @@ public class TrajectoryMathTools
     * @param traj1
     * @param traj2
     */
-   public void addByTrimming(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
+   public static void addByTrimming(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
    {
       validatePackingTrajectoryForLinearCombination(trajToPack, traj1, traj2);
       setTimeIntervalByTrimming(trajToPack, traj1, traj2);
       setCoeffsByAddition(trajToPack, traj1, traj2);
    }
 
-   private void setCoeffsByAddition(Trajectory trajectoryToPack, Trajectory trajectory1, Trajectory trajectory2)
+   private static void setCoeffsByAddition(Trajectory trajectoryToPack, Trajectory trajectory1, Trajectory trajectory2)
    {
       int numberOfCoeffsToSet = Math.max(trajectory1.getNumberOfCoefficients(), trajectory2.getNumberOfCoefficients());
 
@@ -97,7 +95,7 @@ public class TrajectoryMathTools
     * @param traj1
     * @param traj2
     */
-   public void subtract(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
+   public static void subtract(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
    {
       validatePackingTrajectoryForLinearCombination(trajToPack, traj1, traj2);
       validateTrajectoryTimes(traj1, traj2);
@@ -106,19 +104,33 @@ public class TrajectoryMathTools
    }
 
    /**
+    * Subtracts {@code traj2} from {@code traj1} in case the two have the same start and end times
+    * Throws runtime exception in case the start and end time values do not match or if {@code trajToPack} is not large enough to store the result
+    * @param traj1
+    * @param traj2
+    */
+   public static void subtractEquals(Trajectory traj1, Trajectory traj2)
+   {
+      validatePackingTrajectoryForLinearCombination(traj1, traj2);
+      validateTrajectoryTimes(traj1, traj2);
+      traj1.setTime(traj1.getInitialTime(), traj2.getFinalTime());
+      setCoeffsBySubtraction(traj1, traj1, traj2);
+   }
+
+   /**
     * Subtracts the two trajectories by taking the intersection of the time intervals over which the two are defined
     * @param trajToPack
     * @param traj1
     * @param traj2
     */
-   public void subtractByTrimming(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
+   public static void subtractByTrimming(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
    {
       validatePackingTrajectoryForLinearCombination(trajToPack, traj1, traj2);
       setTimeIntervalByTrimming(trajToPack, traj1, traj2);
       setCoeffsBySubtraction(trajToPack, traj1, traj2);
    }
 
-   private void setCoeffsBySubtraction(Trajectory trajectoryToPack, Trajectory trajectory1, Trajectory trajectory2)
+   private static void setCoeffsBySubtraction(Trajectory trajectoryToPack, Trajectory trajectory1, Trajectory trajectory2)
    {
       int numberOfCoeffsToSet = Math.max(trajectory1.getNumberOfCoefficients(), trajectory2.getNumberOfCoefficients());
       for (int i = 0; i < numberOfCoeffsToSet; i++)
@@ -138,22 +150,30 @@ public class TrajectoryMathTools
       validatePackingTrajectoryForMultiplication(trajToPack, traj1, traj2);
       validateTrajectoryTimes(traj1, traj2);
       trajToPack.setTime(traj1.getInitialTime(), traj2.getFinalTime());
-      setCoeffsByMultiplication(trajToPack, traj1, traj2);
+      setCoefficientsByMultiplication(trajToPack, traj1, traj2);
+   }
+
+   public void multiplySubtract(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
+   {
+      validatePackingTrajectoryForMultiplication(trajToPack, traj1, traj2);
+      validateTrajectoryTimes(traj1, traj2);
+      trajToPack.setTime(traj1.getInitialTime(), traj2.getFinalTime());
+      subtractCoefficientsByMultiplication(trajToPack, traj1, traj2);
    }
 
    public void multiplyByTrimming(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
    {
       validatePackingTrajectoryForMultiplication(trajToPack, traj1, traj2);
       setTimeIntervalByTrimming(trajToPack, traj1, traj2);
-      setCoeffsByMultiplication(trajToPack, traj1, traj2);
+      setCoefficientsByMultiplication(trajToPack, traj1, traj2);
    }
 
-   private void setCoeffsByMultiplication(Trajectory trajectoryToPack, Trajectory trajectory1, Trajectory trajectory2)
+   private void setCoefficientsByMultiplication(Trajectory trajectoryToPack, Trajectory trajectory1, Trajectory trajectory2)
    {
       int numberOfCoeffsToSet = trajectory1.getNumberOfCoefficients() + trajectory2.getNumberOfCoefficients() - 1;
 
       fft.setCoefficients(trajectory1.getCoefficients(), trajectory1.getNumberOfCoefficients());
-      tempComplexReference = fft.getForwardTransform();
+      ComplexNumber[] tempComplexReference = fft.getForwardTransform();
       ComplexNumber.copyComplexArray(tempComplex1, tempComplexReference);
 
       fft.setCoefficients(trajectory2.getCoefficients(), trajectory2.getNumberOfCoefficients());
@@ -171,37 +191,104 @@ public class TrajectoryMathTools
       trajectoryToPack.reshape(numberOfCoeffsToSet);
    }
 
-   public void scale(Trajectory3D trajToPack, Trajectory3D traj, double scalarX, double scalarY, double scalarZ)
+   private void addCoefficientsByMultiplication(Trajectory trajectoryToPack, Trajectory trajectory1, Trajectory trajectory2)
+   {
+      int numberOfCoeffsToSet = trajectory1.getNumberOfCoefficients() + trajectory2.getNumberOfCoefficients() - 1;
+
+      fft.setCoefficients(trajectory1.getCoefficients(), trajectory1.getNumberOfCoefficients());
+      ComplexNumber[] tempComplexReference = fft.getForwardTransform();
+      ComplexNumber.copyComplexArray(tempComplex1, tempComplexReference);
+
+      fft.setCoefficients(trajectory2.getCoefficients(), trajectory2.getNumberOfCoefficients());
+      tempComplexReference = fft.getForwardTransform();
+      ComplexNumber.copyComplexArray(tempComplex2, tempComplexReference);
+
+      for (int i = 0; i < tempComplex1.length; i++)
+         tempComplex1[i].timesAndStore(tempComplex2[i]);
+
+      fft.setCoefficients(tempComplex1);
+      tempComplexReference = fft.getInverseTransform();
+
+      for (int i = 0; i < numberOfCoeffsToSet; i++)
+         trajectoryToPack.setDirectlyFast(i, tempComplexReference[i].real() + trajectoryToPack.getCoefficient(i));
+      trajectoryToPack.reshape(numberOfCoeffsToSet);
+   }
+
+   private void subtractCoefficientsByMultiplication(Trajectory trajectoryToPack, Trajectory trajectory1, Trajectory trajectory2)
+   {
+      int numberOfCoeffsToSet = trajectory1.getNumberOfCoefficients() + trajectory2.getNumberOfCoefficients() - 1;
+
+      fft.setCoefficients(trajectory1.getCoefficients(), trajectory1.getNumberOfCoefficients());
+      ComplexNumber[] tempComplexReference = fft.getForwardTransform();
+      ComplexNumber.copyComplexArray(tempComplex1, tempComplexReference);
+
+      fft.setCoefficients(trajectory2.getCoefficients(), trajectory2.getNumberOfCoefficients());
+      tempComplexReference = fft.getForwardTransform();
+      ComplexNumber.copyComplexArray(tempComplex2, tempComplexReference);
+
+      for (int i = 0; i < tempComplex1.length; i++)
+         tempComplex1[i].timesAndStore(tempComplex2[i]);
+
+      fft.setCoefficients(tempComplex1);
+      tempComplexReference = fft.getInverseTransform();
+
+      for (int i = 0; i < numberOfCoeffsToSet; i++)
+         trajectoryToPack.setDirectlyFast(i, trajectoryToPack.getCoefficient(i) - tempComplexReference[i].real());
+      trajectoryToPack.reshape(numberOfCoeffsToSet);
+   }
+
+   public static void scale(Trajectory3D trajToPack, Trajectory3D traj, double scalarX, double scalarY, double scalarZ)
    {
       scale(trajToPack.getTrajectoryX(), traj.getTrajectoryX(), scalarX);
       scale(trajToPack.getTrajectoryY(), traj.getTrajectoryY(), scalarY);
       scale(trajToPack.getTrajectoryZ(), traj.getTrajectoryZ(), scalarZ);
    }
 
-   public void scale(Trajectory3D trajToPack, Trajectory3D traj, double scalar)
+   public static void scale(Trajectory3D traj, double scalarX, double scalarY, double scalarZ)
+   {
+      scale(traj.getTrajectoryX(), scalarX);
+      scale(traj.getTrajectoryY(), scalarY);
+      scale(traj.getTrajectoryZ(), scalarZ);
+   }
+
+   public static void scale(Trajectory3D trajToPack, Trajectory3D traj, double scalar)
    {
       scale(trajToPack, traj, scalar, scalar, scalar);
    }
 
-   public void add(Trajectory3D trajToPack, Trajectory3D traj1, Trajectory3D traj2)
+   public static void scale(double scalar, Trajectory3D traj)
+   {
+      scale(traj, scalar, scalar, scalar);
+   }
+
+   public static void add(Trajectory3D trajToPack, Trajectory3D traj1, Trajectory3D traj2)
    {
       for (int direction = 0; direction < 3; direction++)
          add(trajToPack.getTrajectory(direction), traj1.getTrajectory(direction), traj2.getTrajectory(direction));
    }
 
-   public void addByTrimming(Trajectory3D trajToPack, Trajectory3D traj1, Trajectory3D traj2)
+   public static void addByTrimming(Trajectory3D trajToPack, Trajectory3D traj1, Trajectory3D traj2)
    {
       for (int direction = 0; direction < 3; direction++)
          addByTrimming(trajToPack.getTrajectory(direction), traj1.getTrajectory(direction), traj2.getTrajectory(direction));
    }
 
-   public void subtract(Trajectory3D trajToPack, Trajectory3D traj1, Trajectory3D traj2)
+   public static void subtract(Trajectory3D trajToPack, Trajectory3D traj1, Trajectory3D traj2)
    {
+      if (trajToPack == traj1)
+         throw new RuntimeException("Cannot set to the container.");
+
       for (int direction = 0; direction < 3; direction++)
          subtract(trajToPack.getTrajectory(direction), traj1.getTrajectory(direction), traj2.getTrajectory(direction));
    }
 
-   public void subtractByTrimming(Trajectory3D trajToPack, Trajectory3D traj1, Trajectory3D traj2)
+   public static void subtractEquals(Trajectory3D traj1, Trajectory3D traj2)
+   {
+      for (int direction = 0; direction < 3; direction++)
+         subtractEquals(traj1.getTrajectory(direction), traj2.getTrajectory(direction));
+   }
+
+   public static void subtractByTrimming(Trajectory3D trajToPack, Trajectory3D traj1, Trajectory3D traj2)
    {
       for (int direction = 0; direction < 3; direction++)
          subtractByTrimming(trajToPack.getTrajectory(direction), traj1.getTrajectory(direction), traj2.getTrajectory(direction));
@@ -235,37 +322,55 @@ public class TrajectoryMathTools
       multiplyByTrimming(trajToPackZ, traj1Z, traj2Z);
    }
 
+   /**
+    * trajToPack = traj1 x traj2
+    * @param trajToPack
+    * @param traj1
+    * @param traj2
+    */
    public void crossProduct(Trajectory3D trajToPack, Trajectory3D traj1, Trajectory3D traj2)
    {
-      crossProduct(trajToPack.getTrajectoryX(), trajToPack.getTrajectoryY(), trajToPack.getTrajectoryZ(), traj1.getTrajectoryX(),
-                   traj1.getTrajectoryY(), traj1.getTrajectoryZ(), traj2.getTrajectoryX(), traj2.getTrajectoryY(), traj2.getTrajectoryZ());
+      if (trajToPack == traj1)
+         throw new RuntimeException("Trajectory to pack must be different from one of its inputs.");
+
+      multiply(trajToPack.xTrajectory, traj1.yTrajectory, traj2.zTrajectory);
+      multiplySubtract(trajToPack.xTrajectory, traj1.zTrajectory, traj2.yTrajectory);
+
+      multiply(trajToPack.yTrajectory, traj1.zTrajectory, traj2.xTrajectory);
+      multiplySubtract(trajToPack.yTrajectory, traj1.xTrajectory, traj2.zTrajectory);
+
+      multiply(trajToPack.zTrajectory, traj1.xTrajectory, traj2.yTrajectory);
+      multiplySubtract(trajToPack.zTrajectory, traj1.yTrajectory, traj2.xTrajectory);
    }
 
+   /**
+    * traj1 = traj1 x traj2;
+    * @param traj1
+    * @param traj2
+    */
+   public void crossProduct(Trajectory3D traj1, Trajectory3D traj2)
+   {
+      multiply(tempTraj3D.xTrajectory, traj1.yTrajectory, traj2.zTrajectory);
+      multiplySubtract(tempTraj3D.xTrajectory, traj1.zTrajectory, traj2.yTrajectory);
+
+      multiply(tempTraj3D.yTrajectory, traj1.zTrajectory, traj2.xTrajectory);
+      multiplySubtract(tempTraj3D.yTrajectory, traj1.xTrajectory, traj2.zTrajectory);
+
+      multiply(tempTraj3D.zTrajectory, traj1.xTrajectory, traj2.yTrajectory);
+      multiplySubtract(tempTraj3D.zTrajectory, traj1.yTrajectory, traj2.xTrajectory);
+
+      traj1.xTrajectory.set(tempTraj3D.xTrajectory);
+      traj1.yTrajectory.set(tempTraj3D.yTrajectory);
+      traj1.zTrajectory.set(tempTraj3D.zTrajectory);
+   }
+
+   /*
    public void crossProductByTrimming(Trajectory3D trajToPack, Trajectory3D traj1, Trajectory3D traj2)
    {
       crossProductByTrimming(trajToPack.getTrajectoryX(), trajToPack.getTrajectoryY(), trajToPack.getTrajectoryZ(), traj1.getTrajectoryX(),
                              traj1.getTrajectoryY(), traj1.getTrajectoryZ(), traj2.getTrajectoryX(), traj2.getTrajectoryY(), traj2.getTrajectoryZ());
    }
 
-   public void crossProduct(Trajectory xTrajectoryToPack, Trajectory yTrajectoryToPack, Trajectory zTrajectoryToPack,
-                                   Trajectory traj1X, Trajectory traj1Y, Trajectory traj1Z, Trajectory traj2X, Trajectory traj2Y, Trajectory traj2Z)
-   {
-      multiply(tempTraj1, traj1Y, traj2Z);
-      multiply(tempTraj2, traj1Z, traj2Y);
-      subtract(tempTraj3.xTrajectory, tempTraj1, tempTraj2);
-      
-      multiply(tempTraj1, traj1X, traj2Z);
-      multiply(tempTraj2, traj1Z, traj2X);
-      subtract(tempTraj3.yTrajectory, tempTraj2, tempTraj1);
-
-      multiply(tempTraj1, traj1X, traj2Y);
-      multiply(tempTraj2, traj1Y, traj2X);
-      subtract(tempTraj3.zTrajectory, tempTraj1, tempTraj2);
-
-      xTrajectoryToPack.set(tempTraj3.xTrajectory);
-      yTrajectoryToPack.set(tempTraj3.yTrajectory);
-      zTrajectoryToPack.set(tempTraj3.zTrajectory);
-   }
 
    public void crossProductByTrimming(Trajectory trajToPackX, Trajectory trajToPackY, Trajectory trajToPackZ, Trajectory traj1X,
                                              Trajectory traj1Y, Trajectory traj1Z, Trajectory traj2X, Trajectory traj2Y, Trajectory traj2Z)
@@ -281,12 +386,14 @@ public class TrajectoryMathTools
       multiplyByTrimming(tempTraj1, traj1X, traj2Y);
       multiplyByTrimming(tempTraj2, traj1Y, traj2X);
       subtractByTrimming(tempTraj3.zTrajectory, tempTraj1, tempTraj2);
+
       trajToPackX.set(tempTraj3.xTrajectory);
       trajToPackY.set(tempTraj3.yTrajectory);
       trajToPackZ.set(tempTraj3.zTrajectory);
    }
+   */
 
-   public void validateTrajectoryTimes(Trajectory traj1, Trajectory traj2)
+   public static void validateTrajectoryTimes(Trajectory traj1, Trajectory traj2)
    {
       if (Math.abs(traj1.getInitialTime() - traj2.getInitialTime()) > Epsilons.ONE_THOUSANDTH
             || Math.abs(traj1.getFinalTime() - traj2.getFinalTime()) > Epsilons.ONE_THOUSANDTH)
@@ -296,7 +403,7 @@ public class TrajectoryMathTools
       }
    }
 
-   private void setTimeIntervalByTrimming(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
+   private static void setTimeIntervalByTrimming(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
    {
       double latestStartingTime = Math.max(traj1.getInitialTime(), traj2.getInitialTime());
       double earliestEndingTime = Math.min(traj1.getFinalTime(), traj2.getFinalTime());
@@ -310,7 +417,7 @@ public class TrajectoryMathTools
       trajToPack.setFinalTime(earliestEndingTime);
    }
 
-   public void validatePackingTrajectoryForLinearCombination(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
+   public static void validatePackingTrajectoryForLinearCombination(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
    {
       if (trajToPack.getMaximumNumberOfCoefficients() < Math.max(traj1.getNumberOfCoefficients(), traj2.getNumberOfCoefficients()))
       {
@@ -320,7 +427,16 @@ public class TrajectoryMathTools
       }
    }
 
-   public void validatePackingTrajectoryForMultiplication(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
+   public static void validatePackingTrajectoryForLinearCombination(Trajectory traj1, Trajectory traj2)
+   {
+      if (traj1.getNumberOfCoefficients() != traj2.getNumberOfCoefficients())
+      {
+         PrintTools.warn("Inequal number of coefficients. Traj1: " + traj1.getNumberOfCoefficients() + ", Traj2: " + traj2.getNumberOfCoefficients());
+         throw new InvalidParameterException();
+      }
+   }
+
+   public static void validatePackingTrajectoryForMultiplication(Trajectory trajToPack, Trajectory traj1, Trajectory traj2)
    {
       if (trajToPack.getMaximumNumberOfCoefficients() < traj1.getNumberOfCoefficients() + traj2.getNumberOfCoefficients() - 1)
       {
@@ -395,7 +511,7 @@ public class TrajectoryMathTools
       return numberOfSegments;
    }
 
-   private void setCurrentSegmentPolynomial(Trajectory trajToPack, Trajectory traj, double segmentStartTime, double segmentFinalTime,
+   private static void setCurrentSegmentPolynomial(Trajectory trajToPack, Trajectory traj, double segmentStartTime, double segmentFinalTime,
                                                    double TIME_EPSILON)
    {
       trajToPack.set(traj);
@@ -405,21 +521,22 @@ public class TrajectoryMathTools
          trajToPack.setZero();
    }
 
-   private void setCurrentSegmentPolynomial(Trajectory3D trajToPack, Trajectory3D traj, double segmentStartTime, double segmentFinalTime,
+   private static void setCurrentSegmentPolynomial(Trajectory3D trajToPack, Trajectory3D traj, double segmentStartTime, double segmentFinalTime,
                                                    double TIME_EPSILON)
    {
       for (int i = 0; i < 3; i++)
          setCurrentSegmentPolynomial(trajToPack.getTrajectory(i), traj.getTrajectory(i), segmentStartTime, segmentFinalTime, TIME_EPSILON);
    }
 
-   public int getSegmentTimeList(List<Double> trajTimeListToPack, Trajectory traj1, Trajectory traj2, double TIME_EPSILON)
+   public static int getSegmentTimeList(TDoubleArrayList trajTimeListToPack, Trajectory traj1, Trajectory traj2, double TIME_EPSILON)
    {
-      trajTimeListToPack.set(0, traj1.getInitialTime());
-      trajTimeListToPack.set(1, traj1.getFinalTime());
-      trajTimeListToPack.set(2, traj2.getInitialTime());
-      trajTimeListToPack.set(3, traj2.getFinalTime());
+      trajTimeListToPack.clear();
+      trajTimeListToPack.add(traj1.getInitialTime());
+      trajTimeListToPack.add(traj1.getFinalTime());
+      trajTimeListToPack.add(traj2.getInitialTime());
+      trajTimeListToPack.add(traj2.getFinalTime());
 
-      tempTimeArrayLength = trajTimeListToPack.size();
+      int tempTimeArrayLength = trajTimeListToPack.size();
       for (int i = 0, j = 0, k = 2; k < tempTimeArrayLength; i++)
       {
          if (Math.abs(trajTimeListToPack.get(j) - trajTimeListToPack.get(k)) < TIME_EPSILON)
@@ -446,7 +563,7 @@ public class TrajectoryMathTools
       return tempTimeArrayLength - 1;
    }
 
-   public void checkZeroTimeTrajectory(Trajectory trajectory, double TIME_EPSILON)
+   public static void checkZeroTimeTrajectory(Trajectory trajectory, double TIME_EPSILON)
    {
       if (Math.abs(trajectory.getFinalTime() - trajectory.getInitialTime()) < TIME_EPSILON)
          throw new RuntimeException("Cannot operate with null trajectory, start time: " + trajectory.getInitialTime() + " end time: "
@@ -474,7 +591,7 @@ public class TrajectoryMathTools
       }
 
       fft.setCoefficients(tempComplex1);
-      tempComplexReference = fft.getForwardTransform();
+      ComplexNumber[] tempComplexReference = fft.getForwardTransform();
       ComplexNumber.copyComplexArray(tempComplex1, tempComplexReference);
 
       fft.setCoefficients(tempComplex2);
@@ -496,7 +613,7 @@ public class TrajectoryMathTools
       trajectory.setTime(trajectory.getInitialTime() + timeOffset, trajectory.getFinalTime() + timeOffset);
    }
 
-   public void getIntergal(Trajectory trajectoryToPack, Trajectory trajectoryToIntegrate)
+   public static void getIntergal(Trajectory trajectoryToPack, Trajectory trajectoryToIntegrate)
    {
       if (trajectoryToPack.getMaximumNumberOfCoefficients() < trajectoryToIntegrate.getNumberOfCoefficients() + 1)
          throw new InvalidParameterException("Not enough coefficients to store result of trajectory integration");
@@ -510,7 +627,7 @@ public class TrajectoryMathTools
       trajectoryToPack.setTime(trajectoryToIntegrate.getInitialTime(), trajectoryToIntegrate.getFinalTime());
    }
 
-   public void getDerivative(Trajectory derivativeToPack, Trajectory trajectoryToDifferentiate)
+   public static void getDerivative(Trajectory derivativeToPack, Trajectory trajectoryToDifferentiate)
    {
       if (derivativeToPack.getMaximumNumberOfCoefficients() < trajectoryToDifferentiate.getNumberOfCoefficients() - 1)
          throw new InvalidParameterException("Not enough coefficients to store the result of differentiation");
@@ -523,25 +640,27 @@ public class TrajectoryMathTools
       derivativeToPack.setTime(trajectoryToDifferentiate.getInitialTime(), trajectoryToDifferentiate.getFinalTime());
    }
 
-   public void addSegmentedTrajectories(SegmentedFrameTrajectory3D trajToPack, SegmentedFrameTrajectory3D traj1, SegmentedFrameTrajectory3D traj2,
+   public static void addSegmentedTrajectories(SegmentedFrameTrajectory3D trajToPack, SegmentedFrameTrajectory3D traj1, SegmentedFrameTrajectory3D traj2,
                                         double TIME_EPSILON)
    {
       double currentTime = Math.min(traj1.getSegment(0).getInitialTime(), traj2.getSegment(0).getInitialTime());
-      int k = 0;
-      for (int i = 0, j = 0; i < traj1.getNumberOfSegments() || j < traj2.getNumberOfSegments(); k++)
+      for (int i = 0, j = 0; i < traj1.getNumberOfSegments() || j < traj2.getNumberOfSegments();)
       {
+         FrameTrajectory3D segmentTraj1, segmentTraj2;
+         FrameTrajectory3D currentTrajectoryToPack = trajToPack.add();
+
          // Select the one that is ahead or set if no intersection
          if (i >= traj1.getNumberOfSegments()
                || (j < traj2.getNumberOfSegments() && traj2.getSegment(j).getFinalTime() < traj1.getSegment(i).getInitialTime() - TIME_EPSILON))
          {
-            setCurrentSegmentPolynomial(trajToPack.getSegment(k), traj2.getSegment(j), currentTime, traj2.getSegment(j).getFinalTime(), TIME_EPSILON);
+            setCurrentSegmentPolynomial(currentTrajectoryToPack, traj2.getSegment(j), currentTime, traj2.getSegment(j).getFinalTime(), TIME_EPSILON);
             currentTime = traj2.getSegment(j++).getFinalTime();
             continue;
          }
          else if (j >= traj2.getNumberOfSegments()
                || (i < traj1.getNumberOfSegments() && traj1.getSegment(i).getFinalTime() < traj2.getSegment(j).getInitialTime() - TIME_EPSILON))
          {
-            setCurrentSegmentPolynomial(trajToPack.getSegment(k), traj1.getSegment(i), currentTime, traj1.getSegment(i).getFinalTime(), TIME_EPSILON);
+            setCurrentSegmentPolynomial(currentTrajectoryToPack, traj1.getSegment(i), currentTime, traj1.getSegment(i).getFinalTime(), TIME_EPSILON);
             currentTime = traj1.getSegment(i++).getFinalTime();
             continue;
          }
@@ -556,12 +675,13 @@ public class TrajectoryMathTools
             segmentTraj1 = traj2.getSegment(j);
          }
 
+         // FIXME why get the next one
          if (segmentTraj1.getInitialTime() < segmentTraj2.getInitialTime() - TIME_EPSILON && currentTime - TIME_EPSILON < segmentTraj1.getInitialTime())
          {
-            setCurrentSegmentPolynomial(trajToPack.getSegment(k++), segmentTraj1, currentTime, segmentTraj2.getInitialTime(), TIME_EPSILON);
+            setCurrentSegmentPolynomial(currentTrajectoryToPack, segmentTraj1, currentTime, segmentTraj2.getInitialTime(), TIME_EPSILON);
          }
 
-         addByTrimming(trajToPack.getSegment(k), segmentTraj1, segmentTraj2);
+         addByTrimming(currentTrajectoryToPack, segmentTraj1, segmentTraj2);
          currentTime = Math.min(segmentTraj1.getFinalTime(), segmentTraj2.getFinalTime());
          if (currentTime < traj2.getSegment(j).getFinalTime() - TIME_EPSILON)
             i++;
@@ -573,13 +693,11 @@ public class TrajectoryMathTools
             j++;
          }
       }
-      trajToPack.setNumberOfSegments(k);
    }
 
-   public void getDerivative(FrameTrajectory3D trajectoryToPack, FrameTrajectory3D trajectoryToDifferentiate)
+   public static void getDerivative(FrameTrajectory3D trajectoryToPack, FrameTrajectory3D trajectoryToDifferentiate)
    {
       for(int i = 0; i < 3; i++)
          getDerivative(trajectoryToPack.getTrajectory(i), trajectoryToDifferentiate.getTrajectory(i));
    }
-
 }

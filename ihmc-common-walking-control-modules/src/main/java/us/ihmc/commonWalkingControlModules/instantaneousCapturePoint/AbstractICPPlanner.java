@@ -21,6 +21,7 @@ import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -38,6 +39,8 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    protected final YoBoolean isStanding = new YoBoolean(namePrefix + "IsStanding", registry);
    protected final YoBoolean isInitialTransfer = new YoBoolean(namePrefix + "IsInitialTransfer", registry);
    protected final YoBoolean isDoubleSupport = new YoBoolean(namePrefix + "IsDoubleSupport", registry);
+
+   protected final ExecutionTimer timer = new ExecutionTimer(namePrefix + "Timer", registry);
 
    /////////////////////////////// Start Planner Output ///////////////////////////////
 
