@@ -3,7 +3,8 @@ package us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.badlogic.gdx.graphics.g3d.particles.influencers.DynamicsModifier;
+import us.ihmc.commonWalkingControlModules.configurations.AngularMomentumEstimationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -17,7 +18,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMomentumTrajectoryGeneratorInterface
 {
@@ -45,16 +45,13 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
    private FramePoint3D tempFramePoint2 = new FramePoint3D(worldFrame);
    private double planTime;
 
-   public CommandBasedAngularMomentumTrajectoryGenerator(String namePrefix, AngularMomentumEstimationParameters trajectoryGenerationParameters,
-                                                         WalkingMessageHandler handler, YoVariableRegistry registry)
+   public CommandBasedAngularMomentumTrajectoryGenerator(String namePrefix, SmoothCMPPlannerParameters smoothCMPPlannerParameters,
+                                                         WalkingMessageHandler handler, YoDouble time, YoVariableRegistry registry)
    {
       this.momentumWaypointSource = handler;
-      YoVariable<?> timeVariableCandidate = registry.getVariable(trajectoryGenerationParameters.getYoTimeVariableName());
-      if (timeVariableCandidate.getClass() == YoDouble.class)
-         this.time = (YoDouble) timeVariableCandidate;
-      else
-         throw new RuntimeException("Unable to find yotime variable for angular momentum trajectory generation");
+      this.time = time;
 
+      AngularMomentumEstimationParameters trajectoryGenerationParameters = smoothCMPPlannerParameters.getAngularMomentumEstimationParameters();
       this.numberOfWaypointsToUseForTransfer = new YoInteger(namePrefix + "NumberOfSampledWaypointsForTransfer", registry);
       this.numberOfWaypointsToUseForTransfer.set(trajectoryGenerationParameters.getNumberOfPointsToSampleForTransfer());
       this.numberOfWaypointsToUseForSwing = new YoInteger(namePrefix + "NumberOfSampledWaypintsForSwing", registry);
@@ -63,7 +60,7 @@ public class CommandBasedAngularMomentumTrajectoryGenerator implements AngularMo
       this.trajectoryType.set(trajectoryGenerationParameters.getSplineType());
 
       this.numberOfFootstepsToPlan = new YoInteger(namePrefix + "NumberOfFootstepsToPlan", registry);
-      this.numberOfFootstepsToPlan.set(trajectoryGenerationParameters.getNumberOfFootstepsToConsider());
+      this.numberOfFootstepsToPlan.set(smoothCMPPlannerParameters.getNumberOfFootstepsToConsider());
 
       this.waypoints = new RecyclingArrayList<>(Math.max(numberOfWaypointsToUseForSwing.getIntegerValue(), numberOfWaypointsToUseForTransfer.getIntegerValue()),
                                                 TrajectoryPoint3D.class);
