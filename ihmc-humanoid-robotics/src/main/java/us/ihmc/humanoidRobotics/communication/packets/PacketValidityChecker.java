@@ -4,8 +4,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import us.ihmc.communication.packets.ObjectValidityChecker;
 import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
@@ -142,6 +143,17 @@ public abstract class PacketValidityChecker
          if (packetToCheck.getSwingTrajectoryBlendDuration() > 0.0 && packetToCheck.getSwingTrajectory()[0].getTime() > 1.0e-5)
          {
             String errorMessage = messageClassName + "'s swing trajectory blend duration is greater than zero, initial waypoint at t = 0.0 is missing.";
+            return errorMessage;
+         }
+      }
+
+      if (trajectoryType == TrajectoryType.CUSTOM)
+      {
+         String messageClassName = packetToCheck.getClass().getSimpleName();
+         Point3D[] positionWaypoints = packetToCheck.getCustomPositionWaypoints();
+         if (positionWaypoints == null)
+         {
+            String errorMessage = messageClassName + "'s type is custom but no position waypoints were specified.";
             return errorMessage;
          }
       }
@@ -941,7 +953,7 @@ public abstract class PacketValidityChecker
 
       return null;
    }
-   
+
    private static String validateEuclideanTrajectoryPointMessage(EuclideanTrajectoryPointMessage se3TrajectoryPoint,
          EuclideanTrajectoryPointMessage previousTrajectoryPoint, boolean checkId)
    {

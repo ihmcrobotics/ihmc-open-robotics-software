@@ -83,7 +83,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
-      footstep.setPredictedContactPointsFromPoint2ds(originalFootstep.getPredictedContactPoints());
+      footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints());
       footstep.setFootstepType(type);
       FramePose solePoseInWorld = new FramePose(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);

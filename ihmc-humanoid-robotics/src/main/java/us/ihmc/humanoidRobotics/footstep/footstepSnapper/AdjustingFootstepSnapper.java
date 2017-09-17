@@ -113,7 +113,7 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
    {
       // can only snap footsteps in world frame
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      
+
       FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
       //set to the sole pose
       FramePoint3D position = new FramePoint3D();
@@ -121,13 +121,13 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
       footstep.getPose(position, orientation);
       originalFootstep.setLocation(position.getPoint());
       originalFootstep.setOrientation(orientation.getQuaternion());
-      
+
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
       if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints() != null){
          throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
       }
-      footstep.setPredictedContactPointsFromPoint2ds(originalFootstep.getPredictedContactPoints());
+      footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints());
       footstep.setFootstepType(type);
       FramePose solePoseInWorld = new FramePose(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);
