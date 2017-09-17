@@ -267,6 +267,15 @@ public class WalkingMessageHandler
       comTrajectoryHandler.handleComTrajectory(command);
    }
 
+   /**
+    * This method will set the provided timing to the timing of the {@code i}'th upcoming
+    * footstep. If there is less then {@code i} upcoming steps this method will throw a
+    * {@link RuntimeException}. To check how many footsteps are upcoming use
+    * {@link #getCurrentNumberOfFootsteps()}.
+    *
+    * @param i is the index of the upcoming footstep timing that will be packed.
+    * @param timingToPack will be set to the timing of footstep i in the list of upcoming steps.
+    */
    public void peekTiming(int i, FootstepTiming timingToPack)
    {
       if (i >= upcomingFootstepTimings.size())
@@ -276,7 +285,16 @@ public class WalkingMessageHandler
       timingToPack.set(upcomingFootstepTimings.get(i));
    }
 
-   public void peek(int i, Footstep footstepToPack)
+   /**
+    * This method will set the provided footstep to the {@code i}'th upcoming
+    * footstep. If there is less then {@code i} upcoming steps this method will throw a
+    * {@link RuntimeException}. To check how many footsteps are upcoming use
+    * {@link #getCurrentNumberOfFootsteps()}.
+    *
+    * @param i is the index of the upcoming footstep that will be packed.
+    * @param footstepToPack will be set to the footstep i in the list of upcoming steps.
+    */
+   public void peekFootstep(int i, Footstep footstepToPack)
    {
       if (i >= upcomingFootsteps.size())
       {
@@ -285,6 +303,15 @@ public class WalkingMessageHandler
       footstepToPack.set(upcomingFootsteps.get(i));
    }
 
+   /**
+    * This method will pack the provided footstep and timing with the next upcoming
+    * step. It will then remove that footstep from the list of upcoming footsteps.
+    * Use this method if you wish to remove the next upcoming step because the execution
+    * has started. If there is no upcoming step this method will throw a {@link RuntimeException}.
+    *
+    * @param footstepToPack will be set to the next footstep in the list of upcoming steps.
+    * @param timingToPack will be set to the next footsteps timing in the list of upcoming steps.
+    */
    public void poll(Footstep footstepToPack, FootstepTiming timingToPack)
    {
       if (upcomingFootsteps.isEmpty())
@@ -304,6 +331,15 @@ public class WalkingMessageHandler
       upcomingFootsteps.remove(0);
    }
 
+   /**
+    * This method can be used if the timing of a upcoming footstep needs to be adjusted. It
+    * will throw a {@link RuntimeException} if there is less upcoming footstep timings then
+    * {@code stepIndex}.
+    *
+    * @param stepIndex is the index of the timing that will be adjusted in the list of upcoming steps.
+    * @param newSwingDuration is the new swing duration for the adjusted timing
+    * @param newTransferDuration is the new transfer duration for the adjusted timing.
+    */
    public void adjustTimings(int stepIndex, double newSwingDuration, double newTransferDuration)
    {
       if (upcomingFootstepTimings.size() <= stepIndex)

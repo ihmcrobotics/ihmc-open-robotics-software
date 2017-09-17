@@ -124,7 +124,7 @@ public abstract class TransferState extends WalkingState
       feetManager.initializeContactStatesForDoubleSupport(transferToSide);
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
-      walkingMessageHandler.peek(0, nextFootstep);
+      walkingMessageHandler.peekFootstep(0, nextFootstep);
       failureDetectionControlModule.setNextFootstep(nextFootstep);
       balanceManager.setUpcomingFootstep(nextFootstep);
 

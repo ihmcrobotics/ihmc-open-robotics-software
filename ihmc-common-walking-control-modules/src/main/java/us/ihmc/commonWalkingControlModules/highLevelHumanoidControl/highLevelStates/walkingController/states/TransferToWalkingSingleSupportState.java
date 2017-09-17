@@ -65,7 +65,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
       {
          Footstep footstep = footsteps[i];
          FootstepTiming timing = footstepTimings[i];
-         walkingMessageHandler.peek(i, footstep);
+         walkingMessageHandler.peekFootstep(i, footstep);
          walkingMessageHandler.peekTiming(i, timing);
 
          if (i == 0)
