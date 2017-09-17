@@ -224,7 +224,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       boolean isLastStep = stepsToAdd == 0;
       for (int i = 0; i < stepsToAdd; i++)
       {
-         walkingMessageHandler.peek(i, footsteps[i]);
+         walkingMessageHandler.peekFootstep(i, footsteps[i]);
          walkingMessageHandler.peekTiming(i, footstepTimings[i]);
          balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
       }
