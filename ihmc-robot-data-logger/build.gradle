@@ -39,7 +39,7 @@ testSuites {
    disableBambooConfigurationCheck = true
 }
 
-sourceSets.main.java.srcDirs += ['generated-src']
+sourceSets.main.java.srcDirs += ['src/main/java-generated']
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
