@@ -672,6 +672,8 @@ public class WalkingMessageHandler
 
    private void setFootstepTiming(FootstepDataCommand footstep, ExecutionTiming executionTiming, FootstepTiming timingToSet)
    {
+      int stepsInQueue = getCurrentNumberOfFootsteps();
+
       double swingDuration = footstep.getSwingDuration();
       if (Double.isNaN(swingDuration) || swingDuration <= 0.0)
          swingDuration = defaultSwingTime.getDoubleValue();
@@ -679,7 +681,7 @@ public class WalkingMessageHandler
       double transferDuration = footstep.getTransferDuration();
       if (Double.isNaN(transferDuration) || transferDuration <= 0.0)
       {
-         if (upcomingFootstepTimings.isEmpty() && !isWalking.getBooleanValue())
+         if (stepsInQueue == 0 && !isWalking.getBooleanValue())
             transferDuration = defaultInitialTransferTime.getDoubleValue();
          else
             transferDuration = defaultTransferTime.getDoubleValue();
@@ -692,7 +694,6 @@ public class WalkingMessageHandler
       case CONTROL_DURATIONS:
          break;
       case CONTROL_ABSOLUTE_TIMINGS:
-         int stepsInQueue = getCurrentNumberOfFootsteps();
          if (stepsInQueue == 0 && !executingFootstep.getBooleanValue())
          {
             timingToSet.setAbsoluteTime(transferDuration, footstepDataListRecievedTime.getDoubleValue());
