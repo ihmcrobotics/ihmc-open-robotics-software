@@ -57,6 +57,8 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 	            
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
 
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
+
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
 	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
@@ -66,6 +68,10 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
 
 	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
+
+	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+
+	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
 
 	
 	    return current_alignment - initial_alignment;
@@ -83,6 +89,8 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 	            
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
 
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getDescription().length() + 1;
+
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
 	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
@@ -92,6 +100,10 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
 
 	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
+
+	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
+
+	    current_alignment += 8 + CDR.alignment(current_alignment, 8);
 
 	
 	    return current_alignment - initial_alignment;
@@ -104,6 +116,10 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 	    cdr.write_type_d(data.getName());else
 	        throw new RuntimeException("name field exceeds the maximum length");
 
+	    if(data.getDescription().length() <= 255)
+	    cdr.write_type_d(data.getDescription());else
+	        throw new RuntimeException("description field exceeds the maximum length");
+
 	    cdr.write_type_c(data.getType().ordinal());
 
 
@@ -114,12 +130,18 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 	    cdr.write_type_7(data.getAllowNullValues());
 
 	    cdr.write_type_7(data.getIsParameter());
+
+	    cdr.write_type_6(data.getMin());
+
+	    cdr.write_type_6(data.getMax());
    }
 
    public static void read(us.ihmc.robotDataLogger.YoVariableDefinition data, CDR cdr)
    {
 
 	    	cdr.read_type_d(data.getName());	
+
+	    	cdr.read_type_d(data.getDescription());	
 
 	    	data.setType(us.ihmc.robotDataLogger.YoType.values[cdr.read_type_c()]);
 	    	
@@ -135,12 +157,20 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 
 	    	data.setIsParameter(cdr.read_type_7());
 	    	
+
+	    	data.setMin(cdr.read_type_6());
+	    	
+
+	    	data.setMax(cdr.read_type_6());
+	    	
    }
    
 	@Override
 	public final void serialize(us.ihmc.robotDataLogger.YoVariableDefinition data, InterchangeSerializer ser)
 	{
 			    ser.write_type_d("name", data.getName());
+			    
+			    ser.write_type_d("description", data.getDescription());
 			    
 			    ser.write_type_c("type", data.getType());
 			    
@@ -152,12 +182,18 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 			    
 			    ser.write_type_7("isParameter", data.getIsParameter());
 			    
+			    ser.write_type_6("min", data.getMin());
+			    
+			    ser.write_type_6("max", data.getMax());
+			    
 	}
 	
 	@Override
 	public final void deserialize(InterchangeSerializer ser, us.ihmc.robotDataLogger.YoVariableDefinition data)
 	{
 	    			ser.read_type_d("name", data.getName());	
+	    	    
+	    			ser.read_type_d("description", data.getDescription());	
 	    	    
 	    			data.setType((us.ihmc.robotDataLogger.YoType)ser.read_type_c("type", us.ihmc.robotDataLogger.YoType.class));
 	    	
@@ -169,6 +205,10 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<us.ihmc.rob
 	    			data.setAllowNullValues(ser.read_type_7("allowNullValues"));	
 	    	    
 	    			data.setIsParameter(ser.read_type_7("isParameter"));	
+	    	    
+	    			data.setMin(ser.read_type_6("min"));	
+	    	    
+	    			data.setMax(ser.read_type_6("max"));	
 	    	    
 	}
 
