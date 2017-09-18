@@ -634,15 +634,6 @@ public class BalanceManager
       return closeEnough;
    }
 
-   public boolean isTransitionToStandingSafe()
-   {
-      FrameConvexPolygon2d supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
-      controllerToolbox.getCapturePoint(capturePoint2d);
-
-      // signed distance returns a negative number if the point is inside the polygon.
-      return supportPolygonInWorld.signedDistance(capturePoint2d) < -safeDistanceFromSupportEdgesToStopCancelICPPlan.getDoubleValue();
-   }
-
    public double getICPErrorMagnitude()
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
