@@ -16,9 +16,9 @@ public class AtlasReferenceFrameHashTest extends ReferenceFrameHashTest
    }
    
    @Override
-   public void testAddingTwoFramesWithTheSameName()
+   public void testAddingTwoFramesWithTheSameNameThrowsException()
    {
-      super.testAddingTwoFramesWithTheSameName();
+      super.testAddingTwoFramesWithTheSameNameThrowsException();
    }
    
    @Override
