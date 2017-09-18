@@ -15,6 +15,7 @@ public class YoVariableDefinition
     public YoVariableDefinition()
     {
         	name_ = new StringBuilder(255); 
+        	description_ = new StringBuilder(255); 
         
         
     }
@@ -23,11 +24,15 @@ public class YoVariableDefinition
     {
         	name_.setLength(0);
         	name_.append(other.name_);
+        	description_.setLength(0);
+        	description_.append(other.description_);
         	type_ = other.type_;
         	registry_ = other.registry_;
         	enumType_ = other.enumType_;
         	allowNullValues_ = other.allowNullValues_;
         	isParameter_ = other.isParameter_;
+        	min_ = other.min_;
+        	max_ = other.max_;
 
     }
 
@@ -45,6 +50,23 @@ public class YoVariableDefinition
     public StringBuilder getName()
     {
         return name_;
+    }
+
+        
+        public void setDescription(String description)
+        {
+        	description_.setLength(0);
+        	description_.append(description);
+        }
+        
+        public String getDescriptionAsString()
+        {
+        	return getDescription().toString();
+        }
+
+    public StringBuilder getDescription()
+    {
+        return description_;
     }
 
         
@@ -103,6 +125,28 @@ public class YoVariableDefinition
     }
 
         
+    public void setMin(double min)
+    {
+        min_ = min;
+    }
+
+    public double getMin()
+    {
+        return min_;
+    }
+
+        
+    public void setMax(double max)
+    {
+        max_ = max;
+    }
+
+    public double getMax()
+    {
+        return max_;
+    }
+
+        
 
 
 
@@ -117,6 +161,8 @@ public class YoVariableDefinition
         boolean returnedValue = true;
 
         returnedValue &= us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_);
+                
+        returnedValue &= us.ihmc.idl.IDLTools.equals(this.description_, otherMyClass.description_);
                 
         returnedValue &= this.type_ == otherMyClass.type_;
 
@@ -133,6 +179,12 @@ public class YoVariableDefinition
         returnedValue &= this.isParameter_ == otherMyClass.isParameter_;
 
                 
+        returnedValue &= this.min_ == otherMyClass.min_;
+
+                
+        returnedValue &= this.max_ == otherMyClass.max_;
+
+                
 
         return returnedValue;
     }
@@ -145,6 +197,10 @@ public class YoVariableDefinition
       	builder.append("YoVariableDefinition {");
         builder.append("name=");
         builder.append(this.name_);
+
+                builder.append(", ");
+        builder.append("description=");
+        builder.append(this.description_);
 
                 builder.append(", ");
         builder.append("type=");
@@ -166,16 +222,27 @@ public class YoVariableDefinition
         builder.append("isParameter=");
         builder.append(this.isParameter_);
 
+                builder.append(", ");
+        builder.append("min=");
+        builder.append(this.min_);
+
+                builder.append(", ");
+        builder.append("max=");
+        builder.append(this.max_);
+
                 
         builder.append("}");
 		return builder.toString();
     }
 
     private StringBuilder name_; 
+    private StringBuilder description_; 
     private us.ihmc.robotDataLogger.YoType type_; 
     private int registry_; 
     private int enumType_; 
     private boolean allowNullValues_; 
     private boolean isParameter_; 
+    private double min_; 
+    private double max_; 
 
 }

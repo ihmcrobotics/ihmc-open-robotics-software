@@ -83,9 +83,9 @@ if (ihmc.isBuildRoot())
    }
 
    task compileIDL(type: us.ihmc.idl.generator.IDLGeneratorTask) {
-      idlFiles = fileTree(dir: 'idl')
+      idlFiles = fileTree(dir: 'src/main/idl')
       includeDirs = files(".")
-      targetDirectory = file("generated-src")
+      targetDirectory = file("src/main/java-generated")
       packagePrefix = ""
    }
 
