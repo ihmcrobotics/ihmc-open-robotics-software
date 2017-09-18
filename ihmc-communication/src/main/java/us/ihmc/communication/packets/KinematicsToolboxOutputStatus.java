@@ -1,6 +1,5 @@
 package us.ihmc.communication.packets;
 
-import java.util.List;
 import java.util.Random;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -46,10 +45,22 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
       // empty constructor for serialization
    }
 
+   public KinematicsToolboxOutputStatus(KinematicsToolboxOutputStatus other)
+   {
+      set(other);
+   }
+
    public KinematicsToolboxOutputStatus(OneDoFJoint[] joints)
    {
       desiredJointAngles = new float[joints.length];
       jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(joints);
+   }
+
+   public KinematicsToolboxOutputStatus(FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] newJointData, boolean useQDesired)
+   {
+      desiredJointAngles = new float[newJointData.length];
+      jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(newJointData);
+      setDesiredJointState(rootJoint, newJointData, useQDesired);
    }
 
    @Override
@@ -80,25 +91,48 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
       solutionQuality = other.solutionQuality;
    }
 
-   public void setDesiredJointState(FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] newJointData)
+   public void getDesiredJointState(FloatingInverseDynamicsJoint rootJointToUpdate, OneDoFJoint[] jointsToUpdate)
+   {
+      if (jointsToUpdate.length != desiredJointAngles.length)
+         throw new RuntimeException("Array size does not match");
+      int jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(jointsToUpdate);
+
+      if (jointNameHash != this.jointNameHash)
+         throw new RuntimeException("The robots are different.");
+
+      for (int i = 0; i < desiredJointAngles.length; i++)
+         jointsToUpdate[i].setQ(desiredJointAngles[i]);
+
+      rootJointToUpdate.setPosition(desiredRootTranslation);
+      rootJointToUpdate.setRotation(desiredRootOrientation);
+   }
+
+   public void setDesiredJointState(FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] newJointData, boolean useQDesired)
    {
       if (newJointData.length != desiredJointAngles.length)
          throw new RuntimeException("Array size does not match");
+      int jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(newJointData);
 
-      for (int i = 0; i < desiredJointAngles.length; i++)
-         desiredJointAngles[i] = (float) newJointData[i].getqDesired();
+      if (jointNameHash != this.jointNameHash)
+         throw new RuntimeException("The robots are different.");
+
+      if (useQDesired)
+      {
+         for (int i = 0; i < desiredJointAngles.length; i++)
+         {
+            desiredJointAngles[i] = (float) newJointData[i].getqDesired();
+         }
+      }
+      else
+      {
+         for (int i = 0; i < desiredJointAngles.length; i++)
+         {
+            desiredJointAngles[i] = (float) newJointData[i].getQ();
+         }
+      }
 
       rootJoint.getTranslation(desiredRootTranslation);
       rootJoint.getRotation(desiredRootOrientation);
-   }
-
-   public void setDesiredJointState(List<OneDoFJoint> newJointData)
-   {
-      if (newJointData.size() != desiredJointAngles.length)
-         throw new RuntimeException("Array size does not match");
-
-      for (int i = 0; i < desiredJointAngles.length; i++)
-         desiredJointAngles[i] = (float) newJointData.get(i).getqDesired();
    }
 
    public void setRootTranslation(Vector3D rootTranslation)
@@ -157,7 +191,8 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
          if (Math.abs(desiredJointAngles[i] - other.desiredJointAngles[i]) > epsilon)
          {
             System.out.println(i);
-            System.out.println("Diff: " + Math.abs(desiredJointAngles[i] - other.desiredJointAngles[i]) + ", this: " + desiredJointAngles[i] + ", other: " + other.desiredJointAngles[i]);
+            System.out.println("Diff: " + Math.abs(desiredJointAngles[i] - other.desiredJointAngles[i]) + ", this: " + desiredJointAngles[i] + ", other: "
+                  + other.desiredJointAngles[i]);
             return false;
          }
       }

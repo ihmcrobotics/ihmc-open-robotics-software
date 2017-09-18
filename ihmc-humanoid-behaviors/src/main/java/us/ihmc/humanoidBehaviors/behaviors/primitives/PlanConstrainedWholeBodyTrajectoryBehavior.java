@@ -162,10 +162,11 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
             if (cwbtoolboxOutputStatusQueue.isNewPacketAvailable())
             {
                cwbtoolboxOutputStatus = cwbtoolboxOutputStatusQueue.getLatestPacket();
-               if (cwbtoolboxOutputStatus.planningResult == 4)
+               if (cwbtoolboxOutputStatus.getPlanningResult() == 4)
                {
                   planningSuccess = true;
-                  wholebodyTrajectoryMessage = cwbtoolboxOutputStatus.wholeBodyTrajectoryMessage;
+                  // TODO: after making converter.
+                  // wholebodyTrajectoryMessage = cwbtoolboxOutputStatus.wholeBodyTrajectoryMessage;
                   
                   handTrajectories = cwbtoolboxOutputStatus.handTrajectories;
                   

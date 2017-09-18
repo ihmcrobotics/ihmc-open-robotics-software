@@ -9,6 +9,7 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -31,10 +32,10 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTim
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.TreeStateVisualizer;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -83,7 +84,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    private CTTaskNode visualizedNode;
 
-   private RobotKinematicsConfiguration initialConfiguration;
+   private KinematicsToolboxOutputStatus initialConfiguration;
 
    private FullHumanoidRobotModel visualizedFullRobotModel;
 
@@ -231,9 +232,10 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          ctTaskNodeWholeBodyTrajectoryMessageFactory = new CTTaskNodeWholeBodyTrajectoryMessageFactory();
 
          ctTaskNodeWholeBodyTrajectoryMessageFactory.setCTTaskNodePath(tree.getPath(), constrainedEndEffectorTrajectory);
-         
-         ConstrainedWholeBodyPlanningToolboxOutputStatus packResult = packResult(ctTaskNodeWholeBodyTrajectoryMessageFactory.getWholeBodyTrajectoryMessage(),
-                                                                                 4);
+
+         ConstrainedWholeBodyPlanningToolboxOutputStatus packResult = packResult(ctTaskNodeWholeBodyTrajectoryMessageFactory.getConfigurations(),
+                                                                                 ctTaskNodeWholeBodyTrajectoryMessageFactory.getTrajectoryTimes(), 4);
+
          packResult(packResult, tree.getPath());
          reportMessage(packResult);
          PrintTools.info("packResult");
@@ -282,7 +284,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       numberOfMotionPath = tree.getPath().size();
 
       //if(startYoVariableServer)
-      if(true)
+      if (true)
          treeVisualizer.update(tree.getPath());
       /*
        * terminate state
@@ -304,7 +306,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       expandingCount.increment();
 
       tree.updateRandomConfiguration();
-      
+
       tree.updateNearestNodeTaskTime();
       tree.updateNewConfiguration();
       tree.getNewNode().convertNormalizedDataToData(taskRegion);
@@ -323,24 +325,24 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       else
       {
          tree.connectNewNode(false);
-                           
-//         tree.updateNearestNodeTaskOnly();
-//                  
-//         tree.updateNewConfiguration();         
-//         tree.getNewNode().convertNormalizedDataToData(taskRegion);
-//                  
-//         tree.getNewNode().setParentNode(tree.getNearNode());
-//
-//         updateValidity(tree.getNewNode());
-//         if (tree.getNewNode().getValidity())
-//         {            
-//            tree.connectNewNode(true);
-//            if (tree.getNewNode().getTime() == taskRegion.getTrajectoryTime())
-//            {
-//               PrintTools.info("terminate expanding");
-//               numberOfExpanding = 1; // for terminate
-//            }
-//         }
+
+         //         tree.updateNearestNodeTaskOnly();
+         //                  
+         //         tree.updateNewConfiguration();         
+         //         tree.getNewNode().convertNormalizedDataToData(taskRegion);
+         //                  
+         //         tree.getNewNode().setParentNode(tree.getNearNode());
+         //
+         //         updateValidity(tree.getNewNode());
+         //         if (tree.getNewNode().getValidity())
+         //         {            
+         //            tree.connectNewNode(true);
+         //            if (tree.getNewNode().getTime() == taskRegion.getTrajectoryTime())
+         //            {
+         //               PrintTools.info("terminate expanding");
+         //               numberOfExpanding = 1; // for terminate
+         //            }
+         //         }
       }
 
       visualizedNode = tree.getNewNode().createNodeCopy();
@@ -467,7 +469,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
        */
       taskRegion = constrainedEndEffectorTrajectory.getTaskRegion();
       // if (startYoVariableServer)
-      if(true)
+      if (true)
       {
          treeVisualizer = new CTTreeVisualizer(tree);
          treeVisualizer.initialize();
@@ -510,23 +512,15 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       };
    }
 
-   private ConstrainedWholeBodyPlanningToolboxOutputStatus packResult(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage, int planningResult)
+   private ConstrainedWholeBodyPlanningToolboxOutputStatus packResult(KinematicsToolboxOutputStatus[] robotConfigurations, double[] trajectoryTimes,
+                                                                      int planningResult)
    {
       ConstrainedWholeBodyPlanningToolboxOutputStatus result = new ConstrainedWholeBodyPlanningToolboxOutputStatus();
 
-      if (wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT) == null
-            || wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT) == null)
-      {
-         result.wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-         PrintTools.info("no message");
-      }
-      else
-      {
-         result.wholeBodyTrajectoryMessage = wholebodyTrajectoryMessage;
-         PrintTools.info("message " + wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT).getTrajectoryTime());
-      }
+      result.set(robotConfigurations, trajectoryTimes);
+      PrintTools.info("message ");
 
-      result.planningResult = planningResult;
+      result.setPlanningResult(planningResult);
 
       return result;
    }
@@ -563,8 +557,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private boolean updateValidity(CTTaskNode node)
    {
       long astartTime = System.currentTimeMillis();
-            
-      
+
       if (node.getParentNode() != null)
       {
          kinematicsSolver.updateRobotConfigurationData(node.getParentNode().getConfiguration());
@@ -612,28 +605,27 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       kinematicsSolver.solve();
       boolean result = kinematicsSolver.getResult();
 
-      node.setConfigurationJoints(kinematicsSolver.getFullRobotModelCopy());
+      node.setConfigurationJoints(kinematicsSolver.getSolution());
 
       node.setValidity(result);
 
       cntKinematicSolver.set(kinematicsSolver.getCntForUpdateInternal());
 
-      
-
       long stopTime = System.currentTimeMillis();
       long elapsedTime = stopTime - astartTime;
-      
+
       // System.out.println("a " + elapsedTime / 1000.0 + " seconds " + cntKinematicSolver.getIntegerValue());
-      
+
       return result;
    }
 
    /**
     * set fullRobotModel.
     */
-   private void updateVisualizerRobotConfiguration(RobotKinematicsConfiguration robotKinematicsConfiguration)
+   private void updateVisualizerRobotConfiguration(KinematicsToolboxOutputStatus robotKinematicsConfiguration)
    {
-      robotKinematicsConfiguration.getRobotConfiguration(visualizedFullRobotModel);
+      robotKinematicsConfiguration.getDesiredJointState(visualizedFullRobotModel.getRootJoint(),
+                                                        FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel));
    }
 
    private void updateVisualizerRobotConfiguration()
@@ -655,7 +647,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          currentIsValid.set(visualizedNode.getValidity());
          currentTrajectoryTime.set(visualizedNode.getNormalizedNodeData(0));
          // if (startYoVariableServer)
-         if(true)
+         if (true)
             treeVisualizer.update(visualizedNode);
       }
    }

@@ -16,6 +16,7 @@ import us.ihmc.avatar.networkProcessor.rrtToolboxModule.ConstrainedWholeBodyPlan
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
@@ -41,6 +42,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -379,7 +381,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
        * solver.
        */
       WheneverWholeBodyKinematicsSolver kinematicsSolver = new WheneverWholeBodyKinematicsSolver(getRobotModel());
-      kinematicsSolver.updateRobotConfigurationData(new RobotKinematicsConfiguration(sdfFullRobotModel));
+      kinematicsSolver.updateRobotConfigurationData(new KinematicsToolboxOutputStatus(sdfFullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel), false));
 
       kinematicsSolver.initialize();
       kinematicsSolver.holdCurrentTrajectoryMessages();

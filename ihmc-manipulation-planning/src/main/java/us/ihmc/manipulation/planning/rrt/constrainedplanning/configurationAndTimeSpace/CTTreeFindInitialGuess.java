@@ -7,6 +7,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
+import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -68,7 +69,7 @@ public class CTTreeFindInitialGuess
       }
    }
 
-   public void findInitialGuess(CTTaskNode node, TaskRegion taskRegion, RobotKinematicsConfiguration initialConfiguration,
+   public void findInitialGuess(CTTaskNode node, TaskRegion taskRegion, KinematicsToolboxOutputStatus initialConfiguration,
                                 ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory, double handCoordinateOffsetX)
          throws InterruptedException, ExecutionException
    {
@@ -123,7 +124,7 @@ public class CTTreeFindInitialGuess
 
    }
 
-   private static boolean updateValidity(CTTaskNode node, WheneverWholeBodyKinematicsSolver kinematicsSolver, RobotKinematicsConfiguration initialConfiguration,
+   private static boolean updateValidity(CTTaskNode node, WheneverWholeBodyKinematicsSolver kinematicsSolver, KinematicsToolboxOutputStatus initialConfiguration,
                                          ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory, double handCoordinateOffsetX,
                                          SideDependentList<YoFramePose> endeffectorPose, YoInteger cntKinematicSolver)
    {
@@ -179,7 +180,7 @@ public class CTTreeFindInitialGuess
       boolean result = kinematicsSolver.getResult();
 
       //      node.setConfigurationJoints(kinematicsSolver.getFullRobotModelCopy());
-      node.setConfigurationJoints(kinematicsSolver.getDesiredFullRobotModel());
+      node.setConfigurationJoints(kinematicsSolver.getSolution());
 
       node.setValidity(result);
 
