@@ -20,7 +20,7 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
     */
    public int planningResult;
 
-   public WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage;
+   // public WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage;
 
    //TODO : will be get rid of.
    public SideDependentList<ArrayList<Pose3D>> handTrajectories = new SideDependentList<>();
@@ -36,23 +36,61 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
 
       
    }
+   
+   public void set(KinematicsToolboxOutputStatus[] robotConfigurations, double[] trajectoryTimes)
+   {
+      if(robotConfigurations.length != trajectoryTimes.length)
+         throw new RuntimeException("length is different");
+      
+      this.robotConfigurations = robotConfigurations;
+      this.trajectoryTimes = trajectoryTimes;
+   }
 
    @Override
    public boolean epsilonEquals(ConstrainedWholeBodyPlanningToolboxOutputStatus other, double epsilon)
    {
-      if (planningResult != other.planningResult)
-         return false;
-      if (handTrajectories != other.handTrajectories)
-         return false;
-      return (wholeBodyTrajectoryMessage.epsilonEquals(other.wholeBodyTrajectoryMessage, epsilon));
+      if (getPlanningResult() != other.getPlanningResult())
+         return false;      
+      // TODO : more equals
+      return true;
    }
 
    @Override
    public void set(ConstrainedWholeBodyPlanningToolboxOutputStatus other)
    {
-      planningResult = other.planningResult;
-      wholeBodyTrajectoryMessage = other.wholeBodyTrajectoryMessage;
+      setPlanningResult(other.getPlanningResult());
       handTrajectories = other.handTrajectories;
    }
 
+   public int getPlanningResult()
+   {
+      return planningResult;
+   }
+
+   public void setPlanningResult(int planningResult)
+   {
+      this.planningResult = planningResult;
+   }
+
+   public KinematicsToolboxOutputStatus[] getRobotConfigurations()
+   {
+      return robotConfigurations;
+   }
+
+   public void setRobotConfigurations(KinematicsToolboxOutputStatus[] robotConfigurations)
+   {
+      this.robotConfigurations = robotConfigurations;
+   }
+
+   public double[] getTrajectoryTimes()
+   {
+      return trajectoryTimes;
+   }
+
+   public void setTrajectoryTimes(double[] trajectoryTimes)
+   {
+      this.trajectoryTimes = trajectoryTimes;
+   }
+   
+   
 }

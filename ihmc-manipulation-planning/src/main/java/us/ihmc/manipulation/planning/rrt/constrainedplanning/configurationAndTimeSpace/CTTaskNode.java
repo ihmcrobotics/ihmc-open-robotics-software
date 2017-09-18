@@ -3,10 +3,9 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.RobotKinematicsConfiguration;
+import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.NodeData;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 public class CTTaskNode
 {
@@ -18,7 +17,7 @@ public class CTTaskNode
 
    protected boolean validity = true;
 
-   protected RobotKinematicsConfiguration configuration;
+   protected KinematicsToolboxOutputStatus configuration;
 
    public CTTaskNode(CTTaskNode node)
    {
@@ -32,7 +31,6 @@ public class CTTaskNode
       this.childNodes = new ArrayList<CTTaskNode>();
       this.normalizedNodeData = new NodeData(rootData.length);
 
-      this.configuration = new RobotKinematicsConfiguration();
    }
 
    public CTTaskNode(int dimensionOfData)
@@ -41,7 +39,6 @@ public class CTTaskNode
       this.childNodes = new ArrayList<CTTaskNode>();
       this.normalizedNodeData = new NodeData(dimensionOfData);
 
-      this.configuration = new RobotKinematicsConfiguration();
    }
 
    public final int getDimensionOfNodeData()
@@ -63,17 +60,17 @@ public class CTTaskNode
    {
       return nodeData.distance(targetNode.nodeData);
    }
-   
+
    public final double getNormailzedDistance(CTTaskNode targetNode)
    {
       return normalizedNodeData.distance(targetNode.normalizedNodeData);
    }
-   
+
    public final double getTimeGap(CTTaskNode targetNode)
    {
       return targetNode.getNodeData(0) - getNodeData(0);
    }
-   
+
    public final double getNormalizedTimeGap(CTTaskNode targetNode)
    {
       return targetNode.getNormalizedNodeData(0) - getNormalizedNodeData(0);
@@ -212,20 +209,20 @@ public class CTTaskNode
       nodeCopy.nodeData = new NodeData(this.nodeData);
       nodeCopy.normalizedNodeData = new NodeData(this.normalizedNodeData);
       nodeCopy.configuration = this.configuration;
-      
+
       nodeCopy.parentNode = this.parentNode;
-      
+
       nodeCopy.validity = this.validity;
-      
+
       return nodeCopy;
    }
 
-   public final void setConfigurationJoints(FullHumanoidRobotModel robot)
+   public final void setConfigurationJoints(KinematicsToolboxOutputStatus outputStatus)
    {
-      this.configuration.setRobotConfigurationData(robot);
+      this.configuration = new KinematicsToolboxOutputStatus(outputStatus);
    }
 
-   public RobotKinematicsConfiguration getConfiguration()
+   public KinematicsToolboxOutputStatus getConfiguration()
    {
       return configuration;
    }
@@ -239,5 +236,5 @@ public class CTTaskNode
    {
       return validity;
    }
-   
+
 }

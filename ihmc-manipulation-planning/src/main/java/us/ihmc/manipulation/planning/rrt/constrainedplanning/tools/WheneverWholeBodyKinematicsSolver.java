@@ -119,7 +119,7 @@ public class WheneverWholeBodyKinematicsSolver
    private final EnumMap<LegJointName, YoDouble> legJointLimitReductionFactors = new EnumMap<>(LegJointName.class);
    private final List<RigidBody> listOfControllableRigidBodies = new ArrayList<>();
 
-   private final AtomicReference<RobotKinematicsConfiguration> latestRobotConfigurationReference = new AtomicReference<>(null);
+   private final AtomicReference<KinematicsToolboxOutputStatus> latestRobotConfigurationReference = new AtomicReference<>(null);
 
    private final Map<String, FeedbackControlCommand<?>> userFeedbackCommands = new HashMap<>();
    private final YoInteger numberOfActiveCommands = new YoInteger("numberOfActiveCommands", registry);
@@ -251,6 +251,8 @@ public class WheneverWholeBodyKinematicsSolver
       return command;
    }
 
+   
+   
    public boolean initialize()
    {
       userFeedbackCommands.clear();
@@ -259,14 +261,14 @@ public class WheneverWholeBodyKinematicsSolver
       cntForUpdateInternal = 0;
       solutionQualityOld.setToNaN();
 
-      RobotKinematicsConfiguration robotConfiguration = latestRobotConfigurationReference.get();
+      KinematicsToolboxOutputStatus robotConfiguration = latestRobotConfigurationReference.get();
 
       if (robotConfiguration == null)
          return false;
 
       // Initializes this desired robot to the most recent robot configuration
       // data received from the walking controller.
-      robotConfiguration.getRobotConfiguration(desiredFullRobotModel);
+      robotConfiguration.getDesiredJointState(rootJoint, oneDoFJoints);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -333,7 +335,7 @@ public class WheneverWholeBodyKinematicsSolver
       // the next control tick.
       wholeBodyFunctions.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, oneDoFJoints);
 
-      inverseKinematicsSolution.setDesiredJointState(rootJoint, oneDoFJoints);
+      inverseKinematicsSolution.setDesiredJointState(rootJoint, oneDoFJoints, false);
       inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
 
       double solutionUltimateStableThresholdVEL = 1.0e-4;
@@ -549,7 +551,7 @@ public class WheneverWholeBodyKinematicsSolver
       updateRobotConfigurationData(node.getConfiguration());
    }
 
-   public void updateRobotConfigurationData(RobotKinematicsConfiguration atlasConfiguration)
+   public void updateRobotConfigurationData(KinematicsToolboxOutputStatus atlasConfiguration)
    {
       latestRobotConfigurationReference.set(atlasConfiguration);
    }
@@ -566,7 +568,7 @@ public class WheneverWholeBodyKinematicsSolver
       for (int i = 0; i < oneDoFJoints.length; i++)
          oneDoFJoints[i].setqDesired(oneDoFJoints[i].getQ());
 
-      currentOutputStatus.setDesiredJointState(rootJoint, oneDoFJoints);
+      currentOutputStatus.setDesiredJointState(rootJoint, oneDoFJoints, false);
 
       KinematicsToolboxOutputConverter currentOutputConverter;
       currentOutputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
@@ -601,7 +603,7 @@ public class WheneverWholeBodyKinematicsSolver
       for (int i = 0; i < oneDoFJoints.length; i++)
          oneDoFJoints[i].setqDesired(oneDoFJoints[i].getQ());
 
-      currentOutputStatus.setDesiredJointState(rootJoint, oneDoFJoints);
+      currentOutputStatus.setDesiredJointState(rootJoint, oneDoFJoints, false);
 
       KinematicsToolboxOutputConverter currentOutputConverter;
       currentOutputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);

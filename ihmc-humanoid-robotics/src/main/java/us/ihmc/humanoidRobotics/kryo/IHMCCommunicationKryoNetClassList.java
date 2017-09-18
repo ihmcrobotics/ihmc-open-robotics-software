@@ -24,6 +24,7 @@ import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
+import us.ihmc.communication.packets.SetBooleanParameterPacket;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.ToolboxStateMessage;
@@ -119,6 +120,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTr
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.CenterOfMassTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
@@ -564,5 +566,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketClass(ObjectDetectorResultPacket.class);
       registerPacketClass(ConstrainedWholeBodyPlanningRequestPacket.class);
+      registerPacketClass(ConstrainedWholeBodyPlanningToolboxOutputStatus.class);
+      registerPacketClass(SetBooleanParameterPacket.class);
    }
 }

@@ -267,7 +267,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
 
    }
 
-   @Test
+   //@Test
    public void testForCuttingWallBehavior() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -326,7 +326,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
 
    }
 
-   //   @Test
+      @Test
    public void testForCWBPlanningBehavior() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -358,6 +358,8 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
                                                                                referenceFrames.getMidFootZUpGroundFrame());
       drcBehaviorTestHelper.send(rhandTrajectoryMessage);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+      
+      sdfFullRobotModel.updateFrames();
       /*
        * Behavior create.
        */
@@ -380,7 +382,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(15.0);
       System.out.println("Go Motion " + drcBehaviorTestHelper.getYoTime());
 
-      PrintTools.info("planningResult " + planningBehavior.getConstrainedWholeBodyPlanningToolboxOutputStatus().planningResult);
+      PrintTools.info("planningResult " + planningBehavior.getConstrainedWholeBodyPlanningToolboxOutputStatus().getPlanningResult());
 
       ArrayList<Pose3D> handTrajectories = planningBehavior.getHandTrajectories(RobotSide.LEFT);
       int numberOfPath = handTrajectories.size();
@@ -392,6 +394,8 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
 
       System.out.println("Send " + drcBehaviorTestHelper.getYoTime());
       drcBehaviorTestHelper.send(planningBehavior.getWholebodyTrajectoryMessage());
+      
+      System.out.println("Send " + drcBehaviorTestHelper.getYoTime());
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(planningBehavior.getWholebodyTrajectoryMessage().getHandTrajectoryMessage(RobotSide.LEFT)
                                                                                .getTrajectoryTime());
 

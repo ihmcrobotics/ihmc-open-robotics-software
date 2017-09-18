@@ -1,7 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning;
 
+import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 
 public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<ConstrainedWholeBodyPlanningRequestPacket>
 {
@@ -9,7 +11,7 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
 
    public int numberOfFindInitialGuess;
 
-   public RobotKinematicsConfiguration initialConfiguration;
+   public KinematicsToolboxOutputStatus initialConfiguration;
 
    /*
     * ConstrainedEndEffectorTrajectory cannot be imported in
@@ -24,7 +26,7 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
 
    public void setInitialRobotConfigration(FullHumanoidRobotModel fullRobotModel)
    {
-      initialConfiguration = new RobotKinematicsConfiguration(fullRobotModel);
+      initialConfiguration = new KinematicsToolboxOutputStatus(fullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel), false);
    }
 
    public void setNumberOfExpanding(int value)
