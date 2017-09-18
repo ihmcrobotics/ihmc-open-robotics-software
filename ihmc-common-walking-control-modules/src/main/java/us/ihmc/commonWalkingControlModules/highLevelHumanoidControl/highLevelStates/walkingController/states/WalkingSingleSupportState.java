@@ -27,9 +27,13 @@ public class WalkingSingleSupportState extends SingleSupportState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private Footstep nextFootstep;
+   private final Footstep nextFootstep = new Footstep();
    private final FootstepTiming footstepTiming = new FootstepTiming();
    private double swingTime;
+
+   private static final int additionalFootstepsToConsider = 2;
+   private final Footstep[] footsteps = Footstep.createFootsteps(additionalFootstepsToConsider);
+   private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(additionalFootstepsToConsider);
 
    private final FramePose actualFootPoseInWorld = new FramePose(worldFrame);
    private final FramePose desiredFootPoseInWorld = new FramePose(worldFrame);
@@ -199,7 +203,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       {
          swingTime = defaultSwingTime;
          footstepTiming.setTimings(swingTime, defaultTransferTime);
-         nextFootstep = balanceManager.createFootstepForRecoveringFromDisturbance(swingSide, defaultSwingTime);
+         balanceManager.packFootstepForRecoveringFromDisturbance(swingSide, defaultSwingTime, nextFootstep);
          nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
          walkingMessageHandler.reportWalkingAbortRequested();
          walkingMessageHandler.clearFootsteps();
@@ -207,20 +211,24 @@ public class WalkingSingleSupportState extends SingleSupportState
       else
       {
          swingTime = walkingMessageHandler.getNextSwingTime();
-         footstepTiming.set(walkingMessageHandler.peekTiming(0));
-         nextFootstep = walkingMessageHandler.poll();
+         walkingMessageHandler.poll(nextFootstep, footstepTiming);
       }
 
       updateFootstepParameters();
 
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringSwing.getBooleanValue());
-
       balanceManager.setNextFootstep(nextFootstep);
-
-      FootstepTiming nextFootstepTiming = walkingMessageHandler.peekTiming(0);
       balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
-      balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0), nextFootstepTiming);
-      balanceManager.addFootstepToPlan(walkingMessageHandler.peek(1), walkingMessageHandler.peekTiming(1));
+
+      int stepsToAdd = Math.min(additionalFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
+      boolean isLastStep = stepsToAdd == 0;
+      for (int i = 0; i < stepsToAdd; i++)
+      {
+         walkingMessageHandler.peekFootstep(i, footsteps[i]);
+         walkingMessageHandler.peekTiming(i, footstepTimings[i]);
+         balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
+      }
+
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport(footstepTiming.getSwingTime(), footstepTiming.getTransferTime(), finalTransferTime);
 
@@ -233,10 +241,16 @@ public class WalkingSingleSupportState extends SingleSupportState
          swingTime = currentSwingDuration;
          footstepTiming.setTimings(currentSwingDuration, currentTransferDuration);
 
-         if (nextFootstepTiming != null)
-            nextFootstepTiming.setTimings(nextFootstepTiming.getSwingTime(), nextTransferDuration);
-         else
+         if (isLastStep)
+         {
             balanceManager.setFinalTransferTime(nextTransferDuration);
+         }
+         else
+         {
+            double nextSwingTime = footstepTimings[0].getSwingTime();
+            footstepTimings[0].setTimings(nextSwingTime, nextTransferDuration);
+            walkingMessageHandler.adjustTimings(0, nextSwingTime, nextTransferDuration);
+         }
       }
 
       if (balanceManager.isRecoveringFromDoubleSupportFall())
@@ -251,11 +265,15 @@ public class WalkingSingleSupportState extends SingleSupportState
       legConfigurationManager.useHighWeight(swingSide.getOppositeSide());
       legConfigurationManager.setStepDuration(supportSide, footstepTiming.getStepTime());
 
-      if (nextFootstepTiming != null)
-         pelvisOrientationManager.initializeSwing(supportSide, swingTime, nextFootstepTiming.getTransferTime(), nextFootstepTiming.getSwingTime());
-      else
+      if (isLastStep)
+      {
          pelvisOrientationManager.initializeSwing(supportSide, swingTime, finalTransferTime, 0.0);
-
+      }
+      else
+      {
+         FootstepTiming nextTiming = footstepTimings[0];
+         pelvisOrientationManager.initializeSwing(supportSide, swingTime, nextTiming.getTransferTime(), nextTiming.getSwingTime());
+      }
 
       nextFootstep.getPose(desiredFootPoseInWorld);
       desiredFootPoseInWorld.changeFrame(worldFrame);
