@@ -18,7 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.RobotKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
@@ -110,7 +110,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    /*
     * API
     */
-   private final AtomicReference<ConstrainedWholeBodyPlanningRequestPacket> latestRequestReference = new AtomicReference<ConstrainedWholeBodyPlanningRequestPacket>(null);
+   private final AtomicReference<ConstrainedWholeBodyPlanningToolboxRequestPacket> latestRequestReference = new AtomicReference<ConstrainedWholeBodyPlanningToolboxRequestPacket>(null);
 
    private int numberOfExpanding = 1;
 
@@ -434,7 +434,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    protected boolean initialize()
    {
       isDone.set(false);
-      ConstrainedWholeBodyPlanningRequestPacket request = latestRequestReference.getAndSet(null);
+      ConstrainedWholeBodyPlanningToolboxRequestPacket request = latestRequestReference.getAndSet(null);
       if (request == null)
          return false;
 
@@ -504,12 +504,12 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       return isDone.getBooleanValue();
    }
 
-   public PacketConsumer<ConstrainedWholeBodyPlanningRequestPacket> createRequestConsumer()
+   public PacketConsumer<ConstrainedWholeBodyPlanningToolboxRequestPacket> createRequestConsumer()
    {
-      return new PacketConsumer<ConstrainedWholeBodyPlanningRequestPacket>()
+      return new PacketConsumer<ConstrainedWholeBodyPlanningToolboxRequestPacket>()
       {
          @Override
-         public void receivedPacket(ConstrainedWholeBodyPlanningRequestPacket packet)
+         public void receivedPacket(ConstrainedWholeBodyPlanningToolboxRequestPacket packet)
          {
             if (packet == null)
                return;

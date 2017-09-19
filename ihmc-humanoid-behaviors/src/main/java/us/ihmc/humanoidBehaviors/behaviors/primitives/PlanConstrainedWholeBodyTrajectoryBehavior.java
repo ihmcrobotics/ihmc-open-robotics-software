@@ -16,7 +16,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -140,7 +140,7 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
                TextToSpeechPacket p1 = new TextToSpeechPacket("Requesting Plan");
                sendPacket(p1);
             }
-            ConstrainedWholeBodyPlanningRequestPacket request = new ConstrainedWholeBodyPlanningRequestPacket();
+            ConstrainedWholeBodyPlanningToolboxRequestPacket request = new ConstrainedWholeBodyPlanningToolboxRequestPacket();
             
             request.setNumberOfFindInitialGuess(numberOfFindInitialGuess);            
             request.setNumberOfExpanding(numberOfExpanding);

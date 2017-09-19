@@ -5,7 +5,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 
-public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<ConstrainedWholeBodyPlanningRequestPacket>
+public class ConstrainedWholeBodyPlanningToolboxRequestPacket extends Packet<ConstrainedWholeBodyPlanningToolboxRequestPacket>
 {
    public int numberOfExpanding;
 
@@ -21,7 +21,7 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
     */
    // public ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
 
-   public ConstrainedWholeBodyPlanningRequestPacket()
+   public ConstrainedWholeBodyPlanningToolboxRequestPacket()
    {
 
    }
@@ -47,7 +47,7 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
    }
    
    @Override
-   public boolean epsilonEquals(ConstrainedWholeBodyPlanningRequestPacket other, double epsilon)
+   public boolean epsilonEquals(ConstrainedWholeBodyPlanningToolboxRequestPacket other, double epsilon)
    {
       return true;
    }
