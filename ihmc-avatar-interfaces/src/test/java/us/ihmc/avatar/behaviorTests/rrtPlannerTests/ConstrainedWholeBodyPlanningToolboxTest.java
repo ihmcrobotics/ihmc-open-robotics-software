@@ -36,7 +36,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWh
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.RobotKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
@@ -262,7 +262,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("Send packet " + drcBehaviorTestHelper.getYoTime());
       ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
 
-      ConstrainedWholeBodyPlanningRequestPacket packet = new ConstrainedWholeBodyPlanningRequestPacket();
+      ConstrainedWholeBodyPlanningToolboxRequestPacket packet = new ConstrainedWholeBodyPlanningToolboxRequestPacket();
 
       PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
       packet.setNumberOfFindInitialGuess(200);
@@ -529,7 +529,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       System.out.println("Send input " + drcBehaviorTestHelper.getYoTime());
 
-      ConstrainedWholeBodyPlanningRequestPacket requestPacket = new ConstrainedWholeBodyPlanningRequestPacket();
+      ConstrainedWholeBodyPlanningToolboxRequestPacket requestPacket = new ConstrainedWholeBodyPlanningToolboxRequestPacket();
       toolboxCommunicator.send(requestPacket);
 
       System.out.println("Send input Done " + drcBehaviorTestHelper.getYoTime());
