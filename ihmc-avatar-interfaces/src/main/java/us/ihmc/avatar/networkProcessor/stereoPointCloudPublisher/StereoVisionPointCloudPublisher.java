@@ -46,7 +46,7 @@ public class StereoVisionPointCloudPublisher
 
    private PPSTimestampOffsetProvider ppsTimestampOffsetProvider = null;
 
-   public StereoVisionPointCloudPublisher(String lidarName, FullHumanoidRobotModelFactory modelFactory, PacketCommunicator packetCommunicator)
+   public StereoVisionPointCloudPublisher(FullHumanoidRobotModelFactory modelFactory, PacketCommunicator packetCommunicator)
    {
       this.packetCommunicator = packetCommunicator;
       robotName = modelFactory.getRobotDescription().getName();
@@ -66,16 +66,16 @@ public class StereoVisionPointCloudPublisher
       executorService.shutdownNow();
    }
 
-   public void receiveLidarFromROS(String lidarScanROSTopic, URI rosCoreURI)
+   public void receiveStereoPointCloudFromROS(String stereoPointCloudROSTopic, URI rosCoreURI)
    {
       String graphName = robotName + "/" + name;
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, graphName, true);
-      receiveStereoPointCloudFromROS(lidarScanROSTopic, rosMainNode);
+      receiveStereoPointCloudFromROS(stereoPointCloudROSTopic, rosMainNode);
    }
 
-   public void receiveStereoPointCloudFromROS(String lidarScanROSTopic, RosMainNode rosMainNode)
+   public void receiveStereoPointCloudFromROS(String stereoPointCloudROSTopic, RosMainNode rosMainNode)
    {
-      rosMainNode.attachSubscriber(lidarScanROSTopic, createROSPointCloud2Subscriber());
+      rosMainNode.attachSubscriber(stereoPointCloudROSTopic, createROSPointCloud2Subscriber());
    }
 
    public void setPPSTimestampOffsetProvider(PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
