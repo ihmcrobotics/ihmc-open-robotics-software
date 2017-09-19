@@ -1,6 +1,5 @@
 package us.ihmc.robotics.math.trajectories;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commons.Epsilons;
@@ -8,8 +7,8 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.robotics.lists.GenericTypeBuilder;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 
 /**
  * <p>Provides a basic frame work to create and access a list of {@link FrameTrajectory3D}. 
@@ -29,36 +28,29 @@ public abstract class SegmentedFrameTrajectory3D implements SegmentedFrameTrajec
 
    protected final int maxNumberOfSegments;
    protected final int maxNumberOfCoefficients;
-   protected final List<FrameTrajectory3D> segments = new ArrayList<>();
 
-   protected int numberOfSegments;
+   protected final RecyclingArrayList<FrameTrajectory3D> segments;
+
    protected int currentSegmentIndex;
 
    protected FrameTrajectory3D currentSegment;
    protected double[] nodeTime;
 
+
    public SegmentedFrameTrajectory3D(int maxNumberOfSegments, int maxNumberOfCoefficients)
    {
       this.maxNumberOfSegments = maxNumberOfSegments;
       this.maxNumberOfCoefficients = maxNumberOfCoefficients;
-      numberOfSegments = 0;
       currentSegmentIndex = -1;
-      for (int i = 0; i < maxNumberOfSegments; i++)
-      {
-         FrameTrajectory3D segmentTrajectory = new FrameTrajectory3D(maxNumberOfCoefficients, worldFrame);
-         segmentTrajectory.reset();
-         segments.add(segmentTrajectory);
-      }
+      segments = new RecyclingArrayList<>(maxNumberOfSegments, new FrameTrajectory3DBuilder());
       nodeTime = new double[maxNumberOfSegments + 1];
    }
 
    public void reset()
    {
-      for (int i = 0; i < segments.size(); i++)
-         segments.get(i).reset();
+      segments.clear();
       currentSegmentIndex = -1;
       currentSegment = null;
-      numberOfSegments = 0;
    }
 
    public void update(double timeInState)
@@ -89,6 +81,9 @@ public abstract class SegmentedFrameTrajectory3D implements SegmentedFrameTrajec
    private void setCurrentSegmentIndexFromStateTime(double timeInState)
    {
       int segmentIndex = 0;
+      if (getNumberOfSegments() == 0) // standing
+         return;
+
       if (MathTools.isGreaterThanOrEqualToWithPrecision(timeInState, segments.get(0).getInitialTime(), Epsilons.ONE_TEN_THOUSANDTH))
       {
          for (; segmentIndex < getNumberOfSegments() - 1; segmentIndex++)
@@ -108,7 +103,7 @@ public abstract class SegmentedFrameTrajectory3D implements SegmentedFrameTrajec
 
    public int getNumberOfSegments()
    {
-      return numberOfSegments;
+      return segments.size();
    }
 
    public int getCurrentSegmentIndex()
@@ -126,6 +121,26 @@ public abstract class SegmentedFrameTrajectory3D implements SegmentedFrameTrajec
    {
       setCurrentSegmentIndexFromStateTime(timeInState);
       return currentSegment;
+   }
+
+   public void setNext(FrameTrajectory3D other)
+   {
+      FrameTrajectory3D segment = segments.add();
+      segment.set(other);
+   }
+
+   public void setAll(SegmentedFrameTrajectory3D other)
+   {
+      for (int segmentIndex = 0; segmentIndex < other.getNumberOfSegments(); segmentIndex++)
+      {
+         FrameTrajectory3D segment = segments.add();
+         segment.set(other.getSegment(segmentIndex));
+      }
+   }
+
+   public FrameTrajectory3D add()
+   {
+      return segments.add();
    }
 
    public FrameTrajectory3D getSegment(int segmentIndex)
@@ -149,11 +164,13 @@ public abstract class SegmentedFrameTrajectory3D implements SegmentedFrameTrajec
       return maxNumberOfSegments;
    }
 
+   /*
    public void setNumberOfSegments(int numberOfSegments)
    {
       this.numberOfSegments = numberOfSegments;
    }
 
+*/
    
    /**
     * Returns the coefficients for all the set trajectories
@@ -162,7 +179,7 @@ public abstract class SegmentedFrameTrajectory3D implements SegmentedFrameTrajec
    public String toString()
    {
       String ret = "";
-      for (int i = 0; i < numberOfSegments; i++)
+      for (int i = 0; i < segments.size(); i++)
          ret += "\nSegment " + i + ":\n" + segments.get(i).toString();
       return ret;
    }
@@ -187,7 +204,7 @@ public abstract class SegmentedFrameTrajectory3D implements SegmentedFrameTrajec
    {
       String ret = "";
       FramePoint3D tempFramePointForPrinting = new FramePoint3D();
-      for (int i = 0; i < numberOfSegments; i++)
+      for (int i = 0; i < segments.size(); i++)
       {
          ret += "\nSegment " + i + ":\n"; 
          segments.get(i).getStartPoint(tempFramePointForPrinting);
@@ -197,5 +214,15 @@ public abstract class SegmentedFrameTrajectory3D implements SegmentedFrameTrajec
       }
       return ret;
    }
-   
+
+   private class FrameTrajectory3DBuilder extends GenericTypeBuilder<FrameTrajectory3D>
+   {
+      @Override
+      public FrameTrajectory3D newInstance()
+      {
+         FrameTrajectory3D frameTrajectory3D = new FrameTrajectory3D(maxNumberOfCoefficients, worldFrame);
+         frameTrajectory3D.reset();
+         return frameTrajectory3D;
+      }
+   }
 }

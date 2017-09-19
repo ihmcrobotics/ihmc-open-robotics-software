@@ -1,6 +1,7 @@
 package us.ihmc.jMonkeyEngineToolkit;
 
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.GraphicsDevice;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -8,7 +9,9 @@ import java.net.URL;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.Graphics3DSpotLight;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
@@ -271,4 +274,46 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
 	public void pause() {
 		
 	}
+
+   @Override
+   public void setupSky(String skyBox)
+   {
+      
+   }
+   
+   @Override
+   public void setupSky(String west, String east, String north, String south, String up, String down)
+   {
+      
+   }
+
+   @Override
+   public void addDirectionalLight(Color color, Vector3D direction)
+   {
+      
+   }
+
+   @Override
+   public void clearDirectionalLights()
+   {
+      
+   }
+
+   @Override
+   public void setAmbientLight(Color color)
+   {
+      
+   }
+
+   @Override
+   public void addSpotLight(Graphics3DSpotLight spotLight)
+   {
+      
+   }
+
+   @Override
+   public void removeSpotLight(Graphics3DSpotLight spotLight)
+   {
+      
+   }
 }

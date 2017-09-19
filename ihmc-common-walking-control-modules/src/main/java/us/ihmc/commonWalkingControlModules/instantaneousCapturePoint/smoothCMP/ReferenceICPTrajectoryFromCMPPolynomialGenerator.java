@@ -74,7 +74,6 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    private DenseMatrix64F polynomialCoefficientVector = new DenseMatrix64F(defaultSize, defaultSize);
    
    private final DenseMatrix64F tPowersDerivativeVector = new DenseMatrix64F(defaultSize, 1);
-   private final DenseMatrix64F tPowersDerivativeVectorTranspose = new DenseMatrix64F(defaultSize, 1);
 
    
    private DenseMatrix64F icpPositionDesiredInitialMatrix = new DenseMatrix64F(defaultSize, 3);
@@ -323,7 +322,7 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
     */
    private void calculateICPQuantityDesiredCurrentFromCMPPolynomialsScalar(FrameTuple3D<?, ?> icpQuantityDesiredOutput, int icpDerivativeOrder, double time)
    {            
-      for(Direction dir : Direction.values())
+      for(Direction dir : Direction.values)
       {
          Trajectory cmpPolynomial = cmpTrajectories.get(FIRST_SEGMENT).getTrajectory(dir.ordinal());
          double icpPositionDesiredFinal = icpPositionDesiredFinalMatrix.get(FIRST_SEGMENT, dir.ordinal());
@@ -344,7 +343,7 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
       
       for(int i = totalNumberOfSegments.getIntegerValue() - 1; i >= 0; i--)
       {
-         for(Direction dir : Direction.values())
+         for(Direction dir : Direction.values)
          {
             Trajectory cmpPolynomial = cmpTrajectories.get(i).getTrajectory(dir.ordinal());
             double icpPositionDesiredFinal = icpPositionDesiredFinalMatrix.get(i, dir.ordinal());
@@ -515,21 +514,15 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
    {
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
       
-      tPowersDerivativeVector.reshape(numberOfCoefficients, 1);
-      tPowersDerivativeVectorTranspose.reshape(1, numberOfCoefficients);
+      tPowersDerivativeVector.reshape(1, numberOfCoefficients);
 
       for(int i = 0; i < numberOfCoefficients; i++)
       {
          tPowersDerivativeVector.zero();
-         tPowersDerivativeVectorTranspose.zero();
-         
          tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i + alphaDerivativeOrder, time));
-         CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
-                  
+
          double scalar = Math.pow(omega0.getDoubleValue(), -i);
-         CommonOps.addEquals(generalizedAlphaPrime, scalar, tPowersDerivativeVectorTranspose);
-         
-//         PrintTools.debug("A = " + generalizedAlphaPrime .toString());
+         CommonOps.addEquals(generalizedAlphaPrime, scalar, tPowersDerivativeVector);
       }
    }
    
@@ -549,21 +542,15 @@ public class ReferenceICPTrajectoryFromCMPPolynomialGenerator implements Positio
       int numberOfCoefficients = cmpPolynomial.getNumberOfCoefficients();
       double timeSegmentTotal = cmpPolynomial.getFinalTime();
       
-      tPowersDerivativeVector.reshape(numberOfCoefficients, 1);
-      tPowersDerivativeVectorTranspose.reshape(1, numberOfCoefficients);
+      tPowersDerivativeVector.reshape(1, numberOfCoefficients);
 
       for(int i = 0; i < numberOfCoefficients; i++)
       {
          tPowersDerivativeVector.zero();
-         tPowersDerivativeVectorTranspose.zero();
-
          tPowersDerivativeVector.set(cmpPolynomial.getXPowersDerivativeVector(i, timeSegmentTotal));
-         CommonOps.transpose(tPowersDerivativeVector, tPowersDerivativeVectorTranspose);
-                  
+
          double scalar = Math.pow(omega0.getDoubleValue(), betaDerivativeOrder-i) * Math.exp(omega0.getDoubleValue()*(time-timeSegmentTotal));
-         CommonOps.addEquals(generalizedBetaPrime, scalar, tPowersDerivativeVectorTranspose);
-         
-//         PrintTools.debug("B = " + generalizedBetaPrime.toString());
+         CommonOps.addEquals(generalizedBetaPrime, scalar, tPowersDerivativeVector);
       }
    }
 

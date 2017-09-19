@@ -28,9 +28,9 @@ public interface AngularMomentumTrajectoryGeneratorInterface
 
    void getDesiredAngularMomentum(YoFrameVector desiredAngMomToPack, YoFrameVector desiredTorqueToPack);
 
-   void initializeForTransfer(double currentTime);
+   void initializeForDoubleSupport(double currentTime, boolean isStanding);
 
-   void initializeForSwing(double currentTime);
+   void initializeForSingleSupport(double currentTime);
 
    void computeReferenceAngularMomentumStartingFromDoubleSupport(boolean atAStop);
 

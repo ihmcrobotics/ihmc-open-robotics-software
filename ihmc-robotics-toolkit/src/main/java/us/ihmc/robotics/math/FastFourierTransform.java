@@ -1,6 +1,5 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 
 import java.util.List;
@@ -22,11 +21,10 @@ public class FastFourierTransform
 
    private int maxNumberOfCoefficients;
    private int logMaxNumberOfCoefficients;
+   private int numberOfCoefficients;
    private List<ComplexNumber> rootsOfUnity;
    private ComplexNumber[] coefficients;
    private ComplexNumber[] transformedCoeffs;
-
-   private int temp;
 
    public FastFourierTransform(int maxNumberOfCoefficients)
    {
@@ -44,23 +42,29 @@ public class FastFourierTransform
 
    public void setCoefficients(ComplexNumber[] coefficients)
    {
-      if (coefficients.length > maxNumberOfCoefficients)
+      numberOfCoefficients = coefficients.length;
+      if (numberOfCoefficients > maxNumberOfCoefficients)
          throw new RuntimeException("Insufficient number of coefficients for FFT transform, max: " + maxNumberOfCoefficients + ", provided: "
-               + coefficients.length);
+               + numberOfCoefficients);
       int index = 0;
-      for (; index < coefficients.length; index++)
+      for (; index < numberOfCoefficients; index++)
+      {
          this.coefficients[index].set(coefficients[index]);
+      }
       for (; index < maxNumberOfCoefficients; index++)
+      {
          this.coefficients[index].setToPurelyReal(0.0);
+      }
    }
 
    public void setCoefficients(double[] coefficients)
    {
-      if (coefficients.length > maxNumberOfCoefficients)
+      numberOfCoefficients = coefficients.length;
+      if (numberOfCoefficients > maxNumberOfCoefficients)
          throw new RuntimeException("Insufficient number of coefficients for FFT transform, max: " + maxNumberOfCoefficients + ", provided: "
-               + coefficients.length);
+               + numberOfCoefficients);
       int index = 0;
-      for (; index < coefficients.length; index++)
+      for (; index < numberOfCoefficients; index++)
       {
          this.coefficients[index].setToPurelyReal(coefficients[index]);
       }
@@ -72,7 +76,8 @@ public class FastFourierTransform
 
    public void setCoefficients(double[] coefficients, int numberOfCoefficientsToUse)
    {
-      if (coefficients.length > maxNumberOfCoefficients)
+      numberOfCoefficients = numberOfCoefficientsToUse;
+      if (numberOfCoefficientsToUse > maxNumberOfCoefficients)
          throw new RuntimeException("Insufficient number of coefficients for FFT transform, max: " + maxNumberOfCoefficients + ", provided: "
                + numberOfCoefficientsToUse);
       int index = 0;
@@ -103,10 +108,9 @@ public class FastFourierTransform
    private void transform(boolean inverse)
    {
       bitReverseCopy(transformedCoeffs, coefficients);
-      int m = 0;
       for (int i = 1; i <= logMaxNumberOfCoefficients; i++)
       {
-         m = (int) Math.pow(2.0, i);
+         int m = (int) Math.pow(2.0, i);
          tempComplex.setToPurelyReal(1.0);
          for (int j = 0; j < m / 2; j++)
          {
@@ -132,9 +136,11 @@ public class FastFourierTransform
 
    private void bitReverseCopy(ComplexNumber[] arrayToPack, ComplexNumber[] arrayToCopy)
    {
-      temp = (int) (Math.log(arrayToCopy.length) / Math.log(2.0));
+      int temp = (int) (Math.log(arrayToCopy.length) / Math.log(2.0));
       for (int i = 0; i < arrayToCopy.length; i++)
+      {
          arrayToPack[i].set(arrayToCopy[bitReverse(i, temp)]);
+      }
    }
 
    public int bitReverse(int a, int numberOfBits)
@@ -147,13 +153,13 @@ public class FastFourierTransform
 
    private void clearTransformed()
    {
-      for (int i = 0; i < transformedCoeffs.length; i++)
+      for (int i = 0; i < maxNumberOfCoefficients; i++)
          transformedCoeffs[i].set(0.0, 0.0);
    }
 
    private void clearInput()
    {
-      for (int i = 0; i < transformedCoeffs.length; i++)
+      for (int i = 0; i < numberOfCoefficients; i++)
          coefficients[i].set(0.0, 0.0);
    }
 

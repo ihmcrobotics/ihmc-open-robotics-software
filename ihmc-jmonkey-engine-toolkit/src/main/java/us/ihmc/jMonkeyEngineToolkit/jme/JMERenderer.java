@@ -14,7 +14,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -39,6 +38,7 @@ import com.jme3.audio.AudioContext;
 import com.jme3.input.InputManager;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
+import com.jme3.light.Light;
 import com.jme3.material.TechniqueDef;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -66,6 +66,8 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DSpotLight;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
@@ -92,6 +94,7 @@ import us.ihmc.jMonkeyEngineToolkit.jme.contextManager.AWTPanelsContextManager;
 import us.ihmc.jMonkeyEngineToolkit.jme.contextManager.CanvasContextManager;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.JMEGPULidar;
 import us.ihmc.jMonkeyEngineToolkit.jme.terrain.JMEHeightMapTerrain;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMENodeTools;
 import us.ihmc.jMonkeyEngineToolkit.stlLoader.STLLoader;
@@ -153,6 +156,9 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    private HashBiMap<Graphics3DNode, JMEGraphics3DNode> jmeGraphicsNodes = HashBiMap.create();
    private Collection<JMEGraphics3DNode> jmeGraphicsNodesListView = jmeGraphicsNodes.values();
+   
+   private HashBiMap<Graphics3DSpotLight, JMESpotLight> jmeSpotLights = HashBiMap.create();
+   private Collection<JMESpotLight> jmeSpotLightsView = jmeSpotLights.values();
 
    private boolean isTerrainVisible = true;
 
@@ -167,14 +173,18 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    private Node terrain;
    private Node zUpNode;
 
+   private ArrayList<DirectionalLight> lights = new ArrayList<>(); 
    private ArrayList<JMEGPULidar> gpuLidars = new ArrayList<>();
    private ArrayList<PBOAwtPanel> pboAwtPanels;
-
    private DirectionalLight primaryLight;
    private CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
    private ArrayList<Updatable> updatables = new ArrayList<Updatable>(); // things we want to move automatically
 
+   private Spatial sky = null;
+   private HeightMap heightMap = null;
+   private AppearanceDefinition terrainAppearance = null;
+   
    public JMERenderer(RenderType renderType)
    {
       this(renderType, null);
@@ -482,6 +492,24 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       ambientLight.setColor(ColorRGBA.White.mult(brightness));
       notifyRepaint();
    }
+   
+   @Override
+   public void setAmbientLight(Color ambient)
+   {
+      enqueue(new Callable<Object>()
+      {
+
+         @Override
+         public Object call() throws Exception
+         {
+
+            ColorRGBA jmeAmbient = JMEDataTypeUtils.colorToColorRGBA(ambient);
+            ambientLight.setColor(jmeAmbient);
+            notifyRepaint();
+            return null;
+         }
+      });
+   }
 
    private void setupLighting()
    {
@@ -489,69 +517,131 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       primaryLight.setColor(ColorRGBA.White.mult(0.5f));
       primaryLight.setDirection(new Vector3f(-0.1f, -1.0f, -0.2f).normalizeLocal());
       rootNode.addLight(primaryLight);
+      lights.add(primaryLight);
 
       ambientLight = new AmbientLight();
       ambientLight.setColor(ColorRGBA.White.mult(.8f)); //1.3f));
       rootNode.addLight(ambientLight);
 
-      DirectionalLight primaryLight2 = new DirectionalLight();
-      primaryLight2.setColor(ColorRGBA.White.mult(0.1f));
-      primaryLight2.setDirection(new Vector3f(1.0f, -0.0f, -0.5f).normalizeLocal());
-      rootNode.addLight(primaryLight2);
+      addDirectionalLight(ColorRGBA.White.mult(0.1f), new Vector3f(1.0f, -0.0f, -0.5f).normalizeLocal());
 
-      DirectionalLight primaryLight3 = new DirectionalLight();
-      primaryLight3.setColor(ColorRGBA.White.mult(0.4f));
-      primaryLight3.setDirection(new Vector3f(0.0f, -1.0f, 0.0f).normalizeLocal());
-      rootNode.addLight(primaryLight3);
-
+      addDirectionalLight(ColorRGBA.White.mult(0.4f), new Vector3f(0.0f, -1.0f, 0.0f).normalizeLocal());
+      
       renderManager.setPreferredLightMode(TechniqueDef.LightMode.SinglePass);
 
       rootNode.setShadowMode(ShadowMode.CastAndReceive);
       zUpNode.setShadowMode(ShadowMode.CastAndReceive);
    }
 
-   public void addDirectionalLight(ColorRGBA color, Vector3f direction)
+   private void addDirectionalLight(ColorRGBA color, Vector3f direction)
    {
-      DirectionalLight light = new DirectionalLight();
-      light.setColor(color);
-      light.setDirection(direction.normalizeLocal());
-      rootNode.addLight(light);
+      
+      if(lights.size() > 1)
+      {
+         DirectionalLight light = new DirectionalLight();
+         light.setColor(color);
+         light.setDirection(direction.normalizeLocal());
+         lights.add(light);
+         rootNode.addLight(light);         
+      }
+      else
+      {
+         primaryLight.setColor(color);
+         primaryLight.setDirection(direction);
+         lights.add(primaryLight);
+         rootNode.addLight(primaryLight);
+      }
    }
 
+
+   private void deleteSky()
+   {
+      if(sky != null)
+      {
+         rootNode.detachChild(sky);
+         sky = null;
+      }
+   }
+   
+   private void updateSky()
+   {
+      sky.setLocalScale(1000);
+      rootNode.attachChild(sky);
+      notifyRepaint();
+
+   }
+   
+   public void setupSky(String skyBox)
+   {
+      enqueue(new Callable<Object>()
+      {
+
+         @Override
+         public Object call() throws Exception
+         {
+            deleteSky();
+            sky = SkyFactory.createSky(assetManager, skyBox, EnvMapType.CubeMap);
+            updateSky();
+            return null;
+         }
+      });
+   }
+   
+   public void setupSky(String west, String east, String north, String south, String up, String down)
+   {
+      
+      Texture westTex = assetManager.loadTexture(new TextureKey(west, true));
+      Texture eastTex = assetManager.loadTexture(new TextureKey(east, true));
+      Texture northTex = assetManager.loadTexture(new TextureKey(north, true));
+      Texture southTex = assetManager.loadTexture(new TextureKey(south, true));
+      Texture upTex = assetManager.loadTexture(new TextureKey(up, true));
+      Texture downTex = assetManager.loadTexture(new TextureKey(down, true));
+      enqueue(new Callable<Object>()
+      {
+
+         @Override
+         public Object call() throws Exception
+         {
+            deleteSky();
+            sky = SkyFactory.createSky(assetManager, westTex, eastTex, northTex, southTex, upTex, downTex);
+       
+            updateSky();
+            return null;
+         }
+      });
+   }
+
+   
    @Override
    public void setupSky()
    {
       try
       {
-         Spatial sky = null;
          if (skyboxToUse == SkyboxToUse.BLUE_SKY)
          {
-            Texture west = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0005.bmp", true));
-            Texture east = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0002.bmp", true));
-            Texture north = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0001.bmp", true));
-            Texture south = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0004.bmp", true));
-            Texture up = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0003.bmp", true));
-            Texture down = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0007.bmp", true));
-            sky = SkyFactory.createSky(assetManager, west, east, north, south, up, down);
+            String west = "Textures/Sky/Bright/skyboxsun25degtest/skyrender0005.bmp";
+            String east = "Textures/Sky/Bright/skyboxsun25degtest/skyrender0002.bmp";
+            String north ="Textures/Sky/Bright/skyboxsun25degtest/skyrender0001.bmp";
+            String south ="Textures/Sky/Bright/skyboxsun25degtest/skyrender0004.bmp";
+            String up =   "Textures/Sky/Bright/skyboxsun25degtest/skyrender0003.bmp";
+            String down = "Textures/Sky/Bright/skyboxsun25degtest/skyrender0007.bmp";
+            setupSky(west, east, north, south, up, down);
          }
          else if (skyboxToUse == SkyboxToUse.DUSK_SKY)
          {
-            Texture west = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0005.bmp", true));
-            Texture east = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0002.bmp", true));
-            Texture north = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0001.bmp", true));
-            Texture south = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0004.bmp", true));
-            Texture up = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0003.bmp", true));
-            Texture down = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0006.bmp", true));
-            sky = SkyFactory.createSky(assetManager, west, east, north, south, up, down);
+            String west = "Textures/Sky/Bright/skyboxsun45deg/skyrender0005.bmp";
+            String east = "Textures/Sky/Bright/skyboxsun45deg/skyrender0002.bmp";
+            String north ="Textures/Sky/Bright/skyboxsun45deg/skyrender0001.bmp";
+            String south ="Textures/Sky/Bright/skyboxsun45deg/skyrender0004.bmp";
+            String up =   "Textures/Sky/Bright/skyboxsun45deg/skyrender0003.bmp";
+            String down = "Textures/Sky/Bright/skyboxsun45deg/skyrender0006.bmp";
+            setupSky(west, east, north, south, up, down);
          }
          else if (skyboxToUse == SkyboxToUse.JME_MOUNTAINS)
          {
-            sky = SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", EnvMapType.CubeMap);
+            setupSky("Textures/Sky/Bright/BrightSky.dds");
          }
 
-         sky.setLocalScale(1000);
-         rootNode.attachChild(sky);
-         notifyRepaint();
       }
       catch (Exception e)
       {
@@ -609,6 +699,9 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
          {
             jmeGraphicsNode.update();
          }
+         
+         updateSpotLights();
+         
          updateCameras();
       }
 
@@ -738,6 +831,14 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       // user code here..
    }
 
+   private void updateSpotLights()
+   {
+      for (JMESpotLight spotLight : jmeSpotLightsView)
+      {
+         spotLight.update();
+      }
+   }
+   
    private synchronized void updateCameras()
    {
       if (alreadyClosing)
@@ -777,8 +878,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       notifyRepaint();
    }
 
-   @Override
-   public void setHeightMap(final HeightMap heightMap)
+   private void repaintTerrain()
    {
       enqueue(new Callable<JMEHeightMapTerrain>()
       {
@@ -790,7 +890,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
                terrain.removeFromParent();
             }
 
-            JMEHeightMapTerrain jmeTerrain = new JMEHeightMapTerrain(heightMap, assetManager);
+            JMEHeightMapTerrain jmeTerrain = new JMEHeightMapTerrain(heightMap, assetManager, terrainAppearance);
             terrain = jmeTerrain.getTerrain();
             terrain.setShadowMode(ShadowMode.Receive);
 
@@ -803,6 +903,14 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
          }
       });
       notifyRepaint();
+
+   }
+   
+   @Override
+   public void setHeightMap(final HeightMap heightMap)
+   {
+      this.heightMap = heightMap;
+      repaintTerrain();
    }
 
    public HashBiMap<Graphics3DNode, JMEGraphics3DNode> getJmeGraphicsNodes()
@@ -1236,9 +1344,11 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    @Override
    public void setGroundAppearance(AppearanceDefinition app)
    {
-      System.err.println(getClass().getSimpleName() + ": setGroundAppearance not implemented.");
-
-      // TODO
+      terrainAppearance = app;
+      if(heightMap != null)
+      {
+         repaintTerrain();
+      }
    }
 
    @Override
@@ -1511,6 +1621,88 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
          {
             updatables.remove(updatable);
 
+            return null;
+         }
+      });
+   }
+
+   @Override
+   public void addDirectionalLight(Color color, Vector3D direction)
+   {
+      Vector3f jmeDirection = JMEDataTypeUtils.vecMathTuple3dToJMEVector3f(direction);
+      JMEGeometryUtils.transformFromZupToJMECoordinates(jmeDirection);
+      
+      ColorRGBA jmeColor = JMEDataTypeUtils.colorToColorRGBA(color);
+      enqueue(new Callable<Object>()
+      {
+
+         @Override
+         public Object call() throws Exception
+         {
+            addDirectionalLight(jmeColor, jmeDirection);
+            return null;
+         }
+      });
+   }
+
+   @Override
+   public void clearDirectionalLights()
+   {
+      enqueue(new Callable<Object>()
+      {
+
+         @Override
+         public Object call() throws Exception
+         {
+            for(Light light : lights)
+            {
+               rootNode.removeLight(light);
+            }
+            lights.clear();
+            return null;
+         }
+      });
+   }
+
+   @Override
+   public void addSpotLight(Graphics3DSpotLight spotLight)
+   {
+      enqueue(new Callable<Object>()
+      {
+
+         @Override
+         public Object call() throws Exception
+         {
+            if(jmeSpotLights.containsKey(spotLight))
+            {
+               throw new RuntimeException("Spotlight is already added to graphic subsystem");
+            }
+            
+            JMESpotLight jmeSpotLight = new JMESpotLight(spotLight);
+            jmeSpotLights.put(spotLight, jmeSpotLight);
+            rootNode.addLight(jmeSpotLight); 
+            
+            return null;
+         }
+      });
+   }
+
+   @Override
+   public void removeSpotLight(Graphics3DSpotLight spotLight)
+   {
+      enqueue(new Callable<Object>()
+      {
+
+         @Override
+         public Object call() throws Exception
+         {
+            JMESpotLight spotLightToRemove = jmeSpotLights.remove(spotLight);
+            if(spotLightToRemove != null)
+            {
+               rootNode.removeLight(spotLightToRemove);
+            }
+            
+            
             return null;
          }
       });
