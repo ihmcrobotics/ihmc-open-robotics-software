@@ -10,6 +10,8 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
    public int numberOfExpanding;
 
    public int numberOfFindInitialGuess;
+   
+   public int numerOfEndEffectorWayPoints;
 
    public KinematicsToolboxOutputStatus initialConfiguration;
 
@@ -39,6 +41,11 @@ public class ConstrainedWholeBodyPlanningRequestPacket extends Packet<Constraine
       this.numberOfFindInitialGuess = value;
    }
 
+   public void setNumberOfEndEffectorWayPoints(int value)
+   {
+      this.numerOfEndEffectorWayPoints = value;
+   }
+   
    @Override
    public boolean epsilonEquals(ConstrainedWholeBodyPlanningRequestPacket other, double epsilon)
    {

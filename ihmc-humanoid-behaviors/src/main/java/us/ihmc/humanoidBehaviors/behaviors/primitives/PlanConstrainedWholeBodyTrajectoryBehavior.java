@@ -33,6 +33,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
 {
+   // TODO : should be replaced with simple packet structure. need to add 'configruationspaces, buildorder etc' on kryonet.
    public static ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
 
    private final boolean DEBUG = true;
@@ -55,6 +56,10 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
    private ConstrainedWholeBodyPlanningToolboxOutputStatus cwbtoolboxOutputStatus;
    
    private long startTime; // computing time measure.
+   
+   private static int numberOfFindInitialGuess = 320;
+   private static int numberOfExpanding = 1000;
+   private static int numberOfEndEffectorWayPoints = 10;
 
    public PlanConstrainedWholeBodyTrajectoryBehavior(String namePrefix, CommunicationBridgeInterface communicationBridge, FullHumanoidRobotModel fullRobotModel,
                                                      YoDouble yoTime)
@@ -72,6 +77,21 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
    {
       PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = constrainedEndEffectorTrajectory;
       this.fullRobotModel = fullRobotModel;
+   }
+   
+   public void setNumberOfFindInitialGuess(int value)
+   {
+      numberOfFindInitialGuess = value;
+   }
+   
+   public void setNumberOfExpanding(int value)
+   {
+      numberOfExpanding = value;
+   }
+   
+   public void setNumberOfEndEffectorWayPoints(int value)
+   {
+      numberOfEndEffectorWayPoints = value;
    }
 
    public ConstrainedWholeBodyPlanningToolboxOutputStatus getConstrainedWholeBodyPlanningToolboxOutputStatus()
@@ -104,7 +124,6 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
                sendPacket(p1);
             }
             ToolboxStateMessage wakeUp = new ToolboxStateMessage(ToolboxState.WAKE_UP);
-            // ToolboxStateMessage wakeUp = new ToolboxStateMessage(ToolboxState.REINITIALIZE);
             sendPackageToPlanner(wakeUp);
             
             PrintTools.info("initialize Planner");
@@ -122,10 +141,11 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
                sendPacket(p1);
             }
             ConstrainedWholeBodyPlanningRequestPacket request = new ConstrainedWholeBodyPlanningRequestPacket();
-
-            request.setNumberOfFindInitialGuess(320);
-            request.setNumberOfExpanding(1000);
+            
+            request.setNumberOfFindInitialGuess(numberOfFindInitialGuess);            
+            request.setNumberOfExpanding(numberOfExpanding);
             request.setInitialRobotConfigration(fullRobotModel);
+            request.setNumberOfEndEffectorWayPoints(numberOfEndEffectorWayPoints);
 
             request.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
 
