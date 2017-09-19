@@ -194,7 +194,8 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
 
       CommonAvatarEnvironmentInterface environment = new FlatGroundEnvironment();
 
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(environment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(environment, getSimpleRobotName(), DRCObstacleCourseStartingLocation.DEFAULT,
+                                                        simulationTestingParameters, getRobotModel());
 
       setupCWBPlanningToolboxModule();
    }
@@ -204,7 +205,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
    {
 
    }
-   
+
    // @Test
    public void testForReachability() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -221,34 +222,33 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
 
       Point3D centerPosition = new Point3D(0.52, -0.01, 1.0164);
       Quaternion centerOrientation = new Quaternion();
-      centerOrientation.appendPitchRotation(-Math.PI*0.5);
-      
+      centerOrientation.appendPitchRotation(-Math.PI * 0.5);
 
       Point3D desiredPosition = new Point3D(centerPosition);
       desiredPosition.addY(-0.35);
-      
+
       Quaternion desiredOrientation = new Quaternion();
       desiredOrientation.appendRollRotation(Math.PI * 0.5);
       desiredOrientation.appendYawRotation(Math.PI * 0.5);
       // desiredOrientation.appendPitchRotation(-Math.PI * 0.4);
       desiredOrientation.appendPitchRotation(-Math.PI * 0.5);
-      
+
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
       scs.addStaticLinkGraphics(getXYZAxis(new Pose3D(desiredPosition, desiredOrientation)));
-      
-//      HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, desiredPosition, desiredOrientation,
-//                                                                               referenceFrames.getMidFootZUpGroundFrame());
-//      drcBehaviorTestHelper.send(lhandTrajectoryMessage);
-      
+
+      //      HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, desiredPosition, desiredOrientation,
+      //                                                                               referenceFrames.getMidFootZUpGroundFrame());
+      //      drcBehaviorTestHelper.send(lhandTrajectoryMessage);
+
       WholeBodyInverseKinematicsBehavior wholebodyBehavior = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
-                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-                                                                                     drcBehaviorTestHelper.getSDFFullRobotModel());
-      
+                                                                                                    drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                                                    drcBehaviorTestHelper.getSDFFullRobotModel());
+
       FramePose handFramePose = new FramePose(referenceFrames.getMidFootZUpGroundFrame(), desiredPosition, desiredOrientation);
-      
+
       wholebodyBehavior.setTrajectoryTime(5.0);
       wholebodyBehavior.setDesiredHandPose(RobotSide.LEFT, handFramePose);
-      
+
       drcBehaviorTestHelper.dispatchBehavior(wholebodyBehavior);
 
       desiredOrientation = new Quaternion();
@@ -258,16 +258,11 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       drcBehaviorTestHelper.send(rhandTrajectoryMessage);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
-
-
-      
-      
-      
       System.out.println("End");
 
    }
 
-   //@Test
+   // @Test
    public void testForCuttingWallBehavior() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -305,17 +300,17 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
                                                                                                             sdfFullRobotModel, referenceFrames);
 
       referenceFrames.updateFrames();
-      
+
       System.out.println("Behavior Dispatch");
       drcBehaviorTestHelper.dispatchBehavior(cuttingWallBehaviorStateMachine);
-      
+
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-            
+
       Point3D centerPosition = new Point3D(0.52, -0.01, 1.0164);
       Quaternion centerOrientation = new Quaternion();
-      centerOrientation.appendPitchRotation(-Math.PI*0.5);
+      centerOrientation.appendPitchRotation(-Math.PI * 0.5);
       WallPosePacket wallPosePacket = new WallPosePacket(0.35, centerPosition, centerOrientation);
-      
+
       System.out.println("wallPosePacket Dispatch");
       drcBehaviorTestHelper.getBehaviorCommunicationBridge().sendPacketToBehavior(wallPosePacket);
       System.out.println("wallPosePacket Dispatch done");
@@ -326,7 +321,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
 
    }
 
-      @Test
+   @Test
    public void testForCWBPlanningBehavior() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -358,7 +353,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
                                                                                referenceFrames.getMidFootZUpGroundFrame());
       drcBehaviorTestHelper.send(rhandTrajectoryMessage);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(4.0);
-      
+
       sdfFullRobotModel.updateFrames();
       /*
        * Behavior create.
@@ -394,7 +389,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
 
       System.out.println("Send " + drcBehaviorTestHelper.getYoTime());
       drcBehaviorTestHelper.send(planningBehavior.getWholebodyTrajectoryMessage());
-      
+
       System.out.println("Send " + drcBehaviorTestHelper.getYoTime());
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(planningBehavior.getWholebodyTrajectoryMessage().getHandTrajectoryMessage(RobotSide.LEFT)
                                                                                .getTrajectoryTime());
@@ -461,6 +456,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
       packet.setNumberOfFindInitialGuess(200);
       packet.setNumberOfExpanding(600);
+      packet.setNumberOfEndEffectorWayPoints(30);
       packet.setInitialRobotConfigration(sdfFullRobotModel);
 
       packet.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);

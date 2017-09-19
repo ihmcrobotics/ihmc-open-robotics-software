@@ -180,12 +180,16 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
             System.out.println(transform1);
 
              // ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(20.0);
-            // ConstrainedEndEffectorTrajectory endeffectorTrajectory = new CuttingWallTrajectory(centerFramePose, latestPacket.getCuttingRadius(), 20.0);
             ConstrainedEndEffectorTrajectory endeffectorTrajectory = new CuttingWallTrajectory(centerFramePose.getPosition(),
                                                                                                computeWallOrientation(centerFramePose.getOrientation()),
                                                                                                latestPacket.getCuttingRadius(), 20.0);
 
             planConstrainedWholeBodyTrajectoryBehavior.setInputs(endeffectorTrajectory, fullRobotModel);
+            
+            planConstrainedWholeBodyTrajectoryBehavior.setNumberOfEndEffectorWayPoints(30);
+            planConstrainedWholeBodyTrajectoryBehavior.setNumberOfExpanding(1000);
+            planConstrainedWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(320);
+            
             PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
          }
       };
@@ -211,9 +215,10 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
 
             WholeBodyTrajectoryMessage wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
 
-            wholebodyTrajectoryMessage = planConstrainedWholeBodyTrajectoryBehavior.getWholebodyTrajectoryMessage();
+            // TODO
+            // wholebodyTrajectoryMessage = planConstrainedWholeBodyTrajectoryBehavior.getWholebodyTrajectoryMessage();
 
-            wholebodyTrajectoryBehavior.setInput(wholebodyTrajectoryMessage);
+            // wholebodyTrajectoryBehavior.setInput(wholebodyTrajectoryMessage);
          }
       };
 
