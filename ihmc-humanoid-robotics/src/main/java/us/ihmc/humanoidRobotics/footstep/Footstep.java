@@ -255,7 +255,7 @@ public class Footstep implements Settable<Footstep>
       for (int i = 0; i < contactPointList.size(); i++)
       {
          Point2DReadOnly point = contactPointList.get(i);
-         this.predictedContactPoints.get(i).set(point);
+         this.predictedContactPoints.add().set(point);
       }
    }
 
