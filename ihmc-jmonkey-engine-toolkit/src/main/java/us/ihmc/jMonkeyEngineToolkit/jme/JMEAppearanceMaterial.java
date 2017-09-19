@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import com.jme3.asset.AssetLocator;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.material.MaterialList;
@@ -125,8 +124,7 @@ public class JMEAppearanceMaterial
          }
       }
 
-      Image alphaImage = awtLoader.load(alphaMap, true);
-      Texture alphaTexture = new Texture2D(alphaImage);
+      Texture alphaTexture = createTexture(alphaMap);
       material.setTexture("AlphaMap", alphaTexture);
 
       ArrayList<TextureDefinition> textures = appearanceDefinition.getTextures();
@@ -291,11 +289,13 @@ public class JMEAppearanceMaterial
       if (DEBUG) System.out.println(string);
    }
 
+   
+   
    public static Material createMaterialFromBufferedImage(AssetManager contentMan, BufferedImage bufferedImage)
    {
       Material material = new Material(contentMan, PHONG_ILLUMINATED_JME_MAT);
-      Image image = awtLoader.load(bufferedImage, true);
-      Texture texture = new Texture2D(image);
+      Texture texture = createTexture(bufferedImage);
+
       material.setTexture("DiffuseMap", texture);
       if (bufferedImage.getColorModel().hasAlpha())
       {
@@ -305,6 +305,13 @@ public class JMEAppearanceMaterial
 
       //      material.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off);
       return material;
+   }
+
+   public static Texture createTexture(BufferedImage bufferedImage)
+   {
+      Image image = awtLoader.load(bufferedImage, true);
+      Texture texture = new Texture2D(image);
+      return texture;
    }
 
    public static Material createMaterialFromFileURL(AssetManager contentMan, String path)

@@ -23,4 +23,46 @@ public class AtlasEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectory
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
+   
+   @Override
+   public void testMessageWithTooManyTrajectoryPoints() throws Exception
+   {
+      super.testMessageWithTooManyTrajectoryPoints();
+   }
+   
+   @Override
+   public void testMultipleTrajectoryPoints() throws Exception
+   {
+      super.testMultipleTrajectoryPoints();
+   }
+   
+   @Override
+   public void testQueuedMessages() throws Exception
+   {
+      super.testQueuedMessages();
+   }
+   
+   @Override
+   public void testQueueStoppedWithOverrideMessage() throws Exception
+   {
+      super.testQueueStoppedWithOverrideMessage();
+   }
+   
+   @Override
+   public void testQueueWithWrongPreviousId() throws Exception
+   {
+      super.testQueueWithWrongPreviousId();
+   }
+   
+   @Override
+   public void testSingleTrajectoryPoint() throws Exception
+   {
+      super.testSingleTrajectoryPoint();
+   }
+   
+   @Override
+   public void testStopAllTrajectory() throws Exception
+   {
+      super.testStopAllTrajectory();
+   }
 }

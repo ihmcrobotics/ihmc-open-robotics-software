@@ -33,8 +33,10 @@ import javax.swing.JTextField;
 import com.jme3.renderer.Camera;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.Graphics3DSpotLight;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -2223,6 +2225,38 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
    }
 
+   /**
+    * Setup the skybox 
+    * 
+    * @param skyBox path to a skybox resource on the classpath
+    */
+   public void setupSky(String skyBox)
+   {
+      if (myGUI != null)
+      {
+         myGUI.setupSky(skyBox);
+      }
+   }
+   
+   /**
+    * Setup the skybox 
+    * 
+    * @param west path to a image resource on the classpath
+    * @param east path to a image resource on the classpath
+    * @param north path to a image resource on the classpath
+    * @param south path to a image resource on the classpath
+    * @param up path to a image resource on the classpath
+    * @param down path to a image resource on the classpath
+    */
+   public void setupSky(String west, String east, String north, String south, String up, String down)
+   {
+      if (myGUI != null)
+      {
+         myGUI.setupSky(west, east, north, south, up, down);
+      }
+   }
+
+   
    /**
     * Sets the ground visibility.
     *
@@ -4533,5 +4567,75 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void setParameterRootPath(YoVariableRegistry registry)
    {
       this.parameterRootPath = registry.getNameSpace();
+   }
+   
+   
+   /**
+    * Clear all directional lights from the 3D render
+    */
+   public void clearDirectionalLights()
+   {
+      if (myGUI != null)
+      {
+         myGUI.clearDirectionalLights();
+      }
+   }
+   
+   /**
+    * Add a directional light to the 3D render.
+    * 
+    * The fist light added to the renderer is considered the primary light. By default, a primary light 
+    * is created. Use clearLights() to remove all lights.
+    * 
+    * @param color Light color. To change the intensity, scale all values (r,g,b,a) with a factor of 0.0 - 1.0.
+    * @param direction direction of the light
+    */
+   public void addDirectionalLight(Color color, Vector3D direction)
+   {
+      if (myGUI != null)
+      {
+         myGUI.addDirectionalLight(color, direction);
+      }
+   }
+   
+   /**
+    * Set the ambient light color and intensity.
+    * 
+    * Set to new Color(0,0,0,0) to disable.
+    * 
+    * @param color Light color. To change the intensity, scale all values (r,g,b,a) with a factor of 0.0 - 1.0.
+    */
+   public void setAmbientLight(Color color)
+   {
+      if (myGUI != null)
+      {
+         myGUI.setAmbientLight(color);
+      }
+   }
+   
+   /**
+    * Add a spotlight to the 3D render
+    * 
+    * @param spotLight
+    */
+   public void addSpotLight(Graphics3DSpotLight spotLight)
+   {
+      if (myGUI != null)
+      {
+         myGUI.addSpotLight(spotLight);
+      }
+   }
+
+   /**
+    * Remove a spotLight from the 3D render
+    * 
+    * @param spotLight
+    */
+   public void removeSpotLight(Graphics3DSpotLight spotLight)
+   {
+      if (myGUI != null)
+      {
+         myGUI.removeSpotLight(spotLight);         
+      }
    }
 }

@@ -1,11 +1,11 @@
 package us.ihmc.jMonkeyEngineToolkit.jme;
 
+import java.awt.Color;
 import java.awt.GraphicsDevice;
 import java.net.URL;
 
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DSpotLight;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
@@ -178,13 +178,52 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
 
    }
 
-   public void addDirectionalLight(ColorRGBA color, Vector3f direction)
-   {
-      jmeRenderer.addDirectionalLight(color, direction);
-   }
 
    public void setAmbientLightBrightness(float brightness)
    {
       jmeRenderer.setAmbientLightBrightness(brightness);
+   }
+
+   @Override
+   public void addDirectionalLight(Color color, Vector3D direction)
+   {
+      jmeRenderer.addDirectionalLight(color, direction);
+   }
+
+   @Override
+   public void clearDirectionalLights()
+   {
+      jmeRenderer.clearDirectionalLights();
+   }
+
+   @Override
+   public void setAmbientLight(Color color)
+   {
+      jmeRenderer.setAmbientLight(color);
+   }
+
+   @Override
+   public void setupSky(String skyBox)
+   {
+      jmeRenderer.setupSky(skyBox);
+   }
+
+   @Override
+   public void setupSky(String west, String east, String north, String south, String up, String down)
+   {
+      jmeRenderer.setupSky(west, east, north, south, up, down);
+
+   }
+   
+   @Override
+   public void addSpotLight(Graphics3DSpotLight spotLight)
+   {
+      jmeRenderer.addSpotLight(spotLight);
+   }
+
+   @Override
+   public void removeSpotLight(Graphics3DSpotLight spotLight)
+   {
+      jmeRenderer.removeSpotLight(spotLight);
    }
 }

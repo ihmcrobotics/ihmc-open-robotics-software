@@ -4,17 +4,17 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.8.2"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.8.7"
+      classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
    }
 }
-plugins {
-   id "org.hidetake.ssh" version "2.9.0"
-}
+
+apply plugin: "org.hidetake.ssh"
 apply plugin: "us.ihmc.ihmc-build"
 
 ihmc {
    loadProductProperties("../product.properties")
-   
+
    configureDependencyResolution()
    configurePublications()
 }
@@ -60,67 +60,74 @@ mainDependencies {
 
 testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
-   compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.16.8"
    compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: groupDependencyVersion
 }
 
-remotes {
-   stepprController {
-      host = '10.66.171.20' //CPU1
-      // Set the username and password in ~/.gradle/gradle.properties.
-      user = steppr_username
-      password = steppr_password
-      knownHosts = allowAnyHosts
-   }
-   wandererController {
-      host = '10.66.171.21'
-      // Set the username and password in ~/.gradle/gradle.properties.
-      user = wanderer_username
-      password = wanderer_password
-      knownHosts = allowAnyHosts
-   }
-}
-
-task deploy(dependsOn: assemble) << {
-   def rep;
-   def scriptDir;
-   def directory;
-
-   if (robot == "steppr")
-   {
-      rep = remotes.stepprController
-      scriptDir = new File("scripts/steppr");
-      directory = "steppr"
-   } else if (robot == "wanderer")
-   {
-      rep = remotes.wandererController
-      scriptDir = new File("scripts/wanderer");
-      directory = "wanderer"
-   } else
-   {
-      println("Invalid robot \"$robot\" passed in. Valid options are \"steppr\" and \"wanderer\"");
+if (ihmc.isBuildRoot())
+{
+   remotes {
+      stepprController {
+         host = '10.66.171.20' //CPU1
+         // Set the username and password in ~/.gradle/gradle.properties.
+         user = steppr_username
+         password = steppr_password
+         knownHosts = allowAnyHosts
+      }
+      wandererController {
+         host = '10.66.171.21'
+         // Set the username and password in ~/.gradle/gradle.properties.
+         user = wanderer_username
+         password = wanderer_password
+         knownHosts = allowAnyHosts
+      }
    }
 
-   println "Trying ssh"
+   task deploy(dependsOn: assemble) {
+      ihmc.jarWithLibFolder()
 
-   ssh.run {
-      session(rep) {
-         execute 'mkdir -p ' + directory + '/lib'
-         println "Adding Jars"
-         //configurations.runtime.each {
-         //   put it, directory + '/lib'
-         //}
+      doLast {
+         def rep;
+         def scriptDir;
+         def directory;
 
-         put jar.archivePath, directory + '/AcsellController.jar'
+         if (robot == "steppr")
+         {
+            rep = remotes.stepprController
+            scriptDir = new File("scripts/steppr");
+            directory = "steppr"
+         } else if (robot == "wanderer")
+         {
+            rep = remotes.wandererController
+            scriptDir = new File("scripts/wanderer");
+            directory = "wanderer"
+         } else
+         {
+            println("Invalid robot \"$robot\" passed in. Valid options are \"steppr\" and \"wanderer\"");
+         }
 
-         def scriptDirCollection = files { scriptDir.listFiles() }
-         put scriptDirCollection, directory
+         println "Trying ssh"
 
-         scriptDirCollection.each {
-            execute 'chmod 777 ' + directory + '/' + it.name
+         ssh.run {
+            session(rep) {
+               execute 'mkdir -p ' + directory + '/lib'
+               println "Adding Jars"
+               configurations.runtime.each {
+                  put it, directory + '/lib'
+               }
+
+               put jar.archivePath, directory + '/AcsellController.jar'
+
+               def scriptDirCollection = files { scriptDir.listFiles() }
+               put scriptDirCollection, directory
+
+               scriptDirCollection.each {
+                  execute 'chmod 777 ' + directory + '/' + it.name
+               }
+            }
          }
       }
    }

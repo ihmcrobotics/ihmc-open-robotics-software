@@ -4,15 +4,13 @@ import junit.framework.Assert;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerSegmentedTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePointTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class CoMIntegrationToolsTest
