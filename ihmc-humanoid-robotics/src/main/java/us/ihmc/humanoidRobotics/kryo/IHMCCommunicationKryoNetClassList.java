@@ -121,7 +121,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheel
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.NodeDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.CenterOfMassTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
@@ -569,6 +568,5 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(ConstrainedWholeBodyPlanningToolboxRequestPacket.class);
       registerPacketClass(ConstrainedWholeBodyPlanningToolboxOutputStatus.class);
       registerPacketClass(SetBooleanParameterPacket.class);
-      registerPacketClass(NodeDataPacket.class);  
    }
 }

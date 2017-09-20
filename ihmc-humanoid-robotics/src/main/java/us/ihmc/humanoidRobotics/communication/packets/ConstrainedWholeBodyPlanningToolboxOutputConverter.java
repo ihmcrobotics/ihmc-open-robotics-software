@@ -94,194 +94,188 @@ public class ConstrainedWholeBodyPlanningToolboxOutputConverter
       this.firstTrajectoryPointTime = firstTrajectoryPointTime;
    }
 
-   private SideDependentList<HandTrajectoryMessage> handTrajectoryMessages = new SideDependentList<>();
-   private ChestTrajectoryMessage chestTrajectoryMessage;
-   private PelvisTrajectoryMessage pelvisTrajectoryMessage;
-
-   private void updateHandTrajectoryMessages()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         int numberOfTrajectoryPoints = outputPath.size();
-
-         PrintTools.info("" + numberOfTrajectoryPoints);
-
-         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
-
-         handTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
-         handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
-
-         EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
-
-         for (int i = 0; i < numberOfTrajectoryPoints; i++)
-         {
-            // CTTaskNode trajectoryNode = path.get(i);
-            NodeDataPacket trajectoryNode = outputPath.get(i);
-
-            ConfigurationSpace configurationSpace = CTTreeTools.getConfigurationSpace(trajectoryNode, robotSide);
-
-            Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(trajectoryNode.getQ(0), robotSide, configurationSpace);
-
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(new Point3D(desiredPose.getPosition()));
-         }
-
-         double[] trajectoryTimes = new double[numberOfTrajectoryPoints];
-
-         for (int i = 0; i < numberOfTrajectoryPoints; i++)
-            trajectoryTimes[i] = outputPath.get(i).getQ(0);
-
-         euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTimes);
-
-         euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
-
-         RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
-
-         for (int i = 0; i < numberOfTrajectoryPoints; i++)
-         {
-            // CTTaskNode trajectoryNode = path.get(i);
-            NodeDataPacket trajectoryNode = outputPath.get(i);
-
-            ConfigurationSpace configurationSpace = CTTreeTools.getConfigurationSpace(trajectoryNode, robotSide);
-
-            Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(trajectoryNode.getQ(0), robotSide, configurationSpace);
-
-            Point3D desiredPosition = new Point3D(desiredPose.getPosition());
-            Vector3D desiredLinearVelocity = new Vector3D();
-            Quaternion desiredOrientation = new Quaternion(desiredPose.getOrientation());
-
-            if (robotSide == RobotSide.LEFT)
-               desiredOrientation.appendRollRotation(Math.PI * 0.5);
-            else
-               desiredOrientation.appendRollRotation(-Math.PI * 0.5);
-
-            Vector3D desiredAngularVelocity = new Vector3D();
-
-            double time = trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
-
-            //            PrintTools.info(""+i+" "+time +" " + desiredLinearVelocity+" ");
-
-            handTrajectoryMessage.setTrajectoryPoint(i, time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, worldFrame);
-         }
-
-         handTrajectoryMessages.put(robotSide, handTrajectoryMessage);
-
-      }
-   }
-
-   private void updateChestTrajectoryMessage()
-   {
-      int numberOfTrajectoryPoints = outputPath.size();
-
-      PrintTools.info("" + numberOfTrajectoryPoints);
-
-      chestTrajectoryMessage = new ChestTrajectoryMessage(numberOfTrajectoryPoints);
-      chestTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
-      chestTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
-
-      PrintTools.info("" + chestTrajectoryMessage.getNumberOfTrajectoryPoints());
-
-      SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
-      orientationCalculator.clear();
-      orientationCalculator.setFirstTrajectoryPointTime(firstTrajectoryPointTime);
-
-      for (int i = 0; i < numberOfTrajectoryPoints; i++)
-      {
-      // CTTaskNode trajectoryNode = path.get(i);
-         NodeDataPacket trajectoryNode = outputPath.get(i);
-
-         double time = firstTrajectoryPointTime + trajectoryNode.getQ(0);
-
-         Quaternion desiredOrientation = new Quaternion();
-
-         desiredOrientation.appendYawRotation(trajectoryNode.getQ(2));
-         desiredOrientation.appendPitchRotation(trajectoryNode.getQ(3));
-         desiredOrientation.appendRollRotation(trajectoryNode.getQ(4));
-
-         orientationCalculator.appendTrajectoryPointOrientation(time, desiredOrientation);
-      }
-
-      orientationCalculator.compute();
-
-      for (int i = 0; i < numberOfTrajectoryPoints; i++)
-      {
-      // CTTaskNode trajectoryNode = path.get(i);
-         NodeDataPacket trajectoryNode = outputPath.get(i);
-
-         double time = firstTrajectoryPointTime + trajectoryNode.getQ(0);
-
-         Quaternion desiredOrientation = new Quaternion();
-
-         desiredOrientation.appendYawRotation(trajectoryNode.getQ(2));
-         desiredOrientation.appendPitchRotation(trajectoryNode.getQ(3));
-         desiredOrientation.appendRollRotation(trajectoryNode.getQ(4));
-
-         Vector3D desiredAngularVelocity = orientationCalculator.getTrajectoryPointsAngularVelocity().get(i);
-
-         PrintTools.info("" + i + " " + time);
-
-         chestTrajectoryMessage.setTrajectoryPoint(i, time, desiredOrientation, desiredAngularVelocity, worldFrame);
-      }
-   }
-
-   private void updatePelvisTrajectoryMessage()
-   {
-      int numberOfTrajectoryPoints = outputPath.size();
-
-      PrintTools.info("" + numberOfTrajectoryPoints);
-
-      pelvisTrajectoryMessage = new PelvisTrajectoryMessage(numberOfTrajectoryPoints);
-      pelvisTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
-      pelvisTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
-
-      SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
-      selectionMatrix6D.clearAngularSelection();
-      selectionMatrix6D.clearLinearSelection();
-      selectionMatrix6D.selectLinearZ(true);
-      pelvisTrajectoryMessage.setSelectionMatrix(selectionMatrix6D);
-
-      EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
-
-      for (int i = 0; i < numberOfTrajectoryPoints; i++)
-      {
-         // CTTaskNode trajectoryNode = path.get(i);
-         NodeDataPacket trajectoryNode = outputPath.get(i);
-
-         Point3D pelvisPosition = new Point3D(0, 0, trajectoryNode.getQ(1));
-
-         euclideanTrajectoryPointCalculator.appendTrajectoryPoint(pelvisPosition);
-      }
-
-      double[] trajectoryTimes = new double[numberOfTrajectoryPoints];
-
-      for (int i = 0; i < numberOfTrajectoryPoints; i++)
-         trajectoryTimes[i] = outputPath.get(i).getQ(0);
-
-      euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTimes);
-      euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
-
-      RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
-
-      for (int i = 0; i < numberOfTrajectoryPoints; i++)
-      {
-         // CTTaskNode trajectoryNode = path.get(i);
-         NodeDataPacket trajectoryNode = outputPath.get(i);
-
-         Point3D pelvisPosition = new Point3D(0, 0, trajectoryNode.getQ(1));
-
-         Quaternion orientation = new Quaternion();
-         Vector3D angularVelocity = new Vector3D();
-
-         Vector3D pelvisLinearVelocity = new Vector3D();
-
-         double time = trajectoryPoints.get(i).get(pelvisPosition, pelvisLinearVelocity);
-
-         pelvisTrajectoryMessage.setTrajectoryPoint(i, time, pelvisPosition, orientation, pelvisLinearVelocity, angularVelocity, worldFrame);
-
-         //         PrintTools.info(""+ i+" "+pelvisPosition +" "+pelvisLinearVelocity);
-      }
-   }
-
-   public ArrayList<NodeDataPacket> outputPath;
+//   private SideDependentList<HandTrajectoryMessage> handTrajectoryMessages = new SideDependentList<>();
+//   private ChestTrajectoryMessage chestTrajectoryMessage;
+//   private PelvisTrajectoryMessage pelvisTrajectoryMessage;
+//
+//   private ArrayList<NodeDataPacket> outputPath;
+//   
+//   private void updateHandTrajectoryMessages()
+//   {
+//      for (RobotSide robotSide : RobotSide.values)
+//      {
+//         int numberOfTrajectoryPoints = outputPath.size();
+//
+//         PrintTools.info("" + numberOfTrajectoryPoints);
+//
+//         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
+//
+//         handTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
+//         handTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
+//
+//         EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
+//
+//         for (int i = 0; i < numberOfTrajectoryPoints; i++)
+//         {
+//            NodeDataPacket trajectoryNode = outputPath.get(i);
+//
+//            ConfigurationSpace configurationSpace = CTTreeTools.getConfigurationSpace(trajectoryNode, robotSide);
+//
+//            Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(trajectoryNode.getQ(0), robotSide, configurationSpace);
+//
+//            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(new Point3D(desiredPose.getPosition()));
+//         }
+//
+//         double[] trajectoryTimes = new double[numberOfTrajectoryPoints];
+//
+//         for (int i = 0; i < numberOfTrajectoryPoints; i++)
+//            trajectoryTimes[i] = outputPath.get(i).getQ(0);
+//
+//         euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTimes);
+//
+//         euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
+//
+//         RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
+//
+//         for (int i = 0; i < numberOfTrajectoryPoints; i++)
+//         {
+//            NodeDataPacket trajectoryNode = outputPath.get(i);
+//
+//            ConfigurationSpace configurationSpace = CTTreeTools.getConfigurationSpace(trajectoryNode, robotSide);
+//
+//            Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(trajectoryNode.getQ(0), robotSide, configurationSpace);
+//
+//            Point3D desiredPosition = new Point3D(desiredPose.getPosition());
+//            Vector3D desiredLinearVelocity = new Vector3D();
+//            Quaternion desiredOrientation = new Quaternion(desiredPose.getOrientation());
+//
+//            if (robotSide == RobotSide.LEFT)
+//               desiredOrientation.appendRollRotation(Math.PI * 0.5);
+//            else
+//               desiredOrientation.appendRollRotation(-Math.PI * 0.5);
+//
+//            Vector3D desiredAngularVelocity = new Vector3D();
+//
+//            double time = trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
+//
+//            //            PrintTools.info(""+i+" "+time +" " + desiredLinearVelocity+" ");
+//
+//            handTrajectoryMessage.setTrajectoryPoint(i, time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, worldFrame);
+//         }
+//
+//         handTrajectoryMessages.put(robotSide, handTrajectoryMessage);
+//
+//      }
+//   }
+//
+//   private void updateChestTrajectoryMessage()
+//   {
+//      int numberOfTrajectoryPoints = outputPath.size();
+//
+//      PrintTools.info("" + numberOfTrajectoryPoints);
+//
+//      chestTrajectoryMessage = new ChestTrajectoryMessage(numberOfTrajectoryPoints);
+//      chestTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
+//      chestTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
+//
+//      PrintTools.info("" + chestTrajectoryMessage.getNumberOfTrajectoryPoints());
+//
+//      SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
+//      orientationCalculator.clear();
+//      orientationCalculator.setFirstTrajectoryPointTime(firstTrajectoryPointTime);
+//
+//      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+//      {
+//         NodeDataPacket trajectoryNode = outputPath.get(i);
+//
+//         double time = firstTrajectoryPointTime + trajectoryNode.getQ(0);
+//
+//         Quaternion desiredOrientation = new Quaternion();
+//
+//         desiredOrientation.appendYawRotation(trajectoryNode.getQ(2));
+//         desiredOrientation.appendPitchRotation(trajectoryNode.getQ(3));
+//         desiredOrientation.appendRollRotation(trajectoryNode.getQ(4));
+//
+//         orientationCalculator.appendTrajectoryPointOrientation(time, desiredOrientation);
+//      }
+//
+//      orientationCalculator.compute();
+//
+//      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+//      {
+//         NodeDataPacket trajectoryNode = outputPath.get(i);
+//
+//         double time = firstTrajectoryPointTime + trajectoryNode.getQ(0);
+//
+//         Quaternion desiredOrientation = new Quaternion();
+//
+//         desiredOrientation.appendYawRotation(trajectoryNode.getQ(2));
+//         desiredOrientation.appendPitchRotation(trajectoryNode.getQ(3));
+//         desiredOrientation.appendRollRotation(trajectoryNode.getQ(4));
+//
+//         Vector3D desiredAngularVelocity = orientationCalculator.getTrajectoryPointsAngularVelocity().get(i);
+//
+//         PrintTools.info("" + i + " " + time);
+//
+//         chestTrajectoryMessage.setTrajectoryPoint(i, time, desiredOrientation, desiredAngularVelocity, worldFrame);
+//      }
+//   }
+//
+//   private void updatePelvisTrajectoryMessage()
+//   {
+//      int numberOfTrajectoryPoints = outputPath.size();
+//
+//      PrintTools.info("" + numberOfTrajectoryPoints);
+//
+//      pelvisTrajectoryMessage = new PelvisTrajectoryMessage(numberOfTrajectoryPoints);
+//      pelvisTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
+//      pelvisTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
+//
+//      SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
+//      selectionMatrix6D.clearAngularSelection();
+//      selectionMatrix6D.clearLinearSelection();
+//      selectionMatrix6D.selectLinearZ(true);
+//      pelvisTrajectoryMessage.setSelectionMatrix(selectionMatrix6D);
+//
+//      EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
+//
+//      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+//      {
+//         NodeDataPacket trajectoryNode = outputPath.get(i);
+//
+//         Point3D pelvisPosition = new Point3D(0, 0, trajectoryNode.getQ(1));
+//
+//         euclideanTrajectoryPointCalculator.appendTrajectoryPoint(pelvisPosition);
+//      }
+//
+//      double[] trajectoryTimes = new double[numberOfTrajectoryPoints];
+//
+//      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+//         trajectoryTimes[i] = outputPath.get(i).getQ(0);
+//
+//      euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTimes);
+//      euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
+//
+//      RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
+//
+//      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+//      {
+//         NodeDataPacket trajectoryNode = outputPath.get(i);
+//
+//         Point3D pelvisPosition = new Point3D(0, 0, trajectoryNode.getQ(1));
+//
+//         Quaternion orientation = new Quaternion();
+//         Vector3D angularVelocity = new Vector3D();
+//
+//         Vector3D pelvisLinearVelocity = new Vector3D();
+//
+//         double time = trajectoryPoints.get(i).get(pelvisPosition, pelvisLinearVelocity);
+//
+//         pelvisTrajectoryMessage.setTrajectoryPoint(i, time, pelvisPosition, orientation, pelvisLinearVelocity, angularVelocity, worldFrame);
+//
+//         //         PrintTools.info(""+ i+" "+pelvisPosition +" "+pelvisLinearVelocity);
+//      }
+//   }
 
    public void updateFullRobotModel(ConstrainedWholeBodyPlanningToolboxOutputStatus solution)
    {
@@ -301,18 +295,18 @@ public class ConstrainedWholeBodyPlanningToolboxOutputConverter
       //      rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
       //      fullRobotModelToUseForConversion.updateFrames();
 
-      outputPath = solution.outputPath;
-
-      wholeBodyTrajectoryMessage.clear();
-
-      updateHandTrajectoryMessages();
-      updateChestTrajectoryMessage();
-      updatePelvisTrajectoryMessage();
-
-      for (RobotSide robotSide : RobotSide.values)
-         wholeBodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessages.get(robotSide));
-
-      wholeBodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
-      wholeBodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);
+//      outputPath = solution.outputPath;
+//
+//      wholeBodyTrajectoryMessage.clear();
+//
+//      updateHandTrajectoryMessages();
+//      updateChestTrajectoryMessage();
+//      updatePelvisTrajectoryMessage();
+//
+//      for (RobotSide robotSide : RobotSide.values)
+//         wholeBodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessages.get(robotSide));
+//
+//      wholeBodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
+//      wholeBodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);
    }
 }

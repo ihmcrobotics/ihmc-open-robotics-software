@@ -173,8 +173,6 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
    {
       int numberOfTrajectoryPoints = path.size();
 
-      PrintTools.info("" + numberOfTrajectoryPoints);
-
       pelvisTrajectoryMessage = new PelvisTrajectoryMessage(numberOfTrajectoryPoints);
       pelvisTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
       pelvisTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
@@ -257,7 +255,10 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
       KinematicsToolboxOutputStatus[] configurations = new KinematicsToolboxOutputStatus[numberOfConfigurations];
 
       for (int i = 0; i < numberOfConfigurations; i++)
+      {
          configurations[i] = new KinematicsToolboxOutputStatus(path.get(i).getConfiguration());
+      }
+         
 
       return configurations;
    }
