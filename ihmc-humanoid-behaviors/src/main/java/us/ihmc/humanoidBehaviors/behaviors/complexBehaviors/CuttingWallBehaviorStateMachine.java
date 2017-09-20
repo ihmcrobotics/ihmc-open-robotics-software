@@ -24,6 +24,7 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTraject
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CuttingWallTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -51,7 +52,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
       WAITING_INPUT, PLANNING, WAITING_CONFIRM, MOTION, PLAN_FALIED, DONE
    }
 
-   public CuttingWallBehaviorStateMachine(CommunicationBridge communicationBridge, YoDouble yoTime, FullHumanoidRobotModel fullRobotModel,
+   public CuttingWallBehaviorStateMachine(FullHumanoidRobotModelFactory robotModelFactory, CommunicationBridge communicationBridge, YoDouble yoTime, FullHumanoidRobotModel fullRobotModel,
                                           HumanoidReferenceFrames referenceFrames)
    {
       super("cuttingWallBehaviorState", CuttingWallBehaviorState.class, yoTime, communicationBridge);
@@ -64,7 +65,9 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
 
       this.fullRobotModel = fullRobotModel;
 
-      this.planConstrainedWholeBodyTrajectoryBehavior = new PlanConstrainedWholeBodyTrajectoryBehavior("CuttingWallPlanning", communicationBridge,
+      this.planConstrainedWholeBodyTrajectoryBehavior = new PlanConstrainedWholeBodyTrajectoryBehavior("CuttingWallPlanning", 
+                                                                                                       robotModelFactory,
+                                                                                                       communicationBridge,
                                                                                                        this.fullRobotModel, yoTime);
 
       this.yoTime = yoTime;
