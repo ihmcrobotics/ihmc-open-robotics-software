@@ -1,12 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning;
 
-import java.util.ArrayList;
-
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.StatusPacket;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 
 public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacket<ConstrainedWholeBodyPlanningToolboxOutputStatus>
 {
@@ -17,68 +14,81 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
     * 3: fail to optimize path.
     * 4: solution is available.
     */
-   public int planningResult;
+   public int planningResult = 0;
 
-   public ArrayList<NodeDataPacket> outputPath;
+   public WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
 
-   // public WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage;
-
-   //TODO : will be get rid of.
-   public SideDependentList<ArrayList<Pose3D>> handTrajectories = new SideDependentList<>();
-
-   // I think that this field should be in converter to be converted from this class.
    public KinematicsToolboxOutputStatus[] robotConfigurations;
    public double[] trajectoryTimes;
    
-   
-
    public ConstrainedWholeBodyPlanningToolboxOutputStatus()
    {
-      handTrajectories.put(RobotSide.LEFT, new ArrayList<Pose3D>());
-      handTrajectories.put(RobotSide.RIGHT, new ArrayList<Pose3D>());
-
       
    }
    
-   public void set(ArrayList<NodeDataPacket> outputPath)
+   public ConstrainedWholeBodyPlanningToolboxOutputStatus(ConstrainedWholeBodyPlanningToolboxOutputStatus other)
    {
-      if(outputPath == null)
-         throw new RuntimeException("outputPath is empty.");
-      
-      if(outputPath.size() == 0)
-         throw new RuntimeException("outputPath is empty.");
-      
-      
-      
-      this.outputPath = outputPath;
+      set(other);
    }
-   
-   public void set(KinematicsToolboxOutputStatus[] robotConfigurations, double[] trajectoryTimes)
-   {
-      if(robotConfigurations.length != trajectoryTimes.length)
-         throw new RuntimeException("length is different");
       
-      this.robotConfigurations = robotConfigurations;
-      this.trajectoryTimes = trajectoryTimes;
-   }
+//   public void set(KinematicsToolboxOutputStatus[] robotConfigurations, double[] trajectoryTimes)
+//   {
+//      if(robotConfigurations.length != trajectoryTimes.length)
+//         throw new RuntimeException("length is different");
+//      
+//      this.robotConfigurations = robotConfigurations;
+//      this.trajectoryTimes = trajectoryTimes;
+//   }
 
    @Override
    public boolean epsilonEquals(ConstrainedWholeBodyPlanningToolboxOutputStatus other, double epsilon)
    {
       if (getPlanningResult() != other.getPlanningResult())
-         return false;      
-      // TODO : more equals
+         return false;     
+      
+      int numberOfConfigurations = getRobotConfigurations().length;
+      if(numberOfConfigurations == other.robotConfigurations.length)
+      {
+         for(int i=0;i<numberOfConfigurations;i++)
+         {
+            if (!getRobotConfigurations()[i].epsilonEquals(other.robotConfigurations[i], 1e-3f));
+               return false;
+         }     
+      }
+      else
+      {
+         return false;
+      }
+      
+      if(!getWholeBodyTrajectoryMessage().epsilonEquals(other.getWholeBodyTrajectoryMessage(), 1e-3f))
+         return false;
+      
       return true;
    }
 
    @Override
    public void set(ConstrainedWholeBodyPlanningToolboxOutputStatus other)
    {
-      setPlanningResult(other.getPlanningResult());
+      setPlanningResult(other.planningResult);
       
-      // TODO initialize variables before set.
-      handTrajectories = other.handTrajectories;
-      outputPath = other.outputPath;
+      int numberOfConfigurations = other.robotConfigurations.length;
+      
+      robotConfigurations = new KinematicsToolboxOutputStatus[numberOfConfigurations];
+            
+      for(int i=0;i<numberOfConfigurations;i++)
+      {
+         if(other.robotConfigurations[i] == null)
+            PrintTools.info("something wrong");
+         robotConfigurations[i] = new KinematicsToolboxOutputStatus(other.robotConfigurations[i]);
+      }
+      
+      trajectoryTimes = new double[numberOfConfigurations];
+      for(int i=0;i<numberOfConfigurations;i++)
+         trajectoryTimes[i] = other.trajectoryTimes[i];
+      
+      wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+      
+      wholeBodyTrajectoryMessage = other.wholeBodyTrajectoryMessage;
    }
 
    public int getPlanningResult()
@@ -98,7 +108,12 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
 
    public void setRobotConfigurations(KinematicsToolboxOutputStatus[] robotConfigurations)
    {
-      this.robotConfigurations = robotConfigurations;
+      int numberOfConfigurations = robotConfigurations.length;
+      
+      this.robotConfigurations = new KinematicsToolboxOutputStatus[numberOfConfigurations];
+      for(int i=0;i<numberOfConfigurations;i++)
+         this.robotConfigurations[i] = new KinematicsToolboxOutputStatus(robotConfigurations[i]);
+                  
    }
 
    public double[] getTrajectoryTimes()
@@ -111,5 +126,13 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
       this.trajectoryTimes = trajectoryTimes;
    }
    
+   public void setWholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage)
+   {
+      this.wholeBodyTrajectoryMessage = wholeBodyTrajectoryMessage;
+   }
    
+   public WholeBodyTrajectoryMessage getWholeBodyTrajectoryMessage()
+   {
+      return wholeBodyTrajectoryMessage;
+   }
 }

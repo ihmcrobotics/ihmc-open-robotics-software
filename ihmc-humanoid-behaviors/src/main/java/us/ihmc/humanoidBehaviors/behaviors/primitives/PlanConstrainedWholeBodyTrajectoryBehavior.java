@@ -148,7 +148,7 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
             }
             ConstrainedWholeBodyPlanningToolboxRequestPacket request = new ConstrainedWholeBodyPlanningToolboxRequestPacket();
             
-            request.setNumberOfFindInitialGuess(numberOfFindInitialGuess);            
+            request.setNumberOfFindInitialGuess(numberOfFindInitialGuess);
             request.setNumberOfExpanding(numberOfExpanding);
             request.setInitialRobotConfigration(fullRobotModel);
             request.setNumberOfEndEffectorWayPoints(numberOfEndEffectorWayPoints);
@@ -192,24 +192,22 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
                {
                   planningSuccess = true;
                   
-                  if(cwbtoolboxOutputStatus.outputPath == null)
+                  if(cwbtoolboxOutputStatus.getRobotConfigurations().length == 0)
                      PrintTools.info("something wrong");
                   
-                  PrintTools.info("received size of path is "+cwbtoolboxOutputStatus.outputPath.size());
+                  PrintTools.info("received size of path is "+cwbtoolboxOutputStatus.getRobotConfigurations().length);
                   
                   
                   
-                  wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+                  wholebodyTrajectoryMessage = cwbtoolboxOutputStatus.getWholeBodyTrajectoryMessage();
                   
-                  outputConverter.setConstrainedEndEffectorTrajectory(constrainedEndEffectorTrajectory);
-                  outputConverter.setMessageToCreate(wholebodyTrajectoryMessage);
-                  outputConverter.updateFullRobotModel(cwbtoolboxOutputStatus);
+//                  wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+//                  outputConverter.setConstrainedEndEffectorTrajectory(constrainedEndEffectorTrajectory);
+//                  outputConverter.setMessageToCreate(wholebodyTrajectoryMessage);
+//                  outputConverter.updateFullRobotModel(cwbtoolboxOutputStatus);
                   
                   // TODO: deactivate toolbox module.
-                  
-                  
-                  // TODO: after making converter.
-                  // wholebodyTrajectoryMessage = cwbtoolboxOutputStatus.wholeBodyTrajectoryMessage;                  
+                                    
                   // TODO: to be replaced with results from converter.
                   //handTrajectories = cwbtoolboxOutputStatus.handTrajectories;
                   
