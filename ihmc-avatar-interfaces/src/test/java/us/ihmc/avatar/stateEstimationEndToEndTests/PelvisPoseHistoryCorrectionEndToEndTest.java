@@ -1,6 +1,6 @@
 package us.ihmc.avatar.stateEstimationEndToEndTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -9,7 +9,6 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
@@ -21,7 +20,6 @@ import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.commons.Conversions;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -37,11 +35,6 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -51,6 +44,8 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.OscillateFeetPerturber;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -58,15 +53,18 @@ import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRobotTestInterface
 {
@@ -323,8 +321,6 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 7.8)
-	@Test(timeout = 39000)
    public void testPelvisCorrectionControllerOutOfTheLoop() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -367,8 +363,6 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 12.1)
-	@Test(timeout = 61000)
    public void testPelvisCorrectionDuringSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -399,8 +393,6 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 	 *
 	 * @throws SimulationExceededMaximumTimeException
 	 */
-	@ContinuousIntegrationTest(estimatedDuration = 7.7)
-	@Test(timeout = 39000)
    public void testBigYawInDoubleSupport() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -429,8 +421,6 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 	 *
 	 * @throws SimulationExceededMaximumTimeException
 	 */
-	@ContinuousIntegrationTest(estimatedDuration = 9.4)
-	@Test(timeout = 47000)
    public void testBigYawInSingleSupport() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -461,8 +451,6 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 	 *
 	 * @throws SimulationExceededMaximumTimeException
 	 */
-	@ContinuousIntegrationTest(estimatedDuration = 8.1)
-	@Test(timeout = 41000)
    public void testLocalizationOffsetOutsideOfFootInSingleSupport() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -521,8 +509,6 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
     * @throws SimulationExceededMaximumTimeException
     * @throws ControllerFailureException
     */
-	@ContinuousIntegrationTest(estimatedDuration = 5.0)
-	@Test(timeout = 30000)
    public void testWalkingDuringBigPelvisCorrection() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

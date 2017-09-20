@@ -1,13 +1,12 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
-
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -18,8 +17,6 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class RobotConfigurationDataBufferTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Test(timeout = 30000)
    public void testAddingStuff()
    {
       RobotConfigurationDataBuffer buffer = new RobotConfigurationDataBuffer();
@@ -54,16 +51,14 @@ public abstract class RobotConfigurationDataBufferTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 300000)
-   public void waitForTimestampTest()
+   public void testWaitForTimestamp()
    {
 	   for (int numberOfTestIterations = 0; numberOfTestIterations < 100; numberOfTestIterations++)
 	   {
          final int TEST_COUNT = 5;
          final CountDownLatch countdownA = new CountDownLatch(TEST_COUNT);
          final CountDownLatch countdownB = new CountDownLatch(TEST_COUNT + 1);
-   
+
          final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
          Thread receivedThread = new Thread()
          {
@@ -89,7 +84,7 @@ public abstract class RobotConfigurationDataBufferTest
             data.timestamp = i * (TEST_COUNT * 10) + i;
             robotConfigurationDataBuffer.receivedPacket(data);
          }
-   
+
          try
          {
             assertTrue(countdownA.await(1, TimeUnit.SECONDS));
@@ -102,7 +97,7 @@ public abstract class RobotConfigurationDataBufferTest
          RobotConfigurationData data = new RobotConfigurationData();
          data.timestamp = TEST_COUNT * (TEST_COUNT * 10);
          robotConfigurationDataBuffer.receivedPacket(data);
-   
+
          try
          {
             assertTrue(countdownB.await(1, TimeUnit.SECONDS));

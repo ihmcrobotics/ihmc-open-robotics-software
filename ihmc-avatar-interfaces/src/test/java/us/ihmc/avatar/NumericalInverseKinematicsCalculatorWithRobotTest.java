@@ -6,13 +6,10 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Random;
 
-import org.junit.Test;
-
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,8 +18,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.DdoglegInverseKinematicsCalculator;
@@ -39,6 +34,8 @@ import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
 {
@@ -194,9 +191,6 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       }
    }
 
-
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testSimpleCase()
    {
       Random random = new Random(1984L);
@@ -213,10 +207,6 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       assertTrue(success);
    }
 
-
-
-	@ContinuousIntegrationTest(estimatedDuration = 13.2)
-   @Test(timeout = 66000)
    public void testRandomFeasibleRobotPoses()
    {
       Random random = new Random(1776L);
