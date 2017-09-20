@@ -191,10 +191,27 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
                if (cwbtoolboxOutputStatus.getPlanningResult() == 4)
                {
                   planningSuccess = true;
-                  // TODO: after making converter.
-                  // wholebodyTrajectoryMessage = cwbtoolboxOutputStatus.wholeBodyTrajectoryMessage;
                   
-                  handTrajectories = cwbtoolboxOutputStatus.handTrajectories;
+                  if(cwbtoolboxOutputStatus.outputPath == null)
+                     PrintTools.info("something wrong");
+                  
+                  PrintTools.info("received size of path is "+cwbtoolboxOutputStatus.outputPath.size());
+                  
+                  
+                  
+                  
+                  
+                  outputConverter.setConstrainedEndEffectorTrajectory(constrainedEndEffectorTrajectory);
+                  outputConverter.setMessageToCreate(wholebodyTrajectoryMessage);
+                  outputConverter.updateFullRobotModel(cwbtoolboxOutputStatus);
+                  
+                  // TODO: deactivate toolbox module.
+                  
+                  
+                  // TODO: after making converter.
+                  // wholebodyTrajectoryMessage = cwbtoolboxOutputStatus.wholeBodyTrajectoryMessage;                  
+                  // TODO: to be replaced with results from converter.
+                  //handTrajectories = cwbtoolboxOutputStatus.handTrajectories;
                   
                   long stopTime = System.currentTimeMillis();
                   long elapsedTime = stopTime - startTime;

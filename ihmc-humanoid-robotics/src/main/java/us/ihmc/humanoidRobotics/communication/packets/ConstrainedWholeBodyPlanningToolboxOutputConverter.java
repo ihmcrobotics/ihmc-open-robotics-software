@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -29,6 +30,8 @@ public class ConstrainedWholeBodyPlanningToolboxOutputConverter
    
    private double firstTrajectoryPointTime = 6.0;
    
+   private ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
+   
    public ConstrainedWholeBodyPlanningToolboxOutputConverter(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
       this.fullRobotModelToUseForConversion = fullRobotModelFactory.createFullRobotModel();
@@ -43,9 +46,14 @@ public class ConstrainedWholeBodyPlanningToolboxOutputConverter
       return wholebodyTrajectoryMessage;
    }
 
-   public void setWholebodyTrajectoryMessage(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage)
+   public void setMessageToCreate(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage)
    {
       this.wholebodyTrajectoryMessage = wholebodyTrajectoryMessage;
+   }
+   
+   public void setConstrainedEndEffectorTrajectory(ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory)
+   {
+      this.constrainedEndEffectorTrajectory = constrainedEndEffectorTrajectory;
    }
 
    public double getTrajectoryTime()
