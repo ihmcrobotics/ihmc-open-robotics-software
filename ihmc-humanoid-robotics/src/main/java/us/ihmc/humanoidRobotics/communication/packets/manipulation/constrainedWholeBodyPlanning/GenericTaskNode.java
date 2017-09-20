@@ -1,9 +1,7 @@
-package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
+package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning;
 
 public class GenericTaskNode extends CTTaskNode
-{
-   public static double handCoordinateOffsetX = -0.2;
- 
+{ 
    /**
     * 0  time
     * 1  pelvis height
@@ -35,7 +33,7 @@ public class GenericTaskNode extends CTTaskNode
    {
       super(node);
    }
-
+   
 //   public GenericTaskNode(double time, double pelvisHeight, double chestYaw, double chestPitch, double chestRoll, double eeX, double eeY, double eeZ,
 //                          double eeRoll, double eePitch, double eeYaw)
 //   {

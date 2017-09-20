@@ -19,14 +19,18 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
     */
    public int planningResult;
 
+   public ArrayList<NodeDataPacket> outputPath;
+
    // public WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage;
 
    //TODO : will be get rid of.
    public SideDependentList<ArrayList<Pose3D>> handTrajectories = new SideDependentList<>();
 
+   // I think that this field should be in converter to be converted from this class.
    public KinematicsToolboxOutputStatus[] robotConfigurations;
-
    public double[] trajectoryTimes;
+   
+   
 
    public ConstrainedWholeBodyPlanningToolboxOutputStatus()
    {
@@ -34,6 +38,19 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
       handTrajectories.put(RobotSide.RIGHT, new ArrayList<Pose3D>());
 
       
+   }
+   
+   public void set(ArrayList<NodeDataPacket> outputPath)
+   {
+      if(outputPath == null)
+         throw new RuntimeException("outputPath is empty.");
+      
+      if(outputPath.size() == 0)
+         throw new RuntimeException("outputPath is empty.");
+      
+      
+      
+      this.outputPath = outputPath;
    }
    
    public void set(KinematicsToolboxOutputStatus[] robotConfigurations, double[] trajectoryTimes)
@@ -58,7 +75,10 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
    public void set(ConstrainedWholeBodyPlanningToolboxOutputStatus other)
    {
       setPlanningResult(other.getPlanningResult());
+      
+      // TODO initialize variables before set.
       handTrajectories = other.handTrajectories;
+      outputPath = other.outputPath;
    }
 
    public int getPlanningResult()

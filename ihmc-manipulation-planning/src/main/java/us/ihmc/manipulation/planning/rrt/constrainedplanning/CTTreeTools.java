@@ -2,8 +2,8 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning;
 
 import java.util.Random;
 
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.CTTaskNode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class CTTreeTools

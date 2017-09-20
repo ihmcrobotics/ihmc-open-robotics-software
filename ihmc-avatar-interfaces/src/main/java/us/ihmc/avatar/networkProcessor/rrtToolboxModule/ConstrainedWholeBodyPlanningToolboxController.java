@@ -16,17 +16,18 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.CTTaskNode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.GenericTaskNode;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.NodeDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.CTTreeTools;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeFindInitialGuess;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeVisualizer;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.GenericTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.TreeStateVisualizer;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -232,6 +233,10 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
           * generate WholeBodyTrajectoryMessage.
           */
          terminateToolboxController();
+         
+         // TODO
+         reportMessage(packResult(4));
+         
          // TODO
          //         ctTaskNodeWholeBodyTrajectoryMessageFactory = new CTTaskNodeWholeBodyTrajectoryMessageFactory();
          //
@@ -244,6 +249,30 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          //         reportMessage(packResult);
          PrintTools.info("packResult");
       }
+   }
+   
+   // TODO
+   private ConstrainedWholeBodyPlanningToolboxOutputStatus packResult(int planningResult)
+   {
+      ConstrainedWholeBodyPlanningToolboxOutputStatus outputStatus = new ConstrainedWholeBodyPlanningToolboxOutputStatus();
+      
+      outputStatus.setPlanningResult(planningResult);
+      if(planningResult == 4)
+      {
+         PrintTools.info("pack tree path on OutputStatus ");
+         ArrayList<NodeDataPacket> outputPath = new ArrayList<NodeDataPacket>();
+         
+         for(int i=0;i<tree.getPath().size();i++)
+         {
+            outputPath.add(tree.getPath().get(i).getNodeDataPacket());
+         }
+         
+         PrintTools.info("path size is " + outputPath.size());
+         outputStatus.outputPath = outputPath;
+         PrintTools.info("path size is " + outputStatus.outputPath.size());
+      }
+      
+      return outputStatus;
    }
 
    /**
@@ -270,7 +299,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       tree.addNodeOnPath(revertedPath.get(revertedPathSize - 1));
       int currentIndex = 0;
-      for (int j = 0; j < revertedPathSize - 1; j++)
+      for (int j = 0; j < revertedPathSize - 2; j++)
       {
          int i = revertedPathSize - 1 - j;
 
@@ -282,6 +311,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
             currentIndex++;
          }
       }
+      tree.addNodeOnPath(revertedPath.get(0));
 
       PrintTools.info("the size of the path is " + tree.getPath().size() + " before dismissing " + revertedPathSize);
 

@@ -1,16 +1,14 @@
-package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
+package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning;
 
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.specifiedspace.NodeData;
 
 public class CTTaskNode
 {
-   private NodeData nodeData;
-   private NodeData normalizedNodeData;
+   protected NodeData nodeData;
+   protected NodeData normalizedNodeData;
 
    private ArrayList<CTTaskNode> childNodes;
    private CTTaskNode parentNode;
@@ -38,9 +36,14 @@ public class CTTaskNode
       this.nodeData = new NodeData(dimensionOfData);
       this.childNodes = new ArrayList<CTTaskNode>();
       this.normalizedNodeData = new NodeData(dimensionOfData);
-
    }
 
+   public final NodeDataPacket getNodeDataPacket()
+   {
+      NodeDataPacket packet = new NodeDataPacket(nodeData);
+      return packet;
+   }
+   
    public final int getDimensionOfNodeData()
    {
       return nodeData.getDimension();
