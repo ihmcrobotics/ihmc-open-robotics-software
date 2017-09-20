@@ -1,9 +1,7 @@
-package us.ihmc.manipulation.planning.rrt.constrainedplanning;
+package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning;
 
 import java.util.Random;
 
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.CTTaskNode;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class CTTreeTools
@@ -68,6 +66,23 @@ public class CTTreeTools
       {
          configurationSpace.setTranslation(node.getNodeData(11), node.getNodeData(12), node.getNodeData(13));
          configurationSpace.setRotation(node.getNodeData(14), node.getNodeData(15), node.getNodeData(16));
+      }
+      
+      return configurationSpace;
+   }
+   
+   public static ConfigurationSpace getConfigurationSpace(NodeDataPacket node, RobotSide robotSide)
+   {
+      ConfigurationSpace configurationSpace = new ConfigurationSpace();
+      if(robotSide == RobotSide.LEFT)
+      {
+         configurationSpace.setTranslation(node.getQ(5), node.getQ(6), node.getQ(7));
+         configurationSpace.setRotation(node.getQ(8), node.getQ(9), node.getQ(10));
+      }
+      else
+      {
+         configurationSpace.setTranslation(node.getQ(11), node.getQ(12), node.getQ(13));
+         configurationSpace.setRotation(node.getQ(14), node.getQ(15), node.getQ(16));
       }
       
       return configurationSpace;
