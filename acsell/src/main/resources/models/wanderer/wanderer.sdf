@@ -1,0 +1,1605 @@
+<!-- WANDERER -->
+<sdf version='1.4'>
+  <model name='wanderer'>
+  <pose>0 0 0.8999 0 0 0</pose>
+    <link name='pelvis'>
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+		<pose>0.074017 -0.000014 0.122080 0 0 0</pose>
+        <mass>9.845143</mass>
+        <inertia>
+          <ixx> 0.126304</ixx>
+          <ixy> 0.000007</ixy>
+          <ixz>-0.000490</ixz>
+          <iyy> 0.055959</iyy>
+          <iyz>-0.000021</iyz>
+          <izz> 0.090494</izz>
+        </inertia>
+      </inertial>
+      <collision name='pelvis_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/pelvis.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='pelvis_visual'>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.1 .1 .1 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>1 1 1 1</emmisive>
+        </material>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/pelvis.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+        <sensor name='pelvisIMU' type='imu'>
+            <always_on>1</always_on>
+            <update_rate>1000</update_rate>
+            <imu>
+                <noise>
+                    <type>gaussian</type>
+                    <rate>
+                        <mean>0</mean>
+                        <stddev>0.0002</stddev>
+                        <bias_mean>7.5e-06</bias_mean>
+                        <bias_stddev>8e-07</bias_stddev>
+                    </rate>
+                    <accel>
+                        <mean>0</mean>
+                        <stddev>0.017</stddev>
+                        <bias_mean>0.1</bias_mean>
+                        <bias_stddev>0.001</bias_stddev>
+                    </accel>
+                </noise>
+            </imu>
+            <pose>0.0914 0.0 0.0285 0 0 0</pose>
+        </sensor>
+    </link>
+    <link name='ltorso'>
+      <pose>-0.011968 0.0 0.215900 0.0 0.0 0.0</pose>
+      <inertial>
+        <pose>-0.005734 -0.003875 0.000005 0 -0 0</pose>
+        <mass>1.942617</mass>
+        <inertia>
+          <ixx> 0.003370</ixx>
+          <ixy> 0.000045</ixy>
+          <ixz> 0.000000</ixz>
+          <iyy> 0.002102</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.003886</izz>
+        </inertia>
+      </inertial>
+      <collision name='ltorso_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/ltorso.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='ltorso_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.2 0 0 1</ambient>
+        	<diffuse>.9 0 0 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>1 1 1 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/ltorso.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='back_lbx' type='revolute'>
+      <child>ltorso</child>
+      <parent>pelvis</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.349</lower>
+          <upper>0.349</upper>
+          <effort>245</effort>
+          <velocity>1.95</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.2</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='mtorso'>
+      <pose>-0.011968 0.0 0.215900 0.0 0.0 0.0</pose>
+      <inertial>
+        <pose>0.014050 0.003626 0.109236 0 -0 0</pose>
+        <mass>3.561282</mass>
+        <inertia>
+          <ixx> 0.016749</ixx>
+          <ixy>-0.000826</ixy>
+          <ixz>-0.000617</ixz>
+          <iyy> 0.019698</iyy>
+          <iyz> 0.000484</iyz>
+          <izz> 0.026730</izz>
+        </inertia>
+      </inertial>
+      <collision name='mtorso_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/mtorso.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='mtorso_visual'>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.2 .1 .1 1</ambient>
+        	<diffuse>0.9 0.1 0.1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>1 1 1 1</emmisive>
+        </material>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/mtorso.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='back_mby' type='revolute'>
+      <child>mtorso</child>
+      <parent>ltorso</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.5236</lower>
+          <upper>0.5236</upper>
+          <effort>245</effort>
+          <velocity>1.75</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.5</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='utorso'>
+      <pose>-0.011968 0.0 0.215900 0.0 0.0 0.0</pose>
+<!-- Full Torso -->
+      <inertial>
+        <pose> 0.004656 0.003641 0.341597 0 -0 0</pose>
+        <mass>19.260992</mass>
+        <inertia>
+          <ixx> 0.506466</ixx>
+          <ixy> 0.003042</ixy>
+          <ixz>-0.003928</ixz>
+          <iyy> 0.230936</iyy>
+          <iyz>-0.002912</iyz>
+          <izz> 0.395404</izz>
+        </inertia>
+      </inertial>
+<!-- no torso
+      <inertial>
+        <pose> 0.006491 0.0 0.321049 0 -0 0</pose>
+        <mass>1</mass>
+        <inertia>
+          <ixx> 0.001</ixx>
+          <ixy> 0</ixy>
+          <ixz>-0</ixz>
+          <iyy> 0.001</iyy>
+          <iyz>-0</iyz>
+          <izz> 0.001</izz>
+        </inertia>
+      </inertial>      
+-->
+<!-- No Bateries 
+      <inertial>
+        <pose> 0.021892 0.010133 0.385833 0 0 0</pose>
+        <mass>6.920518</mass>
+        <inertia>
+          <ixx> 0.195742</ixx>
+          <ixy> 0.004250</ixy>
+          <ixz> 0.001886</ixz>
+          <iyy> 0.104078</iyy>
+          <iyz> 0.000191</iyz>
+          <izz> 0.127069</izz>
+        </inertia>
+      </inertial>
+-->
+      <collision name='utorso_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/utorso.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='utorso_visual'>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.1 .1 .1 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>1 1 1 1</emmisive>
+        </material>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/utorso.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='back_ubz' type='revolute'>
+      <child>utorso</child>
+      <parent>mtorso</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.38</lower>
+          <upper>0.38</upper>
+          <effort>245</effort>
+          <velocity>2.45</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.3</damping>
+        </dynamics>
+      </axis>
+    </joint>
+   <link name='l_uglut'>
+      <pose>0.0 0.114300 0.0 0 0 0</pose>
+      <inertial>
+        <pose>-0.026725 -0.024857 0.011768 0 -0 0</pose>
+        <mass>3.033570</mass>
+        <inertia>
+          <ixx> 0.008029</ixx>
+          <ixy>-0.002549</ixy>
+          <ixz>-0.000580</ixz>
+          <iyy> 0.012383</iyy>
+          <iyz>-0.000192</iyz>
+          <izz> 0.011805</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_uglut_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/l_uglut.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='l_uglut_visual'>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>.5 .5 .5 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/l_uglut.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='l_leg_mhx' type='revolute'>
+      <child>l_uglut</child>
+      <parent>pelvis</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.314</lower>
+          <upper>0.384</upper>
+          <effort>245</effort>
+          <velocity>4</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.18</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='l_lglut'>
+      <pose>0.000010 0.114300 0.0 0 0 0</pose>
+      <inertial>
+        <pose>-0.069849 0.081724 0.061145 0 -0 0</pose>
+        <mass>4.718064</mass>
+        <inertia>
+          <ixx> 0.021103</ixx>
+          <ixy> 0.003875</ixy>
+          <ixz> 0.003173</ixz>
+          <iyy> 0.024886</iyy>
+          <iyz>-0.003152</iyz>
+          <izz> 0.016717</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_lglut_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/l_lglut.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='l_lglut_visual'>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>.3 .3 .3 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/l_lglut.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='l_leg_uhz' type='revolute'>
+      <child>l_lglut</child>
+      <parent>l_uglut</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.262</lower>
+          <upper>0.523</upper>
+          <effort>63</effort>
+          <velocity>26</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.04</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='l_uleg'>
+      <pose>0.000010 0.114300 -0.050925 0 0 0</pose>
+      <inertial>
+        <pose>-0.003185 0.003262 -0.167928 0 -0 0</pose>
+        <mass>9.911709</mass>
+        <inertia>
+          <ixx> 0.202401</ixx>
+          <ixy>-0.002075</ixy>
+          <ixz> 0.003361</ixz>
+          <iyy> 0.175765</iyy>
+          <iyz> 0.005309</iyz>
+          <izz> 0.072711</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_uleg_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/l_uleg.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='l_uleg_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.05 0.05 0.05 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/l_uleg.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='l_leg_lhy' type='revolute'>
+      <child>l_uleg</child>
+      <parent>l_lglut</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>0.5236</upper>
+          <effort>440</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.11</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='l_lleg'>
+      <pose>0.000010 0.107823 -0.426845 0 0 0</pose>
+	  <inertial>
+        <pose>0.006748 0.027044 -0.058802 0 -0 0</pose>
+        <mass>8.248916</mass>
+        <inertia>
+          <ixx> 0.122150</ixx>
+          <ixy> 0.001649</ixy>
+          <ixz> 0.007736</ixz>
+          <iyy> 0.118953</iyy>
+          <iyz>-0.012417</iyz>
+          <izz> 0.034578</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_lleg_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/l_lleg.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='l_lleg_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>.5 .5 .5 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/l_lleg.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='l_leg_kny' type='revolute'>
+      <child>l_lleg</child>
+      <parent>l_uleg</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.35</lower>
+          <upper>1.885</upper>
+          <effort>196</effort>
+          <velocity>5</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.08</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='l_talus'>
+      <pose>0.000010 0.107820 -0.833181 0 0 0</pose>
+      <inertial>
+        <pose>-0.003726 0.000000 0.003144 0 -0 0</pose>
+        <mass>0.898661</mass>
+        <inertia>
+          <ixx> 0.001400</ixx>
+          <ixy>-0.000000</ixy>
+          <ixz> 0.000005</ixz>
+          <iyy> 0.000497</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.001357</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_talus_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/l_talus.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='l_talus_visual'>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.3 0.3 0.3 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/l_talus.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='l_leg_uay' type='revolute'>
+      <child>l_talus</child>
+      <parent>l_lleg</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.6981</lower>
+          <upper>0.611</upper>
+          <effort>387</effort>
+          <velocity>11</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.07</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='l_foot'>
+      <pose>0.000009 0.107820 -0.833181 0 0 0</pose>
+      <inertial>
+        <pose>0.075312 0.000000 -0.050496 0 -0 0</pose>
+        <mass>0.733719</mass>
+        <inertia>
+          <ixx> 0.001674</ixx>
+          <ixy>-0.000000</ixy>
+          <ixz>-0.000028</ixz>
+          <iyy> 0.004680</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.006016</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_foot_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/l_foot.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='l_foot_visual'>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.05 0.05 0.05 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/l_foot.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='l_leg_lax' type='revolute'>
+      <child>l_foot</child>
+      <parent>l_talus</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.265</lower>
+          <upper>0.265</upper>
+          <effort>138</effort>
+          <velocity>32</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>
+	
+    <link name='r_uglut'>
+      <pose>0.0 -0.114300 0.0 0 0 0</pose>
+      <inertial>
+        <pose>-0.026889 0.024933 0.011772 0 -0 0</pose>
+        <mass>3.033569</mass>
+        <inertia>
+		  <ixx> 0.008039</ixx>
+		  <ixy> 0.002637</ixy>
+		  <ixz>-0.000606</ixz>
+		  <iyy> 0.012457</iyy>
+		  <iyz> 0.000189</iyz>
+		  <izz> 0.011889</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_uglut_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_uglut.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='r_uglut_visual'>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.5 0.5 0.5 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_uglut.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='r_leg_mhx' type='revolute'>
+      <child>r_uglut</child>
+      <parent>pelvis</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.384</lower>
+          <upper>0.314</upper>
+          <effort>245</effort>
+          <velocity>4</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.18</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='r_lglut'>
+      <pose>-0.000002 -0.114300 0.0 0 0 0</pose>
+      <inertial>
+        <pose>-0.071496 -0.081716 0.060720 0 -0 0</pose>
+        <mass>4.718065</mass>
+        <inertia>
+          <ixx> 0.020718</ixx>
+          <ixy>-0.003949</ixy>
+          <ixz> 0.003824</ixz>
+          <iyy> 0.025022</iyy>
+          <iyz> 0.003120</iyz>
+          <izz> 0.017235</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_lglut_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_lglut.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='r_lglut_visual'>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.3 0.3 0.3 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_lglut.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='r_leg_uhz' type='revolute'>
+      <child>r_lglut</child>
+      <parent>r_uglut</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.523</lower>
+          <upper>0.262</upper>
+          <effort>63</effort>
+          <velocity>26</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.04</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='r_uleg'>
+      <pose>-0.000002 -0.114300 -0.050925 0 0 0</pose>
+      <inertial>
+        <pose>-0.003268 -0.003277 -0.167898 0 -0 0</pose>
+        <mass>9.905477</mass>
+        <inertia>
+          <ixx> 0.202417</ixx>
+          <ixy> 0.001988</ixy>
+          <ixz> 0.003490</ixz>
+          <iyy> 0.175751</iyy>
+          <iyz>-0.005305</iyz>
+          <izz> 0.072708</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_uleg_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_uleg.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='r_uleg_visual'>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.05 0.05 0.05 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_uleg.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='r_leg_lhy' type='revolute'>
+      <child>r_uleg</child>
+      <parent>r_lglut</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>0.5236</upper>
+          <effort>440</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.11</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='r_lleg'>
+      <pose>-0.000002 -0.107823 -0.426845 0 0 0</pose>
+	  <inertial>
+        <pose>0.006739 -0.026752 -0.058812 0 -0 0</pose>
+        <mass>8.248955</mass>
+        <inertia>
+          <ixx> 0.122306</ixx>
+          <ixy>-0.001621</ixy>
+          <ixz> 0.007738</ixz>
+          <iyy> 0.118969</iyy>
+          <iyz> 0.013028</iyz>
+          <izz> 0.034718</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_lleg_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_lleg.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='r_lleg_visual'>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.5 0.5 0.5 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_lleg.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='r_leg_kny' type='revolute'>
+      <child>r_lleg</child>
+      <parent>r_uleg</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.35</lower>
+          <upper>1.885</upper>
+          <effort>196</effort>
+          <velocity>5</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.08</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='r_talus'>
+      <pose>-0.000002 -0.107820 -0.833245 0 0 0</pose>
+      <inertial>
+        <pose>-0.003726 0.000000 0.003144 0 -0 0</pose>
+        <mass>0.898661</mass>
+        <inertia>
+          <ixx> 0.001400</ixx>
+          <ixy>-0.000000</ixy>
+          <ixz> 0.000005</ixz>
+          <iyy> 0.000497</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.001357</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_talus_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_talus.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='r_talus_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.3 0.3 0.3 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_talus.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='r_leg_uay' type='revolute'>
+      <child>r_talus</child>
+      <parent>r_lleg</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.6981</lower>
+          <upper>0.611</upper>
+          <effort>387</effort>
+          <velocity>11</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.07</damping>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='r_foot'>
+      <pose>-0.000003 -0.107820 -0.833245 0 0 0</pose>
+      <inertial>
+        <pose>0.075312 0.000000 -0.050496 0 -0 0</pose>
+        <mass>0.733719</mass>
+        <inertia>
+          <ixx> 0.001674</ixx>
+          <ixy>-0.000000</ixy>
+          <ixz>-0.000028</ixz>
+          <iyy> 0.004680</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.006016</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_foot_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_foot.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='r_foot_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.05 0.05 0.05 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_foot.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='r_leg_lax' type='revolute'>
+      <child>r_foot</child>
+      <parent>r_talus</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.265</lower>
+          <upper>0.265</upper>
+          <effort>138</effort>
+          <velocity>32</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.01</damping>
+        </dynamics>
+      </axis>
+    </joint>
+	
+
+	<link name='l_arm_ugh'>
+      <pose>-0.006817 0.347293 0.671245 0 0 0</pose>
+      <inertial>
+        <pose>0.004318 -0.021559 0.0 0 -0 0</pose>
+        <mass>0.022453</mass>
+        <inertia>
+          <ixx> 0.000007</ixx>
+          <ixy>-0.000002</ixy>
+          <ixz>-0.000000</ixz>
+          <iyy> 0.000015</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.000018</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_arm_ugh_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/l_arm_ugh.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='l_arm_ugh_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.05 0.05 0.05 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/l_arm_ugh.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='l_arm_shy' type='revolute'>
+      <child>l_arm_ugh</child>
+      <parent>utorso</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>	
+	<link name='l_arm_lgh'>
+      <pose>-0.006817 0.347293 0.671245 0 0 0</pose>
+      <inertial>
+        <pose>-0.000177 0.004503 -0.045238 0 -0 0</pose>
+        <mass>0.291416</mass>
+        <inertia>
+          <ixx> 0.000405</ixx>
+          <ixy>-0.000000</ixy>
+          <ixz> 0.000004</ixz>
+          <iyy> 0.000391</iyy>
+          <iyz> 0.000043</iyz>
+          <izz> 0.000095</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_arm_lgh_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/l_arm_lgh.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='l_arm_lgh_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.3 0.3 0.3 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/l_arm_lgh.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='l_arm_shx' type='revolute'>
+      <child>l_arm_lgh</child>
+      <parent>l_arm_ugh</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>0</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>
+	<link name='l_arm_hum'>
+      <pose>-0.006749 0.342194 0.369376 0 0 0</pose>
+      <inertial>
+        <pose> 0.000172 0.001366 0.086391 0 -0 0</pose>
+        <mass>0.063676</mass>
+        <inertia>
+          <ixx> 0.000291</ixx>
+          <ixy> 0.000000</ixy>
+          <ixz>-0.000000</ixz>
+          <iyy> 0.000282</iyy>
+          <iyz> 0.000008</iyz>
+          <izz> 0.000017</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_arm_hum_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_hum.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='l_arm_hum_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.05 0.05 0.05 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_hum.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='l_arm_shz' type='revolute'>
+      <child>l_arm_hum</child>
+      <parent>l_arm_lgh</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>
+	<link name='l_arm_fore'>
+      <pose>-0.006749 0.342194 0.369376 0 0 0</pose>
+      <inertial>
+        <pose>-0.004536 -0.000247 -0.037863 0 -0 0</pose>
+        <mass>0.214833</mass>
+        <inertia>
+          <ixx> 0.000237</ixx>
+          <ixy> 0.000000</ixy>
+          <ixz>-0.000035</ixz>
+          <iyy> 0.000243</iyy>
+          <iyz> 0.000003</iyz>
+          <izz> 0.000059</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_arm_fore_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_fore.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='l_arm_fore_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.3 0.3 0.3 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_fore.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='l_arm_ely' type='revolute'>
+      <child>l_arm_fore</child>
+      <parent>l_arm_hum</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-2.00</lower>
+          <upper>2.00</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>
+	<link name='l_arm_hand'>
+      <pose>-0.007780 0.342180 0.015487 0 0 0</pose>
+      <inertial>
+        <pose>-0.000124 -0.000045 0.086910 0 -0 0</pose>
+        <mass>0.111092</mass>
+        <inertia>
+          <ixx> 0.000824</ixx>
+          <ixy>-0.000002</ixy>
+          <ixz> 0.000001</ixz>
+          <iyy> 0.001047</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.000255</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_arm_hand_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_hand.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='l_arm_hand_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.03 0.03 0.03 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_hand.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='l_arm_wrz' type='revolute'>
+      <child>l_arm_hand</child>
+      <parent>l_arm_fore</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>
+	
+	<link name='r_arm_ugh'>
+      <pose>-0.006817 -0.347282 0.671245 0 0 0</pose>
+      <inertial>
+        <pose>-0.004318 0.021559 0.0 0 -0 0</pose>
+        <mass>0.022453</mass>
+        <inertia>
+          <ixx> 0.000007</ixx>
+          <ixy>-0.000002</ixy>
+          <ixz>-0.000000</ixz>
+          <iyy> 0.000015</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.000018</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_arm_ugh_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_arm_ugh.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='r_arm_ugh_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.03 0.03 0.03 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_arm_ugh.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='r_arm_shy' type='revolute'>
+      <child>r_arm_ugh</child>
+      <parent>utorso</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>	
+	<link name='r_arm_lgh'>
+      <pose>-0.006817 -0.347282 0.671245 0 0 0</pose>
+      <inertial>
+        <pose> 0.000177 -0.004503 -0.045238 0 -0 0</pose>
+        <mass>0.291416</mass>
+        <inertia>
+          <ixx> 0.000405</ixx>
+          <ixy>-0.000000</ixy>
+          <ixz>-0.000004</ixz>
+          <iyy> 0.000391</iyy>
+          <iyz>-0.000043</iyz>
+          <izz> 0.000095</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_arm_lgh_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_arm_lgh.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='r_arm_lgh_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.3 0.3 0.3 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_arm_lgh.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='r_arm_shx' type='revolute'>
+      <child>r_arm_lgh</child>
+      <parent>r_arm_ugh</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>3.14</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>
+	<link name='r_arm_hum'>
+      <pose>-0.006885 -0.342183 0.369376 0 0 0</pose>
+      <inertial>
+        <pose> 0.000172 0.001366 0.086391 0 -0 0</pose>
+        <mass>0.063676</mass>
+        <inertia>
+          <ixx> 0.000291</ixx>
+          <ixy> 0.000000</ixy>
+          <ixz>-0.000000</ixz>
+          <iyy> 0.000282</iyy>
+          <iyz> 0.000008</iyz>
+          <izz> 0.000017</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_arm_hum_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_hum.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='r_arm_hum_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.03 0.03 0.03 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_hum.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='r_arm_shz' type='revolute'>
+      <child>r_arm_hum</child>
+      <parent>r_arm_lgh</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>
+	<link name='r_arm_fore'>
+      <pose>-0.006885 -0.342183 0.369376 0 0 0</pose>
+      <inertial>
+        <pose>-0.004536 -0.000247 -0.037863 0 -0 0</pose>
+        <mass>0.214833</mass>
+        <inertia>
+          <ixx> 0.000237</ixx>
+          <ixy> 0.000000</ixy>
+          <ixz>-0.000035</ixz>
+          <iyy> 0.000243</iyy>
+          <iyz> 0.000003</iyz>
+          <izz> 0.000059</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_arm_fore_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_fore.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='r_arm_fore_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.3 0.3 0.3 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_fore.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='r_arm_ely' type='revolute'>
+      <child>r_arm_fore</child>
+      <parent>r_arm_hum</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-2.00</lower>
+          <upper>2.00</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>
+	<link name='r_arm_hand'>
+      <pose>-0.007916 -0.342197 0.015487 0 0 0</pose>
+      <inertial>
+        <pose>-0.000124 -0.000045 0.086910 0 -0 0</pose>
+        <mass>0.111092</mass>
+        <inertia>
+          <ixx> 0.000824</ixx>
+          <ixy>-0.000002</ixy>
+          <ixz> 0.000001</ixz>
+          <iyy> 0.001047</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.000255</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_arm_hand_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_hand.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='r_arm_hand_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.03 0.03 0.03 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 0 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_hand.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='r_arm_wrz' type='revolute'>
+      <child>r_arm_hand</child>
+      <parent>r_arm_fore</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>
+  </model>
+</sdf>
