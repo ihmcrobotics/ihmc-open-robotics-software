@@ -180,7 +180,7 @@ public class JavaFXGraphicsObject extends Graphics3DInstructionExecutor
       mesh.getTexCoords().addAll(texCoordBuffer);
 
       float[] normalBuffer = Arrays.stream(normals).flatMap(n -> Stream.of(n.getX(), n.getY(), n.getZ())).collect(FloatArrayCollector.create());
-      mesh.getPoints().addAll(normalBuffer);
+      mesh.getNormals().addAll(normalBuffer);
 
       return mesh;
    }
