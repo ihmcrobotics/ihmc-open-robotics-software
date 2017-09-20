@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.forwaypoint;
+package us.ihmc.robotics.math.trajectories.waypoints;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +12,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SO3TrajectoryPointCalculator

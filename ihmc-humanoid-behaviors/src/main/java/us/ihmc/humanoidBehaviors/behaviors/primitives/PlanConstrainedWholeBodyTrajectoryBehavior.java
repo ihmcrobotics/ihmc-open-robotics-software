@@ -199,7 +199,7 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
                   
                   
                   
-                  
+                  wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
                   
                   outputConverter.setConstrainedEndEffectorTrajectory(constrainedEndEffectorTrajectory);
                   outputConverter.setMessageToCreate(wholebodyTrajectoryMessage);
