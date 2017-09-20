@@ -1,4 +1,4 @@
-package us.ihmc.robotbuilder.util;
+package us.ihmc.tools;
 
 import java.util.Arrays;
 import java.util.Collections;
