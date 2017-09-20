@@ -18,11 +18,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.RobotKinematicsConfiguration;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.CTTreeTools;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
@@ -53,7 +51,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
 
    private WheneverWholeBodyKinematicsSolver kinematicsSolver;
-   
+
    private final ConstrainedWholeBodyPlanningToolboxOutputStatus toolboxSolution;
 
    /*
@@ -164,7 +162,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       this.state = CWBToolboxState.FIND_INITIAL_GUESS;
 
       this.ctTreeFindInitialGuess = new CTTreeFindInitialGuess(drcRobotModel, 4, registry);
-      
+
       this.toolboxSolution = new ConstrainedWholeBodyPlanningToolboxOutputStatus();
       this.toolboxSolution.setDestination(-1);
    }
@@ -235,15 +233,15 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
           */
          terminateToolboxController();
          // TODO
-//         ctTaskNodeWholeBodyTrajectoryMessageFactory = new CTTaskNodeWholeBodyTrajectoryMessageFactory();
-//
-//         ctTaskNodeWholeBodyTrajectoryMessageFactory.setCTTaskNodePath(tree.getPath(), constrainedEndEffectorTrajectory);
-//
-//         ConstrainedWholeBodyPlanningToolboxOutputStatus packResult = packResult(ctTaskNodeWholeBodyTrajectoryMessageFactory.getConfigurations(),
-//                                                                                 ctTaskNodeWholeBodyTrajectoryMessageFactory.getTrajectoryTimes(), 4);
-//
-//         packResult(packResult, tree.getPath());
-//         reportMessage(packResult);
+         //         ctTaskNodeWholeBodyTrajectoryMessageFactory = new CTTaskNodeWholeBodyTrajectoryMessageFactory();
+         //
+         //         ctTaskNodeWholeBodyTrajectoryMessageFactory.setCTTaskNodePath(tree.getPath(), constrainedEndEffectorTrajectory);
+         //
+         //         ConstrainedWholeBodyPlanningToolboxOutputStatus packResult = packResult(ctTaskNodeWholeBodyTrajectoryMessageFactory.getConfigurations(),
+         //                                                                                 ctTaskNodeWholeBodyTrajectoryMessageFactory.getTrajectoryTimes(), 4);
+         //
+         //         packResult(packResult, tree.getPath());
+         //         reportMessage(packResult);
          PrintTools.info("packResult");
       }
    }
@@ -518,44 +516,44 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       };
    }
 
-//   private ConstrainedWholeBodyPlanningToolboxOutputStatus packResult(KinematicsToolboxOutputStatus[] robotConfigurations, double[] trajectoryTimes,
-//                                                                      int planningResult)
-//   {
-//      ConstrainedWholeBodyPlanningToolboxOutputStatus result = new ConstrainedWholeBodyPlanningToolboxOutputStatus();
-//
-//      result.set(robotConfigurations, trajectoryTimes);
-//      PrintTools.info("message ");
-//
-//      result.setPlanningResult(planningResult);
-//
-//      return result;
-//   }
-//
-//   private void packResult(ConstrainedWholeBodyPlanningToolboxOutputStatus result, ArrayList<CTTaskNode> path)
-//   {
-//      SideDependentList<ArrayList<Pose3D>> handTrajectories = new SideDependentList<>();
-//
-//      for (RobotSide robotSide : RobotSide.values)
-//      {
-//         handTrajectories.put(robotSide, new ArrayList<Pose3D>());
-//      }
-//
-//      for (int i = 0; i < path.size(); i++)
-//      {
-//         CTTaskNode node = path.get(i);
-//
-//         for (RobotSide robotSide : RobotSide.values)
-//         {
-//            ConfigurationSpace configurationSpace = CTTreeTools.getConfigurationSpace(node, robotSide);
-//
-//            Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(node.getNodeData(0), robotSide, configurationSpace);
-//
-//            handTrajectories.get(robotSide).add(desiredPose);
-//         }
-//      }
-//
-//      result.handTrajectories = handTrajectories;
-//   }
+   //   private ConstrainedWholeBodyPlanningToolboxOutputStatus packResult(KinematicsToolboxOutputStatus[] robotConfigurations, double[] trajectoryTimes,
+   //                                                                      int planningResult)
+   //   {
+   //      ConstrainedWholeBodyPlanningToolboxOutputStatus result = new ConstrainedWholeBodyPlanningToolboxOutputStatus();
+   //
+   //      result.set(robotConfigurations, trajectoryTimes);
+   //      PrintTools.info("message ");
+   //
+   //      result.setPlanningResult(planningResult);
+   //
+   //      return result;
+   //   }
+   //
+   //   private void packResult(ConstrainedWholeBodyPlanningToolboxOutputStatus result, ArrayList<CTTaskNode> path)
+   //   {
+   //      SideDependentList<ArrayList<Pose3D>> handTrajectories = new SideDependentList<>();
+   //
+   //      for (RobotSide robotSide : RobotSide.values)
+   //      {
+   //         handTrajectories.put(robotSide, new ArrayList<Pose3D>());
+   //      }
+   //
+   //      for (int i = 0; i < path.size(); i++)
+   //      {
+   //         CTTaskNode node = path.get(i);
+   //
+   //         for (RobotSide robotSide : RobotSide.values)
+   //         {
+   //            ConfigurationSpace configurationSpace = CTTreeTools.getConfigurationSpace(node, robotSide);
+   //
+   //            Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(node.getNodeData(0), robotSide, configurationSpace);
+   //
+   //            handTrajectories.get(robotSide).add(desiredPose);
+   //         }
+   //      }
+   //
+   //      result.handTrajectories = handTrajectories;
+   //   }
 
    /**
     * update validity of input node. 

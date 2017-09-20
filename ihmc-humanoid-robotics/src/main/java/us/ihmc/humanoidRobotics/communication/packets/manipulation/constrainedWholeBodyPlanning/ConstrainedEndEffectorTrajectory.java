@@ -9,9 +9,6 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedConfigurationSpace
 {
-   /*
-    * TaskRegion = new TaskRegion(GenericTaskNode.nodeDimension);
-    */
    protected TaskRegion taskNodeRegion;
    protected SideDependentList<ConfigurationBuildOrder> configurationBuildOrders;
    protected SideDependentList<SelectionMatrix6D> controllableSelectionMatrices;
