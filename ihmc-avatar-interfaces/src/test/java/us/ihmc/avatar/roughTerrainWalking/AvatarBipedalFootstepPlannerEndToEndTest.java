@@ -174,8 +174,16 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(cinderBlockField);
       toolboxCommunicator.send(planarRegionsListMessage);
 
+      double timeout = 30.0;
+      long startTime = System.currentTimeMillis();
       while(outputStatus.get() == null)
       {
+         long time = System.currentTimeMillis();
+         if (timeout < (time - startTime) / 1000.0)
+         {
+            fail("Timed out.");
+         }
+
          try
          {
             blockingSimulationRunner.simulateAndBlock(1.0);
