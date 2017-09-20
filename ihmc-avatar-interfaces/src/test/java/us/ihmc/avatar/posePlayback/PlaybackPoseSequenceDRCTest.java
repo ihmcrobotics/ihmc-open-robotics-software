@@ -1,22 +1,17 @@
 package us.ihmc.avatar.posePlayback;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.StringReader;
 import java.util.Random;
 
-import org.junit.Test;
-
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 public abstract class PlaybackPoseSequenceDRCTest implements MultiRobotTestInterface
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-	@Test(timeout = 30000)
    public void testReadAndWriteWithRandomSequence()
    {
       DRCRobotModel robotModel = getRobotModel();

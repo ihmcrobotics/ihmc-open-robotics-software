@@ -9,7 +9,6 @@ import java.io.IOException;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.controllerAPI.EndToEndChestTrajectoryMessageTest;
@@ -20,7 +19,6 @@ import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -99,8 +97,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       setupKinematicsToolboxModule();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests if pelvis and chest are not affected (change in position & orientation) by a hand movement of 20cm in the positive x direction
-   @Test(timeout = 60000)
    public void testSolvingForAHandPose() throws SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -182,8 +178,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 35.0) // Tests position and orientation of the two hands after a movement of 20cm in the positive x direction
-   @Test(timeout = 70000)
    public void testSolvingForBothHandPoses() throws SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -268,8 +262,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the selection matrix of a hand, sets a desired roll offset and makes sure it is reached
-   @Test(timeout = 60000)
    public void testSolvingForHandSelectionMatrix() throws SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -353,8 +345,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests the method setHandLinearControlOnly, sets desired angular offsets on both hands and makes sure they are not reached
-   @Test(timeout = 60000)
    public void testSolvingForHandAngularLinearControl() throws SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -460,8 +450,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 40.0) // Tests the method setHandLinearControlAndYawPitchOnly, sets a desired roll offset on one hand and makes sure it is not reached
-   @Test(timeout = 80000)
    public void testSolvingForHandRollConstraint() throws SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -538,8 +526,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 25.0) // Tests the selection matrix of the chest
-   @Test(timeout = 50000)
    public void testSolvingForChestAngularControl() throws SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -593,8 +579,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 25.0) // Tests the selection matrix of the pelvis
-   @Test(timeout = 50000)
    public void testSolvingForPelvisAngularControl() throws SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

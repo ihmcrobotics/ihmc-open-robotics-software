@@ -15,6 +15,7 @@ public class AtlasEndToEndHandLoadBearingTest extends EndToEndHandLoadBearingTes
 {
    private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, true);
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 100000)
    public void testUsingHand() throws SimulationExceededMaximumTimeException

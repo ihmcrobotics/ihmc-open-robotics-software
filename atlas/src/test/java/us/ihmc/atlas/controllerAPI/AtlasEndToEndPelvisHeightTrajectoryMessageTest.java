@@ -23,13 +23,13 @@ public class AtlasEndToEndPelvisHeightTrajectoryMessageTest extends EndToEndPelv
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
-   
+
    @Override
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();
    }
-   
+
    @Override
    public void testSingleWaypointInUserMode() throws Exception
    {
