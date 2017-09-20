@@ -16,7 +16,10 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.trajectories.*;
+import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
+import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.YoSegmentedFrameTrajectory3D;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -268,7 +271,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
    @Override
    public void updateListeners()
    {
-      // TODO Auto-generated method stub      
+      // TODO Auto-generated method stub
    }
 
    @Override
@@ -384,7 +387,13 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       initialTime = currentTime;
 
       if (!isStanding)
+      {
          activeTrajectory = transferAngularMomentumTrajectories.get(0);
+      }
+      else
+      {
+         activeTrajectory = null;
+      }
 
       if (DEBUG)
       {
@@ -536,7 +545,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       segmentSupportFootPositionTrajectory.setTime(initialTime, finalTime);
       TrajectoryMathTools.getDerivative(segmentSupportFootVelocityTrajectory, segmentSupportFootPositionTrajectory);
    }
-   
+
    private void setFootTrajectoriesForPhase(int footstepIndex, WalkingTrajectoryType phase)
    {
       CoPPointsInFoot copPointsInFoot = upcomingCoPsInFootsteps.get(footstepIndex + 1);
@@ -556,7 +565,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       setSwingFootTrajectoryForPhase(footstepIndex, phase, phaseDuration);
       setSupportFootTrajectoryForPhase(footstepIndex, phase, phaseDuration);
    }
-   
+
    private void setSwingFootTrajectoryForPhase(int footstepIndex, WalkingTrajectoryType phase, double phaseDuration)
    {
       if(phase == WalkingTrajectoryType.SWING)
@@ -571,7 +580,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
          segmentSwingFootPositionTrajectory.setQuinticWithZeroTerminalAcceleration(0.0, phaseDuration, tempFramePoint1, zeroVector, tempFramePoint1, zeroVector);
       }
    }
-   
+
    private void setSupportFootTrajectoryForPhase(int footstepIndex, WalkingTrajectoryType phase, double phaseDuration)
    {
       upcomingCoPsInFootsteps.get(footstepIndex + 1).getSupportFootLocation(tempFramePoint1);
