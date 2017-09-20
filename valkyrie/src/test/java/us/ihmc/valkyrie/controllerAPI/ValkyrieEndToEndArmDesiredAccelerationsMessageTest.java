@@ -1,8 +1,11 @@
 package us.ihmc.valkyrie.controllerAPI;
 
+import org.junit.Test;
+
 import us.ihmc.avatar.controllerAPI.EndToEndArmDesiredAccelerationsMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
@@ -20,5 +23,13 @@ public class ValkyrieEndToEndArmDesiredAccelerationsMessageTest extends EndToEnd
    public String getSimpleRobotName()
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test
+   public void testSimpleCommands() throws Exception
+   {
+      super.testSimpleCommands();
    }
 }
