@@ -300,8 +300,8 @@ public class IHMCHumanoidBehaviorManager
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(behaviorCommunicationBridge, fullRobotModel, yoTime);
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
 
-      CuttingWallBehaviorStateMachine cuttingWallBehavior = new CuttingWallBehaviorStateMachine(behaviorCommunicationBridge, yoTime, fullRobotModel,
-                                                                                                referenceFrames);
+      CuttingWallBehaviorStateMachine cuttingWallBehavior = new CuttingWallBehaviorStateMachine(robotModelFactory, behaviorCommunicationBridge,
+                                                                                                yoTime, fullRobotModel, referenceFrames);
       dispatcher.addBehavior(HumanoidBehaviorType.CUTTING_WALL, cuttingWallBehavior);
    }
 

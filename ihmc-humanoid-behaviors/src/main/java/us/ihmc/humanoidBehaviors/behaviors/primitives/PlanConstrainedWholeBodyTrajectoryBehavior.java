@@ -15,11 +15,13 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavi
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidRobotics.communication.packets.ConstrainedWholeBodyPlanningToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.taskExecutor.PipeLine;
@@ -55,13 +57,15 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
 
    private ConstrainedWholeBodyPlanningToolboxOutputStatus cwbtoolboxOutputStatus;
    
+   private final ConstrainedWholeBodyPlanningToolboxOutputConverter outputConverter;
+   
    private long startTime; // computing time measure.
    
    private static int numberOfFindInitialGuess = 320;
    private static int numberOfExpanding = 1000;
    private static int numberOfEndEffectorWayPoints = 10;
 
-   public PlanConstrainedWholeBodyTrajectoryBehavior(String namePrefix, CommunicationBridgeInterface communicationBridge, FullHumanoidRobotModel fullRobotModel,
+   public PlanConstrainedWholeBodyTrajectoryBehavior(String namePrefix, FullHumanoidRobotModelFactory fullRobotModelFactory, CommunicationBridgeInterface communicationBridge, FullHumanoidRobotModel fullRobotModel,
                                                      YoDouble yoTime)
    {
       super(namePrefix, communicationBridge);
@@ -71,6 +75,8 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
       this.sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
 
       this.fullRobotModel = fullRobotModel;
+      
+      this.outputConverter = new ConstrainedWholeBodyPlanningToolboxOutputConverter(fullRobotModelFactory);
    }
 
    public void setInputs(ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory, FullHumanoidRobotModel fullRobotModel)
