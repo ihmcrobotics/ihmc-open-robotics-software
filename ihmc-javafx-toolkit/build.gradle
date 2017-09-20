@@ -31,6 +31,8 @@ mainDependencies {
    }
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
+   compile group: 'us.ihmc.thirdparty', name: 'jassimp', version: '4.0.0-ihmc1'
 }
 
 visualizersDependencies {
