@@ -20,6 +20,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.SetBooleanParameterPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -276,21 +277,21 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
       referenceFrames.updateFrames();
 
-      Quaternion initialOrientation = new Quaternion();
-      initialOrientation.appendRollRotation(Math.PI * 0.5);
-      initialOrientation.appendYawRotation(Math.PI * 0.5);
-      initialOrientation.appendPitchRotation(-Math.PI * 0.4);
-      HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, new Point3D(0.6, 0.35, 1.0), initialOrientation,
-                                                                               referenceFrames.getMidFootZUpGroundFrame());
-      drcBehaviorTestHelper.send(lhandTrajectoryMessage);
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
-
-      initialOrientation = new Quaternion();
-      initialOrientation.appendPitchRotation(Math.PI * 0.4);
-      HandTrajectoryMessage rhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2.0, new Point3D(-0.1, -0.5, 0.7), initialOrientation,
-                                                                               referenceFrames.getMidFootZUpGroundFrame());
-      drcBehaviorTestHelper.send(rhandTrajectoryMessage);
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+//      Quaternion initialOrientation = new Quaternion();
+//      initialOrientation.appendRollRotation(Math.PI * 0.5);
+//      initialOrientation.appendYawRotation(Math.PI * 0.5);
+//      initialOrientation.appendPitchRotation(-Math.PI * 0.4);
+//      HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, new Point3D(0.6, 0.35, 1.0), initialOrientation,
+//                                                                               referenceFrames.getMidFootZUpGroundFrame());
+//      drcBehaviorTestHelper.send(lhandTrajectoryMessage);
+//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+//
+//      initialOrientation = new Quaternion();
+//      initialOrientation.appendPitchRotation(Math.PI * 0.4);
+//      HandTrajectoryMessage rhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2.0, new Point3D(-0.1, -0.5, 0.7), initialOrientation,
+//                                                                               referenceFrames.getMidFootZUpGroundFrame());
+//      drcBehaviorTestHelper.send(rhandTrajectoryMessage);
+//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
       /*
        * Behavior create.
@@ -322,9 +323,14 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       {
          drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
          yoTime = drcBehaviorTestHelper.getYoTime().getDoubleValue();
-         if(cuttingWallBehaviorStateMachine.getStateMachine().getCurrentStateEnum() == CuttingWallBehaviorState.MOTION)
+         if(cuttingWallBehaviorStateMachine.getStateMachine().getCurrentStateEnum() == CuttingWallBehaviorState.WAITING_CONFIRM)
          {
             PrintTools.info("Motion START!");
+            
+            SetBooleanParameterPacket confirmPacket = new SetBooleanParameterPacket("", true);
+
+            System.out.println("confirmPacket Dispatch");
+            drcBehaviorTestHelper.getBehaviorCommunicationBridge().sendPacketToBehavior(confirmPacket);
             
             int numberOfDiplayedWayPoints = 10;
             ConstrainedWholeBodyPlanningToolboxOutputConverter converter = new ConstrainedWholeBodyPlanningToolboxOutputConverter(getRobotModel());
@@ -335,7 +341,6 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
                int length = constrainedWholeBodyPlanningToolboxOutputStatus.getTrajectoryTimes().length;
                double trajectoryTime = constrainedWholeBodyPlanningToolboxOutputStatus.getTrajectoryTimes()[length-1];
                double time = trajectoryTime * (double)(i)/(double)(numberOfDiplayedWayPoints);
-               PrintTools.info(""+time);
                
                KinematicsToolboxOutputStatus robotConfiguration = converter.getRobotConfiguration(constrainedWholeBodyPlanningToolboxOutputStatus, time);
                KinematicsToolboxOutputConverter kinematicConverter = new KinematicsToolboxOutputConverter(getRobotModel());

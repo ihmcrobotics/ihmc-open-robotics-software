@@ -45,7 +45,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
    private FramePose centerFramePose;
 
    private final ConcurrentListeningQueue<WallPosePacket> wallPacketQueue = new ConcurrentListeningQueue<WallPosePacket>(5);
-   
+
    private final ConcurrentListeningQueue<SetBooleanParameterPacket> confirmQueue = new ConcurrentListeningQueue<SetBooleanParameterPacket>(5);
 
    private final HumanoidReferenceFrames referenceFrames;
@@ -55,8 +55,8 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
       WAITING_INPUT, PLANNING, WAITING_CONFIRM, MOTION, PLAN_FALIED, DONE
    }
 
-   public CuttingWallBehaviorStateMachine(FullHumanoidRobotModelFactory robotModelFactory, CommunicationBridge communicationBridge, YoDouble yoTime, FullHumanoidRobotModel fullRobotModel,
-                                          HumanoidReferenceFrames referenceFrames)
+   public CuttingWallBehaviorStateMachine(FullHumanoidRobotModelFactory robotModelFactory, CommunicationBridge communicationBridge, YoDouble yoTime,
+                                          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super("cuttingWallBehaviorState", CuttingWallBehaviorState.class, yoTime, communicationBridge);
 
@@ -68,15 +68,13 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
 
       this.fullRobotModel = fullRobotModel;
 
-      this.planConstrainedWholeBodyTrajectoryBehavior = new PlanConstrainedWholeBodyTrajectoryBehavior("CuttingWallPlanning", 
-                                                                                                       robotModelFactory,
-                                                                                                       communicationBridge,
-                                                                                                       this.fullRobotModel, yoTime);
+      this.planConstrainedWholeBodyTrajectoryBehavior = new PlanConstrainedWholeBodyTrajectoryBehavior("CuttingWallPlanning", robotModelFactory,
+                                                                                                       communicationBridge, this.fullRobotModel, yoTime);
 
       this.yoTime = yoTime;
 
       attachNetworkListeningQueue(wallPacketQueue, WallPosePacket.class);
-      
+
       attachNetworkListeningQueue(confirmQueue, SetBooleanParameterPacket.class);
 
       setupStateMachine();
@@ -89,13 +87,13 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
 
    @Override
    public void doControl()
-   {  
+   {
       if (isPaused())
          return;
-      
+
       super.doControl();
    }
-   
+
    public void setCenterFramePose(FramePose centerFramePose)
    {
       PrintTools.info("" + centerFramePose);
@@ -112,12 +110,12 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
 
       double xz = 0;
       double xy = 0;
-      if(cuttingWallVz.getZ() == 0.0)
+      if (cuttingWallVz.getZ() == 0.0)
       {
          xz = 1.0;
          xy = 0.0;
       }
-      else if(cuttingWallVz.getY() == 0.0)
+      else if (cuttingWallVz.getY() == 0.0)
       {
          xz = 0.0;
          xy = 1.0;
@@ -125,10 +123,8 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
       else
       {
          xz = Math.sqrt(1 / (1 + (cuttingWallVz.getZ() / cuttingWallVz.getY()) * (cuttingWallVz.getZ() / cuttingWallVz.getY())));
-         xy = -(cuttingWallVz.getZ()) / (cuttingWallVz.getY()) * xz;   
+         xy = -(cuttingWallVz.getZ()) / (cuttingWallVz.getY()) * xz;
       }
-      
-      
 
       Vector3D cuttingWallVx = new Vector3D(0.0, xy, xz);
 
@@ -186,24 +182,24 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
             RigidBodyTransform transform = new RigidBodyTransform(centerFramePose.getOrientation(), centerFramePose.getPosition());
             PrintTools.info("transform ");
             System.out.println(transform);
-            
-            
-            RigidBodyTransform transform1 = new RigidBodyTransform(new Quaternion(computeWallOrientation(centerFramePose.getOrientation())), new Point3D(centerFramePose.getPosition()));
+
+            RigidBodyTransform transform1 = new RigidBodyTransform(new Quaternion(computeWallOrientation(centerFramePose.getOrientation())),
+                                                                   new Point3D(centerFramePose.getPosition()));
             PrintTools.info("transform ");
             System.out.println(transform1);
 
             ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(20.0);
-//            ConstrainedEndEffectorTrajectory endeffectorTrajectory = new CuttingWallTrajectory(centerFramePose.getPosition(),
-//                                                                                               computeWallOrientation(centerFramePose.getOrientation()),
-//                                                                                               latestPacket.getCuttingRadius(), 20.0);
+            //            ConstrainedEndEffectorTrajectory endeffectorTrajectory = new CuttingWallTrajectory(centerFramePose.getPosition(),
+            //                                                                                               computeWallOrientation(centerFramePose.getOrientation()),
+            //                                                                                               latestPacket.getCuttingRadius(), 20.0);
 
             planConstrainedWholeBodyTrajectoryBehavior.setInputs(endeffectorTrajectory, fullRobotModel);
-            
+
             planConstrainedWholeBodyTrajectoryBehavior.setNumberOfEndEffectorWayPoints(30);
             planConstrainedWholeBodyTrajectoryBehavior.setNumberOfExpanding(1000);
             planConstrainedWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(320);
             planConstrainedWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(160);
-            
+
             PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
          }
       };
@@ -214,12 +210,20 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
          @Override
          protected void setBehaviorInput()
          {
-            PrintTools.info("setBehaviorInput WAITING " + yoTime.getDoubleValue());
+            PrintTools.info("setBehaviorInput WAITING_CONFIRM " + yoTime.getDoubleValue());
          }
+
          @Override
          public boolean isDone()
          {
-            return confirmQueue.isNewPacketAvailable();
+            if (confirmQueue.isNewPacketAvailable())
+            {               
+               boolean parameterValue = confirmQueue.getLatestPacket().getParameterValue();
+               System.out.println("user confirmed "+parameterValue);
+               return parameterValue;
+            }
+            else
+               return false;
          }
       };
 
@@ -326,6 +330,5 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
       sendPacket(p1);
 
    }
-   
-   
+
 }
