@@ -23,26 +23,26 @@ import java.util.*;
 
 public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 {
-   protected final Deque<BipedalFootstepPlannerNode> stack = new ArrayDeque<BipedalFootstepPlannerNode>();
+   private final String name = getClass().getSimpleName();
+   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+
+   private final Deque<BipedalFootstepPlannerNode> stack = new ArrayDeque<BipedalFootstepPlannerNode>();
 
    private final BipedalFootstepPlannerParameters parameters;
-   protected final PlanarRegionPotentialNextStepCalculator planarRegionPotentialNextStepCalculator;
-   protected final HashMap<Integer, List<BipedalFootstepPlannerNode>> mapToAllExploredNodes = new HashMap<>();
+   private final PlanarRegionPotentialNextStepCalculator planarRegionPotentialNextStepCalculator;
+   private final HashSet<BipedalFootstepPlannerNode> expandedNodes = new HashSet<>();
 
-   protected SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
-   protected BipedalFootstepPlannerNode startNode;
+   private SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
+   private BipedalFootstepPlannerNode startNode;
 
-   protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoInteger maximumNumberOfNodesToExpand = new YoInteger("maximumNumberOfNodesToExpand", registry);
+   private final YoInteger numberOfNodesExpanded = new YoInteger("numberOfNodesExpanded", registry);
+   private final YoDouble timeout = new YoDouble("Timeout", registry);
+   private final YoLong planningStartTime = new YoLong("planningStartTime", registry);
 
-   protected final YoInteger maximumNumberOfNodesToExpand = new YoInteger("maximumNumberOfNodesToExpand", registry);
-   protected final YoInteger numberOfNodesExpanded = new YoInteger("numberOfNodesExpanded", registry);
-   protected final YoDouble timeout = new YoDouble("Timeout", registry);
-   protected final YoLong planningStartTime = new YoLong("planningStartTime", registry);
-
-   protected final ArrayList<BipedalFootstepPlannerNode> goalNodes = new ArrayList<>();
-   protected final YoBoolean exitAfterInitialSolution = new YoBoolean("exitAfterInitialSolution", registry);
-   protected BipedalFootstepPlannerNode bestGoalNode;
-   protected FootstepPlan footstepPlan = null;
+   private final ArrayList<BipedalFootstepPlannerNode> goalNodes = new ArrayList<>();
+   private final YoBoolean exitAfterInitialSolution = new YoBoolean("exitAfterInitialSolution", registry);
+   private BipedalFootstepPlannerNode bestGoalNode;
    private PlanarRegionsList planarRegionsList;
 
    protected BipedalFootstepPlannerListener listener;
@@ -134,7 +134,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       stack.clear();
       notifiyListenersStartNodeWasAdded(startNode);
       stack.push(startNode);
-      mapToAllExploredNodes.clear();
+      expandedNodes.clear();
    }
 
    @Override
@@ -142,7 +142,6 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    {
       bestGoalNode = null;
       goalNodes.clear();
-      footstepPlan = null;
       double smallestCostToGoal = Double.POSITIVE_INFINITY;
 
       if (!initialStanceFootWasSet || !goalWasSet)
@@ -170,21 +169,9 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             continue;
 
          // if we already found this node make sure we update its parent in case we found a better path here.
-         BipedalFootstepPlannerNode equivalentNode = checkIfNearbyNodeAlreadyExistsAndStoreIfNot(nodeToExpand);
-         if (equivalentNode != null)
-         {
-            double costToGoToEquivalentNode = BipedalFootstepPlannerNodeUtils.getCostFromStartToNode(equivalentNode);
-
-            if (MathTools.epsilonEquals(costToNode, costToGoToEquivalentNode, 1.0e-5))
-               nodeToExpand = equivalentNode;
-            else if (costToNode > costToGoToEquivalentNode)
-               continue;
-            else
-            {
-               equivalentNode.setParentNode(nodeToExpand.getParentNode());
-               nodeToExpand = equivalentNode;
-            }
-         }
+         if (expandedNodes.contains(nodeToExpand))
+            continue;
+         expandedNodes.add(nodeToExpand);
 
          numberOfNodesExpanded.increment();
          notifyListenerNodeIsBeingExpanded(nodeToExpand);
@@ -224,7 +211,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
    }
 
-   protected double updateGoalPath(double smallestCostToGoal)
+   private double updateGoalPath(double smallestCostToGoal)
    {
       if (goalNodes.isEmpty())
          return Double.POSITIVE_INFINITY;
@@ -262,43 +249,6 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             continue;
 
          stack.push(node);
-      }
-   }
-
-   /**
-    * Will return null if no near node exists. Otherwise will return the nearest node.
-    * @param nodeToExpand
-    * @return
-    */
-   protected BipedalFootstepPlannerNode checkIfNearbyNodeAlreadyExistsAndStoreIfNot(BipedalFootstepPlannerNode nodeToExpand)
-   {
-      int hashCode = nodeToExpand.hashCode();
-
-      List<BipedalFootstepPlannerNode> nodesWithThisHash = mapToAllExploredNodes.get(hashCode);
-
-      if (nodesWithThisHash == null)
-      {
-         nodesWithThisHash = new ArrayList<>();
-         nodesWithThisHash.add(nodeToExpand);
-         mapToAllExploredNodes.put(hashCode, nodesWithThisHash);
-
-         return null;
-      }
-      else
-      {
-         int size = nodesWithThisHash.size();
-
-         for (int i = 0; i < size; i++)
-         {
-            BipedalFootstepPlannerNode nodeWithSameHash = nodesWithThisHash.get(i);
-
-            if (nodeToExpand.equals(nodeWithSameHash))
-            {
-               return nodeWithSameHash;
-            }
-         }
-
-         return null;
       }
    }
 
