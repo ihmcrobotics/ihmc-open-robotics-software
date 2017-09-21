@@ -32,7 +32,7 @@ import us.ihmc.yoVariables.variable.YoVariableList;
 
 public class DataFileWriterTest
 {
-   private static final String TEST_DIRECTORY = "resources/us/ihmc/simulationconstructionset/dataFileWriterTest/";
+   private static final String TEST_DIRECTORY = "testResources/us/ihmc/simulationconstructionset/dataFileWriterTest/";
 
    @Rule
    public ExpectedException expectedException = ExpectedException.none();
