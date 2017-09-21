@@ -207,10 +207,7 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
 //                  outputConverter.updateFullRobotModel(cwbtoolboxOutputStatus);
                   
                   // TODO: deactivate toolbox module.
-                                    
-                  // TODO: to be replaced with results from converter.
-                  //handTrajectories = cwbtoolboxOutputStatus.handTrajectories;
-                  
+                                                      
                   long stopTime = System.currentTimeMillis();
                   long elapsedTime = stopTime - startTime;
                   System.out.println("===========================================");

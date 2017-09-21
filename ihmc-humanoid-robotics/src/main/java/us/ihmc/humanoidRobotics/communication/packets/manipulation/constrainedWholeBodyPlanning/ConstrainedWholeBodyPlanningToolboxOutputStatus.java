@@ -30,15 +30,6 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
    {
       set(other);
    }
-      
-//   public void set(KinematicsToolboxOutputStatus[] robotConfigurations, double[] trajectoryTimes)
-//   {
-//      if(robotConfigurations.length != trajectoryTimes.length)
-//         throw new RuntimeException("length is different");
-//      
-//      this.robotConfigurations = robotConfigurations;
-//      this.trajectoryTimes = trajectoryTimes;
-//   }
 
    @Override
    public boolean epsilonEquals(ConstrainedWholeBodyPlanningToolboxOutputStatus other, double epsilon)
@@ -112,7 +103,10 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
       
       this.robotConfigurations = new KinematicsToolboxOutputStatus[numberOfConfigurations];
       for(int i=0;i<numberOfConfigurations;i++)
+      {
          this.robotConfigurations[i] = new KinematicsToolboxOutputStatus(robotConfigurations[i]);
+         // PrintTools.info(""+i+" "+this.robotConfigurations[i].desiredJointAngles[3]);
+      }
                   
    }
 

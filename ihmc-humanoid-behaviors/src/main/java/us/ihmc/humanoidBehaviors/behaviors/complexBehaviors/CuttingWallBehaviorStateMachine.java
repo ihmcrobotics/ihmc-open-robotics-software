@@ -77,6 +77,11 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
       setupStateMachine();
    }
 
+   public PlanConstrainedWholeBodyTrajectoryBehavior getPlanConstrainedWholeBodyTrajectoryBehavior()
+   {
+      return planConstrainedWholeBodyTrajectoryBehavior;
+   }
+
    @Override
    public void doControl()
    {  
@@ -192,7 +197,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
             planConstrainedWholeBodyTrajectoryBehavior.setNumberOfEndEffectorWayPoints(30);
             planConstrainedWholeBodyTrajectoryBehavior.setNumberOfExpanding(1000);
             planConstrainedWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(320);
-            //planConstrainedWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(160);
+            planConstrainedWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(160);
             
             PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
          }
@@ -312,4 +317,6 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
       sendPacket(p1);
 
    }
+   
+   
 }
