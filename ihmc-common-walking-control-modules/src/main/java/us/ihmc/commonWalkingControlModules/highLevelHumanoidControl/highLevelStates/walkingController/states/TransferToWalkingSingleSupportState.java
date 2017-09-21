@@ -6,17 +6,23 @@ import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegCo
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class TransferToWalkingSingleSupportState extends TransferState
 {
+   private static final int numberOfFootstepsToConsider = 3;
+   private final Footstep[] footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
+   private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
+
    private final YoDouble minimumTransferTime = new YoDouble("minimumTransferTime", registry);
 
    private final LegConfigurationManager legConfigurationManager;
    private final YoDouble fractionOfTransferToCollapseLeg = new YoDouble("fractionOfTransferToCollapseLeg", registry);
+   private final YoDouble currentTransferDuration = new YoDouble("CurrentTransferDuration", registry);
 
    public TransferToWalkingSingleSupportState(RobotSide transferToSide, WalkingMessageHandler walkingMessageHandler,
                                               HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
@@ -37,8 +43,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void doTransitionIntoAction()
    {
-      adjustTimings();
-
       super.doTransitionIntoAction();
 
       boolean initialTransfer = isInitialTransfer();
@@ -52,23 +56,43 @@ public class TransferToWalkingSingleSupportState extends TransferState
       else
          pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
-      for (int i = 0; i < 3; i++)
-         balanceManager.addFootstepToPlan(walkingMessageHandler.peek(i), walkingMessageHandler.peekTiming(i));
+      int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
+      if (stepsToAdd < 1)
+      {
+         throw new RuntimeException("Can not go to walking single support if there are no upcoming footsteps.");
+      }
+      for (int i = 0; i < stepsToAdd; i++)
+      {
+         Footstep footstep = footsteps[i];
+         FootstepTiming timing = footstepTimings[i];
+         walkingMessageHandler.peekFootstep(i, footstep);
+         walkingMessageHandler.peekTiming(i, timing);
+
+         if (i == 0)
+         {
+            adjustTiming(timing);
+            walkingMessageHandler.adjustTimings(0, timing.getSwingTime(), timing.getTransferTime());
+         }
+
+         balanceManager.addFootstepToPlan(footstep, timing);
+      }
+
       balanceManager.setICPPlanTransferToSide(transferToSide);
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      FootstepTiming footstepTiming = walkingMessageHandler.peekTiming(0);
-      balanceManager.initializeICPPlanForTransfer(footstepTiming.getSwingTime(), footstepTiming.getTransferTime(), finalTransferTime);
+      FootstepTiming firstTiming = footstepTimings[0];
+      currentTransferDuration.set(firstTiming.getTransferTime());
+      balanceManager.initializeICPPlanForTransfer(firstTiming.getSwingTime(), firstTiming.getTransferTime(), finalTransferTime);
 
       if (balanceManager.wasTimingAdjustedForReachability())
       {
          double currentTransferDuration = balanceManager.getCurrentTransferDurationAdjustedForReachability();
          double currentSwingDuration = balanceManager.getCurrentSwingDurationAdjustedForReachability();
 
-         footstepTiming.setTimings(currentSwingDuration, currentTransferDuration);
+         firstTiming.setTimings(currentSwingDuration, currentTransferDuration);
       }
 
-      pelvisOrientationManager.setUpcomingFootstep(walkingMessageHandler.peek(0));
-      pelvisOrientationManager.initializeTransfer(transferToSide, footstepTiming.getTransferTime(), footstepTiming.getSwingTime());
+      pelvisOrientationManager.setUpcomingFootstep(footsteps[0]);
+      pelvisOrientationManager.initializeTransfer(transferToSide, firstTiming.getTransferTime(), firstTiming.getSwingTime());
 
       legConfigurationManager.beginStraightening(transferToSide);
       legConfigurationManager.setFullyExtendLeg(transferToSide, false);
@@ -79,17 +103,12 @@ public class TransferToWalkingSingleSupportState extends TransferState
    {
       super.doAction();
 
-      FootstepTiming footstepTiming = walkingMessageHandler.peekTiming(0);
-      if (footstepTiming != null)
+      double transferDuration = currentTransferDuration.getDoubleValue();
+      boolean pastMinimumTime = getTimeInCurrentState() > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration;
+      boolean isFootWellPosition = legConfigurationManager.areFeetWellPositionedForCollapse(transferToSide.getOppositeSide());
+      if (pastMinimumTime && isFootWellPosition && !legConfigurationManager.isLegCollapsed(transferToSide.getOppositeSide()))
       {
-         double transferDuration = footstepTiming.getTransferTime();
-
-         boolean pastMinimumTime = getTimeInCurrentState() > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration;
-         boolean isFootWellPosition = legConfigurationManager.areFeetWellPositionedForCollapse(transferToSide.getOppositeSide());
-         if (pastMinimumTime && isFootWellPosition && !legConfigurationManager.isLegCollapsed(transferToSide.getOppositeSide()))
-         {
-            legConfigurationManager.collapseLegDuringTransfer(transferToSide);
-         }
+         legConfigurationManager.collapseLegDuringTransfer(transferToSide);
       }
    }
 
@@ -103,9 +122,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
     * This method checks if the upcoming step has a desired absolute start time. If that is the case
     * the transfer time is adjusted such that the swing starts at the correct time.
     */
-   private void adjustTimings()
+   private void adjustTiming(FootstepTiming stepTiming)
    {
-      FootstepTiming stepTiming = walkingMessageHandler.peekTiming(0);
       double originalSwingTime = stepTiming.getSwingTime();
 
       if (!stepTiming.hasAbsoluteTime())

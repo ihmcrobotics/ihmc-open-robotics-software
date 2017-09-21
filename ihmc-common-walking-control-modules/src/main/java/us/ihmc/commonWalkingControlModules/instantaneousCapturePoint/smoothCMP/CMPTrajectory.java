@@ -21,11 +21,6 @@ public class CMPTrajectory extends SegmentedFrameTrajectory3D
       timeIntoStep = Double.NaN;
    }
 
-   public FrameTrajectory3D getCurrentSegment()
-   {
-      return currentSegment;
-   }
-
    public void update(double timeInState)
    {
       super.update(timeInState);
@@ -52,7 +47,7 @@ public class CMPTrajectory extends SegmentedFrameTrajectory3D
 
    public boolean isDone()
    {
-      boolean currentIsLast = currentSegmentIndex  == numberOfSegments - 1;
+      boolean currentIsLast = currentSegmentIndex  == getNumberOfSegments() - 1;
       boolean currentIsDone = !currentSegment.timeIntervalContains(timeIntoStep);
 
       return currentIsLast && currentIsDone;
@@ -60,13 +55,15 @@ public class CMPTrajectory extends SegmentedFrameTrajectory3D
    
    public void getExitCMPLocation(FramePoint3D exitCMPLocationToPack)
    {
-      segments.get(numberOfSegments - 1).compute(segments.get(numberOfSegments -1).getFinalTime());
-      exitCMPLocationToPack.setIncludingFrame(segments.get(numberOfSegments - 1).getFramePosition());
+      FrameTrajectory3D segment = segments.getLast();
+      segment.compute(segment.getFinalTime());
+      exitCMPLocationToPack.setIncludingFrame(segment.getFramePosition());
    }
 
    public void getEntryCMPLocation(FramePoint3D entryCMPLocationToPack)
    {
-      segments.get(0).compute(segments.get(0).getInitialTime());
-      entryCMPLocationToPack.setIncludingFrame(segments.get(0).getFramePosition());
+      FrameTrajectory3D segment = segments.getFirst();
+      segment.compute(segment.getInitialTime());
+      entryCMPLocationToPack.setIncludingFrame(segment.getFramePosition());
    }
 }

@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlanne
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePointTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -149,7 +149,7 @@ public class SphereICPPlannerVisualizer
    private final int numberOfBalls = (int) (trailingDuration / dt / simulatedTicksPerGraphicUpdate);
 
    private FootstepTestHelper footstepTestHelper;
-   
+
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
    public SphereICPPlannerVisualizer()
@@ -477,7 +477,7 @@ public class SphereICPPlannerVisualizer
       for (int i = 0; i < randomSupportPolygon.getNumberOfVertices(); i++)
          randomPredictedContactPointList.add(randomSupportPolygon.getFrameVertexCopy(i));
 
-      footstep.setPredictedContactPointsFromFramePoint2ds(randomPredictedContactPointList);
+      footstep.setPredictedContactPoints(randomPredictedContactPointList);
    }
 
    private void updateUpcomingFootstepsViz(Footstep nextFootstep, Footstep nextNextFootstep, Footstep nextNextNextFootstep)
@@ -494,7 +494,7 @@ public class SphereICPPlannerVisualizer
       }
 
       if (nextFootstep.getPredictedContactPoints() == null)
-         nextFootstep.setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(nextFootstep.getRobotSide()).getContactPoints2d());
+         nextFootstep.setPredictedContactPoints(contactableFeet.get(nextFootstep.getRobotSide()).getContactPoints2d());
 
       double polygonShrinkAmount = 0.005;
 
@@ -517,7 +517,7 @@ public class SphereICPPlannerVisualizer
       }
 
       if (nextNextFootstep.getPredictedContactPoints() == null)
-         nextNextFootstep.setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(nextNextFootstep.getRobotSide()).getContactPoints2d());
+         nextNextFootstep.setPredictedContactPoints(contactableFeet.get(nextNextFootstep.getRobotSide()).getContactPoints2d());
 
       tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(nextNextFootstep.getSoleReferenceFrame(), nextNextFootstep.getPredictedContactPoints());
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
@@ -536,7 +536,7 @@ public class SphereICPPlannerVisualizer
       }
 
       if (nextNextNextFootstep.getPredictedContactPoints() == null)
-         nextNextNextFootstep.setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(nextNextNextFootstep.getRobotSide()).getContactPoints2d());
+         nextNextNextFootstep.setPredictedContactPoints(contactableFeet.get(nextNextNextFootstep.getRobotSide()).getContactPoints2d());
 
       tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(nextNextNextFootstep.getSoleReferenceFrame(), nextNextNextFootstep.getPredictedContactPoints());
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);

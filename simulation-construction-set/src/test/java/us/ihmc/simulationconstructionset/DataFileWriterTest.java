@@ -32,8 +32,8 @@ import us.ihmc.yoVariables.variable.YoVariableList;
 
 public class DataFileWriterTest
 {
-   private static final String TEST_DIRECTORY = "testResources/us/ihmc/simulationconstructionset/dataFileWriterTest/";
-   
+   private static final String TEST_DIRECTORY = "resources/us/ihmc/simulationconstructionset/dataFileWriterTest/";
+
    @Rule
    public ExpectedException expectedException = ExpectedException.none();
 
@@ -341,23 +341,23 @@ public class DataFileWriterTest
 
       int bufferSize = 50;
       DataBuffer dataBuffer = new DataBuffer(bufferSize);
-      
+
       dataBuffer.addVariables(variables);
-      
+
       for (int i=0; i<bufferSize/2; i++)
       {
          dataBuffer.setDataAtIndexToYoVariableValues();
          dataBuffer.tick(1);
       }
-      
-      
+
+
       dataBuffer.setInOutPointFullBuffer();
-      
+
       Robot robot = new Robot("testWritingRobot");
       writeALongDataFile(fileOne, dataBuffer, variables, robot);
 
       System.out.println("Wrote File. Now reading it.");
-      
+
       DataFileReader dataFileReader = new DataFileReader(fileOne);
 
       YoVariableList newVarList = new YoVariableList("newVarList");
@@ -390,7 +390,7 @@ public class DataFileWriterTest
       boolean binary = false;
       dataFileWriter.writeState("model", recordDT, variables, binary, compress);
    }
-   
+
    private void writeALongDataFile(File file, DataBuffer dataBuffer, ArrayList<YoVariable<?>> variables, Robot robot)
    {
       DataFileWriter dataFileWriter = new DataFileWriter(file);

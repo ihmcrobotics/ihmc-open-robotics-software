@@ -9,5 +9,5 @@ public interface CoPTrajectoryInterface extends SegmentedFrameTrajectory3DInterf
    public void update(double timeInState, FramePoint3D desiredCoPToPack);
    public void update(double timeInState, FramePoint3D desiredCoPToPack, FrameVector3D desiredCoPVelocityToPack);
    public void update(double timeInState, FramePoint3D desiredCoPToPack, FrameVector3D desiredCoPVelocityToPack, FrameVector3D desiredCoPAccelerationToPack);
-   public void setSegment(double initialTime, double finalTime, FramePoint3D initialPosition, FramePoint3D finalPosition);
+   public void setNextSegment(double initialTime, double finalTime, FramePoint3D initialPosition, FramePoint3D finalPosition);
 }

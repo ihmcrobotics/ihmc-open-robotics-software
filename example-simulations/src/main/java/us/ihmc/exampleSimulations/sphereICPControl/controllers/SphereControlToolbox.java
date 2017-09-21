@@ -10,10 +10,10 @@ import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSupportPolygonNames;
 import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -489,7 +489,7 @@ public class SphereControlToolbox
       }
 
       if (nextFootstep.getPredictedContactPoints() == null)
-         nextFootstep.setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(nextFootstep.getRobotSide()).getContactPoints2d());
+         nextFootstep.setPredictedContactPoints(contactableFeet.get(nextFootstep.getRobotSide()).getContactPoints2d());
 
       double polygonShrinkAmount = 0.005;
 
@@ -512,7 +512,7 @@ public class SphereControlToolbox
       }
 
       if (nextNextFootstep.getPredictedContactPoints() == null)
-         nextNextFootstep.setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(nextNextFootstep.getRobotSide()).getContactPoints2d());
+         nextNextFootstep.setPredictedContactPoints(contactableFeet.get(nextNextFootstep.getRobotSide()).getContactPoints2d());
 
       tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(nextNextFootstep.getSoleReferenceFrame(), nextNextFootstep.getPredictedContactPoints());
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
@@ -531,7 +531,7 @@ public class SphereControlToolbox
       }
 
       if (nextNextNextFootstep.getPredictedContactPoints() == null)
-         nextNextNextFootstep.setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(nextNextNextFootstep.getRobotSide()).getContactPoints2d());
+         nextNextNextFootstep.setPredictedContactPoints(contactableFeet.get(nextNextNextFootstep.getRobotSide()).getContactPoints2d());
 
       tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(nextNextNextFootstep.getSoleReferenceFrame(), nextNextNextFootstep.getPredictedContactPoints());
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
@@ -628,7 +628,7 @@ public class SphereControlToolbox
    {
       return new SphereSmoothCMPPlannerParameters();
    }
-   
+
    private class SphereSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
    {
       public SphereSmoothCMPPlannerParameters()
@@ -674,8 +674,14 @@ public class SphereControlToolbox
          copOffsetBoundsInFootFrame.put(CoPPointName.BALL_COP, new Vector2D(0.0, 0.055));
          copOffsetBoundsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.08));
       }
+
+      @Override
+      public boolean planWithAngularMomentum()
+      {
+         return true;
+      }
    }
-   
+
    public ICPOptimizationParameters createICPOptimizationParameters()
    {
       return new ICPOptimizationParameters()

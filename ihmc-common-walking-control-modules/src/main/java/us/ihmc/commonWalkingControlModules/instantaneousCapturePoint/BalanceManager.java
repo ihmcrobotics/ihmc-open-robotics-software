@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabili
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.SmoothCMPBasedICPPlanner;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -460,9 +459,9 @@ public class BalanceManager
       yoDesiredCMP.set(desiredCMP);
    }
 
-   public Footstep createFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
+   public void packFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining, Footstep footstepToPack)
    {
-      return pushRecoveryControlModule.createFootstepForRecoveringFromDisturbance(swingSide, swingTimeRemaining);
+      pushRecoveryControlModule.packFootstepForRecoveringFromDisturbance(swingSide, swingTimeRemaining, footstepToPack);
    }
 
    public void disablePelvisXYControl()
@@ -633,15 +632,6 @@ public class BalanceManager
             + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY.getDoubleValue());
       boolean closeEnough = ellipticErrorSquared < 1.0;
       return closeEnough;
-   }
-
-   public boolean isTransitionToStandingSafe()
-   {
-      FrameConvexPolygon2d supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
-      controllerToolbox.getCapturePoint(capturePoint2d);
-
-      // signed distance returns a negative number if the point is inside the polygon.
-      return supportPolygonInWorld.signedDistance(capturePoint2d) < -safeDistanceFromSupportEdgesToStopCancelICPPlan.getDoubleValue();
    }
 
    public double getICPErrorMagnitude()

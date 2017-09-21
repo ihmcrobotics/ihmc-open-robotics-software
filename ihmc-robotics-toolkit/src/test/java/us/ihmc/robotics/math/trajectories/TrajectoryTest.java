@@ -236,12 +236,12 @@ public class TrajectoryTest
             for (int j = i; j < coefficients.length; j++)
             {
                double derivativeCoefficient = polynomial.getCoefficientMultiplierForDerivative(i, j);
-               generalizedDYHand.set(j, 0, derivativeCoefficient * Math.pow(x, j - i));
+               generalizedDYHand.set(j, derivativeCoefficient * Math.pow(x, j - i));
             }
          }
          for (int k = 0; k < coefficients.length; k++)
          {
-            assertEquals(generalizedDYPoly.get(k, 0), generalizedDYHand.get(k, 0), EPSILON);
+            assertEquals(generalizedDYPoly.get(k), generalizedDYHand.get(k), EPSILON);
          }
       }
    }
@@ -255,9 +255,9 @@ public class TrajectoryTest
          double generalizedDYHandScalar = 0.0;
 
          DenseMatrix64F generalizedDYPolyVector = polynomial.getXPowersDerivativeVector(i, x);
-         for (int j = 0; j < generalizedDYPolyVector.numRows; j++)
+         for (int j = 0; j < generalizedDYPolyVector.numCols; j++)
          {
-            generalizedDYHandScalar += generalizedDYPolyVector.get(j, 0) * coefficients[j];
+            generalizedDYHandScalar += generalizedDYPolyVector.get(j) * coefficients[j];
          }
          assertEquals(generalizedDYPolyScalar, generalizedDYHandScalar, EPSILON);
       }

@@ -32,6 +32,7 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
       {
          return new AtlasWalkingControllerParameters(target, jointMap, getContactPointParameters())
          {
+            @Override
             public boolean alwaysAllowMomentum()
             {
                return true;
@@ -44,33 +45,35 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
    private final int numberOfSteps = 8;
    private final double stepWidth = 0.25;
    private final double stepLength = 0.5;
-   
+
    private final double swingTime = 0.6;
    private final double transferTime = 0.2;
    private final double finalTransferTime = 1.0;
-   
+
    private final double forcePercentageOfWeight1 = 0.025;
    private final double forceDuration1 = 1;
    private final double forceDelay1 = 0.1 * swingTime;
    private final Vector3D forceDirection1 = new Vector3D(0.0, -1.0, 0.0);
-   
+
    private final double forcePercentageOfWeight2 = 0.025;
    private final double forceDuration2 = 1;
    private final double forceDelay2 = 0.5 * swingTime;
    private final Vector3D forceDirection2 = new Vector3D(1.0, 0.0, 0.0);
-   
+
+   @Override
    @Test
    public void testForwardWalk() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalk();
    }
-   
+
+   @Override
    @Test
    public void testForwardWalkWithForceDisturbances() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalkWithForceDisturbances();
    }
-   
+
    @Override
    public DRCRobotModel getRobotModel()
    {
@@ -85,7 +88,7 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
 
    @Override
    public int getNumberOfSteps()
-   { 
+   {
       return numberOfSteps;
    }
 
@@ -100,64 +103,64 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
    {
       return stepLength;
    }
-   
+
    @Override
    public double getForceDelay1()
    {
       return forceDelay1;
    }
-   
+
    @Override
    public double getForcePercentageOfWeight1()
    {
       return forcePercentageOfWeight1;
    }
-   
+
    @Override
    public double getForceDuration1()
    {
       return forceDuration1;
    }
-   
+
    @Override
    public Vector3D getForceDirection1()
    {
       return forceDirection1;
    }
-   
+
    @Override
    public double getForceDelay2()
    {
       return forceDelay2;
    }
-   
+
    @Override
    public double getForcePercentageOfWeight2()
    {
       return forcePercentageOfWeight2;
    }
-   
+
    @Override
    public double getForceDuration2()
    {
       return forceDuration2;
    }
-   
+
    @Override
    public Vector3D getForceDirection2()
    {
       return forceDirection2;
    }
-   
+
    @Override
    protected FootstepDataListMessage getFootstepDataListMessage()
    {
       return new FootstepDataListMessage(swingTime, transferTime, finalTransferTime);
    }
-   
+
    @Override
    protected boolean keepSCSUp()
    {
-      return true;
+      return false;
    }
 }

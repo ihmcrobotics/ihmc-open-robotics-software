@@ -11,9 +11,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class TransferState extends WalkingState
 {
@@ -35,6 +35,8 @@ public abstract class TransferState extends WalkingState
    private final FramePoint2D filteredDesiredCoP = new FramePoint2D();
    private final FramePoint2D desiredCoP = new FramePoint2D();
    private final FramePoint3D nextExitCMP = new FramePoint3D();
+
+   private final Footstep nextFootstep = new Footstep();
 
    public TransferState(RobotSide transferToSide, WalkingStateEnum transferStateEnum, WalkingMessageHandler walkingMessageHandler,
          HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
@@ -83,11 +85,6 @@ public abstract class TransferState extends WalkingState
          return balanceManager.isTransitionToSingleSupportSafe(transferToSide);
    }
 
-   public boolean isStopWalkingSafe()
-   {
-      return balanceManager.isTransitionToStandingSafe();
-   }
-
    public void switchToToeOffIfPossible()
    {
       RobotSide trailingLeg = transferToSide.getOppositeSide();
@@ -122,7 +119,7 @@ public abstract class TransferState extends WalkingState
       feetManager.initializeContactStatesForDoubleSupport(transferToSide);
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
-      Footstep nextFootstep = walkingMessageHandler.peek(0);
+      walkingMessageHandler.peekFootstep(0, nextFootstep);
       failureDetectionControlModule.setNextFootstep(nextFootstep);
       balanceManager.setUpcomingFootstep(nextFootstep);
 

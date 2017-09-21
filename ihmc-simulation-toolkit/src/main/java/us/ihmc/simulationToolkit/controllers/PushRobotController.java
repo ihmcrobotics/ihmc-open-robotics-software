@@ -41,20 +41,25 @@ public class PushRobotController implements RobotController
    private StateTransitionCondition pushCondition = null;
    private final ExternalForcePoint forcePoint;
    private final Vector3D forceVector = new Vector3D();
-   
+
    private final YoGraphicVector forceVisualizer;
-   
+
    public PushRobotController(FloatingRootJointRobot pushableRobot, FullRobotModel fullRobotModel)
    {
-      this(pushableRobot, fullRobotModel.getChest().getParentJoint().getName(), new Vector3D(0, 0, 0.3));
+      this(pushableRobot, fullRobotModel.getChest().getParentJoint().getName(), new Vector3D(0, 0, 0.3), 0.005);
    }
-   
+
    public PushRobotController(FloatingRootJointRobot pushableRobot, String jointNameToApplyForce, Vector3D forcePointOffset)
+   {
+      this(pushableRobot, jointNameToApplyForce, forcePointOffset, 0.005);
+   }
+
+   public PushRobotController(FloatingRootJointRobot pushableRobot, String jointNameToApplyForce, Vector3D forcePointOffset, double visualScale)
    {
       yoTime = pushableRobot.getYoTime();
       registry = new YoVariableRegistry(jointNameToApplyForce + "_" + getClass().getSimpleName());
       forcePoint = new ExternalForcePoint(jointNameToApplyForce + "_externalForcePoint", forcePointOffset, pushableRobot);
-      
+
       pushDuration = new YoDouble(jointNameToApplyForce + "_pushDuration", registry);
       pushForceMagnitude = new YoDouble(jointNameToApplyForce + "_pushMagnitude", registry);
       pushDirection = new YoFrameVector(jointNameToApplyForce + "_pushDirection", worldFrame, registry);
@@ -63,16 +68,17 @@ public class PushRobotController implements RobotController
       pushNumber = new YoInteger(jointNameToApplyForce + "_pushNumber", registry);
       isBeingPushed = new YoBoolean(jointNameToApplyForce + "_isBeingPushed", registry);
       pushDelay = new YoDouble(jointNameToApplyForce + "_pushDelay", registry);
-      
+
       pushableRobot.getJoint(jointNameToApplyForce).addExternalForcePoint(forcePoint);
       pushableRobot.setController(this);
 
       pushTimeSwitch.set(Double.NEGATIVE_INFINITY);
       pushForceMagnitude.set(0.0);
-      
-      forceVisualizer = new YoGraphicVector(jointNameToApplyForce + "_pushForce", forcePoint.getYoPosition(), forcePoint.getYoForce(), 0.005, YoAppearance.DarkBlue());
+
+      forceVisualizer = new YoGraphicVector(jointNameToApplyForce + "_pushForce", forcePoint.getYoPosition(), forcePoint.getYoForce(), visualScale,
+            YoAppearance.DarkBlue());
    }
-   
+
    public YoGraphic getForceVisualizer()
    {
       return forceVisualizer;
@@ -97,7 +103,7 @@ public class PushRobotController implements RobotController
    {
       pushDirection.set(direction);
    }
-   
+
    public void setPushDelay(double delay)
    {
       pushDelay.set(delay);
@@ -141,14 +147,14 @@ public class PushRobotController implements RobotController
    }
 
    private void applyForce()
-   {      
+   {
       double length = pushDirection.length();
       if (length > 1e-5)
       {
          pushForce.set(pushDirection);
          pushForce.normalize();
          pushForce.scale(pushForceMagnitude.getDoubleValue());
-         if(pushCondition == null)
+         if (pushCondition == null)
          {
             pushTimeSwitch.set(yoTime.getDoubleValue());
          }

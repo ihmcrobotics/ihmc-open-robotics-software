@@ -35,10 +35,8 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -51,9 +49,9 @@ public class WalkingMessageHandler
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   // TODO Need to find something better than an ArrayList.
-   private final List<Footstep> upcomingFootsteps = new ArrayList<>();
-   private final List<FootstepTiming> upcomingFootstepTimings = new ArrayList<>();
+   private static final int maxNumberOfFootsteps = 100;
+   private final RecyclingArrayList<Footstep> upcomingFootsteps = new RecyclingArrayList<>(maxNumberOfFootsteps, Footstep.class);
+   private final RecyclingArrayList<FootstepTiming> upcomingFootstepTimings = new RecyclingArrayList<>(maxNumberOfFootsteps, FootstepTiming.class);
 
    private final YoBoolean hasNewFootstepAdjustment = new YoBoolean("hasNewFootstepAdjustement", registry);
    private final AdjustFootstepCommand requestedFootstepAdjustment = new AdjustFootstepCommand();
@@ -103,6 +101,9 @@ public class WalkingMessageHandler
    {
       this.statusOutputManager = statusOutputManager;
 
+      upcomingFootsteps.clear();
+      upcomingFootstepTimings.clear();
+
       this.yoTime = yoTime;
       footstepDataListRecievedTime.setToNaN();
 
@@ -146,11 +147,8 @@ public class WalkingMessageHandler
          switch(command.getExecutionMode())
          {
          case OVERRIDE:
-            upcomingFootsteps.clear();
-            upcomingFootstepTimings.clear();
-            currentFootstepIndex.set(0);
+            clearFootsteps();
             clearFootTrajectory();
-            currentNumberOfFootsteps.set(command.getNumberOfFootsteps());
             if (yoTime != null)
             {
                footstepDataListRecievedTime.set(yoTime.getDoubleValue());
@@ -162,12 +160,18 @@ public class WalkingMessageHandler
                PrintTools.warn("Can not queue footsteps if no footsteps are present. Send an override message instead. Command ignored.");
                return;
             }
-            currentNumberOfFootsteps.add(command.getNumberOfFootsteps());
             break;
          default:
             PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
             return;
          }
+      }
+
+      if (command.getNumberOfFootsteps() + currentNumberOfFootsteps.getIntegerValue() > maxNumberOfFootsteps)
+      {
+         PrintTools.warn("Can not exceed " + maxNumberOfFootsteps + " footsteps stopping execution.");
+         clearFootsteps();
+         return;
       }
 
       isWalkingPaused.set(false);
@@ -190,10 +194,9 @@ public class WalkingMessageHandler
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
-         FootstepTiming newFootstepTiming = createFootstepTiming(command.getFootstep(i), command.getExecutionTiming());
-         upcomingFootstepTimings.add(newFootstepTiming);
-         Footstep newFootstep = createFootstep(command.getFootstep(i), trustHeightOfFootsteps, newFootstepTiming.getSwingTime());
-         upcomingFootsteps.add(newFootstep);
+         setFootstepTiming(command.getFootstep(i), command.getExecutionTiming(), upcomingFootstepTimings.add());
+         setFootstep(command.getFootstep(i), trustHeightOfFootsteps, upcomingFootsteps.add());
+         currentNumberOfFootsteps.increment();
       }
 
       if (!checkTimings(upcomingFootstepTimings))
@@ -264,34 +267,86 @@ public class WalkingMessageHandler
       comTrajectoryHandler.handleComTrajectory(command);
    }
 
-   public FootstepTiming peekTiming(int i)
+   /**
+    * This method will set the provided timing to the timing of the {@code i}'th upcoming
+    * footstep. If there is less then {@code i} upcoming steps this method will throw a
+    * {@link RuntimeException}. To check how many footsteps are upcoming use
+    * {@link #getCurrentNumberOfFootsteps()}.
+    *
+    * @param i is the index of the upcoming footstep timing that will be packed.
+    * @param timingToPack will be set to the timing of footstep i in the list of upcoming steps.
+    */
+   public void peekTiming(int i, FootstepTiming timingToPack)
    {
       if (i >= upcomingFootstepTimings.size())
-         return null;
-      else
-         return upcomingFootstepTimings.get(i);
+      {
+         throw new RuntimeException("Can not get timing " + i + " since there are only " + upcomingFootstepTimings.size() + " upcoming timings.");
+      }
+      timingToPack.set(upcomingFootstepTimings.get(i));
    }
 
-   public Footstep peek(int i)
+   /**
+    * This method will set the provided footstep to the {@code i}'th upcoming
+    * footstep. If there is less then {@code i} upcoming steps this method will throw a
+    * {@link RuntimeException}. To check how many footsteps are upcoming use
+    * {@link #getCurrentNumberOfFootsteps()}.
+    *
+    * @param i is the index of the upcoming footstep that will be packed.
+    * @param footstepToPack will be set to the footstep i in the list of upcoming steps.
+    */
+   public void peekFootstep(int i, Footstep footstepToPack)
    {
       if (i >= upcomingFootsteps.size())
-         return null;
-      else
-         return upcomingFootsteps.get(i);
+      {
+         throw new RuntimeException("Can not get footstep " + i + " since there are only " + upcomingFootsteps.size() + " upcoming steps.");
+      }
+      footstepToPack.set(upcomingFootsteps.get(i));
    }
 
-   public Footstep poll()
+   /**
+    * This method will pack the provided footstep and timing with the next upcoming
+    * step. It will then remove that footstep from the list of upcoming footsteps.
+    * Use this method if you wish to remove the next upcoming step because the execution
+    * has started. If there is no upcoming step this method will throw a {@link RuntimeException}.
+    *
+    * @param footstepToPack will be set to the next footstep in the list of upcoming steps.
+    * @param timingToPack will be set to the next footsteps timing in the list of upcoming steps.
+    */
+   public void poll(Footstep footstepToPack, FootstepTiming timingToPack)
    {
       if (upcomingFootsteps.isEmpty())
-         return null;
-      else
       {
-         updateVisualization();
-         currentNumberOfFootsteps.decrement();
-         currentFootstepIndex.increment();
-         lastTimingExecuted.set(upcomingFootstepTimings.remove(0));
-         return upcomingFootsteps.remove(0);
+         throw new RuntimeException("Can not poll footstep since there are no upcoming steps.");
       }
+
+      footstepToPack.set(upcomingFootsteps.get(0));
+      timingToPack.set(upcomingFootstepTimings.get(0));
+      lastTimingExecuted.set(upcomingFootstepTimings.get(0));
+
+      updateVisualization();
+      currentNumberOfFootsteps.decrement();
+      currentFootstepIndex.increment();
+
+      upcomingFootstepTimings.remove(0);
+      upcomingFootsteps.remove(0);
+   }
+
+   /**
+    * This method can be used if the timing of a upcoming footstep needs to be adjusted. It
+    * will throw a {@link RuntimeException} if there is less upcoming footstep timings then
+    * {@code stepIndex}.
+    *
+    * @param stepIndex is the index of the timing that will be adjusted in the list of upcoming steps.
+    * @param newSwingDuration is the new swing duration for the adjusted timing
+    * @param newTransferDuration is the new transfer duration for the adjusted timing.
+    */
+   public void adjustTimings(int stepIndex, double newSwingDuration, double newTransferDuration)
+   {
+      if (upcomingFootstepTimings.size() <= stepIndex)
+      {
+         throw new RuntimeException("Can not adjust timing of upciming step " + stepIndex + ", only have " + upcomingFootstepTimings.size() + " upcoming steps.");
+      }
+      upcomingFootstepTimings.get(stepIndex).setTimings(newSwingDuration, newTransferDuration);
    }
 
    public FootTrajectoryCommand pollFootTrajectoryForFlamingoStance(RobotSide swingSide)
@@ -321,7 +376,7 @@ public class WalkingMessageHandler
          List<Point2D> contactPoints = new ArrayList<>();
          for (int i = 0; i < footstepToAdjust.getPredictedContactPoints().size(); i++)
             contactPoints.add(footstepToAdjust.getPredictedContactPoints().get(i));
-         footstepToAdjust.setPredictedContactPointsFromPoint2ds(contactPoints);
+         footstepToAdjust.setPredictedContactPoints(contactPoints);
       }
 
       hasNewFootstepAdjustment.set(false);
@@ -354,9 +409,11 @@ public class WalkingMessageHandler
    public boolean isNextFootstepFor(RobotSide swingSide)
    {
       if (!hasUpcomingFootsteps())
+      {
          return false;
-      else
-         return peek(0).getRobotSide() == swingSide;
+      }
+
+      return upcomingFootsteps.get(0).getRobotSide() == swingSide;
    }
 
    public boolean hasFootTrajectoryForFlamingoStance()
@@ -565,98 +622,57 @@ public class WalkingMessageHandler
       Footstep transferFromFootstep = getFootstepAtCurrentLocation(transferToSide.getOppositeSide());
       Footstep transferToFootstep = getFootstepAtCurrentLocation(transferToSide);
 
-      Footstep nextFootstep;
-
-      nextFootstep = peek(0);
-
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
       transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
       transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
       transferToAndNextFootstepsData.setTransferToSide(transferToSide);
-      transferToAndNextFootstepsData.setNextFootstep(nextFootstep);
+
+      if (getCurrentNumberOfFootsteps() > 0)
+      {
+         transferToAndNextFootstepsData.setNextFootstep(upcomingFootsteps.get(0));
+      }
+      else
+      {
+         transferToAndNextFootstepsData.setNextFootstep(null);
+      }
 
       return transferToAndNextFootstepsData;
    }
 
    public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForSingleSupport(Footstep transferToFootstep, RobotSide swingSide)
    {
-      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
-
       Footstep transferFromFootstep = getFootstepAtCurrentLocation(swingSide.getOppositeSide());
 
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
       transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
       transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
-
       transferToAndNextFootstepsData.setTransferToSide(swingSide);
-      transferToAndNextFootstepsData.setNextFootstep(peek(0));
+
+      if (getCurrentNumberOfFootsteps() > 0)
+      {
+         transferToAndNextFootstepsData.setNextFootstep(upcomingFootsteps.get(0));
+      }
+      else
+      {
+         transferToAndNextFootstepsData.setNextFootstep(null);
+      }
 
       return transferToAndNextFootstepsData;
    }
 
-   private Footstep createFootstep(FootstepDataCommand footstepData, boolean trustHeight, double swingTime)
+   private void setFootstep(FootstepDataCommand footstepData, boolean trustHeight, Footstep footstepToSet)
    {
-      FramePose footstepPose = new FramePose(footstepData.getPosition(), footstepData.getOrientation());
+      footstepToSet.set(footstepData, trustHeight);
 
-      List<Point2D> contactPoints;
-      if (footstepData.getPredictedContactPoints().isEmpty())
-         contactPoints = null;
-      else
-      {
-         contactPoints = new ArrayList<>();
-         for (int i = 0; i < footstepData.getPredictedContactPoints().size(); i++)
-            contactPoints.add(footstepData.getPredictedContactPoints().get(i));
-      }
-
-      RobotSide robotSide = footstepData.getRobotSide();
-      TrajectoryType trajectoryType = footstepData.getTrajectoryType();
-
-      Footstep footstep = new Footstep(robotSide, footstepPose, trustHeight, contactPoints);
-
-      if (trajectoryType == TrajectoryType.CUSTOM)
-      {
-         if (footstepData.getCustomPositionWaypoints() == null)
-         {
-            PrintTools.warn("Can not request custom trajectory without specifying waypoints. Using default trajectory.");
-            trajectoryType = TrajectoryType.DEFAULT;
-         }
-         else
-         {
-            RecyclingArrayList<FramePoint3D> positionWaypoints = footstepData.getCustomPositionWaypoints();
-            footstep.setCustomPositionWaypoints(positionWaypoints);
-         }
-      }
-      if (trajectoryType == TrajectoryType.WAYPOINTS)
-      {
-         RecyclingArrayList<FrameSE3TrajectoryPoint> swingTrajectory = footstepData.getSwingTrajectory();
-         if (swingTrajectory == null)
-         {
-            PrintTools.warn("Can not request custom trajectory without specifying waypoints. Using default trajectory.");
-            trajectoryType = TrajectoryType.DEFAULT;
-         }
-         if (swingTrajectory.getLast().getTime() > swingTime)
-         {
-            PrintTools.warn("Last waypoint in custom trajectory has time greater then the swing time. Using default trajectory.");
-            trajectoryType = TrajectoryType.DEFAULT;
-         }
-         else
-         {
-            footstep.setSwingTrajectory(swingTrajectory);
-         }
-      }
-
-      footstep.setTrajectoryType(trajectoryType);
-      footstep.setSwingHeight(footstepData.getSwingHeight());
-      footstep.setSwingTrajectoryBlendDuration(footstepData.getSwingTrajectoryBlendDuration());
       if (offsettingPlanWithFootstepError.getBooleanValue())
       {
-         footstep.addOffset(planOffsetInWorld);
+         footstepToSet.addOffset(planOffsetInWorld);
       }
-      return footstep;
    }
 
-   private FootstepTiming createFootstepTiming(FootstepDataCommand footstep, ExecutionTiming executionTiming)
+   private void setFootstepTiming(FootstepDataCommand footstep, ExecutionTiming executionTiming, FootstepTiming timingToSet)
    {
-      FootstepTiming timing = new FootstepTiming();
+      int stepsInQueue = getCurrentNumberOfFootsteps();
 
       double swingDuration = footstep.getSwingDuration();
       if (Double.isNaN(swingDuration) || swingDuration <= 0.0)
@@ -665,41 +681,38 @@ public class WalkingMessageHandler
       double transferDuration = footstep.getTransferDuration();
       if (Double.isNaN(transferDuration) || transferDuration <= 0.0)
       {
-         if (upcomingFootstepTimings.isEmpty() && !isWalking.getBooleanValue())
+         if (stepsInQueue == 0 && !isWalking.getBooleanValue())
             transferDuration = defaultInitialTransferTime.getDoubleValue();
          else
             transferDuration = defaultTransferTime.getDoubleValue();
       }
 
-      timing.setTimings(swingDuration, transferDuration);
+      timingToSet.setTimings(swingDuration, transferDuration);
 
       switch (executionTiming)
       {
       case CONTROL_DURATIONS:
          break;
       case CONTROL_ABSOLUTE_TIMINGS:
-         int stepsInQueue = upcomingFootstepTimings.size();
          if (stepsInQueue == 0 && !executingFootstep.getBooleanValue())
          {
-            timing.setAbsoluteTime(transferDuration, footstepDataListRecievedTime.getDoubleValue());
+            timingToSet.setAbsoluteTime(transferDuration, footstepDataListRecievedTime.getDoubleValue());
          }
          else if (stepsInQueue == 0)
          {
             double swingStartTime = lastTimingExecuted.getSwingStartTime() + lastTimingExecuted.getSwingTime() + transferDuration;
-            timing.setAbsoluteTime(swingStartTime, footstepDataListRecievedTime.getDoubleValue());
+            timingToSet.setAbsoluteTime(swingStartTime, footstepDataListRecievedTime.getDoubleValue());
          }
          else
          {
             FootstepTiming previousTiming = upcomingFootstepTimings.get(stepsInQueue - 1);
             double swingStartTime = previousTiming.getSwingStartTime() + previousTiming.getSwingTime() + transferDuration;
-            timing.setAbsoluteTime(swingStartTime, footstepDataListRecievedTime.getDoubleValue());
+            timingToSet.setAbsoluteTime(swingStartTime, footstepDataListRecievedTime.getDoubleValue());
          }
          break;
       default:
          throw new RuntimeException("Timing mode not implemented.");
       }
-
-      return timing;
    }
 
    private void updateTransferTimes(List<FootstepTiming> upcomingFootstepTimings)
