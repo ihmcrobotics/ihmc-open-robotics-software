@@ -8,6 +8,7 @@ import javafx.scene.AmbientLight;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
@@ -29,7 +30,7 @@ public class AtlasJavaFxRobotVisualizer extends Application
    {
       primaryStage.setTitle("SDF Viewer");
 
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_TROOPER, RobotTarget.SCS, false);
+      AtlasRobotModel robotModel = AtlasRobotModelFactory.createDefaultRobotModel();
       humanoidFloatingRootJointRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
 
       graphicsRobot = new GraphicsRobot(humanoidFloatingRootJointRobot);
@@ -41,7 +42,7 @@ public class AtlasJavaFxRobotVisualizer extends Application
 
       View3DFactory view3DFactory = new View3DFactory(1024, 768);
       view3DFactory.addCameraController();
-      view3DFactory.setBackgroundColor(Color.WHITE);
+//      view3DFactory.setBackgroundColor(Color.WHITE);
       view3DFactory.addNodeToView(new AmbientLight(Color.WHITE));
       view3DFactory.addPointLight(5, 0, 2, Color.GRAY);
       view3DFactory.addPointLight(-5, 0, 2, Color.GRAY);
@@ -77,12 +78,12 @@ public class AtlasJavaFxRobotVisualizer extends Application
    public void updateRobotAndGraphics()
    {
       OneDegreeOfFreedomJoint[] oneDegreeOfFreedomJoints = humanoidFloatingRootJointRobot.getOneDegreeOfFreedomJoints();
-      for (int i = 0; i < oneDegreeOfFreedomJoints.length; i++)
-      {
-         t += 0.001;
-         double q = Math.sin(t);
-         oneDegreeOfFreedomJoints[i].setQ(q);
-      }
+//      for (int i = 0; i < oneDegreeOfFreedomJoints.length; i++)
+//      {
+//         t += 0.001;
+//         double q = Math.sin(t);
+//         oneDegreeOfFreedomJoints[i].setQ(q);
+//      }
       humanoidFloatingRootJointRobot.update();
       graphicsRobot.update();
       rootNode.update();
