@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.packets.SetBooleanParameterPacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -43,7 +44,9 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
 
    private FramePose centerFramePose;
 
-   private final ConcurrentListeningQueue<WallPosePacket> queue = new ConcurrentListeningQueue<WallPosePacket>(5);
+   private final ConcurrentListeningQueue<WallPosePacket> wallPacketQueue = new ConcurrentListeningQueue<WallPosePacket>(5);
+   
+   private final ConcurrentListeningQueue<SetBooleanParameterPacket> confirmQueue = new ConcurrentListeningQueue<SetBooleanParameterPacket>(5);
 
    private final HumanoidReferenceFrames referenceFrames;
 
@@ -72,7 +75,9 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
 
       this.yoTime = yoTime;
 
-      attachNetworkListeningQueue(queue, WallPosePacket.class);
+      attachNetworkListeningQueue(wallPacketQueue, WallPosePacket.class);
+      
+      attachNetworkListeningQueue(confirmQueue, SetBooleanParameterPacket.class);
 
       setupStateMachine();
    }
@@ -157,7 +162,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
          @Override
          public boolean isDone()
          {
-            return queue.isNewPacketAvailable();
+            return wallPacketQueue.isNewPacketAvailable();
          }
       };
 
@@ -170,7 +175,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
             PrintTools.info("setBehaviorInput PLANNING " + yoTime.getDoubleValue());
 
             FramePose centerFramePose = new FramePose();
-            WallPosePacket latestPacket = queue.getLatestPacket();
+            WallPosePacket latestPacket = wallPacketQueue.getLatestPacket();
             centerFramePose.setPosition(latestPacket.getCenterPosition());
             centerFramePose.setOrientation(latestPacket.getCenterOrientation());
 
@@ -187,7 +192,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
             PrintTools.info("transform ");
             System.out.println(transform1);
 
-             ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(20.0);
+            ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(20.0);
 //            ConstrainedEndEffectorTrajectory endeffectorTrajectory = new CuttingWallTrajectory(centerFramePose.getPosition(),
 //                                                                                               computeWallOrientation(centerFramePose.getOrientation()),
 //                                                                                               latestPacket.getCuttingRadius(), 20.0);
@@ -210,7 +215,11 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
          protected void setBehaviorInput()
          {
             PrintTools.info("setBehaviorInput WAITING " + yoTime.getDoubleValue());
-
+         }
+         @Override
+         public boolean isDone()
+         {
+            return confirmQueue.isNewPacketAvailable();
          }
       };
 
