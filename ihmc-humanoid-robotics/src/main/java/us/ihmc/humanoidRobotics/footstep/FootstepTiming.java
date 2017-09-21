@@ -120,4 +120,14 @@ public class FootstepTiming
       swingStartTime = other.swingStartTime;
       executionStartTime = other.executionStartTime;
    }
+
+   public static FootstepTiming[] createTimings(int numberOfTimings)
+   {
+      FootstepTiming[] timings = new FootstepTiming[numberOfTimings];
+      for (int i = 0; i < numberOfTimings; i++)
+      {
+         timings[i] = new FootstepTiming();
+      }
+      return timings;
+   }
 }

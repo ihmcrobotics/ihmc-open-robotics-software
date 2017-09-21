@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -46,8 +47,10 @@ import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 
 import javafx.animation.AnimationTimer;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.Graphics3DSpotLight;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -1123,6 +1126,16 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    public void setGroundAppearance(AppearanceDefinition app)
    {
       graphics3dAdapter.setGroundAppearance(app);
+   }
+   
+   public void setupSky(String skyBox)
+   {
+      graphics3dAdapter.setupSky(skyBox);
+   }
+   
+   public void setupSky(String west, String east, String north, String south, String up, String down)
+   {
+      graphics3dAdapter.setupSky(west, east, north, south, up, down);
    }
 
    public void setGroundVisible(boolean isVisible)
@@ -3331,4 +3344,28 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       mainPanel.add(viewportPanel); //TODO: Why is this here? 
    }
 
+   public void clearDirectionalLights()
+   {
+      graphics3dAdapter.clearDirectionalLights();
+   }
+   
+   public void addDirectionalLight(Color color, Vector3D direction)
+   {
+      graphics3dAdapter.addDirectionalLight(color, direction);
+   }
+   
+   public void setAmbientLight(Color color)
+   {
+      graphics3dAdapter.setAmbientLight(color);
+   }
+   
+   public void addSpotLight(Graphics3DSpotLight spotLight)
+   {
+      graphics3dAdapter.addSpotLight(spotLight);
+   }
+
+   public void removeSpotLight(Graphics3DSpotLight spotLight)
+   {
+      graphics3dAdapter.removeSpotLight(spotLight);
+   }
 }

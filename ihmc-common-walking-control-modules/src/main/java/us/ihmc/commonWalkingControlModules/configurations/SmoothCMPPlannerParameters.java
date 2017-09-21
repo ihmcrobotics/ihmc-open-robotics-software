@@ -91,6 +91,11 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
       copOffsetBoundsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.08));
    }
 
+   public boolean planWithAngularMomentum()
+   {
+      return false;
+   }
+
    @Override
    /** {@inheritDoc} */
    public boolean useSmoothCMPPlanner()
@@ -370,5 +375,10 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
    public CoPSplineType getOrderOfCoPInterpolation()
    {
       return CoPSplineType.LINEAR;
+   }
+
+   public AngularMomentumEstimationParameters getAngularMomentumEstimationParameters()
+   {
+      return new AngularMomentumEstimationParameters();
    }
 }

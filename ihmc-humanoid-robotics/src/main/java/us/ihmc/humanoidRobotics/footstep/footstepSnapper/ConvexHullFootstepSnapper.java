@@ -202,7 +202,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       {
          throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
       }
-      footstep.setPredictedContactPointsFromPoint2ds(originalFootstep.getPredictedContactPoints());
+      footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints());
       footstep.setFootstepType(type);
       FramePose solePoseInWorld = new FramePose(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);
@@ -240,7 +240,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
    {
       // can only snap footsteps in world frame
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      
+
       FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
 
       //set to the sole pose
@@ -253,7 +253,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, pointList, defaultHeight);
       footstep.setFootstepType(type);
-      footstep.setPredictedContactPointsFromPoint2ds(originalFootstep.getPredictedContactPoints());
+      footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints());
       FramePose solePoseInWorld = new FramePose(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);
 

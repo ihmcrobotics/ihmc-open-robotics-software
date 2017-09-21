@@ -4,19 +4,18 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.8.2"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.5"
+      classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
    }
 }
-plugins {
-   id 'org.hidetake.ssh' version '2.9.0'
-   id 'org.ajoberstar.grgit' version '1.7.2'
-   id 'application'
-}
+
+apply plugin: "org.hidetake.ssh"
+apply plugin: "application"
 apply plugin: "us.ihmc.ihmc-build"
 
 ihmc {
    loadProductProperties("../product.properties")
-   
+
    configureDependencyResolution()
    configurePublications()
 }
@@ -24,12 +23,11 @@ ihmc {
 testSuites {
    def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
    bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
-   disableBambooConfigurationCheck = true
 }
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.2'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.3'
    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
    compile group: 'org.yaml', name: 'snakeyaml', version: '1.17' //1.11
    compile group: 'org.ejml', name: 'core', version: '0.30'
@@ -70,7 +68,7 @@ mainDependencies {
 
 testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
-   compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.16.8"
    compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: groupDependencyVersion
@@ -81,153 +79,131 @@ applicationName = "IHMCValkyrieAPI"
 mainClassName = "us.ihmc.valkyrie.ValkyrieROSAPISimulator"
 applicationDefaultJvmArgs = ["-Xmx4g"]
 
-startScripts {
-   outputs.upToDateWhen { false }
+if (ihmc.isBuildRoot())
+{
+   startScripts {
+      outputs.upToDateWhen { false }
 
-   doLast {
-      def simUnixScriptGazebo = file(outputDir.canonicalPath + "/IHMCValkyrieGazeboController")
-      simUnixScriptGazebo.text = unixScript.text.replace("IHMCValkyrieAPI", "IHMCValkyrieGazeboController").replace("us.ihmc.valkyrie.ValkyrieROSAPISimulator", "us.ihmc.valkyrie.gazebo.ValkyrieGazeboControllerFactory")
-      simUnixScriptGazebo.setExecutable(true)
-   }
-}
-
-applicationDistribution.from(startScripts.outputDir) {
-   into "bin"
-}
-
-remotes {
-   valkyrieRealtimeComputer {
-      host = project.hasProperty('valkyrie_link_ip') ? "${valkyrie_link_ip}" : "invalid"
-
-      // Set the username and password in ~/.gradle/gradle.properties.
-      user = project.hasProperty('valkyrie_realtime_username') ? "${valkyrie_realtime_username}" : "invalid"
-      password = project.hasProperty('valkyrie_realtime_password') ? "${valkyrie_realtime_password}" : "invalid"
-
-      knownHosts = allowAnyHosts
-   }
-
-   valkyrieNonRealtimeComputer {
-      host = project.hasProperty('valkyrie_zelda_ip') ? "${valkyrie_zelda_ip}" : "invalid"
-
-      // Set the username and password in ~/.gradle/gradle.properties.
-      user = project.hasProperty('valkyrie_realtime_username') ? "${valkyrie_realtime_username}" : "invalid"
-      password = project.hasProperty('valkyrie_realtime_password') ? "${valkyrie_realtime_password}" : "invalid"
-
-      knownHosts = allowAnyHosts
-   }
-}
-
-//jar {
-////   List depend = []
-////   configurations.runtime.each {
-////      if (!it.name.contains("IHMCHumanoidOperatorInterface"))
-////      {
-////         depend.add('lib/' + it.name)
-////      }
-////   }
-//
-//   manifest {
-//      attributes(
-//            "Created-By": "IHMC Gradle Build Script",
-//            "Implementation-Title": project.name,
-//            "Implementation-Version": project.version,
-//            "Implementation-Vendor": "IHMC",
-//
-//            "Bundle-Name": project.name,
-//            "Bundle-Version": project.version,
-//            "Bundle-License": "${project.ext.licenseURL}",
-//            "Bundle-Vendor": "IHMC",
-//            //'Class-Path': depend.join(' '))
-//      )
-//   }
-//}
-
-task deployLocal(dependsOn: jar) {
-   def directory = 'valkyrie'
-
-   doLast {
-      def dest = new File(System.properties['user.home'], directory)
-      def lib = new File(dest, 'lib')
-      lib.deleteDir();
-      lib.mkdirs();
-
-      //configurations.runtime.each {
-      //   if (!it.name.contains("IHMCHumanoidOperatorInterface"))
-      //   {
-      //      def src = file(it)
-      //      copy {
-      //         from src
-      //         into lib
-      //      }
-      //   }
-      //}
-
-      copy {
-         from jar.archivePath
-         into dest
-         rename { fileName -> "ValkyrieController.jar" }
+      doLast {
+         def simUnixScriptGazebo = file(outputDir.canonicalPath + "/IHMCValkyrieGazeboController")
+         simUnixScriptGazebo.text = unixScript.text.replace("IHMCValkyrieAPI", "IHMCValkyrieGazeboController").replace("us.ihmc.valkyrie.ValkyrieROSAPISimulator", "us.ihmc.valkyrie.gazebo.ValkyrieGazeboControllerFactory")
+         simUnixScriptGazebo.setExecutable(true)
       }
    }
-}
 
-task deploy(dependsOn: ['jar']) {
-   def projectDir = project.buildscript.sourceFile.parent
-   def directory = 'valkyrie'
+   applicationDistribution.from(startScripts.outputDir) {
+      into "bin"
+   }
 
-   doLast {
-      if (!project.hasProperty('valkyrie_realtime_username') || !project.hasProperty('valkyrie_realtime_password'))
-      {
-         println("Please set valkyrie_realtime_username and valkyrie_realtime_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
+   remotes {
+      valkyrieRealtimeComputer {
+         host = project.hasProperty('valkyrie_link_ip') ? "${valkyrie_link_ip}" : "invalid"
+
+         // Set the username and password in ~/.gradle/gradle.properties.
+         user = project.hasProperty('valkyrie_realtime_username') ? "${valkyrie_realtime_username}" : "invalid"
+         password = project.hasProperty('valkyrie_realtime_password') ? "${valkyrie_realtime_password}" : "invalid"
+
+         knownHosts = allowAnyHosts
       }
 
-      if (!project.hasProperty('valkyrie_link_ip') || !project.hasProperty('valkyrie_zelda_ip'))
-      {
-         println("Please set valkyrie_link_ip and valkyrie_zelda_ip in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
+      valkyrieNonRealtimeComputer {
+         host = project.hasProperty('valkyrie_zelda_ip') ? "${valkyrie_zelda_ip}" : "invalid"
+
+         // Set the username and password in ~/.gradle/gradle.properties.
+         user = project.hasProperty('valkyrie_realtime_username') ? "${valkyrie_realtime_username}" : "invalid"
+         password = project.hasProperty('valkyrie_realtime_password') ? "${valkyrie_realtime_password}" : "invalid"
+
+         knownHosts = allowAnyHosts
       }
+   }
 
-      ssh.run {
-         session(remotes.valkyrieRealtimeComputer) {
-            execute("rm -rf " + directory + "/lib")
-            execute("mkdir -p " + directory + "/lib")
-            execute("mkdir -p " + directory + "/Configurations")
+   task deployLocal(dependsOn: jar) {
+      ihmc.jarWithLibFolder()
+      def directory = 'valkyrie'
 
-            //configurations.runtime.each {
-            //   put it, directory + '/lib'
-            //}
+      doLast {
+         def dest = new File(System.properties['user.home'], directory)
+         def lib = new File(dest, 'lib')
+         lib.deleteDir();
+         lib.mkdirs();
 
-            put jar.archivePath, directory + '/ValkyrieController.jar'
-
-            def scriptDir = new File(projectDir, "launchScripts/")
-            def scriptDirCollection = files { scriptDir.listFiles() }
-            put scriptDirCollection, directory
-
-            scriptDirCollection.each {
-               execute 'chmod 777 ' + directory + '/' + it.name
+         configurations.runtime.each {
+            if (!it.name.contains("IHMCHumanoidOperatorInterface"))
+            {
+               def src = file(it)
+               copy {
+                  from src
+                  into lib
+               }
             }
          }
 
-         session(remotes.valkyrieNonRealtimeComputer) {
-            execute("rm -rf " + directory + "/lib")
-            execute("mkdir -p " + directory + "/lib")
-            execute("mkdir -p " + directory + "/Configurations")
+         copy {
+            from jar.archivePath
+            into dest
+            rename { fileName -> "ValkyrieController.jar" }
+         }
+      }
+   }
 
-            configurations.runtime.each {
-               put it, directory + '/lib'
+   task deploy(dependsOn: ['jar']) {
+      def projectDir = project.buildscript.sourceFile.parent
+      def directory = 'valkyrie'
+
+      doLast {
+         if (!project.hasProperty('valkyrie_realtime_username') || !project.hasProperty('valkyrie_realtime_password'))
+         {
+            println("Please set valkyrie_realtime_username and valkyrie_realtime_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
+         }
+
+         if (!project.hasProperty('valkyrie_link_ip') || !project.hasProperty('valkyrie_zelda_ip'))
+         {
+            println("Please set valkyrie_link_ip and valkyrie_zelda_ip in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
+         }
+
+         ssh.run {
+            session(remotes.valkyrieRealtimeComputer) {
+               execute("rm -rf " + directory + "/lib")
+               execute("mkdir -p " + directory + "/lib")
+               execute("mkdir -p " + directory + "/Configurations")
+
+               configurations.runtime.each {
+                  put it, directory + '/lib'
+               }
+
+               put jar.archivePath, directory + '/ValkyrieController.jar'
+
+               def scriptDir = new File(projectDir, "launchScripts/")
+               def scriptDirCollection = files { scriptDir.listFiles() }
+               put scriptDirCollection, directory
+
+               scriptDirCollection.each {
+                  execute 'chmod 777 ' + directory + '/' + it.name
+               }
             }
 
-            put jar.archivePath, directory + '/ValkyrieController.jar'
+            session(remotes.valkyrieNonRealtimeComputer) {
+               execute("rm -rf " + directory + "/lib")
+               execute("mkdir -p " + directory + "/lib")
+               execute("mkdir -p " + directory + "/Configurations")
 
-            def scriptDir = new File(projectDir, "launchScripts/")
-            def scriptDirCollection = files { scriptDir.listFiles() }
-            put scriptDirCollection, directory
+               configurations.runtime.each {
+                  put it, directory + '/lib'
+               }
 
-            scriptDirCollection.each {
-               execute 'chmod 777 ' + directory + '/' + it.name
+               put jar.archivePath, directory + '/ValkyrieController.jar'
+
+               def scriptDir = new File(projectDir, "launchScripts/")
+               def scriptDirCollection = files { scriptDir.listFiles() }
+               put scriptDirCollection, directory
+
+               scriptDirCollection.each {
+                  execute 'chmod 777 ' + directory + '/' + it.name
+               }
             }
          }
       }
    }
-}
 
 //task createRosJar(type: Jar) {
 //   def gitRepo;
@@ -258,3 +234,4 @@ task deploy(dependsOn: ['jar']) {
 //   from createRosJar
 //   into "lib/"
 //}
+}

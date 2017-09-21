@@ -1,8 +1,11 @@
 package us.ihmc.jMonkeyEngineToolkit;
 
+import java.awt.Color;
 import java.awt.GraphicsDevice;
 import java.net.URL;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DSpotLight;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
@@ -17,6 +20,10 @@ import us.ihmc.robotics.lidar.LidarScanParameters;
 public interface Graphics3DAdapter 
 {
    public void setupSky();
+   
+   public void setupSky(String skyBox);
+   
+   public void setupSky(String west, String east, String north, String south, String up, String down);
    
    public void addRootNode(Graphics3DNode rootNode);
 
@@ -63,4 +70,16 @@ public interface Graphics3DAdapter
    public void play();
 
    public void pause();
+   
+   public void addSpotLight(Graphics3DSpotLight spotLight);
+   
+   public void removeSpotLight(Graphics3DSpotLight spotLight);
+   
+   public void addDirectionalLight(Color color, Vector3D direction);
+   
+   void clearDirectionalLights();
+   
+   void setAmbientLight(Color color);
+
+   
 }

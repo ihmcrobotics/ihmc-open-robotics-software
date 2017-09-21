@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.8.2"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.5"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -19,13 +19,12 @@ ihmc {
 testSuites {
    def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
    bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
-   disableBambooConfigurationCheck = true
 }
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
    compile group: 'us.ihmc', name: 'euclid', version: '0.6.0'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.2'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.3'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
    compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
    compile group: 'org.ejml', name: 'core', version: '0.30'
@@ -51,7 +50,7 @@ mainDependencies {
 
 testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
-   compile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.16.8"
    compile group: 'com.google.caliper', name: 'caliper', version: '1.0-beta-2'
    compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion

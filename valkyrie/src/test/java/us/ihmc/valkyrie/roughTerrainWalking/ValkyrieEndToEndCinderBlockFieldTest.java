@@ -30,4 +30,10 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
+   
+   @Override
+   public void testWalkingOverCinderBlockField() throws Exception
+   {
+      super.testWalkingOverCinderBlockField();
+   }
 }

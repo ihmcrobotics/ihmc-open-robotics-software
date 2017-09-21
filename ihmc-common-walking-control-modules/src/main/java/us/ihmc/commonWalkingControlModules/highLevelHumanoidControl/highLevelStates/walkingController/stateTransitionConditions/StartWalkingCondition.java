@@ -18,12 +18,6 @@ public class StartWalkingCondition implements StateTransitionCondition
    @Override
    public boolean checkCondition()
    {
-      boolean transferringToThisRobotSide;
-      if (walkingMessageHandler.hasUpcomingFootsteps())
-         transferringToThisRobotSide = transferToSide == walkingMessageHandler.peek(0).getRobotSide().getOppositeSide();
-      else
-         transferringToThisRobotSide = false;
-
-      return transferringToThisRobotSide;
+      return walkingMessageHandler.isNextFootstepFor(transferToSide.getOppositeSide());
    }
 }

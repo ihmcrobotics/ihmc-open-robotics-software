@@ -65,6 +65,12 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
       copOffsetBoundsInFootFrame.put(CoPPointName.TOE_COP, new Vector2D(0.0, 0.08));
    }
 
+   @Override
+   public boolean planWithAngularMomentum()
+   {
+      return true;
+   }
+
    /** {@inheritDoc} */
    @Override
    public double getStepLengthThresholdForExitCoPOnToesWhenSteppingDown()
