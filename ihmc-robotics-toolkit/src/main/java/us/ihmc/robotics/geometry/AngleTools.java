@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import java.util.Random;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -219,7 +220,7 @@ public class AngleTools
    {
       int arraySize = numberOfAngles;
       double epsilon = stayThisFarAwayFromPlusMinus2PI;
-      
+
       if (includeZero && !includePlusMinusPI)
       {
          arraySize += 1;
@@ -235,13 +236,13 @@ public class AngleTools
 
       double thetaMin = -2.0 * Math.PI + stayThisFarAwayFromPlusMinus2PI;
       double thetaMax = 2.0 * Math.PI - stayThisFarAwayFromPlusMinus2PI;
-      double deltaTheta = Math.abs(thetaMax - thetaMin) / (numberOfAngles-1);
-      
+      double deltaTheta = Math.abs(thetaMax - thetaMin) / (numberOfAngles - 1);
+
       double[] ret = new double[arraySize];
 
       for (int i = 0; i < numberOfAngles; i++)
       {
-         ret[i] = thetaMin + deltaTheta*i;
+         ret[i] = thetaMin + deltaTheta * i;
 
          boolean epsilonEqualToZero = MathTools.epsilonEquals(Math.abs(ret[i]), 0.0, epsilon);
          boolean epsilonEqualToPlusMinusPI = MathTools.epsilonEquals(Math.abs(ret[i]), Math.PI, epsilon);
@@ -298,6 +299,25 @@ public class AngleTools
    }
 
    /**
+    * Returns an angle between two points + heading Offset from -PI to PI. 
+    *
+    * @param startPose initial position
+    * @param endPoint end position
+    * @return number between -PI and PI
+    */
+   public static double calculateHeading(Point2D32 startPose, Point2D32 endPoint)
+   {
+      double deltaX = endPoint.getX() - startPose.getX();
+      double deltaY = endPoint.getY() - startPose.getY();
+      double heading;
+
+      double pathHeading = Math.atan2(deltaY, deltaX);
+      heading = AngleTools.trimAngleMinusPiToPi(pathHeading);
+
+      return heading;
+   }
+
+   /**
     * Pass in a vector. Get its angle in polar coordinates.
     * 
     * @param vx
@@ -307,7 +327,7 @@ public class AngleTools
    public static double angleFromZeroToTwoPi(double vx, double vy)
    {
       double angleFromNegtivePiToPi = Math.atan2(vy, vx);
-      
+
       if (angleFromNegtivePiToPi < 0.0)
       {
          return 2.0 * Math.PI + angleFromNegtivePiToPi;
