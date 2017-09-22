@@ -4,6 +4,8 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.aStar.FootstepNode;
+import us.ihmc.footstepPlanning.aStar.FootstepNodeChecker;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -14,17 +16,17 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class BipedalFootstepPlannerNodeChecker
+public class BipedalFootstepPlannerNodeChecker implements FootstepNodeChecker
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private BipedalFootstepPlannerNode startNode;
    private BipedalFootstepPlannerListener listener;
    private PlanarRegionsList planarRegionsList;
    private BipedalFootstepPlannerSnapAndWiggler snapAndWiggler;
    private BipedalFootstepPlannerParameters parameters;
    private final PlanarRegionBaseOfCliffAvoider baseOfCliffAvoider;
    private SideDependentList<ConvexPolygon2D> controllerPolygonsInSoleFrame;
+   private final ConvexPolygon2D footholdIntersection = new ConvexPolygon2D();
 
    private final YoDouble footArea = new YoDouble("footArea", registry);
    private final YoDouble totalArea = new YoDouble("totalArea", registry);
@@ -45,15 +47,10 @@ public class BipedalFootstepPlannerNodeChecker
       this.baseOfCliffAvoider = new PlanarRegionBaseOfCliffAvoider(registry, graphicsListRegistry);
    }
 
-   public void setStartNode(BipedalFootstepPlannerNode startNode)
-   {
-      this.startNode = startNode;
-   }
-
-   public void setFeetPolygons(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, SideDependentList<ConvexPolygon2D> controllerPolygonsInSoleFrame)
+   public void setFeetPolygons(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame)
    {
       this.snapAndWiggler.setFootPolygonsInSoleFrame(footPolygonsInSoleFrame);
-      this.controllerPolygonsInSoleFrame = controllerPolygonsInSoleFrame;
+      this.controllerPolygonsInSoleFrame = footPolygonsInSoleFrame;
    }
 
    public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
@@ -65,7 +62,7 @@ public class BipedalFootstepPlannerNodeChecker
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
-      this.snapAndWiggler.setPlanarRegionsList(planarRegionsList);
+      this.snapAndWiggler.setPlanarRegions(planarRegionsList);
 
       if (listener != null)
       {
@@ -73,69 +70,38 @@ public class BipedalFootstepPlannerNodeChecker
       }
    }
 
-   public boolean snapNodeAndCheckIfAcceptableToExpand(BipedalFootstepPlannerNode nodeToExpand)
+   @Override
+   public boolean isNodeValid(FootstepNode nodeToExpand, FootstepNode previousNode)
    {
-      // Make sure popped node is a good one and can be expanded...
-      boolean snapSucceded = snapToPlanarRegionAndCheckIfGoodSnap(nodeToExpand);
-      if (!snapSucceded)
+      RigidBodyTransform snapTransform = snapAndWiggler.snapFootstepNode(nodeToExpand, footholdIntersection);
+
+      if (snapTransform == null)
          return false;
 
-      boolean goodFootstep = checkIfGoodFootstep(nodeToExpand);
+      RigidBodyTransform snappedSoleTransform = BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(nodeToExpand, snapTransform);
+      baseOfCliffAvoider.shiftAwayFromCliffBottoms(parameters, planarRegionsList, snappedSoleTransform);
+
+      boolean isEnoughArea = checkIfEnoughArea(nodeToExpand, footholdIntersection);
+      if (!isEnoughArea)
+         return false;
+
+      if(previousNode == null)
+         return true;
+
+      RigidBodyTransform previousSnapTransform = snapAndWiggler.snapFootstepNode(previousNode, null);
+      RigidBodyTransform previousSnappedSoleTransform = BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(previousNode, previousSnapTransform);
+      boolean goodFootstep = checkIfGoodFootstep(nodeToExpand, snappedSoleTransform, previousSnappedSoleTransform);
       if (!goodFootstep)
          return false;
-
-      boolean differentFromParent = checkIfDifferentFromGrandParent(nodeToExpand);
-      {
-         if (!differentFromParent)
-            return false;
-      }
 
       notifyListenerNodeUnderConsiderationWasSuccessful(nodeToExpand);
 
       return true;
    }
 
-   private boolean snapToPlanarRegionAndCheckIfGoodSnap(BipedalFootstepPlannerNode nodeToExpand)
+   private boolean checkIfEnoughArea(FootstepNode nodeToExpand, ConvexPolygon2D footholdIntersection)
    {
-      if (planarRegionsList != null)
-      {
-         PlanarRegion planarRegion = new PlanarRegion();
-         RigidBodyTransform nodeToExpandSnapTransform = snapAndWiggler.getSnapAndWiggleTransform(parameters.getWiggleInsideDelta(), nodeToExpand, planarRegion);
-
-         if (nodeToExpandSnapTransform == null)
-         {
-            return false;
-         }
-
-         RigidBodyTransform snappedSoleTransform = BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(nodeToExpand, nodeToExpandSnapTransform);
-         baseOfCliffAvoider.shiftAwayFromCliffBottoms(parameters, planarRegionsList, snappedSoleTransform);
-
-         boolean isEnoughArea = checkIfEnoughArea(nodeToExpand, planarRegion);
-         if (!isEnoughArea)
-            return false;
-      }
-
-      return true;
-   }
-
-   private boolean checkIfEnoughArea(BipedalFootstepPlannerNode nodeToExpand, PlanarRegion planarRegion)
-   {
-      RigidBodyTransform nodeToExpandTransform = new RigidBodyTransform();
-      nodeToExpand.getSoleTransform(nodeToExpandTransform);
-
-      ConvexPolygon2D snappedPolygon = controllerPolygonsInSoleFrame.get(nodeToExpand.getRobotSide());
-      snappedPolygon.update();
-      footArea.set(snappedPolygon.getArea());
-
-      ConvexPolygon2D footholdPolygon = new ConvexPolygon2D();
-      totalArea.set(planarRegion.getPolygonIntersectionAreaWhenSnapped(snappedPolygon, nodeToExpandTransform, footholdPolygon));
-
-      nodeToExpand.setPercentageOfFoothold(totalArea.getDoubleValue() / footArea.getDoubleValue());
-
-      if (nodeToExpand.isPartialFoothold())
-      {
-         nodeToExpand.setPartialFootholdPolygon(footholdPolygon);
-      }
+      totalArea.set(footholdIntersection.getArea());
 
       if (totalArea.getDoubleValue() < parameters.getMinimumFootholdPercent() * footArea.getDoubleValue())
       {
@@ -146,19 +112,12 @@ public class BipedalFootstepPlannerNodeChecker
       return true;
    }
 
-   private boolean checkIfGoodFootstep(BipedalFootstepPlannerNode nodeToExpand)
+   private boolean checkIfGoodFootstep(FootstepNode nodeToExpand, RigidBodyTransform soleTransform, RigidBodyTransform previousSoleTransform)
    {
-      BipedalFootstepPlannerNode parentNode = nodeToExpand.getParentNode();
-      if (parentNode == null)
-         return true;
-
-      parentNode.getSoleTransform(transform);
-
-      parentSoleFrame.setTransformAndUpdate(transform);
+      parentSoleFrame.setTransformAndUpdate(previousSoleTransform);
       parentSoleZupFrame.update();
 
-      nodeToExpand.getSoleTransform(transform);
-      nodeSoleFrame.setTransformAndUpdate(transform);
+      nodeSoleFrame.setTransformAndUpdate(soleTransform);
 
       solePositionInParentZUpFrame.setToZero(nodeSoleFrame);
       solePositionInParentZUpFrame.changeFrame(parentSoleZupFrame);
@@ -217,33 +176,7 @@ public class BipedalFootstepPlannerNodeChecker
       return Math.sqrt(point.getX() * point.getX() + point.getY() * point.getY());
    }
 
-   private boolean checkIfDifferentFromGrandParent(BipedalFootstepPlannerNode nodeToExpand)
-   {
-      // OK to step in place if at goal.
-      if (nodeToExpand.isAtGoal())
-         return true;
-
-      BipedalFootstepPlannerNode parentNode = nodeToExpand.getParentNode();
-      if (parentNode == null)
-         return true;
-
-      BipedalFootstepPlannerNode grandParentNode = parentNode.getParentNode();
-      if (grandParentNode == null)
-      {
-         //TODO: How to check in place step when first step?
-         return true;
-      }
-
-      if (grandParentNode.equals(nodeToExpand))
-      {
-         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_IN_PLACE);
-         return false;
-      }
-
-      return true;
-   }
-
-   private void notifyListenerNodeUnderConsiderationWasSuccessful(BipedalFootstepPlannerNode node)
+   private void notifyListenerNodeUnderConsiderationWasSuccessful(FootstepNode node)
    {
       if (listener != null)
       {
@@ -251,7 +184,7 @@ public class BipedalFootstepPlannerNodeChecker
       }
    }
 
-   private void notifyListenerNodeUnderConsideration(BipedalFootstepPlannerNode nodeToExpand)
+   private void notifyListenerNodeUnderConsideration(FootstepNode nodeToExpand)
    {
       if (listener != null)
       {
@@ -259,7 +192,7 @@ public class BipedalFootstepPlannerNodeChecker
       }
    }
 
-   private void notifyListenerNodeUnderConsiderationWasRejected(BipedalFootstepPlannerNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
+   private void notifyListenerNodeUnderConsiderationWasRejected(FootstepNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       if (listener != null)
       {

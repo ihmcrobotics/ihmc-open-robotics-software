@@ -9,7 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNode;
+import us.ihmc.footstepPlanning.aStar.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeUtils;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -18,7 +18,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertTrue;
 
-public class BipedalFootstepPlannerNodeTest
+public class FootstepNodeTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
@@ -26,7 +26,7 @@ public class BipedalFootstepPlannerNodeTest
    {
       Random random = new Random(3823L);
       int numTrials = 100;
-      BipedalFootstepPlannerNode nodeA, nodeB;
+      FootstepNode nodeA, nodeB;
 
       for (int i = 0; i < numTrials; i++)
       {
@@ -37,8 +37,8 @@ public class BipedalFootstepPlannerNodeTest
          double y = EuclidCoreRandomTools.generateRandomDouble(random, 1.0);
          double yaw = EuclidCoreRandomTools.generateRandomDouble(random, 1.0);
 
-         nodeA = new BipedalFootstepPlannerNode(x, y, yaw, robotSide);
-         nodeB = new BipedalFootstepPlannerNode(x, y, yaw, robotSide);
+         nodeA = new FootstepNode(x, y, yaw, robotSide);
+         nodeB = new FootstepNode(x, y, yaw, robotSide);
 
          assertTrue(nodeA.equals(nodeB));
          assertTrue(nodeA.hashCode() == nodeB.hashCode());
@@ -52,7 +52,7 @@ public class BipedalFootstepPlannerNodeTest
       Vector3D soleTranslation = new Vector3D();
       double yaw = 0.0;
       RigidBodyTransform soleTransform = new RigidBodyTransform(new AxisAngle(0.0, 0.0, 1.0, yaw), soleTranslation);
-      BipedalFootstepPlannerNode node = new BipedalFootstepPlannerNode(soleTranslation.getX(), soleTranslation.getY(), yaw, RobotSide.LEFT);
+      FootstepNode node = new FootstepNode(soleTranslation.getX(), soleTranslation.getY(), yaw, RobotSide.LEFT);
 
       Vector2D shiftVector = new Vector2D(1.0, 2.0);
       RigidBodyTransform shiftedSoleTransform = BipedalFootstepPlannerNodeUtils.shiftInSoleFrame(shiftVector, soleTransform);
@@ -63,7 +63,7 @@ public class BipedalFootstepPlannerNodeTest
       yaw = Math.PI/2.0;
       soleTransform = new RigidBodyTransform(new AxisAngle(0.0, 0.0, 1.0, yaw), soleTranslation);
       soleTransform.setRotationEulerAndZeroTranslation(0.0, 0.0, Math.PI/2.0);
-      node = new BipedalFootstepPlannerNode(soleTranslation.getX(), soleTranslation.getY(), yaw, RobotSide.LEFT);
+      node = new FootstepNode(soleTranslation.getX(), soleTranslation.getY(), yaw, RobotSide.LEFT);
 
       shiftVector = new Vector2D(1.0, 2.0);
       shiftedSoleTransform = BipedalFootstepPlannerNodeUtils.shiftInSoleFrame(shiftVector, soleTransform);

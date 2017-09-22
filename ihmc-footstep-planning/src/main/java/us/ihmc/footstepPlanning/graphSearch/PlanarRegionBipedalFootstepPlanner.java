@@ -4,15 +4,17 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.footstepPlanning.FootstepPlannerGoal;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.aStar.*;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -26,41 +28,43 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final Deque<BipedalFootstepPlannerNode> stack = new ArrayDeque<BipedalFootstepPlannerNode>();
-
    private final BipedalFootstepPlannerParameters parameters;
-   private final PlanarRegionPotentialNextStepCalculator planarRegionPotentialNextStepCalculator;
-   private final HashSet<BipedalFootstepPlannerNode> expandedNodes = new HashSet<>();
-
-   private SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
-   private BipedalFootstepPlannerNode startNode;
-
    private final YoInteger maximumNumberOfNodesToExpand = new YoInteger("maximumNumberOfNodesToExpand", registry);
-   private final YoInteger numberOfNodesExpanded = new YoInteger("numberOfNodesExpanded", registry);
    private final YoDouble timeout = new YoDouble("Timeout", registry);
+   private final YoBoolean exitAfterInitialSolution = new YoBoolean("exitAfterInitialSolution", registry);
+
+   private final FootstepGraph footstepGraph;
+   private final Deque<FootstepNode> stack = new ArrayDeque<FootstepNode>();
+   private final FootstepNodeExpansion nodeExpansion;
+   private final FootstepNodeSnapper snapper;
+   private final FootstepNodeChecker checker;
+   private final FootstepCost stepCostCalculator;
+   private SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
+   private FootstepNode startNode;
+   private final SideDependentList<FootstepNode> goalNodes = new SideDependentList<>();
+   private FootstepNode bestGoalNode;
+
+   private BipedalFootstepPlannerListener listener;
+   private final YoInteger numberOfNodesExpanded = new YoInteger("numberOfNodesExpanded", registry);
    private final YoLong planningStartTime = new YoLong("planningStartTime", registry);
 
-   private final ArrayList<BipedalFootstepPlannerNode> goalNodes = new ArrayList<>();
-   private final YoBoolean exitAfterInitialSolution = new YoBoolean("exitAfterInitialSolution", registry);
-   private BipedalFootstepPlannerNode bestGoalNode;
-   private PlanarRegionsList planarRegionsList;
-
-   protected BipedalFootstepPlannerListener listener;
-
-   public PlanarRegionBipedalFootstepPlanner(BipedalFootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
+   public PlanarRegionBipedalFootstepPlanner(BipedalFootstepPlannerParameters parameters, FootstepNodeExpansion nodeExpansion, FootstepNodeSnapper snapper,
+                                             FootstepNodeChecker checker, FootstepCost stepCostCalculator, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       this.parameters = parameters;
-
-      planarRegionPotentialNextStepCalculator = new PlanarRegionPotentialNextStepCalculator(parameters, parentRegistry, null);
       exitAfterInitialSolution.set(true);
       timeout.set(Double.POSITIVE_INFINITY);
+      this.nodeExpansion = nodeExpansion;
+      this.footstepGraph = new FootstepGraph();
+      this.snapper = snapper;
+      this.checker = checker;
+      this.stepCostCalculator = stepCostCalculator;
    }
 
    public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
    {
       this.listener = listener;
-      planarRegionPotentialNextStepCalculator.setBipedalFootstepPlannerListener(listener);
    }
 
    public void setMaximumNumberOfNodesToExpand(int maximumNumberOfNodesToExpand)
@@ -81,13 +85,11 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    public void setFeetPolygons(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
-      planarRegionPotentialNextStepCalculator.setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
    }
 
    public void setFeetPolygons(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, SideDependentList<ConvexPolygon2D> controllerPolygonsInSoleFrame)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
-      planarRegionPotentialNextStepCalculator.setFeetPolygons(footPolygonsInSoleFrame, controllerPolygonsInSoleFrame);
    }
 
    public SideDependentList<ConvexPolygon2D> getFootPolygonsInSoleFrame()
@@ -95,100 +97,126 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       return footPolygonsInSoleFrame;
    }
 
-   protected boolean initialStanceFootWasSet = false;
-   protected boolean goalWasSet = false;
-
    @Override
    public final void setInitialStanceFoot(FramePose stanceFootPose, RobotSide initialSide)
    {
       stanceFootPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      startNode = new BipedalFootstepPlannerNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), initialSide);
-      initialStanceFootWasSet = true;
+      startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), initialSide);
    }
 
    @Override
    public final void setGoal(FootstepPlannerGoal goal)
    {
-      planarRegionPotentialNextStepCalculator.setGoal(goal);
-      goalWasSet = true;
+      checkGoalType(goal);
+      FramePose goalPose = goal.getGoalPoseBetweenFeet();
+      ReferenceFrame goalFrame = new PoseReferenceFrame("GoalFrame", goalPose);
+
+      for (RobotSide side : RobotSide.values)
+      {
+         FramePose goalNodePose = new FramePose(goalFrame);
+         goalNodePose.setY(side.negateIfRightSide(parameters.getIdealFootstepWidth() / 2.0));
+         goalNodePose.changeFrame(goalPose.getReferenceFrame());
+         FootstepNode goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), side);
+         goalNodes.put(side, goalNode);
+      }
+   }
+
+   private void checkGoalType(FootstepPlannerGoal goal)
+   {
+      FootstepPlannerGoalType supportedGoalType = FootstepPlannerGoalType.POSE_BETWEEN_FEET;
+      if (!(goal.getFootstepPlannerGoalType() == supportedGoalType))
+         throw new RuntimeException("Planner does not support goals other then " + supportedGoalType);
    }
 
    @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
-      this.planarRegionsList = planarRegionsList;
-      planarRegionPotentialNextStepCalculator.setPlanarRegions(planarRegionsList);
+      checker.setPlanarRegions(planarRegionsList);
+      snapper.setPlanarRegions(planarRegionsList);
    }
 
    @Override
    public FootstepPlan getPlan()
    {
-      if (bestGoalNode == null)
+      if (!footstepGraph.doesNodeExist(bestGoalNode))
          return null;
 
-      return BipedalFootstepPlannerNodeUtils.createFootstepPlanFromEndNode(bestGoalNode, planarRegionsList, parameters, footPolygonsInSoleFrame);
+      FootstepPlan plan = new FootstepPlan();
+      List<FootstepNode> path = footstepGraph.getPathFromStart(bestGoalNode);
+      for (int i = 1; i < path.size(); i++)
+      {
+         RobotSide robotSide = path.get(i).getRobotSide();
+         RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i), null);
+
+         RigidBodyTransform footstepPose = new RigidBodyTransform();
+         footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());
+         footstepPose.setTranslationX(path.get(i).getX());
+         footstepPose.setTranslationY(path.get(i).getY());
+         snapTransform.transform(footstepPose);
+
+         plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), footstepPose));
+      }
+
+      return plan;
    }
 
-   protected void initialize()
+   private void initialize()
    {
       stack.clear();
-      notifiyListenersStartNodeWasAdded(startNode);
       stack.push(startNode);
-      expandedNodes.clear();
+      footstepGraph.initialize(startNode);
+      notifiyListenersStartNodeWasAdded(startNode);
+
+      numberOfNodesExpanded.set(0);
+      planningStartTime.set(System.nanoTime());
+      bestGoalNode = null;
    }
 
    @Override
    public FootstepPlanningResult plan()
    {
-      bestGoalNode = null;
-      goalNodes.clear();
       double smallestCostToGoal = Double.POSITIVE_INFINITY;
-
-      if (!initialStanceFootWasSet || !goalWasSet)
-      {
-         return FootstepPlanningResult.NO_PATH_EXISTS;
-      }
-
       initialize();
-      planarRegionPotentialNextStepCalculator.setStartNode(startNode);
-      numberOfNodesExpanded.set(0);
-      planningStartTime.set(System.nanoTime());
 
       while (!stack.isEmpty())
       {
-         BipedalFootstepPlannerNode nodeToExpand;
+         numberOfNodesExpanded.increment();
+
+         FootstepNode nodeToExpand;
          // find a path to the goal fast using depth first then refine using breath first
          if (bestGoalNode == null)
             nodeToExpand = stack.pop();
          else
             nodeToExpand = stack.pollLast();
 
-         // if going to the node is more expensive then going to the goal there is no point in expanding it.
-         double costToNode = BipedalFootstepPlannerNodeUtils.getCostFromStartToNode(nodeToExpand);
-         if (costToNode > smallestCostToGoal)
-            continue;
-
-         // if we already found this node make sure we update its parent in case we found a better path here.
-         if (expandedNodes.contains(nodeToExpand))
-            continue;
-         expandedNodes.add(nodeToExpand);
-
-         numberOfNodesExpanded.increment();
          notifyListenerNodeIsBeingExpanded(nodeToExpand);
 
-         if (nodeToExpand.isAtGoal())
+         if (goalNodes.get(nodeToExpand.getRobotSide()).equals(nodeToExpand))
          {
-            goalNodes.add(nodeToExpand);
-            smallestCostToGoal = updateGoalPath(smallestCostToGoal);
+            bestGoalNode = goalNodes.get(nodeToExpand.getRobotSide());
             if (exitAfterInitialSolution.getBooleanValue())
                break;
+            else
+               continue;
          }
-         else
-            expandChildrenAndAddNodes(stack, nodeToExpand, smallestCostToGoal);
 
-         // keep checking if the goal cost decreased from time to time
-         if (numberOfNodesExpanded.getIntegerValue() % 500 == 0)
-            smallestCostToGoal = updateGoalPath(smallestCostToGoal);
+         HashSet<FootstepNode> childNodes = nodeExpansion.expandNode(nodeToExpand);
+         for (FootstepNode childNode : childNodes)
+         {
+            if (!checker.isNodeValid(childNode, nodeToExpand))
+               continue;
+
+            // if going to the node is more expensive then going to the goal there is no point in expanding it.
+            double stepCost = stepCostCalculator.compute(nodeToExpand, childNode);
+            if (stepCost + footstepGraph.getCostFromStart(nodeToExpand) > smallestCostToGoal)
+               continue;
+
+            // only add to stack if the node hasn't been explored
+            if (!footstepGraph.doesNodeExist(childNode))
+               stack.add(childNode);
+
+            footstepGraph.checkAndSetEdge(nodeToExpand, childNode, stepCost);
+         }
 
          if (numberOfNodesExpanded.getIntegerValue() > maximumNumberOfNodesToExpand.getIntegerValue())
             break;
@@ -198,61 +226,18 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             break;
       }
 
-      if (goalNodes.isEmpty())
+      if (bestGoalNode == null)
       {
          notifyListenerSolutionWasNotFound();
          return FootstepPlanningResult.NO_PATH_EXISTS;
       }
-
-      updateGoalPath(smallestCostToGoal);
 
       if (stack.isEmpty())
          return FootstepPlanningResult.OPTIMAL_SOLUTION;
       return FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
    }
 
-   private double updateGoalPath(double smallestCostToGoal)
-   {
-      if (goalNodes.isEmpty())
-         return Double.POSITIVE_INFINITY;
-
-      Collections.sort(goalNodes, new Comparator<BipedalFootstepPlannerNode>()
-      {
-         @Override
-         public int compare(BipedalFootstepPlannerNode o1, BipedalFootstepPlannerNode o2)
-         {
-            double cost1 = BipedalFootstepPlannerNodeUtils.getCostFromStartToNode(o1);
-            double cost2 = BipedalFootstepPlannerNodeUtils.getCostFromStartToNode(o2);
-            if(cost1 == cost2) return 0;
-            return cost1 < cost2 ? -1 : 1;
-         }
-      });
-
-      bestGoalNode = goalNodes.get(0);
-      double costToGoal = BipedalFootstepPlannerNodeUtils.getCostFromStartToNode(bestGoalNode);
-      if (costToGoal < smallestCostToGoal)
-      {
-         PrintTools.info("Reduced cost to goal: " + costToGoal);
-         smallestCostToGoal = costToGoal;
-      }
-
-      return smallestCostToGoal;
-   }
-
-   protected void expandChildrenAndAddNodes(Deque<BipedalFootstepPlannerNode> stack, BipedalFootstepPlannerNode nodeToExpand, double smallestCostToGoal)
-   {
-      ArrayList<BipedalFootstepPlannerNode> nodesToAddFromWorstToBest = planarRegionPotentialNextStepCalculator.computeChildrenNodes(nodeToExpand, smallestCostToGoal);
-
-      for (BipedalFootstepPlannerNode node : nodesToAddFromWorstToBest)
-      {
-         if (BipedalFootstepPlannerNodeUtils.getCostFromStartToNode(node) > smallestCostToGoal)
-            continue;
-
-         stack.push(node);
-      }
-   }
-
-   protected void notifyListenerSolutionWasFound(FootstepPlan footstepPlan)
+   private void notifyListenerSolutionWasFound(FootstepPlan footstepPlan)
    {
       if (listener != null)
       {
@@ -260,7 +245,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   protected void notifyListenerSolutionWasNotFound()
+   private void notifyListenerSolutionWasNotFound()
    {
       if (listener != null)
       {
@@ -268,7 +253,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   protected void notifyListenerNodeIsBeingExpanded(BipedalFootstepPlannerNode nodeToExpand)
+   private void notifyListenerNodeIsBeingExpanded(FootstepNode nodeToExpand)
    {
       if (listener != null)
       {
@@ -276,7 +261,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       }
    }
 
-   protected void notifiyListenersStartNodeWasAdded(BipedalFootstepPlannerNode startNode)
+   private void notifiyListenersStartNodeWasAdded(FootstepNode startNode)
    {
       if (listener != null)
       {
