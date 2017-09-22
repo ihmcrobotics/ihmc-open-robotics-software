@@ -155,9 +155,8 @@ public class JavaFXGraphicsObject extends Graphics3DInstructionExecutor
 
    private static Material convertMaterial(AppearanceDefinition appearance)
    {
-      Color color = new Color(appearance.getColor().getX(), appearance.getColor().getY(), appearance.getColor().getZ(), appearance.getTransparency());
-      PhongMaterial res = new PhongMaterial();
-      res.setDiffuseColor(color);
+      Color color = new Color(appearance.getColor().getX(), appearance.getColor().getY(), appearance.getColor().getZ(), 1.0 - appearance.getTransparency());
+      PhongMaterial res = new PhongMaterial(color);
       res.setSpecularColor(Color.WHITE);
       return res;
    }
