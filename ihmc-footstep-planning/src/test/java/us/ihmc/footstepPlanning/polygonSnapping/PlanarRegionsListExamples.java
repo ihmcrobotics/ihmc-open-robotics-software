@@ -6,10 +6,19 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class PlanarRegionsListExamples
 {
@@ -200,5 +209,144 @@ public class PlanarRegionsListExamples
       convexPolygon.addVertex(lengthX / 2.0, -widthY / 2.0);
       convexPolygon.update();
       return convexPolygon;
+   }
+
+   public static PlanarRegionsList createBodyPathPlannerTestEnvironment()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      double extrusionDistance = -0.05;
+
+      // starting plane
+      generator.translate(1.0, 0.5, 0.0);
+      generator.addRectangle(2.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.identity();
+
+      // long plane on the start side
+      generator.translate(2.5, -3.5, 0.0);
+      generator.addRectangle(1.0 + extrusionDistance, 13.0 + extrusionDistance);
+      generator.identity();
+
+      // narrow passage
+      double wallSeparation = 0.4;
+      double wallWidth = 0.5;
+      double wallHeight = 1.0;
+
+      generator.translate(4.5, 2.5, 0.0);
+      generator.addRectangle(3.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.translate(-0.5 * wallHeight, 0.5 * (wallSeparation + wallWidth), 0.0);
+      generator.addRectangle(wallHeight, wallWidth);
+      generator.translate(0.0, -2.0 * 0.5 * (wallSeparation + wallWidth), 0.0);
+      generator.addRectangle(wallHeight, wallWidth);
+      generator.identity();
+
+      // high-sloped ramp
+      generator.translate(3.5, 0.5, 0.5);
+      generator.rotate(-0.25 * Math.PI, Axis.Y);
+      generator.addRectangle(Math.sqrt(2.0), 1.0);
+      generator.identity();
+      generator.translate(4.5, 0.5, 1.0);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.identity();
+      generator.translate(5.5, 0.5, 0.5);
+      generator.rotate(0.25 * Math.PI, Axis.Y);
+      generator.addRectangle(Math.sqrt(2.0), 1.0);
+      generator.identity();
+
+      // large step down
+      double stepDownHeight = 0.4;
+      generator.translate(3.5, -1.5, 0.0);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.translate(1.0, 0.0, - stepDownHeight);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.translate(1.0, 0.0, stepDownHeight);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.identity();
+
+      // large step up
+      double stepUpHeight = 0.4;
+      generator.translate(3.5, -3.5, 0.0);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.translate(1.0, 0.0, stepUpHeight);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.translate(1.0, 0.0, - stepUpHeight);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.identity();
+
+      // barrier
+      double barrierHeight = 1.5;
+      double barrierWidth = 0.8;
+
+      generator.translate(4.5, -5.5, 0.0);
+      generator.addRectangle(3.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.translate(0.0, 0.0, 0.5 * barrierHeight);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.addRectangle(barrierHeight, barrierWidth);
+      generator.identity();
+
+      // long gap
+      generator.translate(3.5, -7.5, 0.0);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.translate(2.0, 0.0, 0.0);
+      generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.identity();
+
+      // long plane on the goal side
+      generator.translate(6.5, -3.5, 0.01);
+      generator.addRectangle(1.0 + extrusionDistance, 13.0 + extrusionDistance);
+      generator.identity();
+
+      // goal plane
+      generator.translate(8.0, -3.5, 0.01);
+      generator.addRectangle(2.0 + extrusionDistance, 1.0 + extrusionDistance);
+      generator.identity();
+
+      PlanarRegionsList obstacleCourse =  generator.getPlanarRegionsList();
+
+      // overhang, wide barrier, and stepping stones
+      generator.translate(4.5, -9.5, 2.5);
+      generator.addRectangle(1.5, 0.8);
+      generator.identity();
+
+      wallSeparation = 0.9;
+      wallWidth = 0.2;
+      wallHeight = 1.0;
+
+      generator.translate(3.0, -9.5, 0.0);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.translate(-0.5 * wallHeight, 0.5 * (wallSeparation + wallWidth), 0.0);
+      generator.addRectangle(wallHeight, wallWidth);
+      generator.translate(0.0, -2.0 * 0.5 * (wallSeparation + wallWidth), 0.0);
+      generator.addRectangle(wallHeight, wallWidth);
+      generator.identity();
+
+      PlanarRegionsList cinderBlockField = generateCinderBlockField(3.0, -9.5, 0.25, 0.2, 11, 4, 0.0);
+      for (int i = 0; i < cinderBlockField.getNumberOfPlanarRegions(); i++)
+      {
+         obstacleCourse.addPlanarRegion(cinderBlockField.getPlanarRegion(i));
+      }
+
+      return obstacleCourse;
+   }
+
+   public static void main(String[] args)
+   {
+      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("exampleRobot"));
+      PlanarRegionsList planarRegionsList = createBodyPathPlannerTestEnvironment();
+      PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment", planarRegionsList, 1e-5,
+                                                                                                false);
+      TerrainObject3D terrainObject3D = environment.getTerrainObject3D();
+      scs.addStaticLinkGraphics(terrainObject3D.getLinkGraphics());
+      scs.setGroundVisible(false);
+
+      Graphics3DObject startAndEndGraphics = new Graphics3DObject();
+      startAndEndGraphics.translate(0.5, 0.5, 0.5);
+      startAndEndGraphics.addSphere(0.2, YoAppearance.Green());
+      startAndEndGraphics.identity();
+      startAndEndGraphics.translate(8.5, -3.5, 0.5);
+      startAndEndGraphics.addSphere(0.2, YoAppearance.Red());
+      scs.addStaticLinkGraphics(startAndEndGraphics);
+
+      scs.startOnAThread();
    }
 }

@@ -12,9 +12,9 @@ import us.ihmc.avatar.NumericalInverseKinematicsCalculatorWithRobotTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
@@ -31,7 +31,7 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 120000)
    public void testTroublesomeCaseOne()
@@ -46,5 +46,21 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
       double errorThreshold = 0.01;
       boolean success = testAPose(random, handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold , updateListenersEachStep);
       assertTrue("testAPose returned false", success);
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 13.2)
+   @Test
+   public void testRandomFeasibleRobotPoses()
+   {
+      super.testRandomFeasibleRobotPoses();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
+   public void testSimpleCase()
+   {
+      super.testSimpleCase();
    }
 }

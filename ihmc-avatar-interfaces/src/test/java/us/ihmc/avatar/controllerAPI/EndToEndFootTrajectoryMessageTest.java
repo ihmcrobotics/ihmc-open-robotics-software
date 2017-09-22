@@ -14,7 +14,6 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -26,7 +25,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerData
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -41,8 +39,6 @@ import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -62,6 +58,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -71,8 +69,6 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    private final CommonAvatarEnvironmentInterface environment = new FlatGroundEnvironment();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 41.5)
-   @Test
    public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -144,8 +140,6 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 41.5)
-   @Test
    public void testCustomControlPoint() throws Exception
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -158,7 +152,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(4.0, 0.0, 0.0), new Point3D(10.0, 0.0, -0.1));
       ThreadTools.sleep(1000);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
-      
+
       RobotSide robotSide = RobotSide.LEFT;
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -202,8 +196,6 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       assertFalse("Singularity escape should not be active.", singularityEscape.getBooleanValue());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 46.8)
-   @Test
    public void testMultipleTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -346,8 +338,6 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 108.9)
-   @Test
    public void testQueuedMessages() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -530,8 +520,6 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy().getQuaternion(), currentDesiredOrientation, 0.001);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 32.1)
-   @Test
    public void testQueueWithWrongPreviousId() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -673,8 +661,6 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 38.0)
-   @Test
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

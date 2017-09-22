@@ -1,36 +1,33 @@
 package us.ihmc.avatar;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestInterface
 {
@@ -51,8 +48,6 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 9.2)
-   @Test(timeout = 46000)
    public void testCanRewindAndGoForward() throws UnreasonableAccelerationException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -72,8 +67,6 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 43.4)
-   @Test(timeout = 220000)
    public void testRunsTheSameWayTwice() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -103,9 +96,6 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   // "Bamboo link: https://bamboo.ihmc.us/browse/RC-FASTLOOP-ATLASAFAST/test/case/115277833")
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 2400000)
    public void testRewindabilityWithSimpleFastMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -153,9 +143,6 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   // This takes a long time. Use it for debugging where the broken changes were made when the tests above fail.
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 2400000)
    public void testRewindabilityWithSlowerMoreExtensiveMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
