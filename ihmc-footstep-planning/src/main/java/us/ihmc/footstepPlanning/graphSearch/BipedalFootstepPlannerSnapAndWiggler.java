@@ -5,6 +5,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.aStar.FootstepNode;
+import us.ihmc.footstepPlanning.aStar.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
@@ -17,7 +19,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BipedalFootstepPlannerSnapAndWiggler
+public class BipedalFootstepPlannerSnapAndWiggler implements FootstepNodeSnapper
 {
    private PlanarRegionsList planarRegionsList;
    private BipedalFootstepPlannerListener listener;
@@ -29,7 +31,7 @@ public class BipedalFootstepPlannerSnapAndWiggler
       this.parameters = parameters;
    }
 
-   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
+   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
    }
@@ -44,8 +46,7 @@ public class BipedalFootstepPlannerSnapAndWiggler
       this.listener = listener;
    }
 
-   public RigidBodyTransform getSnapAndWiggleTransform(double wiggleInsideDelta, BipedalFootstepPlannerNode bipedalFootstepPlannerNode,
-                                                       PlanarRegion planarRegionToPack)
+   public RigidBodyTransform snapFootstepNode(FootstepNode bipedalFootstepPlannerNode, ConvexPolygon2D footholdIntersectionToPack)
    {
       if (planarRegionsList == null)
       {
@@ -55,7 +56,7 @@ public class BipedalFootstepPlannerSnapAndWiggler
       RobotSide nodeSide = bipedalFootstepPlannerNode.getRobotSide();
       RigidBodyTransform soleTransformBeforeSnap = new RigidBodyTransform();
 
-      bipedalFootstepPlannerNode.getSoleTransform(soleTransformBeforeSnap);
+      BipedalFootstepPlannerNodeUtils.getSoleTransform(bipedalFootstepPlannerNode, soleTransformBeforeSnap);
       if (!isTransformZUp(soleTransformBeforeSnap))
       {
          throw new RuntimeException("Node needs to be flat (no pitch or roll) before calling this! bipedalFootstepPlannerNode = \n"
@@ -65,6 +66,7 @@ public class BipedalFootstepPlannerSnapAndWiggler
       ConvexPolygon2D currentFootPolygon = new ConvexPolygon2D(footPolygonsInSoleFrame.get(nodeSide));
       currentFootPolygon.applyTransformAndProjectToXYPlane(soleTransformBeforeSnap);
 
+      PlanarRegion planarRegionToPack = new PlanarRegion();
       RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(currentFootPolygon, planarRegionsList,
                                                                                                         planarRegionToPack);
       if (snapTransform == null)
@@ -83,7 +85,7 @@ public class BipedalFootstepPlannerSnapAndWiggler
       BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(bipedalFootstepPlannerNode, snapTransform);
 
       WiggleParameters wiggleParameters = new WiggleParameters();
-      wiggleParameters.deltaInside = wiggleInsideDelta;
+      wiggleParameters.deltaInside = parameters.getWiggleInsideDelta();
       //      parameters.minX = -0.1;
       //      parameters.maxX = 0.1;
       //      parameters.minY = -0.1;
@@ -210,7 +212,7 @@ public class BipedalFootstepPlannerSnapAndWiggler
       return Math.abs(soleTransformBeforeSnap.getM22() - 1.0) < 1e-4;
    }
 
-   private void notifyListenerNodeUnderConsiderationWasRejected(BipedalFootstepPlannerNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
+   private void notifyListenerNodeUnderConsiderationWasRejected(FootstepNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       if (listener != null)
       {

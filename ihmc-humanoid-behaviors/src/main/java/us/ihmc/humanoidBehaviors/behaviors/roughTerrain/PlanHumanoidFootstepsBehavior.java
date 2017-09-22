@@ -18,9 +18,9 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
+import us.ihmc.footstepPlanning.aStar.implementations.SimpleGridResolutionBasedExpansion;
+import us.ihmc.footstepPlanning.aStar.implementations.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.*;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -130,9 +130,12 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       double idealFootstepWidth = 0.26; //0.2; //0.25;
       parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
 
-      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(parameters, registry);
-
+      SimpleGridResolutionBasedExpansion nodeExpansion = new SimpleGridResolutionBasedExpansion();
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = createDefaultFootPolygons();
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygonsInSoleFrame);
+      BipedalFootstepPlannerNodeChecker nodeChecker = new BipedalFootstepPlannerNodeChecker(parameters, null);
+      ConstantFootstepCost footstepCost = new ConstantFootstepCost(1.0);
+      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(parameters, nodeExpansion, snapper, nodeChecker, footstepCost, registry);
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
       planner.setMaximumNumberOfNodesToExpand(500);

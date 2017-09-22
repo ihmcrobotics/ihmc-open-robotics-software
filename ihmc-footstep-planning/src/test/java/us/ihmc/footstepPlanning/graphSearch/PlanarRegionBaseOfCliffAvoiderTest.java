@@ -9,6 +9,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.footstepPlanning.aStar.FootstepNode;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -133,7 +134,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
    {
       RigidBodyTransform soleTransform = new RigidBodyTransform();
       soleTransform.setTranslation(x, y, 0.0);
-      BipedalFootstepPlannerNode node = new BipedalFootstepPlannerNode(x, y, 0.0, footstepSide);
+      FootstepNode node = new FootstepNode(x, y, 0.0, footstepSide);
       RigidBodyTransform newSoleTransform = new RigidBodyTransform(soleTransform);
       avoider.shiftAwayFromCliffBottoms(parameters, planarRegionsList, newSoleTransform);
 

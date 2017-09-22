@@ -32,9 +32,9 @@ import us.ihmc.footstepPlanning.FootstepPlannerUtils;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.aStar.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.aStar.FootstepNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
+import us.ihmc.footstepPlanning.aStar.implementations.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
+import us.ihmc.footstepPlanning.graphSearch.*;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -127,7 +127,11 @@ public class FootstepPlanningToolboxController extends ToolboxController
       BipedalFootstepPlannerParameters footstepPlanningParameters = new BipedalFootstepPlannerParameters(registry);
       FootstepPlannerUtils.setPlannerParametersForToolbox(footstepPlanningParameters);
 
-      PlanarRegionBipedalFootstepPlanner footstepPlanner = new PlanarRegionBipedalFootstepPlanner(footstepPlanningParameters, registry);
+      SimpleSideBasedExpansion nodeExpansion = new SimpleSideBasedExpansion();
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygonsInSoleFrame);
+      BipedalFootstepPlannerNodeChecker nodeChecker = new BipedalFootstepPlannerNodeChecker(footstepPlanningParameters, null);
+      ConstantFootstepCost footstepCost = new ConstantFootstepCost(1.0);
+      PlanarRegionBipedalFootstepPlanner footstepPlanner = new PlanarRegionBipedalFootstepPlanner(footstepPlanningParameters, nodeExpansion, snapper, nodeChecker, footstepCost, registry);
       footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
       footstepPlanner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       footstepPlanner.setExitAfterInitialSolution(false);

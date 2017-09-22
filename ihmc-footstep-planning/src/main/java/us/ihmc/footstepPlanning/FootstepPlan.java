@@ -3,9 +3,6 @@ package us.ihmc.footstepPlanning;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNode;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 
