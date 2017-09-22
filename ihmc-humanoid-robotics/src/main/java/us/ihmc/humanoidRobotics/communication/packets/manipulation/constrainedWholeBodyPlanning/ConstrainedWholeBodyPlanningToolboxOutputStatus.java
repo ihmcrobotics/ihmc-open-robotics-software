@@ -129,4 +129,14 @@ public class ConstrainedWholeBodyPlanningToolboxOutputStatus extends StatusPacke
    {
       return wholeBodyTrajectoryMessage;
    }
+   
+   public double getTrajectoryTime()
+   {
+      return trajectoryTimes[trajectoryTimes.length-1];
+   }
+   
+   public KinematicsToolboxOutputStatus getLastRobotConfiguration()
+   {
+      return robotConfigurations[robotConfigurations.length-1];
+   }
 }
