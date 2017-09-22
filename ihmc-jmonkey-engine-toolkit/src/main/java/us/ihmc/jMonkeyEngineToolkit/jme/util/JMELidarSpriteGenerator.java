@@ -147,7 +147,7 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
             Node pointCloud = pointCloudGenerator.generatePointCloudGraph(pointSource, colors);
 
             pointCloudGeometry = (pointCloud.getChildren().size() > 0) ? (Geometry) pointCloud.getChild(0) : null;
-            pointCloud.setShadowMode(ShadowMode.CastAndReceive);
+//            pointCloud.setShadowMode(ShadowMode.CastAndReceive);
 
             newPointCloud.set(pointCloud);
             // System.out.println("graph made");
