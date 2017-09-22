@@ -11,12 +11,12 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.sensorProcessing.signalCorruption.OrientationConstantAcceleratingYawDriftCorruptor;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class ValkyrieFlatGroundWalkingWithIMUDriftTest extends DRCFlatGroundWalkingWithIMUDriftTest
 {
@@ -24,13 +24,13 @@ public class ValkyrieFlatGroundWalkingWithIMUDriftTest extends DRCFlatGroundWalk
 
    /**
     * Need to fix the signal corruptors for the simulated sensors.
-    * 
+    *
     * @throws SimulationExceededMaximumTimeException
     * @throws ControllerFailureException
     */
    @Ignore
 	@ContinuousIntegrationTest(estimatedDuration = 50.3)
-	@Test(timeout = 150919)
+	@Test
    public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());
@@ -57,7 +57,7 @@ public class ValkyrieFlatGroundWalkingWithIMUDriftTest extends DRCFlatGroundWalk
          yawDriftAccelerationVariables.get(i).set(sign * driftAccelerationMagnitude);
          sign *= -driftAccelerationMagnitude;
       }
-      
+
       simulateAndAssertGoodWalking(track, runName);
    }
 

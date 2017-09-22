@@ -480,9 +480,12 @@ public class DRCSimulationTestHelper
 
    public void setStartingLocation(DRCStartingLocation startingLocation)
    {
-      this.startingLocation = startingLocation.getStartingLocationOffset();
+      if (startingLocation != null)
+      {
+         this.startingLocation = startingLocation.getStartingLocationOffset();
+      }
    }
-   
+
    public void setStartingLocation(OffsetAndYawRobotInitialSetup startingLocation)
    {
       this.startingLocation = startingLocation;

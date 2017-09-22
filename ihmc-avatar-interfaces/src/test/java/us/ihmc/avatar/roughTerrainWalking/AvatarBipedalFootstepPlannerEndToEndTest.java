@@ -1,12 +1,17 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
-import us.ihmc.avatar.DRCStartingLocation;
+
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -42,13 +47,6 @@ import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsLis
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
 public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiRobotTestInterface
@@ -105,8 +103,6 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       planCompleted = false;
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
    public void testSteppingStones() throws IOException
    {
       outputStatus = new AtomicReference<>();
@@ -178,8 +174,16 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(cinderBlockField);
       toolboxCommunicator.send(planarRegionsListMessage);
 
+      double timeout = 30.0;
+      long startTime = System.currentTimeMillis();
       while(outputStatus.get() == null)
       {
+         long time = System.currentTimeMillis();
+         if (timeout < (time - startTime) / 1000.0)
+         {
+            fail("Timed out.");
+         }
+
          try
          {
             blockingSimulationRunner.simulateAndBlock(1.0);

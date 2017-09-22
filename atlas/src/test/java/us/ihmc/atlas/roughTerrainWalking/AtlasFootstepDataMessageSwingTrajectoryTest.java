@@ -21,7 +21,7 @@ public class AtlasFootstepDataMessageSwingTrajectoryTest extends AvatarFootstepD
    {
       super.testSwingTrajectoryInWorld();
    }
-   
+
    @Override
    public DRCRobotModel getRobotModel()
    {
