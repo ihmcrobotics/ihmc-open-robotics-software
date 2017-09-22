@@ -25,6 +25,7 @@ import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.ArcTorusGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.CapsuleGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.ConeGraphics3DInstruction;
@@ -54,6 +55,7 @@ import us.ihmc.tools.FloatArrayCollector;
 public class JavaFXGraphicsObject extends Graphics3DInstructionExecutor
 {
 
+   private static float r;
    private final Group parentGroup = new Group();
    private Group currentGroup = parentGroup;
 
@@ -155,7 +157,17 @@ public class JavaFXGraphicsObject extends Graphics3DInstructionExecutor
 
    private static Material convertMaterial(AppearanceDefinition appearance)
    {
-      Color color = new Color(appearance.getColor().getX(), appearance.getColor().getY(), appearance.getColor().getZ(), 1.0 - appearance.getTransparency());
+      r = appearance.getColor().getX();
+      float g = appearance.getColor().getY();
+      float b = appearance.getColor().getZ();
+      double transparency = appearance.getTransparency();
+
+      if(appearance instanceof YoAppearanceRGBColor)
+      {
+         transparency = 1.0 - transparency;
+      }
+
+      Color color = new Color(r, g, b, transparency);
       PhongMaterial res = new PhongMaterial(color);
       res.setSpecularColor(Color.WHITE);
       return res;
