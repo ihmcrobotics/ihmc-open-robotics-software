@@ -191,6 +191,9 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
                if (cwbtoolboxOutputStatus.getPlanningResult() == 4)
                {
                   planningSuccess = true;
+                  ConstrainedWholeBodyPlanningToolboxOutputStatus uiPacket = new ConstrainedWholeBodyPlanningToolboxOutputStatus(cwbtoolboxOutputStatus);
+                  uiPacket.setDestination(PacketDestination.UI);
+                  sendPacketToUI(uiPacket);
                   
                   if(cwbtoolboxOutputStatus.getRobotConfigurations().length == 0)
                      PrintTools.info("something wrong");

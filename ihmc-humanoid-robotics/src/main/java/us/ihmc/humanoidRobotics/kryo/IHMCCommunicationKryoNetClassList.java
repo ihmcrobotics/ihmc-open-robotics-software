@@ -568,5 +568,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(ConstrainedWholeBodyPlanningToolboxRequestPacket.class);
       registerPacketClass(ConstrainedWholeBodyPlanningToolboxOutputStatus.class);
       registerPacketClass(SetBooleanParameterPacket.class);
+      registerPacketField(KinematicsToolboxOutputStatus[].class);
    }
 }
