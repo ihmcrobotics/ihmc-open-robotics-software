@@ -131,7 +131,6 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
 
          newCloudAvailable = false;
          Point3D32[] pointSource = this.pointSource.get();
-         System.out.println(pointSource.length);
          if (pointSource == null)
          {
             return;
