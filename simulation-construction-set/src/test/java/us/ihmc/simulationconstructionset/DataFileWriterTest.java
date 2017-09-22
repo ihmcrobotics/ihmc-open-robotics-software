@@ -295,9 +295,7 @@ public class DataFileWriterTest
 	@Test(timeout = 30000)
    public void testWritingAndReadingALongStateFile() throws IOException
    {
-      String filename = TEST_DIRECTORY + "fileOne.state";
-      URL resource = getClass().getClassLoader().getResource(filename);
-      File fileOne = resource == null ? new File("resources", filename) : new File(resource.getFile());
+      File fileOne = new File("fileOne.state");
 
       if (fileOne.exists())
          fileOne.delete();
@@ -339,9 +337,7 @@ public class DataFileWriterTest
 	@Test(timeout = 30000)
    public void testWritingAndReadingADataFileWithLotsOfVariables() throws IOException
    {
-      String filename = TEST_DIRECTORY + "fileOne.data.gz";
-      URL resource = getClass().getClassLoader().getResource(filename);
-      File fileOne = resource == null ? new File("resources", filename) : new File(resource.getFile());
+      File fileOne = new File("fileOne.state");
 
       if (fileOne.exists())
          fileOne.delete();
