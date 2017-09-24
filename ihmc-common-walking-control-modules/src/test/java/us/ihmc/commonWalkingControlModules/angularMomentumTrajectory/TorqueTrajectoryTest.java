@@ -1,30 +1,49 @@
 package us.ihmc.commonWalkingControlModules.angularMomentumTrajectory;
 
 import static org.junit.Assert.assertTrue;
+
+import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.AngularMomentumTrajectory;
 import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.TorqueTrajectory;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.Trajectory;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 
 public class TorqueTrajectoryTest
 {
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   @Test
-   public void test()
+   private final int minSegments = 2;
+   private final int maxSegments = 10;
+   private final int minCoefficients = 3;
+   private final int maxCoefficients = 14;
+   private AngularMomentumTrajectory angularMomentumTrajectory;
+   private TorqueTrajectory torqueTrajectory;
+   private FrameTrajectory3D calculatedTrajectory;
+   private static final double epsilon = Epsilons.ONE_HUNDRED_BILLIONTH;
+
+   @Before
+   public void setup()
    {
-      int numberOfSegments = 10;
-      int numberOfCoefficients = 10;
-      AngularMomentumTrajectory angularMomentumTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfSegments, numberOfCoefficients);
-      TorqueTrajectory torqueTrajectory = new TorqueTrajectory(numberOfSegments, numberOfCoefficients);
-      FrameTrajectory3D calculatedTrajectory = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+      int numberOfSegments = minSegments + (int) Math.floor(Math.random() * (maxSegments - minSegments));
+      int numberOfCoefficients = minCoefficients + (int) Math.floor(Math.random() * (maxCoefficients - minCoefficients));
+      angularMomentumTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfSegments, numberOfCoefficients);
+      torqueTrajectory = new TorqueTrajectory(numberOfSegments, numberOfCoefficients);
       generateRandomAngularMomentumTrajectory(angularMomentumTrajectory);
       torqueTrajectory.setNext(angularMomentumTrajectory);
+      calculatedTrajectory = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
+   }
+
+   @Test
+   public void testSetter()
+   {
+      assertTrue("Got incorrect number of segments, got: " + torqueTrajectory.getNumberOfSegments() + " should have been: "
+            + angularMomentumTrajectory.getNumberOfSegments(), torqueTrajectory.getNumberOfSegments() == angularMomentumTrajectory.getNumberOfSegments());
       for (int i = 0; i < torqueTrajectory.getNumberOfSegments(); i++)
       {
          TrajectoryMathTools.getDerivative(calculatedTrajectory.getTrajectoryX(), angularMomentumTrajectory.getSegment(i).getTrajectoryY());
@@ -32,8 +51,43 @@ public class TorqueTrajectoryTest
          TrajectoryMathTools.scale(calculatedTrajectory.getTrajectoryY(), -1.0);
          calculatedTrajectory.getTrajectoryZ().setConstant(angularMomentumTrajectory.getSegment(i).getInitialTime(Direction.X),
                                                            angularMomentumTrajectory.getSegment(i).getFinalTime(Direction.X), 0.0);
-         assertTrue("Failed for segment " + i + " wanted: \n" + calculatedTrajectory.toString() + " got: \n"
-               + torqueTrajectory.getSegment(i).toString() + " from: \n" + angularMomentumTrajectory.getSegment(i).toString(), TrajectoryMathTools.epsilonEquals(torqueTrajectory.getSegment(i), calculatedTrajectory, Epsilons.ONE_HUNDRED_BILLIONTH));
+         assertTrue("Failed for segment " + i + " wanted: \n" + calculatedTrajectory.toString() + " got: \n" + torqueTrajectory.getSegment(i).toString()
+               + " from: \n" + angularMomentumTrajectory.getSegment(i).toString(),
+                    TrajectoryMathTools.epsilonEquals(torqueTrajectory.getSegment(i), calculatedTrajectory, epsilon));
+      }
+   }
+
+   @Test
+   public void testScaling()
+   {
+      double scalar = Math.random();
+      torqueTrajectory.scale(scalar);
+      assertTrue("Got incorrect number of segments, got: " + torqueTrajectory.getNumberOfSegments() + " should have been: "
+            + angularMomentumTrajectory.getNumberOfSegments(), torqueTrajectory.getNumberOfSegments() == angularMomentumTrajectory.getNumberOfSegments());
+      for (int i = 0; i < angularMomentumTrajectory.getNumberOfSegments(); i++)
+      {
+         TrajectoryMathTools.getDerivative(calculatedTrajectory, angularMomentumTrajectory.getSegment(i));
+         Trajectory testTrajectory = torqueTrajectory.getSegment(i).getTrajectoryX();
+         Trajectory controlTrajectory = calculatedTrajectory.getTrajectoryY();
+         assertTrue("Got incorrect number of coefficients for segment " + i + "got: " + testTrajectory.getNumberOfCoefficients() + "  should have been: "
+               + controlTrajectory.getNumberOfCoefficients(), testTrajectory.getNumberOfCoefficients() == controlTrajectory.getNumberOfCoefficients());
+         for (int j = 0; j < controlTrajectory.getNumberOfCoefficients(); j++)
+         {
+            assertTrue(MathTools.epsilonEquals(testTrajectory.getCoefficient(j) / controlTrajectory.getCoefficient(j), scalar, epsilon));
+         }
+         testTrajectory = torqueTrajectory.getSegment(i).getTrajectoryY();
+         controlTrajectory = calculatedTrajectory.getTrajectoryX();
+         assertTrue("Got incorrect number of coefficients for segment " + i + "got: " + testTrajectory.getNumberOfCoefficients() + "  should have been: "
+               + controlTrajectory.getNumberOfCoefficients(), testTrajectory.getNumberOfCoefficients() == controlTrajectory.getNumberOfCoefficients());
+         for (int j = 0; j < controlTrajectory.getNumberOfCoefficients(); j++)
+         {
+            assertTrue(MathTools.epsilonEquals(testTrajectory.getCoefficient(j) / controlTrajectory.getCoefficient(j), -scalar, epsilon));
+         }
+
+         testTrajectory = torqueTrajectory.getSegment(i).getTrajectoryZ();
+         assertTrue("Got incorrect number of coefficients for segment " + i + "got: " + testTrajectory.getNumberOfCoefficients() + "  should have been: 1",
+                    1 == testTrajectory.getNumberOfCoefficients());
+         assertTrue(MathTools.epsilonEquals(testTrajectory.getCoefficient(0), 0.0, epsilon));
       }
    }
 
