@@ -6,6 +6,7 @@ import java.util.List;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.robotics.math.FastFourierTransform;
 
@@ -699,5 +700,29 @@ public class TrajectoryMathTools
    {
       for(int i = 0; i < 3; i++)
          getDerivative(trajectoryToPack.getTrajectory(i), trajectoryToDifferentiate.getTrajectory(i));
+   }
+
+   public static boolean epsilonEquals(FrameTrajectory3D trajectory1, FrameTrajectory3D trajectory2, double epsilon)
+   {
+      boolean result = true;
+      if(trajectory1.getReferenceFrame() != trajectory2.getReferenceFrame())
+         return false;
+      if(!MathTools.epsilonEquals(trajectory1.getInitialTime(), trajectory2.getInitialTime(), epsilon))
+         return false;
+      if(!MathTools.epsilonEquals(trajectory1.getFinalTime(), trajectory2.getFinalTime(), epsilon))
+         return false;
+      for(int i = 0; i < 3; i ++)
+      {
+         result &= trajectory1.getTrajectory(i).getNumberOfCoefficients() == trajectory2.getTrajectory(i).getNumberOfCoefficients();
+         if(result)
+         {
+            for(int j =0; j < trajectory1.getTrajectory(i).getNumberOfCoefficients(); j++)
+               result &= MathTools.epsilonEquals(trajectory1.getTrajectory(i).getCoefficient(j), trajectory2.getTrajectory(i).getCoefficient(j), epsilon);
+         }
+         else
+            return false;
+      }
+      
+      return result;
    }
 }
