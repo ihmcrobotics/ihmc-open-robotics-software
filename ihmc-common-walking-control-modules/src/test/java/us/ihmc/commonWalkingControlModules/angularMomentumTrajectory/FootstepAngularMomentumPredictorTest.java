@@ -328,6 +328,13 @@ public class FootstepAngularMomentumPredictorTest
             + " segments, needed 1.\n" + transferAngularMomentumTrajectory.toString(), transferAngularMomentumTrajectory.getNumberOfSegments() == 1);
       assertTrue(transferAngularMomentumTrajectory.getSegment(0).getInitialTime() == 0.0);
       assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == testParameters.getTransferSplitFraction() * transferTime);
+      comListCounter = setCoMTrajectory(0.0, transferTime * testParameters.getTransferSplitFraction(), comInitialPositionList, comFinalPositionList,
+                                        comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList, comListCounter);
+      computeDoubleSupportFootTrajectories(copWaypointList, numberOfFootstepsToConsider.getIntegerValue());
+      computeAngularMomentumTrajectory();
+      assertTrue(angularMomentumTrajectory.toString() + "\n\n" + transferAngularMomentumTrajectory.getSegment(0).toString(),
+                 TrajectoryMathTools.epsilonEquals(angularMomentumTrajectory, transferAngularMomentumTrajectory.getSegment(0), Epsilons.ONE_TEN_THOUSANDTH));
+
    }
 
    private void computeDoubleSupportFootTrajectories(List<CoPPointsInFoot> copWaypointList, int stepIndex)
@@ -409,34 +416,78 @@ public class FootstepAngularMomentumPredictorTest
 
       List<? extends AngularMomentumTrajectory> swingAngularMomentumTrajectories = angularMomentumGenerator.getSwingAngularMomentumTrajectories();
       List<? extends AngularMomentumTrajectory> transferAngularMomentumTrajectories = angularMomentumGenerator.getTransferAngularMomentumTrajectories();
-      for (int i = 0; i < numberOfFootstepsToConsider.getIntegerValue(); i++)
+      int comListCounter = 0;
+      for (int stepIndex = 0; stepIndex < numberOfFootstepsToConsider.getIntegerValue(); stepIndex++)
       {
-         AngularMomentumTrajectory transferAngularMomentumTrajectory = transferAngularMomentumTrajectories.get(i);
-         assertTrue("Transfer trajectory " + i + " has " + transferAngularMomentumTrajectory.getNumberOfSegments() + " segments, needed 2.\n"
+         AngularMomentumTrajectory transferAngularMomentumTrajectory = transferAngularMomentumTrajectories.get(stepIndex);
+         assertTrue("Transfer trajectory " + stepIndex + " has " + transferAngularMomentumTrajectory.getNumberOfSegments() + " segments, needed 2.\n"
                + transferAngularMomentumTrajectory.toString(), transferAngularMomentumTrajectory.getNumberOfSegments() == 2);
+
          assertTrue(transferAngularMomentumTrajectory.getSegment(0).getInitialTime() == 0.0);
          assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == testParameters.getTransferSplitFraction() * transferTime);
+         comListCounter = setCoMTrajectory(0.0, transferTime * testParameters.getTransferSplitFraction(), comInitialPositionList, comFinalPositionList,
+                                           comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList, comListCounter);
+         computeDoubleSupportFootTrajectories(copWaypointList, stepIndex);
+         computeAngularMomentumTrajectory();
+         assertTrue(angularMomentumTrajectory.toString() + "\n\n" + transferAngularMomentumTrajectory.getSegment(0).toString(),
+                    TrajectoryMathTools.epsilonEquals(angularMomentumTrajectory, transferAngularMomentumTrajectory.getSegment(0), Epsilons.ONE_TEN_THOUSANDTH));
+
          assertTrue(transferAngularMomentumTrajectory.getSegment(1).getInitialTime() == testParameters.getTransferSplitFraction() * transferTime);
          assertTrue(transferAngularMomentumTrajectory.getSegment(1).getFinalTime() == transferTime);
+         comListCounter = setCoMTrajectory(transferTime * testParameters.getTransferSplitFraction(), transferTime, comInitialPositionList, comFinalPositionList,
+                                           comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList, comListCounter);
+         computeDoubleSupportFootTrajectories(copWaypointList, stepIndex);
+         computeAngularMomentumTrajectory();
 
-         AngularMomentumTrajectory swingAngularMomentumTrajectory = swingAngularMomentumTrajectories.get(i);
-         assertTrue("Swing trajectory " + i + " has " + swingAngularMomentumTrajectory.getNumberOfSegments() + " segments, needed 3.\n"
+         assertTrue(angularMomentumTrajectory.toString() + "\n\n" + transferAngularMomentumTrajectory.getSegment(1).toString(),
+                    TrajectoryMathTools.epsilonEquals(angularMomentumTrajectory, transferAngularMomentumTrajectory.getSegment(1), Epsilons.ONE_TEN_THOUSANDTH));
+
+         AngularMomentumTrajectory swingAngularMomentumTrajectory = swingAngularMomentumTrajectories.get(stepIndex);
+         assertTrue("Swing trajectory " + stepIndex + " has " + swingAngularMomentumTrajectory.getNumberOfSegments() + " segments, needed 3.\n"
                + swingAngularMomentumTrajectory.toString(), swingAngularMomentumTrajectory.getNumberOfSegments() == 3);
+
          assertTrue(swingAngularMomentumTrajectory.getSegment(0).getInitialTime() == 0.0);
          assertTrue(swingAngularMomentumTrajectory.getSegment(0).getFinalTime() == swingTime * testParameters.getSwingDurationShiftFraction()
                * testParameters.getSwingSplitFraction());
+         comListCounter = setCoMTrajectory(0.0, swingTime * testParameters.getSwingSplitFraction() * testParameters.getSwingDurationShiftFraction(),
+                                           comInitialPositionList, comFinalPositionList, comInitialVelocityList, comFinalVelocityList,
+                                           comInitialAccelerationList, comFinalAccelerationList, comListCounter);
+         computeSingleSupportFootTrajectories(copWaypointList, stepIndex);
+         computeAngularMomentumTrajectory();
+         assertTrue(angularMomentumTrajectory.toString() + "\n\n" + swingAngularMomentumTrajectory.getSegment(0).toString(),
+                    TrajectoryMathTools.epsilonEquals(angularMomentumTrajectory, swingAngularMomentumTrajectory.getSegment(0), Epsilons.ONE_TEN_THOUSANDTH));
+
          assertTrue(swingAngularMomentumTrajectory.getSegment(1).getInitialTime() == swingTime * testParameters.getSwingDurationShiftFraction()
                * testParameters.getSwingSplitFraction());
          assertTrue(swingAngularMomentumTrajectory.getSegment(1).getFinalTime() == swingTime * testParameters.getSwingDurationShiftFraction());
+         comListCounter = setCoMTrajectory(swingTime * testParameters.getSwingSplitFraction() * testParameters.getSwingDurationShiftFraction(),
+                                           swingTime * testParameters.getSwingDurationShiftFraction(), comInitialPositionList, comFinalPositionList,
+                                           comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList, comListCounter);
+         computeSingleSupportFootTrajectories(copWaypointList, stepIndex);
+         computeAngularMomentumTrajectory();
+         assertTrue(angularMomentumTrajectory.toString() + "\n\n" + swingAngularMomentumTrajectory.getSegment(1).toString(),
+                    TrajectoryMathTools.epsilonEquals(angularMomentumTrajectory, swingAngularMomentumTrajectory.getSegment(1), Epsilons.ONE_TEN_THOUSANDTH));
+
          assertTrue(swingAngularMomentumTrajectory.getSegment(2).getInitialTime() == swingTime * testParameters.getSwingDurationShiftFraction());
          assertTrue(swingAngularMomentumTrajectory.getSegment(2).getFinalTime() == swingTime);
-
+         comListCounter = setCoMTrajectory(swingTime * testParameters.getSwingDurationShiftFraction(), swingTime, comInitialPositionList, comFinalPositionList,
+                                           comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList, comListCounter);
+         computeSingleSupportFootTrajectories(copWaypointList, stepIndex);
+         computeAngularMomentumTrajectory();
+         assertTrue(angularMomentumTrajectory.toString() + "\n\n" + swingAngularMomentumTrajectory.getSegment(2).toString(),
+                    TrajectoryMathTools.epsilonEquals(angularMomentumTrajectory, swingAngularMomentumTrajectory.getSegment(2), Epsilons.ONE_TEN_THOUSANDTH));
       }
       AngularMomentumTrajectory transferAngularMomentumTrajectory = transferAngularMomentumTrajectories.get(numberOfFootstepsToConsider.getIntegerValue());
       assertTrue("Transfer trajectory " + numberOfFootstepsToConsider.getIntegerValue() + " has " + transferAngularMomentumTrajectory.getNumberOfSegments()
             + " segments, needed 1.\n" + transferAngularMomentumTrajectory.toString(), transferAngularMomentumTrajectory.getNumberOfSegments() == 1);
       assertTrue(transferAngularMomentumTrajectory.getSegment(0).getInitialTime() == 0.0);
       assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == testParameters.getTransferSplitFraction() * transferTime);
+      comListCounter = setCoMTrajectory(0.0, transferTime * testParameters.getTransferSplitFraction(), comInitialPositionList, comFinalPositionList,
+                                        comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList, comListCounter);
+      computeDoubleSupportFootTrajectories(copWaypointList, numberOfFootstepsToConsider.getIntegerValue());
+      computeAngularMomentumTrajectory();
+      assertTrue(angularMomentumTrajectory.toString() + "\n\n" + transferAngularMomentumTrajectory.getSegment(0).toString(),
+                 TrajectoryMathTools.epsilonEquals(angularMomentumTrajectory, transferAngularMomentumTrajectory.getSegment(0), Epsilons.ONE_TEN_THOUSANDTH));
    }
 
    @Test
@@ -511,34 +562,77 @@ public class FootstepAngularMomentumPredictorTest
       assertTrue(angularMomentumTrajectory.toString() + "\n\n" + swingAngularMomentumTrajectory.getSegment(2).toString(),
                  TrajectoryMathTools.epsilonEquals(angularMomentumTrajectory, swingAngularMomentumTrajectory.getSegment(2), Epsilons.ONE_TEN_THOUSANDTH));
 
-      for (int i = 1; i < numberOfFootstepsToConsider.getIntegerValue(); i++)
+      for (stepIndex = 1; stepIndex < numberOfFootstepsToConsider.getIntegerValue(); stepIndex++)
       {
-         AngularMomentumTrajectory transferAngularMomentumTrajectory = transferAngularMomentumTrajectories.get(i);
-         assertTrue("Transfer trajectory " + i + " has " + transferAngularMomentumTrajectory.getNumberOfSegments() + " segments, needed 2.\n"
+         AngularMomentumTrajectory transferAngularMomentumTrajectory = transferAngularMomentumTrajectories.get(stepIndex);
+         assertTrue("Transfer trajectory " + stepIndex + " has " + transferAngularMomentumTrajectory.getNumberOfSegments() + " segments, needed 2.\n"
                + transferAngularMomentumTrajectory.toString(), transferAngularMomentumTrajectory.getNumberOfSegments() == 2);
+
          assertTrue(transferAngularMomentumTrajectory.getSegment(0).getInitialTime() == 0.0);
          assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == testParameters.getTransferSplitFraction() * transferTime);
+         comListCounter = setCoMTrajectory(0.0, transferTime * testParameters.getTransferSplitFraction(), comInitialPositionList, comFinalPositionList,
+                                           comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList, comListCounter);
+         computeDoubleSupportFootTrajectories(copWaypointList, stepIndex);
+         computeAngularMomentumTrajectory();
+         assertTrue(angularMomentumTrajectory.toString() + "\n\n" + transferAngularMomentumTrajectory.getSegment(0).toString(),
+                    TrajectoryMathTools.epsilonEquals(angularMomentumTrajectory, transferAngularMomentumTrajectory.getSegment(0), Epsilons.ONE_TEN_THOUSANDTH));
+
          assertTrue(transferAngularMomentumTrajectory.getSegment(1).getInitialTime() == testParameters.getTransferSplitFraction() * transferTime);
          assertTrue(transferAngularMomentumTrajectory.getSegment(1).getFinalTime() == transferTime);
+         comListCounter = setCoMTrajectory(transferTime * testParameters.getTransferSplitFraction(), transferTime, comInitialPositionList, comFinalPositionList,
+                                           comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList, comListCounter);
+         computeDoubleSupportFootTrajectories(copWaypointList, stepIndex);
+         computeAngularMomentumTrajectory();
 
-         swingAngularMomentumTrajectory = swingAngularMomentumTrajectories.get(i);
-         assertTrue("Swing trajectory " + i + " has " + swingAngularMomentumTrajectory.getNumberOfSegments() + " segments, needed 3.\n"
+         assertTrue(angularMomentumTrajectory.toString() + "\n\n" + transferAngularMomentumTrajectory.getSegment(1).toString(),
+                    TrajectoryMathTools.epsilonEquals(angularMomentumTrajectory, transferAngularMomentumTrajectory.getSegment(1), Epsilons.ONE_TEN_THOUSANDTH));
+
+         swingAngularMomentumTrajectory = swingAngularMomentumTrajectories.get(stepIndex);
+         assertTrue("Swing trajectory " + stepIndex + " has " + swingAngularMomentumTrajectory.getNumberOfSegments() + " segments, needed 3.\n"
                + swingAngularMomentumTrajectory.toString(), swingAngularMomentumTrajectory.getNumberOfSegments() == 3);
+
          assertTrue(swingAngularMomentumTrajectory.getSegment(0).getInitialTime() == 0.0);
          assertTrue(swingAngularMomentumTrajectory.getSegment(0).getFinalTime() == swingTime * testParameters.getSwingDurationShiftFraction()
                * testParameters.getSwingSplitFraction());
+         comListCounter = setCoMTrajectory(0.0, swingTime * testParameters.getSwingSplitFraction() * testParameters.getSwingDurationShiftFraction(),
+                                           comInitialPositionList, comFinalPositionList, comInitialVelocityList, comFinalVelocityList,
+                                           comInitialAccelerationList, comFinalAccelerationList, comListCounter);
+         computeSingleSupportFootTrajectories(copWaypointList, stepIndex);
+         computeAngularMomentumTrajectory();
+         assertTrue(angularMomentumTrajectory.toString() + "\n\n" + swingAngularMomentumTrajectory.getSegment(0).toString(),
+                    TrajectoryMathTools.epsilonEquals(angularMomentumTrajectory, swingAngularMomentumTrajectory.getSegment(0), Epsilons.ONE_TEN_THOUSANDTH));
+
          assertTrue(swingAngularMomentumTrajectory.getSegment(1).getInitialTime() == swingTime * testParameters.getSwingDurationShiftFraction()
                * testParameters.getSwingSplitFraction());
          assertTrue(swingAngularMomentumTrajectory.getSegment(1).getFinalTime() == swingTime * testParameters.getSwingDurationShiftFraction());
+         comListCounter = setCoMTrajectory(swingTime * testParameters.getSwingSplitFraction() * testParameters.getSwingDurationShiftFraction(),
+                                           swingTime * testParameters.getSwingDurationShiftFraction(), comInitialPositionList, comFinalPositionList,
+                                           comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList, comListCounter);
+         computeSingleSupportFootTrajectories(copWaypointList, stepIndex);
+         computeAngularMomentumTrajectory();
+         assertTrue(angularMomentumTrajectory.toString() + "\n\n" + swingAngularMomentumTrajectory.getSegment(1).toString(),
+                    TrajectoryMathTools.epsilonEquals(angularMomentumTrajectory, swingAngularMomentumTrajectory.getSegment(1), Epsilons.ONE_TEN_THOUSANDTH));
+
          assertTrue(swingAngularMomentumTrajectory.getSegment(2).getInitialTime() == swingTime * testParameters.getSwingDurationShiftFraction());
          assertTrue(swingAngularMomentumTrajectory.getSegment(2).getFinalTime() == swingTime);
-
+         comListCounter = setCoMTrajectory(swingTime * testParameters.getSwingDurationShiftFraction(), swingTime, comInitialPositionList, comFinalPositionList,
+                                           comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList, comListCounter);
+         computeSingleSupportFootTrajectories(copWaypointList, stepIndex);
+         computeAngularMomentumTrajectory();
+         assertTrue(angularMomentumTrajectory.toString() + "\n\n" + swingAngularMomentumTrajectory.getSegment(2).toString(),
+                    TrajectoryMathTools.epsilonEquals(angularMomentumTrajectory, swingAngularMomentumTrajectory.getSegment(2), Epsilons.ONE_TEN_THOUSANDTH));
       }
       AngularMomentumTrajectory transferAngularMomentumTrajectory = transferAngularMomentumTrajectories.get(numberOfFootstepsToConsider.getIntegerValue());
       assertTrue("Transfer trajectory " + numberOfFootstepsToConsider.getIntegerValue() + " has " + transferAngularMomentumTrajectory.getNumberOfSegments()
             + " segments, needed 1.\n" + transferAngularMomentumTrajectory.toString(), transferAngularMomentumTrajectory.getNumberOfSegments() == 1);
       assertTrue(transferAngularMomentumTrajectory.getSegment(0).getInitialTime() == 0.0);
       assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == testParameters.getTransferSplitFraction() * transferTime);
+      comListCounter = setCoMTrajectory(0.0, transferTime * testParameters.getTransferSplitFraction(), comInitialPositionList, comFinalPositionList,
+                                        comInitialVelocityList, comFinalVelocityList, comInitialAccelerationList, comFinalAccelerationList, comListCounter);
+      computeDoubleSupportFootTrajectories(copWaypointList, numberOfFootstepsToConsider.getIntegerValue());
+      computeAngularMomentumTrajectory();
+      assertTrue(angularMomentumTrajectory.toString() + "\n\n" + transferAngularMomentumTrajectory.getSegment(0).toString(),
+                 TrajectoryMathTools.epsilonEquals(angularMomentumTrajectory, transferAngularMomentumTrajectory.getSegment(0), Epsilons.ONE_TEN_THOUSANDTH));
    }
 
    private void setupInputs()
