@@ -245,26 +245,26 @@ public class FootstepAngularMomentumPredictorTest
          assertTrue("Transfer trajectory " + i + " has " + transferAngularMomentumTrajectory.getNumberOfSegments() + " segments, needed 2.\n"
                + transferAngularMomentumTrajectory.toString(), transferAngularMomentumTrajectory.getNumberOfSegments() == 2);
          assertTrue(transferAngularMomentumTrajectory.getSegment(0).getInitialTime() == 0.0);
-         assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == 0.1);
-         assertTrue(transferAngularMomentumTrajectory.getSegment(1).getInitialTime() == 0.1);
-         assertTrue(transferAngularMomentumTrajectory.getSegment(1).getFinalTime() == 0.2);
+         assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == testParameters.getTransferSplitFraction() * transferTime);
+         assertTrue(transferAngularMomentumTrajectory.getSegment(1).getInitialTime() == testParameters.getTransferSplitFraction() * transferTime);
+         assertTrue(transferAngularMomentumTrajectory.getSegment(1).getFinalTime() == transferTime);
       }
       AngularMomentumTrajectory transferAngularMomentumTrajectory = transferAngularMomentumTrajectories.get(numberOfFootstepsToConsider.getIntegerValue());
       assertTrue("Transfer trajectory " + numberOfFootstepsToConsider.getIntegerValue() + " has " + transferAngularMomentumTrajectory.getNumberOfSegments()
             + " segments, needed 1.\n" + transferAngularMomentumTrajectory.toString(), transferAngularMomentumTrajectory.getNumberOfSegments() == 1);
       assertTrue(transferAngularMomentumTrajectory.getSegment(0).getInitialTime() == 0.0);
-      assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == 0.1);
+      assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == testParameters.getTransferSplitFraction() * transferTime);
       for (int i = 0; i < numberOfFootstepsToConsider.getIntegerValue(); i++)
       {
          AngularMomentumTrajectory swingAngularMomentumTrajectory = swingAngularMomentumTrajectories.get(i);
          assertTrue("Swing trajectory " + i + " has " + swingAngularMomentumTrajectory.getNumberOfSegments() + " segments, needed 3.\n"
                + swingAngularMomentumTrajectory.toString(), swingAngularMomentumTrajectory.getNumberOfSegments() == 3);
          assertTrue(swingAngularMomentumTrajectory.getSegment(0).getInitialTime() == 0.0);
-         assertTrue(swingAngularMomentumTrajectory.getSegment(0).getFinalTime() == 0.99/2.0);
-         assertTrue(swingAngularMomentumTrajectory.getSegment(1).getInitialTime() == 0.99/2.0);
-         assertTrue(swingAngularMomentumTrajectory.getSegment(1).getFinalTime() == 0.99);
-         assertTrue(swingAngularMomentumTrajectory.getSegment(2).getInitialTime() == 0.99);
-         assertTrue(swingAngularMomentumTrajectory.getSegment(2).getFinalTime() == 1.0);
+         assertTrue(swingAngularMomentumTrajectory.getSegment(0).getFinalTime() == swingTime * testParameters.getSwingDurationShiftFraction() * testParameters.getSwingSplitFraction());
+         assertTrue(swingAngularMomentumTrajectory.getSegment(1).getInitialTime() == swingTime * testParameters.getSwingDurationShiftFraction() * testParameters.getSwingSplitFraction());
+         assertTrue(swingAngularMomentumTrajectory.getSegment(1).getFinalTime() == swingTime * testParameters.getSwingDurationShiftFraction());
+         assertTrue(swingAngularMomentumTrajectory.getSegment(2).getInitialTime() == swingTime * testParameters.getSwingDurationShiftFraction());
+         assertTrue(swingAngularMomentumTrajectory.getSegment(2).getFinalTime() == swingTime);
       }
    }
 
@@ -306,26 +306,26 @@ public class FootstepAngularMomentumPredictorTest
          assertTrue("Transfer trajectory " + i + " has " + transferAngularMomentumTrajectory.getNumberOfSegments() + " segments, needed 2.\n"
                + transferAngularMomentumTrajectory.toString(), transferAngularMomentumTrajectory.getNumberOfSegments() == 2);
          assertTrue(transferAngularMomentumTrajectory.getSegment(0).getInitialTime() == 0.0);
-         assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == 0.1);
-         assertTrue(transferAngularMomentumTrajectory.getSegment(1).getInitialTime() == 0.1);
-         assertTrue(transferAngularMomentumTrajectory.getSegment(1).getFinalTime() == 0.2);
+         assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == testParameters.getTransferSplitFraction() * transferTime);
+         assertTrue(transferAngularMomentumTrajectory.getSegment(1).getInitialTime() == testParameters.getTransferSplitFraction() * transferTime);
+         assertTrue(transferAngularMomentumTrajectory.getSegment(1).getFinalTime() == transferTime);
       }
       AngularMomentumTrajectory transferAngularMomentumTrajectory = transferAngularMomentumTrajectories.get(numberOfFootstepsToConsider.getIntegerValue());
       assertTrue("Transfer trajectory " + numberOfFootstepsToConsider.getIntegerValue() + " has " + transferAngularMomentumTrajectory.getNumberOfSegments()
             + " segments, needed 1.\n" + transferAngularMomentumTrajectory.toString(), transferAngularMomentumTrajectory.getNumberOfSegments() == 1);
       assertTrue(transferAngularMomentumTrajectory.getSegment(0).getInitialTime() == 0.0);
-      assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == 0.1);
+      assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == testParameters.getTransferSplitFraction() * transferTime);
       for (int i = 0; i < numberOfFootstepsToConsider.getIntegerValue(); i++)
       {
          AngularMomentumTrajectory swingAngularMomentumTrajectory = swingAngularMomentumTrajectories.get(i);
          assertTrue("Swing trajectory " + i + " has " + swingAngularMomentumTrajectory.getNumberOfSegments() + " segments, needed 3.\n"
                + swingAngularMomentumTrajectory.toString(), swingAngularMomentumTrajectory.getNumberOfSegments() == 3);
          assertTrue(swingAngularMomentumTrajectory.getSegment(0).getInitialTime() == 0.0);
-         assertTrue(swingAngularMomentumTrajectory.getSegment(0).getFinalTime() == 0.99/2.0);
-         assertTrue(swingAngularMomentumTrajectory.getSegment(1).getInitialTime() == 0.99/2.0);
-         assertTrue(swingAngularMomentumTrajectory.getSegment(1).getFinalTime() == 0.99);
-         assertTrue(swingAngularMomentumTrajectory.getSegment(2).getInitialTime() == 0.99);
-         assertTrue(swingAngularMomentumTrajectory.getSegment(2).getFinalTime() == 1.0);
+         assertTrue(swingAngularMomentumTrajectory.getSegment(0).getFinalTime() == swingTime * testParameters.getSwingDurationShiftFraction() * testParameters.getSwingSplitFraction());
+         assertTrue(swingAngularMomentumTrajectory.getSegment(1).getInitialTime() == swingTime * testParameters.getSwingDurationShiftFraction() * testParameters.getSwingSplitFraction());
+         assertTrue(swingAngularMomentumTrajectory.getSegment(1).getFinalTime() == swingTime * testParameters.getSwingDurationShiftFraction());
+         assertTrue(swingAngularMomentumTrajectory.getSegment(2).getInitialTime() == swingTime * testParameters.getSwingDurationShiftFraction());
+         assertTrue(swingAngularMomentumTrajectory.getSegment(2).getFinalTime() == swingTime);
       }
    }
 
@@ -367,27 +367,28 @@ public class FootstepAngularMomentumPredictorTest
          assertTrue("Transfer trajectory " + i + " has " + transferAngularMomentumTrajectory.getNumberOfSegments() + " segments, needed 2.\n"
                + transferAngularMomentumTrajectory.toString(), transferAngularMomentumTrajectory.getNumberOfSegments() == 2);
          assertTrue(transferAngularMomentumTrajectory.getSegment(0).getInitialTime() == 0.0);
-         assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == 0.1);
-         assertTrue(transferAngularMomentumTrajectory.getSegment(1).getInitialTime() == 0.1);
-         assertTrue(transferAngularMomentumTrajectory.getSegment(1).getFinalTime() == 0.2);
+         assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == testParameters.getTransferSplitFraction() * transferTime);
+         assertTrue(transferAngularMomentumTrajectory.getSegment(1).getInitialTime() == testParameters.getTransferSplitFraction() * transferTime);
+         assertTrue(transferAngularMomentumTrajectory.getSegment(1).getFinalTime() == transferTime);
       }
       AngularMomentumTrajectory transferAngularMomentumTrajectory = transferAngularMomentumTrajectories.get(numberOfFootstepsToConsider.getIntegerValue());
       assertTrue("Transfer trajectory " + numberOfFootstepsToConsider.getIntegerValue() + " has " + transferAngularMomentumTrajectory.getNumberOfSegments()
             + " segments, needed 1.\n" + transferAngularMomentumTrajectory.toString(), transferAngularMomentumTrajectory.getNumberOfSegments() == 1);
       assertTrue(transferAngularMomentumTrajectory.getSegment(0).getInitialTime() == 0.0);
-      assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == 0.1);
+      assertTrue(transferAngularMomentumTrajectory.getSegment(0).getFinalTime() == testParameters.getTransferSplitFraction() * transferTime);
       for (int i = 0; i < numberOfFootstepsToConsider.getIntegerValue(); i++)
       {
          AngularMomentumTrajectory swingAngularMomentumTrajectory = swingAngularMomentumTrajectories.get(i);
          assertTrue("Swing trajectory " + i + " has " + swingAngularMomentumTrajectory.getNumberOfSegments() + " segments, needed 3.\n"
                + swingAngularMomentumTrajectory.toString(), swingAngularMomentumTrajectory.getNumberOfSegments() == 3);
          assertTrue(swingAngularMomentumTrajectory.getSegment(0).getInitialTime() == 0.0);
-         assertTrue(swingAngularMomentumTrajectory.getSegment(0).getFinalTime() == 0.99/2.0);
-         assertTrue(swingAngularMomentumTrajectory.getSegment(1).getInitialTime() == 0.99/2.0);
-         assertTrue(swingAngularMomentumTrajectory.getSegment(1).getFinalTime() == 0.99);
-         assertTrue(swingAngularMomentumTrajectory.getSegment(2).getInitialTime() == 0.99);
-         assertTrue(swingAngularMomentumTrajectory.getSegment(2).getFinalTime() == 1.0);
+         assertTrue(swingAngularMomentumTrajectory.getSegment(0).getFinalTime() == swingTime * testParameters.getSwingDurationShiftFraction() * testParameters.getSwingSplitFraction());
+         assertTrue(swingAngularMomentumTrajectory.getSegment(1).getInitialTime() == swingTime * testParameters.getSwingDurationShiftFraction() * testParameters.getSwingSplitFraction());
+         assertTrue(swingAngularMomentumTrajectory.getSegment(1).getFinalTime() == swingTime * testParameters.getSwingDurationShiftFraction());
+         assertTrue(swingAngularMomentumTrajectory.getSegment(2).getInitialTime() == swingTime * testParameters.getSwingDurationShiftFraction());
+         assertTrue(swingAngularMomentumTrajectory.getSegment(2).getFinalTime() == swingTime);
       }
+
    }
 
    private void setupInputs()
