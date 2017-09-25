@@ -134,7 +134,6 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
 
       sensorProcessing.computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(jointVelocityAlphaFilter, jointVelocitySlopTime, false, armAndBackJoints);
       sensorProcessing.computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(backXFilter, backXSlopTime, false, backXName);
-      sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(jointVelocityAlphaFilter, false, JOINT_VELOCITY, armJointNames);
 
       sensorProcessing.computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(armJointVelocityAlphaFilter1, armJointVelocitySlopTime, false, armJointNames);
 //      sensorProcessing.addJointVelocityAlphaFilterOnlyForSpecifiedJoints(armJointVelocityAlphaFilter2, false, armJointNames);
