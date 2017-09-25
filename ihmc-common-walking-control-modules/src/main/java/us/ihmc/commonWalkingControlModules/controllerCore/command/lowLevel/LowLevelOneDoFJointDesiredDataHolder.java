@@ -57,12 +57,12 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
          registerJointWithEmptyData(joint[i]);
    }
 
-   public void registerJointWithEmptyData(OneDoFJoint joint)
+   public LowLevelJointData registerJointWithEmptyData(OneDoFJoint joint)
    {
       if (lowLevelJointDataMap.containsKey(joint.getNameBasedHashCode()))
          throwJointAlreadyRegisteredException(joint);
 
-      registerJointWithEmptyDataUnsafe(joint);
+      return registerJointWithEmptyDataUnsafe(joint);
    }
 
    public void registerLowLevelJointData(OneDoFJoint joint, LowLevelJointDataReadOnly jointDataToRegister)
