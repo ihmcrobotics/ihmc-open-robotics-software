@@ -168,7 +168,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
       }
    }
 
-   public void setResetIntegratorsromJoints(OneDoFJoint[] joints)
+   public void setResetIntegratorsFromJoints(OneDoFJoint[] joints)
    {
       for (int i = 0; i < joints.length; i++)
       {
