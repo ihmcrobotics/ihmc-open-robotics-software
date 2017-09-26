@@ -1,27 +1,26 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.aStar.*;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
 
 public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 {
@@ -200,7 +199,15 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
                continue;
          }
 
-         HashSet<FootstepNode> childNodes = nodeExpansion.expandNode(nodeToExpand);
+         ArrayList<FootstepNode> childNodes = new ArrayList<>();
+         childNodes.addAll(nodeExpansion.expandNode(nodeToExpand));
+         childNodes.sort((node1, node2) ->
+                         {
+                            double goalDistance1 = node1.euclideanDistance(goalNodes.get(node1.getRobotSide()));
+                            double goalDistance2 = node2.euclideanDistance(goalNodes.get(node2.getRobotSide()));
+                            return goalDistance1 < goalDistance2 ? 1 : -1;
+                         });
+
          for (FootstepNode childNode : childNodes)
          {
             if (!checker.isNodeValid(childNode, nodeToExpand))
@@ -213,7 +220,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
             // only add to stack if the node hasn't been explored
             if (!footstepGraph.doesNodeExist(childNode))
-               stack.add(childNode);
+               stack.addFirst(childNode);
 
             footstepGraph.checkAndSetEdge(nodeToExpand, childNode, stepCost);
          }
