@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 import org.ros.RosCore;
 import org.ros.internal.message.Message;
 
@@ -31,7 +30,6 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
@@ -98,8 +96,6 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 8.7)
-   @Test(timeout = 43000)
    public void testFuzzyPacketsUsingRos()
    {
       RosCore rosCore = RosCore.newPrivate();
@@ -214,8 +210,6 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 
    private AvatarSimulation avatarSimulation;
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.7)
-   @Test(timeout = 30000)
    public void testFuzzyPacketsWithoutRos()
    {
       DRCRobotModel robotModel = getRobotModel();

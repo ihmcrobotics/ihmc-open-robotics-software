@@ -1,13 +1,17 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
+import org.junit.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseStandingYawedTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasObstacleCourseStandingYawedTest extends DRCObstacleCourseStandingYawedTest
@@ -23,6 +27,14 @@ public class AtlasObstacleCourseStandingYawedTest extends DRCObstacleCourseStand
    public String getSimpleRobotName()
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 18.4)
+   @Test
+   public void testStandingYawed() throws SimulationExceededMaximumTimeException
+   {
+      super.testStandingYawed();
    }
 
 }

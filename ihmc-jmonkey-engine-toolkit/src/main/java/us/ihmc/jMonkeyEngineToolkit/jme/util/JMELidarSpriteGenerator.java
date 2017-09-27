@@ -34,6 +34,7 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
    protected JMEPointCloudGenerator pointCloudGenerator;
    protected ArrayList<ColorRGBA> colorList = new ArrayList<ColorRGBA>();
    private Random random = new Random();
+   private boolean prepairingPointCloud = false;
 
    protected final AtomicReference<Point3D32[]> pointSource = new AtomicReference<>();
 
@@ -116,11 +117,13 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
    {
       this.pointSource.set(source);
       newCloudAvailable = true;
+      getNextCloudReady();
    }
 
-   public void update()
+   AtomicReference<Node> newPointCloud = new AtomicReference<>();
+
+   public void getNextCloudReady()
    {
-      // System.out.println("test2"+newCloudAvailable);
 
       if (newCloudAvailable)
       {
@@ -128,34 +131,47 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
 
          newCloudAvailable = false;
          Point3D32[] pointSource = this.pointSource.get();
-
          if (pointSource == null)
          {
             return;
          }
 
+//         if (pointSource.length % 10000 <= 200)
+//            System.out.println(pointSource.length);
+
+         colors = generateColors(pointSource);
+
+         try
+         {
+            // System.out.println("making graph");
+            Node pointCloud = pointCloudGenerator.generatePointCloudGraph(pointSource, colors);
+
+            pointCloudGeometry = (pointCloud.getChildren().size() > 0) ? (Geometry) pointCloud.getChild(0) : null;
+//            pointCloud.setShadowMode(ShadowMode.CastAndReceive);
+
+            newPointCloud.set(pointCloud);
+            // System.out.println("graph made");
+         }
+         catch (Exception e)
+         {
+            e.printStackTrace();
+         }
+      }
+
+   }
+
+   public void update()
+   {
+      Node newCloud;
+
+      if ((newCloud = newPointCloud.getAndSet(null)) != null)
+      {
          if (this.getParent() != null)
          {
             thisObject.detachAllChildren();
-
-            colors = generateColors(pointSource);
-
-            try
-            {
-               // System.out.println("making graph");
-               Node pointCloud = pointCloudGenerator.generatePointCloudGraph(pointSource, colors);
-
-               pointCloudGeometry = (pointCloud.getChildren().size() > 0) ? (Geometry) pointCloud.getChild(0) : null;
-               pointCloud.setShadowMode(ShadowMode.CastAndReceive);
-               thisObject.attachChild(pointCloud);
-
-               // System.out.println("graph made");
-            }
-            catch (Exception e)
-            {
-               e.printStackTrace();
-            }
+            thisObject.attachChild(newCloud);
          }
+
       }
    }
 
@@ -200,7 +216,8 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
             Point3D32 nearest = getNearestIntersection(origin, dir, getLidarResolution(), geom.getWorldTransform());
             if (nearest != null)
             {
-               CollisionResult collRes = new CollisionResult(geom, new com.jme3.math.Vector3f(nearest.getX32(), nearest.getY32(), nearest.getZ32()), (float) origin.distance(nearest), 0);
+               CollisionResult collRes = new CollisionResult(geom, new com.jme3.math.Vector3f(nearest.getX32(), nearest.getY32(), nearest.getZ32()),
+                                                             (float) origin.distance(nearest), 0);
                collRes.setContactNormal(new com.jme3.math.Vector3f(0, 0, 1));
                results.addCollision(collRes);
 

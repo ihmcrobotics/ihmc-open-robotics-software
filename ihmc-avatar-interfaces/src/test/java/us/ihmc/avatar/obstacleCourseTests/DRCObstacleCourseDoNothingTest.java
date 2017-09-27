@@ -1,26 +1,22 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Test;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -50,43 +46,41 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
-      
+
       simulationTestingParameters = null;
-      
+
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
    @AfterClass
    public static void garbageCollectAndPauseForYourKitToSeeWhatIsStillAllocated()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB("DRCObstacleCourseDoNothingTest after class.");
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 11.1)
-   @Test
    public void testDoNothing1() throws SimulationExceededMaximumTimeException
    {
       doATest();
    }
-   
+
    private void doATest() throws SimulationExceededMaximumTimeException
    {
-      doATestWithDRCStuff();      
+      doATestWithDRCStuff();
    }
-   
+
    private void doATestWithDRCStuff() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
 
-      
+
 //      new DRCDemo01NavigationEnvironment(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, checkNothingChanged, showGUI, showGUI,
 //      createVideo, false, robotModel
-      
+
       String name = "DRCDoNothingTest";
       DRCRobotModel robotModel = getRobotModel();
-      
+
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation(name);
@@ -103,7 +97,7 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       assertTrue(success);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
-   
+
    private void doATestWithJustAnSCS() throws SimulationExceededMaximumTimeException
    {
 //      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -113,9 +107,9 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       simulationConstructionSetParameters.setShowSplashScreen(false);
       simulationConstructionSetParameters.setShowWindows(true);
 
-      
+
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("TEST"), simulationConstructionSetParameters);
-      
+
       scs.startOnAThread();
       ThreadTools.sleep(4000);
       scs.closeAndDispose();

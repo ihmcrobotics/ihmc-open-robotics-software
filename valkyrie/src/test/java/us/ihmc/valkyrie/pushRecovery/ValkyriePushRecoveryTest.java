@@ -14,6 +14,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 @ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
 {
+   @Override
    protected DRCRobotModel getRobotModel()
    {
       return new ValkyrieRobotModel(RobotTarget.SCS, false);
@@ -112,7 +113,7 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    {
       super.testRecoveryWhileInFlamingoStance();
    }
-   
+
    @Override
    public void testPushICPOptimiWhileInSwing() throws SimulationExceededMaximumTimeException
    {
