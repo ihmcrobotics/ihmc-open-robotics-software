@@ -7,20 +7,16 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
@@ -32,6 +28,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class AvatarICPOptimizationPushRecoveryTest
 {
@@ -87,8 +84,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
    protected abstract DRCRobotModel getRobotModel();
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
    public void testPushICPOptimizationNoPush() throws SimulationExceededMaximumTimeException
    {
       setupTest(getScript());
@@ -100,8 +95,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
    public void testPushICPOptimizationOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(getScript());
@@ -124,8 +117,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
    public void testPushICPOptimizationOutwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(getSlowstepScript());
@@ -148,8 +139,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
    public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(getScript());
@@ -172,9 +161,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
    public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       RigidBodyTransform transform = new RigidBodyTransform();
@@ -229,8 +215,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
    public void testPushICPOptimizationRandomPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(getScript());
@@ -257,8 +241,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
    public void testPushICPOptimizationLongForwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(getScript());
@@ -281,8 +263,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
    public void testPushICPOptimizationLongBackwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(getScript());
@@ -305,8 +285,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
    public void testPushICPOptimizationLongInwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(getScript());
@@ -329,8 +307,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
    public void testPushICPOptimizationOutwardPushInTransfer() throws SimulationExceededMaximumTimeException
    {
       setupTest(getScript());
@@ -359,8 +335,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
    public void testPushICPOptimizationInwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(getScript());
@@ -383,9 +357,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
    public void testPushICPOptimizationForwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(getScript());
@@ -408,8 +379,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
    public void testPushICPOptimizationForwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(getSlowstepScript());
@@ -432,8 +401,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
    public void testPushICPOptimizationBackwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupTest(getScript());
@@ -456,8 +423,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(noExceptions);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
    public void testPushICPOptimizationOutwardPushOnEachStep() throws SimulationExceededMaximumTimeException
    {
       setupTest(getScript());
@@ -468,7 +433,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
       StateTransitionCondition secondPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
       double delay = 0.5 * swingTime;
-
 
       // push parameters:
       Vector3D firstForceDirection = new Vector3D(0.0, -1.0, 0.0);
@@ -524,9 +488,10 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       totalMass = fullRobotModel.getTotalMass();
-//      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
+      //      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
       double z = getForcePointOffsetZInChestFrame();
-      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel.getChest().getParentJoint().getName(), new Vector3D(0, 0, z));
+      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel.getChest().getParentJoint().getName(),
+                                                    new Vector3D(0, 0, z));
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       scs.addYoGraphic(pushRobotController.getForceVisualizer());
 
@@ -549,11 +514,9 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
-         final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
-               footPrefix + "State");
+         final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule", footPrefix + "State");
          @SuppressWarnings("unchecked")
-         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
-               "walkingState");
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }

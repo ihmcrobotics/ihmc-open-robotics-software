@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,11 +12,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.StringTokenizer;
 
-import org.junit.Test;
-
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -39,8 +36,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
@@ -61,11 +56,11 @@ import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FootstepSnapperSimulationTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testFootstepAndPointsFromDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {
       QuadTreeFootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
@@ -96,8 +91,6 @@ public class FootstepSnapperSimulationTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
    public void testPointsFromAtlasDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {
       boolean assertPositionConditions = true;
@@ -164,8 +157,6 @@ public class FootstepSnapperSimulationTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test(timeout = 300000)
    public void testSimpleFootstepSnapperOnListOfPoints() throws InsufficientDataException, IOException
    {
       boolean assertPositionConditions = false;
@@ -232,8 +223,6 @@ public class FootstepSnapperSimulationTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
    public void testSimpleFootstepSnapperOnBumpyGround() throws InsufficientDataException
    {
       boolean assertPositionConditions = true;
@@ -269,8 +258,6 @@ public class FootstepSnapperSimulationTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
    public void testSimpleFootstepSnapperOnSteps() throws InsufficientDataException
    {
       boolean assertPositionConditions = true;
@@ -317,8 +304,6 @@ public class FootstepSnapperSimulationTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
    public void testConvexHullFootstepSnapperOnSteps() throws InsufficientDataException
    {
       boolean assertPositionConditions = true;
@@ -360,8 +345,6 @@ public class FootstepSnapperSimulationTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
    public void testConvexHullFootstepSnapperOnOddTerrain() throws InsufficientDataException
    {
       boolean assertPositionConditions = true;
@@ -404,8 +387,6 @@ public class FootstepSnapperSimulationTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.8)
-   @Test(timeout = 30000)
    public void testAdjustingFootstepSnapperOnOddTerrain() throws InsufficientDataException
    {
       boolean assertPositionConditions = false;

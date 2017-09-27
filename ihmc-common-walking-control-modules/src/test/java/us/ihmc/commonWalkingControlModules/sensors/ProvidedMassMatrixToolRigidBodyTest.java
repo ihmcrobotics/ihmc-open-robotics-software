@@ -2,16 +2,13 @@ package us.ihmc.commonWalkingControlModules.sensors;
 
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
-
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class ProvidedMassMatrixToolRigidBodyTest
 {
@@ -20,8 +17,6 @@ public abstract class ProvidedMassMatrixToolRigidBodyTest
    private final double gravity = 9.81;
    private final double mass = 2.0;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
    public void testprovidedMassMatrixToolRigidBody()
    {
       FullHumanoidRobotModel fullRobotModel = getFullRobotModel();

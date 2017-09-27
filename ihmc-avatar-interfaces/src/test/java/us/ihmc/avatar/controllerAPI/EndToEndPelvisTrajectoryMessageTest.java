@@ -12,9 +12,7 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -30,7 +28,6 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.RateBasedDe
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -82,8 +79,6 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test
    public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -160,8 +155,6 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       assertSingleWaypointExecuted(pelvisName, fullRobotModel, desiredPosition, desiredOrientation, scs);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test
    public void testSingleWaypointAndWalk() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -305,8 +298,6 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       return footsteps;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 18.0)
-   @Test
    public void testHeightUsingMultipleWaypoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -448,8 +439,6 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       return simpleSE3TrajectoryPoint;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 18.0)
-   @Test
    public void testHeightUsingMultipleWaypointsWhileWalking() throws Exception
    {
 
@@ -571,8 +560,6 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       assertCenterOfMassHeightManagerIsInState(scs, PelvisHeightControlMode.USER);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 18.0)
-   @Test
    public void testHeightModeSwitchWhileWalking() throws Exception
    {
 
@@ -691,8 +678,6 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       assertCenterOfMassHeightManagerIsInState(scs, PelvisHeightControlMode.WALKING_CONTROLLER);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 18.0)
-   @Test
    public void testMultipleWaypoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -828,8 +813,6 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    }
 
    @SuppressWarnings("unchecked")
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
    public void testStopAllTrajectory() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

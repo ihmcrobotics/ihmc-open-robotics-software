@@ -239,7 +239,7 @@ public class YoVariableHandShakeBuilder
          yoVariableDefinition.setName(variable.getName());
          
          String description = variable.getDescription();
-         if(description.length() > 255)
+         if(description != null && description.length() > 255)
          {
             description = description.substring(0, 255);
          }
