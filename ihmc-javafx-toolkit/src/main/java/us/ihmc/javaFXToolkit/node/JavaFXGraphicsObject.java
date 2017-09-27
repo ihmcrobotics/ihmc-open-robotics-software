@@ -55,7 +55,7 @@ import us.ihmc.tools.FloatArrayCollector;
 public class JavaFXGraphicsObject extends Graphics3DInstructionExecutor
 {
 
-   private static float r;
+//   private static float r;
    private final Group parentGroup = new Group();
    private Group currentGroup = parentGroup;
 
@@ -157,7 +157,7 @@ public class JavaFXGraphicsObject extends Graphics3DInstructionExecutor
 
    private static Material convertMaterial(AppearanceDefinition appearance)
    {
-      r = appearance.getColor().getX();
+      float r = appearance.getColor().getX();
       float g = appearance.getColor().getY();
       float b = appearance.getColor().getZ();
       double transparency = appearance.getTransparency();
