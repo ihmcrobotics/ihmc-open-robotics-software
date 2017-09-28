@@ -6,6 +6,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.aStar.*;
+import us.ihmc.footstepPlanning.aStar.implementations.DistanceAndYawBasedHeuristics;
+import us.ihmc.footstepPlanning.aStar.implementations.PlanarRegionBipedalFootstepNodeExpansion;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -17,10 +19,10 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.PriorityQueue;
 
 public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 {
@@ -33,8 +35,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    private final YoBoolean exitAfterInitialSolution = new YoBoolean("exitAfterInitialSolution", registry);
 
    private final FootstepGraph footstepGraph;
-   private final Deque<FootstepNode> stack = new ArrayDeque<FootstepNode>();
-   private final FootstepNodeExpansion nodeExpansion;
+   private final PriorityQueue<FootstepNode> stack;
+   private final PlanarRegionBipedalFootstepNodeExpansion nodeExpansion; //  = new SimpleSideBasedExpansion();
    private final FootstepNodeSnapper snapper;
    private final FootstepNodeChecker checker;
    private final FootstepCost stepCostCalculator;
@@ -47,23 +49,35 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    private final YoInteger numberOfNodesExpanded = new YoInteger("numberOfNodesExpanded", registry);
    private final YoLong planningStartTime = new YoLong("planningStartTime", registry);
 
-   public PlanarRegionBipedalFootstepPlanner(BipedalFootstepPlannerParameters parameters, FootstepNodeExpansion nodeExpansion, FootstepNodeSnapper snapper,
+   public PlanarRegionBipedalFootstepPlanner(BipedalFootstepPlannerParameters parameters, FootstepNodeSnapper snapper,
                                              FootstepNodeChecker checker, FootstepCost stepCostCalculator, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       this.parameters = parameters;
-      exitAfterInitialSolution.set(true);
-      timeout.set(Double.POSITIVE_INFINITY);
-      this.nodeExpansion = nodeExpansion;
       this.footstepGraph = new FootstepGraph();
       this.snapper = snapper;
       this.checker = checker;
       this.stepCostCalculator = stepCostCalculator;
+      nodeExpansion = new PlanarRegionBipedalFootstepNodeExpansion(parameters);
+
+      DistanceAndYawBasedHeuristics costToGoHeuristics = new DistanceAndYawBasedHeuristics(0.5, registry);
+      Comparator<FootstepNode> nodeComparator = (node1, node2) ->
+      {
+         double cost1 = costToGoHeuristics.compute(node1, goalNodes.get(node1.getRobotSide()));
+         double cost2 = costToGoHeuristics.compute(node2, goalNodes.get(node2.getRobotSide()));
+         if (cost1 == cost2) return 0;
+         return cost1 < cost2 ? -1 : 1;
+      };
+      stack = new PriorityQueue<>(nodeComparator);
+
+      exitAfterInitialSolution.set(true);
+      timeout.set(Double.POSITIVE_INFINITY);
    }
 
    public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
    {
       this.listener = listener;
+      ((BipedalFootstepPlannerNodeChecker) checker).setBipedalFootstepPlannerListener(listener);
    }
 
    public void setMaximumNumberOfNodesToExpand(int maximumNumberOfNodesToExpand)
@@ -118,6 +132,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
          FootstepNode goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), side);
          goalNodes.put(side, goalNode);
       }
+
+      nodeExpansion.setGoalNodes(goalNodes);
    }
 
    private void checkGoalType(FootstepPlannerGoal goal)
@@ -132,6 +148,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    {
       checker.setPlanarRegions(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
+      if(listener != null)
+         listener.planarRegionsListSet(planarRegionsList);
    }
 
    @Override
@@ -144,6 +162,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       List<FootstepNode> path = footstepGraph.getPathFromStart(bestGoalNode);
       for (int i = 1; i < path.size(); i++)
       {
+         System.out.println(path.get(i).getYaw());
          RobotSide robotSide = path.get(i).getRobotSide();
          RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i), null);
 
@@ -162,7 +181,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    private void initialize()
    {
       stack.clear();
-      stack.push(startNode);
+      stack.add(startNode);
       footstepGraph.initialize(startNode);
       notifiyListenersStartNodeWasAdded(startNode);
 
@@ -180,14 +199,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       while (!stack.isEmpty())
       {
          numberOfNodesExpanded.increment();
-
-         FootstepNode nodeToExpand;
-         // find a path to the goal fast using depth first then refine using breath first
-         if (bestGoalNode == null)
-            nodeToExpand = stack.pop();
-         else
-            nodeToExpand = stack.pollLast();
-
+         FootstepNode nodeToExpand = stack.poll();
          notifyListenerNodeIsBeingExpanded(nodeToExpand);
 
          if (goalNodes.get(nodeToExpand.getRobotSide()).equals(nodeToExpand))
@@ -199,15 +211,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
                continue;
          }
 
-         ArrayList<FootstepNode> childNodes = new ArrayList<>();
-         childNodes.addAll(nodeExpansion.expandNode(nodeToExpand));
-         childNodes.sort((node1, node2) ->
-                         {
-                            double goalDistance1 = node1.euclideanDistance(goalNodes.get(node1.getRobotSide()));
-                            double goalDistance2 = node2.euclideanDistance(goalNodes.get(node2.getRobotSide()));
-                            return goalDistance1 < goalDistance2 ? 1 : -1;
-                         });
-
+         HashSet<FootstepNode> childNodes = nodeExpansion.expandNode(nodeToExpand);
          for (FootstepNode childNode : childNodes)
          {
             if (!checker.isNodeValid(childNode, nodeToExpand))
@@ -220,7 +224,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
             // only add to stack if the node hasn't been explored
             if (!footstepGraph.doesNodeExist(childNode))
-               stack.addFirst(childNode);
+               stack.add(childNode);
 
             footstepGraph.checkAndSetEdge(nodeToExpand, childNode, stepCost);
          }
