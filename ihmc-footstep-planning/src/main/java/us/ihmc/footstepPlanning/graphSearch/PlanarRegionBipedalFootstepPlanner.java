@@ -36,7 +36,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
    private final FootstepGraph footstepGraph;
    private final PriorityQueue<FootstepNode> stack;
-   private final PlanarRegionBipedalFootstepNodeExpansion nodeExpansion; //  = new SimpleSideBasedExpansion();
+   private final PlanarRegionBipedalFootstepNodeExpansion nodeExpansion;
    private final FootstepNodeSnapper snapper;
    private final FootstepNodeChecker checker;
    private final FootstepCost stepCostCalculator;
