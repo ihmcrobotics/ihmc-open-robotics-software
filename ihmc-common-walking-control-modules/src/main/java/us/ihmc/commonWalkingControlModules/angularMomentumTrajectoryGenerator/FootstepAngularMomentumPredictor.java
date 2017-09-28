@@ -461,10 +461,10 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       // handle each of the upcoming footsteps
       WalkingTrajectoryType currentWalkingPhase = WalkingTrajectoryType.TRANSFER;
       int numberOfSteps = Math.min(numberOfRegisteredFootsteps.getIntegerValue(), numberOfFootstepsToConsider.getIntegerValue());
+      setFootTrajectoriesForPhase(footstepIndex, currentWalkingPhase);
       for(int stepIndex = footstepIndex; stepIndex < numberOfSteps; stepIndex++)
       {
          copPointsInFoot = upcomingCoPsInFootsteps.get(stepIndex + 1);
-         setFootTrajectoriesForPhase(stepIndex, currentWalkingPhase);
          for(int j = 0; j < copPointsInFoot.getNumberOfCoPPoints(); j++, comIndex++)
          {
             setCoMTrajectory(phaseTime, phaseTime + copPointsInFoot.get(j).getTime(), comIndex);
@@ -497,12 +497,14 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
             if(copPointsInFoot.getCoPPointList().get(j) == entryCoPName)
             {
                currentWalkingPhase = WalkingTrajectoryType.SWING;
+               setFootTrajectoriesForPhase(stepIndex, currentWalkingPhase);
                phaseTime = 0.0;
             }
             else if(j >= copPointsInFoot.getNumberOfCoPPoints() - 1)
             {
                currentWalkingPhase = WalkingTrajectoryType.TRANSFER;
                phaseTime = 0.0;
+               setFootTrajectoriesForPhase(stepIndex + 1, currentWalkingPhase);
             }
          }
       }
