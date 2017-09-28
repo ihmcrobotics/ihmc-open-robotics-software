@@ -22,9 +22,9 @@ import javax.swing.border.Border;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
+@SuppressWarnings("serial")
 public class YoGraphicsPropertiesDialog extends JDialog implements ActionListener
 {
-   private static final long serialVersionUID = -8226475433536336684L;
    private JButton okButton, applyButton, cancelButton;
    private YoGraphicsPropertiesPanel yoGraphicsPropertiesPanel;
    @SuppressWarnings("unused")
