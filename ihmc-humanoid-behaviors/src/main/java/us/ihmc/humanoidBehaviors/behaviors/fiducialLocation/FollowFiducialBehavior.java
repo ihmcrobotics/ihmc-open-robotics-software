@@ -152,10 +152,9 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = createDefaultFootPolygons();
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygonsInSoleFrame);
-      SimpleGridResolutionBasedExpansion nodeExpansion = new SimpleGridResolutionBasedExpansion();
       BipedalFootstepPlannerNodeChecker nodeChecker = new BipedalFootstepPlannerNodeChecker(parameters, null);
       ConstantFootstepCost footstepCost = new ConstantFootstepCost(1.0);
-      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(parameters, nodeExpansion, snapper, nodeChecker, footstepCost, registry);
+      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(parameters, snapper, nodeChecker, footstepCost, registry);
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
       planner.setMaximumNumberOfNodesToExpand(500);

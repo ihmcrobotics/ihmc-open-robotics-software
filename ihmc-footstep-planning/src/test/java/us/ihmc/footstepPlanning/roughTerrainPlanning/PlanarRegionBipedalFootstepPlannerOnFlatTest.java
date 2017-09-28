@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.aStar.FootstepNodeVisualization;
 import us.ihmc.footstepPlanning.aStar.implementations.SimpleGridResolutionBasedExpansion;
 import us.ihmc.footstepPlanning.aStar.implementations.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.flatGroundPlanning.FootstepPlannerOnFlatGroundTest;
@@ -76,12 +77,11 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
       registry = new YoVariableRegistry("test");
       parameters = new BipedalFootstepPlannerParameters(registry);
 
-      SimpleGridResolutionBasedExpansion nodeExpansion = new SimpleGridResolutionBasedExpansion();
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygonsInSoleFrame);
       BipedalFootstepPlannerNodeChecker nodeChecker = new BipedalFootstepPlannerNodeChecker(parameters, null);
       ConstantFootstepCost footstepCost = new ConstantFootstepCost(1.0);
-      planner = new PlanarRegionBipedalFootstepPlanner(parameters, nodeExpansion, snapper, nodeChecker, footstepCost, registry);
+      planner = new PlanarRegionBipedalFootstepPlanner(parameters, snapper, nodeChecker, footstepCost, registry);
 
       setDefaultParameters();
    }
