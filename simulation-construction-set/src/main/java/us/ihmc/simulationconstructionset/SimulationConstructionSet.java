@@ -1316,7 +1316,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       mySimulation = null;
       jFrame = null;
 
-      System.out.println("closeAndDisposeLocal in SCSGUI");
+//      System.out.println("closeAndDisposeLocal in SCSGUI");
 
       // Destroy the LWJGL Threads. Not sure if need to do Display.destroy() or not.
 //      Display.destroy();
