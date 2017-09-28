@@ -10,6 +10,8 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.aStar.FootstepNodeVisualization;
+import us.ihmc.footstepPlanning.aStar.implementations.AlwaysValidNodeChecker;
+import us.ihmc.footstepPlanning.aStar.implementations.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.aStar.implementations.SimpleGridResolutionBasedExpansion;
 import us.ihmc.footstepPlanning.aStar.implementations.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.flatGroundPlanning.FootstepPlannerOnFlatGroundTest;
@@ -25,7 +27,7 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
    private BipedalFootstepPlannerParameters parameters;
    private PlanarRegionBipedalFootstepPlanner planner;
 
-   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   private static final boolean visualize = false; // !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    private static final boolean showPlannerVisualizer = false;
 
    @Override
@@ -52,6 +54,9 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
    @Test(timeout = 300000)
    public void testStraightLineWithInitialTurn()
    {
+      planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
+      planner.setTimeout(2.0);
+      planner.setExitAfterInitialSolution(false);
       super.testStraightLineWithInitialTurn(true);
    }
 
@@ -60,6 +65,9 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
    @Test(timeout = 300000)
    public void testJustTurnInPlace()
    {
+      planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
+      planner.setTimeout(2.0);
+      planner.setExitAfterInitialSolution(false);
       super.testJustTurnInPlace(true);
    }
 
@@ -68,6 +76,9 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
    @Test(timeout = 300000)
    public void testRandomPoses()
    {
+      planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
+      planner.setTimeout(2.0);
+      planner.setExitAfterInitialSolution(false);
       super.testRandomPoses(true);
    }
 
@@ -78,8 +89,8 @@ public class PlanarRegionBipedalFootstepPlannerOnFlatTest extends FootstepPlanne
       parameters = new BipedalFootstepPlannerParameters(registry);
 
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygonsInSoleFrame);
-      BipedalFootstepPlannerNodeChecker nodeChecker = new BipedalFootstepPlannerNodeChecker(parameters, null);
+      FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper(footPolygonsInSoleFrame);
+      AlwaysValidNodeChecker nodeChecker = new AlwaysValidNodeChecker();
       ConstantFootstepCost footstepCost = new ConstantFootstepCost(1.0);
       planner = new PlanarRegionBipedalFootstepPlanner(parameters, snapper, nodeChecker, footstepCost, registry);
 
