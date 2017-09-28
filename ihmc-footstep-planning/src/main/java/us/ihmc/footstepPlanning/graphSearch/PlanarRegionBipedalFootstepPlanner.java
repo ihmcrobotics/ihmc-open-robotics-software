@@ -160,6 +160,8 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
       FootstepPlan plan = new FootstepPlan();
       List<FootstepNode> path = footstepGraph.getPathFromStart(bestGoalNode);
+      path.add(goalNodes.get(bestGoalNode.getRobotSide().getOppositeSide()));
+
       for (int i = 1; i < path.size(); i++)
       {
          System.out.println(path.get(i).getYaw());
