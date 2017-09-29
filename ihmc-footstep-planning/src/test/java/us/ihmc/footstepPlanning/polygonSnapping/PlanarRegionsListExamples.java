@@ -1,15 +1,11 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
-import java.util.Random;
-
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
@@ -18,7 +14,8 @@ import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsLis
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+
+import java.util.Random;
 
 public class PlanarRegionsListExamples
 {
@@ -211,6 +208,53 @@ public class PlanarRegionsListExamples
       return convexPolygon;
    }
 
+   public static PlanarRegionsList createSteppingStonesEnvironment()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      double cinderBlockWidth = 0.2;
+      double cinderBlockLength = 0.3;
+      double cinderBlockSeparationWidth = 0.5;
+      double cinderBlockSeparationLength = 0.3;
+
+      double pathRadius = 2.5;
+
+      double quarterCircleLength = 0.5 * Math.PI * pathRadius;
+      int numberOfSteps = (int) Math.round(quarterCircleLength / cinderBlockSeparationLength);
+      if(numberOfSteps % 2 != 1) numberOfSteps++;
+
+      // starting block
+      generator.translate(0.0, -0.5, 0.0);
+      generator.addRectangle(2.0, 1.0);
+      generator.identity();
+
+      // ending block
+      generator.translate(pathRadius + 0.5, pathRadius, 0.0);
+      generator.addRectangle(1.0, 2.0);
+      generator.identity();
+
+      // cinder blocks
+      for (int i = 0; i < numberOfSteps; i++)
+      {
+         double percentageAlongCurve = ((double) i / (double) numberOfSteps);
+
+         double angle = percentageAlongCurve * 0.5 * Math.PI;
+         double xPositionAlongCurve = pathRadius * (1.0 - Math.cos(angle));
+         double yPositionAlongCurve = pathRadius * Math.sin(angle);
+
+         generator.translate(xPositionAlongCurve, yPositionAlongCurve, 0.0);
+         generator.rotate(- angle, Axis.Z);
+
+         double xTranslation = cinderBlockSeparationWidth * 0.5;
+         if(i % 2 == 0) xTranslation *= -1.0;
+         generator.translate(xTranslation, 0.0, 0.0);
+
+         generator.addRectangle(cinderBlockWidth, cinderBlockLength);
+         generator.identity();
+      }
+
+      return generator.getPlanarRegionsList();
+   }
+
    public static PlanarRegionsList createBodyPathPlannerTestEnvironment()
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
@@ -332,7 +376,7 @@ public class PlanarRegionsListExamples
    public static void main(String[] args)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("exampleRobot"));
-      PlanarRegionsList planarRegionsList = createBodyPathPlannerTestEnvironment();
+      PlanarRegionsList planarRegionsList = createSteppingStonesEnvironment();
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment", planarRegionsList, 1e-5,
                                                                                                 false);
       TerrainObject3D terrainObject3D = environment.getTerrainObject3D();
@@ -340,10 +384,10 @@ public class PlanarRegionsListExamples
       scs.setGroundVisible(false);
 
       Graphics3DObject startAndEndGraphics = new Graphics3DObject();
-      startAndEndGraphics.translate(0.5, 0.5, 0.5);
+      startAndEndGraphics.translate(0.0, 0.0, 0.5);
       startAndEndGraphics.addSphere(0.2, YoAppearance.Green());
       startAndEndGraphics.identity();
-      startAndEndGraphics.translate(8.5, -3.5, 0.5);
+      startAndEndGraphics.translate(3.0, 2.5, 0.5);
       startAndEndGraphics.addSphere(0.2, YoAppearance.Red());
       scs.addStaticLinkGraphics(startAndEndGraphics);
 
