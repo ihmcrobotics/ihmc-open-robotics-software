@@ -75,7 +75,7 @@ public class DRCOutputProcessorWithStateChangeSmoother implements DRCOutputProce
       for (int i = 0; i < jointTorquesSmoothedAtStateChange.size(); i++)
       {
          LowLevelJointData jointData = jointTorquesSmoothedAtStateChange.first(i);
-         double tau = jointData.getDesiredTorque();
+         double tau = jointData.hasDesiredTorque() ? jointData.getDesiredTorque() : 0.0;
          AlphaFilteredYoVariable smoothedJointTorque = jointTorquesSmoothedAtStateChange.second(i);
          smoothedJointTorque.update(tau);
          jointData.setDesiredTorque(smoothedJointTorque.getDoubleValue());
