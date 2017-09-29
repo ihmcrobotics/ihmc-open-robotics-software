@@ -164,9 +164,9 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
       for (int i = 1; i < path.size(); i++)
       {
-         System.out.println(path.get(i).getYaw());
          RobotSide robotSide = path.get(i).getRobotSide();
-         RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i), null);
+         ConvexPolygon2D footholdIntersection = new ConvexPolygon2D();
+         RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i), footholdIntersection);
 
          RigidBodyTransform footstepPose = new RigidBodyTransform();
          footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());

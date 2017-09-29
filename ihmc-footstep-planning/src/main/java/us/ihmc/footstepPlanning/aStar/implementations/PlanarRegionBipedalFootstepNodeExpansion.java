@@ -106,7 +106,7 @@ public class PlanarRegionBipedalFootstepNodeExpansion implements FootstepNodeExp
             {
                if (x == 0 && y == 0 && yaw == 0)
                   continue;
-               FootstepNode offsetNode = constructNodeOffsetFromAnotherNode(x, nextSide.negateIfRightSide(y), yaw, node);
+               FootstepNode offsetNode = constructNodeOffsetFromAnotherNode(x, nextSide.negateIfRightSide(y), nextSide.negateIfRightSide(yaw), node);
                expansion.add(offsetNode);
             }
          }
