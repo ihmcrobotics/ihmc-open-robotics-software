@@ -20,7 +20,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.R
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.ReferenceCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.ReferenceICPTrajectoryGenerator;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -519,5 +519,10 @@ public class FootstepAngularMomentumPredictorTest
          copTrajectoryGenerator.addFootstepToPlan(newFootstep, new FootstepTiming(swingTime, transferTime));
          side = side.getOppositeSide();
       }
+   }
+   
+   public static void main(String args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(FootstepAngularMomentumPredictor.class, FootstepAngularMomentumPredictorTest.class);
    }
 }
