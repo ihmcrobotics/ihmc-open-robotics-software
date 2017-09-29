@@ -125,6 +125,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       drcSimulationTestHelper.setTestEnvironment(steppingStonesEnvironment);
       drcSimulationTestHelper.setNetworkProcessorParameters(networkModuleParameters);
       drcSimulationTestHelper.setStartingLocation(startingLocation);
+      drcSimulationTestHelper.createSimulation("steppingStonesTestHelper");
 
       toolboxCommunicator.connect();
       toolboxCommunicator.attachListener(FootstepPlanningToolboxOutputStatus.class, this::setOutputStatus);
