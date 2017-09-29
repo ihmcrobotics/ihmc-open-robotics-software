@@ -2,10 +2,9 @@ package us.ihmc.avatar.networkProcessor.lidarScanPublisher;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executors;
@@ -29,6 +28,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -56,11 +56,11 @@ public class LidarScanPublisher
 
    private final String name = getClass().getSimpleName();
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
-   
+
    private final AtomicReference<ScanData> scanDataToPublish = new AtomicReference<>(null);
 
    private final PacketCommunicator packetCommunicator;
-   private final ConcurrentLinkedDeque<PacketDestination> listeners = new ConcurrentLinkedDeque<>();
+   private final ConcurrentLinkedDeque<RequestLidarScanMessage> listeners = new ConcurrentLinkedDeque<>();
 
    private final String robotName;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -72,7 +72,6 @@ public class LidarScanPublisher
    private CollisionShapeTester collisionBoxNode = null;
    private PPSTimestampOffsetProvider ppsTimestampOffsetProvider = null;
 
-   private boolean removeShadows = false;
    private double shadowAngleThreshold = DEFAULT_SHADOW_ANGLE_THRESHOLD;
 
    public LidarScanPublisher(String lidarName, FullHumanoidRobotModelFactory modelFactory, PacketCommunicator packetCommunicator)
@@ -140,55 +139,18 @@ public class LidarScanPublisher
    }
 
    /**
-    * Attempt to remove flying LIDAR points, which, when present, result as objects having shadows.
     * <p>
-    * Warning: The algorithm for removing shadows expects to be dealing with single LIDAR scans.
-    * </p>
-    * <p>
-    * The rejection method is based on the observation that flying points always fall in line with
-    * view direction of the laser ray. It compares the angle between the angle between the scanner
-    *  view direction and the line segment connecting outlier points with their scan line neighbors.
-    * </p>
-    * <p>
-    * For more details, see <a href="http://groups.csail.mit.edu/robotics-center/public_papers/Marion16a.pdf">
-    * Pat Marion master thesis, section 2.2.1, page 25.</a> 
-    * </p>
-    */
-   public void enableShadowRemoval()
-   {
-      removeShadows = true;
-   }
-
-   /**
-    * Attempt to remove flying LIDAR points, which, when present, result as objects having shadows.
-    * <p>
-    * Warning: The algorithm for removing shadows expects to be dealing with single LIDAR scans.
-    * </p>
-    * <p>
-    * The rejection method is based on the observation that flying points always fall in line with
-    * view direction of the laser ray. It compares the angle between the angle between the scanner
-    *  view direction and the line segment connecting outlier points with their scan line neighbors.
-    * </p>
-    * <p>
-    * For more details, see <a href="http://groups.csail.mit.edu/robotics-center/public_papers/Marion16a.pdf">
-    * Pat Marion master thesis, section 2.2.1, page 25.</a> 
+    * For more details, see
+    * <a href="http://groups.csail.mit.edu/robotics-center/public_papers/Marion16a.pdf"> Pat Marion
+    * master thesis, section 2.2.1, page 25.</a>
     * </p>
     * 
-    * @param angleThreshold the angle threshold in radians used by the removal algorithm.
-    * Expecting a positive value close to zero, the default value is 0.21 radian (= 12 degrees).
+    * @param angleThreshold the angle threshold in radians used by the removal algorithm. Expecting
+    *           a positive value close to zero, the default value is 0.21 radian (= 12 degrees).
     */
-   public void enableShadowRemoval(double angleThreshold)
+   public void setShadowThreshold(double angleThreshold)
    {
-      removeShadows = true;
       shadowAngleThreshold = angleThreshold;
-   }
-
-   /**
-    * Disables the shadow removal algorithm.
-    */
-   public void disableShadowRemoval()
-   {
-      removeShadows = false;
    }
 
    public void setPPSTimestampOffsetProvider(PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
@@ -253,9 +215,6 @@ public class LidarScanPublisher
    }
 
    // Temporary variables used to find shadows
-   private final Vector3D fromLidarToScanPoint = new Vector3D();
-   private final Vector3D currentToNextScanPoint = new Vector3D();
-   private final Vector3D previousToCurrentScanPoint = new Vector3D();
    private final Point3D lidarPosition = new Point3D();
 
    private Runnable createPublisherTask()
@@ -275,7 +234,7 @@ public class LidarScanPublisher
                return;
 
             int count = 0;
-            Set<PacketDestination> listenerSet = EnumSet.noneOf(PacketDestination.class);
+            Set<RequestLidarScanMessage> listenerSet = new HashSet<>();
 
             while (!listeners.isEmpty() && count < MAX_NUMBER_OF_LISTENERS)
             {
@@ -307,51 +266,11 @@ public class LidarScanPublisher
                scanData.transform(transformToWorld);
             }
 
-            if (removeShadows)
-            {
-               lidarSensorFrame.getTransformToRoot().getTranslation(lidarPosition);
+            collisionBoxNode.update();
+            lidarSensorFrame.getTransformToRoot().getTranslation(lidarPosition);
 
-               List<Point3D> filteredScanPoints = new ArrayList<>();
-               filteredScanPoints.add(scanData.scanPoints[0]);
-
-               for (int i = 1; i < scanData.numberOfScanPoints - 1; i++)
-               {
-                  Point3D currentScanPoint = scanData.scanPoints[i];
-                  Point3D previousScanPoint = scanData.scanPoints[i-1];
-                  fromLidarToScanPoint.sub(currentScanPoint, lidarPosition);
-                  previousToCurrentScanPoint.sub(currentScanPoint, previousScanPoint);
-
-                  if (fromLidarToScanPoint.dot(previousToCurrentScanPoint) < 0.0)
-                     previousToCurrentScanPoint.negate();
-                  if (fromLidarToScanPoint.angle(previousToCurrentScanPoint) < shadowAngleThreshold)
-                     continue;
-
-                  Point3D nextScanPoint = scanData.scanPoints[i+1];
-                  currentToNextScanPoint.sub(nextScanPoint, currentScanPoint);
-
-                  if (fromLidarToScanPoint.dot(currentToNextScanPoint) < 0.0)
-                     currentToNextScanPoint.negate();
-                  if (fromLidarToScanPoint.angle(currentToNextScanPoint) < shadowAngleThreshold)
-                     continue;
-
-                  
-                  filteredScanPoints.add(currentScanPoint);
-               }
-               filteredScanPoints.add(scanData.scanPoints[scanData.numberOfScanPoints - 1]);
-               scanData = new ScanData(scanData.timestamp, filteredScanPoints);
-            }
-
-            float[] scanPointBuffer;
-
-            if (collisionBoxNode != null)
-            {
-               collisionBoxNode.update();
-               scanPointBuffer = scanData.getFilteredScanBuffer(collisionBoxNode);
-            }
-            else
-            {
-               scanPointBuffer = scanData.getScanBuffer();
-            }
+            List<Integer> shadowRemovalIndices = scanData.computeShadowPointIndices(lidarPosition, shadowAngleThreshold);
+            List<Integer> selfCollisionRemovalIndices = scanData.computeCollidingPointIndices(collisionBoxNode);
 
             Point3D32 lidarPosition;
             Quaternion32 lidarOrientation;
@@ -369,32 +288,35 @@ public class LidarScanPublisher
                lidarOrientation = null;
             }
 
-            sendLidarScanMessageToListeners(robotTimestamp, lidarPosition, lidarOrientation, scanPointBuffer, listenerSet);
+            for (RequestLidarScanMessage requestLidarScanMessage : listenerSet)
+            {
+               lidarPosition = lidarPosition == null ? null : new Point3D32(lidarPosition);
+               lidarOrientation = lidarOrientation == null ? null : new Quaternion32(lidarOrientation);
+
+               PriorityQueue<Integer> indicesToRemove = new PriorityQueue<>();
+
+               if (requestLidarScanMessage.isRemoveSelfCollisions())
+               {
+                  indicesToRemove.addAll(selfCollisionRemovalIndices);
+               }
+
+               if (requestLidarScanMessage.isRemoveShadows())
+               {
+                  indicesToRemove.addAll(shadowRemovalIndices);
+               }
+
+               float[] scanPointBuffer = scanData.getScanBuffer(indicesToRemove);
+
+               LidarScanMessage message = new LidarScanMessage(robotTimestamp, lidarPosition, lidarOrientation, scanPointBuffer);
+
+               PacketDestination destination = PacketDestination.fromOrdinal(requestLidarScanMessage.getSource());
+               message.setDestination(destination);
+               packetCommunicator.send(message);
+            }
+
             listeners.clear();
          }
       };
-   }
-   
-   private void sendLidarScanMessageToListeners(long timestamp, Point3D32 lidarPosition, Quaternion32 lidarOrientation, float[] scanPointBuffer, Set<PacketDestination> listeners)
-   {
-      LidarScanMessage message = new LidarScanMessage(timestamp, lidarPosition, lidarOrientation, scanPointBuffer);
-
-      Iterator<PacketDestination> iterator = listeners.iterator();
-
-      while (true)
-      {
-         PacketDestination destination = iterator.next();
-         message.setDestination(destination);
-         packetCommunicator.send(message);
-
-         if (!iterator.hasNext())
-            break;
-
-         lidarPosition = lidarPosition == null ? null : new Point3D32(lidarPosition);
-         lidarOrientation = lidarOrientation == null ? null : new Quaternion32(lidarOrientation);
-         scanPointBuffer = Arrays.copyOf(scanPointBuffer, scanPointBuffer.length);
-         message = new LidarScanMessage(timestamp, lidarPosition, lidarOrientation, scanPointBuffer);
-      }
    }
 
    private PacketConsumer<RequestLidarScanMessage> createRequestLidarScanMessageConsumer()
@@ -405,7 +327,7 @@ public class LidarScanPublisher
          public void receivedPacket(RequestLidarScanMessage packet)
          {
             if (packet != null)
-               listeners.add(PacketDestination.fromOrdinal(packet.getSource()));
+               listeners.add(packet);
          }
       };
    }
@@ -441,36 +363,91 @@ public class LidarScanPublisher
             transform.transform(scanPoints[i]);
       }
 
-      public float[] getFilteredScanBuffer(CollisionShapeTester collisionShapeTester)
+      public List<Integer> computeCollidingPointIndices(CollisionShapeTester collisionShapeTester)
       {
-         TFloatArrayList scanPointBuffer = new TFloatArrayList();
+         List<Integer> collidingPointIndices = new ArrayList<>();
 
-         for (int i = 0; i < numberOfScanPoints; i++)
+         if (collisionShapeTester != null)
          {
-            Point3D scanPoint = scanPoints[i];
-
-            if (collisionShapeTester.contains(scanPoint))
-               continue;
-
-            scanPointBuffer.add((float) scanPoint.getX());
-            scanPointBuffer.add((float) scanPoint.getY());
-            scanPointBuffer.add((float) scanPoint.getZ());
+            for (int i = 0; i < numberOfScanPoints; i++)
+            {
+               if (collisionShapeTester.contains(scanPoints[i]))
+                  collidingPointIndices.add(i);
+            }
          }
-
-         return scanPointBuffer.toArray();
+         return collidingPointIndices;
       }
 
-      public float[] getScanBuffer()
+      /**
+       * Attempt to remove flying LIDAR points, which, when present, result as objects having
+       * shadows.
+       * <p>
+       * Warning: The algorithm for removing shadows expects to be dealing with single LIDAR scans.
+       * </p>
+       * <p>
+       * The rejection method is based on the observation that flying points always fall in line
+       * with view direction of the laser ray. It compares the angle between the angle between the
+       * scanner view direction and the line segment connecting outlier points with their scan line
+       * neighbors.
+       * </p>
+       * <p>
+       * For more details, see
+       * <a href="http://groups.csail.mit.edu/robotics-center/public_papers/Marion16a.pdf"> Pat
+       * Marion master thesis, section 2.2.1, page 25.</a>
+       * </p>
+       */
+      public List<Integer> computeShadowPointIndices(Tuple3DReadOnly lidarPosition, double shadowAngleThreshold)
+      {
+         List<Integer> shadowPointIndices = new ArrayList<>();
+         Vector3D fromLidarToScanPoint = new Vector3D();
+         Vector3D currentToNextScanPoint = new Vector3D();
+         Vector3D previousToCurrentScanPoint = new Vector3D();
+
+         for (int i = 1; i < numberOfScanPoints - 1; i++)
+         {
+            Point3D currentScanPoint = scanPoints[i];
+            Point3D previousScanPoint = scanPoints[i - 1];
+            fromLidarToScanPoint.sub(currentScanPoint, lidarPosition);
+            previousToCurrentScanPoint.sub(currentScanPoint, previousScanPoint);
+
+            if (fromLidarToScanPoint.dot(previousToCurrentScanPoint) < 0.0)
+               previousToCurrentScanPoint.negate();
+            if (fromLidarToScanPoint.angle(previousToCurrentScanPoint) < shadowAngleThreshold)
+            {
+               shadowPointIndices.add(i);
+               continue;
+            }
+
+            Point3D nextScanPoint = scanPoints[i + 1];
+            currentToNextScanPoint.sub(nextScanPoint, currentScanPoint);
+
+            if (fromLidarToScanPoint.dot(currentToNextScanPoint) < 0.0)
+               currentToNextScanPoint.negate();
+            if (fromLidarToScanPoint.angle(currentToNextScanPoint) < shadowAngleThreshold)
+               shadowPointIndices.add(i);
+         }
+
+         return shadowPointIndices;
+      }
+
+      public float[] getScanBuffer(PriorityQueue<Integer> indicesToRemove)
       {
          TFloatArrayList scanPointBuffer = new TFloatArrayList();
+         Integer nextIndexToIgnore = indicesToRemove.poll();
 
          for (int i = 0; i < numberOfScanPoints; i++)
          {
-            Point3D scanPoint = scanPoints[i];
-
-            scanPointBuffer.add((float) scanPoint.getX());
-            scanPointBuffer.add((float) scanPoint.getY());
-            scanPointBuffer.add((float) scanPoint.getZ());
+            if (nextIndexToIgnore == null || i < nextIndexToIgnore)
+            {
+               Point3D scanPoint = scanPoints[i];
+               scanPointBuffer.add((float) scanPoint.getX());
+               scanPointBuffer.add((float) scanPoint.getY());
+               scanPointBuffer.add((float) scanPoint.getZ());
+            }
+            else
+            {
+               nextIndexToIgnore = indicesToRemove.poll();
+            }
          }
 
          return scanPointBuffer.toArray();
