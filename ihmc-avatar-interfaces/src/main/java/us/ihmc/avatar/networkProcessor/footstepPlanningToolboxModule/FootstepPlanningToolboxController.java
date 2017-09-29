@@ -127,10 +127,14 @@ public class FootstepPlanningToolboxController extends ToolboxController
       BipedalFootstepPlannerParameters footstepPlanningParameters = new BipedalFootstepPlannerParameters(registry);
       FootstepPlannerUtils.setPlannerParametersForToolbox(footstepPlanningParameters);
 
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygonsInSoleFrame);
+      BipedalFootstepPlannerSnapAndWiggler snapper = new BipedalFootstepPlannerSnapAndWiggler(footstepPlanningParameters);
       BipedalFootstepPlannerNodeChecker nodeChecker = new BipedalFootstepPlannerNodeChecker(footstepPlanningParameters, null);
-      ConstantFootstepCost footstepCost = new ConstantFootstepCost(1.0);
-      PlanarRegionBipedalFootstepPlanner footstepPlanner = new PlanarRegionBipedalFootstepPlanner(footstepPlanningParameters, snapper, nodeChecker, footstepCost, registry);
+      ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
+
+      nodeChecker.setFeetPolygons(footPolygonsInSoleFrame);
+      snapper.setFootPolygonsInSoleFrame(footPolygonsInSoleFrame);
+
+      PlanarRegionBipedalFootstepPlanner footstepPlanner = new PlanarRegionBipedalFootstepPlanner(footstepPlanningParameters, snapper, nodeChecker, stepCostCalculator, registry);
       footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
       footstepPlanner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       footstepPlanner.setExitAfterInitialSolution(false);
