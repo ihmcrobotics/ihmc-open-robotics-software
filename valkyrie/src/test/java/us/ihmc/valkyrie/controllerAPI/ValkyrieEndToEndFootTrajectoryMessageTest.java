@@ -26,7 +26,7 @@ public class ValkyrieEndToEndFootTrajectoryMessageTest extends EndToEndFootTraje
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 200000)
    @Override
-   public void testSingleWaypoint() throws Exception
+   public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
       super.testSingleWaypoint();
    }
@@ -42,7 +42,7 @@ public class ValkyrieEndToEndFootTrajectoryMessageTest extends EndToEndFootTraje
    @ContinuousIntegrationTest(estimatedDuration = 90.0)
    @Test(timeout = 200000)
    @Override
-   public void testQueuedMessages() throws Exception
+   public void testQueuedMessages() throws SimulationExceededMaximumTimeException
    {
       super.testQueuedMessages();
    }
@@ -58,7 +58,7 @@ public class ValkyrieEndToEndFootTrajectoryMessageTest extends EndToEndFootTraje
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 200000)
    @Override
-   public void testQueueWithWrongPreviousId() throws Exception
+   public void testQueueWithWrongPreviousId() throws SimulationExceededMaximumTimeException
    {
       super.testQueueWithWrongPreviousId();
    }
