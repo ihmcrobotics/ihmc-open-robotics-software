@@ -96,7 +96,7 @@ public class MirroredYoVariableRegistry extends YoVariableRegistry
          VariableChangedListener variableChangedListener = variableChangedListeners.get(i);
          if (variableChangedListener.getClass() != YoVariableRegistryChangedListener.class)
          {
-            variableChangedListener.variableChanged(variable);
+            variableChangedListener.notifyOfVariableChanged(variable);
          }
       }
    }
@@ -111,7 +111,7 @@ public class MirroredYoVariableRegistry extends YoVariableRegistry
       }
 
       @Override
-      public void variableChanged(YoVariable<?> v)
+      public void notifyOfVariableChanged(YoVariable<?> v)
       {
          queue.add(v);
       }

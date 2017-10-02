@@ -205,7 +205,7 @@ public class MirroredYoVariableRegistryTest
 
 
         @Override
-        public void variableChanged(YoVariable<?> v)
+        public void notifyOfVariableChanged(YoVariable<?> v)
         {
             ++callCount;
         }

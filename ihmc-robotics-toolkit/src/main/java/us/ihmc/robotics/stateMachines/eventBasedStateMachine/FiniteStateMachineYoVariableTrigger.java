@@ -22,7 +22,7 @@ public class FiniteStateMachineYoVariableTrigger<E extends Enum<E>>
       yoVariable.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChanged(YoVariable<?> v)
          {
             if (yoVariable.getEnumValue() != null)
             {

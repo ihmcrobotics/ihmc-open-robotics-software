@@ -165,7 +165,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       {
 
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChanged(YoVariable<?> v)
          {
             if((leftFootForce.getDoubleValue() + rightFootForce.getDoubleValue()) > 400.0)
             {	
