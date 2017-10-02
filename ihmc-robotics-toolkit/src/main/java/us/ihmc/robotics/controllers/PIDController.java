@@ -41,7 +41,7 @@ public class PIDController
 
       VariableChangedListener leakRatioClipper = new VariableChangedListener()
       {
-         @Override public void notifyOfVariableChanged(YoVariable<?> v)
+         @Override public void notifyOfVariableChange(YoVariable<?> v)
          {
             integralLeakRatio.set(MathTools.clamp(integralLeakRatio.getDoubleValue(), 0.0, 1.0), false);
          }

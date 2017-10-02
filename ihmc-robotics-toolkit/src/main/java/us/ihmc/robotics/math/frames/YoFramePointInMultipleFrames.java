@@ -126,7 +126,7 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
             private final YoFramePoint point = yoFramePointInWorld;
 
             @Override
-            public void notifyOfVariableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                getFrameTupleIncludingFrame(localFramePoint);
                point.setAndMatchFrame(localFramePoint);

@@ -17,7 +17,7 @@ public final class MatrixUpdater implements VariableChangedListener
       this.matrix = matrix;
    }
 
-   public void notifyOfVariableChanged(YoVariable<?> v)
+   public void notifyOfVariableChange(YoVariable<?> v)
    {
       matrix.setElement(i, j, v.getValueAsDouble());
    }

@@ -109,7 +109,7 @@ public class UserDesiredFootstepDataMessageGenerator
       sendSteps.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (sendSteps.getBooleanValue())
             {

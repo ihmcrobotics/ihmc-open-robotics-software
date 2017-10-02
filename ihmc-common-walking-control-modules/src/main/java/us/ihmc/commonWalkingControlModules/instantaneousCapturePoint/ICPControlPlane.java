@@ -23,7 +23,7 @@ public class ICPControlPlane
       omega0.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             double heightOfPlane = -gravityZ / Math.pow(omega0.getDoubleValue(), 2.0);
             controlPlaneHeight.set(heightOfPlane);

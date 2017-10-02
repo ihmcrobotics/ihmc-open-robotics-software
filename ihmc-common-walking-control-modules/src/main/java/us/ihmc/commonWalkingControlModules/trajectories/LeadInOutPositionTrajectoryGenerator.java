@@ -158,7 +158,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
          showViz.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
-            public void notifyOfVariableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                boolean visible = showViz.getBooleanValue();
                currentPositionViz.setVisible(visible);

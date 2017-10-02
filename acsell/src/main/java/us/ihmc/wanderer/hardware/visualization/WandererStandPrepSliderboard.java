@@ -86,7 +86,7 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
       requestPowerOff.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             motorPowerStateRequest.setValueFromDouble(-1);
          }
@@ -134,7 +134,7 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
       {
 
          @Override
-         public void notifyOfVariableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             sliderBoardConfigurationManager.loadConfiguration(selectedJointPair.getEnumValue().toString());
          }
@@ -183,7 +183,7 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
        desiredVelX_Adjust.addVariableChangedListener(new VariableChangedListener()
        {         
           @Override
-          public void notifyOfVariableChanged(YoVariable<?> v)
+          public void notifyOfVariableChange(YoVariable<?> v)
           {
             desiredVelocityX.set(v.getValueAsDouble()+desiredVelX_Setpoint.getDoubleValue());
           }
@@ -191,7 +191,7 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
        desiredVelX_Setpoint.addVariableChangedListener(new VariableChangedListener()
        {         
           @Override
-          public void notifyOfVariableChanged(YoVariable<?> v)
+          public void notifyOfVariableChange(YoVariable<?> v)
           {
             desiredVelocityX.set(v.getValueAsDouble()+desiredVelX_Adjust.getDoubleValue());
           }
@@ -199,7 +199,7 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
        desiredVelocityX.addVariableChangedListener(new VariableChangedListener()
        {
           @Override
-          public void notifyOfVariableChanged(YoVariable<?> v)
+          public void notifyOfVariableChange(YoVariable<?> v)
           {
              if (v.getValueAsDouble() < minVelocityX)
                  v.setValueFromDouble(minVelocityX, false);

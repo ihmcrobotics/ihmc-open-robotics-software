@@ -135,7 +135,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       anglularVelocityFilterBreakFrequeny.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             double freq = anglularVelocityFilterBreakFrequeny.getDoubleValue();
             double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(freq, controllerDt);

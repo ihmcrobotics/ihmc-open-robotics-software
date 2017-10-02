@@ -77,7 +77,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       requestLowlLevelControlMode.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             int selectedIndex = requestControlModeComboBox.getSelectedIndex();
             int ordinal = requestLowlLevelControlMode.getOrdinal() + 1;

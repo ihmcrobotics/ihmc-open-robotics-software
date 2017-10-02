@@ -118,7 +118,7 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
             private final YoFrameVector vector = yoFrameVectorInWorld;
 
             @Override
-            public void notifyOfVariableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                getFrameTupleIncludingFrame(localFrameVector);
                vector.setAndMatchFrame(localFrameVector);

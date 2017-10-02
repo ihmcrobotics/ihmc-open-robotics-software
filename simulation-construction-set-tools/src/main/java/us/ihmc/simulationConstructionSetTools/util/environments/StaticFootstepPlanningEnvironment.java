@@ -288,7 +288,7 @@ public class StaticFootstepPlanningEnvironment implements CommonAvatarEnvironmen
    class GoalMarkerLocationUpdater implements VariableChangedListener
    {
       @Override
-      public void notifyOfVariableChanged(YoVariable<?> v)
+      public void notifyOfVariableChange(YoVariable<?> v)
       {
          GoalMarkerLocation goalMarkerLocation = ((YoEnum<GoalMarkerLocation>) v).getEnumValue();
          goalMarkerRobot.setPosition(goalMarkerLocation.getMarkerLocation());

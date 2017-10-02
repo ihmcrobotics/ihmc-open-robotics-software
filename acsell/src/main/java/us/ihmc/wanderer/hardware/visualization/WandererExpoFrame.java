@@ -150,7 +150,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
       expo_isWalking.addVariableChangedListener(new VariableChangedListener()
       {         
          @Override
-         public void notifyOfVariableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             manageWalkChanged(v.getValueAsDouble()>0.5);
          }
@@ -158,7 +158,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
     /*  walkingState.addVariableChangedListener(new VariableChangedListener()
       {         
          @Override
-         public void notifyOfVariableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             manageWalkingStateChanged((YoEnum<WalkingState>) v);
          }

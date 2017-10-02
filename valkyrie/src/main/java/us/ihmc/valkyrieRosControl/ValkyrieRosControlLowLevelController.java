@@ -111,7 +111,7 @@ public class ValkyrieRosControlLowLevelController
       requestedLowLevelControlMode.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (requestedLowLevelControlMode.getEnumValue() != null)
                requestedLowLevelControlModeAtomic.set(requestedLowLevelControlMode.getEnumValue());

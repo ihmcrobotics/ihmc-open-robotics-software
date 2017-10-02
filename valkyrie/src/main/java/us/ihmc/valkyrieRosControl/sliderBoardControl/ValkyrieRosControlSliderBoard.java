@@ -152,7 +152,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
       selectedJoint.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             ValkyrieSliderBoardJointHolder selected = jointHolders.get(selectedJoint.getOrdinal());
             qDesiredSelected.set(selected.q_d.getDoubleValue());

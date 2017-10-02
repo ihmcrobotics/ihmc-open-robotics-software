@@ -134,7 +134,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       offsetHeightAboveGround.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
             double previous = offsetHeightTrajectoryGenerator.getValue();
