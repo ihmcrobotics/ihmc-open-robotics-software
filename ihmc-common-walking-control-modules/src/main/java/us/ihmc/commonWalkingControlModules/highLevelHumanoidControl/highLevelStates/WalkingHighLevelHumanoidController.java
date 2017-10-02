@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -76,6 +77,7 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateChangedLis
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -741,6 +743,26 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
             }
          }
          controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationCommand);
+      }
+
+      /*
+       * FIXME: This is mainly used for resetting the integrators at touchdown.
+       * It is done in SingleSupportState.doTransitionOutOfAction. Need to
+       * figure out how to use directly the joint data holder instead of
+       * OneDoFJoint.
+       */
+      LowLevelOneDoFJointDesiredDataHolder jointDesiredDataHolder = controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder();
+
+      for (int i = 0; i < allOneDoFjoints.length; i++)
+      {
+         OneDoFJoint joint = allOneDoFjoints[i];
+         if (joint.getResetDesiredAccelerationIntegrator())
+         {
+            LowLevelJointData jointData = jointDesiredDataHolder.getLowLevelJointData(joint);
+            if (jointData == null)
+               jointData = jointDesiredDataHolder.registerJointWithEmptyData(joint);
+            jointData.setResetIntegrators(true);
+         }
       }
    }
 
