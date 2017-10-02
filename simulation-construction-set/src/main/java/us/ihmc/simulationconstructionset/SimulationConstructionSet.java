@@ -469,7 +469,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       attachPlaybackListener(new PlaybackListener()
       {
          @Override
-         public void indexChanged(int newIndex, double newTime)
+         public void notifyOfIndexChange(int newIndex, double newTime)
          {
 
          }

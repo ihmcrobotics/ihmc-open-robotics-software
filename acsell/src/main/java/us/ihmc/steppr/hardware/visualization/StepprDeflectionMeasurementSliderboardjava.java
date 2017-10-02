@@ -94,7 +94,7 @@ public class StepprDeflectionMeasurementSliderboardjava extends SCSVisualizer im
    }
 
    @Override
-   public void indexChanged(int newIndex, double newTime)
+   public void notifyOfIndexChange(int newIndex, double newTime)
    {
       StepprStandPrepSetpoints joint = selectedJointPair.getEnumValue();
       allSetpoints.get(joint).update();
