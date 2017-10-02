@@ -126,7 +126,7 @@ public class IndividualRobotiqHandController implements RobotController
       trajectoryTime.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChanged(YoVariable<?> v)
          {
             hasTrajectoryTimeChanged.set(true);
          }

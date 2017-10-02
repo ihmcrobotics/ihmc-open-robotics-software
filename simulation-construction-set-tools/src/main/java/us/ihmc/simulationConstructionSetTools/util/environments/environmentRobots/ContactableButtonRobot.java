@@ -164,7 +164,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
             new VariableChangedListener()
             {
                @Override
-               public void variableChanged(YoVariable<?> v)
+               public void notifyOfVariableChanged(YoVariable<?> v)
                {
                   if (buttonIsSwitchable == true && buttonSliderJoint.getQYoVariable().getDoubleValue() > buttonLimit * buttonSwitchLimit)
                   {

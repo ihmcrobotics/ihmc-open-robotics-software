@@ -23,7 +23,7 @@ public class DampingUpdater implements VariableChangedListener
    }
 
    @Override
-   public void variableChanged(YoVariable<?> v)
+   public void notifyOfVariableChanged(YoVariable<?> v)
    {
       if (update.getBooleanValue())
       {

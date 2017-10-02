@@ -45,7 +45,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener, Simul
    }
    
    @Override
-   public void variableChanged(YoVariable<?> v)
+   public void notifyOfVariableChanged(YoVariable<?> v)
    {
       if (yoTimeChangedListenerActive)
       {

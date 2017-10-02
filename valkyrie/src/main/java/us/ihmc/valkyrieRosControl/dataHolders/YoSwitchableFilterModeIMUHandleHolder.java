@@ -32,7 +32,7 @@ public class YoSwitchableFilterModeIMUHandleHolder extends YoIMUHandleHolder
       filterTypeToUse.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChanged(YoVariable<?> v)
          {
             handle.setFilterTypeToUse(filterTypeToUse.getEnumValue());
          }

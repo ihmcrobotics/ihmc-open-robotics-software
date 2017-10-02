@@ -87,7 +87,7 @@ public class WandererPDSliderboard extends SCSVisualizer implements IndexChanged
       {
 
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChanged(YoVariable<?> v)
          {
             sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString());
          }
@@ -127,7 +127,7 @@ public class WandererPDSliderboard extends SCSVisualizer implements IndexChanged
          {
 
             @Override
-            public void variableChanged(YoVariable<?> v)
+            public void notifyOfVariableChanged(YoVariable<?> v)
             {
                for (WandererActuator actuator : joint.getActuators())
                {

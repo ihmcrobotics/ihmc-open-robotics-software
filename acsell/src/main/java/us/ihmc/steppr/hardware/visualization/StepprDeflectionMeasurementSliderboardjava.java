@@ -61,7 +61,7 @@ public class StepprDeflectionMeasurementSliderboardjava extends SCSVisualizer im
       {
 
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChanged(YoVariable<?> v)
          {
             sliderBoardConfigurationManager.loadConfiguration(selectedJointPair.getEnumValue().toString());
          }

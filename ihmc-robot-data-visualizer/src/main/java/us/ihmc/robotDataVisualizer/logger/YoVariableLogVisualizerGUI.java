@@ -318,7 +318,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       robot.addCurrentRecordTickListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChanged(YoVariable<?> v)
          {
             synchronized (seekLock)
             {

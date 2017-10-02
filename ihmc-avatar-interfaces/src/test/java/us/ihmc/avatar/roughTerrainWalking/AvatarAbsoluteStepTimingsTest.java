@@ -123,7 +123,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       }
 
       @Override
-      public void variableChanged(YoVariable<?> v)
+      public void notifyOfVariableChanged(YoVariable<?> v)
       {
          if (isDone)
          {
