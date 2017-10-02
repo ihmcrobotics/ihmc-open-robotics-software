@@ -241,7 +241,7 @@ public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedLi
    }
 
    @Override
-   public void indexChanged(int newIndex, double newTime)
+   public void notifyOfIndexChange(int newIndex, double newTime)
    {
       if (started)
       {

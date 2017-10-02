@@ -290,7 +290,7 @@ public class WandererDashboard extends JPanel implements PlaybackListener
    }
 
    @Override
-   public void indexChanged(int newIndex, double newTime)
+   public void notifyOfIndexChange(int newIndex, double newTime)
    {
       int row = 0;
       for (WandererActuator actuator : WandererActuator.values)
