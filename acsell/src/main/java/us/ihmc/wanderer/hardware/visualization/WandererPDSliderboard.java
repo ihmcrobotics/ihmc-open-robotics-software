@@ -241,7 +241,7 @@ public class WandererPDSliderboard extends SCSVisualizer implements IndexChanged
    }
 
    @Override
-   public void notifyOfIndexChange(int newIndex, double newTime)
+   public void notifyOfIndexChange(int newIndex)
    {
       if (started)
       {

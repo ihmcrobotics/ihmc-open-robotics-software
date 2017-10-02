@@ -540,7 +540,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
                e.printStackTrace();
             }
 
-            exportM3Data.players.notifyOfIndexChange(0, 0);
+            exportM3Data.players.notifyOfIndexChange(0);
          }
       }
 

@@ -256,7 +256,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
    }
 
    @Override
-   public void notifyOfIndexChange(int newIndex, double newTime)
+   public void notifyOfIndexChange(int newIndex)
    {
       StepprStandPrepSetpoints joint = selectedJointPair.getEnumValue();
       allSetpoints.get(joint).update();

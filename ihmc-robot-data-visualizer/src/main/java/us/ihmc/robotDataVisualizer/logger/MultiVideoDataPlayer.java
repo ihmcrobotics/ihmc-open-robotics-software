@@ -61,7 +61,7 @@ public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener
    }
 
    @Override
-   public void notifyOfIndexChange(int newIndex, double newTime)
+   public void notifyOfIndexChange(int newIndex)
    {
       if (activePlayer != null)
       {

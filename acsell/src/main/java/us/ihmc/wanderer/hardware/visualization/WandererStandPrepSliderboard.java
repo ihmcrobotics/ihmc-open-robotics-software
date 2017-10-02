@@ -255,7 +255,7 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
    }
 
    @Override
-   public void notifyOfIndexChange(int newIndex, double newTime)
+   public void notifyOfIndexChange(int newIndex)
    {
       WandererStandPrepSetpoints joint = selectedJointPair.getEnumValue();
       allSetpoints.get(joint).update();
