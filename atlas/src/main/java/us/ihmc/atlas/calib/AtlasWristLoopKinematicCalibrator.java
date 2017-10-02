@@ -32,7 +32,7 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
       dataBuffer.attachIndexChangedListener(new IndexChangedListener()
       {
          @Override
-         public void notifyOfIndexChange(int newIndex, double newTime)
+         public void notifyOfIndexChange(int newIndex)
          {
             System.out.println("showing yoIndex: " + yoIndex.getIntegerValue() + "newIndex: " + newIndex);
             debugPrint(yoIndex.getIntegerValue());

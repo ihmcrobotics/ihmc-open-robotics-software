@@ -14,7 +14,7 @@ public class GraphicsUpdatablePlaybackListener implements PlaybackListener
    }
 
    @Override
-   public void notifyOfIndexChange(int newIndex, double newTime)
+   public void notifyOfIndexChange(int newIndex)
    {
       if (graphicsUpdatableList != null)
       {

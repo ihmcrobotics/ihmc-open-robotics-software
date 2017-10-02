@@ -25,7 +25,7 @@ public class SCSPlaybackListener implements PlaybackListener
          networkServer.queueDataToSend(new SCSListenerPacket());
    }
 
-   public void notifyOfIndexChange(int newIndex, double newTime)
+   public void notifyOfIndexChange(int newIndex)
    {
    }
 }

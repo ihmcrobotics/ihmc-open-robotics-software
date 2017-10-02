@@ -28,7 +28,7 @@ public class MultiThreadedRobotController extends AbstractThreadedRobotControlle
    }
 
    @Override
-   public void wasRewound()
+   public void notifyOfRewind()
    {
       updateYoGraphicsListRegistries();
 //      long lcm;

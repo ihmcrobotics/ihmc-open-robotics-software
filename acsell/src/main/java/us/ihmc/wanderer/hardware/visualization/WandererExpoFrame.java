@@ -124,7 +124,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
          startDistance.set(0.0);
          batteryLevel.set(86);
          avgpower.set(456);
-         notifyOfIndexChange(1, 1.0);
+         notifyOfIndexChange(1);
       } else
       {
          nanosecondstime = (YoLong) parentRegistry.getVariable("SensorProcessing","timestamp");
@@ -308,7 +308,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
    }
    
    @Override
-   public void notifyOfIndexChange(int newIndex, double newTime)
+   public void notifyOfIndexChange(int newIndex)
    {
       if(!init_complete)
       {
