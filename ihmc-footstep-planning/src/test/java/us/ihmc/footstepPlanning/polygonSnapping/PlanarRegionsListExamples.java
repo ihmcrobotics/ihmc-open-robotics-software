@@ -255,6 +255,61 @@ public class PlanarRegionsListExamples
       return generator.getPlanarRegionsList();
    }
 
+   public static PlanarRegionsList createMazeEnvironment()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      double extrusionDistance = -0.05;
+
+      // main ground plane
+      generator.translate(5.0, 5.0, 0.0);
+      generator.addRectangle(10.0, 10.0);
+      generator.identity();
+
+      // maze walls along the yz-plane
+      generator.translate(2.0, 5.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.addRectangle(2.0 + extrusionDistance, 6.0 + extrusionDistance);
+      generator.identity();
+
+      generator.translate(4.0, 4.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.addRectangle(2.0 + extrusionDistance, 4.0 + extrusionDistance);
+      generator.identity();
+
+      generator.translate(6.0, 6.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.addRectangle(2.0 + extrusionDistance, 4.0 + extrusionDistance);
+      generator.identity();
+
+      generator.translate(8.0, 4.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.addRectangle(2.0 + extrusionDistance, 4.0 + extrusionDistance);
+      generator.identity();
+
+      generator.translate(8.0, 9.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.addRectangle(2.0 + extrusionDistance, 2.0 + extrusionDistance);
+      generator.identity();
+
+      // maze walls along the xz-plane
+      generator.translate(6.0, 2.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.X);
+      generator.addRectangle(4.0 + extrusionDistance, 2.0 + extrusionDistance);
+      generator.identity();
+
+      generator.translate(9.0, 6.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.X);
+      generator.addRectangle(2.0 + extrusionDistance, 2.0 + extrusionDistance);
+      generator.identity();
+
+      generator.translate(5.0, 8.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.X);
+      generator.addRectangle(6.0 + extrusionDistance, 2.0 + extrusionDistance);
+      generator.identity();
+
+      return generator.getPlanarRegionsList();
+   }
+
    public static PlanarRegionsList createBodyPathPlannerTestEnvironment()
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
@@ -376,20 +431,20 @@ public class PlanarRegionsListExamples
    public static void main(String[] args)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("exampleRobot"));
-      PlanarRegionsList planarRegionsList = createSteppingStonesEnvironment();
+      PlanarRegionsList planarRegionsList = createMazeEnvironment();
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment", planarRegionsList, 1e-5,
                                                                                                 false);
       TerrainObject3D terrainObject3D = environment.getTerrainObject3D();
       scs.addStaticLinkGraphics(terrainObject3D.getLinkGraphics());
       scs.setGroundVisible(false);
 
-      Graphics3DObject startAndEndGraphics = new Graphics3DObject();
-      startAndEndGraphics.translate(0.0, 0.0, 0.5);
-      startAndEndGraphics.addSphere(0.2, YoAppearance.Green());
-      startAndEndGraphics.identity();
-      startAndEndGraphics.translate(3.0, 2.5, 0.5);
-      startAndEndGraphics.addSphere(0.2, YoAppearance.Red());
-      scs.addStaticLinkGraphics(startAndEndGraphics);
+//      Graphics3DObject startAndEndGraphics = new Graphics3DObject();
+//      startAndEndGraphics.translate(0.0, 0.0, 0.5);
+//      startAndEndGraphics.addSphere(0.2, YoAppearance.Green());
+//      startAndEndGraphics.identity();
+//      startAndEndGraphics.translate(3.0, 2.5, 0.5);
+//      startAndEndGraphics.addSphere(0.2, YoAppearance.Red());
+//      scs.addStaticLinkGraphics(startAndEndGraphics);
 
       scs.startOnAThread();
    }
