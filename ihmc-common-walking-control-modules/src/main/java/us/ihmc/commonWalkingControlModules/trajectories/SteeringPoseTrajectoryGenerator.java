@@ -221,7 +221,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
          showViz = new YoBoolean(namePrefix + "ShowSteeringViz", registry);
          showViz.addVariableChangedListener(new VariableChangedListener()
          {
-            public void notifyOfVariableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                boolean visible = showViz.getBooleanValue();
                currentPositionViz.setVisible(visible);

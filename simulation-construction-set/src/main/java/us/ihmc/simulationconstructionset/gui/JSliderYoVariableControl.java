@@ -253,7 +253,7 @@ public class JSliderYoVariableControl extends JPanel implements CloseableAndDisp
       {
          if (variableChangedListener != yoVariableChangeListener)
          {
-            variableChangedListener.notifyOfVariableChanged(this.yoVariable);
+            variableChangedListener.notifyOfVariableChange(this.yoVariable);
          }
       }
    }
@@ -341,7 +341,7 @@ public class JSliderYoVariableControl extends JPanel implements CloseableAndDisp
       }
 
       @Override
-      public void notifyOfVariableChanged(YoVariable<?> v)
+      public void notifyOfVariableChange(YoVariable<?> v)
       {
          //change slider
          jSliderYoVariableControl.setSliderPosition(convertParameterValueToSlider(v.getValueAsDouble()));

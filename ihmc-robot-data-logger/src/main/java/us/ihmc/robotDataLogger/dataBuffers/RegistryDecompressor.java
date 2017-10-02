@@ -46,7 +46,7 @@ public class RegistryDecompressor
                VariableChangedListener changedListener = changedListeners.get(listener);
                if (!(changedListener instanceof VariableChangedProducer.VariableListener))
                {
-                  changedListener.notifyOfVariableChanged(variable);
+                  changedListener.notifyOfVariableChange(variable);
                }
             }
          }
