@@ -39,7 +39,7 @@ public class TransferToFlamingoStanceState extends TransferState
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
       double swingTime = Double.POSITIVE_INFINITY;
-      double initialTransferTime = walkingMessageHandler.getDefaultInitialTransferTime();
+      double initialTransferTime = walkingMessageHandler.getInitialTransferTime();
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       footstepTiming.setTimings(Double.POSITIVE_INFINITY, initialTransferTime);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide()), footstepTiming);
