@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.angularMomentumTrajectory;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CMPGeneration;
 
 import static org.junit.Assert.assertTrue;
 

@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.angularMomentumTrajectory;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
 import java.util.Arrays;
 import java.util.List;

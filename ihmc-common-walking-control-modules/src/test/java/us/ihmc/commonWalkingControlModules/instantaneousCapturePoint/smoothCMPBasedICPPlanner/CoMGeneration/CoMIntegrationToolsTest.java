@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.dynamicReachability;
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoMGeneration;
 
 import junit.framework.Assert;
 import org.junit.Test;
