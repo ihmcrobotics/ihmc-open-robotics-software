@@ -1,37 +1,6 @@
 package us.ihmc.simulationconstructionset;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.Point;
-import java.awt.image.BufferedImage;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
-
-import javax.swing.AbstractButton;
-import javax.swing.ImageIcon;
-import javax.swing.JApplet;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
-import javax.swing.JRadioButton;
-import javax.swing.JTextField;
-
 import com.jme3.renderer.Camera;
-
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -56,33 +25,10 @@ import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
 import us.ihmc.robotics.time.RealTimeRateEnforcer;
-import us.ihmc.simulationconstructionset.commands.AddCameraKeyCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.AddKeyPointCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.CreateNewGraphWindowCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.CreateNewViewportWindowCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.CropBufferCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.CutBufferCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.ExportSnapshotCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.NextCameraKeyCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.PackBufferCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.PreviousCameraKeyCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.RemoveCameraKeyCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.RunCommandsExecutor;
-import us.ihmc.simulationconstructionset.commands.SetInPointCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.SetOutPointCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.StepBackwardCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.StepForwardCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.ToggleCameraKeyModeCommandExecutor;
-import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
+import us.ihmc.simulationconstructionset.commands.*;
 import us.ihmc.simulationconstructionset.dataBuffer.DataBufferTools;
 import us.ihmc.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
-import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
-import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
-import us.ihmc.simulationconstructionset.gui.StandardGUIActions;
-import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
-import us.ihmc.simulationconstructionset.gui.ViewportWindow;
-import us.ihmc.simulationconstructionset.gui.YoGraphicCheckBoxMenuItem;
-import us.ihmc.simulationconstructionset.gui.YoGraphicMenuManager;
+import us.ihmc.simulationconstructionset.gui.*;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
@@ -95,20 +41,22 @@ import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.image.ImageCallback;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.dataBuffer.DataBufferCommandsExecutor;
-import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
-import us.ihmc.yoVariables.dataBuffer.GotoInPointCommandExecutor;
-import us.ihmc.yoVariables.dataBuffer.GotoOutPointCommandExecutor;
-import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandExecutor;
-import us.ihmc.yoVariables.dataBuffer.ToggleKeyPointModeCommandListener;
-import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
+import us.ihmc.yoVariables.dataBuffer.*;
 import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.yoVariables.listener.YoVariableRegistryChangedListener;
 import us.ihmc.yoVariables.registry.NameSpace;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableList;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * <p>Title: SimulationConstructionSet</p>
@@ -469,7 +417,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       attachPlaybackListener(new PlaybackListener()
       {
          @Override
-         public void indexChanged(int newIndex, double newTime)
+         public void notifyOfIndexChange(int newIndex)
          {
 
          }
@@ -2581,7 +2529,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * Enables or disables graph updates during playback. Disabling updates may grant some improved performance but the current data point will nolonger be highlighted on the graphs.
     * This is true by default.
     *
-    * @param updateGraphs Specify whether or not graphs should update during playback.
+    * @param updateGraphsDuringPlayback Specify whether or not graphs should update during playback.
     */
    public void setGraphsUpdatedDuringPlayback(boolean updateGraphsDuringPlayback)
    {
@@ -2613,7 +2561,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Return whether simulation will slow down when faster than real time to simulate at exactly real time rate.
     *
-    * @param simulateNoFasterThanRealTime
     */
    public boolean getSimulateNoFasterThanRealTime()
    {
@@ -2800,7 +2747,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
             }
          }
 
-         myDataBuffer.notifySimulationRewoundListenerListeners();
+         myDataBuffer.notifyRewindListeners();
       }
 
    }

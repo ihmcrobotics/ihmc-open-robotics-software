@@ -49,7 +49,7 @@ public class SCSPointCloudVisualizer implements RewoundListener
    }
 
    @Override
-   public void wasRewound()
+   public void notifyOfRewind()
    {
       disableGraphics = true;
       clear();
