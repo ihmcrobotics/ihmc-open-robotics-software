@@ -8,6 +8,7 @@ import org.junit.Test;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -567,14 +568,14 @@ public class JavaQuadProgSolverTest
 
       solution = new double[1];
       boolean caughtException = false;
-      try
+      numberOfIterations = solver.solve(solution);
+
+      for (int i = 0; i < solution.length; i++)
       {
-         numberOfIterations = solver.solve(solution);
+         if (Double.isNaN(solution[i]))
+            caughtException = true;
       }
-      catch (NoConvergenceException e)
-      {
-         caughtException = true;
-      }
+
       assertEquals(1, numberOfIterations);
 
       assertTrue(caughtException);
@@ -636,24 +637,20 @@ public class JavaQuadProgSolverTest
       solution = new double[3];
 
       caughtException = false;
-      try
+      solver.solve(solution);
+
+      for (int i = 0; i < solution.length; i++)
       {
-         solver.solve(solution);
-      }
-      catch (NoConvergenceException e)
-      {
-         caughtException = true;
+         if (Double.isNaN(solution[i]))
+            caughtException = true;
       }
       assertTrue(caughtException);
       caughtException = false;
-      try
+      numberOfIterations = solver.solve(solution);
+      for (int i = 0; i < solution.length; i++)
       {
-         numberOfIterations = solver.solve(solution);
-      }
-      catch (NoConvergenceException e)
-      {
-         caughtException = true;
-         numberOfIterations = e.getIter();
+         if (Double.isNaN(solution[i]))
+            caughtException = true;
       }
       assertTrue(caughtException);
       assertEquals(2, numberOfIterations); //// TODO: 5/15/17
@@ -1134,13 +1131,11 @@ public class JavaQuadProgSolverTest
 
       double[] solution = new double[2];
       boolean caughtException = false;
-      try
+      solver.solve(solution);
+      for (int i = 0; i < solution.length; i++)
       {
-         solver.solve(solution);
-      }
-      catch (NoConvergenceException e)
-      {
-         caughtException = true;
+         if (Double.isNaN(solution[i]))
+            caughtException = true;
       }
       assertTrue(caughtException);
 
@@ -1403,15 +1398,7 @@ public class JavaQuadProgSolverTest
       double[] solution = new double[3];
 
       solver.setMaxNumberOfIterations(2);
-      int numberOfIterations;
-      try
-      {
-         numberOfIterations = solver.solve(solution);
-      }
-      catch (NoConvergenceException e)
-      {
-         numberOfIterations = e.getIter();
-      }
+      int numberOfIterations = solver.solve(solution);
       assertEquals(2, numberOfIterations);
 
       assertTrue(Double.isNaN(solution[0]));
@@ -1419,14 +1406,7 @@ public class JavaQuadProgSolverTest
       assertTrue(Double.isNaN(solution[2]));
 
       solver.setMaxNumberOfIterations(4);
-      try
-      {
-         numberOfIterations = solver.solve(solution);
-      }
-      catch (NoConvergenceException e)
-      {
-         numberOfIterations = e.getIter();
-      }
+      numberOfIterations = solver.solve(solution);
       assertEquals(3, numberOfIterations);
 
       assertEquals(3, solution.length);
@@ -1439,6 +1419,7 @@ public class JavaQuadProgSolverTest
       double objectiveCost = solver.getObjectiveCost(solutionMatrix);
       assertEquals(248.0, objectiveCost, 1e-7);
    }
+
 
    /*
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
