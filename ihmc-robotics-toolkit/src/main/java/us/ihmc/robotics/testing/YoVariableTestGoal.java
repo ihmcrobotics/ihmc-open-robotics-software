@@ -23,7 +23,7 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
    }
 
    @Override
-   public void variableChanged(YoVariable<?> v)
+   public void notifyOfVariableChange(YoVariable<?> v)
    {
       if (!hasMetGoal && currentlyMeetsGoal())
       {

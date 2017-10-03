@@ -175,7 +175,7 @@ public class PosePlaybackSCSBridge
          this.controller = controller;
       }
 
-      public void variableChanged(YoVariable yoVariable)
+      public void notifyOfVariableChange(YoVariable yoVariable)
       {
          PlaybackPose pose = new PlaybackPose(fullRobotModel, sdfRobot);
 
@@ -278,7 +278,7 @@ public class PosePlaybackSCSBridge
          this.fullRobotModel = fullRobotModel;
       }
       
-      public void variableChanged(YoVariable yoVariable)
+      public void notifyOfVariableChange(YoVariable yoVariable)
       {
          if (!((YoBoolean) yoVariable).getBooleanValue())
             return;
@@ -297,7 +297,7 @@ public class PosePlaybackSCSBridge
 
    private class LoadLastSequenceListener implements VariableChangedListener
    {
-      public void variableChanged(YoVariable yoVariable)
+      public void notifyOfVariableChange(YoVariable yoVariable)
       {
          if (!((YoBoolean) yoVariable).getBooleanValue())
             return;
@@ -314,7 +314,7 @@ public class PosePlaybackSCSBridge
 
    private class LoadFrameByFrameSequenceListener implements VariableChangedListener
    {
-      public void variableChanged(YoVariable yoVariable)
+      public void notifyOfVariableChange(YoVariable yoVariable)
       {
          if (!((YoBoolean) yoVariable).getBooleanValue())
             return;
@@ -334,7 +334,7 @@ public class PosePlaybackSCSBridge
 
    private class PlayPoseFromFrameByFrameSequenceListener implements VariableChangedListener
    {
-      public void variableChanged(YoVariable yoVariable)
+      public void notifyOfVariableChange(YoVariable yoVariable)
       {
          //         if(!((YoBoolean) yoVariable).getBooleanValue())
          //            return;
@@ -345,7 +345,7 @@ public class PosePlaybackSCSBridge
 
    private class SaveSequenceListener implements VariableChangedListener
    {
-      public void variableChanged(YoVariable yoVariable)
+      public void notifyOfVariableChange(YoVariable yoVariable)
       {
          if (((YoBoolean) yoVariable).getBooleanValue())
          {
@@ -357,7 +357,7 @@ public class PosePlaybackSCSBridge
 
    private class ClearSequenceListener implements VariableChangedListener
    {
-      public void variableChanged(YoVariable yoVariable)
+      public void notifyOfVariableChange(YoVariable yoVariable)
       {
          posePlaybackRobotPoseSequence.clear();
          System.out.println("Clearing Sequence");
@@ -366,7 +366,7 @@ public class PosePlaybackSCSBridge
 
    private class ResetToBasePoseListener implements VariableChangedListener
    {
-      public void variableChanged(YoVariable yoVariable)
+      public void notifyOfVariableChange(YoVariable yoVariable)
       {
          if (sdfRobot != null && previousPose != null)
          {
