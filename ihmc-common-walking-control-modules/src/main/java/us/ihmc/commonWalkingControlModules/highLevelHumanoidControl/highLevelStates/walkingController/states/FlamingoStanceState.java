@@ -36,12 +36,14 @@ public class FlamingoStanceState extends SingleSupportState
    private final LegConfigurationManager legConfigurationManager;
 
    private final FootstepTiming footstepTiming = new FootstepTiming();
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    public FlamingoStanceState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
       super(supportSide, WalkingStateEnum.getFlamingoSingleSupportState(supportSide), walkingMessageHandler, controllerToolbox, managerFactory,
             parentRegistry);
+      this.controllerToolbox = controllerToolbox;
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
       this.failureDetectionControlModule = failureDetectionControlModule;
@@ -142,6 +144,7 @@ public class FlamingoStanceState extends SingleSupportState
       loadFoot.set(false);
 
       legConfigurationManager.startSwing(swingSide);
+      controllerToolbox.updateContactPointsForUpcomingFootstep(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
    }
 
    @Override
