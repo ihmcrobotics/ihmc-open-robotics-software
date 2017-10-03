@@ -46,6 +46,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
@@ -87,6 +89,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final HumanoidReferenceFrames humanoidReferenceFrames;
    private final RobotContactPointParameters contactPointParameters;
    private final WalkingControllerParameters walkingControllerParameters;
+   private final LogModelProvider logModelProvider;
    private final FootstepDataListWithSwingOverTrajectoriesAssembler footstepDataListWithSwingOverTrajectoriesAssembler;
    private final FootstepNodeExpansion expansion;
 
@@ -103,6 +106,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       this.packetCommunicator = packetCommunicator;
       this.contactPointParameters = drcRobotModel.getContactPointParameters();
       this.walkingControllerParameters = drcRobotModel.getWalkingControllerParameters();
+      this.logModelProvider = drcRobotModel.getLogModelProvider();
       this.dt = dt;
       packetCommunicator.attachListener(PlanarRegionsListMessage.class, createPlanarRegionsConsumer());
 
@@ -142,7 +146,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       if (visualize)
       {
          PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithYoVariableServer(0.01, fullRobotModel,
-               null, footPolygonsInSoleFrame, "Toolbox_");
+               logModelProvider, footPolygonsInSoleFrame, "Toolbox_");
          footstepPlanner.setBipedalFootstepPlannerListener(listener);
       }
 
