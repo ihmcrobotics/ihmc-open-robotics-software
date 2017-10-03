@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-import us.ihmc.commonWalkingControlModules.angularMomentumTrajectoryGenerator.AngularMomentumSplineType;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.AMGeneration.AngularMomentumSplineType;
 import us.ihmc.robotModels.FullRobotModel;
 
 public class AngularMomentumEstimationParameters
