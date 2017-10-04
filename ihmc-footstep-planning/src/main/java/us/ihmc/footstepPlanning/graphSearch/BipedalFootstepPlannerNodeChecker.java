@@ -125,8 +125,7 @@ public class BipedalFootstepPlannerNodeChecker implements FootstepNodeChecker
       double minimumStepWidth = parameters.getMinimumStepWidth();
 
       RobotSide robotSide = nodeToExpand.getRobotSide();
-      if (((robotSide == RobotSide.LEFT) && (solePositionInParentZUpFrame.getY() < minimumStepWidth))
-            || ((robotSide == RobotSide.RIGHT) && (solePositionInParentZUpFrame.getY() > -minimumStepWidth)))
+      if (robotSide.negateIfRightSide(solePositionInParentZUpFrame.getY()) < minimumStepWidth)
       {
          notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH);
          return false;
@@ -134,8 +133,7 @@ public class BipedalFootstepPlannerNodeChecker implements FootstepNodeChecker
 
       double maximumStepWidth = parameters.getMaximumStepWidth();
 
-      if (((robotSide == RobotSide.LEFT) && (solePositionInParentZUpFrame.getY() > maximumStepWidth))
-            || ((robotSide == RobotSide.RIGHT) && (solePositionInParentZUpFrame.getY() < -maximumStepWidth)))
+      if (robotSide.negateIfRightSide(solePositionInParentZUpFrame.getY()) > maximumStepWidth)
       {
          notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand, BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE);
          return false;
