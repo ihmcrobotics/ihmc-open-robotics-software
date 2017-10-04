@@ -163,14 +163,6 @@ public class CoPPointsInFoot
          copLocations.get(i).registerReferenceFrame(newReferenceFrame);
    }
 
-   public void switchCurrentReferenceFrame(ReferenceFrame desiredFrame)
-   {
-      swingFootCentroid.switchCurrentReferenceFrame(desiredFrame);
-      supportFootCentroid.switchCurrentReferenceFrame(desiredFrame);
-      for (int i = 0; i < copPointsList.size(); i++)
-         copLocations.get(i).switchCurrentReferenceFrame(desiredFrame);
-   }
-
    public void switchCurrentReferenceFrame(int waypointIndex, ReferenceFrame desiredFrame)
    {
       copLocations.get(waypointIndex).switchCurrentReferenceFrame(desiredFrame);

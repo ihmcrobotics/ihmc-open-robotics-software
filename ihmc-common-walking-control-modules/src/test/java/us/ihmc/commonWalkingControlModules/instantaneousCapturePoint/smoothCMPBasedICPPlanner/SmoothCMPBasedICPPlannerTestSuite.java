@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBa
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFootTest;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectoryTest;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration.FootstepDataTest;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration.ReferenceCenterOfPressureWaypointCalculatorTest;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.ICPGeneration.CapturePointToolsTest;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.ICPGeneration.ReferenceICPTrajectoryGeneratorTest;
@@ -33,7 +34,9 @@ import us.ihmc.commons.MutationTestFacilitator;
            SmoothCapturePointAdjustmentToolboxTest.class,
            SmoothCapturePointToolboxTest.class,
            CoPPlanningToolsTest.class,
-           CoPTrajectoryTest.class
+           CoPTrajectoryTest.class,
+           FootstepDataTest.class,
+           
         }
 )
 
