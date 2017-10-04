@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
-import java.util.EnumMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
@@ -20,7 +19,7 @@ public class CoPPlanningTools
       for (int counter = 0; counter < copPointList.size(); counter ++)
          if (copPointList.get(counter) == copPointToSearch)
             return counter;
-      return -1;
+      return -1; 
    }
 }
 
