@@ -185,7 +185,7 @@ public class FootstepAngularMomentumPredictorTest
                                                                    false, testRegistry);
       comTrajectoryGenerator = new ReferenceCoMTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isStanding, isInitialTransfer, isDoubleSupport,
                                                                    testRegistry);
-      angularMomentumGenerator = new FootstepAngularMomentumPredictor(testName, omega, testRegistry);
+      angularMomentumGenerator = new FootstepAngularMomentumPredictor(testName, omega, true, testRegistry);
       copTrajectoryGenerator.initializeParameters(testParameters);
       angularMomentumGenerator.initializeParameters(testParameters, robotMass, gravityZ);
    }
