@@ -274,7 +274,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       isIcpOffsetSenderEnabled.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             DiagnosticBehavior.this.previousIcpPacketSentTime.set(DiagnosticBehavior.this.yoTime.getDoubleValue());
 

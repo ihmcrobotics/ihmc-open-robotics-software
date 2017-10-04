@@ -72,7 +72,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       yoPlanePose.attachVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             yoPlanePose.getFramePose(planePose);
             planeFrame.setPoseAndUpdate(planePose);

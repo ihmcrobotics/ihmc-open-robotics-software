@@ -41,7 +41,7 @@ public class VariableChangedProducer
    {
 
       @Override
-      public void variableChanged(YoVariable<?> v)
+      public void notifyOfVariableChange(YoVariable<?> v)
       {
          if (sendVariableChanges && connected)
          {

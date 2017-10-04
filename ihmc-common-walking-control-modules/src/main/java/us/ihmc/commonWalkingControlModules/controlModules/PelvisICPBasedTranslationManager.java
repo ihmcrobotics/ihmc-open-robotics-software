@@ -115,7 +115,7 @@ public class PelvisICPBasedTranslationManager
       manualMode.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             initialize();
          }

@@ -105,7 +105,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
             }
 
             if (multiPlayer != null)
-               multiPlayer.indexChanged(0, 0);
+               multiPlayer.notifyOfIndexChange(0);
 
          }
 
@@ -318,7 +318,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       robot.addCurrentRecordTickListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             synchronized (seekLock)
             {

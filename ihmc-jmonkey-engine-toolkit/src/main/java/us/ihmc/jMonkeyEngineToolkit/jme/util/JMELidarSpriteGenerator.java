@@ -34,7 +34,6 @@ public class JMELidarSpriteGenerator extends Node implements Updatable
    protected JMEPointCloudGenerator pointCloudGenerator;
    protected ArrayList<ColorRGBA> colorList = new ArrayList<ColorRGBA>();
    private Random random = new Random();
-   private boolean prepairingPointCloud = false;
 
    protected final AtomicReference<Point3D32[]> pointSource = new AtomicReference<>();
 
