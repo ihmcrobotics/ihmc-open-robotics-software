@@ -63,6 +63,10 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    private final TIntArrayList previousActiveSetIndices = new TIntArrayList(defaultSize);
    private final TIntArrayList inactiveSetIndices = new TIntArrayList(defaultSize);
    private final TIntArrayList excludeConstraintFromActiveSet = new TIntArrayList(defaultSize); // booleans
+   private final TIntArrayList inequalityActiveSetIndices = new TIntArrayList(defaultSize);
+   private final TIntArrayList previousInequalityActiveSetIndices = new TIntArrayList(defaultSize);
+   private final TIntArrayList inactiveInequalitySetIndices = new TIntArrayList(defaultSize);
+   private final TIntArrayList excludeInequalityConstraintFromActiveSet = new TIntArrayList(defaultSize); // booleans
 
    private final DenseMatrix64F J = new DenseMatrix64F(defaultSize, defaultSize);
 
@@ -96,6 +100,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    private int numberOfUpperBounds;
 
    private int numberOfActiveConstraints;
+   private int numberOfActiveInequalityConstraints;
    private double R_norm;
    private int constraintIndexForPartialStep;
 
@@ -362,6 +367,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       // TODO  do this all at once because I should be able to
       // Add equality constraints to the working set A
       numberOfActiveConstraints = 0;
+      numberOfActiveInequalityConstraints = 0;
       for (int equalityConstraintIndex = 0; equalityConstraintIndex < numberOfEqualityConstraints; equalityConstraintIndex++)
       {
          MatrixTools.setMatrixBlock(violatedConstraintNormal, 0, 0, linearEqualityConstraintsAMatrix, 0, equalityConstraintIndex, problemSize, 1, 1.0);
@@ -388,8 +394,8 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       }
 
       // set iai = K \ A
-      for (int i = 0; i < numberOfInequalityConstraints; i++)
-         inactiveSetIndices.set(i, i);
+      for (int inequalityConstraintIndex = 0; inequalityConstraintIndex < numberOfInequalityConstraints; inequalityConstraintIndex++)
+         inactiveSetIndices.set(inequalityConstraintIndex, inequalityConstraintIndex);
 
       constraintIndexForPartialStep = 0;
 
@@ -434,6 +440,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
             lagrangeMultipliers.set(numberOfActiveConstraints, 0.0);
             // add the violated constraint to the active set A
             activeSetIndices.set(numberOfActiveConstraints, mostViolatedConstraintIndex);
+            inequalityActiveSetIndices.set(numberOfActiveInequalityConstraints, mostViolatedConstraintIndex);
 
          case COMPUTE_STEP_LENGTH:
             // Step 2a: determine step direction
@@ -524,8 +531,8 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       // step 1: choose a violated constraint
       for (int activeInequalityIndex = numberOfEqualityConstraints; activeInequalityIndex < numberOfActiveConstraints; activeInequalityIndex++)
       {
-         int activeSetIndex = activeSetIndices.get(activeInequalityIndex);
-         inactiveSetIndices.set(activeSetIndex, -1);
+         int activeConstraintIndex = activeSetIndices.get(activeInequalityIndex);
+         inactiveSetIndices.set(activeConstraintIndex, -1);
       }
 
       // compute s(x) = ci^T * x + ci0 for all elements of K \ A
@@ -830,6 +837,12 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       previousActiveSetIndices.fill(0, numberOfConstraints, 0);
       inactiveSetIndices.fill(0, numberOfConstraints, 0);
       excludeConstraintFromActiveSet.fill(0, numberOfConstraints, FALSE);
+
+      int totalInequalityConstraints = numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds;
+      inequalityActiveSetIndices.fill(0, totalInequalityConstraints, 0);
+      previousInequalityActiveSetIndices.fill(0, totalInequalityConstraints, 0);
+      inactiveInequalitySetIndices.fill(0, totalInequalityConstraints, 0);
+      excludeInequalityConstraintFromActiveSet.fill(0, totalInequalityConstraints, FALSE);
 
       // compile all the inequality constraints into one matrix
       totalLinearInequalityConstraintsCMatrix.reshape(problemSize, numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds);
