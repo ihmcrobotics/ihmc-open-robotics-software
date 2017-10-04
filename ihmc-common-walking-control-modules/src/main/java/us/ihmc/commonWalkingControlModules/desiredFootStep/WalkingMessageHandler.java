@@ -573,6 +573,11 @@ public class WalkingMessageHandler
          return getDefaultSwingTime();
       return upcomingFootstepTimings.get(0).getSwingTime();
    }
+   
+   public double getDefaultInitialTransferTime()
+   {
+      return defaultInitialTransferTime.getDoubleValue();
+   }
 
    public double getFinalTransferTime()
    {

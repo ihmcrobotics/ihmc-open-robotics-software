@@ -38,7 +38,7 @@ public class AboutDialogGenerator implements AboutDialogConstructor
 
    public void closeAndDispose()
    {
-      parentJFrame = null; 
+      parentJFrame = null;
    }
 
 }

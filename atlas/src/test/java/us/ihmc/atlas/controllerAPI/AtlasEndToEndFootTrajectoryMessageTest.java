@@ -8,59 +8,59 @@ import us.ihmc.avatar.controllerAPI.EndToEndFootTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasEndToEndFootTrajectoryMessageTest extends EndToEndFootTrajectoryMessageTest
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
+   @ContinuousIntegrationTest(estimatedDuration = 40.0)
+   @Test(timeout = 200000)
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 41.5, categoriesOverride = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
-   @Test
-   public void testSingleWaypoint() throws Exception
-   {
-      super.testSingleWaypoint();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 41.5)
-   @Test
-   public void testCustomControlPoint() throws Exception
+   public void testCustomControlPoint() throws SimulationExceededMaximumTimeException
    {
       super.testCustomControlPoint();
    }
-
+   
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 200000)
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 46.8)
-   @Test
-   public void testMultipleTrajectoryPoints() throws Exception
+   public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
+   {
+      super.testSingleWaypoint();
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 80.5)
+   @Test(timeout = 200000)
+   @Override
+   public void testMultipleTrajectoryPoints() throws SimulationExceededMaximumTimeException
    {
       super.testMultipleTrajectoryPoints();
    }
-
+   
+   @ContinuousIntegrationTest(estimatedDuration = 90.0)
+   @Test(timeout = 200000)
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 108.9)
-   @Test
-   public void testQueuedMessages() throws Exception
+   public void testQueuedMessages() throws SimulationExceededMaximumTimeException
    {
       super.testQueuedMessages();
    }
-
+   
+   @ContinuousIntegrationTest(estimatedDuration = 70.0)
+   @Test(timeout = 200000)
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 32.1)
-   @Test
-   public void testQueueWithWrongPreviousId() throws Exception
-   {
-      super.testQueueWithWrongPreviousId();
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 38.0)
-   @Test
-   public void testQueueStoppedWithOverrideMessage() throws Exception
+   public void testQueueStoppedWithOverrideMessage() throws SimulationExceededMaximumTimeException
    {
       super.testQueueStoppedWithOverrideMessage();
+   }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 200000)
+   @Override
+   public void testQueueWithWrongPreviousId() throws SimulationExceededMaximumTimeException
+   {
+      super.testQueueWithWrongPreviousId();
    }
 
    @Override
