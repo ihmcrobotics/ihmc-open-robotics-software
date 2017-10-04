@@ -64,7 +64,7 @@ import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -277,7 +277,7 @@ public class WalkingControllerTest
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
-         LowLevelJointDataReadOnly jointDesireds = controllerOutput.getLowLevelJointData(joint);
+         JointDesiredOutputReadOnly jointDesireds = controllerOutput.getJointDesiredOutput(joint);
 
          if (jointDesireds.hasControlMode())
          {
