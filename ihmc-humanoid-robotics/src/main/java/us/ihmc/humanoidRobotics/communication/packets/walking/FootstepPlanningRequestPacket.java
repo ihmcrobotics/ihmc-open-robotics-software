@@ -17,9 +17,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public Point3D32 goalPositionInWorld;
    public Quaternion32 goalOrientationInWorld;
    public boolean assumeFlatGround = true;
-   public Planners requestedPlannerType;
+   public FootstepPlannerType requestedPlannerType;
 
-   public enum Planners
+   public enum FootstepPlannerType
    {
       PLANAR_REGION_BIPEDAL,
       PLAN_THEN_SNAP,
@@ -33,15 +33,15 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
    public FootstepPlanningRequestPacket(FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose)
    {
-      this(initialStanceFootPose, initialStanceSide, goalPose, Planners.PLANAR_REGION_BIPEDAL);
+      this(initialStanceFootPose, initialStanceSide, goalPose, FootstepPlannerType.PLANAR_REGION_BIPEDAL);
    }
 
-   public FootstepPlanningRequestPacket(FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, Planners requestedPlannerType)
+   public FootstepPlanningRequestPacket(FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, FootstepPlannerType requestedPlannerType)
    {
       set(initialStanceFootPose, initialStanceSide, goalPose, requestedPlannerType);
    }
 
-   public void set(FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, Planners requestedPlannerType)
+   public void set(FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, FootstepPlannerType requestedPlannerType)
    {
       this.initialStanceSide = initialStanceSide;
 

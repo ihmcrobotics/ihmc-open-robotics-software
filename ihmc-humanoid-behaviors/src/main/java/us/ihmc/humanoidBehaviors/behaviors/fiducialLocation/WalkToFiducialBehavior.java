@@ -21,7 +21,7 @@ public class WalkToFiducialBehavior extends AbstractBehavior
    private final FramePose goalPose = new FramePose();
    private final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> footstepPlanQueue = new ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus>(40);
 
-   private final FootstepPlanningRequestPacket.Planners plannerToUse = FootstepPlanningRequestPacket.Planners.PLANAR_REGION_BIPEDAL;
+   private final FootstepPlanningRequestPacket.FootstepPlannerType plannerToUse = FootstepPlanningRequestPacket.FootstepPlannerType.PLANAR_REGION_BIPEDAL;
 
    public WalkToFiducialBehavior(CommunicationBridgeInterface communicationBridge)
    {

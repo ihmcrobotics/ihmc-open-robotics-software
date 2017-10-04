@@ -163,7 +163,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       YoGraphicsListRegistry graphicsListRegistry = createStartAndGoalGraphics(initialStancePose, goalPose);
       drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(graphicsListRegistry);
 
-      FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket(initialStancePose, initialStanceSide, goalPose, FootstepPlanningRequestPacket.Planners.PLANAR_REGION_BIPEDAL);
+      FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket(initialStancePose, initialStanceSide, goalPose, FootstepPlanningRequestPacket.FootstepPlannerType.PLANAR_REGION_BIPEDAL);
       requestPacket.setAssumeFlatGround(false);
       toolboxCommunicator.send(requestPacket);
 
