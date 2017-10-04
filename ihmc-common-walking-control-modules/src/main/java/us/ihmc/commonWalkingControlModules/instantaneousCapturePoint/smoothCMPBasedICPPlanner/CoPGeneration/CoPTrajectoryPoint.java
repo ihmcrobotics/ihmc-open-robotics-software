@@ -15,18 +15,17 @@ import us.ihmc.yoVariables.variable.YoVariable;
  * Adds some visualization methods to the YoFrameEuclideanTrajectoryPoint class 
  */
 public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
-{  
+{
    protected final YoVariableRegistry registry;
    FramePoint3D localPosition = new FramePoint3D(); // dummy variable to hand out data with    
    private YoFramePoint yoFramePointInWorld;
-   
-   
+
    public CoPTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame[] referenceFrames)
    {
       super(namePrefix, nameSuffix, registry, referenceFrames);
       this.registry = registry;
    }
-   
+
    public void setIncludingFrame(CoPTrajectoryPoint other)
    {
       registerReferenceFrame(other.getReferenceFrame());
@@ -40,7 +39,6 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
       return yoFramePointInWorld.getFrameTuple();
    }
 
-      
    public boolean epsilonEquals(FramePoint2D point, double threshold)
    {
       getPosition().checkReferenceFrameMatch(point);
@@ -50,7 +48,7 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
          return false;
       return true;
    }
-   
+
    /**
     * Just a cleaner print than parent class 
     */
@@ -59,15 +57,16 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
    {
       return "Time: " + getTime() + " Location: " + getPosition().toString();
    }
-   
+
    public YoFramePoint buildUpdatedYoFramePointForVisualizationOnly()
    {
-      if(!isReferenceFrameRegistered(ReferenceFrame.getWorldFrame()))
+      if (!isReferenceFrameRegistered(ReferenceFrame.getWorldFrame()))
          registerReferenceFrame(ReferenceFrame.getWorldFrame());
       yoFramePointInWorld = new YoFramePoint(super.getNamePrefix() + "Viz", getReferenceFrame(), registry);
       getPosition().attachVariableChangedListener(new VariableChangedListener()
-      {         
+      {
          private final FramePoint3D localFramePoint = new FramePoint3D();
+
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
@@ -77,9 +76,9 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
       });
       return yoFramePointInWorld;
    }
-   
+
    public void notifyVariableChangedListeners()
    {
       getPosition().notifyVariableChangedListeners();
-   }   
+   }
 }

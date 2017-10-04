@@ -133,7 +133,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
 
       int numberOfPointsInFoot = plannerParameters.getNumberOfCoPWayPointsPerFoot();
       int maxNumberOfFootstepsToConsider = plannerParameters.getNumberOfFootstepsToConsider();
-      testCoPGenerator = new ReferenceCoPTrajectoryGenerator("TestCoPPlanClass", numberOfPointsInFoot, maxNumberOfFootstepsToConsider, bipedSupportPolygons,
+      testCoPGenerator = new ReferenceCoPTrajectoryGenerator("TestCoPPlanner", numberOfPointsInFoot, maxNumberOfFootstepsToConsider, bipedSupportPolygons,
                                                              contactableFeet, numberOfFootstepsToConsider, swingDurations, transferDurations,
                                                              swingSplitFractions, swingDurationShiftFractions, transferSplitFractions, parentRegistry);
       testCoPGenerator.initializeParameters(plannerParameters);
@@ -143,6 +143,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
    @After
    public void clearAllVariables()
    {
+      parentRegistry.clear();
       testCoPGenerator = null;
       soleZUpFrames.clear();
       ankleZUpFrames.clear();
