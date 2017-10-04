@@ -719,12 +719,6 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
          super(name, maxNumberOfSegments, maxNumberOfCoefficients, registry);
       }
 
-      public void set(YoFrameTrajectory3D trajToCopy)
-      {
-         segments.get(getNumberOfSegments()).set(trajToCopy);
-         numberOfSegments.increment();
-      }
-
       public void set(FrameTrajectory3D trajToCopy)
       {
          segments.get(getNumberOfSegments()).set(trajToCopy);
