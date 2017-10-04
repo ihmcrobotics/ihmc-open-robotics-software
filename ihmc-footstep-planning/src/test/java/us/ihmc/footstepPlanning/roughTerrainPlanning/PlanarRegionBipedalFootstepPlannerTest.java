@@ -15,6 +15,7 @@ import us.ihmc.footstepPlanning.aStar.implementations.SimpleSideBasedExpansion;
 import us.ihmc.footstepPlanning.graphSearch.*;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -24,7 +25,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    private BipedalFootstepPlannerParameters parameters;
    private PlanarRegionBipedalFootstepPlanner planner;
 
-   private static final boolean visualize = false; // !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    private static final boolean showPlannerVisualizer = false;
 
    @ContinuousIntegrationTest(estimatedDuration = 10000.0)
@@ -35,6 +36,9 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
       super.testOnStaircase(new Vector3D(), true);
+
+      if(showPlannerVisualizer)
+         ThreadTools.sleepForever();
    }
 
    @Override
@@ -145,6 +149,7 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
    {
       registry = new YoVariableRegistry("test");
       parameters = new BipedalFootstepPlannerParameters(registry);
+      setDefaultParameters();
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
       BipedalFootstepPlannerSnapAndWiggler snapper = new BipedalFootstepPlannerSnapAndWiggler(parameters);
       BipedalFootstepPlannerNodeChecker nodeChecker = new BipedalFootstepPlannerNodeChecker(parameters, null);
@@ -154,7 +159,15 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       nodeChecker.setFeetPolygons(footPolygonsInSoleFrame);
 
       planner = new PlanarRegionBipedalFootstepPlanner(parameters, snapper, nodeChecker, stepCostCalculator, registry);
-      setDefaultParameters();
+      planner.setFeetPolygons(footPolygonsInSoleFrame);
+
+      if (showPlannerVisualizer)
+      {
+         PlanarRegionBipedalFootstepPlannerVisualizer visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame, registry);
+         planner.setBipedalFootstepPlannerListener(visualizer);
+      }
+
+      planner.setMaximumNumberOfNodesToExpand(100);
    }
 
    private void setDefaultParameters()
@@ -180,17 +193,6 @@ public class PlanarRegionBipedalFootstepPlannerTest extends FootstepPlannerOnRou
       double idealFootstepLength = 0.3;
       double idealFootstepWidth = 0.2;
       parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
-
-      SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
-      planner.setFeetPolygons(footPolygonsInSoleFrame);
-
-      if (showPlannerVisualizer)
-      {
-         PlanarRegionBipedalFootstepPlannerVisualizer visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame, registry);
-         planner.setBipedalFootstepPlannerListener(visualizer);
-      }
-
-      planner.setMaximumNumberOfNodesToExpand(100);
    }
 
    @Override
