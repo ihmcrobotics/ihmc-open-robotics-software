@@ -142,7 +142,7 @@ public class FootCoPOccupancyGrid
       VariableChangedListener changedGridSizeListener = new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             counterGrid.reshape(nLengthSubdivisions.getIntegerValue(), nWidthSubdivisions.getIntegerValue());
             occupancyGrid.reshape(nLengthSubdivisions.getIntegerValue(), nWidthSubdivisions.getIntegerValue());
@@ -153,12 +153,12 @@ public class FootCoPOccupancyGrid
       };
       nLengthSubdivisions.addVariableChangedListener(changedGridSizeListener);
       nWidthSubdivisions.addVariableChangedListener(changedGridSizeListener);
-      changedGridSizeListener.variableChanged(null);
+      changedGridSizeListener.notifyOfVariableChange(null);
 
       VariableChangedListener changedThresholdForCellActivationListener = new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             for (int i = 0; i < nLengthSubdivisions.getIntegerValue(); i++)
             {
@@ -173,12 +173,12 @@ public class FootCoPOccupancyGrid
          }
       };
       thresholdForCellActivation.addVariableChangedListener(changedThresholdForCellActivationListener);
-      changedThresholdForCellActivationListener.variableChanged(null);
+      changedThresholdForCellActivationListener.notifyOfVariableChange(null);
 
       VariableChangedListener resetGridListener = new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (resetGridToEmpty.getBooleanValue())
             {
@@ -188,7 +188,7 @@ public class FootCoPOccupancyGrid
          }
       };
       resetGridToEmpty.addVariableChangedListener(resetGridListener);
-      resetGridListener.variableChanged(null);
+      resetGridListener.notifyOfVariableChange(null);
    }
 
    private final FramePoint3D cellPosition = new FramePoint3D();

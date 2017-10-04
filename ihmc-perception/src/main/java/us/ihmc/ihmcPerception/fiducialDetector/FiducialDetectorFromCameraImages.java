@@ -88,7 +88,7 @@ public class FiducialDetectorFromCameraImages
       expectedFiducialSize.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             synchronized (expectedFiducialSizeChangedConch)
             {

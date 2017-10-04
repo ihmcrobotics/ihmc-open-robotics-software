@@ -125,7 +125,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       omega0.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             comHeight.set(gravityZ.getDoubleValue() / (omega0.getDoubleValue() * omega0.getDoubleValue()));
          }
@@ -133,7 +133,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
       gravityZ.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             comHeight.set(gravityZ.getDoubleValue() / (omega0.getDoubleValue() * omega0.getDoubleValue()));
          }

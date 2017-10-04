@@ -360,7 +360,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
 
         for (int i = 0; i < numVars; i++) {
             DataEntry entry = entriesOnThisGraph.get(i);
-            ret = (ret || entry.minMaxChanged());
+            ret = (ret || entry.hasMinMaxChanged());
         }
 
         return ret;
