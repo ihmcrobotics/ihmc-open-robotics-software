@@ -60,20 +60,24 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
 
    public YoFramePoint buildUpdatedYoFramePointForVisualizationOnly()
    {
-      if (!isReferenceFrameRegistered(ReferenceFrame.getWorldFrame()))
-         registerReferenceFrame(ReferenceFrame.getWorldFrame());
-      yoFramePointInWorld = new YoFramePoint(super.getNamePrefix() + "Viz", getReferenceFrame(), registry);
-      getPosition().attachVariableChangedListener(new VariableChangedListener()
+      if(yoFramePointInWorld == null)
       {
-         private final FramePoint3D localFramePoint = new FramePoint3D();
-
-         @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         if (!isReferenceFrameRegistered(ReferenceFrame.getWorldFrame()))
+            registerReferenceFrame(ReferenceFrame.getWorldFrame());
+         yoFramePointInWorld = new YoFramePoint(super.getNamePrefix() + "Viz", getReferenceFrame(), registry);
+         getPosition().attachVariableChangedListener(new VariableChangedListener()
          {
-            getPosition().getFrameTupleIncludingFrame(localFramePoint);
-            yoFramePointInWorld.setAndMatchFrame(localFramePoint);
-         }
-      });
+            private final FramePoint3D localFramePoint = new FramePoint3D();
+
+            @Override
+            public void notifyOfVariableChange(YoVariable<?> v)
+            {
+               getPosition().getFrameTupleIncludingFrame(localFramePoint);
+               yoFramePointInWorld.setAndMatchFrame(localFramePoint);
+            }
+         });
+         
+      }
       return yoFramePointInWorld;
    }
 
