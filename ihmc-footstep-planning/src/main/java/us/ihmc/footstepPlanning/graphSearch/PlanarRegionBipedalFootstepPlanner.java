@@ -60,7 +60,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       this.stepCostCalculator = stepCostCalculator;
       nodeExpansion = new PlanarRegionBipedalFootstepNodeExpansion(parameters);
 
-      DistanceAndYawBasedHeuristics costToGoHeuristics = new DistanceAndYawBasedHeuristics(0.5, registry);
+      DistanceAndYawBasedHeuristics costToGoHeuristics = new DistanceAndYawBasedHeuristics(0.1, registry);
       Comparator<FootstepNode> nodeComparator = (node1, node2) ->
       {
          double cost1 = costToGoHeuristics.compute(node1, goalNodes.get(node1.getRobotSide()));
