@@ -23,8 +23,19 @@ public class FootstepGraph
    private final HashMap<FootstepNode, HashSet<FootstepEdge>> outgoingEdges = new HashMap<>();
    private final HashMap<FootstepNode, FootstepEdge> incomingBestEdge = new HashMap<>();
 
-   public FootstepGraph(FootstepNode startNode)
+   /**
+    * Removes all nodes and edges stored in the graph and
+    * starts a new graph from the specified start node.
+    *
+    * @param startNode start node of the new graph
+    */
+   public void initialize(FootstepNode startNode)
    {
+      edgeCostMap.clear();
+      nodeCostMap.clear();
+      outgoingEdges.clear();
+      incomingBestEdge.clear();
+
       nodeCostMap.put(startNode, new NodeCost(0.0));
       FootstepEdge edgeToStart = new FootstepEdge(null, startNode);
       incomingBestEdge.put(startNode, edgeToStart);
