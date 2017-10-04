@@ -2,7 +2,7 @@ package us.ihmc.valkyrieRosControl.dataHolders;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.rosControl.EffortJointHandle;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -11,7 +11,7 @@ public class YoEffortJointHandleHolder
    private final String name;
    private final EffortJointHandle handle;
    private final OneDoFJoint joint;
-   private final LowLevelJointData desiredJointData;
+   private final JointDesiredOutput desiredJointData;
 
    private final YoDouble tauMeasured;
    private final YoDouble q;
@@ -21,7 +21,7 @@ public class YoEffortJointHandleHolder
    private final YoDouble controllerTauDesired;
    private final YoDouble tauDesired;
 
-   public YoEffortJointHandleHolder(EffortJointHandle handle, OneDoFJoint joint, LowLevelJointData desiredJointData, YoVariableRegistry parentRegistry)
+   public YoEffortJointHandleHolder(EffortJointHandle handle, OneDoFJoint joint, JointDesiredOutput desiredJointData, YoVariableRegistry parentRegistry)
    {
       this.name = handle.getName();
       YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -60,7 +60,7 @@ public class YoEffortJointHandleHolder
       return joint;
    }
    
-   public LowLevelJointData getDesiredJointData()
+   public JointDesiredOutput getDesiredJointData()
    {
       return desiredJointData;
    }
