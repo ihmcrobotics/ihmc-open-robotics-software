@@ -366,15 +366,15 @@ public class SmoothCMPBasedICPPlannerTest
       {
          assertTrueLocal(comPositionForDiscontinuity.epsilonEquals(comPosition, spatialEpsilon));
          assertTrueLocal(icpPositionForDiscontinuity.epsilonEquals(icpPosition, spatialEpsilon));
-         //assertTrueLocal(cmpPositionForDiscontinuity.epsilonEquals(cmpPosition, spatialEpsilon));
-         //assertTrueLocal(copPositionForDiscontinuity.epsilonEquals(copPosition, spatialEpsilon));
+         assertTrueLocal(cmpPositionForDiscontinuity.epsilonEquals(cmpPosition, spatialEpsilon * 4));
+         assertTrueLocal(copPositionForDiscontinuity.epsilonEquals(copPosition, spatialEpsilon * 4));
       }
       else
          newTestStart = false;
       getPredictedValue(comPositionForDiscontinuity, comPosition, comVelocity, dt);
       getPredictedValue(icpPositionForDiscontinuity, icpPosition, icpVelocity, dt);
-      //getPredictedValue(cmpPositionForDiscontinuity, cmpPosition, cmpVelocity, dt);
-      //getPredictedValue(copPositionForDiscontinuity, copPosition, copVelocity, dt);
+      getPredictedValue(cmpPositionForDiscontinuity, cmpPosition, cmpVelocity, dt);
+      getPredictedValue(copPositionForDiscontinuity, copPosition, copVelocity, dt);
    }
    
    private void getPredictedValue(FramePoint3D predictedValueToPack, FramePoint3D currentValue, FrameVector3D rateOfChange, double deltaT)
