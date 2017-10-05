@@ -177,7 +177,7 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
          AngularMomentumTrajectory transferTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfTransferSegments, 2 * maxNumberOfTrajectoryCoefficients);
          transferAngularMomentumTrajectories.add(transferTrajectory);
 
-         CoPPointsInFoot copLocations = new CoPPointsInFoot(i, referenceFrames, registry);
+         CoPPointsInFoot copLocations = new CoPPointsInFoot(fullPrefix, i, referenceFrames, registry);
          upcomingCoPsInFootsteps.add(copLocations);
 
          if (DEBUG)
@@ -202,8 +202,8 @@ public class FootstepAngularMomentumPredictor implements AngularMomentumTrajecto
             transferSupportFootTrajectories.add(transferSupportFootTrajectory);
          }
       }
-      upcomingCoPsInFootsteps.add(new CoPPointsInFoot(maxNumberOfFootstepsToConsider, referenceFrames, registry));
-      upcomingCoPsInFootsteps.add(new CoPPointsInFoot(maxNumberOfFootstepsToConsider + 1, referenceFrames, registry));
+      upcomingCoPsInFootsteps.add(new CoPPointsInFoot(fullPrefix, maxNumberOfFootstepsToConsider, referenceFrames, registry));
+      upcomingCoPsInFootsteps.add(new CoPPointsInFoot(fullPrefix, maxNumberOfFootstepsToConsider + 1, referenceFrames, registry));
 
       AngularMomentumTrajectory transferTrajectory = new AngularMomentumTrajectory(worldFrame, numberOfTransferSegments, 2 * maxNumberOfTrajectoryCoefficients);
       transferAngularMomentumTrajectories.add(transferTrajectory);

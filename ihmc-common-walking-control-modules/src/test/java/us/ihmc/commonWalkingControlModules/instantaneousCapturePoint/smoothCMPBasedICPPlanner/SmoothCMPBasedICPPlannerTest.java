@@ -432,7 +432,7 @@ public class SmoothCMPBasedICPPlannerTest
       icpCornerPointsFromPreviousPlan = new ArrayList<>();
       cmpCornerPointsFromPreviousPlan = new ArrayList<>();
       copWaypointsFromPreviousPlan = new ArrayList<>();
-      CoPPointsInFoot copPointsInFoot = new CoPPointsInFoot(0, new ReferenceFrame[] {worldFrame, feet.get(RobotSide.LEFT).getSoleFrame(),
+      CoPPointsInFoot copPointsInFoot = new CoPPointsInFoot(testClassName, 0, new ReferenceFrame[] {worldFrame, feet.get(RobotSide.LEFT).getSoleFrame(),
             feet.get(RobotSide.RIGHT).getSoleFrame()}, registry);
       copWaypointsFromPreviousPlan.add(copPointsInFoot);
       for (int j = 0; j < 2; j++)
@@ -447,7 +447,7 @@ public class SmoothCMPBasedICPPlannerTest
 
       for (int i = 0; i < numberOfFootstepsToTestForConsistency; i++)
       {
-         copPointsInFoot = new CoPPointsInFoot(i
+         copPointsInFoot = new CoPPointsInFoot(testClassName, i
                + 1, new ReferenceFrame[] {worldFrame, feet.get(RobotSide.LEFT).getSoleFrame(), feet.get(RobotSide.RIGHT).getSoleFrame()}, registry);
          copWaypointsFromPreviousPlan.add(copPointsInFoot);
 
@@ -510,7 +510,6 @@ public class SmoothCMPBasedICPPlannerTest
       }
    }
 
-   
    private void testICPConsistency(int stepNumber, List<FramePoint3D> icpInitialCornerPointsFromPlanner, List<FramePoint3D> icpFinalCornerPointsFromPlanner,
                                    int numberOfStepsToCheck)
    {

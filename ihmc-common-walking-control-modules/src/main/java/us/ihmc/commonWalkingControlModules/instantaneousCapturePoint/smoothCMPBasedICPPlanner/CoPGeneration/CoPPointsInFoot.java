@@ -33,17 +33,17 @@ public class CoPPointsInFoot
    private final YoFramePointInMultipleFrames swingFootCentroid;
    private final YoFramePointInMultipleFrames supportFootCentroid;
 
-   public CoPPointsInFoot(int stepNumber, ReferenceFrame[] framesToRegister, YoVariableRegistry registry)
+   public CoPPointsInFoot(String namePrefix, int stepNumber, ReferenceFrame[] framesToRegister, YoVariableRegistry registry)
    {
       for (int i = 0; i < maxNumberOfTrajectoryPoints; i++)
       {
-         CoPTrajectoryPoint constantCoP = new CoPTrajectoryPoint("step" + stepNumber + "CoP" + i, "", registry, framesToRegister);
+         CoPTrajectoryPoint constantCoP = new CoPTrajectoryPoint(namePrefix + "Step" + stepNumber + "CoP" + i, "", registry, framesToRegister);
          constantCoP.setToNaN();
          copLocations.add(constantCoP);
          copLocationsInWorldFrameReadOnly.add(constantCoP.buildUpdatedYoFramePointForVisualizationOnly());
       }
-      swingFootCentroid = new YoFramePointInMultipleFrames("step" + stepNumber + "swingCentroid", registry, framesToRegister);
-      supportFootCentroid = new YoFramePointInMultipleFrames("step" + stepNumber + "supportCentroid", registry, framesToRegister);
+      swingFootCentroid = new YoFramePointInMultipleFrames(namePrefix + "Step" + stepNumber + "swingCentroid", registry, framesToRegister);
+      supportFootCentroid = new YoFramePointInMultipleFrames(namePrefix + "Step" + stepNumber + "supportCentroid", registry, framesToRegister);
    }
 
    public void setupVisualizers(YoGraphicsList graphicsList, ArtifactList artifactList, double pointSize)
