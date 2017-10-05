@@ -770,7 +770,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       
    }
    
-   public void testSixDoFMovementsOfPelvis() throws SimulationExceededMaximumTimeException
+   public void testFiveDoFMovementsOfPelvis() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
