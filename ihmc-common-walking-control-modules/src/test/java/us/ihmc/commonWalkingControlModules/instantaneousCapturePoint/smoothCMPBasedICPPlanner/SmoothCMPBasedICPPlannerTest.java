@@ -59,8 +59,8 @@ public class SmoothCMPBasedICPPlannerTest
 {
    private static final String testClassName = "UltimateSmoothCMPBasedICPPlannerTest";
    private static final double epsilon = Epsilons.ONE_TEN_MILLIONTH;
-   private final static double spatialEpsilonForDiscontinuity = 0.003; // mm //TODO this should depend on the simulation dt
-   private final static double spatialEpsilonForPlanningConsistency = 0.003; // mm 
+   private final static double spatialEpsilonForDiscontinuity = 0.003; // m //TODO this should depend on the simulation dt
+   private final static double spatialEpsilonForPlanningConsistency = 0.010; // m 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final boolean visualize = true;
@@ -99,6 +99,7 @@ public class SmoothCMPBasedICPPlannerTest
    private final double stepLength = 0.5;
    private final int numberOfFootstepsToConsider = 3;
    private final int numberOfFootstepsForTest = 10;
+   private final int numberOfPointsToCheckForConsistencyWhenAddingFootsteps = 3;
    private final int numberOfFootstepsToTestForConsistency = Math.min(numberOfFootstepsToConsider, 3);
    private final List<Point2D> contactPointsInFootFrame = Stream.of(new Point2D(footLengthForward, toeWidth / 2.0),
                                                                     new Point2D(footLengthForward, -toeWidth / 2.0),
@@ -434,6 +435,16 @@ public class SmoothCMPBasedICPPlannerTest
       CoPPointsInFoot copPointsInFoot = new CoPPointsInFoot(0, new ReferenceFrame[] {worldFrame, feet.get(RobotSide.LEFT).getSoleFrame(),
             feet.get(RobotSide.RIGHT).getSoleFrame()}, registry);
       copWaypointsFromPreviousPlan.add(copPointsInFoot);
+      for (int j = 0; j < 2; j++)
+      {
+         FramePoint3D newPoint = new FramePoint3D();
+         comCornerPointsFromPreviousPlan.add(newPoint);
+         newPoint = new FramePoint3D();
+         icpCornerPointsFromPreviousPlan.add(newPoint);
+         newPoint = new FramePoint3D();
+         cmpCornerPointsFromPreviousPlan.add(newPoint);
+      }
+
       for (int i = 0; i < numberOfFootstepsToTestForConsistency; i++)
       {
          copPointsInFoot = new CoPPointsInFoot(i
@@ -464,66 +475,52 @@ public class SmoothCMPBasedICPPlannerTest
       {
          int numberOfStepsToCheck = (numberOfFootstepsToTestForConsistency < (numberOfFootstepsForTest - stepNumber) ? numberOfFootstepsToTestForConsistency
                : (numberOfFootstepsForTest - stepNumber));
-         // Test CoPs and footsteps
-         for (int i = (isDoubleSupport ? 0 : 1); i < numberOfStepsToCheck; i++)
-         {
-            CoPPointsInFoot requiredCoPs = copWaypointsFromPreviousPlan.get(i);
-            CoPPointsInFoot gotCoPs = copWaypointsFromPlanner.get(i);
-            assertTrueLocal("Step number: " + (stepNumber + i) + " Required: " + requiredCoPs.getNumberOfCoPPoints() + " Got: "
-                  + gotCoPs.getNumberOfCoPPoints(), requiredCoPs.getNumberOfCoPPoints() == gotCoPs.getNumberOfCoPPoints());
-
-            requiredCoPs.getSwingFootLocation(tempFramePoint1);
-            gotCoPs.getSwingFootLocation(tempFramePoint2);
-            assertTrueLocal("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck + " Required: " + tempFramePoint1.toString() + " Got: "
-                  + tempFramePoint2.toString(), tempFramePoint1.epsilonEquals(tempFramePoint2, spatialEpsilonForPlanningConsistency));
-            requiredCoPs.getSupportFootLocation(tempFramePoint1);
-            gotCoPs.getSupportFootLocation(tempFramePoint2);
-            assertTrueLocal("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck + " Required: " + tempFramePoint1.toString() + " Got: "
-                  + tempFramePoint2.toString(), tempFramePoint1.epsilonEquals(tempFramePoint2, spatialEpsilonForPlanningConsistency));
-
-            for (int j = 0; j < requiredCoPs.getNumberOfCoPPoints(); j++)
-            {
-               assertTrueLocal("Step number: " + (stepNumber + i) + " Required : " + requiredCoPs.getCoPPointList().get(j).toString() + " Got: "
-                     + gotCoPs.getCoPPointList().get(j).toString(), requiredCoPs.getCoPPointList().get(j) == gotCoPs.getCoPPointList().get(j));
-               assertTrueLocal("Step number: " + (stepNumber + i) + " Required : " + requiredCoPs.get(j).toString() + " Got: " + gotCoPs.get(j).toString(),
-                               requiredCoPs.get(j).epsilonEquals(gotCoPs.get(j), spatialEpsilonForPlanningConsistency));
-            }
-         }
-         // Consistency of plans shorter than consideration needs this 
-         if(numberOfStepsToCheck < numberOfFootstepsToConsider)
-         {
-            CoPPointsInFoot requiredCoPs = copWaypointsFromPreviousPlan.get(numberOfStepsToCheck);
-            CoPPointsInFoot gotCoPs = copWaypointsFromPlanner.get(numberOfStepsToCheck);
-
-            requiredCoPs.getSwingFootLocation(tempFramePoint1);
-            gotCoPs.getSwingFootLocation(tempFramePoint2);
-            assertTrueLocal("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck + " Required: " + tempFramePoint1.toString() + " Got: "
-                  + tempFramePoint2.toString(), tempFramePoint1.epsilonEquals(tempFramePoint2, spatialEpsilonForPlanningConsistency));
-            requiredCoPs.getSupportFootLocation(tempFramePoint1);
-            gotCoPs.getSupportFootLocation(tempFramePoint2);
-            assertTrueLocal("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck + " Required: " + tempFramePoint1.toString() + " Got: "
-                  + tempFramePoint2.toString(), tempFramePoint1.epsilonEquals(tempFramePoint2, spatialEpsilonForPlanningConsistency));
-
-            for (int j = 0; j < requiredCoPs.getNumberOfCoPPoints(); j++)
-            {
-               assertTrueLocal("Step number: " + (stepNumber + numberOfStepsToCheck) + " Required : " + requiredCoPs.getCoPPointList().get(j).toString() + " Got: "
-                     + gotCoPs.getCoPPointList().get(j).toString(), requiredCoPs.getCoPPointList().get(j) == gotCoPs.getCoPPointList().get(j));
-               assertTrueLocal("Step number: " + (stepNumber + numberOfStepsToCheck) + " Required : " + requiredCoPs.get(j).toString() + " Got: "
-                     + gotCoPs.get(j).toString(), requiredCoPs.get(j).epsilonEquals(gotCoPs.get(j), spatialEpsilonForPlanningConsistency));
-            }
-         }
-
-         //         assertTrueLocal(icpCornerPointsFromPreviousPlan.get(0).epsilonEquals(icpInitialCornerPointsFromPlanner.get(0), epsilon));
-         //         for(int i = 1; i < icpCornerPointsFromPreviousPlan.size() - 1; i++)
-         //         {
-         //            assertTrueLocal(icpCornerPointsFromPreviousPlan.get(i).epsilonEquals(icpInitialCornerPointsFromPlanner.get(i), epsilon));
-         //            assertTrueLocal(icpCornerPointsFromPreviousPlan.get(i).epsilonEquals(icpFinalCornerPointsFromPlanner.get(i - 1), epsilon));
-         //         }
-         //         assertTrueLocal(icpCornerPointsFromPreviousPlan.get(i).epsilonEquals(icpFinalCornerPointsFromPlanner.get(i - 1), epsilon));
+         
+         testCoPConsistency(isDoubleSupport, stepNumber, numberOfStepsToCheck, copWaypointsFromPlanner);
+         testICPConsistency(stepNumber, icpInitialCornerPointsFromPlanner, icpFinalCornerPointsFromPlanner, numberOfStepsToCheck);
       }
       else
          newTestStartConsistency = false;
 
+      updateCoPsStoredForConsistencyCheck(isDoubleSupport, copWaypointsFromPlanner);
+      updateICPsForConsistencyCheck(isDoubleSupport, icpInitialCornerPointsFromPlanner, icpFinalCornerPointsFromPlanner);
+   }
+
+   private void updateICPsForConsistencyCheck(boolean isDoubleSupport, List<FramePoint3D> icpInitialCornerPointsFromPlanner,
+                                              List<FramePoint3D> icpFinalCornerPointsFromPlanner)
+   {
+      int indexDifference = isDoubleSupport ? plannerParameters.getTransferCoPPointsToPlan().length : (plannerParameters.getSwingCoPPointsToPlan().length + 1);
+      icpCornerPointsFromPreviousPlan.get(0).set(icpInitialCornerPointsFromPlanner.get(indexDifference));
+      for (int i = 1; i < icpCornerPointsFromPreviousPlan.size(); i++)
+      {
+         icpCornerPointsFromPreviousPlan.get(i).set(icpFinalCornerPointsFromPlanner.get(i + indexDifference - 1));
+      }
+   }
+
+   private void testICPConsistency(int stepNumber, List<FramePoint3D> icpInitialCornerPointsFromPlanner, List<FramePoint3D> icpFinalCornerPointsFromPlanner,
+                                   int numberOfStepsToCheck)
+   {
+      assertTrueLocal("Plan number: " + stepNumber + " " + 0 + " Required: " + icpCornerPointsFromPreviousPlan.get(0).toString() + " Got: "
+            + icpInitialCornerPointsFromPlanner.get(0).toString(),
+                      icpCornerPointsFromPreviousPlan.get(0).epsilonEquals(icpInitialCornerPointsFromPlanner.get(0), spatialEpsilonForPlanningConsistency));
+      
+      int numberOfICPPointsToCheck = (numberOfStepsToCheck >= numberOfFootstepsToConsider) ? numberOfPointsToCheckForConsistencyWhenAddingFootsteps : numberOfStepsToCheck * plannerParameters.getNumberOfCoPWayPointsPerFoot() + 3;
+      for (int i = 1; i < numberOfICPPointsToCheck - 1; i++)
+      {
+         assertTrueLocal("Plan number: " + stepNumber + " " + i + " Required: " + icpCornerPointsFromPreviousPlan.get(i).toString() + " Got: "
+               + icpInitialCornerPointsFromPlanner.get(i).toString(),
+                         icpCornerPointsFromPreviousPlan.get(i).epsilonEquals(icpInitialCornerPointsFromPlanner.get(i), spatialEpsilonForPlanningConsistency));
+         assertTrueLocal("Plan number: " + stepNumber + " " + i + " Required: " + icpCornerPointsFromPreviousPlan.get(i).toString() + " Got: "
+               + icpFinalCornerPointsFromPlanner.get(i-1).toString(),
+                         icpCornerPointsFromPreviousPlan.get(i).epsilonEquals(icpFinalCornerPointsFromPlanner.get(i-1), spatialEpsilonForPlanningConsistency));
+      }
+      assertTrueLocal(icpCornerPointsFromPreviousPlan.get(numberOfICPPointsToCheck - 1)
+                                                     .epsilonEquals(icpFinalCornerPointsFromPlanner.get(numberOfICPPointsToCheck - 2),
+                                                                    spatialEpsilonForPlanningConsistency));
+   }
+
+   private void updateCoPsStoredForConsistencyCheck(boolean isDoubleSupport, List<CoPPointsInFoot> copWaypointsFromPlanner)
+   {
       // Update CoPs and footsteps
       int indexDifference = isDoubleSupport ? 0 : 1;
       copWaypointsFromPreviousPlan.get(0).reset();
@@ -538,7 +535,59 @@ public class SmoothCMPBasedICPPlannerTest
                                                                   tempFramePoint1);
       for (int i = 1; i < numberOfFootstepsToTestForConsistency + 1; i++)
          copWaypointsFromPreviousPlan.get(i).set(copWaypointsFromPlanner.get(i + indexDifference));
+   }
 
+   private void testCoPConsistency(boolean isDoubleSupport, int stepNumber, int numberOfStepsToCheck, List<CoPPointsInFoot> copWaypointsFromPlanner)
+   {
+      // Test CoPs and footsteps
+      for (int i = (isDoubleSupport ? 0 : 1); i < numberOfStepsToCheck; i++)
+      {
+         CoPPointsInFoot requiredCoPs = copWaypointsFromPreviousPlan.get(i);
+         CoPPointsInFoot gotCoPs = copWaypointsFromPlanner.get(i);
+         assertTrueLocal("Step number: " + (stepNumber + i) + " Required: " + requiredCoPs.getNumberOfCoPPoints() + " Got: " + gotCoPs.getNumberOfCoPPoints(),
+                         requiredCoPs.getNumberOfCoPPoints() == gotCoPs.getNumberOfCoPPoints());
+
+         requiredCoPs.getSwingFootLocation(tempFramePoint1);
+         gotCoPs.getSwingFootLocation(tempFramePoint2);
+         assertTrueLocal("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck + " Required: " + tempFramePoint1.toString() + " Got: "
+               + tempFramePoint2.toString(), tempFramePoint1.epsilonEquals(tempFramePoint2, spatialEpsilonForPlanningConsistency));
+         requiredCoPs.getSupportFootLocation(tempFramePoint1);
+         gotCoPs.getSupportFootLocation(tempFramePoint2);
+         assertTrueLocal("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck + " Required: " + tempFramePoint1.toString() + " Got: "
+               + tempFramePoint2.toString(), tempFramePoint1.epsilonEquals(tempFramePoint2, spatialEpsilonForPlanningConsistency));
+
+         for (int j = 0; j < requiredCoPs.getNumberOfCoPPoints(); j++)
+         {
+            assertTrueLocal("Step number: " + (stepNumber + i) + " Required : " + requiredCoPs.getCoPPointList().get(j).toString() + " Got: "
+                  + gotCoPs.getCoPPointList().get(j).toString(), requiredCoPs.getCoPPointList().get(j) == gotCoPs.getCoPPointList().get(j));
+            assertTrueLocal("Step number: " + (stepNumber + i) + " Required : " + requiredCoPs.get(j).toString() + " Got: " + gotCoPs.get(j).toString(),
+                            requiredCoPs.get(j).epsilonEquals(gotCoPs.get(j), spatialEpsilonForPlanningConsistency));
+         }
+      }
+
+      // Consistency of plans shorter than consideration needs this 
+      if (numberOfStepsToCheck < numberOfFootstepsToConsider)
+      {
+         CoPPointsInFoot requiredCoPs = copWaypointsFromPreviousPlan.get(numberOfStepsToCheck);
+         CoPPointsInFoot gotCoPs = copWaypointsFromPlanner.get(numberOfStepsToCheck);
+
+         requiredCoPs.getSwingFootLocation(tempFramePoint1);
+         gotCoPs.getSwingFootLocation(tempFramePoint2);
+         assertTrueLocal("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck + " Required: " + tempFramePoint1.toString() + " Got: "
+               + tempFramePoint2.toString(), tempFramePoint1.epsilonEquals(tempFramePoint2, spatialEpsilonForPlanningConsistency));
+         requiredCoPs.getSupportFootLocation(tempFramePoint1);
+         gotCoPs.getSupportFootLocation(tempFramePoint2);
+         assertTrueLocal("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck + " Required: " + tempFramePoint1.toString() + " Got: "
+               + tempFramePoint2.toString(), tempFramePoint1.epsilonEquals(tempFramePoint2, spatialEpsilonForPlanningConsistency));
+
+         for (int j = 0; j < requiredCoPs.getNumberOfCoPPoints(); j++)
+         {
+            assertTrueLocal("Step number: " + (stepNumber + numberOfStepsToCheck) + " Required : " + requiredCoPs.getCoPPointList().get(j).toString() + " Got: "
+                  + gotCoPs.getCoPPointList().get(j).toString(), requiredCoPs.getCoPPointList().get(j) == gotCoPs.getCoPPointList().get(j));
+            assertTrueLocal("Step number: " + (stepNumber + numberOfStepsToCheck) + " Required : " + requiredCoPs.get(j).toString() + " Got: "
+                  + gotCoPs.get(j).toString(), requiredCoPs.get(j).epsilonEquals(gotCoPs.get(j), spatialEpsilonForPlanningConsistency));
+         }
+      }
    }
 
    private void updateVisualizePerTick()
