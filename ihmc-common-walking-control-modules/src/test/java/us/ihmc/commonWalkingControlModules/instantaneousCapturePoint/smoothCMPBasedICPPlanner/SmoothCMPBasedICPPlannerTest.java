@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPB
 
 import static org.junit.Assert.assertTrue;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -25,7 +27,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
@@ -34,7 +36,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -55,16 +56,19 @@ public class SmoothCMPBasedICPPlannerTest
 {
    private static final String testClassName = "UltimateSmoothCMPBasedICPPlannerTest";
    private static final double epsilon = Epsilons.ONE_TEN_MILLIONTH;
+   private final static double spatialEpsilon = Epsilons.ONE_THOUSANDTH; // 1 mm
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final boolean VISUALIZE = true;
-   private static final boolean keepSCSUp = false;
+   private static final boolean visualize = true;
+   private static final boolean keepSCSUp = true;
+   private static final boolean testAssertions = false;
 
    // Simulation parameters
-   private final double dt = 0.0001;
+   private final double dt = 0.001;
    private final double omega = 3.5;
 
    // Physical parameters
+   private final double robotMass = 150;
    private final double gravity = 9.81;
    private final double xToAnkle = 0.05;
    private final double yToAnkle = 0.20;
@@ -87,14 +91,14 @@ public class SmoothCMPBasedICPPlannerTest
    private final double defaultFinalSwingTime = defaultSwingTime;
    private final double defaultFinalTransferTime = 0.2;
 
-   private final double stepWidth = 0.5;
+   private final double stepWidth = 0.25;
    private final double stepLength = 0.5;
    private final int numberOfFootstepsToConsider = 3;
    private final int numberOfFootstepsToTest = 10;
    private final List<Point2D> contactPointsInFootFrame = Stream.of(new Point2D(footLengthForward, toeWidth / 2.0),
                                                                     new Point2D(footLengthForward, -toeWidth / 2.0),
-                                                                    new Point2D(footLengthBack, heelWidth / 2.0),
-                                                                    new Point2D(footLengthBack, -heelWidth / 2.0))
+                                                                    new Point2D(-footLengthBack, -heelWidth / 2.0),
+                                                                    new Point2D(-footLengthBack, heelWidth / 2.0))
                                                                 .collect(Collectors.toList());
 
    // Variables for testing and simulation
@@ -106,7 +110,8 @@ public class SmoothCMPBasedICPPlannerTest
    private final FrameVector3D icpAcceleration = new FrameVector3D();
    private final FramePoint3D cmpPosition = new FramePoint3D();
    private final FrameVector3D cmpVelocity = new FrameVector3D();
-   private final FrameVector3D cmpAcceleration = new FrameVector3D();
+   private final FrameVector3D centroidalAngularMomentum = new FrameVector3D();
+   private final FrameVector3D centroidalTorque = new FrameVector3D();
    private final FramePoint3D copPosition = new FramePoint3D();
    private final FrameVector3D copVelocity = new FrameVector3D();
    private final FrameVector3D copAcceleration = new FrameVector3D();
@@ -122,28 +127,36 @@ public class SmoothCMPBasedICPPlannerTest
    private SideDependentList<ReferenceFrame> soleZUpFrames;
    private ReferenceFrame midFeetZUpFrame;
    private SideDependentList<YoPlaneContactState> contactStates;
-   private FullRobotModel dummyRobotForTesting;
    private List<Footstep> footstepList;
    private List<FootstepTiming> timingList;
+   private boolean newTestStart;
 
    // Variables for visualization
    private YoGraphicsListRegistry graphicsListRegistry;
    private int numberOfTrackBalls = 100;
-   private double trackBallSize = 0.02;
+   private double trackBallSize = 0.002;
    private int numberOfCornerPoints = numberOfFootstepsToConsider * 6 + 1;
-   private double cornerPointBallSize = 0.05;
-   private double footstepHeight = 0.01;
+   private double cornerPointBallSize = 0.005;
+   private double footstepHeight = 0.02;
    private BagOfBalls comTrack, icpTrack, cmpTrack, copTrack;
-   private BagOfBalls comCornerPoints, icpCornerPoints, copCornerPoints;
+   private BagOfBalls comInitialCornerPoints, icpInitialCornerPoints, comFinalCornerPoints, icpFinalCornerPoints, copCornerPoints;
    private List<YoFramePose> nextFootstepPoses;
    private SideDependentList<YoFramePose> currentFootLocations;
    private ArrayList<Updatable> updatables;
    private SimulationConstructionSet scs;
    private int SCS_BUFFER_SIZE = 100000;
+   private YoAppearanceRGBColor nextFootstepColor = new YoAppearanceRGBColor(Color.BLUE, 0.5);
+   private YoAppearanceRGBColor leftFootstepColor = new YoAppearanceRGBColor(new Color(0.85f, 0.35f, 0.65f, 1.0f), 0.5);
+   private YoAppearanceRGBColor rightFootstepColor = new YoAppearanceRGBColor(new Color(0.15f, 0.8f, 0.15f, 1.0f), 0.5);
+   private Color comPointsColor = Color.BLACK;
+   private Color icpPointsColor = Color.RED;
+   private Color cmpPointsColor = Color.YELLOW;
+   private Color copPointsColor = Color.WHITE;
 
    @Before
    public void setupTest()
    {
+      this.newTestStart = true;
       this.registry = new YoVariableRegistry(testClassName);
       this.yoTime = new YoDouble("TestTime", registry);
       this.feet = new SideDependentList<>();
@@ -171,7 +184,7 @@ public class SmoothCMPBasedICPPlannerTest
       this.midFeetZUpFrame = new MidFootZUpGroundFrame("MidFeetFrame", soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
       this.bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, soleZUpFrames, registry, graphicsListRegistry);
       this.bipedSupportPolygons.updateUsingContactStates(contactStates);
-      if (VISUALIZE)
+      if (visualize)
          setupVisualization();
 
       updatables.add(new Updatable()
@@ -179,7 +192,7 @@ public class SmoothCMPBasedICPPlannerTest
          @Override
          public void update(double time)
          {
-            if (VISUALIZE)
+            if (visualize)
             {
                for (YoGraphicsList yoGraphicsList : graphicsListRegistry.getYoGraphicsLists())
                {
@@ -240,7 +253,7 @@ public class SmoothCMPBasedICPPlannerTest
       for (RobotSide side : RobotSide.values())
       {
          Graphics3DObject footstepGraphic = new Graphics3DObject();
-         footstepGraphic.addExtrudedPolygon(contactPointsInFootFrame, footstepHeight);
+         footstepGraphic.addExtrudedPolygon(contactPointsInFootFrame, footstepHeight, side == RobotSide.LEFT ? leftFootstepColor : rightFootstepColor);
          YoFramePose footPose = new YoFramePose(side.getCamelCaseName() + "FootPose", worldFrame, registry);
          currentFootLocations.put(side, footPose);
          graphicsListRegistry.registerYoGraphic("currentFootPose", new YoGraphicShape(side.getCamelCaseName() + "FootViz", footstepGraphic, footPose, 1.0));
@@ -253,7 +266,7 @@ public class SmoothCMPBasedICPPlannerTest
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
       {
          Graphics3DObject nextFootstepGraphic = new Graphics3DObject();
-         nextFootstepGraphic.addExtrudedPolygon(contactPointsInFootFrame, footstepHeight);
+         nextFootstepGraphic.addExtrudedPolygon(contactPointsInFootFrame, footstepHeight, nextFootstepColor);
          YoFramePose nextFootstepPose = new YoFramePose("NextFootstep" + i + "Pose", worldFrame, registry);
          nextFootstepPoses.add(nextFootstepPose);
          graphicsListRegistry.registerYoGraphic("UpcomingFootsteps",
@@ -263,17 +276,19 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void setupCornerPointBallsVisualization()
    {
-      comCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize, "CoMCornerPoint", YoAppearance.Black(), registry, graphicsListRegistry);
-      icpCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize, "ICPCornerPoint", YoAppearance.White(), registry, graphicsListRegistry);
-      copCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize, "CoPCornerPoint", YoAppearance.White(), registry, graphicsListRegistry);
+      comInitialCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize*1.5, "CoMInitialCornerPoint", new YoAppearanceRGBColor(comPointsColor, 0.5), registry, graphicsListRegistry);
+      comFinalCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize, "CoMFinalCornerPoint", new YoAppearanceRGBColor(comPointsColor, 0.0), registry, graphicsListRegistry);
+      icpInitialCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize*1.5, "ICPInitialCornerPoint", new YoAppearanceRGBColor(icpPointsColor, 0.5), registry, graphicsListRegistry);
+      icpFinalCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize, "ICPFinalCornerPoint", new YoAppearanceRGBColor(icpPointsColor, 0.0), registry, graphicsListRegistry);
+      copCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize, "CoPCornerPoint", new YoAppearanceRGBColor(copPointsColor, 0.0), registry, graphicsListRegistry);
    }
 
    private void setupTrackBallsVisualization()
    {
-      comTrack = new BagOfBalls(numberOfTrackBalls, trackBallSize, "CoMTrack", YoAppearance.Black(), registry, graphicsListRegistry);
-      icpTrack = new BagOfBalls(numberOfTrackBalls, trackBallSize, "ICPTrack", YoAppearance.Red(), registry, graphicsListRegistry);
-      cmpTrack = new BagOfBalls(numberOfTrackBalls, trackBallSize, "CMPTrack", YoAppearance.Purple(), registry, graphicsListRegistry);
-      copTrack = new BagOfBalls(numberOfTrackBalls, trackBallSize, "CoPTrack", YoAppearance.Green(), registry, graphicsListRegistry);
+      comTrack = new BagOfBalls(numberOfTrackBalls, trackBallSize, "CoMTrack", new YoAppearanceRGBColor(comPointsColor, 0.0), registry, graphicsListRegistry);
+      icpTrack = new BagOfBalls(numberOfTrackBalls, trackBallSize, "ICPTrack", new YoAppearanceRGBColor(icpPointsColor, 0.0), registry, graphicsListRegistry);
+      cmpTrack = new BagOfBalls(numberOfTrackBalls, trackBallSize, "CMPTrack", new YoAppearanceRGBColor(cmpPointsColor, 0.0), registry, graphicsListRegistry);
+      copTrack = new BagOfBalls(numberOfTrackBalls, trackBallSize, "CoPTrack", new YoAppearanceRGBColor(copPointsColor, 0.0), registry, graphicsListRegistry);
    }
 
    @After
@@ -331,26 +346,58 @@ public class SmoothCMPBasedICPPlannerTest
             return numberOfFootstepsToConsider;
          }
       };
-      this.planner = new SmoothCMPBasedICPPlanner(dummyRobotForTesting, bipedSupportPolygons, feet, plannerParameters.getNumberOfFootstepsToConsider(),
+      this.planner = new SmoothCMPBasedICPPlanner(robotMass, bipedSupportPolygons, feet, plannerParameters.getNumberOfFootstepsToConsider(),
                                                   plannerParameters.getNumberOfCoPWayPointsPerFoot(), registry, graphicsListRegistry, gravity);
+      this.planner.initializeParameters(plannerParameters);
+      this.planner.setFinalTransferDuration(defaultFinalTransferTime);
+      this.planner.setOmega0(omega);
    }
+
+   // Variables for storing values 
+   private final FramePoint3D comPositionForDiscontinuity = new FramePoint3D();
+   private final FramePoint3D icpPositionForDiscontinuity = new FramePoint3D();
+   private final FramePoint3D cmpPositionForDiscontinuity = new FramePoint3D();
+   private final FramePoint3D copPositionForDiscontinuity = new FramePoint3D();
 
    private void testForDiscontinuities()
    {
-
+      if(!newTestStart)
+      {
+         assertTrueLocal(comPositionForDiscontinuity.epsilonEquals(comPosition, spatialEpsilon));
+         assertTrueLocal(icpPositionForDiscontinuity.epsilonEquals(icpPosition, spatialEpsilon));
+         assertTrueLocal(cmpPositionForDiscontinuity.epsilonEquals(cmpPosition, spatialEpsilon));
+         assertTrueLocal(copPositionForDiscontinuity.epsilonEquals(copPosition, spatialEpsilon));
+      }
+      getPredictedValue(comPositionForDiscontinuity, comPosition, comVelocity, dt);
+      getPredictedValue(icpPositionForDiscontinuity, icpPosition, comVelocity, dt);
+      getPredictedValue(cmpPositionForDiscontinuity, cmpPosition, comVelocity, dt);
+      getPredictedValue(copPositionForDiscontinuity, copPosition, comVelocity, dt);
+   }
+   
+   private void getPredictedValue(FramePoint3D predictedValueToPack, FramePoint3D currentValue, FrameVector3D rateOfChange, double deltaT)
+   {
+      predictedValueToPack.setIncludingFrame(rateOfChange);
+      predictedValueToPack.scale(deltaT);
+      predictedValueToPack.changeFrame(currentValue.getReferenceFrame());
+      predictedValueToPack.add(currentValue);
    }
 
    private void testForPlanningConsistency()
    {
-
+      
    }
 
-   private void updateVisualizePerTick(double time)
+   private void updateVisualizePerTick()
    {
       updateCoMTrack();
       updateICPTrack();
       updateCMPTrack();
       updateCoPTrack();
+      scs.tickAndUpdate();
+   }
+
+   private void updateUpdatables(double time)
+   {
       for (Updatable updatable : updatables)
       {
          updatable.update(time);
@@ -359,22 +406,22 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void updateCoMTrack()
    {
-      comTrack.setBall(comPosition);
+      comTrack.setBallLoop(comPosition);
    }
 
    private void updateICPTrack()
    {
-      icpTrack.setBall(icpPosition);
+      icpTrack.setBallLoop(icpPosition);
    }
 
    private void updateCMPTrack()
    {
-      cmpTrack.setBall(cmpPosition);
+      cmpTrack.setBallLoop(cmpPosition);
    }
 
    private void updateCoPTrack()
    {
-      copTrack.setBall(copPosition);
+      copTrack.setBallLoop(copPosition);
    }
 
    private void updateVisualization(int stepIndex)
@@ -408,33 +455,72 @@ public class SmoothCMPBasedICPPlannerTest
    {
       int numberOfStepToUpdate = (numberOfFootstepsToTest - stepIndex) < numberOfFootstepsToConsider ? (numberOfFootstepsToTest - stepIndex)
             : numberOfFootstepsToConsider;
-      for (int i = 0; i < numberOfStepToUpdate; i++)
+      int nextStepIndex;
+      for (nextStepIndex = 0; nextStepIndex < numberOfStepToUpdate; nextStepIndex++)
       {
-         nextFootstepPoses.get(i).set(footstepList.get(stepIndex + i).getFootstepPose());
+         nextFootstepPoses.get(nextStepIndex).set(footstepList.get(stepIndex + nextStepIndex).getFootstepPose());
+      }
+      
+      for(; nextStepIndex < numberOfFootstepsToConsider; nextStepIndex++)
+      {
+         nextFootstepPoses.get(nextStepIndex).setToNaN();
       }
    }
 
    private void updateCoMCornerPoints()
    {
-
+      List<FramePoint3D> comInitialDesiredPositions = planner.getInitialDesiredCenterOfMassPositions();
+      List<FramePoint3D> comFinalDesiredPositions = planner.getFinalDesiredCenterOfMassPositions();
+      comInitialCornerPoints.reset();
+      for (int i = 0; i < comInitialDesiredPositions.size(); i++)
+      {
+         comInitialCornerPoints.setBall(comInitialDesiredPositions.get(i));
+      }
+      comFinalCornerPoints.reset();
+      for (int i = 0; i < comFinalDesiredPositions.size(); i++)
+      {
+         comFinalCornerPoints.setBall(comFinalDesiredPositions.get(i));
+      }
    }
 
    private void updateICPCornerPoints()
    {
-
+      List<FramePoint3D> icpInitialDesiredPositions = planner.getInitialDesiredCapturePointPositions();
+      List<FramePoint3D> icpFinalDesiredPositions = planner.getFinalDesiredCapturePointPositions();
+      icpInitialCornerPoints.reset();
+      for (int i = 0; i < icpInitialDesiredPositions.size(); i++)
+      {
+         icpInitialCornerPoints.setBall(icpInitialDesiredPositions.get(i));
+      }
+      icpFinalCornerPoints.reset();
+      for (int i = 0; i < icpFinalDesiredPositions.size(); i++)
+      {
+         icpFinalCornerPoints.setBall(icpFinalDesiredPositions.get(i));
+      }
    }
 
+   FramePoint3D tempFramePoint = new FramePoint3D();
    private void updateCoPCornerPoints()
    {
-
+      List<CoPPointsInFoot> copCornerPointPositions = planner.getCoPWaypoints();
+      copCornerPoints.reset();
+      for(int i = 0; i < copCornerPointPositions.size(); i++)
+      {
+         CoPPointsInFoot copPoints = copCornerPointPositions.get(i);
+         for (int j = 0; j < copPoints.getCoPPointList().size(); j++)
+         {
+            copPoints.getWaypointInWorldFrameReadOnly(j).getFrameTuple(tempFramePoint);
+            tempFramePoint.add(0.0, 0.0, 0.05);
+            copCornerPoints.setBall(tempFramePoint);
+         }
+      }
    }
 
    @SuppressWarnings("unused")
    private void simulate(boolean checkForDiscontinuities, boolean checkForPlanningConsistency, boolean checkIfDyanmicsAreSatisfied)
    {
-      if (VISUALIZE)
+      if (visualize)
          startSCS();
-
       planFootsteps();
       inDoubleSupport = new YoBoolean("inDoubleSupport", registry);
       inDoubleSupport.set(true);
@@ -445,55 +531,112 @@ public class SmoothCMPBasedICPPlannerTest
 
       for (int currentStepCount = 0; currentStepCount < numberOfFootstepsToTest;)
       {
-         planner.clearPlan();
          addFootsteps(currentStepCount, footstepList, timingList);
-         if (inDoubleSupport.getBooleanValue())
+         updateContactState(currentStepCount);
+         if(inDoubleSupport.getBooleanValue())
          {
-            for (RobotSide side : RobotSide.values)
-               contactStates.get(side).setFullyConstrained();
+            planner.setTransferToSide(footstepList.get(currentStepCount).getRobotSide().getOppositeSide());
+            planner.initializeForTransfer(yoTime.getDoubleValue());
          }
          else
          {
-            RobotSide swingSide = footstepList.get(currentStepCount).getRobotSide();
-            contactStates.get(swingSide).clear();
-            contactStates.get(swingSide.getOppositeSide()).setFullyConstrained();
-            FootSpoof foot = feet.get(swingSide);
-            foot.setSoleFrame(footstepList.get(currentStepCount).getFootstepPose());
+            planner.setSupportLeg(footstepList.get(currentStepCount).getRobotSide().getOppositeSide());
+            planner.initializeForSingleSupport(yoTime.getDoubleValue());
          }
-         bipedSupportPolygons.updateUsingContactStates(contactStates);
-         updateVisualization(currentStepCount);
-
-         for (double timeInState = 0.0; timeInState < (inDoubleSupport.getBooleanValue() ? timingList.get(currentStepCount).getTransferTime()
-               : timingList.get(currentStepCount).getSwingTime()); timeInState += dt)
-         {
-            simulateOneTick(checkForDiscontinuities, checkIfDyanmicsAreSatisfied);
-         }
-
-         // Prep for the next state
-         if (inDoubleSupport.getBooleanValue())
-         {
-            inDoubleSupport.set(false);
-         }
-         else
-         {
-            inDoubleSupport.set(true);
-            currentStepCount++;
-         }
+         
+         if(visualize)
+            updateVisualization(currentStepCount);
+         if(checkForPlanningConsistency)
+            testForPlanningConsistency();
+         simulateTicks(checkForDiscontinuities, checkIfDyanmicsAreSatisfied, (inDoubleSupport.getBooleanValue() ? timingList.get(currentStepCount).getTransferTime()
+               : timingList.get(currentStepCount).getSwingTime()));
+         currentStepCount = updateStateMachine(currentStepCount);
       }
 
-      if (VISUALIZE && keepSCSUp)
+      addFootsteps(numberOfFootstepsToTest, footstepList, timingList);
+      updateContactState(-1);
+      planner.setTransferToSide(footstepList.get(numberOfFootstepsToTest - 1).getRobotSide());
+      planner.initializeForStanding(yoTime.getDoubleValue());
+
+      if(visualize)
+         updateVisualization(numberOfFootstepsToTest);
+      if(checkForPlanningConsistency)
+         testForPlanningConsistency();
+      simulateTicks(checkForDiscontinuities, checkIfDyanmicsAreSatisfied, defaultFinalTransferTime);
+
+      if (visualize && keepSCSUp)
          ThreadTools.sleepForever();
+   }
+
+   private int updateStateMachine(int currentStepCount)
+   {
+      if (inDoubleSupport.getBooleanValue())
+      {
+         inDoubleSupport.set(false);
+      }
+      else
+      {
+         inDoubleSupport.set(true);
+         currentStepCount++;
+      }
+      return currentStepCount;
+   }
+
+   private void simulateTicks(boolean checkForDiscontinuities, boolean checkIfDyanmicsAreSatisfied, double totalTime)
+   {
+      for (double timeInState = 0.0; timeInState < totalTime; timeInState += dt)
+      {
+         simulateOneTick(checkForDiscontinuities, checkIfDyanmicsAreSatisfied);
+      }
+   }
+
+   private void updateContactState(int currentStepCount)
+   {
+      if (inDoubleSupport.getBooleanValue())
+      {
+         for (RobotSide side : RobotSide.values)
+            contactStates.get(side).setFullyConstrained();
+      }
+      else
+      {
+         RobotSide swingSide = footstepList.get(currentStepCount).getRobotSide();
+         contactStates.get(swingSide).clear();
+         contactStates.get(swingSide.getOppositeSide()).setFullyConstrained();
+         FootSpoof foot = feet.get(swingSide);
+         foot.setSoleFrame(footstepList.get(currentStepCount).getFootstepPose());
+      }
+      bipedSupportPolygons.updateUsingContactStates(contactStates);
    }
 
    private void simulateOneTick(boolean checkForDiscontinuities, boolean checkIfDyanmicsAreSatisfied)
    {
-      yoTime.add(dt);
-      if (VISUALIZE)
-         updateVisualizePerTick(yoTime.getDoubleValue());
+      getAllVariablesFromPlanner();
+      updateUpdatables(yoTime.getDoubleValue());
       if (checkForDiscontinuities)
          testForDiscontinuities();
       if (checkIfDyanmicsAreSatisfied)
          testIfDynamicsAreSatisified();
+      if (visualize)
+         updateVisualizePerTick();
+   }
+
+   private void getAllVariablesFromPlanner()
+   {
+      yoTime.add(dt);
+      planner.compute(yoTime.getDoubleValue());
+      planner.getDesiredCenterOfPressurePosition(copPosition);
+      planner.getDesiredCenterOfPressureVelocity(copVelocity);
+      planner.getDesiredCenterOfPressureVelocity(copAcceleration);
+      planner.getDesiredCentroidalAngularMomentum(centroidalAngularMomentum);
+      planner.getDesiredCentroidalTorque(centroidalTorque);
+      planner.getDesiredCentroidalMomentumPivotPosition(cmpPosition);
+      planner.getDesiredCentroidalMomentumPivotVelocity(cmpVelocity);
+      planner.getDesiredCapturePointPosition(icpPosition);
+      planner.getDesiredCapturePointVelocity(icpVelocity);
+      planner.getDesiredCapturePointAcceleration(icpAcceleration);
+      planner.getDesiredCenterOfMassPosition(comPosition);
+      planner.getDesiredCenterOfMassVelocity(comVelocity);
+      planner.getDesiredCenterOfMassAcceleration(comAcceleration);
    }
 
    private void planFootsteps()
@@ -501,13 +644,14 @@ public class SmoothCMPBasedICPPlannerTest
       FootstepTestHelper footstepHelper = new FootstepTestHelper(feet);
       footstepList = footstepHelper.createFootsteps(stepWidth, stepLength, numberOfFootstepsToTest);
       timingList = new ArrayList<>(footstepList.size());
-      timingList.add(new FootstepTiming(defaultSwingTime, defaultInitialTransferTime));
+      timingList.add(new FootstepTiming(defaultInitialSwingTime, defaultInitialTransferTime));
       for (int i = 0; i < footstepList.size() - 1; i++)
          timingList.add(new FootstepTiming(defaultSwingTime, defaultTransferTime));
    }
 
    private void addFootsteps(int currentFootstepIndex, List<Footstep> footstepList, List<FootstepTiming> timingList)
    {
+      planner.clearPlan();
       for (int i = currentFootstepIndex; i < Math.min(footstepList.size(), currentFootstepIndex + numberOfFootstepsToConsider); i++)
       {
          planner.addFootstepToPlan(footstepList.get(i), timingList.get(i));
@@ -516,9 +660,9 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void testIfDynamicsAreSatisified()
    {
-      assertTrue("CoM dynamics not satisfied, t: " + yoTime.getDoubleValue() + " COM Position: " + comPosition.toString() + " ICP Velocity: "
+      assertTrueLocal("CoM dynamics not satisfied, t: " + yoTime.getDoubleValue() + " COM Position: " + comPosition.toString() + " ICP Velocity: "
             + comVelocity.toString() + " ICP Position: " + icpPosition.toString(), checkCoMDynamics(comPosition, comVelocity, icpPosition));
-      assertTrue("ICP dynamics not satisfied, t: " + yoTime.getDoubleValue() + " ICP Position: " + icpPosition.toString() + " ICP Velocity: "
+      assertTrueLocal("ICP dynamics not satisfied, t: " + yoTime.getDoubleValue() + " ICP Position: " + icpPosition.toString() + " ICP Velocity: "
             + icpVelocity.toString() + " CMP Position: " + cmpPosition.toString(), checkICPDynamics(icpPosition, icpVelocity, cmpPosition));
    }
 
@@ -538,5 +682,16 @@ public class SmoothCMPBasedICPPlannerTest
       comVelocityFromDynamics.sub(icpPosition, comPosition);
       comVelocityFromDynamics.scale(omega);
       return comVelocity.epsilonEquals(comVelocityFromDynamics, epsilon);
+   }
+   
+   private void assertTrueLocal(boolean assertion)
+   {
+      assertTrueLocal(null, assertion);
+   }
+   
+   private void assertTrueLocal(String statement, boolean assertion)
+   {
+      if(testAssertions)
+         assertTrue(statement, assertion);
    }
 }

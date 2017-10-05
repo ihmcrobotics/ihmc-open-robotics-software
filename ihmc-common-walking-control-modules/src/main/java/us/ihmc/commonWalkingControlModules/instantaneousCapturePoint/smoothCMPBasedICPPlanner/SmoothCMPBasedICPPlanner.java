@@ -60,7 +60,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    private List<YoFramePointInMultipleFrames> icpPhaseEntryCornerPoints = new ArrayList<>();
    private List<YoFramePointInMultipleFrames> icpPhaseExitCornerPoints = new ArrayList<>();
 
-   private final FullRobotModel fullRobotModel;
+   private final double robotMass;
    private final double gravityZ;
 
    private final YoFramePoint yoSingleSupportFinalCoM;
@@ -74,6 +74,14 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maxNumberOfFootstepsToConsider,
                                    int numberOfPointsPerFoot, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, double gravityZ)
    {
+      this(fullRobotModel.getTotalMass(), bipedSupportPolygons, contactableFeet, maxNumberOfFootstepsToConsider, numberOfPointsPerFoot, parentRegistry,
+           yoGraphicsListRegistry, gravityZ);
+   }
+
+   public SmoothCMPBasedICPPlanner(double robotMass, BipedSupportPolygons bipedSupportPolygons,
+                                   SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maxNumberOfFootstepsToConsider,
+                                   int numberOfPointsPerFoot, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, double gravityZ)
+   {
       super(bipedSupportPolygons, maxNumberOfFootstepsToConsider);
 
       yoSingleSupportFinalCoM = new YoFramePoint(namePrefix + "SingleSupportFinalCoM", worldFrame, registry);
@@ -81,7 +89,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       this.gravityZ = gravityZ;
       defaultSwingDurationShiftFraction = new YoDouble(namePrefix + "DefaultSwingDurationShiftFraction", registry);
 
-      this.fullRobotModel = fullRobotModel;
+      this.robotMass = robotMass;
 
       ReferenceFrame[] framesToRegister = new ReferenceFrame[] {worldFrame, midFeetZUpFrame, soleZUpFrames.get(RobotSide.LEFT),
             soleZUpFrames.get(RobotSide.RIGHT)};
@@ -134,9 +142,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          numberFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
 
          referenceCoPGenerator.initializeParameters((SmoothCMPPlannerParameters) icpPlannerParameters);
-         referenceCMPGenerator.setGroundReaction(fullRobotModel.getTotalMass() * gravityZ);
+         referenceCMPGenerator.setGroundReaction(robotMass * gravityZ);
          //FIXME have the angular momentum parameters be passed into or as part of the ICP Planner parameters to the trajectory generator
-         angularMomentumGenerator.initializeParameters((SmoothCMPPlannerParameters) icpPlannerParameters, fullRobotModel.getTotalMass(), gravityZ);
+         angularMomentumGenerator.initializeParameters((SmoothCMPPlannerParameters) icpPlannerParameters, robotMass, gravityZ);
          defaultSwingDurationShiftFraction.set(((SmoothCMPPlannerParameters) icpPlannerParameters).getSwingDurationShiftFraction());
       }
       else
@@ -584,8 +592,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator.holdPosition(icpPositionToHold);
    }
 
-   private void checkCoMDynamics(FrameVector3D comVelocityDesiredCurrent, FramePoint3D icpPositionDesiredCurrent,
-                                 FramePoint3D comPositionDesiredCurrent)
+   private void checkCoMDynamics(FrameVector3D comVelocityDesiredCurrent, FramePoint3D icpPositionDesiredCurrent, FramePoint3D comPositionDesiredCurrent)
    {
       FrameTuple3D comVelocityDynamicsCurrent = icpPositionDesiredCurrent;
       comVelocityDynamicsCurrent.sub(comPositionDesiredCurrent);
