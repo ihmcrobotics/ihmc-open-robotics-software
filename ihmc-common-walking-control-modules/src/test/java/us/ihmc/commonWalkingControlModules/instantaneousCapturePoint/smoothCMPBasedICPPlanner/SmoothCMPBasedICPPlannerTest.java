@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -27,9 +26,12 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
@@ -39,6 +41,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -57,11 +60,12 @@ public class SmoothCMPBasedICPPlannerTest
 {
    private static final String testClassName = "UltimateSmoothCMPBasedICPPlannerTest";
    private static final double epsilon = Epsilons.ONE_TEN_MILLIONTH;
-   private final static double spatialEpsilon = 0.003; // mm //TODO this should depend on the simulation dt
+   private final static double spatialEpsilonForDiscontinuity = 0.003; // mm //TODO this should depend on the simulation dt
+   private final static double spatialEpsilonForPlanningConsistency = 0.003; // mm 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final boolean visualize = true;
-   private static final boolean keepSCSUp = false;
+   private static final boolean keepSCSUp = true;
    private static final boolean testAssertions = true;
 
    // Simulation parameters
@@ -131,6 +135,11 @@ public class SmoothCMPBasedICPPlannerTest
    private List<Footstep> footstepList;
    private List<FootstepTiming> timingList;
    private boolean newTestStart;
+   private List<CoPPointsInFoot> copWaypointList;
+   private List<FramePoint3D> icpCornerPoints;
+   private List<FramePoint3D> comCornerPoints;
+   private List<FramePoint3D> cmpCornerPoints;
+   private ArrayList<Updatable> updatables;
 
    // Variables for visualization
    private YoGraphicsListRegistry graphicsListRegistry;
@@ -143,7 +152,7 @@ public class SmoothCMPBasedICPPlannerTest
    private BagOfBalls comInitialCornerPoints, icpInitialCornerPoints, comFinalCornerPoints, icpFinalCornerPoints, copCornerPoints;
    private List<YoFramePose> nextFootstepPoses;
    private SideDependentList<YoFramePose> currentFootLocations;
-   private ArrayList<Updatable> updatables;
+   private YoGraphicPosition comPositionGraphic, icpPositionGraphic, cmpPositionGraphic, copPositionGraphic;
    private SimulationConstructionSet scs;
    private int SCS_BUFFER_SIZE = 100000;
    private YoAppearanceRGBColor nextFootstepColor = new YoAppearanceRGBColor(Color.BLUE, 0.5);
@@ -153,7 +162,7 @@ public class SmoothCMPBasedICPPlannerTest
    private Color icpPointsColor = Color.RED;
    private Color cmpPointsColor = Color.YELLOW;
    private Color copPointsColor = Color.ORANGE;
-
+   
    @Before
    public void setupTest()
    {
@@ -221,6 +230,7 @@ public class SmoothCMPBasedICPPlannerTest
       setupCornerPointBallsVisualization();
       setupNextFootstepVisualization();
       setupCurrentFootPoseVisualization();
+      setupPositionGraphics();
       setupSCS();
    }
 
@@ -246,6 +256,27 @@ public class SmoothCMPBasedICPPlannerTest
       simulationOverheadPlotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
       simulationOverheadPlotterFactory.createOverheadPlotter();
       scs.startOnAThread();
+   }
+   
+   private void setupPositionGraphics()
+   {
+      YoFramePoint yoCoMPosition = new YoFramePoint("CoMPositionForViz", worldFrame, registry);
+      comPositionGraphic = new YoGraphicPosition("CoMPositionGraphic", yoCoMPosition, trackBallSize * 2, new YoAppearanceRGBColor(comPointsColor, 0.0), GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoFramePoint yoICPPosition = new YoFramePoint("ICPPositionForViz", worldFrame, registry);
+      icpPositionGraphic = new YoGraphicPosition("ICPPositionGraphic", yoICPPosition, trackBallSize * 2, new YoAppearanceRGBColor(icpPointsColor, 0.0), GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoFramePoint yoCMPPosition = new YoFramePoint("CMPPositionForViz", worldFrame, registry);
+      cmpPositionGraphic = new YoGraphicPosition("CMPPositionGraphic", yoCMPPosition, trackBallSize * 2, new YoAppearanceRGBColor(cmpPointsColor, 0.0), GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoFramePoint yoCoPPosition = new YoFramePoint("CoPPositionForViz", worldFrame, registry);
+      copPositionGraphic = new YoGraphicPosition("CoPPositionGraphic", yoCoPPosition, trackBallSize * 2, new YoAppearanceRGBColor(copPointsColor, 0.0), GraphicType.BALL_WITH_ROTATED_CROSS);
+      graphicsListRegistry.registerYoGraphic("GraphicPositions", comPositionGraphic);
+      graphicsListRegistry.registerArtifact("GraphicsArtifacts", comPositionGraphic.createArtifact());
+      graphicsListRegistry.registerYoGraphic("GraphicPositions", icpPositionGraphic);
+      graphicsListRegistry.registerArtifact("GraphicsArtifacts", icpPositionGraphic.createArtifact());
+      graphicsListRegistry.registerYoGraphic("GraphicPositions", cmpPositionGraphic);
+      graphicsListRegistry.registerArtifact("GraphicsArtifacts", cmpPositionGraphic.createArtifact());
+      graphicsListRegistry.registerYoGraphic("GraphicPositions", copPositionGraphic);
+      graphicsListRegistry.registerArtifact("GraphicsArtifacts", copPositionGraphic.createArtifact());
+      
    }
 
    private void setupCurrentFootPoseVisualization()
@@ -364,10 +395,10 @@ public class SmoothCMPBasedICPPlannerTest
    {
       if(!newTestStart)
       {
-         assertTrueLocal(comPositionForDiscontinuity.epsilonEquals(comPosition, spatialEpsilon));
-         assertTrueLocal(icpPositionForDiscontinuity.epsilonEquals(icpPosition, spatialEpsilon));
-         assertTrueLocal(cmpPositionForDiscontinuity.epsilonEquals(cmpPosition, spatialEpsilon * 4));
-         assertTrueLocal(copPositionForDiscontinuity.epsilonEquals(copPosition, spatialEpsilon * 4));
+         assertTrueLocal(comPositionForDiscontinuity.epsilonEquals(comPosition, spatialEpsilonForDiscontinuity));
+         assertTrueLocal(icpPositionForDiscontinuity.epsilonEquals(icpPosition, spatialEpsilonForDiscontinuity));
+         assertTrueLocal(cmpPositionForDiscontinuity.epsilonEquals(cmpPosition, spatialEpsilonForDiscontinuity * 4));
+         assertTrueLocal(copPositionForDiscontinuity.epsilonEquals(copPosition, spatialEpsilonForDiscontinuity * 4));
       }
       else
          newTestStart = false;
@@ -396,6 +427,7 @@ public class SmoothCMPBasedICPPlannerTest
       updateICPTrack();
       updateCMPTrack();
       updateCoPTrack();
+      updatePositionGraphics();
       scs.tickAndUpdate();
    }
 
@@ -426,7 +458,15 @@ public class SmoothCMPBasedICPPlannerTest
    {
       copTrack.setBallLoop(copPosition);
    }
-
+   
+   private void updatePositionGraphics()
+   {
+      comPositionGraphic.setPosition(comPosition);
+      icpPositionGraphic.setPosition(icpPosition);
+      cmpPositionGraphic.setPosition(cmpPosition);
+      copPositionGraphic.setPosition(copPosition);
+   }
+   
    private void updateVisualization(int stepIndex)
    {
       updateCurrentFootsteps();
