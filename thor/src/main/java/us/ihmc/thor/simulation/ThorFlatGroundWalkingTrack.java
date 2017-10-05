@@ -27,7 +27,7 @@ public class ThorFlatGroundWalkingTrack
       boolean USE_JOYSTICK_CONTROLLER = false;
 
       DRCRobotModel robotModel = new ThorRobotModel(RobotTarget.SCS, false);
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);      
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
 
       final double groundHeight = 0.0;
       GroundProfile3D groundProfile = new FlatGroundProfile(groundHeight);
@@ -44,14 +44,14 @@ public class ThorFlatGroundWalkingTrack
 
       HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();
       DRCFlatGroundWalkingTrack flatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
-            useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel,
-            WalkingProvider.VELOCITY_HEADING_COMPONENT, walkingScriptParameters);
+                                                                                       useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel,
+                                                                                       WalkingProvider.VELOCITY_HEADING_COMPONENT, walkingScriptParameters);
       
       SimulationConstructionSet scs = flatGroundWalkingTrack.getSimulationConstructionSet();
      
 		String namespace = "/multisense",nodeName = "/heading_listener", headingTopicName="/multisense/vector_to_target";
 
-		final RosMainNode rosMainNode;	
+		final RosMainNode rosMainNode;
 		
       if (USE_JOYSTICK_CONTROLLER)
       {
