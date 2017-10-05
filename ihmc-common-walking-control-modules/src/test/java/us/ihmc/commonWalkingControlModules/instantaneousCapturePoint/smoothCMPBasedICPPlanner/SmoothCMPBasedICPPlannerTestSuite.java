@@ -36,7 +36,7 @@ import us.ihmc.commons.MutationTestFacilitator;
            CoPPlanningToolsTest.class,
            CoPTrajectoryTest.class,
            FootstepDataTest.class,
-           
+           SmoothCMPBasedICPPlannerTest.class
         }
 )
 
