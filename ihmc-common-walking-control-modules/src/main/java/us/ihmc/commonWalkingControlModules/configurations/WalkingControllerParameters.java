@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -153,6 +154,14 @@ public abstract class WalkingControllerParameters
     * @see #allowAutomaticManipulationAbort()
     */
    public double getICPErrorThresholdForManipulationAbort()
+   {
+      return 0.04;
+   }
+   
+   /**
+    * This parameter sets the buffer around the support polygon to constrain the offset ICP used in {@link PelvisICPBasedTranslationManager}. It's defined in meters.
+    */
+   public double getPelvisTranslationICPSupportPolygonSafeMargin()
    {
       return 0.04;
    }

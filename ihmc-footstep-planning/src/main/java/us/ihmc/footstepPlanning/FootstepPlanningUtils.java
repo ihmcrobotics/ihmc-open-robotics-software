@@ -6,42 +6,45 @@ import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNode;
+import us.ihmc.footstepPlanning.aStar.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeUtils;
 import us.ihmc.robotics.geometry.FramePose;
 
 public class FootstepPlanningUtils
 {
-   public static FootstepPlan createFootstepPlanFromEndNode(BipedalFootstepPlannerNode endNode)
+   public static FootstepPlan createFootstepPlanFromEndNode(FootstepNode endNode)
    {
       FootstepPlan plan = new FootstepPlan();
       plan.clear();
-      BipedalFootstepPlannerNode node = endNode;
+      FootstepNode node = endNode;
 
-      while (node != null)
-      {
-         RigidBodyTransform soleTransform = new RigidBodyTransform();
-         node.getSoleTransform(soleTransform);
-
-         FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), soleTransform);
-         plan.addFootstep(node.getRobotSide(), framePose);
-
-         node = node.getParentNode();
-      }
+      // TODO use graph to construct
+//      while (node != null)
+//      {
+//         RigidBodyTransform soleTransform = new RigidBodyTransform();
+//         BipedalFootstepPlannerNodeUtils.getSoleTransform(node, soleTransform);
+//
+//         FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), soleTransform);
+//         plan.addFootstep(node.getRobotSide(), framePose);
+//
+//         node = node.getParentNode();
+//      }
 
       plan.reverse();
       return plan;
    }
 
-   public static List<BipedalFootstepPlannerNode> createListOfNodesFromEndNode(BipedalFootstepPlannerNode endNode)
+   public static List<FootstepNode> createListOfNodesFromEndNode(FootstepNode endNode)
    {
-      List<BipedalFootstepPlannerNode> nodeList = new ArrayList<>();
-      BipedalFootstepPlannerNode nodeToAdd = endNode;
+      List<FootstepNode> nodeList = new ArrayList<>();
+      FootstepNode nodeToAdd = endNode;
 
-      while(nodeToAdd != null)
-      {
-         nodeList.add(nodeToAdd);
-         nodeToAdd = nodeToAdd.getParentNode();
-      }
+      // TODO use graph to construct
+//      while(nodeToAdd != null)
+//      {
+//         nodeList.add(nodeToAdd);
+//         nodeToAdd = nodeToAdd.getParentNode();
+//      }
 
       Collections.reverse(nodeList);
 
