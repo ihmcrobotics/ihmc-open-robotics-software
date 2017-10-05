@@ -659,6 +659,20 @@ public abstract class WalkingControllerParameters
    }
 
    /**
+    * Determines the maximum allowable magnitude for the swing initial linear velocity.
+    * <p>
+    * This can be helpful in scenarios where a foot during toe-off causing a large velocity and
+    * resulting in an undesired trajectory.
+    * </p>
+    * 
+    * @return the swing initial linear velocity maximum magnitude.
+    */
+   public double getMaxSwingInitialLinearVelocityMagnitude()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   /**
     * Determines the maximum allowable magnitude for the swing initial angular velocity.
     * <p>
     * This can be helpful in scenarios where a foot during toe-off causing a large velocity and
