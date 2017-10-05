@@ -216,9 +216,9 @@ public class CoPPointsInFootTest
       assertTrue(dummyGraphicsList.getYoGraphics().size() == 10);
       copPointsInFoot.addAndSetIncludingFrame(CoPPointName.BALL_COP, 1.0, new FramePoint3D(footSpoof.getSoleFrame(), 1.0, 2.1, 3.1));
       assertTrue(dummyGraphicsList.getYoGraphics().get(0) instanceof YoGraphicPosition);
-      assertTrue(((YoGraphicPosition)dummyGraphicsList.getYoGraphics().get(0)).getX() == 1.0 + xToAnkle);
-      assertTrue(((YoGraphicPosition)dummyGraphicsList.getYoGraphics().get(0)).getY() == 2.1 + yToAnkle);
-      assertTrue(((YoGraphicPosition)dummyGraphicsList.getYoGraphics().get(0)).getZ() == 3.1 + zToAnkle);
+      assertTrue(((YoGraphicPosition)dummyGraphicsList.getYoGraphics().get(0)).getX() == 1.0 - xToAnkle);
+      assertTrue(((YoGraphicPosition)dummyGraphicsList.getYoGraphics().get(0)).getY() == 2.1 - yToAnkle);
+      assertTrue(((YoGraphicPosition)dummyGraphicsList.getYoGraphics().get(0)).getZ() == 3.1 - zToAnkle);
    }
 
 }
