@@ -19,10 +19,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
 
 public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 {
@@ -35,12 +32,14 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
    private final YoBoolean exitAfterInitialSolution = new YoBoolean("exitAfterInitialSolution", registry);
 
    private final FootstepGraph footstepGraph;
-   private final PriorityQueue<FootstepNode> stack;
+   protected final Deque<FootstepNode> stack = new ArrayDeque<FootstepNode>();
    private final PlanarRegionBipedalFootstepNodeExpansion nodeExpansion;
    private final FootstepNodeSnapper snapper;
    private final FootstepNodeChecker checker;
    private final FootstepCost stepCostCalculator;
    private SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
+   private final Comparator<FootstepNode> nodeComparator;
+
    private FootstepNode startNode;
    private final SideDependentList<FootstepNode> goalNodes = new SideDependentList<>();
    private FootstepNode bestGoalNode;
@@ -61,14 +60,13 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       nodeExpansion = new PlanarRegionBipedalFootstepNodeExpansion(parameters);
 
       DistanceAndYawBasedHeuristics costToGoHeuristics = new DistanceAndYawBasedHeuristics(0.1, registry);
-      Comparator<FootstepNode> nodeComparator = (node1, node2) ->
+      this.nodeComparator = (node1, node2) ->
       {
          double cost1 = costToGoHeuristics.compute(node1, goalNodes.get(node1.getRobotSide()));
          double cost2 = costToGoHeuristics.compute(node2, goalNodes.get(node2.getRobotSide()));
          if (cost1 == cost2) return 0;
-         return cost1 < cost2 ? -1 : 1;
+         return cost1 > cost2 ? -1 : 1;
       };
-      stack = new PriorityQueue<>(nodeComparator);
 
       exitAfterInitialSolution.set(true);
       timeout.set(Double.POSITIVE_INFINITY);
@@ -201,7 +199,13 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       while (!stack.isEmpty())
       {
          numberOfNodesExpanded.increment();
-         FootstepNode nodeToExpand = stack.poll();
+
+         FootstepNode nodeToExpand;
+         if(bestGoalNode == null)
+            nodeToExpand = stack.pollFirst();
+         else
+            nodeToExpand = stack.pollLast();
+
          notifyListenerNodeIsBeingExpanded(nodeToExpand);
 
          if (goalNodes.get(nodeToExpand.getRobotSide()).equals(nodeToExpand))
@@ -213,7 +217,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
                continue;
          }
 
-         HashSet<FootstepNode> childNodes = nodeExpansion.expandNode(nodeToExpand);
+         ArrayList<FootstepNode> childNodes = getSortedNodeList(nodeExpansion.expandNode(nodeToExpand));
          for (FootstepNode childNode : childNodes)
          {
             if (!checker.isNodeValid(childNode, nodeToExpand))
@@ -226,7 +230,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 
             // only add to stack if the node hasn't been explored
             if (!footstepGraph.doesNodeExist(childNode))
-               stack.add(childNode);
+               stack.push(childNode);
 
             footstepGraph.checkAndSetEdge(nodeToExpand, childNode, stepCost);
          }
@@ -248,6 +252,14 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
       if (stack.isEmpty())
          return FootstepPlanningResult.OPTIMAL_SOLUTION;
       return FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
+   }
+
+   private ArrayList<FootstepNode> getSortedNodeList(HashSet<FootstepNode> nodeSet)
+   {
+      ArrayList<FootstepNode> nodeList = new ArrayList<>();
+      nodeList.addAll(nodeSet);
+      nodeList.sort(nodeComparator);
+      return nodeList;
    }
 
    private void notifyListenerSolutionWasFound(FootstepPlan footstepPlan)
