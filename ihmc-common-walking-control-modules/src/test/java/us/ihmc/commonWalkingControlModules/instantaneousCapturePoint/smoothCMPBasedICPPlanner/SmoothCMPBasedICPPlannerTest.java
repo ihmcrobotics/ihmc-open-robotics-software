@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPPointsInFoot;
 import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -64,7 +65,7 @@ public class SmoothCMPBasedICPPlannerTest
 
    private static final boolean visualize = true;
    private static final boolean keepSCSUp = false;
-   private static final boolean testAssertions = true;
+   private static final boolean testAssertions = !keepSCSUp && true;
 
    // Simulation parameters
    private final double dt = 0.001;
@@ -97,8 +98,8 @@ public class SmoothCMPBasedICPPlannerTest
    private final double stepWidth = 0.25;
    private final double stepLength = 0.5;
    private final int numberOfFootstepsToConsider = 3;
-   private final int numberOfFootstepsForTest = 4;
-   private final int numberOfFootstepsToTestForConsistency = 1;
+   private final int numberOfFootstepsForTest = 10;
+   private final int numberOfFootstepsToTestForConsistency = Math.min(numberOfFootstepsToConsider, 3);
    private final List<Point2D> contactPointsInFootFrame = Stream.of(new Point2D(footLengthForward, toeWidth / 2.0),
                                                                     new Point2D(footLengthForward, -toeWidth / 2.0),
                                                                     new Point2D(-footLengthBack, -heelWidth / 2.0),
@@ -134,7 +135,7 @@ public class SmoothCMPBasedICPPlannerTest
    private List<Footstep> footstepList;
    private List<FootstepTiming> timingList;
    private boolean newTestStartDiscontinuity, newTestStartConsistency;
-   private List<CoPPointsInFoot> copWaypointListFromPreviousPlan;
+   private List<CoPPointsInFoot> copWaypointsFromPreviousPlan;
    private List<FramePoint3D> icpCornerPointsFromPreviousPlan;
    private List<FramePoint3D> comCornerPointsFromPreviousPlan;
    private List<FramePoint3D> cmpCornerPointsFromPreviousPlan;
@@ -161,7 +162,7 @@ public class SmoothCMPBasedICPPlannerTest
    private Color icpPointsColor = Color.RED;
    private Color cmpPointsColor = Color.YELLOW;
    private Color copPointsColor = Color.ORANGE;
-   
+
    @Before
    public void setupTest()
    {
@@ -256,17 +257,21 @@ public class SmoothCMPBasedICPPlannerTest
       simulationOverheadPlotterFactory.createOverheadPlotter();
       scs.startOnAThread();
    }
-   
+
    private void setupPositionGraphics()
    {
       YoFramePoint yoCoMPosition = new YoFramePoint("CoMPositionForViz", worldFrame, registry);
-      comPositionGraphic = new YoGraphicPosition("CoMPositionGraphic", yoCoMPosition, trackBallSize * 2, new YoAppearanceRGBColor(comPointsColor, 0.0), GraphicType.BALL_WITH_ROTATED_CROSS);
+      comPositionGraphic = new YoGraphicPosition("CoMPositionGraphic", yoCoMPosition, trackBallSize * 2, new YoAppearanceRGBColor(comPointsColor, 0.0),
+                                                 GraphicType.BALL_WITH_ROTATED_CROSS);
       YoFramePoint yoICPPosition = new YoFramePoint("ICPPositionForViz", worldFrame, registry);
-      icpPositionGraphic = new YoGraphicPosition("ICPPositionGraphic", yoICPPosition, trackBallSize * 2, new YoAppearanceRGBColor(icpPointsColor, 0.0), GraphicType.BALL_WITH_ROTATED_CROSS);
+      icpPositionGraphic = new YoGraphicPosition("ICPPositionGraphic", yoICPPosition, trackBallSize * 2, new YoAppearanceRGBColor(icpPointsColor, 0.0),
+                                                 GraphicType.BALL_WITH_ROTATED_CROSS);
       YoFramePoint yoCMPPosition = new YoFramePoint("CMPPositionForViz", worldFrame, registry);
-      cmpPositionGraphic = new YoGraphicPosition("CMPPositionGraphic", yoCMPPosition, trackBallSize * 2, new YoAppearanceRGBColor(cmpPointsColor, 0.0), GraphicType.BALL_WITH_ROTATED_CROSS);
+      cmpPositionGraphic = new YoGraphicPosition("CMPPositionGraphic", yoCMPPosition, trackBallSize * 2, new YoAppearanceRGBColor(cmpPointsColor, 0.0),
+                                                 GraphicType.BALL_WITH_ROTATED_CROSS);
       YoFramePoint yoCoPPosition = new YoFramePoint("CoPPositionForViz", worldFrame, registry);
-      copPositionGraphic = new YoGraphicPosition("CoPPositionGraphic", yoCoPPosition, trackBallSize * 2, new YoAppearanceRGBColor(copPointsColor, 0.0), GraphicType.BALL_WITH_ROTATED_CROSS);
+      copPositionGraphic = new YoGraphicPosition("CoPPositionGraphic", yoCoPPosition, trackBallSize * 2, new YoAppearanceRGBColor(copPointsColor, 0.0),
+                                                 GraphicType.BALL_WITH_ROTATED_CROSS);
       graphicsListRegistry.registerYoGraphic("GraphicPositions", comPositionGraphic);
       graphicsListRegistry.registerArtifact("GraphicsArtifacts", comPositionGraphic.createArtifact());
       graphicsListRegistry.registerYoGraphic("GraphicPositions", icpPositionGraphic);
@@ -306,11 +311,16 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void setupCornerPointBallsVisualization()
    {
-      comInitialCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize*1.5, "CoMInitialCornerPoint", new YoAppearanceRGBColor(comPointsColor, 0.5), GraphicType.BALL, registry, graphicsListRegistry);
-      comFinalCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize, "CoMFinalCornerPoint", new YoAppearanceRGBColor(comPointsColor, 0.0), GraphicType.BALL, registry, graphicsListRegistry);
-      icpInitialCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize*1.5, "ICPInitialCornerPoint", new YoAppearanceRGBColor(icpPointsColor, 0.5), GraphicType.BALL, registry, graphicsListRegistry);
-      icpFinalCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize, "ICPFinalCornerPoint", new YoAppearanceRGBColor(icpPointsColor, 0.0), GraphicType.BALL, registry, graphicsListRegistry);
-      copCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize, "CoPCornerPoint", new YoAppearanceRGBColor(copPointsColor, 0.0), GraphicType.BALL, registry, graphicsListRegistry);
+      comInitialCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize * 1.5, "CoMInitialCornerPoint",
+                                              new YoAppearanceRGBColor(comPointsColor, 0.5), GraphicType.BALL, registry, graphicsListRegistry);
+      comFinalCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize, "CoMFinalCornerPoint", new YoAppearanceRGBColor(comPointsColor, 0.0),
+                                            GraphicType.BALL, registry, graphicsListRegistry);
+      icpInitialCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize * 1.5, "ICPInitialCornerPoint",
+                                              new YoAppearanceRGBColor(icpPointsColor, 0.5), GraphicType.BALL, registry, graphicsListRegistry);
+      icpFinalCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize, "ICPFinalCornerPoint", new YoAppearanceRGBColor(icpPointsColor, 0.0),
+                                            GraphicType.BALL, registry, graphicsListRegistry);
+      copCornerPoints = new BagOfBalls(numberOfCornerPoints, cornerPointBallSize, "CoPCornerPoint", new YoAppearanceRGBColor(copPointsColor, 0.0),
+                                       GraphicType.BALL, registry, graphicsListRegistry);
    }
 
    private void setupTrackBallsVisualization()
@@ -324,7 +334,7 @@ public class SmoothCMPBasedICPPlannerTest
    @After
    public void cleanUpTest()
    {
-      if(scs != null)
+      if (scs != null)
          scs.closeAndDispose();
    }
 
@@ -391,7 +401,7 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void testForDiscontinuities()
    {
-      if(!newTestStartDiscontinuity)
+      if (!newTestStartDiscontinuity)
       {
          assertTrueLocal(comPositionForDiscontinuity.epsilonEquals(comPosition, spatialEpsilonForDiscontinuity));
          assertTrueLocal(icpPositionForDiscontinuity.epsilonEquals(icpPosition, spatialEpsilonForDiscontinuity));
@@ -405,7 +415,7 @@ public class SmoothCMPBasedICPPlannerTest
       getPredictedValue(cmpPositionForDiscontinuity, cmpPosition, cmpVelocity, dt);
       getPredictedValue(copPositionForDiscontinuity, copPosition, copVelocity, dt);
    }
-   
+
    private void getPredictedValue(FramePoint3D predictedValueToPack, FramePoint3D currentValue, FrameVector3D rateOfChange, double deltaT)
    {
       predictedValueToPack.setIncludingFrame(rateOfChange);
@@ -413,22 +423,24 @@ public class SmoothCMPBasedICPPlannerTest
       predictedValueToPack.changeFrame(currentValue.getReferenceFrame());
       predictedValueToPack.add(currentValue);
    }
-   
+
    private void setupConsistencyChecks()
    {
       newTestStartConsistency = true;
       comCornerPointsFromPreviousPlan = new ArrayList<>();
       icpCornerPointsFromPreviousPlan = new ArrayList<>();
       cmpCornerPointsFromPreviousPlan = new ArrayList<>();
-      copWaypointListFromPreviousPlan = new ArrayList<>();
-      CoPPointsInFoot copPointsInFoot = new CoPPointsInFoot(0, new ReferenceFrame[]{worldFrame, feet.get(RobotSide.LEFT).getSoleFrame(), feet.get(RobotSide.RIGHT).getSoleFrame()}, registry);
-      copWaypointListFromPreviousPlan.add(copPointsInFoot);
-      for(int i = 0; i < numberOfFootstepsToTestForConsistency; i++)
+      copWaypointsFromPreviousPlan = new ArrayList<>();
+      CoPPointsInFoot copPointsInFoot = new CoPPointsInFoot(0, new ReferenceFrame[] {worldFrame, feet.get(RobotSide.LEFT).getSoleFrame(),
+            feet.get(RobotSide.RIGHT).getSoleFrame()}, registry);
+      copWaypointsFromPreviousPlan.add(copPointsInFoot);
+      for (int i = 0; i < numberOfFootstepsToTestForConsistency; i++)
       {
-         copPointsInFoot = new CoPPointsInFoot(i + 1, new ReferenceFrame[]{worldFrame, feet.get(RobotSide.LEFT).getSoleFrame(), feet.get(RobotSide.RIGHT).getSoleFrame()}, registry);
-         copWaypointListFromPreviousPlan.add(copPointsInFoot);
-         
-         for(int j = 0; j < plannerParameters.getNumberOfCoPWayPointsPerFoot(); j++)
+         copPointsInFoot = new CoPPointsInFoot(i
+               + 1, new ReferenceFrame[] {worldFrame, feet.get(RobotSide.LEFT).getSoleFrame(), feet.get(RobotSide.RIGHT).getSoleFrame()}, registry);
+         copWaypointsFromPreviousPlan.add(copPointsInFoot);
+
+         for (int j = 0; j < plannerParameters.getNumberOfCoPWayPointsPerFoot(); j++)
          {
             FramePoint3D newPoint = new FramePoint3D();
             comCornerPointsFromPreviousPlan.add(newPoint);
@@ -440,35 +452,93 @@ public class SmoothCMPBasedICPPlannerTest
       }
    }
 
-   private void testForPlanningConsistency(boolean isDoubleSupport)
+   private void testForPlanningConsistency(boolean isDoubleSupport, int stepNumber)
    {
       List<CoPPointsInFoot> copWaypointsFromPlanner = planner.getCoPWaypoints();
-      if(!newTestStartConsistency)
+      List<FramePoint3D> icpInitialCornerPointsFromPlanner = planner.getInitialDesiredCapturePointPositions();
+      List<FramePoint3D> icpFinalCornerPointsFromPlanner = planner.getFinalDesiredCapturePointPositions();
+      List<FramePoint3D> comInitialCornerPointsFromPlanner = planner.getInitialDesiredCenterOfMassPositions();
+      List<FramePoint3D> comFinalCornerPointsFromPlanner = planner.getFinalDesiredCenterOfMassPositions();
+
+      if (!newTestStartConsistency)
       {
-         for(int i = (isDoubleSupport ? 0 : 1); i < numberOfFootstepsToTestForConsistency; i++)
+         int numberOfStepsToCheck = (numberOfFootstepsToTestForConsistency < (numberOfFootstepsForTest - stepNumber) ? numberOfFootstepsToTestForConsistency
+               : (numberOfFootstepsForTest - stepNumber));
+         // Test CoPs and footsteps
+         for (int i = (isDoubleSupport ? 0 : 1); i < numberOfStepsToCheck; i++)
          {
-            CoPPointsInFoot requiredCoPs = copWaypointListFromPreviousPlan.get(i);
+            CoPPointsInFoot requiredCoPs = copWaypointsFromPreviousPlan.get(i);
             CoPPointsInFoot gotCoPs = copWaypointsFromPlanner.get(i);
-            assertTrueLocal(requiredCoPs.getNumberOfCoPPoints() == gotCoPs.getNumberOfCoPPoints());
-            for(int j = 0 ; j < requiredCoPs.getNumberOfCoPPoints(); j++)
-               assertTrueLocal(i + " " + j + " " + "Required : " + requiredCoPs.get(j).toString() + " Got: " + gotCoPs.get(j).toString(),requiredCoPs.get(j).epsilonEquals(gotCoPs.get(j), spatialEpsilonForPlanningConsistency));
+            assertTrueLocal("Step number: " + (stepNumber + i) + " Required: " + requiredCoPs.getNumberOfCoPPoints() + " Got: "
+                  + gotCoPs.getNumberOfCoPPoints(), requiredCoPs.getNumberOfCoPPoints() == gotCoPs.getNumberOfCoPPoints());
+
+            requiredCoPs.getSwingFootLocation(tempFramePoint1);
+            gotCoPs.getSwingFootLocation(tempFramePoint2);
+            assertTrueLocal("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck + " Required: " + tempFramePoint1.toString() + " Got: "
+                  + tempFramePoint2.toString(), tempFramePoint1.epsilonEquals(tempFramePoint2, spatialEpsilonForPlanningConsistency));
+            requiredCoPs.getSupportFootLocation(tempFramePoint1);
+            gotCoPs.getSupportFootLocation(tempFramePoint2);
+            assertTrueLocal("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck + " Required: " + tempFramePoint1.toString() + " Got: "
+                  + tempFramePoint2.toString(), tempFramePoint1.epsilonEquals(tempFramePoint2, spatialEpsilonForPlanningConsistency));
+
+            for (int j = 0; j < requiredCoPs.getNumberOfCoPPoints(); j++)
+            {
+               assertTrueLocal("Step number: " + (stepNumber + i) + " Required : " + requiredCoPs.getCoPPointList().get(j).toString() + " Got: "
+                     + gotCoPs.getCoPPointList().get(j).toString(), requiredCoPs.getCoPPointList().get(j) == gotCoPs.getCoPPointList().get(j));
+               assertTrueLocal("Step number: " + (stepNumber + i) + " Required : " + requiredCoPs.get(j).toString() + " Got: " + gotCoPs.get(j).toString(),
+                               requiredCoPs.get(j).epsilonEquals(gotCoPs.get(j), spatialEpsilonForPlanningConsistency));
+            }
          }
+         // Consistency of plans shorter than consideration needs this 
+         if(numberOfStepsToCheck < numberOfFootstepsToConsider)
+         {
+            CoPPointsInFoot requiredCoPs = copWaypointsFromPreviousPlan.get(numberOfStepsToCheck);
+            CoPPointsInFoot gotCoPs = copWaypointsFromPlanner.get(numberOfStepsToCheck);
+
+            requiredCoPs.getSwingFootLocation(tempFramePoint1);
+            gotCoPs.getSwingFootLocation(tempFramePoint2);
+            assertTrueLocal("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck + " Required: " + tempFramePoint1.toString() + " Got: "
+                  + tempFramePoint2.toString(), tempFramePoint1.epsilonEquals(tempFramePoint2, spatialEpsilonForPlanningConsistency));
+            requiredCoPs.getSupportFootLocation(tempFramePoint1);
+            gotCoPs.getSupportFootLocation(tempFramePoint2);
+            assertTrueLocal("Plan number: " + stepNumber + " StepNumber: " + numberOfStepsToCheck + " Required: " + tempFramePoint1.toString() + " Got: "
+                  + tempFramePoint2.toString(), tempFramePoint1.epsilonEquals(tempFramePoint2, spatialEpsilonForPlanningConsistency));
+
+            for (int j = 0; j < requiredCoPs.getNumberOfCoPPoints(); j++)
+            {
+               assertTrueLocal("Step number: " + (stepNumber + numberOfStepsToCheck) + " Required : " + requiredCoPs.getCoPPointList().get(j).toString() + " Got: "
+                     + gotCoPs.getCoPPointList().get(j).toString(), requiredCoPs.getCoPPointList().get(j) == gotCoPs.getCoPPointList().get(j));
+               assertTrueLocal("Step number: " + (stepNumber + numberOfStepsToCheck) + " Required : " + requiredCoPs.get(j).toString() + " Got: "
+                     + gotCoPs.get(j).toString(), requiredCoPs.get(j).epsilonEquals(gotCoPs.get(j), spatialEpsilonForPlanningConsistency));
+            }
+         }
+
+         //         assertTrueLocal(icpCornerPointsFromPreviousPlan.get(0).epsilonEquals(icpInitialCornerPointsFromPlanner.get(0), epsilon));
+         //         for(int i = 1; i < icpCornerPointsFromPreviousPlan.size() - 1; i++)
+         //         {
+         //            assertTrueLocal(icpCornerPointsFromPreviousPlan.get(i).epsilonEquals(icpInitialCornerPointsFromPlanner.get(i), epsilon));
+         //            assertTrueLocal(icpCornerPointsFromPreviousPlan.get(i).epsilonEquals(icpFinalCornerPointsFromPlanner.get(i - 1), epsilon));
+         //         }
+         //         assertTrueLocal(icpCornerPointsFromPreviousPlan.get(i).epsilonEquals(icpFinalCornerPointsFromPlanner.get(i - 1), epsilon));
       }
       else
          newTestStartConsistency = false;
+
+      // Update CoPs and footsteps
       int indexDifference = isDoubleSupport ? 0 : 1;
-      
-      copWaypointListFromPreviousPlan.get(0).reset();
-      copWaypointsFromPlanner.get(indexDifference).getSwingFootLocation(tempFramePoint);
-      copWaypointListFromPreviousPlan.get(0).setSwingFootLocation(tempFramePoint);
-      copWaypointsFromPlanner.get(indexDifference).getSupportFootLocation(tempFramePoint);
-      copWaypointListFromPreviousPlan.get(0).setSupportFootLocation(tempFramePoint);
-      
+      copWaypointsFromPreviousPlan.get(0).reset();
+      copWaypointsFromPlanner.get(indexDifference).getSwingFootLocation(tempFramePoint1);
+      copWaypointsFromPreviousPlan.get(0).setSwingFootLocation(tempFramePoint1);
+      copWaypointsFromPlanner.get(indexDifference).getSupportFootLocation(tempFramePoint1);
+      copWaypointsFromPreviousPlan.get(0).setSupportFootLocation(tempFramePoint1);
+
       int finalCoPIndex = copWaypointsFromPlanner.get(indexDifference).getNumberOfCoPPoints() - 1;
-      copWaypointsFromPlanner.get(indexDifference).getFinalCoPPosition(tempFramePoint);
-      copWaypointListFromPreviousPlan.get(0).addAndSetIncludingFrame(copWaypointsFromPlanner.get(indexDifference).getCoPPointList().get(finalCoPIndex), 0.0, tempFramePoint);
-      for(int i = 1; i < numberOfFootstepsToTestForConsistency; i++)
-         copWaypointListFromPreviousPlan.get(i).set(copWaypointsFromPlanner.get(i + indexDifference));
+      copWaypointsFromPlanner.get(indexDifference).getFinalCoPPosition(tempFramePoint1);
+      copWaypointsFromPreviousPlan.get(0).addAndSetIncludingFrame(copWaypointsFromPlanner.get(indexDifference).getCoPPointList().get(finalCoPIndex), 0.0,
+                                                                  tempFramePoint1);
+      for (int i = 1; i < numberOfFootstepsToTestForConsistency + 1; i++)
+         copWaypointsFromPreviousPlan.get(i).set(copWaypointsFromPlanner.get(i + indexDifference));
+
    }
 
    private void updateVisualizePerTick()
@@ -508,7 +578,7 @@ public class SmoothCMPBasedICPPlannerTest
    {
       copTrack.setBallLoop(copPosition);
    }
-   
+
    private void updatePositionGraphics()
    {
       comPositionGraphic.setPosition(comPosition);
@@ -516,7 +586,7 @@ public class SmoothCMPBasedICPPlannerTest
       cmpPositionGraphic.setPosition(cmpPosition);
       copPositionGraphic.setPosition(copPosition);
    }
-   
+
    private void updateVisualization(int stepIndex)
    {
       updateCurrentFootsteps();
@@ -553,8 +623,8 @@ public class SmoothCMPBasedICPPlannerTest
       {
          nextFootstepPoses.get(nextStepIndex).set(footstepList.get(stepIndex + nextStepIndex).getFootstepPose());
       }
-      
-      for(; nextStepIndex < numberOfFootstepsToConsider; nextStepIndex++)
+
+      for (; nextStepIndex < numberOfFootstepsToConsider; nextStepIndex++)
       {
          nextFootstepPoses.get(nextStepIndex).setToNaN();
       }
@@ -592,18 +662,20 @@ public class SmoothCMPBasedICPPlannerTest
       }
    }
 
-   FramePoint3D tempFramePoint = new FramePoint3D();
+   FramePoint3D tempFramePoint1 = new FramePoint3D();
+   FramePoint3D tempFramePoint2 = new FramePoint3D();
+
    private void updateCoPCornerPoints()
    {
       List<CoPPointsInFoot> copCornerPointPositions = planner.getCoPWaypoints();
       copCornerPoints.reset();
-      for(int i = 0; i < copCornerPointPositions.size(); i++)
+      for (int i = 0; i < copCornerPointPositions.size(); i++)
       {
          CoPPointsInFoot copPoints = copCornerPointPositions.get(i);
          for (int j = 0; j < copPoints.getCoPPointList().size(); j++)
          {
-            copPoints.getWaypointInWorldFrameReadOnly(j).getFrameTuple(tempFramePoint);
-            copCornerPoints.setBall(tempFramePoint);
+            copPoints.getWaypointInWorldFrameReadOnly(j).getFrameTuple(tempFramePoint1);
+            copCornerPoints.setBall(tempFramePoint1);
          }
       }
    }
@@ -614,10 +686,10 @@ public class SmoothCMPBasedICPPlannerTest
       if (visualize)
          startSCS();
       planFootsteps();
-      
-      if(checkForPlanningConsistency)
+
+      if (checkForPlanningConsistency)
          setupConsistencyChecks();
-      
+
       inDoubleSupport = new YoBoolean("inDoubleSupport", registry);
       inDoubleSupport.set(true);
 
@@ -629,7 +701,7 @@ public class SmoothCMPBasedICPPlannerTest
       {
          addFootsteps(currentStepCount, footstepList, timingList);
          updateContactState(currentStepCount);
-         if(inDoubleSupport.getBooleanValue())
+         if (inDoubleSupport.getBooleanValue())
          {
             planner.setTransferToSide(footstepList.get(currentStepCount).getRobotSide().getOppositeSide());
             planner.initializeForTransfer(yoTime.getDoubleValue());
@@ -639,13 +711,13 @@ public class SmoothCMPBasedICPPlannerTest
             planner.setSupportLeg(footstepList.get(currentStepCount).getRobotSide().getOppositeSide());
             planner.initializeForSingleSupport(yoTime.getDoubleValue());
          }
-         
-         if(visualize)
+
+         if (visualize)
             updateVisualization(currentStepCount);
-         if(checkForPlanningConsistency)
-            testForPlanningConsistency(inDoubleSupport.getBooleanValue());
-         simulateTicks(checkForDiscontinuities, checkIfDyanmicsAreSatisfied, (inDoubleSupport.getBooleanValue() ? timingList.get(currentStepCount).getTransferTime()
-               : timingList.get(currentStepCount).getSwingTime()));
+         if (checkForPlanningConsistency)
+            testForPlanningConsistency(inDoubleSupport.getBooleanValue(), currentStepCount);
+         simulateTicks(checkForDiscontinuities, checkIfDyanmicsAreSatisfied, (inDoubleSupport.getBooleanValue()
+               ? timingList.get(currentStepCount).getTransferTime() : timingList.get(currentStepCount).getSwingTime()));
          currentStepCount = updateStateMachine(currentStepCount);
       }
 
@@ -654,10 +726,10 @@ public class SmoothCMPBasedICPPlannerTest
       planner.setTransferToSide(footstepList.get(numberOfFootstepsForTest - 1).getRobotSide());
       planner.initializeForStanding(yoTime.getDoubleValue());
 
-      if(visualize)
+      if (visualize)
          updateVisualization(numberOfFootstepsForTest);
-      if(checkForPlanningConsistency)
-         testForPlanningConsistency(true);
+      if (checkForPlanningConsistency)
+         testForPlanningConsistency(true, numberOfFootstepsForTest);
       simulateTicks(checkForDiscontinuities, checkIfDyanmicsAreSatisfied, defaultFinalTransferTime);
 
       if (visualize && keepSCSUp)
@@ -779,15 +851,17 @@ public class SmoothCMPBasedICPPlannerTest
       comVelocityFromDynamics.scale(omega);
       return comVelocity.epsilonEquals(comVelocityFromDynamics, epsilon);
    }
-   
+
    private void assertTrueLocal(boolean assertion)
    {
       assertTrueLocal(null, assertion);
    }
-   
+
    private void assertTrueLocal(String statement, boolean assertion)
    {
-      if(testAssertions)
+      if (testAssertions)
          assertTrue(statement, assertion);
+      else if (!assertion)
+         PrintTools.error(statement);
    }
 }

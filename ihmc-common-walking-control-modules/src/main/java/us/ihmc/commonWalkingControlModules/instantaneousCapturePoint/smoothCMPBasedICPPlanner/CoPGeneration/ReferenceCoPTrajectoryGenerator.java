@@ -507,9 +507,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
          // set swing parameters for angular momentum estimation
          convertToFramePointRetainingZ(tempFramePoint1, supportFootPolygon.getCentroid(), worldFrame);
-         copLocationWaypoint.setSwingFootLocation(tempFramePoint1);
-         convertToFramePointRetainingZ(tempFramePoint1, swingFootInitialPolygon.getCentroid(), worldFrame);
          copLocationWaypoint.setSupportFootLocation(tempFramePoint1);
+         convertToFramePointRetainingZ(tempFramePoint1, swingFootInitialPolygon.getCentroid(), worldFrame);
+         copLocationWaypoint.setSwingFootLocation(tempFramePoint1);
 
          // compute all the upcoming footsteps
          computeCoPPointsForFinalTransfer(copLocationIndex, transferToSide, true, footstepIndex);
@@ -738,7 +738,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private void computeCoPPointsForFinalTransfer(int copLocationIndex, RobotSide finalSupportSide, boolean isLastTransfer, int footstepIndex)
    {
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.get(copLocationIndex);
-
+      
       convertToFramePointRetainingZ(tempFramePoint1, swingFootPredictedFinalPolygon.getCentroid(), worldFrame);
       copLocationWaypoint.setSwingFootLocation(tempFramePoint1);
       convertToFramePointRetainingZ(tempFramePoint1, supportFootPolygon.getCentroid(), worldFrame);
@@ -746,6 +746,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
       swingFootInitialPolygon.setIncludingFrame(supportFootPolygon);
       supportFootPolygon.setIncludingFrame(swingFootPredictedFinalPolygon);
+      
       int loopEnd = CoPPlanningTools.getCoPPointIndex(transferCoPPointList, endCoPName);
       for (int i = 0; i <= loopEnd; i++)
       {
