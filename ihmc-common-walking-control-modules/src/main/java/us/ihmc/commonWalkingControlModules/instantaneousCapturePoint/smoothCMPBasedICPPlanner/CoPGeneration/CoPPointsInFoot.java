@@ -80,6 +80,21 @@ public class CoPPointsInFoot
    {
       this.copPointsList.add(copPointName);
    }
+   
+   public void set(CoPPointsInFoot other)
+   {
+      this.swingFootCentroid.setIncludingFrame(other.swingFootCentroid);
+      this.supportFootCentroid.setIncludingFrame(other.supportFootCentroid);
+      this.copPointsList.clear();
+      int index = 0;
+      for(index = 0; index < other.copPointsList.size(); index++)
+      {
+         this.copPointsList.add(other.copPointsList.get(index));
+         this.copLocations.get(index).set(other.get(index));
+      }
+      for(; index < maxNumberOfTrajectoryPoints; index++)
+         this.copLocations.get(index).setToNaN();
+   }
 
    public void setIncludingFrame(int waypointIndex, double time, FramePoint3D location)
    {
