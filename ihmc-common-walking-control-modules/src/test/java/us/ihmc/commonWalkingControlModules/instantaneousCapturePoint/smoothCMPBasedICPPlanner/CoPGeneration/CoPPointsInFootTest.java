@@ -36,6 +36,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  */
 public class CoPPointsInFootTest
 {
+   private static final String testClassName = "CoPPointsInFootTestRegistry";
    private static final double epsilon = Epsilons.ONE_BILLIONTH;
    private final double maxXInSoleFrame = -0.075;
    private final double minXInSoleFrame = -0.05;
@@ -46,7 +47,7 @@ public class CoPPointsInFootTest
    private final double zToAnkle = 0.5;
    private final List<Point2D> footVertexList = Arrays.asList(new Point2D(maxXInSoleFrame, maxYInSoleFrame), new Point2D(maxXInSoleFrame, minYInSoleFrame),
                                                               new Point2D(minXInSoleFrame, maxYInSoleFrame), new Point2D(minXInSoleFrame, minYInSoleFrame));
-   private final YoVariableRegistry registry = new YoVariableRegistry("CoPPointsInFootTestRegistry");
+   private final YoVariableRegistry registry = new YoVariableRegistry(testClassName);
    private final FootSpoof footSpoof = new FootSpoof("DummyFoot", xToAnkle, yToAnkle, zToAnkle, footVertexList, 0.5);
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame[] framesToRegister = {worldFrame, footSpoof.getSoleFrame()};
@@ -55,7 +56,7 @@ public class CoPPointsInFootTest
    @Before
    public void setup()
    {
-      copPointsInFoot = new CoPPointsInFoot(0, framesToRegister, registry);
+      copPointsInFoot = new CoPPointsInFoot(testClassName, 0, framesToRegister, registry);
    }
 
    @After

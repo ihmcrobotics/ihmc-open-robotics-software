@@ -22,7 +22,8 @@ public class ReferenceCMPTrajectoryGenerator
 {
    private static final int maxNumberOfCoefficients = 10;
    private static final int maxNumberOfSegments = 5;
-
+   
+   private final String fullPrefix;
    private final List<CMPTrajectory> transferCMPTrajectories = new ArrayList<>();
    private final List<CMPTrajectory> swingCMPTrajectories = new ArrayList<>();
    private final YoDouble verticalGroundReaction;
@@ -38,6 +39,7 @@ public class ReferenceCMPTrajectoryGenerator
 
    public ReferenceCMPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, YoInteger numberOfFootstepsToConsider, YoVariableRegistry registry)
    {
+      this.fullPrefix = namePrefix + "CMPTrajectoryGenerator";
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
 
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
@@ -50,7 +52,7 @@ public class ReferenceCMPTrajectoryGenerator
       CMPTrajectory transferCMPTrajectory = new CMPTrajectory(maxNumberOfSegments, maxNumberOfCoefficients);
       transferCMPTrajectories.add(transferCMPTrajectory);
       this.torqueTrajectory = new TorqueTrajectory(maxNumberOfSegments, maxNumberOfCoefficients);
-      this.verticalGroundReaction = new YoDouble(namePrefix + "CMPTorqueOffsetScalingFactor", registry);
+      this.verticalGroundReaction = new YoDouble(fullPrefix + "CMPTorqueOffsetScalingFactor", registry);
    }
    
    public void setGroundReaction(double z)

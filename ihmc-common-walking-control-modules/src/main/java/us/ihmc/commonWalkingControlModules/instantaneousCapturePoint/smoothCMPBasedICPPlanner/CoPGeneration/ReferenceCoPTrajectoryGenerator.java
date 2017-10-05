@@ -46,6 +46,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       POSITION, TIME
    };
 
+   private final String fullPrefix;
    // Standard declarations
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double COP_POINT_SIZE = 0.005;
@@ -144,19 +145,19 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
                                           YoVariableRegistry parentRegistry)
    {
       this.numberFootstepsToConsider = numberFootstepsToConsider;
-
-      additionalTimeForFinalTransfer = new YoDouble(namePrefix + "AdditionalTimeForFinalTransfer", registry);
-      safeDistanceFromCoPToSupportEdges = new YoDouble(namePrefix + "SafeDistanceFromCoPToSupportEdges", registry);
-      safeDistanceFromCoPToSupportEdgesWhenSteppingDown = new YoDouble(namePrefix + "SafeDistanceFromCoPToSupportEdgesWhenSteppingDown", parentRegistry);
-      footstepHeightThresholdToPutExitCoPOnToesSteppingDown = new YoDouble(namePrefix + "FootstepHeightThresholdToPutExitCoPOnToesSteppingDown",
+      this.fullPrefix = namePrefix + "CoPTrajectoryGenerator";
+      additionalTimeForFinalTransfer = new YoDouble(fullPrefix + "AdditionalTimeForFinalTransfer", registry);
+      safeDistanceFromCoPToSupportEdges = new YoDouble(fullPrefix + "SafeDistanceFromCoPToSupportEdges", registry);
+      safeDistanceFromCoPToSupportEdgesWhenSteppingDown = new YoDouble(fullPrefix + "SafeDistanceFromCoPToSupportEdgesWhenSteppingDown", parentRegistry);
+      footstepHeightThresholdToPutExitCoPOnToesSteppingDown = new YoDouble(fullPrefix + "FootstepHeightThresholdToPutExitCoPOnToesSteppingDown",
                                                                            parentRegistry);
-      footstepLengthThresholdToPutExitCoPOnToesSteppingDown = new YoDouble(namePrefix + "FootstepLengthThresholdToPutExitCoPOnToesSteppingDown",
+      footstepLengthThresholdToPutExitCoPOnToesSteppingDown = new YoDouble(fullPrefix + "FootstepLengthThresholdToPutExitCoPOnToesSteppingDown",
                                                                            parentRegistry);
-      footstepLengthThresholdToPutExitCoPOnToes = new YoDouble(namePrefix + "FootstepLengthThresholdToPutExitCoPOnToes", parentRegistry);
-      exitCoPForwardSafetyMarginOnToes = new YoDouble(namePrefix + "ExitCoPForwardSafetyMarginOnToes", parentRegistry);
+      footstepLengthThresholdToPutExitCoPOnToes = new YoDouble(fullPrefix + "FootstepLengthThresholdToPutExitCoPOnToes", parentRegistry);
+      exitCoPForwardSafetyMarginOnToes = new YoDouble(fullPrefix + "ExitCoPForwardSafetyMarginOnToes", parentRegistry);
 
-      percentageChickenSupport = new YoDouble("PercentageChickenSupport", registry);
-      numberOfUpcomingFootsteps = new YoInteger(namePrefix + "NumberOfUpcomingFootsteps", registry);
+      percentageChickenSupport = new YoDouble(fullPrefix + "PercentageChickenSupport", registry);
+      numberOfUpcomingFootsteps = new YoInteger(fullPrefix + "NumberOfUpcomingFootsteps", registry);
 
       this.swingDurations = swingDurations;
       this.transferDurations = transferDurations;
@@ -167,19 +168,19 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       for (int i = 0; i < transferSplitFractions.size(); i++)
          useTransferSplitFractionFor.add(UseSplitFractionFor.TIME);
 
-      this.numberOfPointsPerFoot = new YoInteger(namePrefix + "NumberOfPointsPerFootstep", registry);
-      this.orderOfSplineInterpolation = new YoEnum<>(namePrefix + "OrderOfSplineInterpolation", registry, CoPSplineType.class);
-      this.isDoneWalking = new YoBoolean(namePrefix + "IsDoneWalking", registry);
-      this.holdDesiredState = new YoBoolean(namePrefix + "HoldDesiredState", parentRegistry);
-      this.putExitCoPOnToes = new YoBoolean(namePrefix + "PutExitCoPOnToes", parentRegistry);
-      this.planIsAvailable = new YoBoolean(namePrefix + "CoPPlanAvailable", parentRegistry);
+      this.numberOfPointsPerFoot = new YoInteger(fullPrefix + "NumberOfPointsPerFootstep", registry);
+      this.orderOfSplineInterpolation = new YoEnum<>(fullPrefix + "OrderOfSplineInterpolation", registry, CoPSplineType.class);
+      this.isDoneWalking = new YoBoolean(fullPrefix + "IsDoneWalking", registry);
+      this.holdDesiredState = new YoBoolean(fullPrefix + "HoldDesiredState", parentRegistry);
+      this.putExitCoPOnToes = new YoBoolean(fullPrefix + "PutExitCoPOnToes", parentRegistry);
+      this.planIsAvailable = new YoBoolean(fullPrefix + "CoPPlanAvailable", parentRegistry);
 
       for (CoPPointName pointName : CoPPointName.values)
       {
          CoPPointPlanningParameters copParameters = new CoPPointPlanningParameters(pointName);
 
-         YoDouble maxCoPOffset = new YoDouble("maxCoPForwardOffset" + pointName.toString(), registry);
-         YoDouble minCoPOffset = new YoDouble("minCoPForwardOffset" + pointName.toString(), registry);
+         YoDouble maxCoPOffset = new YoDouble(fullPrefix + "maxCoPForwardOffset" + pointName.toString(), registry);
+         YoDouble minCoPOffset = new YoDouble(fullPrefix + "minCoPForwardOffset" + pointName.toString(), registry);
 
          copParameters.setCoPOffsetBounds(minCoPOffset, maxCoPOffset);
          copPointParametersMap.put(pointName, copParameters);
@@ -187,7 +188,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          for (RobotSide robotSide : RobotSide.values)
          {
             String sidePrefix = robotSide.getCamelCaseNameForMiddleOfExpression();
-            YoFrameVector2d copUserOffset = new YoFrameVector2d(namePrefix + sidePrefix + "CoPConstantOffset" + pointName.toString(), null, registry);
+            YoFrameVector2d copUserOffset = new YoFrameVector2d(fullPrefix + sidePrefix + "CoPConstantOffset" + pointName.toString(), null, registry);
             copParameters.setCoPOffsets(robotSide, copUserOffset);
          }
       }
@@ -218,10 +219,10 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       // Need two additional CoPPoints in Foot to store the initial and final footstep CoPs
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
-         copLocationWaypoints.add(new CoPPointsInFoot(i, framesToRegister, registry));
+         copLocationWaypoints.add(new CoPPointsInFoot(fullPrefix, i, framesToRegister, registry));
       }
-      copLocationWaypoints.add(new CoPPointsInFoot(maxNumberOfFootstepsToConsider + 1, framesToRegister, registry));
-      copLocationWaypoints.add(new CoPPointsInFoot(maxNumberOfFootstepsToConsider + 2, framesToRegister, registry));
+      copLocationWaypoints.add(new CoPPointsInFoot(fullPrefix, maxNumberOfFootstepsToConsider + 1, framesToRegister, registry));
+      copLocationWaypoints.add(new CoPPointsInFoot(fullPrefix, maxNumberOfFootstepsToConsider + 2, framesToRegister, registry));
 
       parentRegistry.addChild(registry);
       clear();
