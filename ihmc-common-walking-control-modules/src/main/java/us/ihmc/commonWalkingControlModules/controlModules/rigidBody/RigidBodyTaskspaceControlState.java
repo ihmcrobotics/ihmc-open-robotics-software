@@ -46,7 +46,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 {
-   public static final int maxPoints = 1000;
+   public static final int maxPoints = 10000;
    public static final int maxPointsInGenerator = 5;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 

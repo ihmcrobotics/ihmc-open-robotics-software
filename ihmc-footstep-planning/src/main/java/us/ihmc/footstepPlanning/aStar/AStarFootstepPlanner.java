@@ -30,13 +30,13 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
    public static final double DEFAULT_STEP_WIDTH = 0.25;
 
-   private FootstepGraph graph;
    private SideDependentList<FootstepNode> goalNodes;
    private FootstepNode startNode;
    private HashSet<FootstepNode> expandedNodes;
    private PriorityQueue<FootstepNode> stack;
    private FootstepNode goalNode;
 
+   private final FootstepGraph graph;
    private final FootstepNodeChecker nodeChecker;
    private final GraphVisualization visualization;
    private final CostToGoHeuristics heuristics;
@@ -61,6 +61,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       this.stepCostCalculator = stepCostCalculator;
       this.visualization = visualization;
       this.snapper = snapper;
+      this.graph = new FootstepGraph();
 
       this.timeout = new YoDouble("timeout", registry);
       timeout.set(Double.POSITIVE_INFINITY);
@@ -149,7 +150,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       if (goalNodes == null)
          throw new RuntimeException("Need to set goal before planning.");
 
-      graph = new FootstepGraph(startNode);
+      graph.initialize(startNode);
       NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
 

@@ -55,7 +55,7 @@ public class PlanarRegionBaseOfCliffAvoider
       }
    }
 
-   public void shiftAwayFromCliffBottoms(BipedalFootstepPlannerParameters parameters, PlanarRegionsList planarRegionsList, BipedalFootstepPlannerNode nodeToExpand)
+   public void shiftAwayFromCliffBottoms(BipedalFootstepPlannerParameters parameters, PlanarRegionsList planarRegionsList, RigidBodyTransform soleTransform)
    {
       double cliffHeightToShiftAwayFrom = parameters.getCliffHeightToShiftAwayFrom();
       double minimumDistanceFromCliffBottoms = parameters.getMinimumDistanceFromCliffBottoms();
@@ -63,8 +63,6 @@ public class PlanarRegionBaseOfCliffAvoider
       if ((cliffHeightToShiftAwayFrom <= 0.0) || (minimumDistanceFromCliffBottoms <= 0.0))
          return;
 
-      RigidBodyTransform soleTransform = new RigidBodyTransform();
-      nodeToExpand.getSoleTransform(soleTransform);
       RigidBodyTransform inverseSoleTransform = new RigidBodyTransform(soleTransform);
       inverseSoleTransform.invert();
 
@@ -112,13 +110,19 @@ public class PlanarRegionBaseOfCliffAvoider
 
             if (visualize)
             {
-               beforeAdjustmentPosition.setPosition(nodeToExpand.getSolePosition());
+               Point3D solePosition = new Point3D();
+               soleTransform.getTranslation(solePosition);
+               beforeAdjustmentPosition.setPosition(solePosition);
             }
-            nodeToExpand.shiftInSoleFrame(shiftVectorInSoleFrame);
+
+            BipedalFootstepPlannerNodeUtils.shiftInSoleFrame(shiftVectorInSoleFrame, soleTransform);
+
             if(visualize)
             {
-               afterAdjustmentPosition.setPosition(nodeToExpand.getSolePosition());
-            }            
+               Point3D solePosition = new Point3D();
+               soleTransform.getTranslation(solePosition);
+               afterAdjustmentPosition.setPosition(solePosition);
+            }
          }
       }
 
