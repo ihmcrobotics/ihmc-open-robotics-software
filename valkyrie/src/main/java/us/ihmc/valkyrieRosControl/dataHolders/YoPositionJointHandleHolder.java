@@ -19,7 +19,8 @@ public class YoPositionJointHandleHolder
    private final YoDouble controllerPositionDesired;
    private final YoDouble positionDesired;
 
-   public YoPositionJointHandleHolder(PositionJointHandle handle, OneDoFJoint joint, JointDesiredOutputReadOnly desiredJointData, YoVariableRegistry parentRegistry)
+   public YoPositionJointHandleHolder(PositionJointHandle handle, OneDoFJoint joint, JointDesiredOutputReadOnly desiredJointData,
+                                      YoVariableRegistry parentRegistry)
    {
       this.name = handle.getName();
       YoVariableRegistry registry = new YoVariableRegistry(name);

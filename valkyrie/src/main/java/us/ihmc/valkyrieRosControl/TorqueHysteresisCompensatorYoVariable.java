@@ -37,15 +37,15 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
    private final YoBoolean enabled;
 
    public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, JointDesiredOutputReadOnly output, YoDouble torqueHysteresisAmplitude,
-         YoDouble jointAccelerationMin, YoDouble jointVelocityMax, YoDouble rampTime, YoDouble yoTime,
-         YoVariableRegistry registry)
+                                                YoDouble jointAccelerationMin, YoDouble jointVelocityMax, YoDouble rampTime, YoDouble yoTime,
+                                                YoVariableRegistry registry)
    {
       this(prefix, joint, output, torqueHysteresisAmplitude, jointAccelerationMin, jointVelocityMax, rampTime, rampTime, yoTime, registry);
    }
 
    public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, JointDesiredOutputReadOnly output, YoDouble torqueHysteresisAmplitude,
-         YoDouble jointAccelerationMin, YoDouble jointVelocityMax, YoDouble rampUpTime, YoDouble rampDownTime,
-         YoDouble yoTime, YoVariableRegistry registry)
+                                                YoDouble jointAccelerationMin, YoDouble jointVelocityMax, YoDouble rampUpTime, YoDouble rampDownTime,
+                                                YoDouble yoTime, YoVariableRegistry registry)
    {
       super(prefix + joint.getName(), registry);
       this.joint = joint;
@@ -137,7 +137,7 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
    {
       double timeInRampUp = yoTime.getDoubleValue() - rampStartTime.getDoubleValue();
       ramp.set(MathTools.clamp(timeInRampUp / rampUpTime.getDoubleValue(), 0.0, 1.0));
-      
+
       double tau_off_hyst = ramp.getDoubleValue() * torqueHysteresisAmplitude.getDoubleValue();
       tau_off_hyst *= hysteresisSign.getDoubleValue();
 
