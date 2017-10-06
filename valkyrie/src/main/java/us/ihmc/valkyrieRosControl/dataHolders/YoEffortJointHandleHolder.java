@@ -59,7 +59,7 @@ public class YoEffortJointHandleHolder
    {
       return joint;
    }
-   
+
    public JointDesiredOutput getDesiredJointData()
    {
       return desiredJointData;
