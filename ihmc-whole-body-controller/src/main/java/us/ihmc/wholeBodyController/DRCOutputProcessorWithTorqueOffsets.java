@@ -5,7 +5,7 @@ import java.util.HashMap;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.tools.lists.PairList;
@@ -23,7 +23,7 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
 
    private final YoBoolean resetTorqueOffsets = new YoBoolean("resetTorqueOffsets", registry);
 
-   private PairList<LowLevelJointData, YoDouble> torqueOffsetList;
+   private PairList<JointDesiredOutput, YoDouble> torqueOffsetList;
    private HashMap<OneDoFJoint, YoDouble> torqueOffsetMap;
 
    private final double updateDT;
@@ -52,10 +52,10 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
    {
       for (int i = 0; i < torqueOffsetList.size(); i++)
       {
-         LowLevelJointData jointData = torqueOffsetList.first(i);
+         JointDesiredOutput jointData = torqueOffsetList.first(i);
          YoDouble torqueOffsetVariable = torqueOffsetList.second(i);
-         
-         
+
+
          double desiredAcceleration = jointData.getDesiredAcceleration();
 
          if (resetTorqueOffsets.getBooleanValue())
@@ -87,9 +87,9 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
       torqueOffsetList = new PairList<>();
       torqueOffsetMap = new HashMap<>();
 
-      for (int i = 0; i < lowLevelControllerCoreOutput.getNumberOfJointsWithLowLevelData(); i++)
+      for (int i = 0; i < lowLevelControllerCoreOutput.getNumberOfJointsWithDesiredOutput(); i++)
       {
-         LowLevelJointData jointData = lowLevelControllerCoreOutput.getLowLevelJointData(i);
+         JointDesiredOutput jointData = lowLevelControllerCoreOutput.getJointDesiredOutput(i);
          final YoDouble torqueOffset = new YoDouble("tauOffset_" + lowLevelControllerCoreOutput.getJointName(i), registry);
 
          torqueOffsetList.add(jointData, torqueOffset);

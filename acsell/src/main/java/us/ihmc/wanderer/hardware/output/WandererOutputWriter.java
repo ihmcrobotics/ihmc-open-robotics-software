@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -47,7 +47,7 @@ public class WandererOutputWriter implements DRCOutputProcessor, ControllerState
    private final WandererCommand command = new WandererCommand(registry);
 
    private EnumMap<WandererJoint, OneDoFJoint> wholeBodyControlStates;
-   private EnumMap<WandererJoint, LowLevelJointData> wholeBodyControlJoints;
+   private EnumMap<WandererJoint, JointDesiredOutput> wholeBodyControlJoints;
    private EnumMap<WandererJoint, YoDouble> tauControllerOutput;
    private final EnumMap<WandererJoint, OneDoFJoint> standPrepJoints;
    private final WandererStandPrep standPrep = new WandererStandPrep();
@@ -225,7 +225,7 @@ public class WandererOutputWriter implements DRCOutputProcessor, ControllerState
          for (WandererJoint joint : WandererJoint.values)
          {
             OneDoFJoint wholeBodyControlState = wholeBodyControlStates.get(joint);
-            LowLevelJointData wholeBodyControlJoint = wholeBodyControlJoints.get(joint);
+            JointDesiredOutput wholeBodyControlJoint = wholeBodyControlJoints.get(joint);
             OneDoFJoint standPrepJoint = standPrepJoints.get(joint);
             RawJointSensorDataHolder rawSensorData = rawJointSensorDataHolderMap.get(wholeBodyControlJoint);
 
@@ -237,7 +237,7 @@ public class WandererOutputWriter implements DRCOutputProcessor, ControllerState
             double desiredQddFeedForwardTorque = desiredQddFeedForwardGain.get(joint).getDoubleValue()*desiredAcceleration;
             yoTauInertiaViz.get(joint).set(motorInertiaTorque);
 
-            double kd = (wholeBodyControlJoint.getKd()+masterMotorDamping.getDoubleValue()*yoMotorDamping.get(joint).getDoubleValue()) * controlRatio + standPrepJoint.getKd() * (1.0 - controlRatio);
+            double kd = (wholeBodyControlJoint.getDamping()+masterMotorDamping.getDoubleValue()*yoMotorDamping.get(joint).getDoubleValue()) * controlRatio + standPrepJoint.getKd() * (1.0 - controlRatio);
             double tau = (wholeBodyControlJoint.getDesiredTorque()+ motorInertiaTorque+desiredQddFeedForwardTorque) * controlRatio + standPrepJoint.getTau() * (1.0 - controlRatio);
 
             AcsellJointCommand jointCommand = command.getAcsellJointCommand(joint);
