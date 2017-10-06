@@ -46,6 +46,8 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    private static final int TRUE = 1;
    private static final int FALSE = 0;
 
+   private boolean requireInequalityConstraintsSatisfied = false;
+
    private static final int defaultSize = 100;
    private static final double epsilon = 1.0e-24;
 
@@ -103,11 +105,15 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    private int inequalityConstraintIndexForPartialStep;
 
    private int maxNumberOfIterations = 100;
-   private double convergenceThreshold = Double.MIN_VALUE;
+   private double convergenceThreshold = 1.0e-14;
 
    private final DenseMatrix64F computedObjectiveFunctionValue = new DenseMatrix64F(1, 1);
 
 
+   public void setRequireInequalityConstraintsSatisfied(boolean requireInequalityConstraintsSatisfied)
+   {
+      this.requireInequalityConstraintsSatisfied = requireInequalityConstraintsSatisfied;
+   }
 
    @Override
    public void setConvergenceThreshold(double convergenceThreshold)
@@ -451,7 +457,8 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       inequalityConstraintIndexForPartialStep = 0;
 
       int numberOfIterations = 0;
-      double fullStepLength;
+      double fullStepLength = 0.0;
+      boolean isValid = true;
       //while (numberOfIterations < maxNumberOfIterations)
       while (true)
       {
@@ -482,9 +489,25 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
             }
             if (biggestConstraintViolation >= 0.0)
             {
+               isValid = true;
+               if (requireInequalityConstraintsSatisfied)
+               {
+                  // modification that states that if the only possible solution violates the inequality constraints, then there is no solution.
+                  for (int row = 0; row < infeasibilityMultiplier.numRows; row++)
+                  {
+                     if (infeasibilityMultiplier.get(row) < 0)
+                     {
+                        isValid = false;
+                        break;
+                     }
+                  }
+                  if (!isValid)
+                     break;
+               }
+
                // we don't have any violations, so the current solution is valid
-               partitionLagrangeMultipliers(lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack, lagrangeLowerBoundMultipliersToPack,
-                                            lagrangeUpperBoundMultipliersToPack);
+               partitionLagrangeMultipliers(lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
+                                            lagrangeLowerBoundMultipliersToPack, lagrangeUpperBoundMultipliersToPack);
                return numberOfIterations;
             }
 
@@ -520,6 +543,9 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
          default:
             throw new RuntimeException("This is an empty state.");
          }
+
+         if (!isValid)
+            break;
 
          // Step 2c: determine new S-pair and take step:
          if (!Double.isFinite(stepLength))
@@ -906,8 +932,10 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       int numberOfUpperBounds = upperBoundsDVector.getNumRows();
       int numberOfConstraints = numberOfEqualityConstraints + numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds;
 
+      totalNumberOfInequalityConstraints = numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds;
+
       R.reshape(problemSize, problemSize);
-      inequalityConstraintViolations.reshape(numberOfConstraints, 1);
+      inequalityConstraintViolations.reshape(totalNumberOfInequalityConstraints, 1);
       stepDirectionInPrimalSpace.reshape(problemSize, 1);
       infeasibilityMultiplier.reshape(numberOfConstraints, 1);
       d.reshape(problemSize, 1);
@@ -937,8 +965,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       // add upper bounds to total inequality constraint
       MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsCMatrix, 0, numberOfInequalityConstraints + numberOfLowerBounds, upperBoundsCMatrix, 0, 0, problemSize, numberOfUpperBounds, 1.0);
       MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsDVector, numberOfInequalityConstraints + numberOfLowerBounds, 0, upperBoundsDVector, 0, 0, numberOfUpperBounds, 1, 1.0);
-
-      totalNumberOfInequalityConstraints = numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds;
    }
 
    // TODO make this more efficient
