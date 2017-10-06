@@ -1,4 +1,4 @@
-package us.ihmc.humanoidRobotics.communication.packets;
+package us.ihmc.communication.packets;
 
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 
