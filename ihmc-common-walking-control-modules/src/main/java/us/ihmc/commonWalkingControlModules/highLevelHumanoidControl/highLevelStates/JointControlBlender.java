@@ -15,6 +15,7 @@ public class JointControlBlender
 
    private final YoDouble tauScale;
    private final DeltaLimitedYoVariable positionStepSizeLimiter;
+   private final DeltaLimitedYoVariable velocityStepSizeLimiter;
 
    private final OneDoFJoint oneDoFJoint;
 
@@ -26,6 +27,7 @@ public class JointControlBlender
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + nameSuffix + "JointControlBlender");
 
       this.positionStepSizeLimiter = new DeltaLimitedYoVariable(namePrefix + "PositionStepSizeLimiter", registry, 0.15);
+      this.velocityStepSizeLimiter = new DeltaLimitedYoVariable(namePrefix + "VelocityStepSizeLimiter", registry, 1.5);
 
       if (ENABLE_TAU_SCALE)
       {
@@ -43,7 +45,9 @@ public class JointControlBlender
    public void initialize()
    {
       double q = oneDoFJoint.getQ();
+      double qd = oneDoFJoint.getQd();
       positionStepSizeLimiter.updateOutput(q, q);
+      velocityStepSizeLimiter.updateOutput(qd, qd);
    }
 
    public void computeAndUpdateJointControl(LowLevelJointData outputDataToPack, LowLevelJointDataReadOnly positionControllerDesireds,
@@ -73,10 +77,12 @@ public class JointControlBlender
       double controlTorque = positionControlTau + walkingControlTau;
 
       double currentJointAngle = oneDoFJoint.getQ();
+      double currentJointVelocity = oneDoFJoint.getQd();
       positionStepSizeLimiter.updateOutput(currentJointAngle, desiredPosition);
+      velocityStepSizeLimiter.updateOutput(currentJointVelocity, desiredVelocity);
 
       outputDataToPack.setDesiredPosition(positionStepSizeLimiter.getDoubleValue());
-      outputDataToPack.setDesiredVelocity(desiredVelocity);
+      outputDataToPack.setDesiredVelocity(velocityStepSizeLimiter.getDoubleValue());
       outputDataToPack.setDesiredAcceleration(desiredAcceleration);
       outputDataToPack.setDesiredTorque(controlTorque);
    }
