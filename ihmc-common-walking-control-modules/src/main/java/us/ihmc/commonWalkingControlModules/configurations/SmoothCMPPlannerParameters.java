@@ -186,7 +186,7 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
     */
    public double getSwingDurationShiftFraction()
    {
-      return 0.99;
+      return 0.90;
    }
 
    @Override
