@@ -1,0 +1,65 @@
+buildscript {
+   repositories {
+      maven { url "https://plugins.gradle.org/m2/" }
+      mavenLocal()
+   }
+   dependencies {
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.5"
+   }
+}
+apply plugin: "us.ihmc.ihmc-build"
+
+ihmc {
+   loadProductProperties("../product.properties")
+   
+   configureDependencyResolution()
+      
+   configurePublications()
+}
+
+testSuites {
+   def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
+   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
+}
+
+mainDependencies {
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
+   compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
+   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+   compile group: 'com.google.guava', name: 'guava', version: '18.0'
+   compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.8'
+   compile group: 'org.ejml', name: 'dense64', version: '0.30'
+   compile group: 'org.ejml', name: 'core', version: '0.30'
+   compile group: 'us.ihmc', name: 'IHMCNativeLibraryLoader', version: '1.0'
+   compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0'
+   compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
+   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
+   compile group: "us.ihmc", name: "ihmc-robot-models", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-sensor-processing", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
+}
+
+testDependencies {
+   compile group: 'junit', name: 'junit', version: '4.11'
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.16.8"
+   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
+   compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "simulation-construction-set-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter-test", version: groupDependencyVersion
+}
+
+visualizersDependencies {
+   compile rootProject
+   compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
+}
