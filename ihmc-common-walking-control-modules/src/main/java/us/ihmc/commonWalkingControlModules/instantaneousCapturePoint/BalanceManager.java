@@ -19,7 +19,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.SmoothCMPBasedICPPlanner;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
