@@ -47,7 +47,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    private static final int FALSE = 0;
 
    private static final int defaultSize = 100;
-   private static final double epsilon = 1.0e-7;
+   private static final double epsilon = 1.0e-24;
 
    private final DenseMatrix64F R = new DenseMatrix64F(0, 0);
 
@@ -92,6 +92,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
 
    private int problemSize;
    private int numberOfInequalityConstraints;
+   private int totalNumberOfInequalityConstraints;
    private int numberOfEqualityConstraints;
    private int numberOfLowerBounds;
    private int numberOfUpperBounds;
@@ -126,6 +127,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       problemSize = 0;
       numberOfEqualityConstraints = 0;
       numberOfInequalityConstraints = 0;
+      totalNumberOfInequalityConstraints = 0;
       numberOfLowerBounds = 0;
       numberOfUpperBounds = 0;
 
@@ -152,6 +154,8 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       if (variableLowerBounds != null)
       {
          numberOfLowerBounds = variableLowerBounds.getNumRows();
+         if (numberOfLowerBounds != quadraticCostQMatrix.getNumRows())
+            throw new RuntimeException("variableLowerBounds.getNumRows() != quadraticCostQMatrix.getNumRows()");
 
          lowerBoundsCMatrix.reshape(numberOfLowerBounds, numberOfLowerBounds);
          CommonOps.setIdentity(lowerBoundsCMatrix);
@@ -167,6 +171,8 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       if (variableUpperBounds != null)
       {
          numberOfUpperBounds = variableUpperBounds.getNumRows();
+         if (numberOfUpperBounds != quadraticCostQMatrix.getNumRows())
+            throw new RuntimeException("variableUpperBounds.getNumRows() != quadraticCostQMatrix.getNumRows()");
 
          upperBoundsCMatrix.reshape(numberOfUpperBounds, numberOfUpperBounds);
          CommonOps.setIdentity(upperBoundsCMatrix);
@@ -206,7 +212,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    @Override
    public void setLinearEqualityConstraints(DenseMatrix64F linearEqualityConstraintsAMatrix, DenseMatrix64F linearEqualityConstraintsBVector)
    {
-      numberOfEqualityConstraints = linearEqualityConstraintsAMatrix.getNumRows();
+      numberOfEqualityConstraints = linearEqualityConstraintsBVector.getNumRows();
 
       if (linearEqualityConstraintsBVector.getNumCols() != 1)
          throw new RuntimeException("linearEqualityConstraintsBVector.getNumCols() != 1");
@@ -226,7 +232,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    @Override
    public void setLinearInequalityConstraints(DenseMatrix64F linearInequalityConstraintCMatrix, DenseMatrix64F linearInequalityConstraintDVector)
    {
-      numberOfInequalityConstraints = linearInequalityConstraintCMatrix.getNumRows();
+      numberOfInequalityConstraints = linearInequalityConstraintDVector.getNumRows();
 
       if (linearInequalityConstraintDVector.getNumCols() != 1)
          throw new RuntimeException("linearInequalityConstraintDVector.getNumCols() != 1");
@@ -244,23 +250,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    }
 
    @Override
-   public int solve(double[] solutionToPack)
-   {
-      if (solutionToPack.length != problemSize)
-         throw new RuntimeException("solutionToPack.length != numberOfVariables");
-
-      DenseMatrix64F solution = new DenseMatrix64F(problemSize, 1);
-      int numberOfIterations = solve(solution);
-
-      for (int i = 0; i < problemSize; i++)
-      {
-         solutionToPack[i] = solution.get(i);
-      }
-
-      return numberOfIterations;
-   }
-
-   @Override
    public void setUseWarmStart(boolean useWarmStart)
    {
       // TODO
@@ -274,18 +263,86 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    }
 
    @Override
-   public int solve(double[] solutionToPack, double[] lagrangeEqualityConstraintMultipliersToPack, double[] lagrangeInequalityConstraintMultipliersToPack,
-         double[] lagrangeLowerBoundMultipliersToPack, double[] lagrangeUpperBoundMultipliersToPack)
+   public int solve(double[] solutionToPack)
    {
-      //FIXME todo
-      return 0;
+      double[] lagrangeEqualityConstraintMultipliersToPack = new double[numberOfEqualityConstraints];
+      double[] lagrangeInequalityConstraintMultipliersToPack = new double[numberOfInequalityConstraints];
+
+      return solve(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack);
    }
 
    @Override
    public int solve(double[] solutionToPack, double[] lagrangeEqualityConstraintMultipliersToPack, double[] lagrangeInequalityConstraintMultipliersToPack)
    {
-      //FIXME todo
-      return 0;
+      double[] lagrangeLowerBoundsConstraintMultipliersToPack = new double[numberOfLowerBounds];
+      double[] lagrangeUpperBoundsConstraintMultipliersToPack = new double[numberOfUpperBounds];
+
+      return solve(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
+                   lagrangeLowerBoundsConstraintMultipliersToPack, lagrangeUpperBoundsConstraintMultipliersToPack);
+   }
+
+
+   @Override
+   public int solve(double[] solutionToPack, double[] lagrangeEqualityConstraintMultipliersToPack, double[] lagrangeInequalityConstraintMultipliersToPack,
+         double[] lagrangeLowerBoundMultipliersToPack, double[] lagrangeUpperBoundMultipliersToPack)
+   {
+      int numberOfVariables = quadraticCostQMatrix.getNumCols();
+
+      if (solutionToPack.length != numberOfVariables)
+         throw new RuntimeException("solutionToPack.length != numberOfVariables");
+      if (lagrangeEqualityConstraintMultipliersToPack.length != numberOfEqualityConstraints)
+         throw new RuntimeException("lagrangeEqualityConstraintMultipliersToPack.length != numberOfEqualityConstraints");
+      if (lagrangeInequalityConstraintMultipliersToPack.length != numberOfInequalityConstraints)
+         throw new RuntimeException("lagrangeInequalityConstraintMultipliersToPack.length != numberOfInequalityConstraints");
+
+      if (lagrangeLowerBoundMultipliersToPack.length != numberOfLowerBounds)
+         throw new RuntimeException("lagrangeLowerBoundsConstraintMultipliersToPack.length != numberOfLowerBoundConstraints. numberOfLowerBoundConstraints = "
+                                          + numberOfLowerBounds);
+      if (lagrangeUpperBoundMultipliersToPack.length != numberOfUpperBounds)
+         throw new RuntimeException("lagrangeUpperBoundsConstraintMultipliersToPack.length != numberOfUpperBoundConstraints");
+
+      DenseMatrix64F solution = new DenseMatrix64F(numberOfVariables, 1);
+      DenseMatrix64F lagrangeEqualityConstraintMultipliers = new DenseMatrix64F(numberOfEqualityConstraints, 1);
+      DenseMatrix64F lagrangeInequalityConstraintMultipliers = new DenseMatrix64F(numberOfInequalityConstraints, 1);
+      DenseMatrix64F lagrangeLowerBoundConstraintMultipliers = new DenseMatrix64F(numberOfLowerBounds, 1);
+      DenseMatrix64F lagrangeUpperBoundConstraintMultipliers = new DenseMatrix64F(numberOfUpperBounds, 1);
+
+      int numberOfIterations = solve(solution, lagrangeEqualityConstraintMultipliers, lagrangeInequalityConstraintMultipliers,
+                                     lagrangeLowerBoundConstraintMultipliers, lagrangeUpperBoundConstraintMultipliers);
+
+      double[] solutionData = solution.getData();
+
+      for (int i = 0; i < numberOfVariables; i++)
+      {
+         solutionToPack[i] = solutionData[i];
+      }
+
+      double[] lagrangeEqualityConstraintMultipliersData = lagrangeEqualityConstraintMultipliers.getData();
+      double[] lagrangeInequalityConstraintMultipliersData = lagrangeInequalityConstraintMultipliers.getData();
+      double[] lagrangeLowerBoundMultipliersData = lagrangeLowerBoundConstraintMultipliers.getData();
+      double[] lagrangeUpperBoundMultipliersData = lagrangeUpperBoundConstraintMultipliers.getData();
+
+      for (int i = 0; i < numberOfEqualityConstraints; i++)
+      {
+         lagrangeEqualityConstraintMultipliersToPack[i] = lagrangeEqualityConstraintMultipliersData[i];
+      }
+
+      for (int i = 0; i < numberOfInequalityConstraints; i++)
+      {
+         lagrangeInequalityConstraintMultipliersToPack[i] = lagrangeInequalityConstraintMultipliersData[i];
+      }
+
+      for (int i = 0; i < numberOfLowerBounds; i++)
+      {
+         lagrangeLowerBoundMultipliersToPack[i] = lagrangeLowerBoundMultipliersData[i];
+      }
+
+      for (int i = 0; i < numberOfUpperBounds; i++)
+      {
+         lagrangeUpperBoundMultipliersToPack[i] = lagrangeUpperBoundMultipliersData[i];
+      }
+
+      return numberOfIterations;
    }
 
    private final DenseMatrix64F lagrangeEqualityConstraintMultipliersToThrowAway = new DenseMatrix64F(0, 0);
@@ -388,19 +445,19 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       }
 
       // set iai = K \ A
-      for (int inequalityConstraintIndex = 0; inequalityConstraintIndex < numberOfInequalityConstraints; inequalityConstraintIndex++)
+      for (int inequalityConstraintIndex = 0; inequalityConstraintIndex < totalNumberOfInequalityConstraints; inequalityConstraintIndex++)
          inactiveInequalitySetIndices.set(inequalityConstraintIndex, inequalityConstraintIndex);
 
       inequalityConstraintIndexForPartialStep = 0;
 
-      int numberOfIterations = -1;
+      int numberOfIterations = 0;
       double fullStepLength;
-      while (numberOfIterations < maxNumberOfIterations)
+      //while (numberOfIterations < maxNumberOfIterations)
+      while (true)
       {
          switch(currentStep)
          {
          case COMPUTE_CONSTRAINT_VIOLATIONS:
-            numberOfIterations++;
 
             if (computeConstraintViolations(solutionToPack, c1, c2))
             { // numerically there are not infeasibilities anymore
@@ -414,7 +471,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
             // Step 2: check for feasibility and determine a new S-pair
             double biggestConstraintViolation = 0.0;
             mostViolatedConstraintIndex = 0;
-            for (int inequalityConstraintIndex = 0; inequalityConstraintIndex < numberOfInequalityConstraints; inequalityConstraintIndex++)
+            for (int inequalityConstraintIndex = 0; inequalityConstraintIndex < totalNumberOfInequalityConstraints; inequalityConstraintIndex++)
             { // select the constraint from the inactive set that is most violated
                if (inequalityConstraintViolations.get(inequalityConstraintIndex) < biggestConstraintViolation &&
                      inactiveInequalitySetIndices.get(inequalityConstraintIndex) != -1 && excludeInequalityConstraintFromActiveSet.get(inequalityConstraintIndex) == TRUE)
@@ -468,24 +525,36 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
          if (!Double.isFinite(stepLength))
          { // case (i): no step in primal or dual space, QP is infeasible
             CommonOps.fill(solutionToPack, Double.NaN);
-            partitionLagrangeMultipliers(lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack, lagrangeLowerBoundMultipliersToPack,
-                                         lagrangeUpperBoundMultipliersToPack);
+            CommonOps.fill(lagrangeEqualityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
+            CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
+            CommonOps.fill(lagrangeLowerBoundMultipliersToPack, Double.POSITIVE_INFINITY);
+            CommonOps.fill(lagrangeUpperBoundMultipliersToPack, Double.POSITIVE_INFINITY);
             return numberOfIterations;
          }
          else if (!Double.isFinite(fullStepLength))
          { // case (ii): step in dual space
+            numberOfIterations++;
+
+            if (numberOfIterations > maxNumberOfIterations)
+               break;
             currentStep = takeStepInDualSpace(stepLength);
          }
          else
          { // case (iii): step in primal and dual space.
+            numberOfIterations++;
+
+            if (numberOfIterations > maxNumberOfIterations)
+               break;
             currentStep = takeStepInPrimalAndDualSpace(solutionToPack, stepLength, fullStepLength, mostViolatedConstraintIndex);
          }
       }
 
       CommonOps.fill(solutionToPack, Double.NaN);
-      partitionLagrangeMultipliers(lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack, lagrangeLowerBoundMultipliersToPack,
-                                   lagrangeUpperBoundMultipliersToPack);
-      return numberOfIterations;
+      CommonOps.fill(lagrangeEqualityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
+      CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
+      CommonOps.fill(lagrangeLowerBoundMultipliersToPack, Double.POSITIVE_INFINITY);
+      CommonOps.fill(lagrangeUpperBoundMultipliersToPack, Double.POSITIVE_INFINITY);
+      return numberOfIterations - 1;
    }
 
 
@@ -535,7 +604,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
 
       // compute s(x) = ci^T * x + ci0 for all elements of K \ A
       double totalInequalityViolation = 0.0; // this value will contain the sum of all infeasibilities
-      for (int inequalityConstraintIndex = 0; inequalityConstraintIndex < numberOfInequalityConstraints; inequalityConstraintIndex++)
+      for (int inequalityConstraintIndex = 0; inequalityConstraintIndex < totalNumberOfInequalityConstraints; inequalityConstraintIndex++)
       {
          excludeInequalityConstraintFromActiveSet.set(inequalityConstraintIndex, TRUE);
          double constraintValue = 0.0;
@@ -546,7 +615,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
          totalInequalityViolation += Math.min(0.0, constraintValue);
       }
 
-      if (Math.abs(totalInequalityViolation) < numberOfInequalityConstraints * convergenceThreshold * c1 * c2 * 100.0)
+      if (Math.abs(totalInequalityViolation) < totalNumberOfInequalityConstraints * convergenceThreshold * c1 * c2 * 100.0)
       { // numerically there are not infeasibilities anymore
          return true;
       }
@@ -595,7 +664,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    {
       double fullStepLength = Double.POSITIVE_INFINITY;
       // Compute full step length (minimum step in primal space such that the violated constraint becomes feasible
-      if (Math.abs(CommonOps.dot(stepDirectionInPrimalSpace, stepDirectionInPrimalSpace)) > epsilon)
       {
          fullStepLength = -inequalityConstraintViolations.get(violatedConstraintIndex) / CommonOps.dot(stepDirectionInPrimalSpace, violatedConstraintNormal);
          if (fullStepLength < 0.0) // patch suggested by Takano Akio for handling numerical inconsistencies
@@ -636,7 +704,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
             excludeInequalityConstraintFromActiveSet.set(mostViolatedConstraintIndex, FALSE);
             deleteConstraint(J);
 
-            for (int i = 0; i < numberOfInequalityConstraints; i++)
+            for (int i = 0; i < totalNumberOfInequalityConstraints; i++)
                inactiveInequalitySetIndices.set(i, i);
 
             for (int i = 0; i < numberOfActiveInequalityConstraints; i++)
@@ -870,33 +938,33 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsCMatrix, 0, numberOfInequalityConstraints + numberOfLowerBounds, upperBoundsCMatrix, 0, 0, problemSize, numberOfUpperBounds, 1.0);
       MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsDVector, numberOfInequalityConstraints + numberOfLowerBounds, 0, upperBoundsDVector, 0, 0, numberOfUpperBounds, 1, 1.0);
 
-      this.numberOfInequalityConstraints = numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds;
+      totalNumberOfInequalityConstraints = numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds;
    }
 
+   // TODO make this more efficient
    private void partitionLagrangeMultipliers(DenseMatrix64F lagrangeEqualityConstraintMultipliersToPack,
          DenseMatrix64F lagrangeInequalityConstraintMultipliersToPack, DenseMatrix64F lagrangeLowerBoundMultipliersToPack,
          DenseMatrix64F lagrangeUpperBoundMultipliersToPack)
    {
       MatrixTools.setMatrixBlock(lagrangeEqualityConstraintMultipliersToPack, 0, 0, lagrangeMultipliers, 0, 0, numberOfEqualityConstraints, 1, 1.0);
 
-      int numberOfInequalityConstraints = linearInequalityConstraintsDVector.getNumRows();
       for (int inequalityConstraintNumber = 0; inequalityConstraintNumber < numberOfActiveInequalityConstraints; inequalityConstraintNumber++)
       {
          int inequalityConstraintIndex = inequalityActiveSetIndices.get(inequalityConstraintNumber);
 
          if (inequalityConstraintIndex < numberOfInequalityConstraints)
          { // add to the inequality constraint lagrange multipliers
-            lagrangeInequalityConstraintMultipliersToPack.set(inequalityConstraintIndex, 0, lagrangeMultipliers.get(inequalityConstraintIndex));
+            lagrangeInequalityConstraintMultipliersToPack.set(inequalityConstraintIndex, 0, lagrangeMultipliers.get(numberOfEqualityConstraints + inequalityConstraintNumber));
          }
          else if (inequalityConstraintIndex < numberOfInequalityConstraints + numberOfLowerBounds)
          { // add to the lower bound lagrange multipliers
             int localIndex = inequalityConstraintIndex - numberOfInequalityConstraints;
-            lagrangeLowerBoundMultipliersToPack.set(localIndex, 0, lagrangeMultipliers.get(inequalityConstraintIndex));
+            lagrangeLowerBoundMultipliersToPack.set(localIndex, 0, lagrangeMultipliers.get(numberOfEqualityConstraints + inequalityConstraintNumber));
          }
          else
          { // add to the upper bound lagrange multipliers
             int localIndex = inequalityConstraintIndex - numberOfInequalityConstraints - numberOfLowerBounds;
-            lagrangeUpperBoundMultipliersToPack.set(localIndex, 0, lagrangeMultipliers.get(inequalityConstraintIndex));
+            lagrangeUpperBoundMultipliersToPack.set(localIndex, 0, lagrangeMultipliers.get(numberOfEqualityConstraints + inequalityConstraintNumber));
          }
       }
    }
