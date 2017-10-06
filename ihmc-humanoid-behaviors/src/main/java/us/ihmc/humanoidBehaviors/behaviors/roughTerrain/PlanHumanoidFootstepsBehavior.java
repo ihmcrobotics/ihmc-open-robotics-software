@@ -18,9 +18,12 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.footstepPlanning.aStar.implementations.SimpleGridResolutionBasedExpansion;
-import us.ihmc.footstepPlanning.aStar.implementations.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlanarRegionBipedalFootstepPlannerVisualizer;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.*;
+import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -59,7 +62,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
    private final YoEnum<RobotSide> nextSideToSwing;
 
-   private final PlanarRegionBipedalFootstepPlanner footstepPlanner;
+   private final DepthFirstFootstepPlanner footstepPlanner;
    private FootstepPlan plan = null;
 
    private final YoFramePose footstepPlannerInitialStepPose;
@@ -102,7 +105,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       requestedPlanarRegion.set(false);
    }
 
-   private PlanarRegionBipedalFootstepPlanner createFootstepPlanner()
+   private DepthFirstFootstepPlanner createFootstepPlanner()
    {
       BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registry);
 
@@ -132,9 +135,9 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = createDefaultFootPolygons();
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygonsInSoleFrame);
-      BipedalFootstepPlannerNodeChecker nodeChecker = new BipedalFootstepPlannerNodeChecker(parameters, null);
+      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(parameters, null);
       ConstantFootstepCost footstepCost = new ConstantFootstepCost(1.0);
-      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(parameters, snapper, nodeChecker, footstepCost, registry);
+      DepthFirstFootstepPlanner planner = new DepthFirstFootstepPlanner(parameters, snapper, nodeChecker, footstepCost, registry);
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
       planner.setMaximumNumberOfNodesToExpand(500);

@@ -4,11 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.aStar.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeUtils;
-import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 
 public class FootstepPlanningUtils
 {
