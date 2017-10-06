@@ -146,7 +146,7 @@ if (ihmc.isBuildRoot())
       }
    }
 
-   task deploy(dependsOn: ['jar']) {
+   task deploy(dependsOn: jar) {
       def projectDir = project.buildscript.sourceFile.parent
       def directory = 'valkyrie'
 
@@ -168,14 +168,14 @@ if (ihmc.isBuildRoot())
                execute("mkdir -p " + directory + "/Configurations")
 
                configurations.runtime.each {
-                  put it, directory + '/lib'
+                  put from: it, into: directory + '/lib'
                }
 
-               put jar.archivePath, directory + '/ValkyrieController.jar'
+               put from: jar.archivePath.path, into: directory + '/ValkyrieController.jar'
 
                def scriptDir = new File(projectDir, "launchScripts/")
                def scriptDirCollection = files { scriptDir.listFiles() }
-               put scriptDirCollection, directory
+               put from: scriptDirCollection, into: directory
 
                scriptDirCollection.each {
                   execute 'chmod 777 ' + directory + '/' + it.name
@@ -188,14 +188,14 @@ if (ihmc.isBuildRoot())
                execute("mkdir -p " + directory + "/Configurations")
 
                configurations.runtime.each {
-                  put it, directory + '/lib'
+                  put from: it, into: directory + '/lib'
                }
 
-               put jar.archivePath, directory + '/ValkyrieController.jar'
+               put from: jar.archivePath, into: directory + '/ValkyrieController.jar'
 
                def scriptDir = new File(projectDir, "launchScripts/")
                def scriptDirCollection = files { scriptDir.listFiles() }
-               put scriptDirCollection, directory
+               put from: scriptDirCollection, into: directory
 
                scriptDirCollection.each {
                   execute 'chmod 777 ' + directory + '/' + it.name
