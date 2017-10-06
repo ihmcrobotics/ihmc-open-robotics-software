@@ -2,7 +2,7 @@
 <GraphGroup>
 	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuAngularVelocityBiasX</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuAngularVelocityBiasX</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -14,7 +14,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuAngularVelocityBiasY</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuAngularVelocityBiasY</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -26,7 +26,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuAngularVelocityBiasZ</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuAngularVelocityBiasZ</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -38,7 +38,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuAngularVelocityBiasX</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuAngularVelocityBiasX</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -50,7 +50,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuAngularVelocityBiasY</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuAngularVelocityBiasY</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -62,7 +62,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuAngularVelocityBiasZ</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuAngularVelocityBiasZ</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -74,7 +74,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuLinearAccelerationBiasX</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuLinearAccelerationBiasX</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -86,7 +86,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuLinearAccelerationBiasY</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuLinearAccelerationBiasY</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -98,7 +98,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuLinearAccelerationBiasZ</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuLinearAccelerationBiasZ</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -110,7 +110,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuLinearAccelerationBiasX</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuLinearAccelerationBiasX</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -122,7 +122,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuLinearAccelerationBiasY</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuLinearAccelerationBiasY</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -134,7 +134,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuLinearAccelerationBiasZ</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuLinearAccelerationBiasZ</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -146,7 +146,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuOrientationBiasMagnitude,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuOrientationBiasMagnitude</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuOrientationBiasMagnitude,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuOrientationBiasMagnitude</Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -158,7 +158,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuYawRateBiasWorld</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuYawRateBiasWorld</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -170,7 +170,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuYawRateBiasWorld</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuYawRateBiasWorld</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -182,7 +182,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.isPelvisrearimuBiasEstimated,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.isLefttorsoimuBiasEstimated</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.isPelvisrearimuBiasEstimated,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.isLefttorsoimuBiasEstimated</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -194,7 +194,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuYawBiasWorld</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedPelvisrearimuYawBiasWorld</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -206,7 +206,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuYawBiasWorld</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.IMUBiasStateEstimator.estimatedLefttorsoimuYawBiasWorld</Variables>
 		<GraphConfiguration>
 			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
