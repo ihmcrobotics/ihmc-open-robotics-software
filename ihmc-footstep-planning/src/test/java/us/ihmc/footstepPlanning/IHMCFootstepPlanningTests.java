@@ -7,6 +7,8 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationSuite;
 import us.ihmc.continuousIntegration.ContinuousIntegrationSuite.ContinuousIntegrationSuiteCategory;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.flatGroundPlanning.FootstepNodeTest;
+import us.ihmc.footstepPlanning.roughTerrainPlanning.DepthFirstFootstepPlannerOnFlatTest;
+import us.ihmc.footstepPlanning.roughTerrainPlanning.DepthFirstFootstepPlannerTest;
 
 /** WARNING: AUTO-GENERATED FILE. DO NOT MAKE MANUAL CHANGES TO THIS FILE. **/
 @RunWith(ContinuousIntegrationSuite.class)
@@ -19,8 +21,8 @@ import us.ihmc.footstepPlanning.flatGroundPlanning.FootstepNodeTest;
    us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionPolygonSnapperTest.class,
    us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapperTest.class,
    us.ihmc.footstepPlanning.polygonWiggling.PolygonWigglingTest.class,
-   us.ihmc.footstepPlanning.roughTerrainPlanning.PlanarRegionBipedalFootstepPlannerOnFlatTest.class,
-   us.ihmc.footstepPlanning.roughTerrainPlanning.PlanarRegionBipedalFootstepPlannerTest.class,
+   DepthFirstFootstepPlannerOnFlatTest.class,
+   DepthFirstFootstepPlannerTest.class,
    us.ihmc.footstepPlanning.roughTerrainPlanning.PlanThenSnapPlannerTest.class,
    us.ihmc.footstepPlanning.scoring.BipedalStepAdjustmentCostCalculatorTest.class
 })
