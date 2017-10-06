@@ -30,9 +30,14 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlannerUtils;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.aStar.AStarFootstepPlanner;
-import us.ihmc.footstepPlanning.aStar.FootstepNodeExpansion;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlanarRegionBipedalFootstepPlannerVisualizer;
+import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.*;
+import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -123,19 +128,19 @@ public class FootstepPlanningToolboxController extends ToolboxController
       isDone.set(true);
    }
 
-   private PlanarRegionBipedalFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FullRobotModel fullRobotModel)
+   private DepthFirstFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FullRobotModel fullRobotModel)
    {
       BipedalFootstepPlannerParameters footstepPlanningParameters = new BipedalFootstepPlannerParameters(registry);
       FootstepPlannerUtils.setPlannerParametersForToolbox(footstepPlanningParameters);
 
-      BipedalFootstepPlannerSnapAndWiggler snapper = new BipedalFootstepPlannerSnapAndWiggler(footstepPlanningParameters);
-      BipedalFootstepPlannerNodeChecker nodeChecker = new BipedalFootstepPlannerNodeChecker(footstepPlanningParameters, null);
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footstepPlanningParameters);
+      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footstepPlanningParameters, null);
       ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
 
       nodeChecker.setFeetPolygons(footPolygonsInSoleFrame);
       snapper.setFootPolygonsInSoleFrame(footPolygonsInSoleFrame);
 
-      PlanarRegionBipedalFootstepPlanner footstepPlanner = new PlanarRegionBipedalFootstepPlanner(footstepPlanningParameters, snapper, nodeChecker, stepCostCalculator, registry);
+      DepthFirstFootstepPlanner footstepPlanner = new DepthFirstFootstepPlanner(footstepPlanningParameters, snapper, nodeChecker, stepCostCalculator, registry);
       footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
       footstepPlanner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       footstepPlanner.setExitAfterInitialSolution(false);
@@ -144,7 +149,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       if (visualize)
       {
          PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithYoVariableServer(0.01, fullRobotModel,
-               logModelProvider, footPolygonsInSoleFrame, "Toolbox_");
+                                                                                                                                                logModelProvider, footPolygonsInSoleFrame, "Toolbox_");
          footstepPlanner.setBipedalFootstepPlannerListener(listener);
       }
 

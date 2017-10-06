@@ -9,7 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.aStar.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeUtils;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
