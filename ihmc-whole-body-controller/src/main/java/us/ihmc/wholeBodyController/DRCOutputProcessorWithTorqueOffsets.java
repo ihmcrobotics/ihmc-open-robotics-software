@@ -55,7 +55,7 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
          JointDesiredOutput jointData = torqueOffsetList.first(i);
          YoDouble torqueOffsetVariable = torqueOffsetList.second(i);
 
-         double desiredAcceleration = jointData.getDesiredAcceleration();
+         double desiredAcceleration = jointData.hasDesiredAcceleration() ? jointData.getDesiredAcceleration() : 0.0;
 
          if (resetTorqueOffsets.getBooleanValue())
             torqueOffsetVariable.set(0.0);
@@ -66,7 +66,8 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
          double alpha = alphaTorqueOffset.getDoubleValue();
          offsetTorque = alpha * (offsetTorque + desiredAcceleration * updateDT) + (1.0 - alpha) * offsetTorque;
          torqueOffsetVariable.set(offsetTorque);
-         jointData.setDesiredTorque(jointData.getDesiredTorque() + offsetTorque + ditherTorque);
+         double desiredTorque = jointData.hasDesiredTorque() ? jointData.getDesiredTorque() : 0.0;
+         jointData.setDesiredTorque(desiredTorque + offsetTorque + ditherTorque);
       }
 
       if (drcOutputWriter != null)
