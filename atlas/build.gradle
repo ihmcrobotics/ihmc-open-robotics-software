@@ -1,0 +1,141 @@
+buildscript {
+   repositories {
+      maven { url "https://plugins.gradle.org/m2/" }
+      mavenLocal()
+   }
+   dependencies {
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.5"
+      classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
+   }
+}
+
+apply plugin: "application"
+apply plugin: "org.hidetake.ssh"
+apply plugin: "us.ihmc.ihmc-build"
+
+applicationName = "IHMCAtlasAPI"
+mainClassName = "us.ihmc.atlas.AtlasROSAPINetworkProcessor"
+applicationDefaultJvmArgs = ["-Xmx4g"]
+
+ihmc {
+   loadProductProperties("../product.properties")
+   
+   configureDependencyResolution()
+   configurePublications()
+}
+
+testSuites {
+   def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
+   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
+}
+
+mainDependencies {
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
+   compile group: 'org.georegression', name: 'georegression', version: '0.11'
+   compile group: 'org.ddogleg', name: 'ddogleg', version: '0.7'
+   compile group: 'org.apache.xmlgraphics', name: 'batik-dom', version: '1.7'
+   compile group: 'org.apache.ant', name: 'ant', version: '1.9.0'
+   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+   compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
+   compile group: 'org.ros.rosjava_core', name: 'rosjava', version: '0.2.1'
+   compile group: 'org.ejml', name: 'core', version: '0.30'
+   compile group: 'org.ejml', name: 'dense64', version: '0.30'
+   compile group: 'org.boofcv', name: 'io', version: '0.24.1'
+   compile group: 'org.boofcv', name: 'ip', version: '0.24.1'
+   compile group: 'org.boofcv', name: 'geo', version: '0.24.1'
+   compile group: 'org.boofcv', name: 'calibration', version: '0.24.1'
+   compile group: 'org.boofcv', name: 'visualize', version: '0.24.1'
+   compile group: 'org.ros.rosjava_bootstrap', name: 'message_generation', version: '0.2.1'
+   compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.20'
+   compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
+   compile group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'
+   compile group: 'org.ros.rosjava_messages', name: 'sensor_msgs', version: '1.11.7'
+   compile group: 'org.ros.rosjava_messages', name: 'multisense_ros', version: '3.4.2'
+   compile group: 'us.ihmc.thirdparty.org.opencv', name: 'opencv', version: '3.2.0-170503'
+   compile 'org.ros.rosjava_messages:geometry_msgs:1.11.9'
+   compile "org.boofcv:recognition:0.24.1"
+   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
+   compile group: "us.ihmc", name: "ihmc-humanoid-behaviors", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-mocap", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-avatar-interfaces", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-perception", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-ros-tools", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "robotiq-hand-drivers", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-model-file-loader", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-sensor-processing", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "simulation-construction-set-tools", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robot-models", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-simulation-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robot-data-visualizer", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-manipulation-planning", version: groupDependencyVersion
+}
+
+testDependencies {
+   compile group: 'junit', name: 'junit', version: '4.11'
+   compile group: 'com.thoughtworks.xstream', name: 'xstream', version: '1.4.7'
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.16.8"
+   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-avatar-interfaces-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-humanoid-robotics-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-sensor-processing-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-simulation-toolkit-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "simulation-construction-set-tools-test", version: groupDependencyVersion
+}
+
+startScripts {
+   outputs.upToDateWhen { false }
+
+   doLast {
+      def simUnixScriptDemo01 = file(outputDir.canonicalPath + "/${applicationName}SimulatorDemo01")
+      simUnixScriptDemo01.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasDemo01ROSAPISimulator")
+      simUnixScriptDemo01.setExecutable(true)
+
+      def simWindowsScriptDemo01 = file(outputDir.canonicalPath + "/${applicationName}SimulatorDemo01.bat")
+      simWindowsScriptDemo01.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasDemo01ROSAPISimulator")
+
+      def simUnixScriptFinals = file(outputDir.canonicalPath + "/${applicationName}SimulatorFinals")
+      simUnixScriptFinals.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasFinalsROSAPISimulator")
+      simUnixScriptFinals.setExecutable(true)
+
+      def simWindowsScriptFinals = file(outputDir.canonicalPath + "/${applicationName}SimulatorFinals.bat")
+      simWindowsScriptFinals.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasFinalsROSAPISimulator")
+
+      def simUnixScriptVisualizer = file(outputDir.canonicalPath + "/IHMCRemoteAtlasVisualizer")
+      simUnixScriptVisualizer.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCRemoteAtlasVisualizer").replace("AtlasROSAPINetworkProcessor", "RemoteAtlasVisualizer")
+      simUnixScriptVisualizer.setExecutable(true)
+
+      def simWindowsScriptVisualizer = file(outputDir.canonicalPath + "/IHMCRemoteAtlasVisualizer.bat")
+      simWindowsScriptVisualizer.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCRemoteAtlasVisualizer").replace("AtlasROSAPINetworkProcessor", "RemoteAtlasVisualizer")
+
+      def simUnixScriptLogger = file(outputDir.canonicalPath + "/IHMCLogger")
+      simUnixScriptLogger.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCLogger").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.robotDataLogger.logger.YoVariableLoggerDispatcher")
+      simUnixScriptLogger.setExecutable(true)
+
+      def simWindowsScriptLogger = file(outputDir.canonicalPath + "/IHMCLogger.bat")
+      simWindowsScriptLogger.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCLogger").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.robotDataLogger.logger.YoVariableLoggerDispatcher")
+
+      def simUnixScriptGazebo = file(outputDir.canonicalPath + "/IHMCAtlasGazeboController")
+      simUnixScriptGazebo.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCAtlasGazeboController").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.atlas.gazebo.AtlasGazeboControllerFactory")
+      simUnixScriptGazebo.setExecutable(true)
+   }
+}
+
+applicationDistribution.from(startScripts.outputDir) {
+   into "bin"
+}

@@ -1,0 +1,28 @@
+
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>valkyrie.qd_torsoPitch,root.main.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.fd_qd_torsoPitch_sp0,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.JointStateUpdater.qd_torsoPitch_IMUBased</Variables>
+		<GraphConfiguration>
+			<Name>config1</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>valkyrie.qd_torsoRoll,root.main.DRCEstimatorThread.ValkyrieRosControlSensorReader.SensorProcessing.fd_qd_torsoRoll_sp0,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.JointStateUpdater.qd_torsoRoll_IMUBased</Variables>
+		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>

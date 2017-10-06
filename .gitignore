@@ -6,6 +6,7 @@
 /target
 /pit-reports
 /install
+/src/*/bin
 
 # Top level directories in sub-projects
 */classes
@@ -15,6 +16,9 @@
 */build
 */pit-reports
 */install
+*/src/*/bin
+*/src/*/build
+*/src/*/out
 
 # directories to always ignore
 **/.gradle
@@ -37,6 +41,7 @@
 **/.LSOverride
 **/.AppleDouble
 **/pitest
+**/generated-src2
 
 
 # File types to ignore
