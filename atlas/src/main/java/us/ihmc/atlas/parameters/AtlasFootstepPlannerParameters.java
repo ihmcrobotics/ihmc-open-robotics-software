@@ -1,7 +1,7 @@
 package us.ihmc.atlas.parameters;
 
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
-import us.ihmc.footstepPlanning.aStar.implementations.ReachableFootstepsBasedExpansion;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ReachableFootstepsBasedExpansion;
 
 public class AtlasFootstepPlannerParameters implements PlanarRegionFootstepPlanningParameters
 {
