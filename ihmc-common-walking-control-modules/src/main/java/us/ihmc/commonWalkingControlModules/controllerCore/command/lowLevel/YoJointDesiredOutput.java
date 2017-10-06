@@ -1,40 +1,40 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class YoLowLevelJointData implements LowLevelJointDataReadOnly
+public class YoJointDesiredOutput implements JointDesiredOutputReadOnly
 {
-   private final YoEnum<LowLevelJointControlMode> controlMode;
+   private final YoEnum<JointDesiredControlMode> controlMode;
+
    private final YoDouble desiredTorque;
    private final YoDouble desiredPosition;
    private final YoDouble desiredVelocity;
    private final YoDouble desiredAcceleration;
-   private final YoDouble desiredCurrent;
    private final YoBoolean resetIntegrators;
-   
-   private final YoDouble kp;
-   private final YoDouble kd;
 
-   public YoLowLevelJointData(String namePrefix, YoVariableRegistry registry, String suffixString)
+   private final YoDouble stiffness;
+   private final YoDouble damping;
+   private final YoDouble masterGain;
+
+   public YoJointDesiredOutput(String namePrefix, YoVariableRegistry registry, String suffixString)
    {
       namePrefix += "LowLevel";
 
-      controlMode = new YoEnum<>(namePrefix + "ControlMode" + suffixString, registry, LowLevelJointControlMode.class, true);
+      controlMode = new YoEnum<>(namePrefix + "ControlMode" + suffixString, registry, JointDesiredControlMode.class, true);
       desiredTorque = new YoDouble(namePrefix + "DesiredTorque" + suffixString, registry);
       desiredPosition = new YoDouble(namePrefix + "DesiredPosition" + suffixString, registry);
       desiredVelocity = new YoDouble(namePrefix + "DesiredVelocity" + suffixString, registry);
       desiredAcceleration = new YoDouble(namePrefix + "DesiredAcceleration" + suffixString, registry);
-      desiredCurrent = new YoDouble(namePrefix + "DesiredCurrent" + suffixString, registry);
       resetIntegrators = new YoBoolean(namePrefix + "ResetIntegrators" + suffixString, registry);
-      
-      kp = new YoDouble(namePrefix + "Kp" + suffixString, registry);
-      kd = new YoDouble(namePrefix + "Kd" + suffixString, registry);
+
+      stiffness = new YoDouble(namePrefix + "Stiffness" + suffixString, registry);
+      damping = new YoDouble(namePrefix + "Damping" + suffixString, registry);
+      masterGain = new YoDouble(namePrefix + "MasterGain" + suffixString, registry);
 
       clear();
    }
@@ -46,30 +46,30 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
       desiredPosition.set(Double.NaN);
       desiredVelocity.set(Double.NaN);
       desiredAcceleration.set(Double.NaN);
-      desiredCurrent.set(Double.NaN);
-      kp.set(Double.NaN);
-      kd.set(Double.NaN);
+      stiffness.set(Double.NaN);
+      damping.set(Double.NaN);
+      masterGain.set(Double.NaN);
       resetIntegrators.set(false);
    }
 
-   public void set(LowLevelJointDataReadOnly other)
+   public void set(JointDesiredOutputReadOnly other)
    {
       controlMode.set(other.getControlMode());
       desiredTorque.set(other.getDesiredTorque());
       desiredPosition.set(other.getDesiredPosition());
       desiredVelocity.set(other.getDesiredVelocity());
       desiredAcceleration.set(other.getDesiredAcceleration());
-      desiredCurrent.set(other.getDesiredCurrent());
       resetIntegrators.set(other.peekResetIntegratorsRequest());
-      kp.set(other.getKp());
-      kd.set(other.getKd());
+      stiffness.set(other.getStiffness());
+      damping.set(other.getDamping());
+      masterGain.set(other.getMasterGain());
    }
 
    /**
     * Complete the information held in this using other.
     * Does not overwrite the data already set in this.
     */
-   public void completeWith(LowLevelJointDataReadOnly other)
+   public void completeWith(JointDesiredOutputReadOnly other)
    {
       if (!hasControlMode())
          controlMode.set(other.getControlMode());
@@ -81,28 +81,17 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
          desiredVelocity.set(other.getDesiredVelocity());
       if (!hasDesiredAcceleration())
          desiredAcceleration.set(other.getDesiredAcceleration());
-      if (!hasDesiredCurrent())
-         desiredCurrent.set(other.getDesiredCurrent());
       if (!peekResetIntegratorsRequest())
          resetIntegrators.set(other.peekResetIntegratorsRequest());
-      if(!hasKp())
-         kp.set(other.getKp());
-      if(!hasKd())
-         kd.set(other.getKd());
-   }
-   
-   public void setDesiredsFromOneDoFJoint(OneDoFJoint jointToExtractDesiredsFrom)
-   {
-      setDesiredTorque(jointToExtractDesiredsFrom.getTau());
-      setDesiredPosition(jointToExtractDesiredsFrom.getqDesired());
-      setDesiredVelocity(jointToExtractDesiredsFrom.getQdDesired());
-      setDesiredAcceleration(jointToExtractDesiredsFrom.getQddDesired());
-      setResetIntegrators(jointToExtractDesiredsFrom.getResetIntegrator());
-      setKp(jointToExtractDesiredsFrom.getKp());
-      setKd(jointToExtractDesiredsFrom.getKd());
+      if(!hasStiffness())
+         stiffness.set(other.getStiffness());
+      if(!hasDamping())
+         damping.set(other.getDamping());
+      if(!hasMasterGain())
+         masterGain.set(other.getMasterGain());
    }
 
-   public void setControlMode(LowLevelJointControlMode controlMode)
+   public void setControlMode(JointDesiredControlMode controlMode)
    {
       this.controlMode.set(controlMode);
    }
@@ -125,11 +114,6 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
    public void setDesiredAcceleration(double qdd)
    {
       desiredAcceleration.set(qdd);
-   }
-
-   public void setDesiredCurrent(double i)
-   {
-      desiredCurrent.set(i);
    }
 
    public void setResetIntegrators(boolean reset)
@@ -168,13 +152,7 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
    }
 
    @Override
-   public boolean hasDesiredCurrent()
-   {
-      return !desiredCurrent.isNaN();
-   }
-
-   @Override
-   public LowLevelJointControlMode getControlMode()
+   public JointDesiredControlMode getControlMode()
    {
       return controlMode.getEnumValue();
    }
@@ -204,12 +182,6 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
    }
 
    @Override
-   public double getDesiredCurrent()
-   {
-      return desiredCurrent.getDoubleValue();
-   }
-
-   @Override
    public boolean pollResetIntegratorsRequest()
    {
       boolean request = resetIntegrators.getBooleanValue();
@@ -231,41 +203,58 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
       ret += "desiredPosition = " + getDesiredPosition() + "\n";
       ret += "desiredVelocity = " + getDesiredVelocity() + "\n";
       ret += "desiredAcceleration = " + getDesiredAcceleration() + "\n";
-      ret += "desiredCurrent = " + getDesiredCurrent() + "\n";
+      ret += "masterGain = " + getMasterGain() + "\n";
       return ret;
    }
 
    @Override
-   public boolean hasKp()
+   public boolean hasStiffness()
    {
-      return !kp.isNaN();
+      return !stiffness.isNaN();
    }
 
    @Override
-   public boolean hasKd()
+   public boolean hasDamping()
    {
-      return kd.isNaN();
+      return damping.isNaN();
    }
 
    @Override
-   public double getKp()
+   public double getStiffness()
    {
-      return kp.getValue();
+      return stiffness.getValue();
    }
 
    @Override
-   public double getKd()
+   public double getDamping()
    {
-      return kd.getValue();
-   }
-   
-   public void setKp(double kp)
-   {
-      this.kp.set(kp);
+      return damping.getValue();
    }
 
-   public void setKd(double kd)
+   public void setStiffness(double stiffness)
    {
-      this.kd.set(kd);
+      this.stiffness.set(stiffness);
+   }
+
+   public void setDamping(double damping)
+   {
+      this.damping.set(damping);
+   }
+
+   @Override
+   public boolean hasMasterGain()
+   {
+      return !masterGain.isNaN();
+   }
+
+   @Override
+   public double getMasterGain()
+   {
+      return masterGain.getDoubleValue();
+   }
+
+   public void setMasterGain(double masterGain)
+   {
+      this.masterGain.set(masterGain);
    }
 }

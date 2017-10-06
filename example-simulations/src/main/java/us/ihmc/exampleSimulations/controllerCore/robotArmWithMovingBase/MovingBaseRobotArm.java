@@ -26,7 +26,7 @@ import us.ihmc.robotics.screwTheory.PrismaticJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.simulationconstructionset.KinematicPoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -328,7 +328,7 @@ public class MovingBaseRobotArm extends Robot
       for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
          OneDoFJoint oneDoFJoint = pair.getKey();
-         LowLevelJointDataReadOnly data = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(oneDoFJoint); 
+         JointDesiredOutputReadOnly data = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(oneDoFJoint); 
 
          if (data.hasDesiredTorque())
          {
@@ -343,7 +343,7 @@ public class MovingBaseRobotArm extends Robot
       for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
          OneDoFJoint oneDoFJoint = pair.getKey();
-         LowLevelJointDataReadOnly data = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(oneDoFJoint); 
+         JointDesiredOutputReadOnly data = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(oneDoFJoint); 
 
          if (data.hasDesiredPosition())
          {

@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -47,7 +47,7 @@ public class ValkyrieTorqueHysteresisCompensator
          if (!shouldProcessJoint(jointName))
             continue;
 
-         LowLevelJointDataReadOnly lowLevelJointData = jointHandle.getDesiredJointData();
+         JointDesiredOutputReadOnly lowLevelJointData = jointHandle.getDesiredJointData();
          processedJointHandles.add(jointHandle);
          TorqueHysteresisCompensatorYoVariable hysteresisCompensator = new TorqueHysteresisCompensatorYoVariable("tau_offHyst_", joint, lowLevelJointData, torqueHysteresisAmplitude, jointAccelerationMin, jointVelocityMax, rampUpTime, rampDownTime, yoTime, registry);
          hysteresisCompensator.enable();

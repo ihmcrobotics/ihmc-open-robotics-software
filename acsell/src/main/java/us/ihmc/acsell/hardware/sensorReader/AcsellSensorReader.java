@@ -118,7 +118,7 @@ public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> impleme
 //            sensorProcessing.setJointTauSensorValue(joint, jointState.getTau());
             
             // TODO: Test me!!!!
-            sensorProcessing.setJointTauSensorValue(joint, estimatorDesiredJointDataHolder.getLowLevelJointData(joint).getDesiredTorque());
+            sensorProcessing.setJointTauSensorValue(joint, estimatorDesiredJointDataHolder.getJointDesiredOutput(joint).getDesiredTorque());
             
             sensorProcessing.setJointVelocitySensorValue(joint, jointState.getQd());
          }
