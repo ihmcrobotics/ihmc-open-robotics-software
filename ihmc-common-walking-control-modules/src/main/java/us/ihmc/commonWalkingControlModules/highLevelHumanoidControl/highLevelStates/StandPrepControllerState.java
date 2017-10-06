@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -25,7 +24,7 @@ public class StandPrepControllerState extends HighLevelControllerState
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   private final PairList<OneDoFJoint, ImmutableTriple<YoDouble, YoPolynomial, YoDouble>> jointsData = new PairList<>();
+   private final PairList<OneDoFJoint, TrajectoryData> jointsData = new PairList<>();
 
    private final YoDouble timeToPrepareForStanding = new YoDouble("timeToPrepareForStanding", registry);
    private final YoDouble minimumTimeDoneWithStandPrep = new YoDouble("minimumTimeDoneWithStandPrep", registry);
@@ -58,8 +57,8 @@ public class StandPrepControllerState extends HighLevelControllerState
 
          standPrepFinalConfiguration.set(standPrepParameters.getSetpoint(jointName));
 
-         ImmutableTriple<YoDouble, YoPolynomial, YoDouble> trajectorySet = new ImmutableTriple<>(standPrepFinalConfiguration, trajectory, standPrepDesiredConfiguration);
-         jointsData.add(controlledJoint, trajectorySet);
+         TrajectoryData jointData = new TrajectoryData(standPrepFinalConfiguration, standPrepDesiredConfiguration, trajectory);
+         jointsData.add(controlledJoint, jointData);
 
          LowLevelJointControlMode jointControlMode = highLevelControllerParameters.getLowLevelJointControlMode(controlledJoint.getName(), controllerState);
          lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(controlledJoint, jointControlMode);
@@ -73,9 +72,9 @@ public class StandPrepControllerState extends HighLevelControllerState
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
       {
          OneDoFJoint joint = jointsData.get(jointIndex).getLeft();
-         ImmutableTriple<YoDouble, YoPolynomial, YoDouble> trajectoryData = jointsData.get(jointIndex).getRight();
-         YoDouble standPrepFinal = trajectoryData.getLeft();
-         YoPolynomial trajectory = trajectoryData.getMiddle();
+         TrajectoryData trajectoryData = jointsData.get(jointIndex).getRight();
+         YoDouble standPrepFinal = trajectoryData.getFinalJointConfiguration();
+         YoPolynomial trajectory = trajectoryData.getJointTrajectory();
 
          double desiredFinalPosition = standPrepFinal.getDoubleValue();
          double desiredFinalVelocity = 0.0;
@@ -95,10 +94,10 @@ public class StandPrepControllerState extends HighLevelControllerState
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
       {
          OneDoFJoint joint = jointsData.get(jointIndex).getLeft();
-         ImmutableTriple<YoDouble, YoPolynomial, YoDouble> trajectoryData = jointsData.get(jointIndex).getRight();
+         TrajectoryData trajectoryData = jointsData.get(jointIndex).getRight();
 
-         YoPolynomial trajectory = trajectoryData.getMiddle();
-         YoDouble desiredPosition = trajectoryData.getRight();
+         YoPolynomial trajectory = trajectoryData.getJointTrajectory();
+         YoDouble desiredPosition = trajectoryData.getDesiredJointConfiguration();
 
          trajectory.compute(timeInTrajectory);
          desiredPosition.set(trajectory.getPosition());
@@ -139,4 +138,34 @@ public class StandPrepControllerState extends HighLevelControllerState
    public void warmup(int iterations)
    {
    }
+
+   private class TrajectoryData
+   {
+      private final YoDouble finalJointConfiguration;
+      private final YoDouble desiredJointConfiguration;
+      private final YoPolynomial jointTrajectory;
+
+      public TrajectoryData(YoDouble finalJointConfiguration, YoDouble desiredJointConfiguration, YoPolynomial jointTrajectory)
+      {
+         this.finalJointConfiguration = finalJointConfiguration;
+         this.desiredJointConfiguration = desiredJointConfiguration;
+         this.jointTrajectory = jointTrajectory;
+      }
+
+      public YoDouble getFinalJointConfiguration()
+      {
+         return finalJointConfiguration;
+      }
+
+      public YoDouble getDesiredJointConfiguration()
+      {
+         return desiredJointConfiguration;
+      }
+
+      public YoPolynomial getJointTrajectory()
+      {
+         return jointTrajectory;
+      }
+   }
+
 }
