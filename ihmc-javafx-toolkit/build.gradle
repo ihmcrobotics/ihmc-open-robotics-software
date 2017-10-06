@@ -1,0 +1,38 @@
+buildscript {
+   repositories {
+      maven { url "https://plugins.gradle.org/m2/" }
+      mavenLocal()
+   }
+   dependencies {
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.5"
+   }
+}
+apply plugin: "us.ihmc.ihmc-build"
+
+ihmc {
+   loadProductProperties("../product.properties")
+   
+   configureDependencyResolution()
+   configurePublications()
+}
+
+testSuites {
+   def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
+   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
+}
+
+mainDependencies {
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
+   compile "net.sf.trove4j:trove4j:3.0.3"
+   compile "org.apache.commons:commons-lang3:3.4"
+   compile("org.fxyz3d:fxyz3d:0.1.1") {
+      exclude group: 'java3d', module: 'vecmath'
+   }
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
+}
+
+visualizersDependencies {
+   compile rootProject
+}
