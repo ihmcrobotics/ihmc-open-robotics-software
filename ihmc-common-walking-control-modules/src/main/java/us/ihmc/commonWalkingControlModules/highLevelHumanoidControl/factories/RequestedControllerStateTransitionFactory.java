@@ -13,18 +13,26 @@ import java.util.EnumMap;
 public class RequestedControllerStateTransitionFactory<E extends Enum<E>> implements ControllerStateTransitionFactory<E>
 {
    private final YoEnum<E> requestedControlState;
-   private final E stateToAttach;
+   private final E stateToAttachEnum;
    private final E nextStateEnum;
 
    private StateTransition<E> stateTransition;
 
-   public RequestedControllerStateTransitionFactory(YoEnum<E> requestedControlState, E stateToAttach, E nextStateEnum)
+   /**
+    * This transition will transition the robot from its current state into a requested state if the yo enum matches the next state enum.
+    *
+    * @param requestedControlState yo variable used to request a state change.
+    * @param stateToAttachEnum state to check if the next state has been requested.
+    * @param nextStateEnum state to transition to on request.
+    */
+   public RequestedControllerStateTransitionFactory(YoEnum<E> requestedControlState, E stateToAttachEnum, E nextStateEnum)
    {
       this.requestedControlState = requestedControlState;
-      this.stateToAttach = stateToAttach;
+      this.stateToAttachEnum = stateToAttachEnum;
       this.nextStateEnum = nextStateEnum;
    }
 
+   /** {@inheritDoc} */
    @Override
    public StateTransition<E> getOrCreateStateTransition(EnumMap<E, ? extends FinishableState<E>> stateMap, HighLevelControllerFactoryHelper controllerFactoryHelper,
                                                         YoVariableRegistry parentRegistry)
@@ -35,9 +43,10 @@ public class RequestedControllerStateTransitionFactory<E extends Enum<E>> implem
       return stateTransition;
    }
 
+   /** {@inheritDoc} */
    @Override
    public E getStateToAttachEnum()
    {
-      return stateToAttach;
+      return stateToAttachEnum;
    }
 }
