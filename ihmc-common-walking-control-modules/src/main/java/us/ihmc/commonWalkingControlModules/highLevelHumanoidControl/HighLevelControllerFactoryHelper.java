@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -28,6 +29,7 @@ public class HighLevelControllerFactoryHelper
    private LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput;
    private YoEnum<HighLevelController> requestedHighLevelControllerState;
    private AtomicReference<HighLevelController> fallbackControllerForFailure;
+   private ForceSensorDataHolderReadOnly forceSensorDataHolder;
 
    public void setLowLevelControllerOutput(LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
    {
@@ -75,6 +77,11 @@ public class HighLevelControllerFactoryHelper
    public void setFallbackControllerForFailure(AtomicReference<HighLevelController> fallbackControllerForFailure)
    {
       this.fallbackControllerForFailure = fallbackControllerForFailure;
+   }
+
+   public void setForceSensorDataHolder(ForceSensorDataHolderReadOnly forceSensorDataHolder)
+   {
+      this.forceSensorDataHolder = forceSensorDataHolder;
    }
 
    public EnumMap<HighLevelController, HighLevelControllerStateFactory> getControllerFactories()
@@ -130,5 +137,10 @@ public class HighLevelControllerFactoryHelper
    public AtomicReference<HighLevelController> getFallbackControllerForFailure()
    {
       return fallbackControllerForFailure;
+   }
+
+   public ForceSensorDataHolderReadOnly getForceSensorDataHolder()
+   {
+      return forceSensorDataHolder;
    }
 }

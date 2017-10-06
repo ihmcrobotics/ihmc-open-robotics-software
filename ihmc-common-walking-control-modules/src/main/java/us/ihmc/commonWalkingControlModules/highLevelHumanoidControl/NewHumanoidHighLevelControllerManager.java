@@ -55,7 +55,6 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
    private final AtomicReference<HighLevelController> fallbackControllerForFailure;
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
 
-   private final ForceSensorDataHolderReadOnly forceSensorDataHolder;
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
    private final LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput;
    private final CommandInputManager commandInputManager;
@@ -87,7 +86,6 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
       this.initialControllerState = initialControllerState;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
       this.lowLevelControllerOutput = lowLevelControllerOutput;
-      this.forceSensorDataHolder = forceSensorDataHolder;
 
       this.requestedHighLevelControllerState.set(initialControllerState);
       registry.addChild(controllerToolbox.getYoVariableRegistry());
@@ -100,6 +98,7 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
       controllerFactoryHelper.setLowLevelControllerOutput(lowLevelControllerOutput);
       controllerFactoryHelper.setRequestedHighLevelControllerState(requestedHighLevelControllerState);
       controllerFactoryHelper.setFallbackControllerForFailure(fallbackControllerForFailure);
+      controllerFactoryHelper.setForceSensorDataHolder(forceSensorDataHolder);
 
       stateMachine = setUpStateMachine(controllerStateFactories, controllerTransitionFactories, managerFactory, controllerToolbox.getYoTime(), registry);
       isListeningToHighLevelStateMessage.set(true);
@@ -221,7 +220,7 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
       for (ControllerStateTransitionFactory<HighLevelController> controllerStateTransitionFactory : controllerTransitionFactories)
       {
          StateTransition<HighLevelController> stateTransition = controllerStateTransitionFactory.getOrCreateStateTransition(highLevelControllerStates, controllerFactoryHelper,
-                                                                                                                            forceSensorDataHolder, registry);
+                                                                                                                            registry);
 
          HighLevelControllerState state = highLevelControllerStates.get(controllerStateTransitionFactory.getStateToAttachEnum());
          state.addStateTransition(stateTransition);

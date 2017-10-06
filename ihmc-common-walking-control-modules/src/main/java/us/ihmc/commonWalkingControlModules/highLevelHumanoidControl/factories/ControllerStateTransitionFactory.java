@@ -11,7 +11,7 @@ import java.util.EnumMap;
 public interface ControllerStateTransitionFactory<E extends Enum<E>>
 {
    StateTransition<E> getOrCreateStateTransition(EnumMap<E, ? extends FinishableState<E>> stateMap, HighLevelControllerFactoryHelper controllerFactoryHelper,
-                                                 ForceSensorDataHolderReadOnly forceSensorDataHolder, YoVariableRegistry parentRegistry);
+                                                 YoVariableRegistry parentRegistry);
 
    E getStateToAttachEnum();
 }
