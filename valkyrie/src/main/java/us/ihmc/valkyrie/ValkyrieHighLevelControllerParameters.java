@@ -33,6 +33,18 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    }
 
    @Override
+   public double getLowLevelJointStiffness(String jointName)
+   {
+      throw new RuntimeException("None of the Valkyrie joint stiffnesses have been set up yet.");
+   }
+
+   @Override
+   public double getLowLevelJointDamping(String jointName)
+   {
+      throw new RuntimeException("None of the Valkyrie joint dampings have been set up yet.");
+   }
+
+   @Override
    public HighLevelController getDefaultInitialControllerState()
    {
       return HighLevelController.WALKING;

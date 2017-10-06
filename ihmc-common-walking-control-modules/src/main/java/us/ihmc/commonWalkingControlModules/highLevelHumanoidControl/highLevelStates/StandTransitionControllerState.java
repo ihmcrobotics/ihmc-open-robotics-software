@@ -45,8 +45,15 @@ public class StandTransitionControllerState extends HighLevelControllerState
          JointControlBlender jointControlBlender = new JointControlBlender("_StandTransition", controlledJoint, registry);
          jointCommandBlenders.add(controlledJoint, jointControlBlender);
 
-         LowLevelJointControlMode jointControlMode = highLevelControllerParameters.getLowLevelJointControlMode(controlledJoint.getName(), controllerState);
-         lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(controlledJoint, jointControlMode);
+         String jointName = controlledJoint.getName();
+         LowLevelJointControlMode jointControlMode = highLevelControllerParameters.getLowLevelJointControlMode(jointName, controllerState);
+         double jointStiffness = highLevelControllerParameters.getLowLevelJointStiffness(jointName);
+         double jointDamping = highLevelControllerParameters.getLowLevelJointDamping(jointName);
+
+         LowLevelJointData lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(controlledJoint);
+         lowLevelJointData.setControlMode(jointControlMode);
+         lowLevelJointData.setKp(jointStiffness);
+         lowLevelJointData.setKd(jointDamping);
       }
    }
 
