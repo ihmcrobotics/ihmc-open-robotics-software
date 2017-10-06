@@ -69,7 +69,7 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
       {         
          private final FramePoint3D localFramePoint = new FramePoint3D();
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             getPosition().getFrameTupleIncludingFrame(localFramePoint);
             yoFramePointInWorld.setAndMatchFrame(localFramePoint);

@@ -5,7 +5,7 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.8.7"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.5"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"

@@ -7,14 +7,12 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -84,8 +82,6 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
 //   private final ComHeightPacket comHeightPacket = new ComHeightPacket(0.05, 1.0);
    private final Random random = new Random(165163L);
 
-	@ContinuousIntegrationTest(estimatedDuration = 50.0)
-   @Test(timeout = 250000)
    public void testWalkingUpRampUsingSnapFootsteps() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

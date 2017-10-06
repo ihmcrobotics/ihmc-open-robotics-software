@@ -547,7 +547,7 @@ public class StepAndTimingAdjustmentExampleGraphic
       }
 
       if (footstepSolutions.get(0).getPredictedContactPoints() == null)
-         footstepSolutions.get(0).setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(footstepSolutions.get(0).getRobotSide()).getContactPoints2d());
+         footstepSolutions.get(0).setPredictedContactPoints(contactableFeet.get(footstepSolutions.get(0).getRobotSide()).getContactPoints2d());
 
       double polygonShrinkAmount = 0.005;
 
@@ -570,7 +570,7 @@ public class StepAndTimingAdjustmentExampleGraphic
       }
 
       if (footstepSolutions.get(1).getPredictedContactPoints() == null)
-         footstepSolutions.get(1).setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(footstepSolutions.get(1).getRobotSide()).getContactPoints2d());
+         footstepSolutions.get(1).setPredictedContactPoints(contactableFeet.get(footstepSolutions.get(1).getRobotSide()).getContactPoints2d());
 
       tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(footstepSolutions.get(1).getSoleReferenceFrame(), footstepSolutions.get(1).getPredictedContactPoints());
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
@@ -589,7 +589,7 @@ public class StepAndTimingAdjustmentExampleGraphic
       }
 
       if (footstepSolutions.get(2).getPredictedContactPoints() == null)
-         footstepSolutions.get(2).setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(footstepSolutions.get(2).getRobotSide()).getContactPoints2d());
+         footstepSolutions.get(2).setPredictedContactPoints(contactableFeet.get(footstepSolutions.get(2).getRobotSide()).getContactPoints2d());
 
       tempFootstepPolygonForShrinking.setIncludingFrameAndUpdate(footstepSolutions.get(2).getSoleReferenceFrame(), footstepSolutions.get(2).getPredictedContactPoints());
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);

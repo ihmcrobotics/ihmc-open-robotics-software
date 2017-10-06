@@ -178,7 +178,7 @@ public abstract class ReferenceFrameHashTest
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 30000, expected = IllegalArgumentException.class)
-   public void testAddingTwoFramesWithTheSameName()
+   public void testAddingTwoFramesWithTheSameNameThrowsException()
    {
       DRCRobotModel robotModelA = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModelA.createFullRobotModel();

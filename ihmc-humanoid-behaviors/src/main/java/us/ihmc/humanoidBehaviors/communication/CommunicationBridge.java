@@ -179,7 +179,7 @@ public class CommunicationBridge implements CommunicationBridgeInterface
       var.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             sendToUI(v.getName(), v.getValueAsDouble());
          }
@@ -192,7 +192,7 @@ public class CommunicationBridge implements CommunicationBridgeInterface
       {
 
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             sendToBehavior(v.getName(), v.getValueAsDouble());
          }

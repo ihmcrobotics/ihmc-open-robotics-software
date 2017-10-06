@@ -13,7 +13,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -21,7 +20,6 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -58,8 +56,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 22.8)
-   @Test (timeout = 110000)
    public void testLookingLeftAndRight() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -112,8 +108,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 * trajectoryTime + 1.0));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 22.8)
-   @Test (timeout = 110000)
    public void testSingleTrajectoryPoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -163,8 +157,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertSingleWaypointExecuted(desiredRandomChestOrientation, scs, chest);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 22.8)
-   @Test (timeout = 110000)
    public void testSelectionMatrixWithAllAxisOffUsingSingleTrajectoryPoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -245,8 +237,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 //      assertSingleWaypointExecuted(desiredRandomChestOrientation, scs, chest);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 22.8)
-   @Test (timeout = 110000)
    public void testSettingWeightMatrixUsingSingleTrajectoryPoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -359,8 +349,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertEquals(zWeight, angularWeightZ.getDoubleValue(), 1e-8);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 22.8)
-   @Test (timeout = 110000)
    public void testSelectionMatrixDisableRandomAxisWithSingleTrajectoryPoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -441,8 +429,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 //      assertSingleWaypointExecuted(desiredRandomChestOrientation, scs, chest);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 19.0)
-   @Test(timeout = 95000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -534,8 +520,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(scs, chest, 1.0e-2);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 25.4)
-   @Test(timeout = 130000)
    public void testMessageWithALotOfTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -643,8 +627,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(scs, chest, 1.0e-2);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 25.4)
-   @Test(timeout = 130000)
    public void testMessageWithALotOfTrajectoryPointsExpressedInPelvisZUp() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -753,8 +735,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(scs, chest, 1.0e-2);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 23.6)
-   @Test(timeout = 120000)
    public void testQueuedMessages() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -886,8 +866,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(scs, chest, 1.0e-2);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 15.3)
-   @Test(timeout = 77000)
    public void testQueueWithWrongPreviousId() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -985,8 +963,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertNumberOfWaypoints(1, scs, chest);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 15.3)
-   @Test(timeout = 77000)
    public void testQueueWithUsingDifferentTrajectoryFrameWithoutOverride() throws Exception
    {
 
@@ -1077,8 +1053,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 22.8)
-   @Test (timeout = 110000)
    public void testLookingLeftAndRightInVariousTrajectoryFrames() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -1131,8 +1105,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 * trajectoryTime + 1.0));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 16.8)
-   @Test(timeout = 84000)
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -1253,8 +1225,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertControlErrorIsLow(scs, chest, 1.0e-2);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 21.8)
-   @Test (timeout = 110000)
    public void testStopAllTrajectory() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

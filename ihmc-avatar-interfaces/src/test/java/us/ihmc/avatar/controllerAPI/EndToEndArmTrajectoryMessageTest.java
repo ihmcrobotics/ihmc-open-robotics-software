@@ -10,25 +10,18 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
@@ -44,6 +37,10 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -53,8 +50,6 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 60000)
    public void testSingleTrajectoryPoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -105,8 +100,6 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 35.0)
-   @Test(timeout = 70000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -186,8 +179,6 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test(timeout = 30000)
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -245,8 +236,6 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 65.0)
-   @Test(timeout = 130000)
    public void testQueuedMessages() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -366,8 +355,6 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       assertSingleWaypointExecuted(armJoints, desiredJointPositions, desiredJointVelocities, epsilon, scs);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test(timeout = 30000)
    public void testQueueWithWrongPreviousId() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -479,8 +466,6 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test(timeout = 30000)
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -609,8 +594,6 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 60000)
    public void testStopAllTrajectory() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

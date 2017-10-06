@@ -2,11 +2,14 @@ package us.ihmc.atlas.referenceFrames;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.junit.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.referenceFrames.ReferenceFrameHashTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class AtlasReferenceFrameHashTest extends ReferenceFrameHashTest
 {
@@ -16,18 +19,24 @@ public class AtlasReferenceFrameHashTest extends ReferenceFrameHashTest
    }
    
    @Override
-   public void testAddingTwoFramesWithTheSameName()
+   @ContinuousIntegrationTest(estimatedDuration = 5.0)
+   @Test(timeout = 15000, expected = IllegalArgumentException.class)
+   public void testAddingTwoFramesWithTheSameNameThrowsException()
    {
-      super.testAddingTwoFramesWithTheSameName();
+      super.testAddingTwoFramesWithTheSameNameThrowsException();
    }
    
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 5.0)
+   @Test(timeout = 15000)
    public void testAllFramesGottenFromFullRobotModelMethodsAreInTheHashList() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       super.testAllFramesGottenFromFullRobotModelMethodsAreInTheHashList();
    }
    
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 5.0)
+   @Test(timeout = 15000)
    public void testAllFramesGottenFromHumanoidReferenceFrameMethodsAreInTheHashList()
          throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
@@ -35,12 +44,16 @@ public class AtlasReferenceFrameHashTest extends ReferenceFrameHashTest
    }
    
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 5.0)
+   @Test(timeout = 15000)
    public void testAllFramesInFullRobotModelMatchHumanoidReferenceFramesThroughHashCode()
    {
       super.testAllFramesInFullRobotModelMatchHumanoidReferenceFramesThroughHashCode();
    }
    
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 5.0)
+   @Test(timeout = 15000)
    public void testGetReferenceFrameFromHashCodeReturnsSameNamedFrames()
    {
       super.testGetReferenceFrameFromHashCodeReturnsSameNamedFrames();

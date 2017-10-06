@@ -53,7 +53,7 @@ public class BlindWalkingFootstepDataMessageGenerator
       return new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (walk.getBooleanValue())
             {

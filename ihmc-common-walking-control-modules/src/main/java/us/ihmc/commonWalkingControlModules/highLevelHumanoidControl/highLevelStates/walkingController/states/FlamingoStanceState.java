@@ -36,12 +36,14 @@ public class FlamingoStanceState extends SingleSupportState
    private final LegConfigurationManager legConfigurationManager;
 
    private final FootstepTiming footstepTiming = new FootstepTiming();
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    public FlamingoStanceState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
       super(supportSide, WalkingStateEnum.getFlamingoSingleSupportState(supportSide), walkingMessageHandler, controllerToolbox, managerFactory,
             parentRegistry);
+      this.controllerToolbox = controllerToolbox;
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
       this.failureDetectionControlModule = failureDetectionControlModule;
@@ -129,19 +131,20 @@ public class FlamingoStanceState extends SingleSupportState
       feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
 
       double swingTime = Double.POSITIVE_INFINITY;
-      double transferTime = walkingMessageHandler.getDefaultTransferTime();
+      double initialTransferTime = walkingMessageHandler.getInitialTransferTime();
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      footstepTiming.setTimings(swingTime, transferTime);
+      footstepTiming.setTimings(swingTime, initialTransferTime);
 
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming);
       balanceManager.setICPPlanSupportSide(supportSide);
-      balanceManager.initializeICPPlanForSingleSupport(swingTime, transferTime, finalTransferTime);
+      balanceManager.initializeICPPlanForSingleSupport(swingTime, initialTransferTime, finalTransferTime);
 
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(supportSide);
       comHeightManager.setSupportLeg(getSupportSide());
       loadFoot.set(false);
 
       legConfigurationManager.startSwing(swingSide);
+      controllerToolbox.updateContactPointsForUpcomingFootstep(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
    }
 
    @Override

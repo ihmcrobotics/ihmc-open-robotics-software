@@ -1,17 +1,14 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,18 +18,18 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Created by agrabertilton on 2/25/15.
@@ -132,8 +129,6 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
    }
 
 
-	@ContinuousIntegrationTest(estimatedDuration = 76.4)
-   @Test(timeout = 380000)
    public void testMultipleHeightFootsteps() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
@@ -185,8 +180,6 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 36.0)
-   @Test(timeout = 180000)
    public void testReallyHighFootstep() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
@@ -216,8 +209,6 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 32.9)
-   @Test(timeout = 160000)
    public void testNegativeSwingHeight() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();

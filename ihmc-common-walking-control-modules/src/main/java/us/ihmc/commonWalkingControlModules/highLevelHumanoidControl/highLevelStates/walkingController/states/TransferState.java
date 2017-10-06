@@ -36,9 +36,11 @@ public abstract class TransferState extends WalkingState
    private final FramePoint2D desiredCoP = new FramePoint2D();
    private final FramePoint3D nextExitCMP = new FramePoint3D();
 
+   private final Footstep nextFootstep = new Footstep();
+
    public TransferState(RobotSide transferToSide, WalkingStateEnum transferStateEnum, WalkingMessageHandler walkingMessageHandler,
-         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
-         WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
+                        HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
+                        WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
       super(transferStateEnum, parentRegistry);
       this.transferToSide = transferToSide;
@@ -83,11 +85,6 @@ public abstract class TransferState extends WalkingState
          return balanceManager.isTransitionToSingleSupportSafe(transferToSide);
    }
 
-   public boolean isStopWalkingSafe()
-   {
-      return balanceManager.isTransitionToStandingSafe();
-   }
-
    public void switchToToeOffIfPossible()
    {
       RobotSide trailingLeg = transferToSide.getOppositeSide();
@@ -122,9 +119,17 @@ public abstract class TransferState extends WalkingState
       feetManager.initializeContactStatesForDoubleSupport(transferToSide);
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
-      Footstep nextFootstep = walkingMessageHandler.peek(0);
-      failureDetectionControlModule.setNextFootstep(nextFootstep);
-      balanceManager.setUpcomingFootstep(nextFootstep);
+      if (walkingMessageHandler.hasUpcomingFootsteps())
+      {
+         walkingMessageHandler.peekFootstep(0, nextFootstep);
+         failureDetectionControlModule.setNextFootstep(nextFootstep);
+         balanceManager.setUpcomingFootstep(nextFootstep);
+      }
+      else
+      {
+         failureDetectionControlModule.setNextFootstep(null);
+         balanceManager.setUpcomingFootstep(null);
+      }
 
       balanceManager.resetPushRecovery();
 
