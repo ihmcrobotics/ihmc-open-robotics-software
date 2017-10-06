@@ -119,7 +119,10 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
       boolean startRampUp = isVelocityLow.getBooleanValue() && isAccelerationHigh.getBooleanValue();
       if (startRampUp)
       {
-         hysteresisSign.set(Math.signum(output.getDesiredAcceleration()));
+         if (output.hasDesiredAcceleration())
+            hysteresisSign.set(Math.signum(output.getDesiredAcceleration()));
+         else
+            hysteresisSign.set(1.0);
          rampStartTime.set(yoTime.getDoubleValue());
          hysteresisState.set(HysteresisState.RAMP_UP);
       }
@@ -143,7 +146,11 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
 
       set(tau_off_hyst);
 
-      boolean qddDesiredChangedSign = hysteresisSign.getDoubleValue() * output.getDesiredAcceleration() < 0.0;
+      boolean qddDesiredChangedSign;
+      if (output.hasDesiredAcceleration())
+         qddDesiredChangedSign = hysteresisSign.getDoubleValue() * output.getDesiredAcceleration() < 0.0;
+      else
+         qddDesiredChangedSign = false;
       boolean startRampDown = !isVelocityLow.getBooleanValue() || !isAccelerationHigh.getBooleanValue() || qddDesiredChangedSign;
       if (startRampDown)
       {
@@ -167,7 +174,11 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
       tau_off_hyst *= hysteresisSign.getDoubleValue();
       set(tau_off_hyst);
 
-      boolean qddDesiredChangedSign = hysteresisSign.getDoubleValue() * output.getDesiredAcceleration() < 0.0;
+      boolean qddDesiredChangedSign;
+      if (output.hasDesiredAcceleration())
+         qddDesiredChangedSign = hysteresisSign.getDoubleValue() * output.getDesiredAcceleration() < 0.0;
+      else
+         qddDesiredChangedSign = false;
       boolean startRampDown = !isVelocityLow.getBooleanValue() || !isAccelerationHigh.getBooleanValue() || qddDesiredChangedSign;
       if (startRampDown)
       {
@@ -208,7 +219,10 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
 
    private void checkAcceleration()
    {
-      isAccelerationHigh.set(Math.abs(output.getDesiredAcceleration()) > jointAccelerationMin.getDoubleValue());
+      if (output.hasDesiredAcceleration())
+         isAccelerationHigh.set(Math.abs(output.getDesiredAcceleration()) > jointAccelerationMin.getDoubleValue());
+      else
+         isAccelerationHigh.set(false);
    }
 
    private void checkVelocity()

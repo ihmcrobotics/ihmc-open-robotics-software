@@ -45,8 +45,15 @@ public class YoEffortJointHandleHolder
       this.q.set(handle.getPosition());
       this.qd.set(handle.getVelocity());
       this.tauMeasured.set(handle.getEffort());
-      this.controllerTauDesired.set(desiredJointData.getDesiredTorque());
-      this.controllerQddDesired.set(desiredJointData.getDesiredAcceleration());
+      if (desiredJointData.hasDesiredTorque())
+         this.controllerTauDesired.set(desiredJointData.getDesiredTorque());
+      else
+         this.controllerTauDesired.set(0.0);
+      
+      if (desiredJointData.hasDesiredAcceleration())
+         this.controllerQddDesired.set(desiredJointData.getDesiredAcceleration());
+      else
+         this.controllerQddDesired.set(0.0);
    }
 
    public void setDesiredEffort(double effort)
