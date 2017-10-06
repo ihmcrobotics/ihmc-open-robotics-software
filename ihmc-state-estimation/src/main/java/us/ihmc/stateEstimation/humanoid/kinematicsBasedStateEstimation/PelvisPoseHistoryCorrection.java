@@ -169,7 +169,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       interpolationTranslationAlphaFilterBreakFrequency.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(interpolationTranslationAlphaFilterBreakFrequency.getDoubleValue(),
                   estimatorDT);
@@ -182,7 +182,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       {
 
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(interpolationRotationAlphaFilterBreakFrequency.getDoubleValue(),
                   estimatorDT);

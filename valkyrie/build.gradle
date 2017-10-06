@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.8.7"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.5"
       classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
    }
 }
@@ -23,12 +23,11 @@ ihmc {
 testSuites {
    def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
    bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
-   disableBambooConfigurationCheck = true
 }
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.2'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
    compile group: 'org.yaml', name: 'snakeyaml', version: '1.17' //1.11
    compile group: 'org.ejml', name: 'core', version: '0.30'

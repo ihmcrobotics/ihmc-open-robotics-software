@@ -52,7 +52,8 @@ public class AStarPlanarRegionsPlannerTest
    {
       FootstepNode startNode = new FootstepNode(0.0, 0.0);
       FootstepNode goalNode = new FootstepNode(4.0, 0.0);
-      FootstepGraph graph = new FootstepGraph(startNode);
+      FootstepGraph graph = new FootstepGraph();
+      graph.initialize(startNode);
       double transitionCost = 1.0;
 
       // assemble simple graph structure

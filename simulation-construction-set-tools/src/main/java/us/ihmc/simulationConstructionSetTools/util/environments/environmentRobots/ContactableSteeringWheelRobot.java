@@ -240,7 +240,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       {
 
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             double rangeOfMotion = 2 * Math.PI * totalNumberOfPossibleTurns;
             steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion.set((Math.abs(steeringWheelPinJoint.getQYoVariable().getDoubleValue()) / (0.5 * rangeOfMotion)) * 100);

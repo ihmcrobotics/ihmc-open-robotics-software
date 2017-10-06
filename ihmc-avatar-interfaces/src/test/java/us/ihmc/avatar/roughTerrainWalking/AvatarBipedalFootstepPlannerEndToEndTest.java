@@ -76,9 +76,9 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    @Before
    public void setup()
    {
-      cinderBlockField = PlanarRegionsListExamples
-            .generateCinderBlockField(CINDER_BLOCK_START_X, CINDER_BLOCK_START_Y, CINDER_BLOCK_SIZE, CINDER_BLOCK_HEIGHT, CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS,
-                                      CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS, CINDER_BLOCK_HEIGHT_VARIATION);
+      cinderBlockField = PlanarRegionsListExamples.generateCinderBlockField(CINDER_BLOCK_START_X, CINDER_BLOCK_START_Y, CINDER_BLOCK_SIZE, CINDER_BLOCK_HEIGHT,
+                                                                            CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS,
+                                                                            CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS, CINDER_BLOCK_HEIGHT_VARIATION);
 
       networkModuleParameters = new DRCNetworkModuleParameters();
       networkModuleParameters.enableFootstepPlanningToolbox(true);
@@ -91,6 +91,8 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullHumanoidRobotModel.getForceSensorDefinitions()));
       humanoidRobotDataReceiver = new HumanoidRobotDataReceiver(fullHumanoidRobotModel, forceSensorDataHolder);
       planCompleted = false;
+
+      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @After
@@ -107,7 +109,19 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test
-   public void testSteppingStones() throws IOException
+   public void testShortCinderBlockFieldWithAStar() throws IOException
+   {
+      testShortCinderBlockField(FootstepPlanningRequestPacket.FootstepPlannerType.A_STAR);
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
+   public void testShortCinderBlockFieldWithPlanarRegionBipedalPlanner() throws IOException
+   {
+      testShortCinderBlockField(FootstepPlanningRequestPacket.FootstepPlannerType.PLANAR_REGION_BIPEDAL);
+   }
+
+   private void testShortCinderBlockField(FootstepPlanningRequestPacket.FootstepPlannerType plannerType) throws IOException
    {
       outputStatus = new AtomicReference<>();
       outputStatus.set(null);
@@ -118,11 +132,13 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       }
 
       CommonAvatarEnvironmentInterface steppingStonesEnvironment = createSteppingStonesEnvironment();
+      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup();
 
       DRCRobotModel robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
       drcSimulationTestHelper.setTestEnvironment(steppingStonesEnvironment);
       drcSimulationTestHelper.setNetworkProcessorParameters(networkModuleParameters);
+      drcSimulationTestHelper.setStartingLocation(startingLocation);
       drcSimulationTestHelper.createSimulation("steppingStonesTestHelper");
 
       toolboxCommunicator.connect();
@@ -161,7 +177,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       YoGraphicsListRegistry graphicsListRegistry = createStartAndGoalGraphics(initialStancePose, goalPose);
       drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(graphicsListRegistry);
 
-      FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket(initialStancePose, initialStanceSide, goalPose);
+      FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket(initialStancePose, initialStanceSide, goalPose, plannerType);
       requestPacket.setAssumeFlatGround(false);
       toolboxCommunicator.send(requestPacket);
 

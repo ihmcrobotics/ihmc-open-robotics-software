@@ -146,8 +146,12 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
          YoVariableDefinition yoVariableDefinition = handshake.getVariables().get(i);
 
          String name = yoVariableDefinition.getNameAsString();
+         String description = yoVariableDefinition.getDescriptionAsString();
          int registryIndex = yoVariableDefinition.getRegistry();
          YoVariableRegistry parent = registryList.get(registryIndex);
+         
+         double min = yoVariableDefinition.getMin();
+         double max = yoVariableDefinition.getMax();
          
          if(!variableOffsets.contains(registryIndex))
          {
@@ -161,26 +165,26 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
             switch (type)
             {
             case DoubleYoVariable:
-               newParameter = new DoubleParameter(name, parent);
+               newParameter = new DoubleParameter(name, description, parent, min, max);
                break;
    
             case IntegerYoVariable:
-               newParameter = new IntegerParameter(name, parent);
+               newParameter = new IntegerParameter(name, description, parent, (int) min, (int) max);
                break;
    
             case BooleanYoVariable:
-               newParameter = new BooleanParameter(name, parent);
+               newParameter = new BooleanParameter(name, description, parent);
                break;
    
             case LongYoVariable:
-               newParameter = new LongParameter(name, parent);
+               newParameter = new LongParameter(name, description, parent, (long) min, (long) max);
                break;
    
             case EnumYoVariable:
                EnumType enumType = handshake.getEnumTypes().get(yoVariableDefinition.getEnumType());
                String[] names = enumType.getEnumValues().toStringArray();
                boolean allowNullValues = yoVariableDefinition.getAllowNullValues();
-               newParameter = new EnumParameter<>(name, "", parent, allowNullValues, names);
+               newParameter = new EnumParameter<>(name, description, parent, allowNullValues, names);
                break;
    
             default:
@@ -199,39 +203,37 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
          }
          else
          {
+            YoVariable<?> newVariable;
             switch (type)
             {
             case DoubleYoVariable:
-               YoDouble doubleVar = new YoDouble(name, parent);
-               variableList.add(doubleVar);
+               newVariable = new YoDouble(name, description, parent);
                break;
    
             case IntegerYoVariable:
-               YoInteger intVar = new YoInteger(name, parent);
-               variableList.add(intVar);
+               newVariable = new YoInteger(name, description, parent);
                break;
    
             case BooleanYoVariable:
-               YoBoolean boolVar = new YoBoolean(name, parent);
-               variableList.add(boolVar);
+               newVariable = new YoBoolean(name, description, parent);
                break;
    
             case LongYoVariable:
-               YoLong longVar = new YoLong(name, parent);
-               variableList.add(longVar);
+               newVariable = new YoLong(name, description, parent);
                break;
    
             case EnumYoVariable:
                EnumType enumType = handshake.getEnumTypes().get(yoVariableDefinition.getEnumType());
                String[] names = enumType.getEnumValues().toStringArray();
                boolean allowNullValues = yoVariableDefinition.getAllowNullValues();
-               YoEnum enumVar = new YoEnum(name, "", parent, allowNullValues, names);
-               variableList.add(enumVar);
+               newVariable = new YoEnum(name, description, parent, allowNullValues, names);
                break;
    
             default:
                throw new RuntimeException("Unknown YoVariable type: " + type.name());
             }
+            newVariable.setManualScalingMinMax(min, max);
+            variableList.add(newVariable);
          }
       }
 

@@ -61,7 +61,7 @@ public class StepprDeflectionMeasurementSliderboardjava extends SCSVisualizer im
       {
 
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             sliderBoardConfigurationManager.loadConfiguration(selectedJointPair.getEnumValue().toString());
          }
@@ -94,7 +94,7 @@ public class StepprDeflectionMeasurementSliderboardjava extends SCSVisualizer im
    }
 
    @Override
-   public void indexChanged(int newIndex, double newTime)
+   public void notifyOfIndexChange(int newIndex)
    {
       StepprStandPrepSetpoints joint = selectedJointPair.getEnumValue();
       allSetpoints.get(joint).update();

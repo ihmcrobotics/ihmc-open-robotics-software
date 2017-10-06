@@ -730,7 +730,7 @@ public abstract class YoVariablePanel extends JPanel implements KeyListener, Mou
          for (int i = 0; i < variableChangedListeners.size(); i++)
          {
             VariableChangedListener listener = variableChangedListeners.get(i);
-            listener.variableChanged(variable);
+            listener.notifyOfVariableChange(variable);
          }
 
          spinner.requestFocusInWindow();
