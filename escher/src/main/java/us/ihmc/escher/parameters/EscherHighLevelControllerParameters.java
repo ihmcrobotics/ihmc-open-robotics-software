@@ -1,11 +1,11 @@
-package us.ihmc.atlas.parameters;
+package us.ihmc.escher.parameters;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
 
-public class AtlasHighLevelControllerParameters implements HighLevelControllerParameters
+public class EscherHighLevelControllerParameters implements HighLevelControllerParameters
 {
    @Override
    public StandPrepParameters getStandPrepParameters()
@@ -22,13 +22,13 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
    @Override
    public double getLowLevelJointStiffness(String joint)
    {
-      return 0.0;
+      return 100.0;
    }
 
    @Override
    public double getLowLevelJointDamping(String joint)
    {
-      return 0.0;
+      return 0.5;
    }
 
    @Override
