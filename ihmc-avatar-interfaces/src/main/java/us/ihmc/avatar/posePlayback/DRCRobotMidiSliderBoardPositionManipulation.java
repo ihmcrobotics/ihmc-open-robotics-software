@@ -215,7 +215,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
       isSymmetricModeRequested.addVariableChangedListener(new VariableChangedListener()
       {
-         public void variableChanged(YoVariable<?> yoVariable)
+         public void notifyOfVariableChange(YoVariable<?> yoVariable)
          {
             symmetricMode = isSymmetricModeRequested.getBooleanValue();
          }
@@ -692,7 +692,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private class ChangeCurrentPartBeingControlledListener implements VariableChangedListener
    {
-      public void variableChanged(YoVariable<?> v)
+      public void notifyOfVariableChange(YoVariable<?> v)
       {
          if (!(v instanceof YoBoolean))
             return;
@@ -730,7 +730,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    {
       private int displayState = 0;
 
-      public void variableChanged(YoVariable<?> v)
+      public void notifyOfVariableChange(YoVariable<?> v)
       {
          setupSlidersForSupportBaseControl();
          if(v.equals(isSupportBaseToggleRequested))
@@ -810,7 +810,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    {
       private int displayState = 0;
 
-      public void variableChanged(YoVariable<?> v)
+      public void notifyOfVariableChange(YoVariable<?> v)
       {
          setupSlidersForSupportBaseTargetControl();
          if(v.equals(isSupportBaseTargetToggleRequested))
@@ -890,7 +890,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    {
       private final RigidBodyTransform desiredTransform = new RigidBodyTransform();
 
-      public void variableChanged(YoVariable<?> v)
+      public void notifyOfVariableChange(YoVariable<?> v)
       {
          if (legInverseKinematicsCalculators == null)
             return;
@@ -937,7 +937,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          this.respectiveSign = sign;
       }
 
-      public void variableChanged(YoVariable<?> yoVariable)
+      public void notifyOfVariableChange(YoVariable<?> yoVariable)
       {
          if (symmetricMode && (robotSide == symmetricControlSide))
          {
@@ -948,7 +948,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private class PelvisRotationListener implements VariableChangedListener
    {
-      public void variableChanged(YoVariable<?> v)
+      public void notifyOfVariableChange(YoVariable<?> v)
       {
          if (!(v instanceof YoDouble))
             return;
@@ -968,7 +968,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       }
 
       @SuppressWarnings("deprecation")
-      public void variableChanged(YoVariable<?> v)
+      public void notifyOfVariableChange(YoVariable<?> v)
       {
          if (!controlFingers.getBooleanValue())
             return;

@@ -28,7 +28,7 @@ public class YoMicroStrainIMUHandleHolder extends YoIMUHandleHolder
       filterTypeToUse.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             microStrainIMUHandle.setFilterTypeToReturn(filterTypeToUse.getEnumValue());
          }

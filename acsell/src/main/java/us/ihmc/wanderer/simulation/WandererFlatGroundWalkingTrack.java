@@ -90,7 +90,7 @@ public class WandererFlatGroundWalkingTrack
 /*      desiredVelocityX.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
          	if (v.getValueAsDouble() < minVelocityX)
             	 v.setValueFromDouble(minVelocityX, false);

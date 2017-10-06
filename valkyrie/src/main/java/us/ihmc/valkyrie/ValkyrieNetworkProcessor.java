@@ -27,6 +27,8 @@ public class ValkyrieNetworkProcessor
       networkModuleParams.enableBehaviorVisualizer(false);
       networkModuleParams.enableRobotEnvironmentAwerenessModule(true);
       networkModuleParams.enableKinematicsToolbox(true);
+      networkModuleParams.enableFootstepPlanningToolbox(true);
+      networkModuleParams.enableFootstepPlanningToolboxVisualizer(true);
 
 //      uncomment these for the sensors
       URI rosuri = NetworkParameters.getROSURI();

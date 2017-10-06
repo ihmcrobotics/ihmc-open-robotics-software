@@ -130,7 +130,7 @@ public class WalkControllerSliderBoard
       VariableChangedListener listener = new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             System.out.println("SliderBoardMode: " + sliderBoardMode.getEnumValue().toString());
             sliderBoardConfigurationManager.loadConfiguration(sliderBoardMode.getEnumValue().toString());
@@ -138,7 +138,7 @@ public class WalkControllerSliderBoard
       };
 
       sliderBoardMode.addVariableChangedListener(listener);
-      listener.variableChanged(null);
+      listener.notifyOfVariableChange(null);
 
    }
 
@@ -228,7 +228,7 @@ public class WalkControllerSliderBoard
          headYawPercentage.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                alphaFilteredHeadYawPercentage.update(headYawPercentage.getDoubleValue());
                NeckJointName headYaw = NeckJointName.DISTAL_NECK_YAW;
@@ -246,7 +246,7 @@ public class WalkControllerSliderBoard
          upperHeadPitchPercentage.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                alphaFilteredUpperHeadPitchPercentage.update(upperHeadPitchPercentage.getDoubleValue());
                NeckJointName upperHeadPitch = NeckJointName.DISTAL_NECK_PITCH;
@@ -264,7 +264,7 @@ public class WalkControllerSliderBoard
          lowerHeadPitchPercentage.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                alphaFilteredLowerHeadPitchYawPercentage.update(lowerHeadPitchPercentage.getDoubleValue());
                NeckJointName lowerHeadPitch = NeckJointName.PROXIMAL_NECK_PITCH;

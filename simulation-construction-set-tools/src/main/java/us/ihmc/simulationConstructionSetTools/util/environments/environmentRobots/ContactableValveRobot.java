@@ -188,7 +188,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       {
          
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             valveClosePercentage.set(valvePinJoint.getQYoVariable().getDoubleValue()/(2*Math.PI)*100/valveNumberOfPossibleTurns);
          }
