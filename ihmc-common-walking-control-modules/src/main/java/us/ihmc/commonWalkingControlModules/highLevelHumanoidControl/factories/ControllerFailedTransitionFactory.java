@@ -18,12 +18,19 @@ public class ControllerFailedTransitionFactory implements ControllerStateTransit
    private final HighLevelController stateToAttachEnum;
    private final HighLevelController nextStateEnum;
 
+   /**
+    * This transition will transition the robot from its current state into another state if the standard controller failure listener returns true.
+    *
+    * @param stateToAttachEnum state to check if the controller has failed.
+    * @param nextStateEnum state to transition to if the controller fails.
+    */
    public ControllerFailedTransitionFactory(HighLevelController stateToAttachEnum, HighLevelController nextStateEnum)
    {
       this.stateToAttachEnum = stateToAttachEnum;
       this.nextStateEnum = nextStateEnum;
    }
 
+   /** {@inheritDoc} */
    @Override
    public StateTransition<HighLevelController> getOrCreateStateTransition(EnumMap<HighLevelController, ? extends FinishableState<HighLevelController>> controllerStateMap,
                                                                           HighLevelControllerFactoryHelper controllerFactoryHelper, YoVariableRegistry parentRegistry)
@@ -38,6 +45,7 @@ public class ControllerFailedTransitionFactory implements ControllerStateTransit
       return stateTransition;
    }
 
+   /** {@inheritDoc} */
    @Override
    public HighLevelController getStateToAttachEnum()
    {
