@@ -31,7 +31,7 @@ public class FinishedControllerStateTransitionFactory<E extends Enum<E>> impleme
 
    @Override
    public StateTransition<E> getOrCreateStateTransition(EnumMap<E, ? extends FinishableState<E>> stateMap, HighLevelControllerFactoryHelper controllerFactoryHelper,
-                                                        ForceSensorDataHolderReadOnly forceSensorDataHolder, YoVariableRegistry parentRegistry)
+                                                        YoVariableRegistry parentRegistry)
    {
       if (stateTransition == null)
          stateTransition = StateMachineTools.buildFinishedStateTransition(stateMap.get(currentStateEnum), nextStateEnum);

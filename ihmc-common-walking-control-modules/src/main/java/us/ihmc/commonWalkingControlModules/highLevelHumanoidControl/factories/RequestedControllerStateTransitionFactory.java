@@ -27,7 +27,7 @@ public class RequestedControllerStateTransitionFactory<E extends Enum<E>> implem
 
    @Override
    public StateTransition<E> getOrCreateStateTransition(EnumMap<E, ? extends FinishableState<E>> stateMap, HighLevelControllerFactoryHelper controllerFactoryHelper,
-                                                        ForceSensorDataHolderReadOnly forceSensorDataHolder, YoVariableRegistry parentRegistry)
+                                                        YoVariableRegistry parentRegistry)
    {
       if (stateTransition == null)
          stateTransition = StateMachineTools.buildRequestableStateTransition(requestedControlState, nextStateEnum);

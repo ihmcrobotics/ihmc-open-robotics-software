@@ -395,7 +395,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
-      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, feet, statusMessageOutputManager, yoTime, yoGraphicsListRegistry, registry);
+      double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, defaultFinalTransferTime,
+                                                                              feet, statusMessageOutputManager, yoTime, yoGraphicsListRegistry, registry);
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
@@ -408,8 +410,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                                                            initialControllerState, highLevelControllerParameters,
                                                                                                                            walkingControllerParameters, icpPlannerParameters,
                                                                                                                            requestedHighLevelControllerState, fallbackControllerForFailure,
-                                                                                                                           controllerFactoriesMap,
-                                                                                                                           stateTransitionFactories, managerFactory, controllerToolbox,
+                                                                                                                           controllerFactoriesMap, stateTransitionFactories,
+                                                                                                                           managerFactory, controllerToolbox,
                                                                                                                            centerOfPressureDataHolderForEstimator,
                                                                                                                            forceSensorDataHolder, lowLevelControllerOutput);
       highLevelHumanoidControllerManager.addYoVariableRegistry(registry);

@@ -36,8 +36,7 @@ public class FeetLoadedToWalkingStandTransitionFactory implements ControllerStat
 
    @Override
    public StateTransition<HighLevelController> getOrCreateStateTransition(EnumMap<HighLevelController, ? extends FinishableState<HighLevelController>> controllerStateMap,
-                                                                          HighLevelControllerFactoryHelper controllerFactoryHelper, ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                                                          YoVariableRegistry parentRegistry)
+                                                                          HighLevelControllerFactoryHelper controllerFactoryHelper, YoVariableRegistry parentRegistry)
    {
       if (stateTransition != null)
          return stateTransition;
@@ -45,6 +44,7 @@ public class FeetLoadedToWalkingStandTransitionFactory implements ControllerStat
       double totalMass = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel().getTotalMass();
       double gravityZ = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getGravityZ();
       double controlDT = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlDT();
+      ForceSensorDataHolderReadOnly forceSensorDataHolder = controllerFactoryHelper.getForceSensorDataHolder();
       HighLevelControllerParameters highLevelControllerParameters = controllerFactoryHelper.getHighLevelControllerParameters();
 
       StateTransitionCondition stateTransitionCondition = new FeetLoadedToWalkingStandTransition(controllerStateMap.get(stateToAttachEnum), nextStateEnum,

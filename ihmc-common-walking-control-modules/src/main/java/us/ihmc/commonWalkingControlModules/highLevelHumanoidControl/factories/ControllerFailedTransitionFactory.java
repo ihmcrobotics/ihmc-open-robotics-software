@@ -26,8 +26,7 @@ public class ControllerFailedTransitionFactory implements ControllerStateTransit
 
    @Override
    public StateTransition<HighLevelController> getOrCreateStateTransition(EnumMap<HighLevelController, ? extends FinishableState<HighLevelController>> controllerStateMap,
-                                                                          HighLevelControllerFactoryHelper controllerFactoryHelper, ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                                                          YoVariableRegistry parentRegistry)
+                                                                          HighLevelControllerFactoryHelper controllerFactoryHelper, YoVariableRegistry parentRegistry)
    {
       if (stateTransition != null)
          return stateTransition;
