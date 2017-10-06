@@ -7,7 +7,9 @@ import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionBaseOfCliffAvoider;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -64,7 +66,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       double x = 0.9;
       double y = 0.0;
       doAQuery(planarRegionsList, avoider, parameters, minimumDistanceFromCliffBottom, scs, footstepSide, x, y);
-      
+
       x = 0.9;
       y = -0.375;
       doAQuery(planarRegionsList, avoider, parameters, minimumDistanceFromCliffBottom, scs, footstepSide, x, y);
@@ -132,36 +134,31 @@ public class PlanarRegionBaseOfCliffAvoiderTest
    {
       RigidBodyTransform soleTransform = new RigidBodyTransform();
       soleTransform.setTranslation(x, y, 0.0);
-      BipedalFootstepPlannerNode node = new BipedalFootstepPlannerNode(footstepSide, soleTransform);
-      avoider.shiftAwayFromCliffBottoms(parameters, planarRegionsList, node);
-
-      RigidBodyTransform newSoleTransform = new RigidBodyTransform();
-      node.getSoleTransform(newSoleTransform);
+      FootstepNode node = new FootstepNode(x, y, 0.0, footstepSide);
+      RigidBodyTransform newSoleTransform = new RigidBodyTransform(soleTransform);
+      avoider.shiftAwayFromCliffBottoms(parameters, planarRegionsList, newSoleTransform);
 
       if ((x > 1.0 - minimumDistanceFromCliffBottom) && (x < 1.0 - 0.1 - 1e-6) && (Math.abs(y) < 0.5-1e-6)) // Close to first cliff
       {
-         Point3D solePosition = node.getSolePosition();
-
+         Vector3DReadOnly newSolePosition = newSoleTransform.getTranslationVector();
          if (doAsserts)
-            assertEquals("x = " + x + ", y = " + y, 1.0 - minimumDistanceFromCliffBottom, solePosition.getX(), 1e-7);
-
+            assertEquals("x = " + x + ", y = " + y, 1.0 - minimumDistanceFromCliffBottom, newSolePosition.getX(), 1e-7);
       }
-      
+
       if ((y > -0.5 - minimumDistanceFromCliffBottom) && (y < -0.5 - 0.1 - 1e-6) && (Math.abs(x - 1.5) < 0.5-1e-6)) // Close to left side cliff
       {
-         Point3D solePosition = node.getSolePosition();
+         Vector3DReadOnly newSolePosition = newSoleTransform.getTranslationVector();
 
          if (doAsserts)
-            assertEquals("x = " + x + ", y = " + y, -0.5 - minimumDistanceFromCliffBottom, solePosition.getY(), 1e-7);
-
+            assertEquals("x = " + x + ", y = " + y, -0.5 - minimumDistanceFromCliffBottom, newSolePosition.getY(), 1e-7);
       }
-      
+
       if ((y < 0.5 + minimumDistanceFromCliffBottom) && (y > 0.5 + 0.1 + 1e-6) && (Math.abs(x - 1.5) < 0.5-1e-6)) // Close to right side cliff
       {
-         Point3D solePosition = node.getSolePosition();
+         Vector3DReadOnly newSolePosition = newSoleTransform.getTranslationVector();
 
          if (doAsserts)
-            assertEquals("x = " + x + ", y = " + y, 0.5 + minimumDistanceFromCliffBottom, solePosition.getY(), 1e-7);
+            assertEquals("x = " + x + ", y = " + y, 0.5 + minimumDistanceFromCliffBottom, newSolePosition.getY(), 1e-7);
       }
 
       if (visualize)

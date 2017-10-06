@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning;
 
-import us.ihmc.footstepPlanning.aStar.implementations.ReachableFootstepsBasedExpansion;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ReachableFootstepsBasedExpansion;
 
 public interface PlanarRegionFootstepPlanningParameters
 {

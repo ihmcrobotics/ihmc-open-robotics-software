@@ -1,6 +1,6 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.footstepPlanning.aStar.implementations.ReachableFootstepsBasedExpansion;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ReachableFootstepsBasedExpansion;
 /**
  * This class adds footstep neighbors specific to Atlas Robot
  * @author Shlok Agarwal

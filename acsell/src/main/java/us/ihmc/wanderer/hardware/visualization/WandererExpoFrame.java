@@ -124,7 +124,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
          startDistance.set(0.0);
          batteryLevel.set(86);
          avgpower.set(456);
-         indexChanged(1, 1.0);
+         notifyOfIndexChange(1);
       } else
       {
          nanosecondstime = (YoLong) parentRegistry.getVariable("SensorProcessing","timestamp");
@@ -150,7 +150,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
       expo_isWalking.addVariableChangedListener(new VariableChangedListener()
       {         
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             manageWalkChanged(v.getValueAsDouble()>0.5);
          }
@@ -158,7 +158,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
     /*  walkingState.addVariableChangedListener(new VariableChangedListener()
       {         
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             manageWalkingStateChanged((YoEnum<WalkingState>) v);
          }
@@ -308,7 +308,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
    }
    
    @Override
-   public void indexChanged(int newIndex, double newTime)
+   public void notifyOfIndexChange(int newIndex)
    {
       if(!init_complete)
       {

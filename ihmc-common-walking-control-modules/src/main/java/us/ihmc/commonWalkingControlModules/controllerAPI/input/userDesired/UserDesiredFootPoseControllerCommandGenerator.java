@@ -46,7 +46,7 @@ public class UserDesiredFootPoseControllerCommandGenerator
       
       userDoFootPose.addVariableChangedListener(new VariableChangedListener()
       {
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (userDoFootPose.getBooleanValue())
             {
