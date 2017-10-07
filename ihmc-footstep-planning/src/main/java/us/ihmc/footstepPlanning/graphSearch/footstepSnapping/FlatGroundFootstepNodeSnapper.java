@@ -15,11 +15,6 @@ public class FlatGroundFootstepNodeSnapper extends FootstepNodeSnapper
    }
 
    @Override
-   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
-   {
-   }
-
-   @Override
    public FootstepNodeSnapData snapInternal(FootstepNode footstepNode)
    {
       return FootstepNodeSnapData.emptyData();
