@@ -185,7 +185,7 @@ public class PositionOptimizedTrajectoryGenerator
    {
       int size = waypointTimes.size() + 1;
       for (Direction axis : Direction.values)
-         trajectories.get(axis).add(new YoPolynomial(namePrefix + "Segment" + size + "Axis" + axis.getIndex(), order.getCoefficients(), registry));
+         trajectories.get(axis).add(new YoPolynomial(namePrefix + "Segment" + size + "Axis" + axis.ordinal(), order.getCoefficients(), registry));
       waypointTimes.add(new YoDouble(namePrefix + "WaypointTime" + size, registry));
       waypointPositions.add();
    }
@@ -229,10 +229,10 @@ public class PositionOptimizedTrajectoryGenerator
 
       for (Direction axis : Direction.values)
       {
-         initialPositionArray.set(axis.getIndex(), this.initialPosition.getElement(axis.getIndex()));
-         initialVelocityArray.set(axis.getIndex(), this.initialVelocity.getElement(axis.getIndex()));
-         finalPositionArray.set(axis.getIndex(), this.finalPosition.getElement(axis.getIndex()));
-         finalVelocityArray.set(axis.getIndex(), this.finalVelocity.getElement(axis.getIndex()));
+         initialPositionArray.set(axis.ordinal(), this.initialPosition.getElement(axis.ordinal()));
+         initialVelocityArray.set(axis.ordinal(), this.initialVelocity.getElement(axis.ordinal()));
+         finalPositionArray.set(axis.ordinal(), this.finalPosition.getElement(axis.ordinal()));
+         finalVelocityArray.set(axis.ordinal(), this.finalVelocity.getElement(axis.ordinal()));
       }
 
       optimizer.setEndPoints(initialPositionArray, initialVelocityArray, finalPositionArray, finalVelocityArray);
@@ -258,7 +258,7 @@ public class PositionOptimizedTrajectoryGenerator
          waypointPosition.changeFrame(trajectoryFrame);
          TDoubleArrayList waypoint = this.waypointPositions.add();
          for (Direction axis : Direction.values)
-            waypoint.set(axis.getIndex(), this.waypointPosition.getElement(axis.getIndex()));
+            waypoint.set(axis.ordinal(), this.waypointPosition.getElement(axis.ordinal()));
          coefficients.add();
       }
 

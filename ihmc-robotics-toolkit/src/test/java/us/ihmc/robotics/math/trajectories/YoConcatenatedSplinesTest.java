@@ -49,8 +49,8 @@ public class YoConcatenatedSplinesTest
             FrameVector3D actualVelocity = concatenatedSplines.getVelocity();
             for (Direction direction : Direction.values())
             {
-               assertEquals(expectedPosition.getElement(direction.getIndex()), actualPosition.getElement(direction.getIndex()), EPSILON);
-               assertEquals(expectedVelocity.getElement(direction.getIndex()), actualVelocity.getElement(direction.getIndex()), EPSILON);
+               assertEquals(expectedPosition.getElement(direction.ordinal()), actualPosition.getElement(direction.ordinal()), EPSILON);
+               assertEquals(expectedVelocity.getElement(direction.ordinal()), actualVelocity.getElement(direction.ordinal()), EPSILON);
             }
          }
       }
@@ -89,8 +89,8 @@ public class YoConcatenatedSplinesTest
          FrameVector3D actualVelocity = concatenatedSplines.getVelocity();
          for (Direction direction : Direction.values())
          {
-            assertEquals(expectedPosition.getElement(direction.getIndex()), actualPosition.getElement(direction.getIndex()), EPSILON);
-            assertEquals(expectedVelocity.getElement(direction.getIndex()), actualVelocity.getElement(direction.getIndex()), EPSILON);
+            assertEquals(expectedPosition.getElement(direction.ordinal()), actualPosition.getElement(direction.ordinal()), EPSILON);
+            assertEquals(expectedVelocity.getElement(direction.ordinal()), actualVelocity.getElement(direction.ordinal()), EPSILON);
          }
       }
    }
@@ -127,8 +127,8 @@ public class YoConcatenatedSplinesTest
             FrameVector3D respacedVelocity = respacedSplines.getVelocity();
             for (Direction direction : Direction.values())
             {
-               assertEquals(originalPosition.getElement(direction.getIndex()), respacedPosition.getElement(direction.getIndex()), EPSILON);
-               assertEquals(originalVelocity.getElement(direction.getIndex()), respacedVelocity.getElement(direction.getIndex()), EPSILON);
+               assertEquals(originalPosition.getElement(direction.ordinal()), respacedPosition.getElement(direction.ordinal()), EPSILON);
+               assertEquals(originalVelocity.getElement(direction.ordinal()), respacedVelocity.getElement(direction.ordinal()), EPSILON);
             }
          }
       }
