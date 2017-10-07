@@ -43,24 +43,14 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
    private final TransformReferenceFrame nodeSoleFrame = new TransformReferenceFrame("nodeSole", ReferenceFrame.getWorldFrame());
    private final FramePoint3D solePositionInParentZUpFrame = new FramePoint3D(parentSoleZupFrame);
 
-   public SnapAndWiggleBasedNodeChecker(BipedalFootstepPlannerParameters parameters,
+   public SnapAndWiggleBasedNodeChecker(SideDependentList<ConvexPolygon2D> footPolygons,
+                                        BipedalFootstepPlannerListener listener,
+                                        BipedalFootstepPlannerParameters parameters,
                                         YoGraphicsListRegistry graphicsListRegistry)
    {
-      this.snapAndWiggler = new FootstepNodeSnapAndWiggler(parameters);
+      this.snapAndWiggler = new FootstepNodeSnapAndWiggler(footPolygons, parameters, listener);
       this.parameters = parameters;
       this.baseOfCliffAvoider = new PlanarRegionBaseOfCliffAvoider(registry, graphicsListRegistry);
-   }
-
-   public void setFeetPolygons(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame)
-   {
-      this.snapAndWiggler.setFootPolygonsInSoleFrame(footPolygonsInSoleFrame);
-      this.controllerPolygonsInSoleFrame = footPolygonsInSoleFrame;
-   }
-
-   public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
-   {
-      this.snapAndWiggler.setListener(listener);
-      this.listener = listener;
    }
 
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)

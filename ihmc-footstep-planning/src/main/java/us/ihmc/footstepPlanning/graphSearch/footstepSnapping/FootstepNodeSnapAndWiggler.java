@@ -23,22 +23,15 @@ import java.util.List;
 
 public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {
-   private BipedalFootstepPlannerListener listener;
-   private SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
-   private BipedalFootstepPlannerParameters parameters;
+   private final BipedalFootstepPlannerListener listener;
+   private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
+   private final BipedalFootstepPlannerParameters parameters;
 
-   public FootstepNodeSnapAndWiggler(BipedalFootstepPlannerParameters parameters)
-   {
-      this.parameters = parameters;
-   }
-
-   public void setFootPolygonsInSoleFrame(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame)
+   public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, BipedalFootstepPlannerParameters parameters,
+                                     BipedalFootstepPlannerListener listener)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
-   }
-
-   public void setListener(BipedalFootstepPlannerListener listener)
-   {
+      this.parameters = parameters;
       this.listener = listener;
    }
 
