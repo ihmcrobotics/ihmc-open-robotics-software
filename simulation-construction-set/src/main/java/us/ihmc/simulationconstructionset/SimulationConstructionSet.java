@@ -2638,10 +2638,10 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
        * myGUI.updateGraphs(); }
        */
 
-      // if(last> myDataBuffer.getIndex())
+      // if(last> myDataBuffer.ordinal())
       // {
       ////            System.out.println("times around = "+count);
-      // last = myDataBuffer.getIndex();
+      // last = myDataBuffer.ordinal();
       // }
       // System.out.println("play Cycle");
    }

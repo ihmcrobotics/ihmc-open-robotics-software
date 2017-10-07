@@ -10,7 +10,7 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.Trajectory;
@@ -94,19 +94,19 @@ public class SmoothCapturePointAdjustmentToolbox
       FrameTrajectory3D cmpPolynomial3DSegment1 = copPolynomials3D.get(0);
       FrameTrajectory3D cmpPolynomial3DSegment2 = copPolynomials3D.get(1);
       FramePoint3D icpPositionFinalSegment2 = exitCornerPointsToPack.get(1);
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         Trajectory cmpPolynomialSegment1 = cmpPolynomial3DSegment1.getTrajectory(direction);
-         Trajectory cmpPolynomialSegment2 = cmpPolynomial3DSegment2.getTrajectory(direction);
+         Trajectory cmpPolynomialSegment1 = cmpPolynomial3DSegment1.getTrajectory(axis);
+         Trajectory cmpPolynomialSegment2 = cmpPolynomial3DSegment2.getTrajectory(axis);
 
-         double icpPositionFinalSegment2Scalar = icpPositionFinalSegment2.getElement(direction.getIndex());
+         double icpPositionFinalSegment2Scalar = icpPositionFinalSegment2.getElement(axis.ordinal());
 
          int numberOfCoefficients = cmpPolynomialSegment1.getNumberOfCoefficients();
          int numberOfConstrainedDerivatives = numberOfCoefficients / 2;
 
          initializeMatrices1D(numberOfCoefficients, numberOfConstrainedDerivatives);
 
-         populateBoundaryConditionMatrices1D(omega0, direction, numberOfCoefficients, numberOfConstrainedDerivatives, cmpPolynomialSegment1,
+         populateBoundaryConditionMatrices1D(omega0, axis, numberOfCoefficients, numberOfConstrainedDerivatives, cmpPolynomialSegment1,
                                              cmpPolynomialSegment2, icpQuantityInitialConditionList, icpPositionFinalSegment2Scalar);
          computeAdjustedPolynomialCoefficientVectors1D(numberOfCoefficients);
          adjustCMPPolynomials(cmpPolynomialSegment1, cmpPolynomialSegment2);
@@ -120,7 +120,7 @@ public class SmoothCapturePointAdjustmentToolbox
       cmpPolynomialSegment2.setDirectly(polynomialCoefficientVectorAdjustmentSegment2);
    }
 
-   private void populateBoundaryConditionMatrices1D(double omega0, Direction direction, int numberOfCoefficients, int numberOfConstrainedDerivatives,
+   private void populateBoundaryConditionMatrices1D(double omega0, Axis axis, int numberOfCoefficients, int numberOfConstrainedDerivatives,
                                                     Trajectory cmpPolynomialSegment1, Trajectory cmpPolynomialSegment2,
                                                     List<FrameTuple3D<?, ?>> icpQuantityInitialConditionList, double icpPositionFinalSegment2Scalar)
    {
@@ -129,7 +129,7 @@ public class SmoothCapturePointAdjustmentToolbox
       // TODO: check whether division always integer
       for (int i = 0; i < numberOfConstrainedDerivatives; i++)
       {
-         double icpQuantityInitialConditionScalar = icpQuantityInitialConditionList.get(i).getElement(direction.getIndex());
+         double icpQuantityInitialConditionScalar = icpQuantityInitialConditionList.get(i).getElement(axis.ordinal());
          calculateGeneralizedICPMatricesOnCMPSegment1(omega0, i, cmpPolynomialSegment1);
          setGeneralizedBoundaryConstraints(i, numberOfCoefficients, numberOfConstrainedDerivatives, cmpPolynomialSegment1, cmpPolynomialSegment2,
                                            icpQuantityInitialConditionScalar, icpPositionFinalSegment2Scalar);
