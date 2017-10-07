@@ -25,7 +25,6 @@ public class AxisTest
       assertEquals(zAxis.ordinal(), 2, 1e-7);
 
       assertEquals(3, Axis.values().length);
-      assertEquals(2, Axis.values2D().length);
 
       boolean touchedX = false;
       boolean touchedY = false;
@@ -55,35 +54,6 @@ public class AxisTest
       assertTrue(touchedX);
       assertTrue(touchedY);
       assertTrue(touchedZ);
-
-      touchedX = false;
-      touchedY = false;
-      touchedZ = false;
-
-      for (Axis axis : Axis.values2D())
-      {
-         switch (axis)
-         {
-            case X :
-               touchedX = true;
-
-               break;
-
-            case Y :
-               touchedY = true;
-
-               break;
-
-            case Z :
-               touchedZ = true;
-
-               break;
-         }
-      }
-
-      assertTrue(touchedX);
-      assertTrue(touchedY);
-      assertFalse(touchedZ);
 
    }
 
