@@ -135,7 +135,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = createDefaultFootPolygons();
       SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygonsInSoleFrame);
-      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(parameters, null);
+      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footPolygonsInSoleFrame, null, parameters, null);
       ConstantFootstepCost footstepCost = new ConstantFootstepCost(1.0);
       DepthFirstFootstepPlanner planner = new DepthFirstFootstepPlanner(parameters, snapper, nodeChecker, footstepCost, registry);
       planner.setFeetPolygons(footPolygonsInSoleFrame);
