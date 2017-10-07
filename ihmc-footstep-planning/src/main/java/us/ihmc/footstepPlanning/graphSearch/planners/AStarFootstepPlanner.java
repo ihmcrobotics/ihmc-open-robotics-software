@@ -142,7 +142,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       for (int i = 1; i < path.size(); i++)
       {
          RobotSide robotSide = path.get(i).getRobotSide();
-         RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i), null);
+         RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i)).getSnapTransform();
 
          RigidBodyTransform footstepPose = new RigidBodyTransform();
          footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());

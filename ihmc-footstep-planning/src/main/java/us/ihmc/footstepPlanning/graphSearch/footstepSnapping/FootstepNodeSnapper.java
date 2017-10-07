@@ -11,16 +11,16 @@ public abstract class FootstepNodeSnapper
 
    public abstract void setPlanarRegions(PlanarRegionsList planarRegionsList);
 
-   public RigidBodyTransform snapFootstepNode(FootstepNode footstepNode, ConvexPolygon2D footholdIntersectionToPack)
+   public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode)
    {
       if(!snapDataHolder.containsKey(footstepNode))
       {
+         ConvexPolygon2D footholdIntersectionToPack = new ConvexPolygon2D();
          RigidBodyTransform transform = snapInternal(footstepNode, footholdIntersectionToPack);
          snapDataHolder.put(footstepNode, new FootstepNodeSnapData(transform, footholdIntersectionToPack));
       }
 
-      FootstepNodeSnapData snapData = snapDataHolder.get(footstepNode);
-      return snapData.getSnapTransform();
+      return snapDataHolder.get(footstepNode);
    }
 
    protected abstract RigidBodyTransform snapInternal(FootstepNode footstepNode, ConvexPolygon2D footholdIntersectionToPack);
