@@ -16,7 +16,7 @@ import us.ihmc.robotics.lists.Settable;
  *
  * @author Sylvain
  *
- * @param <C> Type of the final implementation of this Command. It is used for the copy method {@link #set(Command)}.
+ * @param <C> Type of the final implementation of this Command. It is used for the copy method {@link #set(M)}.
  * @param <M> Type of the corresponding {@link Packet} that this Command can copy.
  */
 public interface Command<C extends Command<C, M>, M extends Packet<M>> extends Settable<C>

@@ -82,7 +82,6 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    public void setBipedalFootstepPlannerListener(BipedalFootstepPlannerListener listener)
    {
       this.listener = listener;
-      ((SnapAndWiggleBasedNodeChecker) checker).setBipedalFootstepPlannerListener(listener);
    }
 
    public void setMaximumNumberOfNodesToExpand(int maximumNumberOfNodesToExpand)
@@ -170,14 +169,15 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
       for (int i = 1; i < path.size(); i++)
       {
          RobotSide robotSide = path.get(i).getRobotSide();
-         ConvexPolygon2D footholdIntersection = new ConvexPolygon2D();
-         RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i), footholdIntersection);
 
          RigidBodyTransform footstepPose = new RigidBodyTransform();
          footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());
          footstepPose.setTranslationX(path.get(i).getX());
          footstepPose.setTranslationY(path.get(i).getY());
-         snapTransform.transform(footstepPose);
+
+         RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i)).getSnapTransform();
+         if(!snapTransform.containsNaN())
+            snapTransform.transform(footstepPose);
 
          plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), footstepPose));
       }

@@ -34,6 +34,8 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
    @Test(timeout = 300000)
    public void testJustStraightLine()
    {
+      planner.setMaximumNumberOfNodesToExpand(10000);
+      planner.setTimeout(10.0);
       super.testJustStraightLine(true);
    }
 
@@ -86,14 +88,22 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
    {
       registry = new YoVariableRegistry("test");
       parameters = new BipedalFootstepPlannerParameters(registry);
-
+      setDefaultParameters();
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
-      FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper(footPolygonsInSoleFrame);
+
+      PlanarRegionBipedalFootstepPlannerVisualizer visualizer = null;
+      if (showPlannerVisualizer)
+      {
+          visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame, registry);
+         planner.setBipedalFootstepPlannerListener(visualizer);
+      }
+
+      FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
       AlwaysValidNodeChecker nodeChecker = new AlwaysValidNodeChecker();
       ConstantFootstepCost footstepCost = new ConstantFootstepCost(1.0);
       planner = new DepthFirstFootstepPlanner(parameters, snapper, nodeChecker, footstepCost, registry);
-
-      setDefaultParameters();
+      planner.setFeetPolygons(footPolygonsInSoleFrame);
+      planner.setMaximumNumberOfNodesToExpand(1000);
    }
 
    private void setDefaultParameters()
@@ -110,18 +120,6 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
       double idealFootstepLength = 0.3;
       double idealFootstepWidth = 0.2;
       parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
-
-      SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
-      planner.setFeetPolygons(footPolygonsInSoleFrame);
-
-      if (showPlannerVisualizer)
-      {
-         PlanarRegionBipedalFootstepPlannerVisualizer visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0,
-                                                                                                                                                       footPolygonsInSoleFrame, registry);
-         planner.setBipedalFootstepPlannerListener(visualizer);
-      }
-
-      planner.setMaximumNumberOfNodesToExpand(1000);
    }
 
    @Override

@@ -41,7 +41,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
@@ -50,7 +50,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
@@ -59,7 +58,6 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientation
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPoint;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -693,6 +691,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       double trajectoryDuration = 10.0;
       int numberOfWaypoints = 100;
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(numberOfWaypoints);
+      pelvisTrajectoryMessage.setEnableUserPelvisControlDuringWalking(true);
       
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame(); 
       
@@ -721,25 +720,25 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
          double x = radius * Math.cos(angle);
          double y = radius * Math.sin(angle);
-         double z = 0.0;//0.05 * Math.sin(angle * 10.0);
+         double z = Math.sin(angle) * 0.03;//0.05 * Math.sin(angle * 10.0);
          
          position.set(x,y,z);
          
          double dx = radius * -Math.sin(angle) * angleDot;
          double dy = radius * Math.cos(angle) * angleDot;
-         double dz = 0.0;//0.05 * 10.0 * Math.cos(angle * 10.0) * angleDot;
+         double dz =  Math.cos(angle) * 0.03 * angleDot;//0.05 * 10.0 * Math.cos(angle * 10.0) * angleDot;
          
          linearVelocity.set(dx, dy, dz);
          
-         double yaw = 0.0;
-         double pitch = -Math.cos(angle) * 0.10;
-         double roll = Math.sin(angle) * 0.10;
+         double yaw = Math.cos(angle) * 0.05;
+         double pitch = -Math.cos(angle) * 0.1;
+         double roll = Math.cos(angle) * 0.1;
          
          orientation.setYawPitchRoll(yaw, pitch, roll);
          
-         double yawRate = 0.0;
-         double pitchRate = 0.10 * Math.sin(angle) * angleDot;
-         double rollRate = 0.10 * Math.cos(angle) * angleDot;
+         double yawRate = 0.05 * -Math.sin(angle) * angleDot;
+         double pitchRate = 0.1 * Math.sin(angle) * angleDot;
+         double rollRate = 0.1 * -Math.sin(angle) * angleDot;
          
          RotationTools.computeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate(yaw, pitch, roll, yawRate, pitchRate, rollRate, angularVelocity);
          

@@ -12,8 +12,8 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 
 public class DoNothingBehavior extends HighLevelBehavior
 {
@@ -44,7 +44,7 @@ public class DoNothingBehavior extends HighLevelBehavior
 
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(allRobotJoints.length);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(allRobotJoints);
-      lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(allRobotJoints, LowLevelJointControlMode.FORCE_CONTROL);
+      lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(allRobotJoints, JointDesiredControlMode.EFFORT);
    }
 
    @Override

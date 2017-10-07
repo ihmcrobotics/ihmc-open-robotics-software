@@ -38,7 +38,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -52,7 +52,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.*;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -733,7 +733,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          OneDoFJoint joint = allOneDoFjoints[i];
          if (joint.getResetDesiredAccelerationIntegrator())
          {
-            LowLevelJointData jointData = jointDesiredDataHolder.getLowLevelJointData(joint);
+            JointDesiredOutput jointData = jointDesiredDataHolder.getJointDesiredOutput(joint);
             if (jointData == null)
                jointData = jointDesiredDataHolder.registerJointWithEmptyData(joint);
             jointData.setResetIntegrators(true);

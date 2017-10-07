@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 
 public class RigidBodyPositionControlHelper
 {
@@ -67,7 +67,7 @@ public class RigidBodyPositionControlHelper
          accelerationIntegrationMaxVelocity[jointIdx].set(jointIntegrationSettings.getMaxVelocity());
 
          lowLevelOneDoFJointDesiredDataHolder.registerJointWithEmptyData(positionControlledJoint);
-         lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(positionControlledJoint, LowLevelJointControlMode.POSITION_CONTROL);
+         lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(positionControlledJoint, JointDesiredControlMode.POSITION);
          jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(positionControlledJoint);
       }
 

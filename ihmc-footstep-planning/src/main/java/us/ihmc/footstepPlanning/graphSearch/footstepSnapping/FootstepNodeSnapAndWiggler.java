@@ -21,34 +21,22 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapper
+public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {
-   private PlanarRegionsList planarRegionsList;
-   private BipedalFootstepPlannerListener listener;
-   private SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
-   private BipedalFootstepPlannerParameters parameters;
+   private final BipedalFootstepPlannerListener listener;
+   private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
+   private final BipedalFootstepPlannerParameters parameters;
 
-   public FootstepNodeSnapAndWiggler(BipedalFootstepPlannerParameters parameters)
-   {
-      this.parameters = parameters;
-   }
-
-   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
-   {
-      this.planarRegionsList = planarRegionsList;
-   }
-
-   public void setFootPolygonsInSoleFrame(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame)
+   public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, BipedalFootstepPlannerParameters parameters,
+                                     BipedalFootstepPlannerListener listener)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
-   }
-
-   public void setListener(BipedalFootstepPlannerListener listener)
-   {
+      this.parameters = parameters;
       this.listener = listener;
    }
 
-   public RigidBodyTransform snapFootstepNode(FootstepNode bipedalFootstepPlannerNode, ConvexPolygon2D footholdIntersectionToPack)
+   @Override
+   public FootstepNodeSnapData snapInternal(FootstepNode bipedalFootstepPlannerNode)
    {
       if (planarRegionsList == null)
       {
@@ -74,14 +62,14 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapper
       if (snapTransform == null)
       {
          notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
-         return null;
+         return FootstepNodeSnapData.emptyData();
       }
 
       if (Math.abs(snapTransform.getM22()) < parameters.getMinimumSurfaceInclineRadians())
       {
          notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode,
                                                          BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
-         return null;
+         return FootstepNodeSnapData.emptyData();
       }
 
       BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(bipedalFootstepPlannerNode, snapTransform);
@@ -113,12 +101,12 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapper
          //TODO: Possibly have different node costs depending on how firm on ground they are.
          if (parameters.getRejectIfCannotFullyWiggleInside())
          {
-            return null;
+            return FootstepNodeSnapData.emptyData();
          }
 
          else
          {
-            return snapTransform;
+            return new FootstepNodeSnapData(snapTransform, new ConvexPolygon2D());
          }
       }
 
@@ -199,14 +187,14 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapper
                   {
                      notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode,
                                                                      BipedalFootstepPlannerNodeRejectionReason.TOO_MUCH_PENETRATION_AFTER_WIGGLE);
-                     return null;
+                     return FootstepNodeSnapData.emptyData();
                   }
                }
             }
          }
       }
 
-      return snapAndWiggleTransform;
+      return new FootstepNodeSnapData(snapAndWiggleTransform, new ConvexPolygon2D());
    }
 
    private boolean isTransformZUp(RigidBodyTransform soleTransformBeforeSnap)
