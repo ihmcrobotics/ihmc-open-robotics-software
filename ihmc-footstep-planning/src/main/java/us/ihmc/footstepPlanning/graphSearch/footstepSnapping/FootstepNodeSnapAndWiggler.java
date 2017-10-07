@@ -49,7 +49,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    }
 
    @Override
-   public RigidBodyTransform snapInternal(FootstepNode bipedalFootstepPlannerNode, ConvexPolygon2D footholdIntersectionToPack)
+   public FootstepNodeSnapData snapInternal(FootstepNode bipedalFootstepPlannerNode)
    {
       if (planarRegionsList == null)
       {
@@ -75,14 +75,14 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       if (snapTransform == null)
       {
          notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
-         return null;
+         return FootstepNodeSnapData.emptyData();
       }
 
       if (Math.abs(snapTransform.getM22()) < parameters.getMinimumSurfaceInclineRadians())
       {
          notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode,
                                                          BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
-         return null;
+         return FootstepNodeSnapData.emptyData();
       }
 
       BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(bipedalFootstepPlannerNode, snapTransform);
@@ -114,12 +114,12 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
          //TODO: Possibly have different node costs depending on how firm on ground they are.
          if (parameters.getRejectIfCannotFullyWiggleInside())
          {
-            return null;
+            return FootstepNodeSnapData.emptyData();
          }
 
          else
          {
-            return snapTransform;
+            return new FootstepNodeSnapData(snapTransform, new ConvexPolygon2D());
          }
       }
 
@@ -200,14 +200,14 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
                   {
                      notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode,
                                                                      BipedalFootstepPlannerNodeRejectionReason.TOO_MUCH_PENETRATION_AFTER_WIGGLE);
-                     return null;
+                     return FootstepNodeSnapData.emptyData();
                   }
                }
             }
          }
       }
 
-      return snapAndWiggleTransform;
+      return new FootstepNodeSnapData(snapAndWiggleTransform, new ConvexPolygon2D());
    }
 
    private boolean isTransformZUp(RigidBodyTransform soleTransformBeforeSnap)

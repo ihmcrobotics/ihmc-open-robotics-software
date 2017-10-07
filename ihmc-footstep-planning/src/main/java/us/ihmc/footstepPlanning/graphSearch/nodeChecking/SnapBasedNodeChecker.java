@@ -17,7 +17,6 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
 
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepNodeSnapper snapper;
-   private final ConvexPolygon2D footholdAfterSnap;
 
    private final YoDouble maxStepHeightChange;
    private final YoDouble minPercentageFoothold;
@@ -26,7 +25,6 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
    {
       this.footPolygons = footPolygons;
       this.snapper = snapper;
-      this.footholdAfterSnap = new ConvexPolygon2D();
 
       maxStepHeightChange = new YoDouble("maxStepHeightChange", registry);
       minPercentageFoothold = new YoDouble("minPercentageFoothold", registry);
@@ -46,9 +44,10 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
    {
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
-      if (snapTransform == null)
+      if (snapTransform.containsNaN())
          return false;
 
+      ConvexPolygon2D footholdAfterSnap = snapData.getCroppedFoothold();
       double area = footholdAfterSnap.getArea();
       double footArea = footPolygons.get(node.getRobotSide()).getArea();
       if (area < minPercentageFoothold.getDoubleValue() * footArea)
