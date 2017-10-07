@@ -130,28 +130,25 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private DepthFirstFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FullRobotModel fullRobotModel)
    {
+      PlanarRegionBipedalFootstepPlannerVisualizer listener = null;
+      if (visualize)
+      {
+         listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithYoVariableServer(0.01, fullRobotModel,
+                                                                                                                                                logModelProvider, footPolygonsInSoleFrame, "Toolbox_");
+      }
+
       BipedalFootstepPlannerParameters footstepPlanningParameters = new BipedalFootstepPlannerParameters(registry);
       FootstepPlannerUtils.setPlannerParametersForToolbox(footstepPlanningParameters);
 
-      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footstepPlanningParameters);
-      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footstepPlanningParameters, null);
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, footstepPlanningParameters, listener);
+      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footPolygonsInSoleFrame, listener, footstepPlanningParameters, null);
       ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
-
-      nodeChecker.setFeetPolygons(footPolygonsInSoleFrame);
-      snapper.setFootPolygonsInSoleFrame(footPolygonsInSoleFrame);
 
       DepthFirstFootstepPlanner footstepPlanner = new DepthFirstFootstepPlanner(footstepPlanningParameters, snapper, nodeChecker, stepCostCalculator, registry);
       footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
       footstepPlanner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       footstepPlanner.setExitAfterInitialSolution(false);
       footstepPlanner.setTimeout(20.0);
-
-      if (visualize)
-      {
-         PlanarRegionBipedalFootstepPlannerVisualizer listener = PlanarRegionBipedalFootstepPlannerVisualizerFactory.createWithYoVariableServer(0.01, fullRobotModel,
-                                                                                                                                                logModelProvider, footPolygonsInSoleFrame, "Toolbox_");
-         footstepPlanner.setBipedalFootstepPlannerListener(listener);
-      }
 
       return footstepPlanner;
    }
