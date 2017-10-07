@@ -100,6 +100,70 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
+   public void testTimingAgainstSimpleSolver()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("test");
+      ExecutionTimer quadProgTotalTimer = new ExecutionTimer("quadProgTotalTimer", registry);
+      ExecutionTimer simpleTotalTimer = new ExecutionTimer("simpleTotalTimer", registry);
+      ExecutionTimer quadProgTimer = new ExecutionTimer("quadProgTimer", registry);
+      ExecutionTimer simpleTimer = new ExecutionTimer("simpleTimer", registry);
+
+      // Minimize x^2 + y^2 subject to x + y >= 2 (-x -y <= -2), y <= 10x - 2 (-10x + y <= -2), x <= 10y - 2 (x - 10y <= -2),
+      // Equality solution will violate all three constraints, but optimal only has the first constraint active.
+      // However, if you set all three constraints active, there is no solution.
+      double[][] costQuadraticMatrix = new double[][] {{2.0, 0.0}, {0.0, 2.0}};
+      double[] costLinearVector = new double[] {0.0, 0.0};
+      double quadraticCostScalar = 0.0;
+
+      double[][] linearInequalityConstraintsCMatrix = new double[][] {{-1.0, -1.0}, {-10.0, 1.0}, {1.0, -10.0}};
+      double[] linearInqualityConstraintsDVector = new double[] {-2.0, -2.0, -2.0};
+
+      JavaQuadProgSolver quadProg = new JavaQuadProgSolver();
+      SimpleEfficientActiveSetQPSolver simpleSolver = new SimpleEfficientActiveSetQPSolver();
+
+      double[] quadProgSolution = new double[2];
+      double[] quadProgLagrangeEqualityMultipliers = new double[0];
+      double[] quadProgLagrangeInequalityMultipliers = new double[3];
+      double[] simpleSolution = new double[2];
+      double[] simpleLagrangeEqualityMultipliers = new double[0];
+      double[] simpleLagrangeInequalityMultipliers = new double[3];
+
+      for (int repeat = 0; repeat < 1000; repeat++)
+      {
+         quadProgTotalTimer.startMeasurement();
+
+         quadProg.clear();
+         quadProg.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+         quadProg.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
+
+         quadProgTimer.startMeasurement();
+         quadProg.solve(quadProgSolution, quadProgLagrangeEqualityMultipliers, quadProgLagrangeInequalityMultipliers);
+         quadProgTimer.stopMeasurement();
+
+         quadProgTotalTimer.stopMeasurement();
+
+
+         simpleTotalTimer.startMeasurement();
+
+         simpleSolver.clear();
+         simpleSolver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+         simpleSolver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
+
+         simpleTimer.startMeasurement();
+         simpleSolver.solve(simpleSolution, simpleLagrangeEqualityMultipliers, simpleLagrangeInequalityMultipliers);
+         simpleTimer.stopMeasurement();
+
+         simpleTotalTimer.stopMeasurement();
+      }
+
+      PrintTools.info("Quad Prog total time : " + quadProgTotalTimer.getAverageTime());
+      PrintTools.info("Simple total time : " + simpleTotalTimer.getAverageTime());
+      PrintTools.info("Quad Prog solve time : " + quadProgTimer.getAverageTime());
+      PrintTools.info("Simple solve time : " + simpleTimer.getAverageTime());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @Test(timeout = 30000)
    public void testAgainstStandardQuadProg() throws NoConvergenceException
    {
       int numberOfInequalityConstraints = 1;
