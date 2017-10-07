@@ -6,8 +6,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -46,14 +46,14 @@ public class StandTransitionControllerState extends HighLevelControllerState
          jointCommandBlenders.add(controlledJoint, jointControlBlender);
 
          String jointName = controlledJoint.getName();
-         LowLevelJointControlMode jointControlMode = highLevelControllerParameters.getLowLevelJointControlMode(jointName, controllerState);
-         double jointStiffness = highLevelControllerParameters.getLowLevelJointStiffness(jointName);
-         double jointDamping = highLevelControllerParameters.getLowLevelJointDamping(jointName);
+         JointDesiredControlMode jointControlMode = highLevelControllerParameters.getJointDesiredControlMode(jointName, controllerState);
+         double jointStiffness = highLevelControllerParameters.getDesiredJointStiffness(jointName);
+         double jointDamping = highLevelControllerParameters.getDesiredJointDamping(jointName);
 
-         LowLevelJointData lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(controlledJoint);
+         JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(controlledJoint);
          lowLevelJointData.setControlMode(jointControlMode);
-         lowLevelJointData.setKp(jointStiffness);
-         lowLevelJointData.setKd(jointDamping);
+         lowLevelJointData.setStiffness(jointStiffness);
+         lowLevelJointData.setDamping(jointDamping);
       }
    }
 
@@ -81,10 +81,10 @@ public class StandTransitionControllerState extends HighLevelControllerState
       {
          OneDoFJoint joint = jointCommandBlenders.get(jointIndex).getLeft();
          JointControlBlender jointControlBlender = jointCommandBlenders.get(jointIndex).getRight();
-         LowLevelJointData lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(joint);
+         JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
 
-         jointControlBlender.computeAndUpdateJointControl(lowLevelJointData, standReadyJointCommand.getLowLevelJointData(joint),
-                                                          walkingJointCommand.getLowLevelJointData(joint), gainRatio);
+         jointControlBlender.computeAndUpdateJointControl(lowLevelJointData, standReadyJointCommand.getJointDesiredOutput(joint),
+                                                          walkingJointCommand.getJointDesiredOutput(joint), gainRatio);
       }
    }
 
