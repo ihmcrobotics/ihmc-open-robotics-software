@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -50,8 +50,8 @@ public class JointControlBlender
       velocityStepSizeLimiter.updateOutput(qd, qd);
    }
 
-   public void computeAndUpdateJointControl(LowLevelJointData outputDataToPack, LowLevelJointDataReadOnly positionControllerDesireds,
-                                            LowLevelJointDataReadOnly walkingControllerDesireds,
+   public void computeAndUpdateJointControl(JointDesiredOutput outputDataToPack, JointDesiredOutputReadOnly positionControllerDesireds,
+                                            JointDesiredOutputReadOnly walkingControllerDesireds,
                                             double forceControlBlendingFactor)
    {
       forceControlBlendingFactor = MathTools.clamp(forceControlBlendingFactor, 0.0, 1.0);
