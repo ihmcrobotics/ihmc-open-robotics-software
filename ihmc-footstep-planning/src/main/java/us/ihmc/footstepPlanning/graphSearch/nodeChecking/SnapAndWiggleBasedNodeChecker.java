@@ -80,7 +80,7 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
       FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(nodeToExpand);
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
-      if (snapTransform == null)
+      if (snapTransform.containsNaN())
          return false;
 
       RigidBodyTransform snappedSoleTransform = BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(nodeToExpand, snapTransform);

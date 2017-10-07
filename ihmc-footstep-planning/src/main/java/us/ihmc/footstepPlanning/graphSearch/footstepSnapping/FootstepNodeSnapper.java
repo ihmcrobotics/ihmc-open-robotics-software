@@ -15,13 +15,12 @@ public abstract class FootstepNodeSnapper
    {
       if(!snapDataHolder.containsKey(footstepNode))
       {
-         ConvexPolygon2D footholdIntersectionToPack = new ConvexPolygon2D();
-         RigidBodyTransform transform = snapInternal(footstepNode, footholdIntersectionToPack);
-         snapDataHolder.put(footstepNode, new FootstepNodeSnapData(transform, footholdIntersectionToPack));
+         FootstepNodeSnapData snapData = snapInternal(footstepNode);
+         snapDataHolder.put(footstepNode, snapData);
       }
 
       return snapDataHolder.get(footstepNode);
    }
 
-   protected abstract RigidBodyTransform snapInternal(FootstepNode footstepNode, ConvexPolygon2D footholdIntersectionToPack);
+   protected abstract FootstepNodeSnapData snapInternal(FootstepNode footstepNode);
 }
