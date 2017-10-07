@@ -3,9 +3,11 @@ package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.HashMap;
+
 public abstract class FootstepNodeSnapper
 {
-   private final FootstepNodeSnapDataHolder snapDataHolder = new FootstepNodeSnapDataHolder();
+   private final HashMap<FootstepNode, FootstepNodeSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
 
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
