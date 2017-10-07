@@ -11,7 +11,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
-public class SimplePlanarRegionFootstepNodeSnapper implements FootstepNodeSnapper
+public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 {
    private PlanarRegionsList planarRegionsList = null;
 
@@ -30,7 +30,7 @@ public class SimplePlanarRegionFootstepNodeSnapper implements FootstepNodeSnappe
    }
 
    @Override
-   public RigidBodyTransform snapFootstepNode(FootstepNode footstepNode, ConvexPolygon2D footholdIntersectionToPack)
+   public RigidBodyTransform snapInternal(FootstepNode footstepNode, ConvexPolygon2D footholdIntersectionToPack)
    {
       if (planarRegionsList == null)
          return null;

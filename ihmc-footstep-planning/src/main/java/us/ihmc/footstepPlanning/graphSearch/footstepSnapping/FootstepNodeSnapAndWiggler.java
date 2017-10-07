@@ -21,7 +21,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapper
+public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {
    private PlanarRegionsList planarRegionsList;
    private BipedalFootstepPlannerListener listener;
@@ -48,7 +48,8 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapper
       this.listener = listener;
    }
 
-   public RigidBodyTransform snapFootstepNode(FootstepNode bipedalFootstepPlannerNode, ConvexPolygon2D footholdIntersectionToPack)
+   @Override
+   public RigidBodyTransform snapInternal(FootstepNode bipedalFootstepPlannerNode, ConvexPolygon2D footholdIntersectionToPack)
    {
       if (planarRegionsList == null)
       {
