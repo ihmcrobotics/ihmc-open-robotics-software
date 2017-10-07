@@ -8,8 +8,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.Direction;
 
 public class Trajectory3D
 {
@@ -233,9 +233,9 @@ public class Trajectory3D
       return integralResult;
    }
 
-   public Trajectory getTrajectory(Direction direction)
+   public Trajectory getTrajectory(Axis axis)
    {
-      return getTrajectory(direction.ordinal());
+      return getTrajectory(axis.ordinal());
    }
 
    public Trajectory getTrajectory(int index)
@@ -310,7 +310,7 @@ public class Trajectory3D
       }
    }
 
-   public double getInitialTime(Direction dir)
+   public double getInitialTime(Axis dir)
    {
       return getTrajectory(dir).getInitialTime();
    }
@@ -320,7 +320,7 @@ public class Trajectory3D
       return getTrajectory(index).getInitialTime();
    }
 
-   public double getFinalTime(Direction dir)
+   public double getFinalTime(Axis dir)
    {
       return getTrajectory(dir).getFinalTime();
    }
@@ -354,7 +354,7 @@ public class Trajectory3D
          return -1;
    }
 
-   public int getNumberOfCoefficients(Direction dir)
+   public int getNumberOfCoefficients(Axis dir)
    {
       return getTrajectory(dir).getNumberOfCoefficients();
    }
@@ -475,9 +475,9 @@ public class Trajectory3D
 
    public void setLinear(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zf)
    {
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         int index = direction.ordinal();
+         int index = axis.ordinal();
          getTrajectory(index).setLinear(t0, tFinal, z0.getElement(index), zf.getElement(index));
       }
    }
@@ -659,9 +659,9 @@ public class Trajectory3D
                                                              Vector3DReadOnly zdd0, Vector3DReadOnly zdIntermediate, Vector3DReadOnly zddIntermediate,
                                                              Point3DReadOnly zFinal, Vector3DReadOnly zdFinal)
    {
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         int index = direction.ordinal();
+         int index = axis.ordinal();
          getTrajectory(index).setSexticUsingWaypointVelocityAndAcceleration(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index),
                                                                               zdd0.getElement(index), zdIntermediate.getElement(index),
                                                                               zddIntermediate.getElement(index), zFinal.getElement(index),
@@ -687,9 +687,9 @@ public class Trajectory3D
 
    public void getDerivative(Trajectory3D dervTraj, int order)
    {
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         int index = direction.ordinal();
+         int index = axis.ordinal();
          getTrajectory(index).getDerivative(dervTraj.getTrajectory(index), order);
       }
    }

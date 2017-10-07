@@ -7,32 +7,33 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.Axis;
 
-public class DirectionTest
+public class AxisTest
 {
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testDirection()
    {
-      Direction xDirection = Direction.X;
-      Direction yDirection = Direction.Y;
-      Direction zDirection = Direction.Z;
+      Axis xAxis = Axis.X;
+      Axis yAxis = Axis.Y;
+      Axis zAxis = Axis.Z;
       
-      assertEquals(xDirection.ordinal(), 0, 1e-7);
-      assertEquals(yDirection.ordinal(), 1, 1e-7);
-      assertEquals(zDirection.ordinal(), 2, 1e-7);
+      assertEquals(xAxis.ordinal(), 0, 1e-7);
+      assertEquals(yAxis.ordinal(), 1, 1e-7);
+      assertEquals(zAxis.ordinal(), 2, 1e-7);
 
-      assertEquals(3, Direction.values().length);
-      assertEquals(2, Direction.values2D().length);
+      assertEquals(3, Axis.values().length);
+      assertEquals(2, Axis.values2D().length);
 
       boolean touchedX = false;
       boolean touchedY = false;
       boolean touchedZ = false;
 
-      for (Direction direction : Direction.values())
+      for (Axis axis : Axis.values())
       {
-         switch (direction)
+         switch (axis)
          {
             case X :
                touchedX = true;
@@ -59,9 +60,9 @@ public class DirectionTest
       touchedY = false;
       touchedZ = false;
 
-      for (Direction direction : Direction.values2D())
+      for (Axis axis : Axis.values2D())
       {
-         switch (direction)
+         switch (axis)
          {
             case X :
                touchedX = true;
