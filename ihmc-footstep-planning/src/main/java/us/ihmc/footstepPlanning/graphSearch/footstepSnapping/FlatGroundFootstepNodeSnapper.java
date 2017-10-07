@@ -7,7 +7,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class FlatGroundFootstepNodeSnapper implements FootstepNodeSnapper
+public class FlatGroundFootstepNodeSnapper extends FootstepNodeSnapper
 {
    private final SideDependentList<ConvexPolygon2D> footPolygons;
 
@@ -22,7 +22,7 @@ public class FlatGroundFootstepNodeSnapper implements FootstepNodeSnapper
    }
 
    @Override
-   public RigidBodyTransform snapFootstepNode(FootstepNode footstepNode, ConvexPolygon2D footholdIntersectionToPack)
+   public RigidBodyTransform snapInternal(FootstepNode footstepNode, ConvexPolygon2D footholdIntersectionToPack)
    {
       if(footholdIntersectionToPack != null)
          footholdIntersectionToPack.set(footPolygons.get(footstepNode.getRobotSide()));
