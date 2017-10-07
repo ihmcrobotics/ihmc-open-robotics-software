@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBa
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.Trajectory;
@@ -266,7 +266,7 @@ public class SmoothCoMIntegrationToolbox
    public void calculateGeneralizedAlphaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedAlphaCoMPrime, 
                                                                       int alphaCoMDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
    {
-      for (Direction dir : Direction.values)
+      for (Axis dir : Axis.values)
       {
          Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
          
@@ -310,7 +310,7 @@ public class SmoothCoMIntegrationToolbox
    public void calculateGeneralizedBetaCoMPrimeOnCMPSegment3D(double omega0, double time, DenseMatrix64F generalizedBetaCoMPrime, 
                                                                      int betaCoMDerivativeOrder, FrameTrajectory3D cmpPolynomial3D)
    {                  
-      for(Direction dir : Direction.values)
+      for(Axis dir : Axis.values)
       {
          Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
          
@@ -404,7 +404,7 @@ public class SmoothCoMIntegrationToolbox
    
    private void setPolynomialCoefficientVector3D(DenseMatrix64F polynomialCoefficientCombinedVector, FrameTrajectory3D cmpPolynomial3D)
    {
-      for (Direction dir : Direction.values)
+      for (Axis dir : Axis.values)
       {
          setPolynomialCoefficientVector1D(polynomialCoefficientVector, cmpPolynomial3D.getTrajectory(dir));
          

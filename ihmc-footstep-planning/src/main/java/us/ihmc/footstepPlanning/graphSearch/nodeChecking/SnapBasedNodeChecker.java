@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -16,7 +17,6 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
 
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepNodeSnapper snapper;
-   private final ConvexPolygon2D footholdAfterSnap;
 
    private final YoDouble maxStepHeightChange;
    private final YoDouble minPercentageFoothold;
@@ -25,7 +25,6 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
    {
       this.footPolygons = footPolygons;
       this.snapper = snapper;
-      this.footholdAfterSnap = new ConvexPolygon2D();
 
       maxStepHeightChange = new YoDouble("maxStepHeightChange", registry);
       minPercentageFoothold = new YoDouble("minPercentageFoothold", registry);
@@ -43,10 +42,12 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      RigidBodyTransform snapTransform = snapper.snapFootstepNode(node, footholdAfterSnap);
-      if (snapTransform == null)
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
+      RigidBodyTransform snapTransform = snapData.getSnapTransform();
+      if (snapTransform.containsNaN())
          return false;
 
+      ConvexPolygon2D footholdAfterSnap = snapData.getCroppedFoothold();
       double area = footholdAfterSnap.getArea();
       double footArea = footPolygons.get(node.getRobotSide()).getArea();
       if (area < minPercentageFoothold.getDoubleValue() * footArea)
@@ -55,7 +56,8 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
       if(previousNode == null)
          return true;
 
-      RigidBodyTransform previousSnapTransform = snapper.snapFootstepNode(previousNode, null);
+      FootstepNodeSnapData previousNodeSnapData = snapper.snapFootstepNode(previousNode);
+      RigidBodyTransform previousSnapTransform = previousNodeSnapData.getSnapTransform();
       double heightChange = Math.abs(snapTransform.getTranslationZ() - previousSnapTransform.getTranslationZ());
       if (heightChange > maxStepHeightChange.getDoubleValue())
          return false;

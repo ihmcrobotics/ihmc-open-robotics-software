@@ -5,12 +5,10 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.AMGeneration.AngularMomentumTrajectory;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.AMGeneration.TorqueTrajectory;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.Trajectory;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
@@ -49,8 +47,8 @@ public class TorqueTrajectoryTest
          TrajectoryMathTools.getDerivative(calculatedTrajectory.getTrajectoryX(), angularMomentumTrajectory.getSegment(i).getTrajectoryY());
          TrajectoryMathTools.getDerivative(calculatedTrajectory.getTrajectoryY(), angularMomentumTrajectory.getSegment(i).getTrajectoryX());
          TrajectoryMathTools.scale(calculatedTrajectory.getTrajectoryY(), -1.0);
-         calculatedTrajectory.getTrajectoryZ().setConstant(angularMomentumTrajectory.getSegment(i).getInitialTime(Direction.X),
-                                                           angularMomentumTrajectory.getSegment(i).getFinalTime(Direction.X), 0.0);
+         calculatedTrajectory.getTrajectoryZ().setConstant(angularMomentumTrajectory.getSegment(i).getInitialTime(Axis.X),
+                                                           angularMomentumTrajectory.getSegment(i).getFinalTime(Axis.X), 0.0);
          assertTrue("Failed for segment " + i + " wanted: \n" + calculatedTrajectory.toString() + " got: \n" + torqueTrajectory.getSegment(i).toString()
                + " from: \n" + angularMomentumTrajectory.getSegment(i).toString(),
                     TrajectoryMathTools.epsilonEquals(torqueTrajectory.getSegment(i), calculatedTrajectory, epsilon));

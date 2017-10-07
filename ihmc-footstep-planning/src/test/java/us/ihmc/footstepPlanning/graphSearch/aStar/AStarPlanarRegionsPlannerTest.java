@@ -205,7 +205,7 @@ public class AStarPlanarRegionsPlannerTest
       EuclideanDistanceHeuristics heuristics = new EuclideanDistanceHeuristics(registry);
       SimpleGridResolutionBasedExpansion expansion = new SimpleGridResolutionBasedExpansion();
       EuclideanBasedCost stepCostCalculator = new EuclideanBasedCost(registry);
-      FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper(footPolygons);
+      FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
       FootstepNodeVisualization viz = null;
       if (visualize)
          viz = new FootstepNodeVisualization(1000, 0.04, planarRegionsList);

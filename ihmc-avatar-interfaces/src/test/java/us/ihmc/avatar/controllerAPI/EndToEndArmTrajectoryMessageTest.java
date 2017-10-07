@@ -17,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;

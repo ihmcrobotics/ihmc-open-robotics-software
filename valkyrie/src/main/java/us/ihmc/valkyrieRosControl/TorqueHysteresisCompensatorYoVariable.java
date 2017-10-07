@@ -2,7 +2,7 @@ package us.ihmc.valkyrieRosControl;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -16,7 +16,7 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
    };
 
    private final OneDoFJoint joint;
-   private final LowLevelJointDataReadOnly output;
+   private final JointDesiredOutputReadOnly output;
    private final YoDouble torqueHysteresisAmplitude;
    private final YoDouble jointAccelerationMin;
    private final YoDouble jointVelocityMax;
@@ -36,16 +36,16 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
 
    private final YoBoolean enabled;
 
-   public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, LowLevelJointDataReadOnly output, YoDouble torqueHysteresisAmplitude,
-         YoDouble jointAccelerationMin, YoDouble jointVelocityMax, YoDouble rampTime, YoDouble yoTime,
-         YoVariableRegistry registry)
+   public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, JointDesiredOutputReadOnly output, YoDouble torqueHysteresisAmplitude,
+                                                YoDouble jointAccelerationMin, YoDouble jointVelocityMax, YoDouble rampTime, YoDouble yoTime,
+                                                YoVariableRegistry registry)
    {
       this(prefix, joint, output, torqueHysteresisAmplitude, jointAccelerationMin, jointVelocityMax, rampTime, rampTime, yoTime, registry);
    }
 
-   public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, LowLevelJointDataReadOnly output, YoDouble torqueHysteresisAmplitude,
-         YoDouble jointAccelerationMin, YoDouble jointVelocityMax, YoDouble rampUpTime, YoDouble rampDownTime,
-         YoDouble yoTime, YoVariableRegistry registry)
+   public TorqueHysteresisCompensatorYoVariable(String prefix, OneDoFJoint joint, JointDesiredOutputReadOnly output, YoDouble torqueHysteresisAmplitude,
+                                                YoDouble jointAccelerationMin, YoDouble jointVelocityMax, YoDouble rampUpTime, YoDouble rampDownTime,
+                                                YoDouble yoTime, YoVariableRegistry registry)
    {
       super(prefix + joint.getName(), registry);
       this.joint = joint;
@@ -119,7 +119,10 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
       boolean startRampUp = isVelocityLow.getBooleanValue() && isAccelerationHigh.getBooleanValue();
       if (startRampUp)
       {
-         hysteresisSign.set(Math.signum(output.getDesiredAcceleration()));
+         if (output.hasDesiredAcceleration())
+            hysteresisSign.set(Math.signum(output.getDesiredAcceleration()));
+         else
+            hysteresisSign.set(1.0);
          rampStartTime.set(yoTime.getDoubleValue());
          hysteresisState.set(HysteresisState.RAMP_UP);
       }
@@ -137,13 +140,17 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
    {
       double timeInRampUp = yoTime.getDoubleValue() - rampStartTime.getDoubleValue();
       ramp.set(MathTools.clamp(timeInRampUp / rampUpTime.getDoubleValue(), 0.0, 1.0));
-      
+
       double tau_off_hyst = ramp.getDoubleValue() * torqueHysteresisAmplitude.getDoubleValue();
       tau_off_hyst *= hysteresisSign.getDoubleValue();
 
       set(tau_off_hyst);
 
-      boolean qddDesiredChangedSign = hysteresisSign.getDoubleValue() * output.getDesiredAcceleration() < 0.0;
+      boolean qddDesiredChangedSign;
+      if (output.hasDesiredAcceleration())
+         qddDesiredChangedSign = hysteresisSign.getDoubleValue() * output.getDesiredAcceleration() < 0.0;
+      else
+         qddDesiredChangedSign = false;
       boolean startRampDown = !isVelocityLow.getBooleanValue() || !isAccelerationHigh.getBooleanValue() || qddDesiredChangedSign;
       if (startRampDown)
       {
@@ -167,7 +174,11 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
       tau_off_hyst *= hysteresisSign.getDoubleValue();
       set(tau_off_hyst);
 
-      boolean qddDesiredChangedSign = hysteresisSign.getDoubleValue() * output.getDesiredAcceleration() < 0.0;
+      boolean qddDesiredChangedSign;
+      if (output.hasDesiredAcceleration())
+         qddDesiredChangedSign = hysteresisSign.getDoubleValue() * output.getDesiredAcceleration() < 0.0;
+      else
+         qddDesiredChangedSign = false;
       boolean startRampDown = !isVelocityLow.getBooleanValue() || !isAccelerationHigh.getBooleanValue() || qddDesiredChangedSign;
       if (startRampDown)
       {
@@ -208,7 +219,10 @@ public class TorqueHysteresisCompensatorYoVariable extends YoDouble
 
    private void checkAcceleration()
    {
-      isAccelerationHigh.set(Math.abs(output.getDesiredAcceleration()) > jointAccelerationMin.getDoubleValue());
+      if (output.hasDesiredAcceleration())
+         isAccelerationHigh.set(Math.abs(output.getDesiredAcceleration()) > jointAccelerationMin.getDoubleValue());
+      else
+         isAccelerationHigh.set(false);
    }
 
    private void checkVelocity()

@@ -1,5 +1,6 @@
 package us.ihmc.robotics;
 
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 /**
@@ -69,6 +70,56 @@ public enum Axis
       public double getZ()
       {
          return z;
+      }
+   }
+
+   /**
+    * Gets the value of the tuple for the given axis.
+    *
+    * @return double value of tuple for axis
+    */
+   public static double get(Tuple3DBasics tuple, Axis axis)
+   {
+      switch (axis)
+      {
+      case X :
+         return tuple.getX();
+
+      case Y :
+         return tuple.getY();
+
+      case Z :
+         return tuple.getZ();
+
+      default :
+         throw new IndexOutOfBoundsException();
+      }
+   }
+
+   /**
+    * Sets the value of the given tuple for the given axis to the given value.
+    */
+   public static void set(Tuple3DBasics tuple, Axis axis, double value)
+   {
+      switch (axis)
+      {
+      case X :
+         tuple.setX(value);
+
+         break;
+
+      case Y :
+         tuple.setY(value);
+
+         break;
+
+      case Z :
+         tuple.setZ(value);
+
+         break;
+
+      default :
+         throw new IndexOutOfBoundsException();
       }
    }
 }

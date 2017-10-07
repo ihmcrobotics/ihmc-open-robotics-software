@@ -15,7 +15,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
@@ -29,9 +32,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.Collection;
 

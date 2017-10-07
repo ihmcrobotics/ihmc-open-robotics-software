@@ -4,10 +4,9 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.ros.generators.RosExportedField;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 
 /**
- * A QueueableMessage is a {@link #Packet} that can be queued for execution inside the controller. It implements command
+ * A QueueableMessage is a {@link Packet} that can be queued for execution inside the controller. It implements command
  * IDs that are used to ensure no commands were dropped in the network.
  *
  * @author Georg

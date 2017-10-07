@@ -1154,7 +1154,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          YoDouble position = outputJointPositions.get(jointToCheck);
          YoDouble velocity = outputJointVelocities.get(jointToCheck);
          YoDouble tau = outputJointTaus.get(jointToCheck);
-         OneDoFJointSensorValidityChecker validityChecker = new OneDoFJointSensorValidityChecker(jointToCheck, outputDataHolder.getLowLevelJointData(jointToCheck), position, velocity, tau, registry);
+         OneDoFJointSensorValidityChecker validityChecker = new OneDoFJointSensorValidityChecker(jointToCheck, outputDataHolder.getJointDesiredOutput(jointToCheck), position, velocity, tau, registry);
          if (enableLogging)
             validityChecker.setupForLogging();
          validityCheckerMap.put(jointToCheck, validityChecker);
@@ -1256,7 +1256,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointsToIgnore.contains(jointToCheck.getName()))
             continue;
 
-         OneDoFJointForceTrackingDelayEstimator delayEstimator = new OneDoFJointForceTrackingDelayEstimator(jointToCheck, outputDataHolder.getLowLevelJointData(jointToCheck), updateDT, registry);
+         OneDoFJointForceTrackingDelayEstimator delayEstimator = new OneDoFJointForceTrackingDelayEstimator(jointToCheck, outputDataHolder.getJointDesiredOutput(jointToCheck), updateDT, registry);
          delayEstimatorMap.put(jointToCheck, delayEstimator);
          diagnosticModules.add(delayEstimator);
       }
@@ -1275,7 +1275,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          if (jointsToIgnore.contains(jointToCheck.getName()))
             continue;
 
-         OneDoFJointFourierAnalysis jointFourierAnalysis = new OneDoFJointFourierAnalysis(jointToCheck, outputDataHolder.getLowLevelJointData(jointToCheck), estimationWindow, updateDT, registry);
+         OneDoFJointFourierAnalysis jointFourierAnalysis = new OneDoFJointFourierAnalysis(jointToCheck, outputDataHolder.getJointDesiredOutput(jointToCheck), estimationWindow, updateDT, registry);
          jointFourierAnalysisMap.put(jointToCheck, jointFourierAnalysis);
          diagnosticModules.add(jointFourierAnalysis);
       }

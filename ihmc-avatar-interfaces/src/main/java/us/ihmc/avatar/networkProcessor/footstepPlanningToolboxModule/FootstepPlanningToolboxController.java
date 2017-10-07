@@ -42,7 +42,7 @@ import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.PlanarRegionBipedalFootstepPlannerVisualizerFactory;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
