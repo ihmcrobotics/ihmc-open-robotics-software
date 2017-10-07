@@ -153,23 +153,19 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       parameters = new BipedalFootstepPlannerParameters(registry);
       setDefaultParameters();
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
-      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(parameters);
-      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(parameters, null);
-      ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
 
-      snapper.setFootPolygonsInSoleFrame(footPolygonsInSoleFrame);
-      nodeChecker.setFeetPolygons(footPolygonsInSoleFrame);
+      PlanarRegionBipedalFootstepPlannerVisualizer visualizer = null;
+      if (showPlannerVisualizer)
+         visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame, registry);
+
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, parameters, visualizer);
+      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footPolygonsInSoleFrame, visualizer, parameters, null);
+      ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
 
       planner = new DepthFirstFootstepPlanner(parameters, snapper, nodeChecker, stepCostCalculator, registry);
       planner.setFeetPolygons(footPolygonsInSoleFrame);
-
-      if (showPlannerVisualizer)
-      {
-         PlanarRegionBipedalFootstepPlannerVisualizer visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame, registry);
-         planner.setBipedalFootstepPlannerListener(visualizer);
-      }
-
       planner.setMaximumNumberOfNodesToExpand(100);
+      planner.setBipedalFootstepPlannerListener(visualizer);
    }
 
    private void setDefaultParameters()

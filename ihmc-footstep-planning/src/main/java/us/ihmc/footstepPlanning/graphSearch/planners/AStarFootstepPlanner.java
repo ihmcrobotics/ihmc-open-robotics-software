@@ -142,13 +142,15 @@ public class AStarFootstepPlanner implements FootstepPlanner
       for (int i = 1; i < path.size(); i++)
       {
          RobotSide robotSide = path.get(i).getRobotSide();
-         RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i)).getSnapTransform();
 
          RigidBodyTransform footstepPose = new RigidBodyTransform();
          footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());
          footstepPose.setTranslationX(path.get(i).getX());
          footstepPose.setTranslationY(path.get(i).getY());
-         snapTransform.transform(footstepPose);
+
+         RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i)).getSnapTransform();
+         if(!snapTransform.containsNaN())
+            snapTransform.transform(footstepPose);
 
          plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), footstepPose));
       }
@@ -267,7 +269,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       AlwaysValidNodeChecker nodeChecker = new AlwaysValidNodeChecker();
       //SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
-      FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper(footPolygons);
+      FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
 
       DistanceAndYawBasedHeuristics heuristics = new DistanceAndYawBasedHeuristics(yawWeight, registry);
       DistanceAndYawBasedCost stepCostCalculator = new DistanceAndYawBasedCost(yawWeight, registry);
