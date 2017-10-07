@@ -171,7 +171,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
       {
          RobotSide robotSide = path.get(i).getRobotSide();
          ConvexPolygon2D footholdIntersection = new ConvexPolygon2D();
-         RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i), footholdIntersection);
+         RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i)).getSnapTransform();
 
          RigidBodyTransform footstepPose = new RigidBodyTransform();
          footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());

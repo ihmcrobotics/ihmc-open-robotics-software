@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.*;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionBaseOfCliffAvoider;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
@@ -76,7 +77,8 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
    @Override
    public boolean isNodeValid(FootstepNode nodeToExpand, FootstepNode previousNode)
    {
-      RigidBodyTransform snapTransform = snapAndWiggler.snapFootstepNode(nodeToExpand, footholdIntersection);
+      FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(nodeToExpand);
+      RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
       if (snapTransform == null)
          return false;
@@ -91,7 +93,8 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
       if(previousNode == null)
          return true;
 
-      RigidBodyTransform previousSnapTransform = snapAndWiggler.snapFootstepNode(previousNode, null);
+      FootstepNodeSnapData previousNodeSnapData = snapAndWiggler.snapFootstepNode(previousNode);
+      RigidBodyTransform previousSnapTransform = previousNodeSnapData.getSnapTransform();
       RigidBodyTransform previousSnappedSoleTransform = BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(previousNode, previousSnapTransform);
       boolean goodFootstep = checkIfGoodFootstep(nodeToExpand, snappedSoleTransform, previousSnappedSoleTransform);
       if (!goodFootstep)

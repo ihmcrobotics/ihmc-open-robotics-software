@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -43,7 +44,8 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      RigidBodyTransform snapTransform = snapper.snapFootstepNode(node, footholdAfterSnap);
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
+      RigidBodyTransform snapTransform = snapData.getSnapTransform();
       if (snapTransform == null)
          return false;
 
@@ -55,7 +57,8 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
       if(previousNode == null)
          return true;
 
-      RigidBodyTransform previousSnapTransform = snapper.snapFootstepNode(previousNode, null);
+      FootstepNodeSnapData previousNodeSnapData = snapper.snapFootstepNode(previousNode);
+      RigidBodyTransform previousSnapTransform = previousNodeSnapData.getSnapTransform();
       double heightChange = Math.abs(snapTransform.getTranslationZ() - previousSnapTransform.getTranslationZ());
       if (heightChange > maxStepHeightChange.getDoubleValue())
          return false;
