@@ -93,9 +93,9 @@ public class SmoothCapturePointToolbox
       for(Direction dir : Direction.values)
       {
          Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);    
-         double icpPositionDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 0, cmpPolynomial, finalCapturePoint.getElement(dir.getIndex()));
+         double icpPositionDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 0, cmpPolynomial, finalCapturePoint.getElement(dir.ordinal()));
          
-         desiredCapturePointToPack.setElement(dir.getIndex(), icpPositionDesired);
+         desiredCapturePointToPack.setElement(dir.ordinal(), icpPositionDesired);
       }
    }  
    
@@ -105,9 +105,9 @@ public class SmoothCapturePointToolbox
       for(Direction dir : Direction.values)
       {
          Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);    
-         double icpVelocityDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 1, cmpPolynomial, finalCapturePoint.getElement(dir.getIndex()));
+         double icpVelocityDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 1, cmpPolynomial, finalCapturePoint.getElement(dir.ordinal()));
          
-         desiredCapturePointVelocityToPack.setElement(dir.getIndex(), icpVelocityDesired);
+         desiredCapturePointVelocityToPack.setElement(dir.ordinal(), icpVelocityDesired);
       }
    }
    
@@ -117,9 +117,9 @@ public class SmoothCapturePointToolbox
       for(Direction dir : Direction.values)
       {
          Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);    
-         double icpAccelerationDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 2, cmpPolynomial, finalCapturePoint.getElement(dir.getIndex()));
+         double icpAccelerationDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 2, cmpPolynomial, finalCapturePoint.getElement(dir.ordinal()));
          
-         desiredCapturePointAccelerationToPack.setElement(dir.getIndex(), icpAccelerationDesired);
+         desiredCapturePointAccelerationToPack.setElement(dir.ordinal(), icpAccelerationDesired);
       }
    }  
    

@@ -24,11 +24,6 @@ public enum Direction
       this.index = index;
    }
 
-   public int getIndex()
-   {
-      return index;
-   }
-
    public static double get(Tuple3DBasics tuple, Direction direction)
    {
       switch (direction)

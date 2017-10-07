@@ -99,7 +99,7 @@ public class SmoothCapturePointAdjustmentToolbox
          Trajectory cmpPolynomialSegment1 = cmpPolynomial3DSegment1.getTrajectory(direction);
          Trajectory cmpPolynomialSegment2 = cmpPolynomial3DSegment2.getTrajectory(direction);
 
-         double icpPositionFinalSegment2Scalar = icpPositionFinalSegment2.getElement(direction.getIndex());
+         double icpPositionFinalSegment2Scalar = icpPositionFinalSegment2.getElement(direction.ordinal());
 
          int numberOfCoefficients = cmpPolynomialSegment1.getNumberOfCoefficients();
          int numberOfConstrainedDerivatives = numberOfCoefficients / 2;
@@ -129,7 +129,7 @@ public class SmoothCapturePointAdjustmentToolbox
       // TODO: check whether division always integer
       for (int i = 0; i < numberOfConstrainedDerivatives; i++)
       {
-         double icpQuantityInitialConditionScalar = icpQuantityInitialConditionList.get(i).getElement(direction.getIndex());
+         double icpQuantityInitialConditionScalar = icpQuantityInitialConditionList.get(i).getElement(direction.ordinal());
          calculateGeneralizedICPMatricesOnCMPSegment1(omega0, i, cmpPolynomialSegment1);
          setGeneralizedBoundaryConstraints(i, numberOfCoefficients, numberOfConstrainedDerivatives, cmpPolynomialSegment1, cmpPolynomialSegment2,
                                            icpQuantityInitialConditionScalar, icpPositionFinalSegment2Scalar);

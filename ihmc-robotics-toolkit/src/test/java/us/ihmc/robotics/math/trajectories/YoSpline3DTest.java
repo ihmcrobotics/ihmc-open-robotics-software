@@ -40,7 +40,7 @@ public class YoSpline3DTest
       
       for (Direction direction : Direction.values())
       {
-         assertEquals(expected.getElement(direction.getIndex()), actual.getElement(direction.getIndex()), EPSILON);
+         assertEquals(expected.getElement(direction.ordinal()), actual.getElement(direction.ordinal()), EPSILON);
       }
       
    }
@@ -69,7 +69,7 @@ public class YoSpline3DTest
 	      
 	   for (Direction direction : Direction.values())
 	   {
-	      assertEquals(expected.getElement(direction.getIndex()), actual.getElement(direction.getIndex()), EPSILON);
+	      assertEquals(expected.getElement(direction.ordinal()), actual.getElement(direction.ordinal()), EPSILON);
 	   }   
 	}
 

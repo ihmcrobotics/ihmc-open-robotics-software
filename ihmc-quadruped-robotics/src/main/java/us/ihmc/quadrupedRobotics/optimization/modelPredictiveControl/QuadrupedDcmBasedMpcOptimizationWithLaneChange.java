@@ -232,7 +232,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
             if (currentContactState.get(robotQuadrant) == ContactState.IN_CONTACT)
             {
                currentSolePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
-               B.set(rowOffset, columnOffset, currentSolePosition.get(robotQuadrant).getElement(direction.getIndex()));
+               B.set(rowOffset, columnOffset, currentSolePosition.get(robotQuadrant).getElement(direction.ordinal()));
                columnOffset++;
             }
          }
@@ -240,7 +240,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
          for (int i = 0; i < numberOfIntervals; i++)
          {
             piecewiseConstantCopTrajectory.getCopPositionAtStartOfInterval(i).changeFrame(ReferenceFrame.getWorldFrame());
-            x0.set(i * 2 + rowOffset, 0, piecewiseConstantCopTrajectory.getCopPositionAtStartOfInterval(i).getElement(direction.getIndex()));
+            x0.set(i * 2 + rowOffset, 0, piecewiseConstantCopTrajectory.getCopPositionAtStartOfInterval(i).getElement(direction.ordinal()));
             B.set(i * 2 + rowOffset, numberOfContacts + rowOffset, piecewiseConstantCopTrajectory.getNormalizedPressureContributedByQueuedSteps(i));
          }
          x0.set(rowOffset, 0, 0);
@@ -260,7 +260,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
 
          double previewTime =
                piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(numberOfIntervals - 1) - piecewiseConstantCopTrajectory.getTimeAtStartOfInterval(0);
-         y0.set(rowOffset, 0, Math.exp(naturalFrequency * previewTime) * currentDcmEstimate.getElement(direction.getIndex()));
+         y0.set(rowOffset, 0, Math.exp(naturalFrequency * previewTime) * currentDcmEstimate.getElement(direction.ordinal()));
          rowOffset++;
       }
 
