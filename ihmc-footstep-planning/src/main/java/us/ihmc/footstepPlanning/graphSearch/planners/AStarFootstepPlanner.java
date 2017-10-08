@@ -166,6 +166,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
          throw new RuntimeException("Need to set goal before planning.");
 
       graph.initialize(startNode);
+      snapper.addStartNode(startNode);
       NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
 
