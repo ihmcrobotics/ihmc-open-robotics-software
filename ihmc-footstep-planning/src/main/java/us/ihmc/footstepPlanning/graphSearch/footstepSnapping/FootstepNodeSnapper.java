@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -29,6 +31,18 @@ public abstract class FootstepNodeSnapper
       }
 
       return snapDataHolder.get(footstepNode);
+   }
+
+   /**
+    * Helper method so the first node is artificially snapped, since it usually isn't
+    * on a planar region.
+    *
+    * @param footstepNode
+    * @return
+    */
+   public void addStartNode(FootstepNode footstepNode)
+   {
+      snapDataHolder.put(footstepNode, new FootstepNodeSnapData(new RigidBodyTransform(), new ConvexPolygon2D()));
    }
 
    protected abstract FootstepNodeSnapData snapInternal(FootstepNode footstepNode);

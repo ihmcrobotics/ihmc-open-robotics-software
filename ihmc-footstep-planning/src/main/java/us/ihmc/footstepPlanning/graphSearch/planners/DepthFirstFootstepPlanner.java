@@ -190,6 +190,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
       stack.clear();
       stack.add(startNode);
       footstepGraph.initialize(startNode);
+      snapper.addStartNode(startNode);
       notifiyListenersStartNodeWasAdded(startNode);
 
       numberOfNodesExpanded.set(0);
