@@ -1,0 +1,133 @@
+buildscript {
+   repositories {
+      maven { url "https://plugins.gradle.org/m2/" }
+      mavenLocal()
+   }
+   dependencies {
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.5"
+      classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
+   }
+}
+
+apply plugin: "org.hidetake.ssh"
+apply plugin: "us.ihmc.ihmc-build"
+
+ihmc {
+   loadProductProperties("../product.properties")
+
+   configureDependencyResolution()
+   configurePublications()
+}
+
+testSuites {
+   def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
+   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
+}
+
+mainDependencies {
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
+   compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.8'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
+   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+   compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
+   compile group: 'org.ejml', name: 'dense64', version: '0.30'
+   compile group: 'org.ejml', name: 'core', version: '0.30'
+   compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
+   compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
+   compile group: 'org.bidib.jbidib.org.qbang.rxtx', name: 'rxtxcomm', version: '2.2'
+   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
+   compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-state-estimation", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-avatar-interfaces", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-model-file-loader", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-sensor-processing", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-perception", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robot-description", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robot-models", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robot-data-visualizer", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
+}
+
+testDependencies {
+   compile group: 'junit', name: 'junit', version: '4.11'
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.16.8"
+   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
+   compile group: "us.ihmc", name: "ihmc-avatar-interfaces-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: groupDependencyVersion
+}
+
+if (ihmc.isBuildRoot())
+{
+   remotes {
+      stepprController {
+         host = '10.66.171.20' //CPU1
+         // Set the username and password in ~/.gradle/gradle.properties.
+         user = steppr_username
+         password = steppr_password
+         knownHosts = allowAnyHosts
+      }
+      wandererController {
+         host = '10.66.171.21'
+         // Set the username and password in ~/.gradle/gradle.properties.
+         user = wanderer_username
+         password = wanderer_password
+         knownHosts = allowAnyHosts
+      }
+   }
+
+   task deploy(dependsOn: assemble) {
+      ihmc.jarWithLibFolder()
+
+      doLast {
+         def rep;
+         def scriptDir;
+         def directory;
+
+         if (robot == "steppr")
+         {
+            rep = remotes.stepprController
+            scriptDir = new File("scripts/steppr");
+            directory = "steppr"
+         } else if (robot == "wanderer")
+         {
+            rep = remotes.wandererController
+            scriptDir = new File("scripts/wanderer");
+            directory = "wanderer"
+         } else
+         {
+            println("Invalid robot \"$robot\" passed in. Valid options are \"steppr\" and \"wanderer\"");
+         }
+
+         println "Trying ssh"
+
+         ssh.run {
+            session(rep) {
+               execute 'mkdir -p ' + directory + '/lib'
+               println "Adding Jars"
+               configurations.runtime.each {
+                  put it, directory + '/lib'
+               }
+
+               put jar.archivePath, directory + '/AcsellController.jar'
+
+               def scriptDirCollection = files { scriptDir.listFiles() }
+               put scriptDirCollection, directory
+
+               scriptDirCollection.each {
+                  execute 'chmod 777 ' + directory + '/' + it.name
+               }
+            }
+         }
+      }
+   }
+}

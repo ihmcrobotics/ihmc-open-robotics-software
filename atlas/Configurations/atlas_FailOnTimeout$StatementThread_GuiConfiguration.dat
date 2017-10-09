@@ -1,0 +1,88 @@
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.atlas.t</Variables>
+		<GraphConfiguration>
+			<Name>config1</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.SmoothCMPBasedICPPlanner.CurrentSegment</Variables>
+		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.desiredICPY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.HighLevelControlManagerFactory.BalanceManager.desiredICPX</Variables>
+		<GraphConfiguration>
+			<Name>config3</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+<Entry Boxes Tab Pane>
+</Entry Boxes Tab Pane>
+
+<Number of ViewPorts>1</Number of ViewPorts>
+ <Main Viewport> 
+<Visible> true</Visible>
+</Main Viewport>
+
+<Graph Array Window Size>0</Graph Array Window Size>
+
+
+<Extra Panels>
+<Main Viewport>
+null,
+</Main Viewport></Extra Panels>
+
+<Current View>Normal View</Current View>
+ <Canvas 1> 
+ <Camera X>1.965205871183981</Camera X>
+ <Camera Y>11.999129586702503</Camera Y>
+ <Camera Z>4.647521963149163</Camera Z>
+ <Dolly data> 
+ <Position X>2.0</Position X>
+ <Position Y>12.0</Position Y>
+ <Position Z>0.0</Position Z>
+<Dolly Booleans>
+<Dolly>true</Dolly>
+<Dolly X>true</Dolly X>
+<Dolly Y>true</Dolly Y>
+<Dolly Z>true</Dolly Z>
+</Dolly Booleans>
+</Dolly data>
+ <Track data> 
+ <Position X>0.0</Position X>
+ <Position Y>0.0</Position Y>
+ <Position Z>0.0</Position Z>
+ <Track Booleans>
+<Track>true</Track>
+<Track X>true</Track X>
+<Track Y>true</Track Y>
+<Track Z>true</Track Z>
+</Track Booleans>
+</Track data>
+<Fix Position>
+<Fix X>-0.034794128816018885</Fix X>
+<Fix Y>-8.704132974962377E-4</Fix Y>
+<Fix Z>1.1</Fix Z>
+</Fix Position>
+</Canvas 1>

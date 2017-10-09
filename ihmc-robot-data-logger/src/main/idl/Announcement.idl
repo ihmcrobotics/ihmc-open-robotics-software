@@ -1,0 +1,43 @@
+module us{
+module ihmc{
+module robotDataLogger{
+	enum CameraType
+	{
+		CAPTURE_CARD,
+		NETWORK_STREAM
+	};
+	
+	struct CameraAnnouncement
+	{	
+		CameraType type;
+		string name;
+		string identifier;
+	};
+	
+	struct ModelFileDescription{
+		boolean hasModel;
+		string name;
+		string modelLoaderClass;
+		sequence<string, 255> resourceDirectories;
+		
+		long modelFileSize;
+		
+		boolean hasResourceZip;
+		long resourceZipSize;
+	};
+		
+		
+	struct Announcement
+	{
+		string identifier;
+		
+		string name;
+		string hostName;
+		sequence<CameraAnnouncement, 127> cameras;
+		ModelFileDescription modelFileDescription;
+		
+		boolean log;
+	};
+};
+};
+};
