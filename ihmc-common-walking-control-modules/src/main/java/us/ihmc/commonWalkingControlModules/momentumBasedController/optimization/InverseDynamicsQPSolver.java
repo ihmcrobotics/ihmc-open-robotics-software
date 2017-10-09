@@ -4,6 +4,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -26,7 +29,7 @@ public class InverseDynamicsQPSolver
    private final YoFrameVector wrenchEquilibriumTorqueError;
 
    private final YoBoolean firstCall = new YoBoolean("firstCall", registry);
-   private final ActiveSetQPSolver qpSolver;
+   private final SimpleActiveSetQPSolverInterface qpSolver;
 
    private final DenseMatrix64F solverInput_H;
    private final DenseMatrix64F solverInput_f;
@@ -65,7 +68,10 @@ public class InverseDynamicsQPSolver
    private final boolean hasFloatingBase;
    private boolean hasWrenchesEquilibriumConstraintBeenSetup = false;
 
-   public InverseDynamicsQPSolver(ActiveSetQPSolver qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase, YoVariableRegistry parentRegistry)
+   private boolean resetActiveSet = false;
+   private boolean useWarmStart = false;
+
+   public InverseDynamicsQPSolver(SimpleActiveSetQPSolverInterface qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase, YoVariableRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.numberOfDoFs = numberOfDoFs;
@@ -145,6 +151,23 @@ public class InverseDynamicsQPSolver
    public void setRhoRegularizationWeight(DenseMatrix64F weight)
    {
       CommonOps.insert(weight, regularizationMatrix, numberOfDoFs, numberOfDoFs);
+   }
+
+   public void setUseWarmStart(boolean useWarmStart)
+   {
+      this.useWarmStart = useWarmStart;
+   }
+
+   public void notifyResetActiveSet()
+   {
+      this.resetActiveSet = true;
+   }
+
+   private boolean pollResetActiveSet()
+   {
+      boolean ret = resetActiveSet;
+      resetActiveSet = false;
+      return ret;
    }
 
    public void reset()
@@ -370,6 +393,9 @@ public class InverseDynamicsQPSolver
       qpSolverTimer.startMeasurement();
 
       qpSolver.clear();
+
+      if (useWarmStart && pollResetActiveSet())
+         qpSolver.resetActiveConstraints();
 
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
       qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
