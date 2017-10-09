@@ -394,6 +394,7 @@ public class InverseDynamicsQPSolver
 
       qpSolver.clear();
 
+      qpSolver.setUseWarmStart(useWarmStart);
       if (useWarmStart && pollResetActiveSet())
          qpSolver.resetActiveConstraints();
 
