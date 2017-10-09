@@ -1,0 +1,137 @@
+package us.ihmc.atlas.operatorInterfaceDebugging;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Scanner;
+
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.WriteOption;
+import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.communication.net.KryoStreamSerializer;
+import us.ihmc.communication.net.ConnectionStateListener;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.tools.FormattingTools;
+
+public class AtlasUIPacketRecorder
+{
+   private static final Path PACKET_RECORDINGS_PATH = Paths.get("./packetRecordings");
+   private static final String PACKET_RECORDING_FILENAME = "PacketRecording_" + FormattingTools.getDateString() + "_real3";
+   private Object streamConch = new Object();
+
+   public AtlasUIPacketRecorder() throws IOException
+   {
+      Scanner scanner = new Scanner(System.in);
+      PrintTools.info("Press Enter to record...");
+      scanner.nextLine();
+      
+      final DataOutputStream fileDataOutputStream = FileTools.newFileDataOutputStream(getPacketRecordingFilePath(), DefaultExceptionHandler.PRINT_STACKTRACE);
+      final PrintWriter timeWriter = FileTools.newPrintWriter(getPacketTimingPath(), WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
+      
+      IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
+      
+      final KryoStreamSerializer kryoStreamSerializer = new KryoStreamSerializer(Conversions.megabytesToBytes(10));
+      kryoStreamSerializer.registerClasses(netClassList);
+      
+      PacketCommunicator packetClient = PacketCommunicator.createTCPPacketCommunicatorClient(NetworkParameters.getHost(NetworkParameterKeys.networkManager), NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, netClassList);
+      packetClient.attachStateListener(new ConnectionStateListener()
+      {
+         @Override
+         public void disconnected()
+         {
+            PrintTools.info("Disconnected");
+            try
+            {
+               synchronized (streamConch)
+               {
+                  fileDataOutputStream.flush();
+                  fileDataOutputStream.close();
+                  
+                  timeWriter.flush();
+                  timeWriter.close();
+               }
+            }
+            catch (IOException e)
+            {
+               e.printStackTrace();
+            }
+         }
+         
+         @Override
+         public void connected()
+         {
+            PrintTools.info("Connected");
+         }
+      });
+      packetClient.connect();
+      packetClient.attachGlobalListener(new GlobalPacketConsumer()
+      {
+         Stopwatch timer = new Stopwatch();
+         boolean firstPacketReceived = false;
+         
+         @Override
+         public void receivedPacket(Packet<?> packet)
+         {
+            try
+            {
+               synchronized (streamConch)
+               {
+                  if (!firstPacketReceived)
+                  {
+                     firstPacketReceived = true;
+                     timer.start();
+                  }
+                  else
+                  {
+                     timeWriter.println(timer.lap());
+                  }
+
+                  PrintTools.info("Receiving packet: " + packet);
+                  kryoStreamSerializer.write(fileDataOutputStream, packet);
+               }
+            }
+            catch (IOException e)
+            {
+               e.printStackTrace();
+            }
+         }
+      });
+      
+      scanner.nextLine();
+      scanner.close();
+      
+      packetClient.disconnect();
+   }
+   
+   public static Path getPacketRecordingFilePath()
+   {
+      FileTools.ensureDirectoryExists(PACKET_RECORDINGS_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
+      return PACKET_RECORDINGS_PATH.resolve(getPrefixFileName() + ".ibag");
+   }
+   
+   public static Path getPacketTimingPath()
+   {
+      return getPacketRecordingFilePath().getParent().resolve(getPrefixFileName() + ".tbag");
+   }
+   
+   public static String getPrefixFileName()
+   {
+      return "PacketRecording_" + FormattingTools.getDateString() + "_real5";
+   }
+   
+   public static void main(String[] args) throws IOException
+   {
+      new AtlasUIPacketRecorder();
+   }
+}
