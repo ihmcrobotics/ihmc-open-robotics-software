@@ -63,11 +63,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    private final DenseMatrix64F previousLagrangeMultipliers = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F previousSolution = new DenseMatrix64F(0, 0);
 
-   private final TIntArrayList inequalityActiveSetIndices = new TIntArrayList(0, 0);
-   private final TIntArrayList previousInequalityActiveSetIndices = new TIntArrayList(0, 0);
-   private final TIntArrayList inactiveInequalitySetIndices = new TIntArrayList(0, 0);
-   private final TIntArrayList excludeInequalityConstraintFromActiveSet = new TIntArrayList(0, 0); // booleans
-
    private final TIntArrayList activeSetIndices = new TIntArrayList(0);
    private final TIntArrayList previousActiveSetIndices = new TIntArrayList(0);
    private final TIntArrayList inactiveSetIndices = new TIntArrayList(0);
@@ -106,7 +101,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    private int numberOfUpperBounds;
 
    private int numberOfActiveConstraints;
-   //private int numberOfActiveInequalityConstraints;
    private double R_norm;
    private int constraintIndexForPartialStep;
 
@@ -434,7 +428,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       // TODO  do this all at once because I should be able to
       // Add equality constraints to the working set A
       numberOfActiveConstraints = 0;
-      //numberOfActiveInequalityConstraints = 0;
       for (int equalityConstraintIndex = 0; equalityConstraintIndex < numberOfEqualityConstraints; equalityConstraintIndex++)
       {
          MatrixTools.setMatrixBlock(violatedConstraintNormal, 0, 0, linearEqualityConstraintsAMatrix, 0, equalityConstraintIndex, problemSize, 1, 1.0);
@@ -461,11 +454,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       }
 
       // set iai = K \ A
-      /*
-      for (int inequalityConstraintIndex = 0; inequalityConstraintIndex < totalNumberOfInequalityConstraints; inequalityConstraintIndex++)
-         inactiveInequalitySetIndices.set(inequalityConstraintIndex, inequalityConstraintIndex);
-         */
-
       for (int inequalityConstraintIndex = 0; inequalityConstraintIndex < totalNumberOfInequalityConstraints; inequalityConstraintIndex++)
          inactiveSetIndices.set(inequalityConstraintIndex, inequalityConstraintIndex);
 
@@ -474,7 +462,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       int numberOfIterations = 0;
       double fullStepLength = 0.0;
       boolean isValid = true;
-      //while (numberOfIterations < maxNumberOfIterations)
       while (true)
       {
          switch(currentStep)
@@ -495,8 +482,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
             mostViolatedConstraintIndex = 0;
             for (int inequalityConstraintIndex = 0; inequalityConstraintIndex < totalNumberOfInequalityConstraints; inequalityConstraintIndex++)
             { // select the constraint from the inactive set that is most violated
-               //if (inequalityConstraintViolations.get(inequalityConstraintIndex) < biggestConstraintViolation &&
-               //      inactiveInequalitySetIndices.get(inequalityConstraintIndex) != -1 && excludeInequalityConstraintFromActiveSet.get(inequalityConstraintIndex) == TRUE)
                if (inequalityConstraintViolations.get(inequalityConstraintIndex) < biggestConstraintViolation &&
                      inactiveSetIndices.get(inequalityConstraintIndex) != -1 && excludeConstraintFromActiveSet.get(inequalityConstraintIndex) == TRUE)
                {
@@ -533,7 +518,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
             // set u = [u 0]^T
             lagrangeMultipliers.set(numberOfActiveConstraints, 0.0);
             // add the violated constraint to the active set A
-            //inequalityActiveSetIndices.add(mostViolatedConstraintIndex);
             activeSetIndices.set(numberOfActiveConstraints, mostViolatedConstraintIndex);
 
          case COMPUTE_STEP_LENGTH:
@@ -640,14 +624,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    private boolean computeConstraintViolations(DenseMatrix64F solutionToPack, double c1, double c2)
    {
       // step 1: choose a violated constraint
-      /*
-      for (int activeInequalityIndex = 0; activeInequalityIndex < numberOfActiveInequalityConstraints; activeInequalityIndex++)
-      {
-         int activeConstraintIndex = inequalityActiveSetIndices.get(activeInequalityIndex);
-         inactiveInequalitySetIndices.set(activeConstraintIndex, -1);
-      }
-      */
-
       for (int activeInequalityIndex = numberOfEqualityConstraints; activeInequalityIndex < numberOfActiveConstraints; activeInequalityIndex++)
       {
          int activeConstraintIndex = activeSetIndices.get(activeInequalityIndex);
@@ -658,7 +634,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       double totalInequalityViolation = 0.0; // this value will contain the sum of all infeasibilities
       for (int inequalityConstraintIndex = 0; inequalityConstraintIndex < totalNumberOfInequalityConstraints; inequalityConstraintIndex++)
       {
-         //excludeInequalityConstraintFromActiveSet.set(inequalityConstraintIndex, TRUE);
          excludeConstraintFromActiveSet.set(inequalityConstraintIndex, TRUE);
          double constraintValue = 0.0;
          for (int j = 0; j < problemSize; j++)
@@ -677,8 +652,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       MatrixTools.setMatrixBlock(previousLagrangeMultipliers, 0, 0, lagrangeMultipliers, 0, 0, numberOfActiveConstraints, 1, 1.0);
       previousSolution.set(solutionToPack);
 
-      //for (int i = 0; i < numberOfActiveInequalityConstraints; i++)
-         //previousInequalityActiveSetIndices.set(i, inequalityActiveSetIndices.get(i));
       for (int i = 0; i < numberOfActiveConstraints; i++)
          previousActiveSetIndices.set(i, activeSetIndices.get(i));
 
@@ -702,16 +675,13 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       // Compute partial step length (maximum step in dual space without violating dual feasibility)
       double partialStepLength = Double.POSITIVE_INFINITY;
       // find the constraintIndexForMinimumStepLength s.t. it reaches the minimum of u+(x) / r
-      //for (int k = 0; k < numberOfActiveInequalityConstraints; k++)
       for (int k = numberOfEqualityConstraints; k < numberOfActiveConstraints; k++)
       {
          //double minimumStepLength = -lagrangeMultipliers.get(numberOfEqualityConstraints + k) / infeasibilityMultiplier.get(numberOfEqualityConstraints + k);
          double minimumStepLength = -lagrangeMultipliers.get(k) / infeasibilityMultiplier.get(k);
-         //if (infeasibilityMultiplier.get(numberOfEqualityConstraints + k) < 0.0 && minimumStepLength < partialStepLength)
          if (infeasibilityMultiplier.get(k) < 0.0 && minimumStepLength < partialStepLength)
          {
             partialStepLength = minimumStepLength;
-            //inequalityConstraintIndexForPartialStep = inequalityActiveSetIndices.get(k);
             constraintIndexForPartialStep = activeSetIndices.get(k);
          }
       }
@@ -739,7 +709,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       MatrixTools.addMatrixBlock(lagrangeMultipliers, 0, 0, infeasibilityMultiplier, 0, 0, numberOfActiveConstraints, 1, stepLength);
       lagrangeMultipliers.set(numberOfActiveConstraints, lagrangeMultipliers.get(numberOfActiveConstraints) + stepLength);
 
-      //inactiveInequalitySetIndices.set(inequalityConstraintIndexForPartialStep, inequalityConstraintIndexForPartialStep);
       inactiveSetIndices.set(constraintIndexForPartialStep, constraintIndexForPartialStep);
       deleteConstraint(J);
 
@@ -759,23 +728,14 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
          // add the violated constraint to the active set
          if (!addInequalityConstraint())
          {
-            //excludeInequalityConstraintFromActiveSet.set(mostViolatedConstraintIndex, FALSE);
             excludeConstraintFromActiveSet.set(mostViolatedConstraintIndex, FALSE);
             deleteConstraint(J);
 
             for (int i = 0; i < totalNumberOfInequalityConstraints; i++)
             {
-               //inactiveInequalitySetIndices.set(i, i);
                inactiveSetIndices.set(i, i);
             }
 
-            /*
-            for (int i = 0; i < numberOfActiveInequalityConstraints; i++)
-            {
-               //inequalityActiveSetIndices.set(i, previousInequalityActiveSetIndices.get(i));
-               //inactiveInequalitySetIndices.set(inequalityActiveSetIndices.get(i), -1);
-            }
-            */
             for (int i = 0; i < numberOfActiveConstraints; i++)
             {
                activeSetIndices.set(i, previousActiveSetIndices.get(i));
@@ -789,7 +749,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
          }
          else
          {
-            //inactiveInequalitySetIndices.set(mostViolatedConstraintIndex, -1);
             inactiveSetIndices.set(mostViolatedConstraintIndex, -1);
          }
 
@@ -798,7 +757,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       else
       { // a partial step has taken
          // drop constraint constraintIndexForMinimumStepLength
-         //inactiveInequalitySetIndices.set(inequalityConstraintIndexForPartialStep, inequalityConstraintIndexForPartialStep);
          inactiveSetIndices.set(constraintIndexForPartialStep, constraintIndexForPartialStep);
          deleteConstraint(J);
 
@@ -868,10 +826,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
 
       // update the number of constraints added
       numberOfActiveConstraints++;
-      /*
-      if (!isEqualityConstraint)
-         numberOfActiveInequalityConstraints++;
-         */
 
       // To update R we have to put the numberOfActiveConstraints components of the d vector into column numberOfActiveConstraints - 1 of R
       for (int i = 0; i < numberOfActiveConstraints; i++)
@@ -894,16 +848,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       int qq = -1;
 
       // Find the index qq for active constraintIndexForMinimumStepLength to be removed
-      /*
-      for (int i = 0; i < numberOfActiveInequalityConstraints; i++)
-      {
-         if (inequalityActiveSetIndices.get(i) == inequalityConstraintIndexForPartialStep)
-         {
-            qq = i;
-            break;
-         }
-      }
-      */
       for (int i = numberOfEqualityConstraints; i < numberOfActiveConstraints; i++)
       {
          if (activeSetIndices.get(i) == constraintIndexForPartialStep)
@@ -914,7 +858,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       }
 
       // remove the constraint from the active set and the duals
-      //for (int i = qq + numberOfEqualityConstraints; i < numberOfActiveConstraints - 1; i++)
       for (int i = qq; i < numberOfActiveConstraints - 1; i++)
       {
          activeSetIndices.set(i, activeSetIndices.get(i + 1));
@@ -926,7 +869,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
 
 
       // FIXME use the remove row feature
-      //inequalityActiveSetIndices.remove(qq);
       activeSetIndices.set(numberOfActiveConstraints - 1, activeSetIndices.get(numberOfActiveConstraints));
       lagrangeMultipliers.set(numberOfActiveConstraints - 1, lagrangeMultipliers.get(numberOfActiveConstraints));
       activeSetIndices.set(numberOfActiveConstraints, 0);
@@ -936,7 +878,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
 
       // constraint has been fully removed
       numberOfActiveConstraints--;
-      //numberOfActiveInequalityConstraints--;
 
       if (numberOfActiveConstraints == 0)
          return;
@@ -1010,12 +951,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       inactiveSetIndices.fill(0, numberOfConstraints, 0);
       excludeConstraintFromActiveSet.fill(0, numberOfConstraints, FALSE);
 
-      int totalInequalityConstraints = numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds;
-      //inequalityActiveSetIndices.clear();
-      //previousInequalityActiveSetIndices.fill(0, totalInequalityConstraints, 0);
-      //inactiveInequalitySetIndices.fill(0, totalInequalityConstraints, 0);
-      //excludeInequalityConstraintFromActiveSet.fill(0, totalInequalityConstraints, FALSE);
-
       // compile all the inequality constraints into one matrix
       totalLinearInequalityConstraintsCMatrix.reshape(problemSize, numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds);
       totalLinearInequalityConstraintsDVector.reshape(numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds, 1);
@@ -1040,10 +975,8 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    {
       MatrixTools.setMatrixBlock(lagrangeEqualityConstraintMultipliersToPack, 0, 0, lagrangeMultipliers, 0, 0, numberOfEqualityConstraints, 1, 1.0);
 
-      //for (int inequalityConstraintNumber = 0; inequalityConstraintNumber < numberOfActiveInequalityConstraints; inequalityConstraintNumber++)
       for (int inequalityConstraintNumber = numberOfEqualityConstraints; inequalityConstraintNumber < numberOfActiveConstraints; inequalityConstraintNumber++)
       {
-         //int inequalityConstraintIndex = inequalityActiveSetIndices.get(inequalityConstraintNumber);
          int inequalityConstraintIndex = activeSetIndices.get(inequalityConstraintNumber);
 
          if (inequalityConstraintIndex < 0)
