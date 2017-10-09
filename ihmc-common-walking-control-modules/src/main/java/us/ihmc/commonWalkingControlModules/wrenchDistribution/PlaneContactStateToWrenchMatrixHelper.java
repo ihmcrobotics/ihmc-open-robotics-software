@@ -23,7 +23,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -55,7 +54,6 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final YoPlaneContactState yoPlaneContactState;
 
-   private final YoLong lastCommandId;
    private final YoBoolean hasReset;
    private final YoBoolean resetRequested;
 
@@ -118,7 +116,6 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       hasReset = new YoBoolean(namePrefix + "HasReset", registry);
       resetRequested = new YoBoolean(namePrefix + "ResetRequested", registry);
-      lastCommandId = new YoLong(namePrefix + "LastCommandId", registry);
 
       for (int i = 0; i < contactPoints2d.size(); i++)
       {
@@ -152,10 +149,9 @@ public class PlaneContactStateToWrenchMatrixHelper
       yoPlaneContactState.updateFromPlaneContactStateCommand(command);
       yoPlaneContactState.computeSupportPolygon();
 
-      if (lastCommandId.getLongValue() != command.getId())
+      if (yoPlaneContactState.pollContactHasChangedNotification())
       {
          resetRequested.set(true);
-         lastCommandId.set(command.getId());
       }
 
       if (command.hasMaxContactPointNormalForce())
@@ -452,5 +448,10 @@ public class PlaneContactStateToWrenchMatrixHelper
    public List<FrameVector3D> getBasisVectors()
    {
       return basisVectors;
+   }
+
+   public boolean hasReset()
+   {
+      return hasReset.getBooleanValue();
    }
 }

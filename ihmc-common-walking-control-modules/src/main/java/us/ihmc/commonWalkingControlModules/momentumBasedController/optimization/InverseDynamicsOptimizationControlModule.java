@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -72,6 +73,8 @@ public class InverseDynamicsOptimizationControlModule
 
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
+
+   private final YoBoolean useWarmStart = new YoBoolean("useWarmStartInSolver", registry);
 
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
@@ -127,11 +130,14 @@ public class InverseDynamicsOptimizationControlModule
       momentumModuleSolution = new MomentumModuleSolution();
 
       boolean hasFloatingBase = toolbox.getRootJoint() != null;
-      ActiveSetQPSolver activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
+      SimpleActiveSetQPSolverInterface activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
       qpSolver = new InverseDynamicsQPSolver(activeSetQPSolver, numberOfDoFs, rhoSize, hasFloatingBase, registry);
       qpSolver.setAccelerationRegularizationWeight(optimizationSettings.getJointAccelerationWeight());
       qpSolver.setJerkRegularizationWeight(optimizationSettings.getJointJerkWeight());
       qpSolver.setJointTorqueWeight(optimizationSettings.getJointTorqueWeight());
+      qpSolver.setUseWarmStart(optimizationSettings.useWarmStartInSolver());
+
+      useWarmStart.set(optimizationSettings.useWarmStartInSolver());
 
       parentRegistry.addChild(registry);
    }
@@ -163,6 +169,12 @@ public class InverseDynamicsOptimizationControlModule
          computeJointAccelerationLimits();
          qpSolver.setMinJointAccelerations(qDDotMinMatrix);
          qpSolver.setMaxJointAccelerations(qDDotMaxMatrix);
+      }
+
+      if (useWarmStart.getBooleanValue() && wrenchMatrixCalculator.hasContactStateChanged())
+      {
+         qpSolver.setUseWarmStart(useWarmStart.getBooleanValue());
+         qpSolver.notifyResetActiveSet();
       }
 
       NoConvergenceException noConvergenceException = null;
