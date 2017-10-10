@@ -325,6 +325,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
       testChallengingCasesWithPolygonConstraints(1, 5);
    }
 
+
    @Override /** This IS a good solver **/
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)

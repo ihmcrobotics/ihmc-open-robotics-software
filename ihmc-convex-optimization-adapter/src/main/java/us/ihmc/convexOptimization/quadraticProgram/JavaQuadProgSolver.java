@@ -104,7 +104,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    private double R_norm;
    private int constraintIndexForPartialStep;
 
-   private int maxNumberOfIterations = 100;
+   private int maxNumberOfIterations = 500;
    private double convergenceThreshold = 1.0e-14;
    //private double convergenceThreshold = Double.MIN_VALUE;
 
@@ -489,28 +489,24 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
                   mostViolatedConstraintIndex = inequalityConstraintIndex;
                }
             }
+
             if (biggestConstraintViolation >= 0.0)
             {
-               isValid = true;
                if (requireInequalityConstraintsSatisfied)
-               {
-                  // modification that states that if the only possible solution violates the inequality constraints, then there is no solution.
-                  for (int row = 0; row < infeasibilityMultiplier.numRows; row++)
-                  {
-                     if (infeasibilityMultiplier.get(row) < 0)
-                     {
-                        isValid = false;
-                        break;
-                     }
-                  }
-                  if (!isValid)
-                     break;
+               { // the active set clearly wasn't satisfied, so the solution isn't valid.
+                  CommonOps.fill(solutionToPack, Double.NaN);
+                  CommonOps.fill(lagrangeEqualityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
+                  CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
+                  CommonOps.fill(lagrangeLowerBoundMultipliersToPack, Double.POSITIVE_INFINITY);
+                  CommonOps.fill(lagrangeUpperBoundMultipliersToPack, Double.POSITIVE_INFINITY);
+                  return numberOfIterations;
                }
-
-               // we don't have any violations, so the current solution is valid
-               partitionLagrangeMultipliers(lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
-                                            lagrangeLowerBoundMultipliersToPack, lagrangeUpperBoundMultipliersToPack);
-               return numberOfIterations;
+               else
+               { // we don't have any violations in the inactive set, so the current solution is valid, by assuming that the active set is satisfied
+                  partitionLagrangeMultipliers(lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
+                                               lagrangeLowerBoundMultipliersToPack, lagrangeUpperBoundMultipliersToPack);
+                  return numberOfIterations;
+               }
             }
 
             // set np = n(violatedConstraintIndex)
@@ -643,7 +639,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
          totalInequalityViolation += Math.min(0.0, constraintValue);
       }
 
-      if (Math.abs(totalInequalityViolation) < totalNumberOfInequalityConstraints * convergenceThreshold * c1 * c2 * 100.0)
+      if (Math.abs(totalInequalityViolation) < (1.0 + totalNumberOfInequalityConstraints) * convergenceThreshold * c1 * c2 * 100.0)
       { // numerically there are not infeasibilities anymore
          return true;
       }
@@ -677,7 +673,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       // find the constraintIndexForMinimumStepLength s.t. it reaches the minimum of u+(x) / r
       for (int k = numberOfEqualityConstraints; k < numberOfActiveConstraints; k++)
       {
-         //double minimumStepLength = -lagrangeMultipliers.get(numberOfEqualityConstraints + k) / infeasibilityMultiplier.get(numberOfEqualityConstraints + k);
          double minimumStepLength = -lagrangeMultipliers.get(k) / infeasibilityMultiplier.get(k);
          if (infeasibilityMultiplier.get(k) < 0.0 && minimumStepLength < partialStepLength)
          {
@@ -728,13 +723,13 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
          // add the violated constraint to the active set
          if (!addInequalityConstraint())
          {
-            excludeConstraintFromActiveSet.set(mostViolatedConstraintIndex, FALSE);
+            if (!requireInequalityConstraintsSatisfied)
+               excludeConstraintFromActiveSet.set(mostViolatedConstraintIndex, FALSE);
+
             deleteConstraint(J);
 
             for (int i = 0; i < totalNumberOfInequalityConstraints; i++)
-            {
                inactiveSetIndices.set(i, i);
-            }
 
             for (int i = 0; i < numberOfActiveConstraints; i++)
             {
@@ -945,11 +940,15 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       previousSolution.reshape(problemSize, 1);
       previousLagrangeMultipliers.reshape(numberOfConstraints, 1);
 
+      activeSetIndices.resetQuick();
+      previousActiveSetIndices.resetQuick();
+      inactiveSetIndices.resetQuick();
+      excludeConstraintFromActiveSet.resetQuick();
 
       activeSetIndices.fill(0, numberOfConstraints, 0);
       previousActiveSetIndices.fill(0, numberOfConstraints, 0);
-      inactiveSetIndices.fill(0, numberOfConstraints, 0);
-      excludeConstraintFromActiveSet.fill(0, numberOfConstraints, FALSE);
+      inactiveSetIndices.fill(0, totalNumberOfInequalityConstraints, 0);
+      excludeConstraintFromActiveSet.fill(0, totalNumberOfInequalityConstraints, FALSE);
 
       // compile all the inequality constraints into one matrix
       totalLinearInequalityConstraintsCMatrix.reshape(problemSize, numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds);
