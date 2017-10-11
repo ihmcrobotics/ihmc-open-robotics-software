@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.nodeExpansion;
 import java.util.HashSet;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -11,17 +12,22 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class SimpleSideBasedExpansion implements FootstepNodeExpansion
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private final FootstepPlannerParameters parameters;
 
-   private static final double maxYaw = Math.PI / 8.0;
-   private static final double defaultStepWidth = 0.25;
-
-   private double[] stepLengths = new double[] {0.0, FootstepNode.gridSizeXY, 0.1, 0.2, 0.4};
-   private double[] stepWidths = new double[] {0.15, defaultStepWidth - FootstepNode.gridSizeXY, defaultStepWidth + FootstepNode.gridSizeXY};
-   private double[] stepYaws = new double[] {0.0, FootstepNode.gridSizeYaw, maxYaw};
+   public SimpleSideBasedExpansion(FootstepPlannerParameters parameters)
+   {
+      this.parameters = parameters;
+   }
 
    @Override
    public HashSet<FootstepNode> expandNode(FootstepNode node)
    {
+      double maxYaw = parameters.getMaximumStepYaw();
+      double defaultStepWidth = parameters.getIdealFootstepWidth();
+      double[] stepLengths = new double[] {0.0, FootstepNode.gridSizeXY, 0.1, 0.2, 0.4};
+      double[] stepWidths = new double[] {0.15, defaultStepWidth - FootstepNode.gridSizeXY, defaultStepWidth + FootstepNode.gridSizeXY};
+      double[] stepYaws = new double[] {0.0, FootstepNode.gridSizeYaw, maxYaw};
+
       HashSet<FootstepNode> neighbors = new HashSet<>();
 
       FramePose stanceFootPose = new FramePose(worldFrame);

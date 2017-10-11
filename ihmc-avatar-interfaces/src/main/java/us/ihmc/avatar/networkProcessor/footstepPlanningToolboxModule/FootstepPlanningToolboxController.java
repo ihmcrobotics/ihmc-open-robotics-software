@@ -36,6 +36,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAnd
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.SimpleSideBasedExpansion;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
@@ -87,7 +88,6 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final WalkingControllerParameters walkingControllerParameters;
    private final LogModelProvider logModelProvider;
    private final FootstepDataListWithSwingOverTrajectoriesAssembler footstepDataListWithSwingOverTrajectoriesAssembler;
-   private final FootstepNodeExpansion expansion;
 
    private final double collisionSphereRadius = 0.2;
    private final PacketCommunicator packetCommunicator;
@@ -109,13 +109,6 @@ public class FootstepPlanningToolboxController extends ToolboxController
       this.dt = dt;
       packetCommunicator.attachListener(PlanarRegionsListMessage.class, createPlanarRegionsConsumer());
 
-      /**
-       * A robot specific node expansion can be achieved with this.
-       * Currently only supported in A-star planner for Atlas and Valkyrie.
-       * Use SimpleSideBasedExpansion ( defaults to Atlas) if using other robots or add custom footstep expansion class.
-       * */
-      this.expansion = drcRobotModel.getPlanarRegionFootstepPlannerParameters().getReachableFootstepExpansion();
-
       SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame = createFootPolygonsFromContactPoints(contactPointParameters);
 
       humanoidReferenceFrames = createHumanoidReferenceFrames(fullHumanoidRobotModel);
@@ -124,11 +117,23 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       plannerMap.put(FootstepPlanningRequestPacket.FootstepPlannerType.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(contactPointsInSoleFrame, fullHumanoidRobotModel));
       plannerMap.put(FootstepPlanningRequestPacket.FootstepPlannerType.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), contactPointsInSoleFrame));
-      plannerMap.put(FootstepPlanningRequestPacket.FootstepPlannerType.A_STAR, AStarFootstepPlanner.createRoughTerrainPlanner(null, contactPointsInSoleFrame, expansion, registry));
+      plannerMap.put(FootstepPlanningRequestPacket.FootstepPlannerType.A_STAR, createAStarPlanner(contactPointsInSoleFrame, drcRobotModel));
       activePlanner.set(FootstepPlanningRequestPacket.FootstepPlannerType.PLANAR_REGION_BIPEDAL);
 
       usePlanarRegions.set(true);
       isDone.set(true);
+   }
+
+   private AStarFootstepPlanner createAStarPlanner(SideDependentList<ConvexPolygon2D> footPolygons, DRCRobotModel robotModel)
+   {
+      /**
+       * A robot specific node expansion can be achieved with this.
+       * Currently only supported in A-star planner for Atlas and Valkyrie.
+       * Use SimpleSideBasedExpansion ( defaults to Atlas) if using other robots or add custom footstep expansion class.
+       * */
+//      FootstepNodeExpansion expansion = robotModel.getPlanarRegionFootstepPlannerParameters().getReachableFootstepExpansion();
+      FootstepNodeExpansion expansion = new SimpleSideBasedExpansion(footstepPlanningParameters);
+      return AStarFootstepPlanner.createRoughTerrainPlanner(footstepPlanningParameters, null, footPolygons, expansion, registry);
    }
 
    private DepthFirstFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FullRobotModel fullRobotModel)

@@ -277,4 +277,22 @@ public interface FootstepPlannerParameters
    {
       return 0.0;
    }
+
+   /**
+    * When using a cost based planning approach this value defined how the yaw of a footstep will be
+    * weighted in comparison to its position.
+    */
+   public default double getYawWeight()
+   {
+      return 0.1;
+   }
+
+   /**
+    * When using a cost based planning approach this value defines the cost that is added for each step
+    * taken. Setting this value to a high number will favour plans with less steps.
+    */
+   public default double getCostPerStep()
+   {
+      return 0.005;
+   }
 }
