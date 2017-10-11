@@ -21,16 +21,16 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.heuristics.EuclideanDistanceHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SimpleNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.SimpleGridResolutionBasedExpansion;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.SimpleSideBasedExpansion;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanBasedCost;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.EuclideanDistanceHeuristics;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.SimpleGridResolutionBasedExpansion;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SimpleNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.SimpleSideBasedExpansion;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -109,8 +109,8 @@ public class AStarPlanarRegionsPlannerTest
    @Test(timeout = 3000)
    public void testFootstepNode()
    {
-      double gridX = FootstepNode.gridSizeX;
-      double gridY = FootstepNode.gridSizeY;
+      double gridX = FootstepNode.gridSizeXY;
+      double gridY = FootstepNode.gridSizeXY;
       FootstepNode node;
 
       node = new FootstepNode(gridX * 0.3, 0.0);
@@ -225,7 +225,7 @@ public class AStarPlanarRegionsPlannerTest
          lastStep.getSoleFramePose(achievedGoalPose);
 
          goalPose.setY(-AStarFootstepPlanner.DEFAULT_STEP_WIDTH / 2.0);
-         assertTrue(goalPose.epsilonEquals(achievedGoalPose, FootstepNode.gridSizeX));
+         assertTrue(goalPose.epsilonEquals(achievedGoalPose, FootstepNode.gridSizeXY));
 
          planner.setWeight(5.0);
          assertEquals(FootstepPlanningResult.SUB_OPTIMAL_SOLUTION, planner.plan());

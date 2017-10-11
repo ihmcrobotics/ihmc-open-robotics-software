@@ -29,13 +29,13 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.taskExecutor.PipeLine;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<WalkOverTerrainState>
 {
@@ -94,7 +94,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       sleepBehavior.setSleepTime(2.0);
       lookDownAtTerrainBehavior = new LookDownBehavior(communicationBridge);
 
-      planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(yoTime, communicationBridge, fullRobotModel, referenceFrames);
+      planHumanoidFootstepsBehavior = new PlanHumanoidFootstepsBehavior(yoTime, communicationBridge, referenceFrames);
 //      planHumanoidFootstepsBehavior.createAndAttachSCSListenerToPlanner();
       planHumanoidFootstepsBehavior.createAndAttachYoVariableServerListenerToPlanner(logModelProvider, fullRobotModel);
 
@@ -233,7 +233,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 //      statemachine.addStateWithDoneTransition(takeSomeStepsAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN); //REACHED_GOAL);
       //      statemachine.addStateWithDoneTransition(takeSomeStepsAction, WalkOverTerrainState.LOOK_FOR_GOAL);
       statemachine.addStateWithDoneTransition(reachedGoalAction, WalkOverTerrainState.LOOK_DOWN_AT_TERRAIN);
-      
+
       //the state machine will transition into this state every time the behavior starts.
       statemachine.setStartState(WalkOverTerrainState.LOOK_FOR_GOAL);
 
@@ -298,7 +298,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
       public void setupPipeLine()
       {
          ReferenceFrame chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
-         
+
          BehaviorAction lookUpAction = new BehaviorAction(atlasPrimitiveActions.headTrajectoryBehavior)
          {
             @Override
