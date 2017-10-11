@@ -165,6 +165,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          String handName = fullRobotModel.getHand(robotSide).getName();
          assertSingleWaypointExecuted(handName, desiredPosition, desiredOrientation, scs);
       }
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
@@ -236,6 +237,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 1.5);
          assertTrue(success);
       }
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
 
       // TODO: add assert to make sure the hand did not move significantly.
    }
@@ -380,6 +383,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          controllerTrajectoryPoint.setTime(expectedTrajectoryPoint.getTime());
          assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
       }
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
@@ -629,6 +634,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       lastPoint.changeFrame(worldFrame);
       EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy().getPoint(), desiredPosition, 0.001);
       EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy().getQuaternion(), desiredOrientation, 0.001);
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testQueueWithWrongPreviousId() throws Exception
