@@ -82,7 +82,7 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
       listener = new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             synchronized (VirtualSliderBoardGui.this)
             {
@@ -245,7 +245,7 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
 
          for (VariableChangedListener listener : sliderBoard.getVariableChangedListeners())
          {
-            listener.variableChanged(slider.midiControl.var);
+            listener.notifyOfVariableChange(slider.midiControl.var);
          }
 
          // System.out.println(slider.ctrl.var.getValueAsDouble()+" " +SliderBoardUtils.valueRatioConvertToIntWithExponents(slider.ctrl, slider.sliderMax));

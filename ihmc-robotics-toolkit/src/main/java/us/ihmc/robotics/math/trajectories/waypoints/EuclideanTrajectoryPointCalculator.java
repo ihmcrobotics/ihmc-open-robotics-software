@@ -10,9 +10,9 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
@@ -31,7 +31,7 @@ public class EuclideanTrajectoryPointCalculator
    private ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
 
    private final RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = new RecyclingArrayList<>(20, FrameEuclideanTrajectoryPoint.class);
-   private final EnumMap<Direction, YoPolynomial> polynomials = new EnumMap<>(Direction.class);
+   private final EnumMap<Axis, YoPolynomial> polynomials = new EnumMap<>(Axis.class);
 
    private boolean useWeightMethod = false;
    private double minWeight = Double.NaN;
@@ -46,8 +46,8 @@ public class EuclideanTrajectoryPointCalculator
    {
       clear();
       YoVariableRegistry dummyRegistry = new YoVariableRegistry("Dummy");
-      for (Direction direction : Direction.values)
-         polynomials.put(direction, new YoPolynomial(StringUtils.lowerCase(direction.toString()) + "Polynomial", 6, dummyRegistry));
+      for (Axis axis : Axis.values)
+         polynomials.put(axis, new YoPolynomial(StringUtils.lowerCase(axis.toString()) + "Polynomial", 6, dummyRegistry));
    }
 
    public void clear()
@@ -264,28 +264,28 @@ public class EuclideanTrajectoryPointCalculator
          EuclideanTrajectoryPointInterface<?> secondTrajectoryPoint, EuclideanTrajectoryPointInterface<?> thirdTrajectoryPoint,
          FrameVector3D linearVelocityToPack)
    {
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
          firstTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          firstTrajectoryPoint.getLinearVelocity(tempFrameVector.getVector());
          double t0 = firstTrajectoryPoint.getTime();
-         double z0 = tempFramePoint.getElement(direction.ordinal());
-         double zd0 = tempFrameVector.getElement(direction.ordinal());
+         double z0 = tempFramePoint.getElement(axis.ordinal());
+         double zd0 = tempFrameVector.getElement(axis.ordinal());
 
          secondTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          double tIntermediate = secondTrajectoryPoint.getTime();
-         double zIntermediate = tempFramePoint.getElement(direction.ordinal());
+         double zIntermediate = tempFramePoint.getElement(axis.ordinal());
 
          thirdTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          thirdTrajectoryPoint.getLinearVelocity(tempFrameVector.getVector());
          double tf = thirdTrajectoryPoint.getTime();
-         double zf = tempFramePoint.getElement(direction.ordinal());
-         double zdf = tempFrameVector.getElement(direction.ordinal());
+         double zf = tempFramePoint.getElement(axis.ordinal());
+         double zdf = tempFrameVector.getElement(axis.ordinal());
 
-         YoPolynomial polynomial = polynomials.get(direction);
+         YoPolynomial polynomial = polynomials.get(axis);
          polynomial.setQuarticUsingWayPoint(t0, tIntermediate, tf, z0, zd0, zIntermediate, zf, zdf);
          polynomial.compute(tIntermediate);
-         linearVelocityToPack.setElement(direction.ordinal(), polynomial.getVelocity());
+         linearVelocityToPack.setElement(axis.ordinal(), polynomial.getVelocity());
       }
    }
 
@@ -298,23 +298,23 @@ public class EuclideanTrajectoryPointCalculator
          EuclideanTrajectoryPointInterface<?> secondTrajectoryPoint, EuclideanTrajectoryPointInterface<?> thirdTrajectoryPoint,
          TrajectoryPoint trajectoryPointToComputeVelocityOf, FrameVector3D linearVelocityToPack)
    {
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
          firstTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          firstTrajectoryPoint.getLinearVelocity(tempFrameVector.getVector());
          double t0 = firstTrajectoryPoint.getTime();
-         double z0 = tempFramePoint.getElement(direction.ordinal());
+         double z0 = tempFramePoint.getElement(axis.ordinal());
 
          secondTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          double tIntermediate = secondTrajectoryPoint.getTime();
-         double zIntermediate = tempFramePoint.getElement(direction.ordinal());
+         double zIntermediate = tempFramePoint.getElement(axis.ordinal());
 
          thirdTrajectoryPoint.getPosition(tempFramePoint.getPoint());
          thirdTrajectoryPoint.getLinearVelocity(tempFrameVector.getVector());
          double tf = thirdTrajectoryPoint.getTime();
-         double zf = tempFramePoint.getElement(direction.ordinal());
+         double zf = tempFramePoint.getElement(axis.ordinal());
 
-         YoPolynomial polynomial = polynomials.get(direction);
+         YoPolynomial polynomial = polynomials.get(axis);
          polynomial.setQuadraticUsingIntermediatePoint(t0, tIntermediate, tf, z0, zIntermediate, zf);
          switch (trajectoryPointToComputeVelocityOf)
          {
@@ -330,7 +330,7 @@ public class EuclideanTrajectoryPointCalculator
             break;
          }
 
-         linearVelocityToPack.setElement(direction.ordinal(), polynomial.getVelocity());
+         linearVelocityToPack.setElement(axis.ordinal(), polynomial.getVelocity());
       }
    }
 

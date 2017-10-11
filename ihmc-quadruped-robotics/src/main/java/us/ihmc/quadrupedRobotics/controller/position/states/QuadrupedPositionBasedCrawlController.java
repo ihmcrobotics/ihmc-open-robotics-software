@@ -492,7 +492,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       filteredDesiredCoMHeightAlphaBreakFrequency.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             filteredDesiredCoMHeightAlpha.set(
                   AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filteredDesiredCoMHeightAlphaBreakFrequency.getDoubleValue(), dt));
@@ -606,7 +606,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       return new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             double newAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getDoubleValue(), dt);
             alpha.set(newAlpha);

@@ -1614,7 +1614,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       PlaybackListener listener = new PlaybackListener()
       {
          @Override
-         public void indexChanged(int newIndex, double newTime)
+         public void notifyOfIndexChange(int newIndex)
          {
 
          }
@@ -1897,7 +1897,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       RewoundListener ret = new RewoundListener()
       {
          @Override
-         public void wasRewound()
+         public void notifyOfRewind()
          {
             simulationRewoundListenerHasBeenNotified.set(true);
          }

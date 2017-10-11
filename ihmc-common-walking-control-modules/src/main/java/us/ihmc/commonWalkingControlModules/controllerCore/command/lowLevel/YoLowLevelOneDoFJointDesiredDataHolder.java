@@ -7,17 +7,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.tools.string.StringTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJointDesiredDataHolderReadOnly
 {
    private final List<OneDoFJoint> jointsWithDesiredData;
-   private final Map<String, YoLowLevelJointData> lowLevelJointDataMap;
+   private final Map<String, YoJointDesiredOutput> lowLevelJointDataMap;
 
    public YoLowLevelOneDoFJointDesiredDataHolder(OneDoFJoint[] controlledJoints, YoVariableRegistry parentRegistry)
    {
@@ -34,7 +34,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
          OneDoFJoint joint = controlledJoints[i];
          jointsWithDesiredData.add(joint);
          String jointName = joint.getName();
-         YoLowLevelJointData jointData = new YoLowLevelJointData(jointName, registry, StringTools.getEveryUppercaseLetter(parentRegistry.getName()));
+         YoJointDesiredOutput jointData = new YoJointDesiredOutput(jointName, registry, StringTools.getEveryUppercaseLetter(parentRegistry.getName()));
          lowLevelJointDataMap.put(jointName, jointData);
       }
    }
@@ -44,7 +44,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       for (int i = 0; i < jointsWithDesiredData.size(); i++)
       {
          OneDoFJoint joint = jointsWithDesiredData.get(i);
-         YoLowLevelJointData jointDataToReset = lowLevelJointDataMap.get(joint.getName());
+         YoJointDesiredOutput jointDataToReset = lowLevelJointDataMap.get(joint.getName());
          jointDataToReset.clear();
       }
    }
@@ -57,9 +57,9 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       }
    }
 
-   public void setJointControlMode(OneDoFJoint joint, LowLevelJointControlMode controlMode)
+   public void setJointControlMode(OneDoFJoint joint, JointDesiredControlMode controlMode)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
 
@@ -68,7 +68,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
 
    public void setDesiredJointTorque(OneDoFJoint joint, double desiredTorque)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
 
@@ -77,17 +77,17 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
 
    public void setupForForceControl(OneDoFJoint joint, double desiredTorque)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
 
-      lowLevelJointData.setControlMode(LowLevelJointControlMode.FORCE_CONTROL);
+      lowLevelJointData.setControlMode(JointDesiredControlMode.EFFORT);
       lowLevelJointData.setDesiredTorque(desiredTorque);
    }
 
    public void setDesiredJointPosition(OneDoFJoint joint, double desiredPosition)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
 
@@ -96,7 +96,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
 
    public void setDesiredJointVelocity(OneDoFJoint joint, double desiredVelocity)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
 
@@ -105,45 +105,36 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
 
    public void setDesiredJointAcceleration(OneDoFJoint joint, double desiredAcceleration)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
 
       lowLevelJointData.setDesiredAcceleration(desiredAcceleration);
    }
 
-   public void setDesiredJointCurrent(OneDoFJoint joint, double desiredCurrent)
-   {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
-      if (lowLevelJointData == null)
-         throwJointNotRegisteredException(joint);
-
-      lowLevelJointData.setDesiredCurrent(desiredCurrent);
-   }
-
    public void setupForPositionControl(OneDoFJoint joint, double desiredPosition, double desiredVelocity)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
 
-      lowLevelJointData.setControlMode(LowLevelJointControlMode.POSITION_CONTROL);
+      lowLevelJointData.setControlMode(JointDesiredControlMode.POSITION);
       lowLevelJointData.setDesiredPosition(desiredPosition);
       lowLevelJointData.setDesiredVelocity(desiredVelocity);
    }
 
    public void setResetJointIntegrators(OneDoFJoint joint, boolean reset)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
 
       lowLevelJointData.setResetIntegrators(reset);
    }
 
-   public void overwriteJointData(OneDoFJoint joint, LowLevelJointDataReadOnly jointData)
+   public void overwriteJointData(OneDoFJoint joint, JointDesiredOutputReadOnly jointData)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
 
@@ -156,13 +147,13 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
     */
    public void completeWith(LowLevelOneDoFJointDesiredDataHolderReadOnly other)
    {
-      for (int i = 0; i < other.getNumberOfJointsWithLowLevelData(); i++)
+      for (int i = 0; i < other.getNumberOfJointsWithDesiredOutput(); i++)
       {
          OneDoFJoint joint = other.getOneDoFJoint(i);
          String jointName = joint.getName();
 
-         YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(jointName);
-         LowLevelJointDataReadOnly otherLowLevelJointData = other.getLowLevelJointData(joint);
+         YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(jointName);
+         JointDesiredOutputReadOnly otherLowLevelJointData = other.getJointDesiredOutput(joint);
 
          if (lowLevelJointData == null)
             throwJointNotRegisteredException(joint);
@@ -177,14 +168,14 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
    {
       clear();
 
-      for (int i = 0; i < other.getNumberOfJointsWithLowLevelData(); i++)
+      for (int i = 0; i < other.getNumberOfJointsWithDesiredOutput(); i++)
       {
          OneDoFJoint joint = other.getOneDoFJoint(i);
-         YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+         YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
          if (lowLevelJointData == null)
             continue;
 
-         lowLevelJointData.set(other.getLowLevelJointData(joint));
+         lowLevelJointData.set(other.getJointDesiredOutput(joint));
       }
    }
 
@@ -197,14 +188,14 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       }
    }
 
-   public YoLowLevelJointData getYoLowLevelJointData(OneDoFJoint joint)
+   public YoJointDesiredOutput getYoLowLevelJointData(OneDoFJoint joint)
    {
       return lowLevelJointDataMap.get(joint.getName());
    }
 
-   public LowLevelJointControlMode getJointControlMode(OneDoFJoint joint)
+   public JointDesiredControlMode getJointControlMode(OneDoFJoint joint)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
       return lowLevelJointData.getControlMode();
@@ -212,7 +203,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
 
    public double getDesiredJointTorque(OneDoFJoint joint)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
       return lowLevelJointData.getDesiredTorque();
@@ -220,7 +211,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
 
    public double getDesiredJointPosition(OneDoFJoint joint)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
       return lowLevelJointData.getDesiredPosition();
@@ -228,7 +219,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
 
    public double getDesiredJointVelocity(OneDoFJoint joint)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
       return lowLevelJointData.getDesiredVelocity();
@@ -236,23 +227,15 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
 
    public double getDesiredJointAcceleration(OneDoFJoint joint)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
       return lowLevelJointData.getDesiredAcceleration();
    }
 
-   public double getDesiredJointCurrent(OneDoFJoint joint)
-   {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
-      if (lowLevelJointData == null)
-         throwJointNotRegisteredException(joint);
-      return lowLevelJointData.getDesiredCurrent();
-   }
-
    public boolean pollResetJointIntegrators(OneDoFJoint joint)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
       return lowLevelJointData.pollResetIntegratorsRequest();
@@ -260,7 +243,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
 
    public boolean peekResetJointIntegrators(OneDoFJoint joint)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
       return lowLevelJointData.peekResetIntegratorsRequest();
@@ -274,7 +257,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
 
    public boolean hasControlModeForJoint(OneDoFJoint joint)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          return false;
       else
@@ -283,7 +266,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
 
    public boolean hasDesiredTorqueForJoint(OneDoFJoint joint)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          return false;
       else
@@ -292,7 +275,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
 
    public boolean hasDesiredPositionForJoint(OneDoFJoint joint)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          return false;
       else
@@ -301,7 +284,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
 
    public boolean hasDesiredVelocityForJoint(OneDoFJoint joint)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          return false;
       else
@@ -310,20 +293,11 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
 
    public boolean hasDesiredAcceleration(OneDoFJoint joint)
    {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      YoJointDesiredOutput lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
       if (lowLevelJointData == null)
          return false;
       else
          return lowLevelJointData.hasDesiredAcceleration();
-   }
-
-   public boolean hasDesiredCurrentForJoint(OneDoFJoint joint)
-   {
-      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
-      if (lowLevelJointData == null)
-         return false;
-      else
-         return lowLevelJointData.hasDesiredCurrent();
    }
 
    @Override
@@ -333,20 +307,20 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
    }
 
    @Override
-   public LowLevelJointDataReadOnly getLowLevelJointData(OneDoFJoint joint)
+   public JointDesiredOutputReadOnly getJointDesiredOutput(OneDoFJoint joint)
    {
       return lowLevelJointDataMap.get(joint.getName());
    }
 
    @Override
-   public int getNumberOfJointsWithLowLevelData()
+   public int getNumberOfJointsWithDesiredOutput()
    {
       return jointsWithDesiredData.size();
    }
 
    @Override
-   public LowLevelJointDataReadOnly getLowLevelJointData(int index)
+   public JointDesiredOutputReadOnly getJointDesiredOutput(int index)
    {
-      return getLowLevelJointData(getOneDoFJoint(index));
+      return getJointDesiredOutput(getOneDoFJoint(index));
    }
 }

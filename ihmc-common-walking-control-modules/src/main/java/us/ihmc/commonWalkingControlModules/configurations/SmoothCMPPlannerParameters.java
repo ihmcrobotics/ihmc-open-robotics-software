@@ -54,7 +54,12 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
    public SmoothCMPPlannerParameters(double modelScale)
    {
       this.modelScale = modelScale;
-
+      this.swingCopPointsToPlan = new CoPPointName[] {CoPPointName.BALL_COP, CoPPointName.TOE_COP};
+      this.transferCoPPointsToPlan = new CoPPointName[] {CoPPointName.MIDFEET_COP, CoPPointName.HEEL_COP};
+      this.exitCoPName = CoPPointName.TOE_COP;
+      this.entryCoPName = CoPPointName.HEEL_COP;
+      this.endCoPName = CoPPointName.MIDFEET_COP;
+      
       copOffsetFrameNames.put(CoPPointName.HEEL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
       copOffsetFrameNames.put(CoPPointName.BALL_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
       copOffsetFrameNames.put(CoPPointName.TOE_COP, CoPSupportPolygonNames.SUPPORT_FOOT_POLYGON);
@@ -181,7 +186,7 @@ public class SmoothCMPPlannerParameters extends ICPWithTimeFreezingPlannerParame
     */
    public double getSwingDurationShiftFraction()
    {
-      return 0.99;
+      return 0.90;
    }
 
    @Override

@@ -34,7 +34,7 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 
 public class KinematicsToolboxHelper
@@ -102,7 +102,7 @@ public class KinematicsToolboxHelper
       {
          if (output.hasDataForJoint(joint))
          {
-            LowLevelJointDataReadOnly data = output.getLowLevelJointData(joint); 
+            JointDesiredOutputReadOnly data = output.getJointDesiredOutput(joint); 
 
             joint.setQ(data.getDesiredPosition()); // ?????
             joint.setqDesired(data.getDesiredPosition());

@@ -32,7 +32,7 @@ public class SimulationRewindabilityVerifierWithStackTracing
       VariableChangedListener variableChangedListenerForSimOne = new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> variableInRegistryOne)
+         public void notifyOfVariableChange(YoVariable<?> variableInRegistryOne)
          {
             if (!recordDifferencesForSimOne)
                return;
@@ -58,7 +58,7 @@ public class SimulationRewindabilityVerifierWithStackTracing
       VariableChangedListener variableChangedListenerForSimTwo = new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> variableInRegistryTwo)
+         public void notifyOfVariableChange(YoVariable<?> variableInRegistryTwo)
          {
             if (!recordDifferencesForSimTwo)
                return;

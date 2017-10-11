@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.parameters;
 
-import us.ihmc.footstepPlanning.aStar.implementations.ReachableFootstepsBasedExpansion;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ReachableFootstepsBasedExpansion;
 
 /**
  * This class adds footstep neighbors specific to Valkyrie Robot
