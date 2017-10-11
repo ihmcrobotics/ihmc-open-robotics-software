@@ -22,7 +22,7 @@ public abstract class FootstepNodeSnapper
    {
       if(planarRegionsList == null)
       {
-         return FootstepNodeSnapData.emptyData();
+         return FootstepNodeSnapData.identityData();
       }
 
       if(!snapDataHolder.containsKey(footstepNode))
