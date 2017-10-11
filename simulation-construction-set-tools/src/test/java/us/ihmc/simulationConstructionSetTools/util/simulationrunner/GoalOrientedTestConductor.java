@@ -45,7 +45,7 @@ public class GoalOrientedTestConductor implements VariableChangedListener, Simul
    }
    
    @Override
-   public void variableChanged(YoVariable<?> v)
+   public void notifyOfVariableChange(YoVariable<?> v)
    {
       if (yoTimeChangedListenerActive)
       {
@@ -206,7 +206,23 @@ public class GoalOrientedTestConductor implements VariableChangedListener, Simul
       
       if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs.getRobots()[0].getName(), scs, additionalStackDepthForRelevantCallingMethod);
+         BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(scs.getRobots()[0].getName(), scs, additionalStackDepthForRelevantCallingMethod + 1);
+      }
+      
+      ThreadTools.sleep(200);
+      scs.closeAndDispose();
+   }
+
+   public void concludeTesting(String videoName)
+   {
+      if (simulationTestingParameters.getKeepSCSUp())
+      {
+         ThreadTools.sleepForever();
+      }
+      
+      if (simulationTestingParameters.getCreateSCSVideos())
+      {
+         BambooTools.createVideoWithDateTimeAndStoreInDefaultDirectory(scs, videoName);
       }
       
       ThreadTools.sleep(200);

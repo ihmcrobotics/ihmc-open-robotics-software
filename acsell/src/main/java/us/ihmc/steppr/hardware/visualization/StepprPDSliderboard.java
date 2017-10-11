@@ -87,7 +87,7 @@ public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedLi
       {
 
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString());
          }
@@ -127,7 +127,7 @@ public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedLi
          {
 
             @Override
-            public void variableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                for (StepprActuator actuator : joint.getActuators())
                {
@@ -241,7 +241,7 @@ public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedLi
    }
 
    @Override
-   public void indexChanged(int newIndex, double newTime)
+   public void notifyOfIndexChange(int newIndex)
    {
       if (started)
       {

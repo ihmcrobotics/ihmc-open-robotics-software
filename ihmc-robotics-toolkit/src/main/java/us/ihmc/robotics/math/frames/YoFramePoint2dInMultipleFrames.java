@@ -107,7 +107,7 @@ public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements Yo
             private final YoFramePoint2d point = yoFramePointInWorld;
 
             @Override
-            public void variableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                getFrameTuple2dIncludingFrame(localFramePoint);
                point.setAndMatchFrame(localFramePoint);

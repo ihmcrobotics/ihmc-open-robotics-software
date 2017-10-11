@@ -116,6 +116,10 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoBoolean addOrientationMidpointForClearance;
    private final YoDouble midpointOrientationInterpolationForClearance;
 
+   private final YoBoolean ignoreInitialAngularVelocityZ;
+   private final YoDouble maxInitialLinearVelocityMagnitude;
+   private final YoDouble maxInitialAngularVelocityMagnitude;
+
    private final YoDouble finalSwingHeightOffset;
    private final double controlDT;
 
@@ -201,6 +205,13 @@ public class SwingState extends AbstractUnconstrainedState
       midpointOrientationInterpolationForClearance = new YoDouble(namePrefix + "MidpointOrientationInterpolationForClearance", registry);
       addOrientationMidpointForClearance.set(swingTrajectoryParameters.addOrientationMidpointForObstacleClearance());
       midpointOrientationInterpolationForClearance.set(swingTrajectoryParameters.midpointOrientationInterpolationForObstacleClearance());
+
+      ignoreInitialAngularVelocityZ = new YoBoolean(namePrefix + "IgnoreInitialAngularVelocityZ", registry);
+      maxInitialLinearVelocityMagnitude = new YoDouble(namePrefix + "MaxInitialLinearVelocityMagnitude", registry);
+      maxInitialAngularVelocityMagnitude = new YoDouble(namePrefix + "MaxInitialAngularVelocityMagnitude", registry);
+      ignoreInitialAngularVelocityZ.set(walkingControllerParameters.ignoreSwingInitialAngularVelocityZ());
+      maxInitialLinearVelocityMagnitude.set(walkingControllerParameters.getMaxSwingInitialLinearVelocityMagnitude());
+      maxInitialAngularVelocityMagnitude.set(walkingControllerParameters.getMaxSwingInitialAngularVelocityMagnitude());
 
       // todo make a smarter distinction on this as a way to work with the push recovery module
       doContinuousReplanning = new YoBoolean(namePrefix + "DoContinuousReplanning", registry);
@@ -305,6 +316,13 @@ public class SwingState extends AbstractUnconstrainedState
       initialPose.setPosition(initialPosition);
       initialPose.changeFrame(initialOrientation.getReferenceFrame());
       initialPose.setOrientation(initialOrientation);
+      if (ignoreInitialAngularVelocityZ.getBooleanValue())
+      {
+         initialAngularVelocity.changeFrame(worldFrame);
+         initialAngularVelocity.setZ(0.0);
+      }
+      initialLinearVelocity.clipToMaxLength(maxInitialLinearVelocityMagnitude.getDoubleValue());
+      initialAngularVelocity.clipToMaxLength(maxInitialAngularVelocityMagnitude.getDoubleValue());
       stanceFootPosition.setToZero(oppositeSoleFrame);
 
       fillAndInitializeTrajectories(true);

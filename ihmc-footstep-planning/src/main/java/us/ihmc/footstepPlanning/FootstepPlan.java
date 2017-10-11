@@ -3,9 +3,6 @@ package us.ihmc.footstepPlanning;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNode;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -15,29 +12,6 @@ public class FootstepPlan
 
    public FootstepPlan()
    {
-   }
-
-   public FootstepPlan(BipedalFootstepPlannerNode endNode)
-   {
-      clear();
-      BipedalFootstepPlannerNode node = endNode;
-
-      while (node != null)
-      {
-         RigidBodyTransform soleTransform = new RigidBodyTransform();
-         node.getSoleTransform(soleTransform);
-
-         FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), soleTransform);
-         SimpleFootstep simpleFootstep = addFootstep(node.getRobotSide(), framePose);
-         if (node.isPartialFoothold())
-         {
-            simpleFootstep.setFoothold(node.getPartialFootholdPolygon());
-         }
-
-         node = node.getParentNode();
-      }
-
-      reverse();
    }
 
    public int getNumberOfSteps()

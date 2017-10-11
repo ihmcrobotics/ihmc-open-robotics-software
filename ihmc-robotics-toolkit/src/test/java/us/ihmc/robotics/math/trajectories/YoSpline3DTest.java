@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.robotics.Axis;
 
 public class YoSpline3DTest
 {
@@ -38,9 +38,9 @@ public class YoSpline3DTest
       cubic.compute(3.0);
       FramePoint3D actual = cubic.getPositionCopy();
       
-      for (Direction direction : Direction.values())
+      for (Axis axis : Axis.values())
       {
-         assertEquals(expected.getElement(direction.getIndex()), actual.getElement(direction.getIndex()), EPSILON);
+         assertEquals(expected.getElement(axis.ordinal()), actual.getElement(axis.ordinal()), EPSILON);
       }
       
    }
@@ -67,9 +67,9 @@ public class YoSpline3DTest
 	   quintic.compute(0.5);
 	   FramePoint3D actual = quintic.getPositionCopy();
 	      
-	   for (Direction direction : Direction.values())
+	   for (Axis axis : Axis.values())
 	   {
-	      assertEquals(expected.getElement(direction.getIndex()), actual.getElement(direction.getIndex()), EPSILON);
+	      assertEquals(expected.getElement(axis.ordinal()), actual.getElement(axis.ordinal()), EPSILON);
 	   }   
 	}
 

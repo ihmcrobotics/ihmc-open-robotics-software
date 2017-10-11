@@ -29,7 +29,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.tools.FormattingTools;
 
@@ -134,7 +134,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
       {
          lowLevelJointDesiredData = new LowLevelOneDoFJointDesiredDataHolder(oneDoFJoints.length);
          lowLevelJointDesiredData.registerJointsWithEmptyData(oneDoFJoints);
-         lowLevelJointDesiredData.setJointsControlMode(oneDoFJoints, LowLevelJointControlMode.POSITION_CONTROL);
+         lowLevelJointDesiredData.setJointsControlMode(oneDoFJoints, JointDesiredControlMode.POSITION);
 
          jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
          jointspaceFeedbackControlCommand = null;

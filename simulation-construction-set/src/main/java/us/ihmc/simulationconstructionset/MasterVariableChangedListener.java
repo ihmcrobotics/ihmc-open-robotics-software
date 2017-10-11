@@ -23,7 +23,7 @@ public class MasterVariableChangedListener implements VariableChangedListener
    }
 
    @Override
-   public void variableChanged(YoVariable<?> master)
+   public void notifyOfVariableChange(YoVariable<?> master)
    {
       for (YoDouble slave : slaves)
       {
