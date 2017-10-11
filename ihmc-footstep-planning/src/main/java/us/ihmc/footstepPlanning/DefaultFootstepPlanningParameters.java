@@ -89,4 +89,15 @@ public class DefaultFootstepPlanningParameters implements FootstepPlannerParamet
       return 0.24;
    }
 
+   @Override
+   public double getMaximumXYWiggleDistance()
+   {
+      return 1.0;
+   }
+
+   @Override
+   public double getMaximumYawWiggle()
+   {
+      return 0.1;
+   }
 }
