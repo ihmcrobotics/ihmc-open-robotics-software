@@ -161,7 +161,6 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       double[] lagrangeEqualityMultipliers = new double[0];
       double[] lagrangeInequalityMultipliers = new double[1];
 
-      /*
       int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
       numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
       assertEquals(expectedNumberOfIterations, numberOfIterations);
@@ -244,7 +243,6 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       solutionMatrix.setData(solution);
       objectiveCost = solver.getObjectiveCost(solutionMatrix);
       assertEquals(4.0, objectiveCost, 1e-7);
-      */
 
       // Minimize x^2 + y^2 subject to x + y = 1.0, x <= y - 1 (x - y <= -1.0)
       solver.clear();
@@ -264,7 +262,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       solution = new double[2];
       lagrangeEqualityMultipliers = new double[1];
       lagrangeInequalityMultipliers = new double[1];
-      int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
       assertEquals(expectedNumberOfIterations + 1, numberOfIterations);
 
       assertEquals(2, solution.length);
@@ -273,9 +271,9 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(-1.0, lagrangeEqualityMultipliers[0], 1e-7);
       assertEquals(1.0, lagrangeInequalityMultipliers[0], 1e-7);
 
-      DenseMatrix64F solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
+      solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);
-      double objectiveCost = solver.getObjectiveCost(solutionMatrix);
+      objectiveCost = solver.getObjectiveCost(solutionMatrix);
       assertEquals(1.0, objectiveCost, 1e-7);
 
       // Minimize x^2 + y^2 subject to x + y = 2.0, 3x - 3y = 0.0, x <= 2, x <= 10, y <= 3
