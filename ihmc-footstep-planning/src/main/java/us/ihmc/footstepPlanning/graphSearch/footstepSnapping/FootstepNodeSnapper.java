@@ -15,6 +15,7 @@ public abstract class FootstepNodeSnapper
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
+      snapDataHolder.clear();
    }
 
    public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode)
