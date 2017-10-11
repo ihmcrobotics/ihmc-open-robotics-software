@@ -15,6 +15,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
@@ -151,10 +152,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
          footstepPose.setTranslationX(path.get(i).getX());
          footstepPose.setTranslationY(path.get(i).getY());
 
-         RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i)).getSnapTransform();
-         if (!snapTransform.containsNaN())
-            snapTransform.transform(footstepPose);
-
+         FootstepNodeSnapData snapData = snapper.snapFootstepNode(path.get(i));
+         RigidBodyTransform snapTransform = snapData.getSnapTransform();
+         snapTransform.transform(footstepPose);
          plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), footstepPose));
       }
 
