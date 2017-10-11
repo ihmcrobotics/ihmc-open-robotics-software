@@ -1,36 +1,28 @@
 package us.ihmc.javaFXToolkit.graphics;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.List;
-
-import jassimp.AiBuiltInWrapperProvider;
-import jassimp.AiClassLoaderIOSystem;
-import jassimp.AiColor;
-import jassimp.AiMaterial;
-import jassimp.AiMesh;
-import jassimp.AiPostProcessSteps;
-import jassimp.AiScene;
-import jassimp.AiTextureType;
-import jassimp.IHMCJassimp;
+import jassimp.*;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
+import javafx.scene.transform.Affine;
+import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
+import us.ihmc.javaFXToolkit.JavaFXTools;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashSet;
+import java.util.List;
 
 public class JAssImpJavaFXTools
 {
-
-   private static final AiBuiltInWrapperProvider wrapperProvider = new AiBuiltInWrapperProvider();
+   private static final AiBuiltInWrapperProvider builtinWrapperProvider = (AiBuiltInWrapperProvider) Jassimp.BUILTIN;
 
    public static Color aiColorToJFXColor(AiColor aiColor)
    {
@@ -42,19 +34,59 @@ public class JAssImpJavaFXTools
       return Color.rgb(red, green, blue, alpha);
    }
 
-   public static MeshView[] getJavaFxMeshes(String meshFileName)
+   public static void convertAssimpMatrix4fToEuclidAffine(AiMatrix4f aiMatrix4f, AffineTransform affineTransform, boolean print)
    {
-      URL meshResource = JAssImpJavaFXTools.class.getClassLoader().getResource(meshFileName);
+      double[] matrix = new double[16];
 
+      for (int i = 0; i < 4; i++)
+      {
+         for (int j = 0; j < 4; j++)
+         {
+            float v = aiMatrix4f.get(i, j);
+            if (print)
+               System.out.println("Matrix value: [i,j]: [" + i + ", " + j + "]: " + v);
+            matrix[4 * i + j] = v;
+         }
+      }
+
+      affineTransform.set(matrix);
+   }
+
+   public static MeshView[] getJavaFxMeshes(String meshFileName) throws URISyntaxException, IOException
+   {
       HashSet<AiPostProcessSteps> aiPostProcessSteps = new HashSet<>();
       aiPostProcessSteps.add(AiPostProcessSteps.FLIP_UVS);
-      aiPostProcessSteps.add(AiPostProcessSteps.OPTIMIZE_GRAPH);
+      //      aiPostProcessSteps.add(AiPostProcessSteps.OPTIMIZE_GRAPH); // There are bugs with OPTIMIZE GRAPH that messes up transforms.
       aiPostProcessSteps.add(AiPostProcessSteps.OPTIMIZE_MESHES);
 
       AiScene aiScene;
       try
       {
          aiScene = IHMCJassimp.importFile(meshFileName, aiPostProcessSteps, new AiClassLoaderIOSystem(JAssImpJavaFXTools.class.getClassLoader()));
+
+         AiNode sceneRoot = aiScene.getSceneRoot(builtinWrapperProvider);
+
+         AiMatrix4f transform = sceneRoot.getTransform(builtinWrapperProvider);
+
+         AffineTransform affineTransform = new AffineTransform();
+
+         convertAssimpMatrix4fToEuclidAffine(transform, affineTransform, false);
+
+         AiMetadataEntry up_axis = sceneRoot.getMetadata().get("UP_AXIS");
+         //Hacky fix for Collada bug
+         if (meshFileName.toLowerCase().endsWith(".dae") && up_axis != null && up_axis.getMetaDataType() == AiMetadataEntry.AiMetadataType.AI_AISTRING)
+         {
+            String upAxisString = (String) up_axis.getData();
+            if (upAxisString.contains("UP_Z"))
+            {
+               affineTransform.appendRollRotation(Math.PI / 2.0);
+            }
+
+            if (upAxisString.contains("UP_X"))
+            {
+               affineTransform.appendPitchRotation(Math.PI / 2.0);
+            }
+         }
 
          List<AiMesh> meshes = aiScene.getMeshes();
 
@@ -78,18 +110,18 @@ public class JAssImpJavaFXTools
             {
                int numDiffuseTextures = aiMaterial.getNumTextures(AiTextureType.DIFFUSE);
 
-               AiColor diffuseColor = aiMaterial.getDiffuseColor(wrapperProvider);
-               AiColor specularColor = aiMaterial.getSpecularColor(wrapperProvider);
+               AiColor diffuseColor = aiMaterial.getDiffuseColor(builtinWrapperProvider);
+               AiColor specularColor = aiMaterial.getSpecularColor(builtinWrapperProvider);
                float shininess = aiMaterial.getShininess();
 
                Image diffuseMap = null;
                for (int j = 0; j < numDiffuseTextures; j++)
                {
                   String textureFile = aiMaterial.getTextureFile(AiTextureType.DIFFUSE, j);
-                  Path path = Paths.get(meshResource.toURI()); // TODO: Do not use Path, gives weird slashes on windows
-                  Path textureLocation = path.getParent().resolve(textureFile);
+                  String textureLocation = meshFileName.substring(0, meshFileName.lastIndexOf("/")) + "/" + textureFile;
+                  URI normalize = new URI(textureLocation).normalize();
 
-                  diffuseMap = new Image(textureLocation.toUri().toURL().openStream());
+                  diffuseMap = new Image(JAssImpJavaFXTools.class.getClassLoader().getResourceAsStream(normalize.toString()));
                   uvIndexToUse = j;
                }
 
@@ -151,19 +183,22 @@ public class JAssImpJavaFXTools
          }
          
          MeshView[] meshViews = new MeshView[meshDataHolders.length];
-         
+
          for (int i = 0; i < meshDataHolders.length; i++)
          {
+            Affine javaFxAffineToPack = new Affine();
+            JavaFXTools.convertEuclidAffineToJavaFXAffine(affineTransform, javaFxAffineToPack);
             MeshDataHolder meshDataHolder = meshDataHolders[i];
             MeshView meshView = new MeshView();
             meshView.setMesh(JavaFXMeshDataInterpreter.interpretMeshData(meshDataHolder));
             meshView.setMaterial(materials[i]);
+            meshView.getTransforms().add(javaFxAffineToPack);
             meshViews[i] = meshView;
          }
          
          return meshViews;
       }
-      catch (IOException | URISyntaxException e)
+      catch (IOException e)
       {
          e.printStackTrace();
          return null;

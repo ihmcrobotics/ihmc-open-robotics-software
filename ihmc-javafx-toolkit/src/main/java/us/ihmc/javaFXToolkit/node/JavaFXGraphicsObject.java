@@ -1,5 +1,7 @@
 package us.ihmc.javaFXToolkit.node;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.stream.IntStream;
@@ -101,7 +103,15 @@ public class JavaFXGraphicsObject extends Graphics3DInstructionExecutor
    @Override
    protected void doAddModelFileInstruction(Graphics3DAddModelFileInstruction graphics3DAddModelFile)
    {
-      MeshView[] outputModelMeshes = JAssImpJavaFXTools.getJavaFxMeshes(graphics3DAddModelFile.getFileName());
+      MeshView[] outputModelMeshes = new MeshView[0];
+      try
+      {
+         outputModelMeshes = JAssImpJavaFXTools.getJavaFxMeshes(graphics3DAddModelFile.getFileName());
+      }
+      catch (URISyntaxException | IOException e)
+      {
+         e.printStackTrace();
+      }
       Group meshGroup = new Group(outputModelMeshes);
       currentGroup.getChildren().add(meshGroup);
       currentGroup = meshGroup;
