@@ -39,7 +39,6 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
@@ -48,6 +47,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -55,7 +55,6 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -106,18 +105,17 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final OneDoFJoint[] oneDoFJoints;
    private final Map<Long, OneDoFJoint> jointNameBasedHashCodeMap = new HashMap<>();
-   
-   
+
    /**
     * List holding the low level output of the controller core.
     */
    private final LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput;
-   
+
    /**
-    * Mostly used here for obtaining the center of mass frame. This holds on various useful frames
-    * such as the center of frame.
+    * Reference frame centered at the robot's center of mass. It is used to hold the initial center
+    * of mass position when requested.
     */
-   private final CommonHumanoidReferenceFrames referenceFrames;
+   private final ReferenceFrame centerOfMassFrame;
 
    /** The same set of gains is used for controlling any part of the desired robot body. */
    private final SymmetricYoPIDSE3Gains gains = new SymmetricYoPIDSE3Gains("genericGains", registry);
@@ -158,8 +156,8 @@ public class KinematicsToolboxController extends ToolboxController
    private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
 
    /**
-    * Updated during the initialization phase, this set of two {@link YoBoolean}s is used to
-    * know which foot is currently used for support in the walking controller.
+    * Updated during the initialization phase, this set of two {@link YoBoolean}s is used to know
+    * which foot is currently used for support in the walking controller.
     */
    private final SideDependentList<YoBoolean> isFootInSupport = new SideDependentList<>();
    /**
@@ -301,9 +299,10 @@ public class KinematicsToolboxController extends ToolboxController
       this.desiredFullRobotModel = desiredFullRobotModel;
       this.lowLevelControllerOutput = new LowLevelOneDoFJointDesiredDataHolderList(desiredFullRobotModel.getOneDoFJoints());
 
-      referenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
       rootBody = desiredFullRobotModel.getElevator();
       rootJoint = desiredFullRobotModel.getRootJoint();
+
+      centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, rootBody);
 
       populateJointLimitReductionFactors();
       populateListOfControllableRigidBodies();
@@ -390,7 +389,6 @@ public class KinematicsToolboxController extends ToolboxController
    public WholeBodyControllerCore createControllerCore()
    {
       InverseDynamicsJoint[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(desiredFullRobotModel);
-      ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
                                                                             null, registry);
@@ -574,7 +572,7 @@ public class KinematicsToolboxController extends ToolboxController
    public void updateTools()
    {
       desiredFullRobotModel.updateFrames();
-      referenceFrames.updateFrames();
+      centerOfMassFrame.update();
    }
 
    /**
@@ -779,7 +777,7 @@ public class KinematicsToolboxController extends ToolboxController
    {
       updateTools();
 
-      initialCenterOfMassPosition.setFromReferenceFrame(referenceFrames.getCenterOfMassFrame());
+      initialCenterOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
 
       for (RobotSide robotSide : RobotSide.values)
       {
