@@ -79,6 +79,8 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       humanoidReferenceFrames.updateFrames();
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       assertSingleWaypointExecuted(desiredRandomChestOrientation.getQuaternion(), head.getName(), scs);
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testLookingLeftAndRight() throws SimulationExceededMaximumTimeException
@@ -123,6 +125,8 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
 
       drcSimulationTestHelper.send(lookStraightAheadMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    private void setupTest() throws SimulationExceededMaximumTimeException
@@ -187,6 +191,10 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
+      
+      head = null;
+      chest = null;
+      neckJoints = null;
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
