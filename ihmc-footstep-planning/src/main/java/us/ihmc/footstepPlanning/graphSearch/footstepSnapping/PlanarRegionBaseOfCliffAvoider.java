@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeUtils;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -57,7 +57,7 @@ public class PlanarRegionBaseOfCliffAvoider
       }
    }
 
-   public void shiftAwayFromCliffBottoms(BipedalFootstepPlannerParameters parameters, PlanarRegionsList planarRegionsList, RigidBodyTransform soleTransform)
+   public void shiftAwayFromCliffBottoms(YoFootstepPlannerParameters parameters, PlanarRegionsList planarRegionsList, RigidBodyTransform soleTransform)
    {
       double cliffHeightToShiftAwayFrom = parameters.getCliffHeightToShiftAwayFrom();
       double minimumDistanceFromCliffBottoms = parameters.getMinimumDistanceFromCliffBottoms();

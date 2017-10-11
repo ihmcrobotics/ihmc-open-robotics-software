@@ -33,7 +33,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final BipedalFootstepPlannerParameters parameters;
+   private final YoFootstepPlannerParameters parameters;
    private final YoInteger maximumNumberOfNodesToExpand = new YoInteger("maximumNumberOfNodesToExpand", registry);
    private final YoDouble timeout = new YoDouble("Timeout", registry);
    private final YoBoolean exitAfterInitialSolution = new YoBoolean("exitAfterInitialSolution", registry);
@@ -55,7 +55,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    private final YoInteger numberOfNodesExpanded = new YoInteger("numberOfNodesExpanded", registry);
    private final YoLong planningStartTime = new YoLong("planningStartTime", registry);
 
-   public DepthFirstFootstepPlanner(BipedalFootstepPlannerParameters parameters, FootstepNodeSnapper snapper,
+   public DepthFirstFootstepPlanner(YoFootstepPlannerParameters parameters, FootstepNodeSnapper snapper,
                                     FootstepNodeChecker checker, FootstepCost stepCostCalculator, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);

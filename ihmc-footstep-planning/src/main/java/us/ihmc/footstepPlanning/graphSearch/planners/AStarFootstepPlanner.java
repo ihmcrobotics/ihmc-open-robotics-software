@@ -16,12 +16,12 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.GraphVisualization;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.NodeComparator;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.GraphVisualization;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
+import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
+import us.ihmc.footstepPlanning.graphSearch.heuristics.NodeComparator;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.AlwaysValidNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
@@ -180,7 +180,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
          if(!validGoalNode)
             throw new RuntimeException("Goal node isn't valid");
       }
-      
+
       stack.add(startNode);
       expandedNodes = new HashSet<>();
       goalNode = null;
