@@ -5,8 +5,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepNode
 {
-   public static final double gridSizeX = 0.05;
-   public static final double gridSizeY = 0.05;
+   public static final double gridSizeXY = 0.05;
    public static final double gridSizeYaw = Math.PI / 18.0;
 
    private final int xIndex;
@@ -21,20 +20,20 @@ public class FootstepNode
 
    public FootstepNode(double x, double y, double yaw, RobotSide robotSide)
    {
-      xIndex = (int) Math.round(x / gridSizeX);
-      yIndex = (int) Math.round(y / gridSizeY);
+      xIndex = (int) Math.round(x / gridSizeXY);
+      yIndex = (int) Math.round(y / gridSizeXY);
       yawIndex = (int) Math.round(AngleTools.trimAngleMinusPiToPi(yaw) / gridSizeYaw);
       this.robotSide = robotSide;
    }
 
    public double getX()
    {
-      return gridSizeX * xIndex;
+      return gridSizeXY * xIndex;
    }
 
    public double getY()
    {
-      return gridSizeY * yIndex;
+      return gridSizeXY * yIndex;
    }
 
    public double getYaw()

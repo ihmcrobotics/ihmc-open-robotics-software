@@ -27,7 +27,7 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
    private BipedalFootstepPlannerListener listener;
    private PlanarRegionsList planarRegionsList;
    private FootstepNodeSnapAndWiggler snapAndWiggler;
-   private BipedalFootstepPlannerParameters parameters;
+   private YoFootstepPlannerParameters parameters;
    private final PlanarRegionBaseOfCliffAvoider baseOfCliffAvoider;
    private SideDependentList<ConvexPolygon2D> controllerPolygonsInSoleFrame;
    private final ConvexPolygon2D footholdIntersection = new ConvexPolygon2D();
@@ -45,7 +45,7 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
 
    public SnapAndWiggleBasedNodeChecker(SideDependentList<ConvexPolygon2D> footPolygons,
                                         BipedalFootstepPlannerListener listener,
-                                        BipedalFootstepPlannerParameters parameters,
+                                        YoFootstepPlannerParameters parameters,
                                         YoGraphicsListRegistry graphicsListRegistry)
    {
       this.snapAndWiggler = new FootstepNodeSnapAndWiggler(footPolygons, parameters, listener);
