@@ -38,20 +38,9 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    @Override
    public FootstepNodeSnapData snapInternal(FootstepNode bipedalFootstepPlannerNode)
    {
-      if (planarRegionsList == null)
-      {
-         throw new RuntimeException("Only call this if planarRegionsList exists. Check for null before calling.");
-      }
-
       RobotSide nodeSide = bipedalFootstepPlannerNode.getRobotSide();
       RigidBodyTransform soleTransformBeforeSnap = new RigidBodyTransform();
-
       BipedalFootstepPlannerNodeUtils.getSoleTransform(bipedalFootstepPlannerNode, soleTransformBeforeSnap);
-      if (!isTransformZUp(soleTransformBeforeSnap))
-      {
-         throw new RuntimeException("Node needs to be flat (no pitch or roll) before calling this! bipedalFootstepPlannerNode = \n"
-                                          + bipedalFootstepPlannerNode);
-      }
 
       ConvexPolygon2D currentFootPolygon = new ConvexPolygon2D(footPolygonsInSoleFrame.get(nodeSide));
       currentFootPolygon.applyTransformAndProjectToXYPlane(soleTransformBeforeSnap);
@@ -71,8 +60,6 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
                                                          BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
          return FootstepNodeSnapData.emptyData();
       }
-
-      BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(bipedalFootstepPlannerNode, snapTransform);
 
       WiggleParameters wiggleParameters = new WiggleParameters();
       wiggleParameters.deltaInside = parameters.getWiggleInsideDelta();
