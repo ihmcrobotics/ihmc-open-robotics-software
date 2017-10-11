@@ -1,16 +1,26 @@
 package us.ihmc.footstepPlanning.graphSearch.planners;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.List;
+
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.*;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.FootstepPlannerGoal;
+import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.heuristics.DistanceAndYawBasedHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
@@ -26,14 +36,12 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
 
-import java.util.*;
-
 public class DepthFirstFootstepPlanner implements FootstepPlanner
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final YoFootstepPlannerParameters parameters;
+   private final FootstepPlannerParameters parameters;
    private final YoInteger maximumNumberOfNodesToExpand = new YoInteger("maximumNumberOfNodesToExpand", registry);
    private final YoDouble timeout = new YoDouble("Timeout", registry);
    private final YoBoolean exitAfterInitialSolution = new YoBoolean("exitAfterInitialSolution", registry);
@@ -55,7 +63,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    private final YoInteger numberOfNodesExpanded = new YoInteger("numberOfNodesExpanded", registry);
    private final YoLong planningStartTime = new YoLong("planningStartTime", registry);
 
-   public DepthFirstFootstepPlanner(YoFootstepPlannerParameters parameters, FootstepNodeSnapper snapper,
+   public DepthFirstFootstepPlanner(FootstepPlannerParameters parameters, FootstepNodeSnapper snapper,
                                     FootstepNodeChecker checker, FootstepCost stepCostCalculator, YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
