@@ -37,9 +37,23 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 
       ArrayList<ConvexPolygon2D> intersections = new ArrayList<>();
       planarRegionToPack.getPolygonIntersectionsWhenProjectedVertically(footPolygon, intersections);
-      if (intersections.size() != 1)
+      if (intersections.size() == 0)
          return FootstepNodeSnapData.emptyData();
+      else
+      {
+         return new FootstepNodeSnapData(snapTransform, combineIntersectionPolygons(intersections));
+      }
+   }
 
-      return new FootstepNodeSnapData(snapTransform, intersections.get(0));
+   private static ConvexPolygon2D combineIntersectionPolygons(ArrayList<ConvexPolygon2D> intersections)
+   {
+      ConvexPolygon2D combinedFootholdIntersection = new ConvexPolygon2D();
+      for (int i = 0; i < intersections.size(); i++)
+      {
+         combinedFootholdIntersection.addVertices(intersections.get(i));
+      }
+      
+      combinedFootholdIntersection.update();
+      return combinedFootholdIntersection;
    }
 }
