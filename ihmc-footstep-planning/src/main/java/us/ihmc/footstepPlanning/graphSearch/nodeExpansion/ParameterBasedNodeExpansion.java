@@ -1,30 +1,30 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeExpansion;
 
-import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-
 import java.util.ArrayList;
 import java.util.HashSet;
+
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 {
    private SideDependentList<FootstepNode> goalNodes;
-   private final BipedalFootstepPlannerParameters parameters;
+   private final FootstepPlannerParameters parameters;
 
    private final ArrayList<Double> xOffsetFromIdealFootstep;
    private final ArrayList<Double> yOffsetFromIdealFootstep;
    private final ArrayList<Double> yawOffsetFromIdealFootstep;
 
-   public ParameterBasedNodeExpansion(BipedalFootstepPlannerParameters parameters)
+   public ParameterBasedNodeExpansion(FootstepPlannerParameters parameters)
    {
       this.parameters = parameters;
 
-      xOffsetFromIdealFootstep = constructArrayFromEndpointsAndSpacing(parameters.getMinimumStepLength(), parameters.getMaximumStepReach(), FootstepNode.gridSizeX);
-      yOffsetFromIdealFootstep = constructArrayFromEndpointsAndSpacing(parameters.getMinimumStepWidth(), parameters.getMaximumStepWidth(), FootstepNode.gridSizeY);
+      xOffsetFromIdealFootstep = constructArrayFromEndpointsAndSpacing(parameters.getMinimumStepLength(), parameters.getMaximumStepReach(), FootstepNode.gridSizeXY);
+      yOffsetFromIdealFootstep = constructArrayFromEndpointsAndSpacing(parameters.getMinimumStepWidth(), parameters.getMaximumStepWidth(), FootstepNode.gridSizeXY);
       yawOffsetFromIdealFootstep = constructArrayFromEndpointsAndSpacing(- parameters.getMaximumStepYaw(), parameters.getMaximumStepYaw(), FootstepNode.gridSizeYaw);
    }
 

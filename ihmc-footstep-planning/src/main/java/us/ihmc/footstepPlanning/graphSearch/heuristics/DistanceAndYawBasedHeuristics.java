@@ -1,33 +1,30 @@
 package us.ihmc.footstepPlanning.graphSearch.heuristics;
 
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DistanceAndYawBasedHeuristics extends CostToGoHeuristics
 {
-   private final YoDouble yawWeight;
+   private final FootstepPlannerParameters parameters;
 
-   public DistanceAndYawBasedHeuristics(double yawWeight, YoVariableRegistry registry)
+   public DistanceAndYawBasedHeuristics(FootstepPlannerParameters parameters, YoVariableRegistry registry)
    {
       super(registry);
-
-      String namePrefix = getClass().getSimpleName();
-      this.yawWeight = new YoDouble(namePrefix + "YawWeight", registry);
-      this.yawWeight.set(yawWeight);
+      this.parameters = parameters;
    }
 
    @Override
    protected double computeHeuristics(FootstepNode node, FootstepNode goalNode)
    {
-      Point2D goalPoint = DistanceAndYawBasedCost.computeMidFootPoint(goalNode);
-      Point2D nodeMidFootPoint = DistanceAndYawBasedCost.computeMidFootPoint(node);
+      Point2D goalPoint = DistanceAndYawBasedCost.computeMidFootPoint(goalNode, parameters.getIdealFootstepWidth());
+      Point2D nodeMidFootPoint = DistanceAndYawBasedCost.computeMidFootPoint(node, parameters.getIdealFootstepWidth());
       double euclideanDistance = nodeMidFootPoint.distance(goalPoint);
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), goalNode.getYaw());
-      return euclideanDistance + yawWeight.getDoubleValue() * Math.abs(yaw);
+      double minSteps = Math.floor(euclideanDistance / parameters.getMaximumStepReach());
+      return euclideanDistance + parameters.getYawWeight() * Math.abs(yaw) + parameters.getCostPerStep() * minSteps;
    }
 }
