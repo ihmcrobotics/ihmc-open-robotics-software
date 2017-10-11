@@ -28,6 +28,8 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoDouble minimumDistanceFromCliffBottoms = new YoDouble("minimumDistanceFromCliffBottoms", registry);
    private final YoDouble minimumSurfaceInclineRadians = new YoDouble("minimumSurfaceInclineRadians", registry);
    private final YoDouble maximumZPenetrationOnValleyRegions = new YoDouble("maximumZPenetrationOnValleyRegions", registry);
+   private final YoDouble yawWeight = new YoDouble("yawWeight", registry);
+   private final YoDouble costPerStep = new YoDouble("costPerStep", registry);
 
    public YoFootstepPlannerParameters(YoVariableRegistry parentRegistry, FootstepPlannerParameters defaults)
    {
@@ -57,6 +59,8 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       minimumDistanceFromCliffBottoms.set(defaults.getMinimumDistanceFromCliffBottoms());
       minimumSurfaceInclineRadians.set(defaults.getMinimumSurfaceInclineRadians());
       maximumZPenetrationOnValleyRegions.set(defaults.getMaximumZPenetrationOnValleyRegions());
+      yawWeight.set(defaults.getYawWeight());
+      costPerStep.set(defaults.getCostPerStep());
    }
 
    @Override
@@ -177,6 +181,18 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public double getMinimumDistanceFromCliffBottoms()
    {
       return minimumDistanceFromCliffBottoms.getDoubleValue();
+   }
+
+   @Override
+   public double getYawWeight()
+   {
+      return yawWeight.getDoubleValue();
+   }
+
+   @Override
+   public double getCostPerStep()
+   {
+      return costPerStep.getDoubleValue();
    }
 
 }
