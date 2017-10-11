@@ -94,6 +94,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private long plannerCount = 0;
    private double dt;
 
+   public static final double timeout = 10.0;
+
    // TODO: this can be made robot specific by getting the parameters from the robot model.
    private final YoFootstepPlannerParameters footstepPlanningParameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters());
 
@@ -133,7 +135,9 @@ public class FootstepPlanningToolboxController extends ToolboxController
        * */
 //      FootstepNodeExpansion expansion = robotModel.getPlanarRegionFootstepPlannerParameters().getReachableFootstepExpansion();
       FootstepNodeExpansion expansion = new SimpleSideBasedExpansion(footstepPlanningParameters);
-      return AStarFootstepPlanner.createRoughTerrainPlanner(footstepPlanningParameters, null, footPolygons, expansion, registry);
+      AStarFootstepPlanner planner = AStarFootstepPlanner.createRoughTerrainPlanner(footstepPlanningParameters, null, footPolygons, expansion, registry);
+      planner.setTimeout(timeout);
+      return planner;
    }
 
    private DepthFirstFootstepPlanner createPlanarRegionBipedalPlanner(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FullRobotModel fullRobotModel)
@@ -153,7 +157,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
       footstepPlanner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       footstepPlanner.setExitAfterInitialSolution(false);
-      footstepPlanner.setTimeout(20.0);
+      footstepPlanner.setTimeout(timeout);
 
       return footstepPlanner;
    }
