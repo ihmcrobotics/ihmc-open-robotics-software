@@ -120,7 +120,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
       double[] simpleLagrangeEqualityMultipliers = new double[0];
       double[] simpleLagrangeInequalityMultipliers = new double[3];
 
-      for (int repeat = 0; repeat < 1000; repeat++)
+      for (int repeat = 0; repeat < 5000; repeat++)
       {
          quadProgTotalTimer.startMeasurement();
 
