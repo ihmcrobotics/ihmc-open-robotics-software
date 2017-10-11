@@ -37,6 +37,7 @@ import us.ihmc.graphicsDescription.instructions.Graphics3DAddExtrusionInstructio
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddHeightMapInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DInstructionExecutor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.instructions.HemiEllipsoidGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.PolygonGraphics3DInstruction;
@@ -48,7 +49,7 @@ import us.ihmc.graphicsDescription.instructions.WedgeGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
-import us.ihmc.graphicsDescription.instructions.Graphics3DInstructionExecutor;
+import us.ihmc.tools.FloatArrayCollector;
 
 /**
  * Converts a {@link us.ihmc.graphicsDescription.Graphics3DObject} to a {@link MeshView}
