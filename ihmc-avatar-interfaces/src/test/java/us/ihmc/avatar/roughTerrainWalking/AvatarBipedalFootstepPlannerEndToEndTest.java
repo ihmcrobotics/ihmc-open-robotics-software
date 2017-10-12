@@ -186,8 +186,6 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       ToolboxStateMessage wakeUpMessage = new ToolboxStateMessage(ToolboxStateMessage.ToolboxState.WAKE_UP);
       toolboxCommunicator.send(wakeUpMessage);
 
-      ThreadTools.sleepForever();
-
       while(!humanoidRobotDataReceiver.framesHaveBeenSetUp())
       {
          try
