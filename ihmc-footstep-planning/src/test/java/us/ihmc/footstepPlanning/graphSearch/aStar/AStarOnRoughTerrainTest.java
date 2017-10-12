@@ -12,6 +12,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.SimpleSideBasedExpansion;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.roughTerrainPlanning.FootstepPlannerOnRoughTerrainTest;
@@ -66,9 +67,18 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
       super.testStepUpsAndDownsScoringDifficult(false);
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
    public void testSteppingStones()
    {
       super.testSteppingStones(!visualizePlanner);
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
+   public void testOverCinderBlockField()
+   {
+      super.testOverCinderBlockField(!visualizePlanner);
    }
 
    @Before
@@ -78,7 +88,7 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
          visualization = new FootstepNodeVisualization(1000, 1.0, null);
       SideDependentList<ConvexPolygon2D> footPolygons = PlanningTestTools.createDefaultFootPolygons();
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
-      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion(parameters);
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
       planner = AStarFootstepPlanner.createRoughTerrainPlanner(parameters, visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
    }
 

@@ -37,8 +37,6 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    public HashSet<FootstepNode> expandNode(FootstepNode node)
    {
       HashSet<FootstepNode> expansion = new HashSet<>();
-
-      addGoalNodeIfReachable(node, expansion);
       addDefaultFootsteps(node, expansion);
 
       return expansion;
