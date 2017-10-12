@@ -66,6 +66,11 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
       super.testStepUpsAndDownsScoringDifficult(false);
    }
 
+   public void testSteppingStones()
+   {
+      super.testSteppingStones(!visualizePlanner);
+   }
+
    @Before
    public void createPlanner()
    {
