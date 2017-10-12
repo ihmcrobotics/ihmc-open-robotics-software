@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
@@ -48,6 +48,11 @@ public class KinematicsToolboxModule extends ToolboxModule
    @Override
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
+      return supportedCommands();
+   }
+
+   static List<Class<? extends Command<?, ?>>> supportedCommands()
+   {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
       commands.add(KinematicsToolboxCenterOfMassCommand.class);
       commands.add(KinematicsToolboxRigidBodyCommand.class);
@@ -62,14 +67,24 @@ public class KinematicsToolboxModule extends ToolboxModule
    @Override
    public List<Class<? extends StatusPacket<?>>> createListOfSupportedStatus()
    {
+      return supportedStatus();
+   }
+
+   static List<Class<? extends StatusPacket<?>>> supportedStatus()
+   {
       List<Class<? extends StatusPacket<?>>> status = new ArrayList<>();
       status.add(KinematicsToolboxOutputStatus.class);
       return status;
    }
 
    @Override
-   public ToolboxController getToolboxController()
+   public KinematicsToolboxController getToolboxController()
    {
       return kinematicsToolBoxController;
+   }
+
+   public CommandInputManager getCommandInputManager()
+   {
+      return commandInputManager;
    }
 }
