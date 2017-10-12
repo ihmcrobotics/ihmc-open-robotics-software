@@ -11,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -32,18 +31,20 @@ public class CoPPointsInFoot
 
    private final YoFramePointInMultipleFrames swingFootCentroid;
    private final YoFramePointInMultipleFrames supportFootCentroid;
+   private final String name;
 
    public CoPPointsInFoot(String namePrefix, int stepNumber, ReferenceFrame[] framesToRegister, YoVariableRegistry registry)
    {
+      this.name = namePrefix + "Step" + stepNumber;
       for (int i = 0; i < maxNumberOfTrajectoryPoints; i++)
       {
-         CoPTrajectoryPoint constantCoP = new CoPTrajectoryPoint(namePrefix + "Step" + stepNumber + "CoP" + i, "", registry, framesToRegister);
+         CoPTrajectoryPoint constantCoP = new CoPTrajectoryPoint(name + "CoP" + i, "", registry, framesToRegister);
          constantCoP.setToNaN();
          copLocations.add(constantCoP);
          copLocationsInWorldFrameReadOnly.add(constantCoP.buildUpdatedYoFramePointForVisualizationOnly());
       }
-      swingFootCentroid = new YoFramePointInMultipleFrames(namePrefix + "Step" + stepNumber + "swingCentroid", registry, framesToRegister);
-      supportFootCentroid = new YoFramePointInMultipleFrames(namePrefix + "Step" + stepNumber + "supportCentroid", registry, framesToRegister);
+      swingFootCentroid = new YoFramePointInMultipleFrames(name + "swingCentroid", registry, framesToRegister);
+      supportFootCentroid = new YoFramePointInMultipleFrames(name + "supportCentroid", registry, framesToRegister);
    }
 
    public void setupVisualizers(YoGraphicsList graphicsList, ArtifactList artifactList, double pointSize)
@@ -81,7 +82,7 @@ public class CoPPointsInFoot
       this.copPointsList.add(copPointName);
    }
    
-   public void set(CoPPointsInFoot other)
+   public void setIncludingFrame(CoPPointsInFoot other)
    {
       this.swingFootCentroid.setIncludingFrame(other.swingFootCentroid);
       this.supportFootCentroid.setIncludingFrame(other.supportFootCentroid);
@@ -141,15 +142,6 @@ public class CoPPointsInFoot
    public void setToNaN(int waypointIndex)
    {
       copLocations.get(waypointIndex).setToNaN();
-   }
-
-   public void setIncludingFrame(CoPPointsInFoot other)
-   {
-      this.swingFootCentroid.setIncludingFrame(other.swingFootCentroid);
-      this.supportFootCentroid.setIncludingFrame(other.supportFootCentroid);
-      for (int i = 0; i < other.copPointsList.size(); i++)
-         this.copLocations.get(i).setIncludingFrame(other.get(i));
-      this.copPointsList.addAll(other.copPointsList);
    }
 
    public CoPTrajectoryPoint get(int copPointIndex)
@@ -238,4 +230,26 @@ public class CoPPointsInFoot
    {
       return copPointsList.size();
    }
+   
+   public String toString()
+   {
+      String string = name;
+      for(int i = 0; i < getNumberOfCoPPoints(); i++)
+      {
+         string += getCoPPointList().get(i).toString() + ": " + get(i).toString() + "\n";
+      }
+      return string;
+   }
+   
+   public String toString2()
+   {
+      String string = name;
+      for(int i = 0; i < getNumberOfCoPPoints(); i++)
+      {
+         string += getCoPPointList().get(i).toString() + "\n";
+      }
+      return string;
+   }
+
+   
 }
