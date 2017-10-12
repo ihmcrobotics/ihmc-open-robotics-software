@@ -47,7 +47,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    @Override
    public double getStepLength()
    {
-      return 0.5;
+      return 0.0;
    }
 
    @Override
@@ -59,13 +59,13 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    @Override
    public double getTimeForPausing()
    {
-      return 2.0;
+      return 3.3;
    }
 
    @Override
    public double getTimeForResuming()
    {
-      return 3.0;
+      return 0.1;
    }
    
    @Override
