@@ -573,7 +573,7 @@ public class SmoothCMPBasedICPPlannerTest
       copWaypointsFromPreviousPlan.get(0).addAndSetIncludingFrame(copWaypointsFromPlanner.get(indexDifference).getCoPPointList().get(finalCoPIndex), 0.0,
                                                                   tempFramePoint1);
       for (int i = 1; i < numberOfFootstepsToTestForConsistency + 1; i++)
-         copWaypointsFromPreviousPlan.get(i).set(copWaypointsFromPlanner.get(i + indexDifference));
+         copWaypointsFromPreviousPlan.get(i).setIncludingFrame(copWaypointsFromPlanner.get(i + indexDifference));
    }
 
    private void testCoPConsistency(boolean isDoubleSupport, int stepNumber, int numberOfStepsToCheck, List<CoPPointsInFoot> copWaypointsFromPlanner)
