@@ -231,7 +231,7 @@ public class PlanarRegionsListExamples
       generator.identity();
 
       // cinder blocks
-      for (int i = 0; i < numberOfSteps; i++)
+      for (int i = 1; i < numberOfSteps; i++)
       {
          double percentageAlongCurve = ((double) i / (double) numberOfSteps);
 
@@ -239,7 +239,7 @@ public class PlanarRegionsListExamples
          double xPositionAlongCurve = pathRadius * (1.0 - Math.cos(angle));
          double yPositionAlongCurve = pathRadius * Math.sin(angle);
 
-         generator.translate(xPositionAlongCurve, yPositionAlongCurve, 0.002);
+         generator.translate(xPositionAlongCurve, yPositionAlongCurve, -0.001);
          generator.rotate(- angle, Axis.Z);
 
          double xTranslation = cinderBlockSeparationWidth * 0.5;
