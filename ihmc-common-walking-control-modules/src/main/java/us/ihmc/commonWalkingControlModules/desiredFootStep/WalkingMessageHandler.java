@@ -159,7 +159,7 @@ public class WalkingMessageHandler
             }
             break;
          case QUEUE:
-            if (currentNumberOfFootsteps.getIntegerValue() < 1 && !executingFootstep.getBooleanValue() || command.getPreviousCommandId() == lastCommandID.getValue())
+            if (currentNumberOfFootsteps.getIntegerValue() < 1 && !executingFootstep.getBooleanValue() && command.getPreviousCommandId() != lastCommandID.getValue())
             {
                PrintTools.warn("Can not queue footsteps if no footsteps are present. Send an override message instead. Command ignored.");
                return;
