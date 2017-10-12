@@ -163,6 +163,14 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       super.testWalkingAroundBox();
    }
 
+   public void testSteppingStones()
+   {
+      planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
+      planner.setExitAfterInitialSolution(false);
+      planner.setTimeout(15.0);
+      super.testSteppingStones(!visualize);
+   }
+
    @Before
    public void setupPlanner()
    {
