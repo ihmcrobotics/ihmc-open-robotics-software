@@ -29,7 +29,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    @Override
    public boolean keepSCSUp()
    {
-      return true;
+      return false;
    }
 
    @Override
