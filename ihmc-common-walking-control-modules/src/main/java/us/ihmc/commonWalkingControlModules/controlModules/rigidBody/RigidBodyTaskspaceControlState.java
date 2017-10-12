@@ -694,7 +694,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          PrintTools.warn(warningPrefix + "Was executing in ." + trajectoryFrame.getName() + " can't switch to " + command.getTrajectoryFrame() + " without override");
          return false;
       }
-      else if(!selectionMatrix.equals(command.getSelectionMatrix()))
+      else if(!selectionMatrix.getLinearPart().equals(command.getSelectionMatrix()))
       {
          PrintTools.warn(warningPrefix + "Received a change of selection matrix without an override");
          System.out.println("rbm:\n" + selectionMatrix);
