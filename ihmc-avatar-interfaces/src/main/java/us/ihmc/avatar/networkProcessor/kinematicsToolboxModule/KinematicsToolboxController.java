@@ -386,7 +386,7 @@ public class KinematicsToolboxController extends ToolboxController
     * @return the controller core that will run for the desired robot
     *         {@link #desiredFullRobotModel}.
     */
-   public WholeBodyControllerCore createControllerCore()
+   private WholeBodyControllerCore createControllerCore()
    {
       InverseDynamicsJoint[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(desiredFullRobotModel);
       KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
@@ -404,7 +404,7 @@ public class KinematicsToolboxController extends ToolboxController
     * it there. If it has to be updated on the fly, it should then be added this toolbox API,
     * probably added to the message {@link KinematicsToolboxConfigurationMessage}.
     */
-   public void populateJointLimitReductionFactors()
+   private void populateJointLimitReductionFactors()
    {
       YoDouble hipReductionFactor = new YoDouble("hipLimitReductionFactor", registry);
       YoDouble kneeReductionFactor = new YoDouble("kneeLimitReductionFactor", registry);
@@ -569,7 +569,7 @@ public class KinematicsToolboxController extends ToolboxController
     * Updates all the reference frames and the twist calculator. This method needs to be called at
     * the beginning of each control tick.
     */
-   public void updateTools()
+   private void updateTools()
    {
       desiredFullRobotModel.updateFrames();
       centerOfMassFrame.update();
