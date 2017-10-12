@@ -346,6 +346,14 @@ public class DRCSimulationTestHelper
          BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName, scs, callStackHeight);
       }
    }
+   
+   public void createVideo(String videoName)
+   {
+      if (simulationTestingParameters.getCreateSCSVideos())
+      {
+         BambooTools.createVideoWithDateTimeAndStoreInDefaultDirectory(scs, videoName);
+      }
+   }
 
    public RobotSide[] createRobotSidesStartingFrom(RobotSide robotSide, int length)
    {
@@ -364,13 +372,21 @@ public class DRCSimulationTestHelper
    {
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
 
-      Random randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent = new Random();
-      Vector3D randomCameraOffset = RandomGeometry.nextVector3D(randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent, 0.05);
-      cameraFix.add(randomCameraOffset);
-
       cameraConfiguration.setCameraFix(cameraFix);
       cameraConfiguration.setCameraPosition(cameraPosition);
       cameraConfiguration.setCameraTracking(false, true, true, false);
+      cameraConfiguration.setCameraDolly(false, true, true, false);
+      scs.setupCamera(cameraConfiguration);
+      scs.selectCamera("testCamera");
+   }
+
+   public void setupCameraForUnitTest(boolean enableTracking, Point3D cameraFix, Point3D cameraPosition)
+   {
+      CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
+      
+      cameraConfiguration.setCameraFix(cameraFix);
+      cameraConfiguration.setCameraPosition(cameraPosition);
+      cameraConfiguration.setCameraTracking(enableTracking, true, true, false);
       cameraConfiguration.setCameraDolly(false, true, true, false);
       scs.setupCamera(cameraConfiguration);
       scs.selectCamera("testCamera");
