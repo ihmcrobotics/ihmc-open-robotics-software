@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -112,10 +113,10 @@ public class PlanningTestTools
          for (int i = 0; i < markers; i++)
          {
             double alpha = (double) i / (double) (markers - 1);
-            FramePoint3D point = new FramePoint3D();
-            bodyPath.getPointAlongPath(alpha, point);
+            Pose2D pose = new Pose2D();
+            bodyPath.getPointAlongPath(alpha, pose);
             YoFramePoint yoPoint = new YoFramePoint("BodyPathPoint" + i, worldFrame, vizRegistry);
-            yoPoint.set(point);
+            yoPoint.set(pose.getPosition());
             YoGraphicPosition pointVis = new YoGraphicPosition("BodyPathPoint" + i, yoPoint, 0.025, YoAppearance.Blue());
             vizGraphicsListRegistry.registerYoGraphic("viz", pointVis);
          }
