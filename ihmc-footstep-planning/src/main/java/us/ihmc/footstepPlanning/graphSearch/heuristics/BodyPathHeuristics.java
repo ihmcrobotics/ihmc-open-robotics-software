@@ -11,6 +11,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class BodyPathHeuristics extends CostToGoHeuristics
 {
+   private static final double pathViolationWeight = 30.0;
    private final BodyPathPlanner bodyPath;
    private final FootstepPlannerParameters parameters;
 
@@ -29,7 +30,7 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       double alpha = bodyPath.getClosestPoint(midFootPoint, closestPointOnPath);
       double distanceToPath = closestPointOnPath.getPosition().distance(midFootPoint);
       double pathLength = bodyPath.computePathLength(alpha);
-      double remainingDistance = Math.sqrt(pathLength * pathLength + distanceToPath * distanceToPath);
+      double remainingDistance = pathLength + pathViolationWeight * distanceToPath;
 
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), closestPointOnPath.getYaw());
       double minSteps = Math.floor(remainingDistance / parameters.getMaximumStepReach());
