@@ -5,7 +5,6 @@ import java.util.Random;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion32;
@@ -306,7 +305,7 @@ public class AngleTools
     * @param endPoint end position
     * @return number between -PI and PI
     */
-   public static double calculateHeading(Point2DBasics startPose, Point2DBasics endPoint)
+   public static double calculateHeading(Point2D32 startPose, Point2D32 endPoint)
    {
       double deltaX = endPoint.getX() - startPose.getX();
       double deltaY = endPoint.getY() - startPose.getY();
