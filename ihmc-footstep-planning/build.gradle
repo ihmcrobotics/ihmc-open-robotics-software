@@ -29,7 +29,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-path-planning", version: groupDependencyVersion
 }
 
 testDependencies {
