@@ -27,6 +27,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
@@ -34,6 +36,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    private SimulationTestingParameters simulationTestingParameters = new SimulationTestingParameters();
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private DRCRobotModel robotModel;
+   private YoBoolean walkPaused;
 
    public abstract boolean keepSCSUp();
 
@@ -81,14 +84,17 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    public void testPauseWalking() throws SimulationExceededMaximumTimeException
    {
       setupTest();
+      walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
       sendFootstepCommand(getNumberOfFoosteps());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForPausing()));
       PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage(true);
       drcSimulationTestHelper.send(pauseWalkingMessage);
+      walkPaused.set(true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForResuming()));
       pauseWalkingMessage = new PauseWalkingMessage(false);
       drcSimulationTestHelper.send(pauseWalkingMessage);
+      walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFoosteps() * (getSwingTime() + getTransferTime())));
    }
 
@@ -136,6 +142,8 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       drcSimulationTestHelper.setStartingLocation(startingLocation);
       drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
       drcSimulationTestHelper.createSimulation(className);
+      YoVariableRegistry registry = drcSimulationTestHelper.getYoVariableRegistry();
+      walkPaused = new YoBoolean("isWalkPaused", registry);
       ThreadTools.sleep(1000);
       setupCameraSideView();
    }
