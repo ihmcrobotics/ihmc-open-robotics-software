@@ -442,7 +442,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       int footstepIndex = 0;
       int copLocationIndex = 1;
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.get(footstepIndex);
-
       // Put first CoP as per chicken support computations in case starting from rest
       if (atAStop && numberOfUpcomingFootsteps.getIntegerValue() == 0)
       {
@@ -497,7 +496,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          computeCoPPointsForUpcomingFootsteps(copLocationIndex, footstepIndex);
       }
       else if (numberOfUpcomingFootsteps.getIntegerValue() == 0)
-      { // Put first CoP at the exitCoP of the swing foot if not starting from rest
+      { 
+         // Put first CoP at the exitCoP of the swing foot if not starting from rest
          //transferToSide = transferToSide.getOppositeSide();
          clearHeldPosition();
          isDoneWalking.set(true);
