@@ -199,7 +199,14 @@ public class AStarPlanarRegionsPlannerTest
 
       // create planner
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
-      FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
+      FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters()
+      {
+         @Override
+         public double getCostPerStep()
+         {
+            return 0.0;
+         }
+      };
       FootstepNodeChecker nodeChecker = new SimpleNodeChecker();
       EuclideanDistanceHeuristics heuristics = new EuclideanDistanceHeuristics(registry);
       SimpleGridResolutionBasedExpansion expansion = new SimpleGridResolutionBasedExpansion();
