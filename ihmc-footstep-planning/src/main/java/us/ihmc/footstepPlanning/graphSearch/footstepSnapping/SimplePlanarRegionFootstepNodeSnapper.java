@@ -1,15 +1,13 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
+import java.util.ArrayList;
+
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import java.util.ArrayList;
 
 public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 {
@@ -39,9 +37,23 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 
       ArrayList<ConvexPolygon2D> intersections = new ArrayList<>();
       planarRegionToPack.getPolygonIntersectionsWhenProjectedVertically(footPolygon, intersections);
-      if (intersections.size() != 1)
+      if (intersections.size() == 0)
          return FootstepNodeSnapData.emptyData();
+      else
+      {
+         return new FootstepNodeSnapData(snapTransform, combineIntersectionPolygons(intersections));
+      }
+   }
 
-      return new FootstepNodeSnapData(snapTransform, intersections.get(0));
+   private static ConvexPolygon2D combineIntersectionPolygons(ArrayList<ConvexPolygon2D> intersections)
+   {
+      ConvexPolygon2D combinedFootholdIntersection = new ConvexPolygon2D();
+      for (int i = 0; i < intersections.size(); i++)
+      {
+         combinedFootholdIntersection.addVertices(intersections.get(i));
+      }
+      
+      combinedFootholdIntersection.update();
+      return combinedFootholdIntersection;
    }
 }

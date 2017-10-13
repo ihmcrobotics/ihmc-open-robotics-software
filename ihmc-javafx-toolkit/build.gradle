@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.5"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.9"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -31,6 +31,8 @@ mainDependencies {
    }
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
+   compile group: 'us.ihmc.thirdparty', name: 'jassimp', version: '4.0.0-ihmc2'
 }
 
 visualizersDependencies {

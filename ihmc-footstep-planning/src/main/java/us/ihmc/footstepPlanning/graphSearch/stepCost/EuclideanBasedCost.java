@@ -1,23 +1,22 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class EuclideanBasedCost implements FootstepCost
 {
-   private final static double defaultStepBaseCost = 0.0;
-   private final YoDouble stepBaseCost;
+   private final FootstepPlannerParameters parameters;
 
-   public EuclideanBasedCost(YoVariableRegistry registry)
+   public EuclideanBasedCost(FootstepPlannerParameters parameters)
    {
-      this.stepBaseCost = new YoDouble("stepBaseCost", registry);
-      stepBaseCost.set(defaultStepBaseCost);
+      this.parameters = parameters;
    }
 
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
-      return startNode.euclideanDistance(endNode) + stepBaseCost.getDoubleValue();
+      return startNode.euclideanDistance(endNode) + parameters.getCostPerStep();
    }
 }

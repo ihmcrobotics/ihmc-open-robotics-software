@@ -2,18 +2,21 @@ package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.*;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlanarRegionBipedalFootstepPlannerVisualizer;
-import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlanarRegionBipedalFootstepPlannerVisualizer;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -24,7 +27,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrainTest
 {
    private YoVariableRegistry registry;
-   private BipedalFootstepPlannerParameters parameters;
+   private YoFootstepPlannerParameters parameters;
    private DepthFirstFootstepPlanner planner;
 
    private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
@@ -39,7 +42,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setExitAfterInitialSolution(false);
       super.testOnStaircase(new Vector3D(), true);
 
-      if(showPlannerVisualizer)
+      if (showPlannerVisualizer)
          ThreadTools.sleepForever();
    }
 
@@ -86,6 +89,7 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       super.testSimpleGaps(true);
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 10000.0)
    @Test(timeout = 300000)
    public void testOverCinderBlockField()
@@ -126,16 +130,30 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       super.testCompareStepBeforeGap(!visualize);
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 10000.0)
    @Test(timeout = 300000)
    public void testPartialGaps()
    {
-      parameters.setMinimumFootholdPercent(0.4);
-      parameters.setRejectIfCannotFullyWiggleInside(false);
+      parameters.set(new DefaultFootstepPlanningParameters()
+      {
+         @Override
+         public double getMinimumFootholdPercent()
+         {
+            return 0.4;
+         }
+
+         @Override
+         public boolean getRejectIfCannotFullyWiggleInside()
+         {
+            return false;
+         }
+      });
 
       super.testPartialGaps(!visualize);
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 10000.0)
    @Test(timeout = 300000)
    public void testWalkingAroundBox()
@@ -146,12 +164,19 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       super.testWalkingAroundBox();
    }
 
+   public void testSteppingStones()
+   {
+      planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
+      planner.setExitAfterInitialSolution(false);
+      planner.setTimeout(15.0);
+      super.testSteppingStones(!visualize);
+   }
+
    @Before
    public void setupPlanner()
    {
       registry = new YoVariableRegistry("test");
-      parameters = new BipedalFootstepPlannerParameters(registry);
-      setDefaultParameters();
+      parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters());
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
 
       PlanarRegionBipedalFootstepPlannerVisualizer visualizer = null;
@@ -159,38 +184,13 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
          visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame, registry);
 
       FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, parameters, visualizer);
-      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footPolygonsInSoleFrame, visualizer, parameters, null);
+      SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygonsInSoleFrame, snapper);
       ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
 
       planner = new DepthFirstFootstepPlanner(parameters, snapper, nodeChecker, stepCostCalculator, registry);
       planner.setFeetPolygons(footPolygonsInSoleFrame);
       planner.setMaximumNumberOfNodesToExpand(100);
       planner.setBipedalFootstepPlannerListener(visualizer);
-   }
-
-   private void setDefaultParameters()
-   {
-      parameters.setMaximumStepReach(0.55); //0.45);
-      parameters.setMaximumStepZ(0.25);
-      parameters.setMaximumStepXWhenForwardAndDown(0.25);
-      parameters.setMaximumStepZWhenForwardAndDown(0.25);
-      parameters.setMaximumStepYaw(0.15);
-      parameters.setMaximumStepWidth(0.4);
-      parameters.setMinimumStepWidth(0.15);
-      parameters.setMinimumFootholdPercent(0.95);
-
-      parameters.setMinimumStepLength(-0.03);
-
-      parameters.setWiggleInsideDelta(0.05);
-      parameters.setMaximumXYWiggleDistance(1.0);
-      parameters.setMaximumYawWiggle(0.1);
-
-      parameters.setCliffHeightToShiftAwayFrom(0.04);
-      parameters.setMinimumDistanceFromCliffBottoms(0.22);
-
-      double idealFootstepLength = 0.3;
-      double idealFootstepWidth = 0.2;
-      parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
    }
 
    @Override

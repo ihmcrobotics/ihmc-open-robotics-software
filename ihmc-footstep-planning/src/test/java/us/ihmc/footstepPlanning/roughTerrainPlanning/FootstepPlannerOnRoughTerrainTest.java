@@ -89,6 +89,29 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
    }
 
+   public void testSteppingStones(boolean assertPlannerReturnedResult)
+   {
+      double pathRadius = 3.5;
+      PlanarRegionsList cinderBlockField = PlanarRegionsListExamples.generateSteppingStonesEnvironment(pathRadius);
+
+      FramePose goalPose = new FramePose(worldFrame);
+      goalPose.setPosition(pathRadius + 0.5, pathRadius, 0.0);
+
+      FramePose initialStanceFootPose = new FramePose(worldFrame);
+      initialStanceFootPose.setPosition(0.0, -0.7, 0.0);
+      initialStanceFootPose.appendYawRotation(0.5 * Math.PI);
+      RobotSide initialStanceSide = RobotSide.RIGHT;
+
+      FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, cinderBlockField, assertPlannerReturnedResult);
+
+      if (visualize())
+      {
+         PlanningTestTools.visualizeAndSleep(cinderBlockField, footstepPlan, goalPose);
+      }
+
+      assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
+   }
+
    public void testStepUpsAndDownsScoringDifficult(boolean assertPlannerReturnedResult)
    {
       double cinderBlockSize = 0.4;
