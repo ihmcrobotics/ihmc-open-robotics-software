@@ -30,7 +30,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FootstepPlanningWithBodyPathTest
 {
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
 
    @Rule
    public TestName name = new TestName();
