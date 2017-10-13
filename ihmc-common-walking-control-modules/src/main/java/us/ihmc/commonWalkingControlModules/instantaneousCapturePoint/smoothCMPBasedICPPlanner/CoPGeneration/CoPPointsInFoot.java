@@ -91,7 +91,7 @@ public class CoPPointsInFoot
       for(index = 0; index < other.copPointsList.size(); index++)
       {
          this.copPointsList.add(other.copPointsList.get(index));
-         this.copLocations.get(index).set(other.get(index));
+         this.copLocations.get(index).setIncludingFrame(other.get(index));
       }
       for(; index < maxNumberOfTrajectoryPoints; index++)
          this.copLocations.get(index).setToNaN();
