@@ -325,18 +325,19 @@ public class FootstepPlanningToolboxController extends ToolboxController
       }
       else
       {
-         if (planarRegionsList.isPresent())
+//         if (planarRegionsList.isPresent())
+//         {
+//            PrintTools.debug(this, "Planar regions present. Assembling footstep data list message");
+//            result.footstepDataList = footstepDataListWithSwingOverTrajectoriesAssembler.assemble(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE,
+//                                                                                                  planarRegionsList.get());
+//         }
+//         else
          {
-            PrintTools.debug(this, "Planar regions present. Assembling footstep data list message");
-            result.footstepDataList = footstepDataListWithSwingOverTrajectoriesAssembler.assemble(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE,
-                                                                                                  planarRegionsList.get());
-         }
-         else
-         {
-            PrintTools.debug(this, "Planar regions not present. Won't swing over!");
+//            PrintTools.debug(this, "Planar regions not present. Won't swing over!");
             result.footstepDataList = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE);
          }
       }
+
       result.planningResult = status;
       return result;
    }
