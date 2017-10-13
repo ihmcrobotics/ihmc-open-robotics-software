@@ -33,7 +33,7 @@ public class BodyPathHeuristics extends CostToGoHeuristics
       double remainingDistance = pathLength + pathViolationWeight * distanceToPath;
 
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(node.getYaw(), closestPointOnPath.getYaw());
-      double minSteps = Math.floor(remainingDistance / parameters.getMaximumStepReach());
+      double minSteps = remainingDistance / parameters.getMaximumStepReach();
       return remainingDistance + parameters.getYawWeight() * Math.abs(yaw) + parameters.getCostPerStep() * minSteps;
    }
 }
