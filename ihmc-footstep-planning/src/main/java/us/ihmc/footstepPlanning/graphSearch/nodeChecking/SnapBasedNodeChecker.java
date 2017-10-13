@@ -31,6 +31,13 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
    @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
+      if (previousNode == null)
+      {
+         // is start node
+         snapper.addStartNode(node);
+         return true;
+      }
+
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
       if (snapTransform.containsNaN())
@@ -41,9 +48,6 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
       double footArea = footPolygons.get(node.getRobotSide()).getArea();
       if (area < parameters.getMinimumFootholdPercent() * footArea)
          return false;
-
-      if (previousNode == null)
-         return true;
 
       FootstepNodeSnapData previousNodeSnapData = snapper.snapFootstepNode(previousNode);
       RigidBodyTransform previousSnapTransform = previousNodeSnapData.getSnapTransform();
