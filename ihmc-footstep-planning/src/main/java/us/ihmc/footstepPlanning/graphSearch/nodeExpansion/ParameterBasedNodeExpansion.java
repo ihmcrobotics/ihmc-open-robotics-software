@@ -25,7 +25,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 
       xOffsetFromIdealFootstep = constructArrayFromEndpointsAndSpacing(parameters.getMinimumStepLength(), parameters.getMaximumStepReach(), FootstepNode.gridSizeXY);
       yOffsetFromIdealFootstep = constructArrayFromEndpointsAndSpacing(parameters.getMinimumStepWidth(), parameters.getMaximumStepWidth(), FootstepNode.gridSizeXY);
-      yawOffsetFromIdealFootstep = constructArrayFromEndpointsAndSpacing(- parameters.getMaximumStepYaw(), parameters.getMaximumStepYaw(), FootstepNode.gridSizeYaw);
+      yawOffsetFromIdealFootstep = constructArrayFromEndpointsAndSpacing(0.0, parameters.getMaximumStepYaw(), FootstepNode.gridSizeYaw);
    }
 
    public void setGoalNodes(SideDependentList<FootstepNode> goalNodes)

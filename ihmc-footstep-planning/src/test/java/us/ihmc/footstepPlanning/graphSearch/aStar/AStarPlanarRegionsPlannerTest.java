@@ -199,15 +199,15 @@ public class AStarPlanarRegionsPlannerTest
 
       // create planner
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
       FootstepNodeChecker nodeChecker = new SimpleNodeChecker();
       EuclideanDistanceHeuristics heuristics = new EuclideanDistanceHeuristics(registry);
       SimpleGridResolutionBasedExpansion expansion = new SimpleGridResolutionBasedExpansion();
-      EuclideanBasedCost stepCostCalculator = new EuclideanBasedCost(registry);
+      EuclideanBasedCost stepCostCalculator = new EuclideanBasedCost(parameters);
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
       FootstepNodeVisualization viz = null;
       if (visualize)
          viz = new FootstepNodeVisualization(1000, 0.04, planarRegionsList);
-      FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
       AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, snapper, viz, registry);
 
       // plan
