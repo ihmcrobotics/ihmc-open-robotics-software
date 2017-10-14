@@ -63,9 +63,13 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
 
       hasPrivilegedJointAngles = messageHashCodes != null && messageJointAngles != null;
       jointNameBasedHashCodes.reset();
-      jointNameBasedHashCodes.addAll(messageHashCodes);
       privilegedJointAngles.reset();
-      privilegedJointAngles.addAll(messageJointAngles);
+
+      if (hasPrivilegedJointAngles)
+      {
+         jointNameBasedHashCodes.addAll(messageHashCodes);
+         privilegedJointAngles.addAll(messageJointAngles);
+      }
    }
 
    public boolean holdCurrentCenterOfMassXYPosition()
