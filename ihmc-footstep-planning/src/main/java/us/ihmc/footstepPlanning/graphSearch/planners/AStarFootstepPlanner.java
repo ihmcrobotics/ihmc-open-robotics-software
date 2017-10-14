@@ -175,8 +175,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
          snapTransform.transform(footstepPose);
          plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), footstepPose));
 
-//         if (!snapData.getCroppedFoothold().isEmpty())
-//            plan.getFootstep(i - 1).setFoothold(snapData.getCroppedFoothold());
+         if (!snapData.getCroppedFoothold().isEmpty())
+            plan.getFootstep(i - 1).setFoothold(snapData.getCroppedFoothold());
       }
 
       return plan;
