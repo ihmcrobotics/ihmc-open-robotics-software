@@ -20,7 +20,7 @@ public class DefaultFootstepPlanningParameters implements FootstepPlannerParamet
    @Override
    public double getMaximumStepReach()
    {
-      return 0.65;
+      return 0.45;
    }
 
    @Override
@@ -32,7 +32,7 @@ public class DefaultFootstepPlanningParameters implements FootstepPlannerParamet
    @Override
    public double getMinimumStepWidth()
    {
-      return 0.12;
+      return 0.15;
    }
 
    @Override
@@ -74,7 +74,7 @@ public class DefaultFootstepPlanningParameters implements FootstepPlannerParamet
    @Override
    public double getWiggleInsideDelta()
    {
-      return 0.02;
+      return 0.01;
    }
 
    @Override
