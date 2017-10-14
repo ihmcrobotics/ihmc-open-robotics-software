@@ -180,8 +180,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
          snapTransform.transform(footstepPose);
          plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), footstepPose));
 
-         if (!snapData.getCroppedFoothold().isEmpty())
-            plan.getFootstep(i - 1).setFoothold(snapData.getCroppedFoothold());
+//         if (!snapData.getCroppedFoothold().isEmpty())
+//            plan.getFootstep(i - 1).setFoothold(snapData.getCroppedFoothold());
       }
 
       return plan;
@@ -333,7 +333,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       heuristics.setWeight(1.5);
 
-      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, snapper, viz, registry);
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, postProcessingSnapper, viz, registry);
       return planner;
    }
 }
