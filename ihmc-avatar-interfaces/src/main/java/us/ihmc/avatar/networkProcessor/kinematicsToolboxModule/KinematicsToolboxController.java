@@ -316,7 +316,7 @@ public class KinematicsToolboxController extends ToolboxController
       inverseKinematicsSolution = new KinematicsToolboxOutputStatus(oneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
 
-      gains.setProportionalGains(800.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
+      gains.setProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
 
       footWeight.set(200.0);
       momentumWeight.set(1.0);
