@@ -17,6 +17,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -127,6 +128,9 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    {
       stanceFootPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), initialSide);
+      RigidBodyTransform startNodeSnapTransform = AStarFootstepPlanner.computeSnapTransform(startNode, stanceFootPose.getGeometryObject());
+      snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransform));
+      checker.addStartNode(startNode, startNodeSnapTransform);
    }
 
    @Override
@@ -198,7 +202,6 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
       stack.clear();
       stack.add(startNode);
       footstepGraph.initialize(startNode);
-      snapper.addStartNode(startNode);
       notifiyListenersStartNodeWasAdded(startNode);
 
       numberOfNodesExpanded.set(0);

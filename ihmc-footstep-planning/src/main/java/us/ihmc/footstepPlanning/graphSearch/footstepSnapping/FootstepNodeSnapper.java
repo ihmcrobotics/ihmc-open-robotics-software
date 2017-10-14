@@ -1,11 +1,9 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import java.util.HashMap;
+
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-
-import java.util.HashMap;
 
 public abstract class FootstepNodeSnapper
 {
@@ -20,30 +18,26 @@ public abstract class FootstepNodeSnapper
 
    public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode)
    {
-      if(planarRegionsList == null)
+      if (planarRegionsList == null)
       {
          return FootstepNodeSnapData.identityData();
       }
 
-      if(!snapDataHolder.containsKey(footstepNode))
+      if (!snapDataHolder.containsKey(footstepNode))
       {
          FootstepNodeSnapData snapData = snapInternal(footstepNode);
-         snapDataHolder.put(footstepNode, snapData);
+         addSnapData(footstepNode, snapData);
       }
 
       return snapDataHolder.get(footstepNode);
    }
 
    /**
-    * Helper method so the first node is artificially snapped, since it usually isn't
-    * on a planar region.
-    *
-    * @param footstepNode
-    * @return
+    * Can manually add snap data for a footstep node to bypass the snapper.
     */
-   public void addStartNode(FootstepNode footstepNode)
+   public void addSnapData(FootstepNode footstepNode, FootstepNodeSnapData snapData)
    {
-      snapDataHolder.put(footstepNode, new FootstepNodeSnapData(new RigidBodyTransform(), new ConvexPolygon2D()));
+      snapDataHolder.put(footstepNode, snapData);
    }
 
    protected abstract FootstepNodeSnapData snapInternal(FootstepNode footstepNode);

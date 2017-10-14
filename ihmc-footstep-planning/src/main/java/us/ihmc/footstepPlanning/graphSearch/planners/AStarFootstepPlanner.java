@@ -6,6 +6,7 @@ import java.util.PriorityQueue;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -13,6 +14,7 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeUtils;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
@@ -101,6 +103,21 @@ public class AStarFootstepPlanner implements FootstepPlanner
    public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide side)
    {
       startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), side);
+      RigidBodyTransform startNodeSnapTransform = computeSnapTransform(startNode, stanceFootPose.getGeometryObject());
+      snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransform));
+      nodeChecker.addStartNode(startNode, startNodeSnapTransform);
+   }
+
+   public static RigidBodyTransform computeSnapTransform(FootstepNode node, Pose3D footstepPose)
+   {
+      RigidBodyTransform snapTransform = new RigidBodyTransform();
+      RigidBodyTransform stepTransform = new RigidBodyTransform();
+      footstepPose.get(stepTransform);
+
+      BipedalFootstepPlannerNodeUtils.getSoleTransform(node, snapTransform);
+      snapTransform.preMultiplyInvertThis(stepTransform);
+
+      return snapTransform;
    }
 
    @Override
@@ -157,9 +174,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
          RigidBodyTransform snapTransform = snapData.getSnapTransform();
          snapTransform.transform(footstepPose);
          plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), footstepPose));
-         
-         if(!snapData.getCroppedFoothold().isEmpty())
-            plan.getFootstep(i - 1).setFoothold(snapData.getCroppedFoothold());
+
+//         if (!snapData.getCroppedFoothold().isEmpty())
+//            plan.getFootstep(i - 1).setFoothold(snapData.getCroppedFoothold());
       }
 
       return plan;
@@ -173,7 +190,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
          throw new RuntimeException("Need to set goal before planning.");
 
       graph.initialize(startNode);
-      snapper.addStartNode(startNode);
       NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
 
