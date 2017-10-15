@@ -24,12 +24,12 @@ public class KinematicsToolboxModule extends ToolboxModule
    private static final PacketDestination PACKET_DESTINATION = PacketDestination.KINEMATICS_TOOLBOX_MODULE;
    private static final NetworkPorts NETWORK_PORT = NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT;
 
-   private final KinematicsToolboxController kinematicsToolBoxController;
+   private final HumanoidKinematicsToolboxController kinematicsToolBoxController;
 
    public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer) throws IOException
    {
       super(robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
-      kinematicsToolBoxController = new KinematicsToolboxController(commandInputManager, statusOutputManager, fullRobotModel, yoGraphicsListRegistry, registry);
+      kinematicsToolBoxController = new HumanoidKinematicsToolboxController(commandInputManager, statusOutputManager, fullRobotModel, yoGraphicsListRegistry, registry);
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel));
       packetCommunicator.attachListener(RobotConfigurationData.class, kinematicsToolBoxController::updateRobotConfigurationData);
       packetCommunicator.attachListener(CapturabilityBasedStatus.class, kinematicsToolBoxController::updateCapturabilityBasedStatus);
