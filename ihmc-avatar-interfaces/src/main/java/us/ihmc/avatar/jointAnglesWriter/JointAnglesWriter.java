@@ -1,7 +1,6 @@
 package us.ihmc.avatar.jointAnglesWriter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +13,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.Robot;
 
 /**
  * This class needs to extend OutputWriter or use some other common class. @dcalvert @sbertrand
@@ -25,14 +25,16 @@ public class JointAnglesWriter
 
    public JointAnglesWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel)
    {
-      this(robot.getRootJoint(), robot.getOneDegreeOfFreedomJoints(), fullRobotModel.getRootJoint(), fullRobotModel.getOneDoFJoints());
+      this(robot, fullRobotModel.getRootJoint(), fullRobotModel.getOneDoFJoints());
    }
 
-   public JointAnglesWriter(FloatingJoint scsRootJoint, OneDegreeOfFreedomJoint[] scsJoints, FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] oneDoFJoints)
+   public JointAnglesWriter(Robot robot, FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] oneDoFJoints)
    {
       oneDoFJointPairList.clear();
       Map<String, OneDegreeOfFreedomJoint> scsJointMap = new HashMap<>();
-      Arrays.stream(scsJoints).forEach(joint -> scsJointMap.put(joint.getName(), joint));
+      ArrayList<OneDegreeOfFreedomJoint> scsOnDoFJointList = new ArrayList<>();
+      robot.getAllOneDegreeOfFreedomJoints(scsOnDoFJointList);
+      scsOnDoFJointList.forEach(joint -> scsJointMap.put(joint.getName(), joint));
 
       for (OneDoFJoint joint : oneDoFJoints)
       {
@@ -44,6 +46,12 @@ public class JointAnglesWriter
          ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, joint);
          this.oneDoFJointPairList.add(jointPair);
       }
+
+      FloatingJoint scsRootJoint;
+      if (robot.getRootJoints().get(0) instanceof FloatingJoint)
+         scsRootJoint = (FloatingJoint) robot.getRootJoints().get(0);
+      else
+         scsRootJoint = null;
 
       if (scsRootJoint == null && rootJoint != null)
          throw new RuntimeException("A " + FloatingInverseDynamicsJoint.class.getSimpleName() + " was provided but there is no "
