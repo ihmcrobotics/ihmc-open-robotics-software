@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -103,8 +105,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
                                               FullHumanoidRobotModel desiredFullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoVariableRegistry parentRegistry)
    {
-      super(commandInputManager, statusOutputManager, desiredFullRobotModel.getRootJoint(), desiredFullRobotModel.getOneDoFJoints(), createListOfControllableRigidBodies(desiredFullRobotModel), yoGraphicsListRegistry,
-            parentRegistry);
+      super(commandInputManager, statusOutputManager, desiredFullRobotModel.getRootJoint(), getAllJointsExcludingHands(desiredFullRobotModel),
+            createListOfControllableRigidBodies(desiredFullRobotModel), yoGraphicsListRegistry, parentRegistry);
 
       this.desiredFullRobotModel = desiredFullRobotModel;
 
