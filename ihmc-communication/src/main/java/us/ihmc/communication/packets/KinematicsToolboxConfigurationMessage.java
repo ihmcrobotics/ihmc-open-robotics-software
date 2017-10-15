@@ -1,10 +1,13 @@
 package us.ihmc.communication.packets;
 
+import java.util.Arrays;
+
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.tools.ArrayTools;
 
 /**
  * {@link KinematicsToolboxConfigurationMessage} is part of the API of the
@@ -19,17 +22,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 public class KinematicsToolboxConfigurationMessage extends TrackablePacket<KinematicsToolboxConfigurationMessage>
 {
    /**
-    * When set to {@code true}, the solver will hold the current x and y coordinates of the center
-    * of mass. By 'current', it means that the solver will use the robot configuration data
-    * broadcasted by the controller to obtain the center of mass position.
-    */
-   public boolean holdCurrentCenterOfMassXYPosition = true;
-   /**
-    * When set to {@code true}, the solver will hold the pose of the active support foot/feet.
-    */
-   public boolean holdSupportFootPositions = true;
-
-   /**
     * When provided, the solver will attempt to find the solution that is the closest to the
     * privileged configuration.
     */
@@ -40,8 +32,9 @@ public class KinematicsToolboxConfigurationMessage extends TrackablePacket<Kinem
     */
    public Quaternion32 privilegedRootJointOrientation;
    /**
-    * This array is used identify to which joint each angle in {@link #privilegedJointAngles} belongs
-    * to. The name-based hash code can be obtained from {@link OneDoFJoint#getNameBasedHashCode()}.
+    * This array is used identify to which joint each angle in {@link #privilegedJointAngles}
+    * belongs to. The name-based hash code can be obtained from
+    * {@link OneDoFJoint#getNameBasedHashCode()}.
     */
    public long[] privilegedJointNameBasedHashCodes;
    /**
@@ -53,29 +46,6 @@ public class KinematicsToolboxConfigurationMessage extends TrackablePacket<Kinem
    public KinematicsToolboxConfigurationMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Specifies whether the {@code KinematicsToolboxController} should hold the initial x and y
-    * coordinates of the robot's center of mass.
-    * 
-    * @param holdCurrentCenterOfMassXYPosition whether x and y coordinates of the robot's center of
-    *           mass should be held or not.
-    */
-   public void setHoldCurrentCenterOfMassXYPosition(boolean holdCurrentCenterOfMassXYPosition)
-   {
-      this.holdCurrentCenterOfMassXYPosition = holdCurrentCenterOfMassXYPosition;
-   }
-
-   /**
-    * Specifies whether the {@code KinematicsToolboxController} should the initial pose of the
-    * current support foot/feet.
-    * 
-    * @param holdSupportFootPositions whether the support foot/feet should be held in place.
-    */
-   public void setHoldSupportFootPositions(boolean holdSupportFootPositions)
-   {
-      this.holdSupportFootPositions = holdSupportFootPositions;
    }
 
    /**
@@ -171,21 +141,11 @@ public class KinematicsToolboxConfigurationMessage extends TrackablePacket<Kinem
     *            {@code jointNameBasedHashCodes} are different.
     */
    public void setPrivilegedRobotConfiguration(Tuple3DReadOnly rootJointPosition, QuaternionReadOnly rootJointOrientation, long[] jointNameBasedHashCodes,
-                                              float[] jointAngles)
+                                               float[] jointAngles)
    {
       setPrivilegedRootJointPosition(rootJointPosition);
       setPrivilegedRootJointOrientation(rootJointOrientation);
       setPrivilegedJointAngles(jointNameBasedHashCodes, jointAngles);
-   }
-
-   public boolean holdCurrentCenterOfMassXYPosition()
-   {
-      return holdCurrentCenterOfMassXYPosition;
-   }
-
-   public boolean holdSupportFootPositions()
-   {
-      return holdSupportFootPositions;
    }
 
    public Point3D32 getPrivilegedRootJointPosition()
@@ -222,10 +182,24 @@ public class KinematicsToolboxConfigurationMessage extends TrackablePacket<Kinem
    @Override
    public boolean epsilonEquals(KinematicsToolboxConfigurationMessage other, double epsilon)
    {
-      if (holdCurrentCenterOfMassXYPosition != other.holdCurrentCenterOfMassXYPosition)
+      if (!Arrays.equals(privilegedJointNameBasedHashCodes, other.privilegedJointNameBasedHashCodes))
          return false;
-      if (holdSupportFootPositions != other.holdSupportFootPositions)
+
+      if (privilegedRootJointPosition == null ^ other.privilegedRootJointPosition == null)
          return false;
+      else if (privilegedRootJointPosition != null && !privilegedRootJointPosition.epsilonEquals(other.privilegedRootJointPosition, epsilon))
+         return false;
+
+      if (privilegedRootJointOrientation == null ^ other.privilegedRootJointOrientation == null)
+         return false;
+      else if (privilegedRootJointOrientation != null && !privilegedRootJointOrientation.epsilonEquals(other.privilegedRootJointOrientation, epsilon))
+         return false;
+
+      if (privilegedJointAngles == other.privilegedJointAngles)
+         return true;
+      else if (!ArrayTools.deltaEquals(privilegedJointAngles, other.privilegedJointAngles, (float) epsilon))
+         return false;
+
       return true;
    }
 }
