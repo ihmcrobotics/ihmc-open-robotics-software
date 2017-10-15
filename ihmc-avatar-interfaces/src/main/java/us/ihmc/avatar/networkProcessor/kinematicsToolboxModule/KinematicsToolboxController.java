@@ -107,11 +107,6 @@ public class KinematicsToolboxController extends ToolboxController
    private final Map<Long, OneDoFJoint> jointNameBasedHashCodeMap = new HashMap<>();
 
    /**
-    * List holding the low level output of the controller core.
-    */
-   private final LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput;
-
-   /**
     * Reference frame centered at the robot's center of mass. It is used to hold the initial center
     * of mass position when requested.
     */
@@ -297,7 +292,6 @@ public class KinematicsToolboxController extends ToolboxController
       this.commandInputManager = commandInputManager;
 
       this.desiredFullRobotModel = desiredFullRobotModel;
-      this.lowLevelControllerOutput = new LowLevelOneDoFJointDesiredDataHolderList(desiredFullRobotModel.getOneDoFJoints());
 
       rootBody = desiredFullRobotModel.getElevator();
       rootJoint = desiredFullRobotModel.getRootJoint();
@@ -307,11 +301,12 @@ public class KinematicsToolboxController extends ToolboxController
       populateJointLimitReductionFactors();
       populateListOfControllableRigidBodies();
 
-      controllerCore = createControllerCore();
-      feedbackControllerDataHolder = controllerCore.getWholeBodyFeedbackControllerDataHolder();
 
       oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
       Arrays.stream(oneDoFJoints).forEach(joint -> jointNameBasedHashCodeMap.put(joint.getNameBasedHashCode(), joint));
+
+      controllerCore = createControllerCore();
+      feedbackControllerDataHolder = controllerCore.getWholeBodyFeedbackControllerDataHolder();
 
       inverseKinematicsSolution = new KinematicsToolboxOutputStatus(oneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
@@ -396,6 +391,7 @@ public class KinematicsToolboxController extends ToolboxController
       toolbox.setupForInverseKinematicsSolver();
       FeedbackControlCommandList controllerCoreTemplate = createControllerCoreTemplate();
       controllerCoreTemplate.addCommand(new CenterOfMassFeedbackControlCommand());
+      LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput = new LowLevelOneDoFJointDesiredDataHolderList(oneDoFJoints);
       return new WholeBodyControllerCore(toolbox, controllerCoreTemplate, lowLevelControllerOutput, registry);
    }
 
