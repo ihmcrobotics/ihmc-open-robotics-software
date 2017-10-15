@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
@@ -57,6 +58,7 @@ public class KinematicsToolboxModule extends ToolboxModule
       commands.add(KinematicsToolboxCenterOfMassCommand.class);
       commands.add(KinematicsToolboxRigidBodyCommand.class);
       commands.add(KinematicsToolboxConfigurationCommand.class);
+      commands.add(HumanoidKinematicsToolboxConfigurationCommand.class);
       return commands;
    }
 
