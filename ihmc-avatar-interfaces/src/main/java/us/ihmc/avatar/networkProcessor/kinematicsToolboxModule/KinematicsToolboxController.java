@@ -603,6 +603,16 @@ public class KinematicsToolboxController extends ToolboxController
       return false;
    }
 
+   public FloatingInverseDynamicsJoint getDesiredRootJoint()
+   {
+      return rootJoint;
+   }
+
+   public OneDoFJoint[] getDesiredOneDoFJoint()
+   {
+      return oneDoFJoints;
+   }
+
    public KinematicsToolboxOutputStatus getSolution()
    {
       return inverseKinematicsSolution;
