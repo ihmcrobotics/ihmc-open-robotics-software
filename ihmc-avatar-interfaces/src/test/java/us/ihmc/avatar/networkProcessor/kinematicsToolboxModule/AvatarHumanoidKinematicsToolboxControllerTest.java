@@ -340,7 +340,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         randomizeJointPositions(random, randomizedFullRobotModel.getOneDoFJoints(), 0.6);
+         randomizeJointPositions(random, randomizedFullRobotModel.getOneDoFJoints(), 0.5);
          randomizedFullRobotModel.updateFrames();
          ReferenceFrame rootJointFrame = randomizedFullRobotModel.getRootJoint().getFrameAfterJoint();
          ReferenceFrame supportFootFrame = randomizedFullRobotModel.getFoot(supportFootSide).getBodyFixedFrame();
