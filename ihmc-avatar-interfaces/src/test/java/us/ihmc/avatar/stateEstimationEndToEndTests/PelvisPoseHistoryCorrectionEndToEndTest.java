@@ -18,6 +18,7 @@ import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
@@ -940,7 +941,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       public StandStillDoNothingPelvisPoseHistoryCorrectorController()
       {
          requestedHighLevelState = (YoEnum<HighLevelController>) simulationConstructionSet.getVariable(
-               HighLevelHumanoidControllerManager.class.getSimpleName(), "requestedHighLevelState");
+               HumanoidHighLevelControllerManager.class.getSimpleName(), "requestedHighLevelState");
          requestedHighLevelState.set(HighLevelController.DO_NOTHING_BEHAVIOR);
 
          jointMap = getRobotModel().getJointMap();

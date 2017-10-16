@@ -101,9 +101,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    private ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
 
-   private boolean setupInverseDynamicsSolver = true;
-   private boolean setupInverseKinematicsSolver = false;
-   private boolean setupVirtualModelControlSolver = false;
+   private HumanoidHighLevelControllerManager humanoidHighLevelControllerManager;
 
    public HighLevelHumanoidControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
                                              SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
@@ -141,7 +139,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
     */
    public void setupControllerCoreInverseDynamicsMode(boolean setup)
    {
-      setupInverseDynamicsSolver = setup;
+      throw new RuntimeException("This has been moved to the Walking Controller State class.");
    }
 
    /**
@@ -154,7 +152,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
     */
    public void setupControllerCoreInverseKinematicsMode(boolean setup)
    {
-      setupInverseKinematicsSolver = setup;
+      throw new RuntimeException("This has been moved to the Walking Controller State class.");
    }
 
    /**
@@ -167,7 +165,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
     */
    public void setupControllerCoreVirtualModelControlMode(boolean setup)
    {
-      setupVirtualModelControlSolver = setup;
+      throw new RuntimeException("This has been moved to the Walking Controller State class.");
    }
 
    private ComponentBasedFootstepDataMessageGenerator footstepGenerator;
@@ -407,7 +405,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
       commandInputManager.registerConversionHelper(commandConversionHelper);
 
-      HumanoidHighLevelControllerManager highLevelHumanoidControllerManager = new HumanoidHighLevelControllerManager(commandInputManager, statusMessageOutputManager,
+      humanoidHighLevelControllerManager = new HumanoidHighLevelControllerManager(commandInputManager, statusMessageOutputManager,
                                                                                                                      initialControllerState, highLevelControllerParameters,
                                                                                                                      walkingControllerParameters, icpPlannerParameters,
                                                                                                                      requestedHighLevelControllerState, fallbackControllerForFailure,
@@ -415,8 +413,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                                                      managerFactory, controllerToolbox,
                                                                                                                      centerOfPressureDataHolderForEstimator,
                                                                                                                      forceSensorDataHolder, lowLevelControllerOutput);
-      highLevelHumanoidControllerManager.addYoVariableRegistry(registry);
-      return highLevelHumanoidControllerManager;
+      humanoidHighLevelControllerManager.addYoVariableRegistry(registry);
+      return humanoidHighLevelControllerManager;
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<? extends ContactablePlaneBody> bipedFeet,
@@ -550,5 +548,10 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public HighLevelHumanoidControllerToolbox getHighLevelHumanoidControllerToolbox()
    {
       return controllerToolbox;
+   }
+
+   public HighLevelController getCurrentHighLevelControlState()
+   {
+      return humanoidHighLevelControllerManager.getCurrentHighLevelControlState();
    }
 }

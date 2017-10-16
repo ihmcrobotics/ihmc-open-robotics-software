@@ -109,10 +109,7 @@ public class DRCFlatGroundWalkingTrack
 
    public void attachControllerFailureListener(ControllerFailureListener listener)
    {
-      if (avatarSimulation.getMomentumBasedControllerFactory() != null)
-         avatarSimulation.getMomentumBasedControllerFactory().attachControllerFailureListener(listener);
-      else
-         avatarSimulation.getHighLevelHumanoidControllerFactory().attachControllerFailureListener(listener);
+      avatarSimulation.getHighLevelHumanoidControllerFactory().attachControllerFailureListener(listener);
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()
