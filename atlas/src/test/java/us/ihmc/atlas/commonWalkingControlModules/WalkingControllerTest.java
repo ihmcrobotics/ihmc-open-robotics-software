@@ -424,7 +424,7 @@ public class WalkingControllerTest
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
 
       walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
-                                                                 capturePointPlannerParameters, controllerToolbox);
+                                                                 controllerToolbox);
    }
 
    @SuppressWarnings("unchecked")
