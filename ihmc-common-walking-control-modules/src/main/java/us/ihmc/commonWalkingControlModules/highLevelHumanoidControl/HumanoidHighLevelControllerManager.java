@@ -275,5 +275,8 @@ public class HumanoidHighLevelControllerManager implements RobotController
       lowLevelControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
    }
 
-
+   public HighLevelController getCurrentHighLevelControlState()
+   {
+      return stateMachine.getCurrentStateEnum();
+   }
 }
