@@ -13,11 +13,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.PDController;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -32,7 +34,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 
-public class JointTorqueOffsetEstimatorController extends HighLevelBehavior implements RobotController, JointTorqueOffsetEstimator
+public class JointTorqueOffsetEstimatorController extends HighLevelControllerState implements RobotController, JointTorqueOffsetEstimator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -62,7 +64,6 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
    private final BipedSupportPolygons bipedSupportPolygons;
    private final SideDependentList<YoPlaneContactState> footContactStates;
 
-   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.OFF);
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final YoBoolean hasReachedMaximumTorqueOffset = new YoBoolean("hasReachedMaximumTorqueOffset", registry);
@@ -205,7 +206,6 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
       }
 
       lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(oneDoFJoints);
-      controllerCoreCommand.completeLowLevelJointData(lowLevelOneDoFJointDesiredDataHolder);
    }
 
    public void updateDiagnosticsWhenHangingHelpers()
@@ -390,14 +390,9 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
    }
 
    @Override
-   public void setControllerCoreOutput(ControllerCoreOutputReadOnly controllerCoreOutput)
+   public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
    {
-   }
-
-   @Override
-   public ControllerCoreCommand getControllerCoreCommand()
-   {
-      return controllerCoreCommand;
+      return lowLevelOneDoFJointDesiredDataHolder;
    }
 
    @Override
@@ -442,5 +437,10 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
    public String getDescription()
    {
       return "Controller for estimating the joint torque offsets. It is based on " + DiagnosticsWhenHangingController.class.getSimpleName() + ".";
+   }
+
+   @Override
+   public void warmup(int iterations)
+   {
    }
 }

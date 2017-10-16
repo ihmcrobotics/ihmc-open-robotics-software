@@ -3,7 +3,7 @@ package us.ihmc.valkyrie;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 
 public class ValkyrieHighLevelControllerParameters implements HighLevelControllerParameters
 {
@@ -27,21 +27,27 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    }
 
    @Override
-   public LowLevelJointControlMode getLowLevelJointControlMode(String jointName, HighLevelController state)
+   public JointDesiredControlMode getJointDesiredControlMode(String jointName, HighLevelController state)
    {
-      throw new RuntimeException("None of the Valkyrie joint control modes have been set up yet.");
+      switch(state)
+      {
+      case DO_NOTHING_BEHAVIOR:
+         return JointDesiredControlMode.DISABLED;
+      default:
+         return JointDesiredControlMode.EFFORT;
+      }
    }
 
    @Override
-   public double getLowLevelJointStiffness(String jointName)
+   public double getDesiredJointStiffness(String jointName)
    {
-      throw new RuntimeException("None of the Valkyrie joint stiffnesses have been set up yet.");
+      return positionControlParameters.getProportionalGain(jointName);
    }
 
    @Override
-   public double getLowLevelJointDamping(String jointName)
+   public double getDesiredJointDamping(String jointName)
    {
-      throw new RuntimeException("None of the Valkyrie joint dampings have been set up yet.");
+      return positionControlParameters.getDerivativeGain(jointName);
    }
 
    @Override
@@ -77,6 +83,6 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    @Override
    public double getTimeInStandTransition()
    {
-      return 0;
+      return 3.0;
    }
 }

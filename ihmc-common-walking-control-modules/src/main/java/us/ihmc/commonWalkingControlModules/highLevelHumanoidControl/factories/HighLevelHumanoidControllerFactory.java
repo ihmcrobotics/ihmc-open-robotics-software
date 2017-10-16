@@ -491,6 +491,16 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       closeableAndDisposableRegistry.closeAndDispose();
    }
 
+   public CommandInputManager getCommandInputManager()
+   {
+      return commandInputManager;
+   }
+
+   public StatusMessageOutputManager getStatusOutputManager()
+   {
+      return statusMessageOutputManager;
+   }
+
    public void attachControllerFailureListeners(List<ControllerFailureListener> listeners)
    {
       for (int i = 0; i < listeners.size(); i++)

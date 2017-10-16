@@ -55,7 +55,6 @@ public class ValkyrieRosControlLowLevelController
    private final YoDouble yoTime = new YoDouble("lowLevelControlTime", registry);
    private final YoDouble wakeUpTime = new YoDouble("lowLevelControlWakeUpTime", registry);
 
-   private final YoDouble timeInStandprep = new YoDouble("timeInStandprep", registry);
    private final YoDouble standPrepStartTime = new YoDouble("standPrepStartTime", registry);
 
    private final YoDouble doIHMCControlRatio = new YoDouble("doIHMCControlRatio", registry);
@@ -362,40 +361,10 @@ public class ValkyrieRosControlLowLevelController
 
    public void updateCommandCalculators()
    {
-      if (!standPrepStartTime.isNaN())
+      for (int i = 0; i < effortControlCommandCalculators.size(); i++)
       {
-         timeInStandprep.set(yoTime.getDoubleValue() - standPrepStartTime.getDoubleValue());
-
-         double ramp = timeInStandprep.getDoubleValue() / standPrepRampDuration.getDoubleValue();
-         ramp = MathTools.clamp(ramp, 0.0, 1.0);
-
-         for (int i = 0; i < effortControlCommandCalculators.size(); i++)
-         {
-            ValkyrieRosControlEffortJointControlCommandCalculator commandCalculator = effortControlCommandCalculators.get(i);
-            commandCalculator.computeAndUpdateJointTorque(ramp, doIHMCControlRatio.getDoubleValue(), masterGain.getDoubleValue());
-         }
-
-         for (int i = 0; i < positionControlCommandCalculators.size(); i++)
-         {
-            ValkyrieRosControlPositionJointControlCommandCalculator commandCalculator = positionControlCommandCalculators.get(i);
-            commandCalculator.computeAndUpdateJointPosition(ramp, doIHMCControlRatio.getDoubleValue(), masterGain.getDoubleValue());
-         }
-      }
-      else
-      {
-         standPrepStartTime.set(yoTime.getDoubleValue());
-
-         for (int i = 0; i < effortControlCommandCalculators.size(); i++)
-         {
-            ValkyrieRosControlEffortJointControlCommandCalculator commandCalculator = effortControlCommandCalculators.get(i);
-            commandCalculator.initialize();
-         }
-
-         for (int i = 0; i < positionControlCommandCalculators.size(); i++)
-         {
-            ValkyrieRosControlPositionJointControlCommandCalculator commandCalculator = positionControlCommandCalculators.get(i);
-            commandCalculator.initialize();
-         }
+         ValkyrieRosControlEffortJointControlCommandCalculator commandCalculator = effortControlCommandCalculators.get(i);
+         commandCalculator.computeAndUpdateJointTorque(doIHMCControlRatio.getDoubleValue(), masterGain.getDoubleValue());
       }
    }
 
