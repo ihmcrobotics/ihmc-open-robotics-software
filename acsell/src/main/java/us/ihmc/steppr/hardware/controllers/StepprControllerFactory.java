@@ -42,7 +42,7 @@ import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.DRCOutputProcessorWithAccelerationIntegration;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerFactory;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerStateFactory;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController.*;
 
@@ -202,7 +202,7 @@ public class StepprControllerFactory
       boolean useArms = false;
       boolean robotIsHanging = true;
 
-      DiagnosticsWhenHangingControllerFactory diagnosticsWhenHangingHighLevelBehaviorFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, useArms, robotIsHanging, null);
+      DiagnosticsWhenHangingControllerStateFactory diagnosticsWhenHangingHighLevelBehaviorFactory = new DiagnosticsWhenHangingControllerStateFactory(humanoidJointPoseList, useArms, robotIsHanging, null);
       // Configure the HighLevelHumanoidController so we start with the diagnostic controller
       diagnosticsWhenHangingHighLevelBehaviorFactory.setTransitionRequested(true);
       controllerFactory.addCustomControlState(diagnosticsWhenHangingHighLevelBehaviorFactory);

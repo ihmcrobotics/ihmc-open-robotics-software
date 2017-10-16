@@ -22,7 +22,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationConstructionSetTools.util.virtualHoist.VirtualHoist;
 import us.ihmc.steppr.parameters.BonoRobotModel;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingController;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
 
 public class StepprDiagnosticsWhenHangingSimulation
