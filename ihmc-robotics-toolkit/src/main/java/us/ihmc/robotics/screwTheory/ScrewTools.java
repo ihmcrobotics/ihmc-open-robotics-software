@@ -980,7 +980,11 @@ public class ScrewTools
          for (String name : names)
          {
             if (body.getName().equals(name))
+            {
                ret[index++] = body;
+               if (index == names.length)
+                  return ret;
+            }
          }
       }
 
