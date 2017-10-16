@@ -26,7 +26,9 @@ public class JointTorqueOffsetEstimatorControllerFactory implements HighLevelCon
       if (jointTorqueOffsetEstimatorController != null)
          return jointTorqueOffsetEstimatorController;
 
-      jointTorqueOffsetEstimatorController = new JointTorqueOffsetEstimatorController(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(), torqueOffsetPrinter);
+      jointTorqueOffsetEstimatorController = new JointTorqueOffsetEstimatorController(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
+                                                                                      controllerFactoryHelper.getHighLevelControllerParameters(),
+                                                                                      torqueOffsetPrinter);
       return jointTorqueOffsetEstimatorController;
    }
 

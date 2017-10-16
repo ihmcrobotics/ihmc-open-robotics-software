@@ -85,4 +85,10 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    {
       return 3.0;
    }
+
+   @Override
+   public double getCalibrationDuration()
+   {
+      return 10.0;
+   }
 }

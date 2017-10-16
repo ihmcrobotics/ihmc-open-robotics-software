@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
 
 public class BonoHighLevelControllerParameters implements HighLevelControllerParameters
 {
@@ -64,6 +63,12 @@ public class BonoHighLevelControllerParameters implements HighLevelControllerPar
 
    @Override
    public double getTimeInStandTransition()
+   {
+      return 0;
+   }
+
+   @Override
+   public double getCalibrationDuration()
    {
       return 0;
    }

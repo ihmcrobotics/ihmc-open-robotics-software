@@ -20,4 +20,5 @@ public interface HighLevelControllerParameters
    double getTimeToMoveInStandPrep();
    double getMinimumTimeInStandReady();
    double getTimeInStandTransition();
+   double getCalibrationDuration();
 }

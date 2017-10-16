@@ -66,4 +66,10 @@ public class EscherHighLevelControllerParameters implements HighLevelControllerP
    {
       return 0;
    }
+
+   @Override
+   public double getCalibrationDuration()
+   {
+      return 0;
+   }
 }

@@ -66,4 +66,10 @@ public class WandererHighLevelControllerParameters implements HighLevelControlle
    {
       return 0;
    }
+
+   @Override
+   public double getCalibrationDuration()
+   {
+      return 0;
+   }
 }
