@@ -7,6 +7,6 @@ public class FlatGroundFootstepNodeSnapper extends FootstepNodeSnapper
    @Override
    public FootstepNodeSnapData snapInternal(FootstepNode footstepNode)
    {
-      return FootstepNodeSnapData.emptyData();
+      return FootstepNodeSnapData.identityData();
    }
 }

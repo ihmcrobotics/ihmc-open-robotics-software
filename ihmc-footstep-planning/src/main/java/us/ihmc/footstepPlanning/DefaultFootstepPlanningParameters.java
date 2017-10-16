@@ -20,25 +20,25 @@ public class DefaultFootstepPlanningParameters implements FootstepPlannerParamet
    @Override
    public double getMaximumStepReach()
    {
-      return 0.55;
+      return 0.45;
    }
 
    @Override
    public double getMaximumStepYaw()
    {
-      return 0.2;
+      return 0.4;
    }
 
    @Override
    public double getMinimumStepWidth()
    {
-      return 0.16;
+      return 0.15;
    }
 
    @Override
    public double getMinimumStepLength()
    {
-      return -0.01;
+      return -0.1;
    }
 
    @Override
@@ -74,7 +74,7 @@ public class DefaultFootstepPlanningParameters implements FootstepPlannerParamet
    @Override
    public double getWiggleInsideDelta()
    {
-      return 0.02;
+      return 0.01;
    }
 
    @Override
@@ -87,17 +87,5 @@ public class DefaultFootstepPlanningParameters implements FootstepPlannerParamet
    public double getMinimumDistanceFromCliffBottoms()
    {
       return 0.24;
-   }
-
-   @Override
-   public double getMaximumXYWiggleDistance()
-   {
-      return 1.0;
-   }
-
-   @Override
-   public double getMaximumYawWiggle()
-   {
-      return 0.1;
    }
 }

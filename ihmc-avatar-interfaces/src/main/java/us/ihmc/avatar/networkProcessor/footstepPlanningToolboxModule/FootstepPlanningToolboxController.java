@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -36,7 +35,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAnd
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.SimpleSideBasedExpansion;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
@@ -134,7 +133,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
        * Use SimpleSideBasedExpansion ( defaults to Atlas) if using other robots or add custom footstep expansion class.
        * */
 //      FootstepNodeExpansion expansion = robotModel.getPlanarRegionFootstepPlannerParameters().getReachableFootstepExpansion();
-      FootstepNodeExpansion expansion = new SimpleSideBasedExpansion(footstepPlanningParameters);
+      FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlanningParameters);
       AStarFootstepPlanner planner = AStarFootstepPlanner.createRoughTerrainPlanner(footstepPlanningParameters, null, footPolygons, expansion, registry);
       planner.setTimeout(timeout);
       return planner;
@@ -325,18 +324,19 @@ public class FootstepPlanningToolboxController extends ToolboxController
       }
       else
       {
-         if (planarRegionsList.isPresent())
+//         if (planarRegionsList.isPresent())
+//         {
+//            PrintTools.debug(this, "Planar regions present. Assembling footstep data list message");
+//            result.footstepDataList = footstepDataListWithSwingOverTrajectoriesAssembler.assemble(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE,
+//                                                                                                  planarRegionsList.get());
+//         }
+//         else
          {
-            PrintTools.debug(this, "Planar regions present. Assembling footstep data list message");
-            result.footstepDataList = footstepDataListWithSwingOverTrajectoriesAssembler.assemble(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE,
-                                                                                                  planarRegionsList.get());
-         }
-         else
-         {
-            PrintTools.debug(this, "Planar regions not present. Won't swing over!");
+//            PrintTools.debug(this, "Planar regions not present. Won't swing over!");
             result.footstepDataList = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE);
          }
       }
+
       result.planningResult = status;
       return result;
    }

@@ -15,17 +15,9 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    private SideDependentList<FootstepNode> goalNodes;
    private final FootstepPlannerParameters parameters;
 
-   private final ArrayList<Double> xOffsetFromIdealFootstep;
-   private final ArrayList<Double> yOffsetFromIdealFootstep;
-   private final ArrayList<Double> yawOffsetFromIdealFootstep;
-
    public ParameterBasedNodeExpansion(FootstepPlannerParameters parameters)
    {
       this.parameters = parameters;
-
-      xOffsetFromIdealFootstep = constructArrayFromEndpointsAndSpacing(parameters.getMinimumStepLength(), parameters.getMaximumStepReach(), FootstepNode.gridSizeXY);
-      yOffsetFromIdealFootstep = constructArrayFromEndpointsAndSpacing(parameters.getMinimumStepWidth(), parameters.getMaximumStepWidth(), FootstepNode.gridSizeXY);
-      yawOffsetFromIdealFootstep = constructArrayFromEndpointsAndSpacing(0.0, parameters.getMaximumStepYaw(), FootstepNode.gridSizeYaw);
    }
 
    public void setGoalNodes(SideDependentList<FootstepNode> goalNodes)
@@ -56,11 +48,11 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    private void addDefaultFootsteps(FootstepNode node, HashSet<FootstepNode> expansion)
    {
       RobotSide nextSide = node.getRobotSide().getOppositeSide();
-      for(double x : xOffsetFromIdealFootstep)
+      for (double x = parameters.getMinimumStepLength(); x < parameters.getMaximumStepReach(); x += FootstepNode.gridSizeXY)
       {
-         for(double y : yOffsetFromIdealFootstep)
+         for (double y = parameters.getMinimumStepWidth(); y < parameters.getMaximumStepWidth(); y += FootstepNode.gridSizeXY)
          {
-            for (double yaw : yawOffsetFromIdealFootstep)
+            for (double yaw = 0.0; yaw < parameters.getMaximumStepYaw(); yaw += FootstepNode.gridSizeYaw)
             {
                FootstepNode offsetNode = constructNodeInPreviousNodeFrame(x, nextSide.negateIfRightSide(y), nextSide.negateIfRightSide(yaw), node);
                expansion.add(offsetNode);
