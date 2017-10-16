@@ -76,6 +76,7 @@ public class InverseDynamicsQPSolver
 
    private boolean resetActiveSet = false;
    private boolean useWarmStart = false;
+   private int maxNumberOfIterations = 100;
 
    public InverseDynamicsQPSolver(SimpleActiveSetQPSolverInterface qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase, YoVariableRegistry parentRegistry)
    {
@@ -168,6 +169,11 @@ public class InverseDynamicsQPSolver
    public void setUseWarmStart(boolean useWarmStart)
    {
       this.useWarmStart = useWarmStart;
+   }
+
+   public void setMaxNumberOfIterations(int maxNumberOfIterations)
+   {
+      this.maxNumberOfIterations = maxNumberOfIterations;
    }
 
    public void notifyResetActiveSet()
@@ -407,6 +413,7 @@ public class InverseDynamicsQPSolver
       qpSolver.clear();
 
       qpSolver.setUseWarmStart(useWarmStart);
+      qpSolver.setMaxNumberOfIterations(maxNumberOfIterations);
       if (useWarmStart && pollResetActiveSet())
          qpSolver.resetActiveConstraints();
 
@@ -424,7 +431,6 @@ public class InverseDynamicsQPSolver
 
       if (MatrixTools.containsNaN(solverOutput))
       {
-         printForJerry();
          throw new NoConvergenceException(numberOfIterations.getIntegerValue());
       }
 
@@ -457,16 +463,11 @@ public class InverseDynamicsQPSolver
 
    private void printForJerry()
    {
-      MatrixTools.printJavaForConstruction("H previous", solverInput_H_previous);
-      MatrixTools.printJavaForConstruction("f previous", solverInput_f_previous);
-      MatrixTools.printJavaForConstruction("lowerBounds previous", solverInput_lb_previous);
-      MatrixTools.printJavaForConstruction("upperBounds previous", solverInput_ub_previous);
-
       MatrixTools.printJavaForConstruction("H", solverInput_H);
       MatrixTools.printJavaForConstruction("f", solverInput_f);
       MatrixTools.printJavaForConstruction("lowerBounds", solverInput_lb);
       MatrixTools.printJavaForConstruction("upperBounds", solverInput_ub);
-      //MatrixTools.printJavaForConstruction("solution", solverOutput);
+      MatrixTools.printJavaForConstruction("solution", solverOutput);
    }
 
    public DenseMatrix64F getJointAccelerations()
