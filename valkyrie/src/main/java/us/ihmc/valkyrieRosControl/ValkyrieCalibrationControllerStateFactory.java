@@ -1,0 +1,47 @@
+package us.ihmc.valkyrieRosControl;
+
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.wholeBodyController.diagnostics.TorqueOffsetPrinter;
+
+public class ValkyrieCalibrationControllerStateFactory implements HighLevelControllerStateFactory
+{
+   private final TorqueOffsetPrinter torqueOffsetPrinter;
+   private ValkyrieCalibrationControllerState calibrationControllerState;
+
+   public ValkyrieCalibrationControllerStateFactory(TorqueOffsetPrinter torqueOffsetPrinter)
+   {
+      this.torqueOffsetPrinter = torqueOffsetPrinter;
+   }
+
+   @Override
+   public HighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
+   {
+      if (calibrationControllerState != null)
+         return calibrationControllerState;
+
+      calibrationControllerState = new ValkyrieCalibrationControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
+                                                                          controllerFactoryHelper.getHighLevelControllerParameters(),
+                                                                          torqueOffsetPrinter);
+      return calibrationControllerState;
+   }
+
+   public ValkyrieCalibrationControllerState getCalibrationControllerState()
+   {
+      return calibrationControllerState;
+   }
+
+   @Override
+   public HighLevelController getStateEnum()
+   {
+      return HighLevelController.CALIBRATION;
+   }
+
+   @Override
+   public boolean isTransitionToControllerRequested()
+   {
+      return false;
+   }
+}

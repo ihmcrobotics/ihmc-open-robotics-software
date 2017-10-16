@@ -68,7 +68,6 @@ public class ValkyrieRosControlLowLevelController
 
    private final TaskExecutor taskExecutor = new TaskExecutor();
 
-   private ForceSensorCalibrationModule forceSensorCalibrationModule;
    private JointTorqueOffsetEstimator jointTorqueOffsetEstimator;
 
    @SuppressWarnings("unchecked")
@@ -202,7 +201,7 @@ public class ValkyrieRosControlLowLevelController
       }
    }
 
-   private void finishedCalibrationState()
+   private void writeTorqueOffsets()
    {
       List<OneDoFJoint> oneDoFJoints = jointTorqueOffsetEstimator.getOneDoFJoints();
       for (int i = 0; i < oneDoFJoints.size(); i++)
@@ -214,9 +213,6 @@ public class ValkyrieRosControlLowLevelController
             jointTorqueOffsetEstimator.resetEstimatedJointTorqueOffset(joint);
          }
       }
-
-      if (forceSensorCalibrationModule != null)
-         forceSensorCalibrationModule.requestFootForceSensorCalibrationAtomic();
    }
 
    public void subtractTorqueOffset(OneDoFJoint oneDoFJoint, double torqueOffset)
@@ -243,39 +239,16 @@ public class ValkyrieRosControlLowLevelController
                currentHighLevelControllerState.set(statusMessage.endState);
 
                if (previousHighLevelControllerState.get() == HighLevelController.CALIBRATION)
-                  finishedCalibrationState();
+                  writeTorqueOffsets();
             }
          }
       };
       statusOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, highLevelStateChangeListener);
    }
    
-   public void attachForceSensorCalibrationModule(DRCRobotSensorInformation sensorInformation, ForceSensorCalibrationModule forceSensorCalibrationModule)
-   {
-      this.forceSensorCalibrationModule = forceSensorCalibrationModule;
-   }
-
    public void attachJointTorqueOffsetEstimator(JointTorqueOffsetEstimator jointTorqueOffsetEstimator)
    {
       this.jointTorqueOffsetEstimator = jointTorqueOffsetEstimator;
-   }
-
-   private abstract class AbstractLowLevelTask implements Task
-   {
-      @Override
-      public void doAction()
-      {
-      }
-
-      @Override
-      public void doTransitionIntoAction()
-      {
-      }
-
-      @Override
-      public void doTransitionOutOfAction()
-      {
-      }
    }
 
    public void setupLowLevelControlWithPacketCommunicator(PacketCommunicator packetCommunicator)

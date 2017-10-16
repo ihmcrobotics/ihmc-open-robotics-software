@@ -122,7 +122,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       valkyrieAffinity = new ValkyrieAffinity(!isGazebo);
    }
 
-   private JointTorqueOffsetEstimatorControllerFactory jointTorqueOffsetEstimatorControllerFactory = null;
+   private ValkyrieCalibrationControllerStateFactory calibrationStateFactory = null;
 
    private HighLevelHumanoidControllerFactory createHighLevelControllerFactory(ValkyrieRobotModel robotModel, PacketCommunicator packetCommunicator,
                                                                          DRCRobotSensorInformation sensorInformation)
@@ -152,17 +152,17 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
       ValkyrieTorqueOffsetPrinter valkyrieTorqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();
       valkyrieTorqueOffsetPrinter.setRobotName(robotModel.getFullRobotName());
-      jointTorqueOffsetEstimatorControllerFactory = new JointTorqueOffsetEstimatorControllerFactory(valkyrieTorqueOffsetPrinter);
-      controllerFactory.addCustomControlState(jointTorqueOffsetEstimatorControllerFactory);
+      calibrationStateFactory = new ValkyrieCalibrationControllerStateFactory(valkyrieTorqueOffsetPrinter);
+      controllerFactory.addCustomControlState(calibrationStateFactory);
 
       // setup transitions
       HighLevelController fallbackControllerState = robotModel.getHighLevelControllerParameters().getFallbackControllerState();
 
       controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, STAND_PREP_STATE);
-      controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, jointTorqueOffsetEstimatorControllerFactory.getStateEnum());
+      controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, calibrationStateFactory.getStateEnum());
 
-      controllerFactory.addRequestableTransition(jointTorqueOffsetEstimatorControllerFactory.getStateEnum(), DO_NOTHING_BEHAVIOR);
-      controllerFactory.addFinishedTransition(jointTorqueOffsetEstimatorControllerFactory.getStateEnum(), DO_NOTHING_BEHAVIOR);
+      controllerFactory.addRequestableTransition(calibrationStateFactory.getStateEnum(), DO_NOTHING_BEHAVIOR);
+      controllerFactory.addFinishedTransition(calibrationStateFactory.getStateEnum(), DO_NOTHING_BEHAVIOR);
 
       controllerFactory.addRequestableTransition(STAND_PREP_STATE, STAND_READY);
       controllerFactory.addRequestableTransition(STAND_PREP_STATE, DO_NOTHING_BEHAVIOR);
@@ -327,9 +327,11 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, sensorInformation, controllerFactory, threadDataSynchronizer, drcOutputWriter,
             dataProducer, yoVariableServer, gravity, estimatorDT);
 
+      ValkyrieCalibrationControllerState calibrationControllerState = calibrationStateFactory.getCalibrationControllerState();
+      calibrationControllerState.attachForceSensorCalibrationModule(estimatorThread.getForceSensorCalibrationModule());
+
       sensorReaderFactory.attachControllerAPI(commandInputManager, statusOutputManager);
-      sensorReaderFactory.attachForceSensorCalibrationModule(estimatorThread.getForceSensorCalibrationModule());
-      sensorReaderFactory.attachJointTorqueOffsetEstimator(jointTorqueOffsetEstimatorControllerFactory.getJointTorqueOffsetEstimatorController());
+      sensorReaderFactory.attachJointTorqueOffsetEstimator(calibrationControllerState);
       sensorReaderFactory.setupLowLevelControlWithPacketCommunicator(controllerPacketCommunicator);
 
       /*
