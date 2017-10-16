@@ -1560,7 +1560,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       solver.setQuadraticCostFunction(dataset.getCostQuadraticMatrix(), dataset.getCostLinearVector(), 0.0);
       solver.setVariableBounds(dataset.getVariableLowerBounds(), dataset.getVariableUpperBounds());
       DenseMatrix64F solution = new DenseMatrix64F(dataset.getProblemSize(), 1);
-      int numberOfIterations = solver.solve(solution);
+      solver.solve(solution);
 
       assertFalse(MatrixTools.containsNaN(solution));
    }
