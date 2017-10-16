@@ -406,11 +406,15 @@ public class InverseDynamicsQPSolver
       numberOfIterations.set(qpSolver.solve(solverOutput));
 
       qpSolverTimer.stopMeasurement();
+
       
       hasWrenchesEquilibriumConstraintBeenSetup = false;
 
       if (MatrixTools.containsNaN(solverOutput))
+      {
+         printForJerry();
          throw new NoConvergenceException(numberOfIterations.getIntegerValue());
+      }
 
       CommonOps.extract(solverOutput, 0, numberOfDoFs, 0, 1, solverOutput_jointAccelerations, 0, 0);
       CommonOps.extract(solverOutput, numberOfDoFs, problemSize, 0, 1, solverOutput_rhos, 0, 0);
