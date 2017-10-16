@@ -4,6 +4,7 @@ import java.util.Map;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -75,6 +76,30 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
       q = MathTools.clamp(q, jointLimitLower, jointLimitUpper);
 
       initialAngle.set(q);
+   }
+
+   public void computeAndUpdateJointTorque(double factor, double masterGain)
+   {
+      double standPrepFactor = 1.0 - factor;
+
+      factor = MathTools.clamp(factor, 0.0, 1.0);
+      if (ENABLE_TAU_SCALE)
+         factor *= tauScale.getDoubleValue();
+
+      JointDesiredOutput jointDesiredOutput = yoEffortJointHandleHolder.getDesiredJointData();
+      pidController.setProportionalGain(jointDesiredOutput.getStiffness());
+      pidController.setDerivativeGain(jointDesiredOutput.getDamping());
+
+      double q = yoEffortJointHandleHolder.getQ();
+      double qDesired = jointDesiredOutput.getDesiredPosition();
+      double qd = yoEffortJointHandleHolder.getQd();
+      double qdDesired = jointDesiredOutput.getDesiredVelocity();
+
+      double standPrepTau = standPrepFactor * masterGain * pidController.compute(q, qDesired, qd, qdDesired, controlDT);
+      double controllerTau = factor * yoEffortJointHandleHolder.getControllerTauDesired();
+
+      double desiredEffort = standPrepTau + controllerTau + tauOff.getDoubleValue();
+      yoEffortJointHandleHolder.setDesiredEffort(desiredEffort);
    }
 
    public void computeAndUpdateJointTorque(double ramp, double factor, double masterGain)

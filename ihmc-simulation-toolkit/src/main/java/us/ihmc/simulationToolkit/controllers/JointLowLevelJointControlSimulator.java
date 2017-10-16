@@ -1,8 +1,8 @@
 package us.ihmc.simulationToolkit.controllers;
 
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -18,10 +18,10 @@ public class JointLowLevelJointControlSimulator implements RobotController
 
    private final double controlDT;
    private final OneDegreeOfFreedomJoint simulatedJoint;
-   private final LowLevelJointData lowLevelJointData;
+   private final JointDesiredOutput jointDesiredOutput;
 
    public JointLowLevelJointControlSimulator(OneDegreeOfFreedomJoint simulatedJoint, OneDoFJoint highLevelControllerOutputJoint,
-                                             LowLevelJointData lowLevelJointData, boolean isUpperBodyJoint,
+                                             JointDesiredOutput jointDesiredOutput, boolean isUpperBodyJoint,
                                              boolean isBackJoint, boolean isExoJoint, double totalMass, double controlDT)
    {
       registry = new YoVariableRegistry(simulatedJoint.getName() + name);
@@ -30,7 +30,7 @@ public class JointLowLevelJointControlSimulator implements RobotController
       jointVelocityController = new PIDController(simulatedJoint.getName() + "VelocityControllerSimulator", registry);
 
       this.simulatedJoint = simulatedJoint;
-      this.lowLevelJointData = lowLevelJointData;
+      this.jointDesiredOutput = jointDesiredOutput;
 
       double integralLeakRatio = 1.0; // 0.996;
 
@@ -102,12 +102,12 @@ public class JointLowLevelJointControlSimulator implements RobotController
    @Override
    public void doControl()
    {
-      if (lowLevelJointData.getControlMode() == LowLevelJointControlMode.POSITION_CONTROL)
+      if (jointDesiredOutput.getControlMode() == JointDesiredControlMode.POSITION)
       {
          double currentPosition = simulatedJoint.getQYoVariable().getDoubleValue();
-         double desiredPosition = lowLevelJointData.getDesiredPosition();
+         double desiredPosition = jointDesiredOutput.getDesiredPosition();
          double currentRate = simulatedJoint.getQDYoVariable().getDoubleValue();
-         double desiredRate = lowLevelJointData.getDesiredVelocity();
+         double desiredRate = jointDesiredOutput.getDesiredVelocity();
          double desiredTau = jointPositionController.compute(currentPosition, desiredPosition, currentRate, desiredRate, controlDT);
          simulatedJoint.setTau(desiredTau);
       }
