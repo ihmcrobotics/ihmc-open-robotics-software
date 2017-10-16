@@ -29,7 +29,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
 
-public class NewWalkingControllerState extends HighLevelControllerState
+public class WalkingControllerState extends HighLevelControllerState
 {
    private final static HighLevelController controllerState = HighLevelController.WALKING;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -44,9 +44,9 @@ public class NewWalkingControllerState extends HighLevelControllerState
    private boolean setupInverseKinematicsSolver = false;
    private boolean setupVirtualModelControlSolver = false;
 
-   public NewWalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, HighLevelControlManagerFactory managerFactory,
-                                    HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
-                                    WalkingControllerParameters walkingControllerParameters)
+   public WalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, HighLevelControlManagerFactory managerFactory,
+                                 HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
+                                 WalkingControllerParameters walkingControllerParameters)
    {
       super(controllerState);
 

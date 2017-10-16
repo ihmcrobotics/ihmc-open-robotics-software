@@ -63,7 +63,7 @@ public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFo
    @Override
    protected YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
    {
-      return (YoDouble) scs.getVariable("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisAxisAngleOrientationController",
+      return (YoDouble) scs.getVariable("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisAxisAngleOrientationController",
             "pelvisRotationErrorInBodyZ");
    }
 }
