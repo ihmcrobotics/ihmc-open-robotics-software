@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
@@ -68,7 +69,10 @@ public class JointTorqueOffsetEstimatorController extends HighLevelControllerSta
 
    private final YoBoolean hasReachedMaximumTorqueOffset = new YoBoolean("hasReachedMaximumTorqueOffset", registry);
 
-   public JointTorqueOffsetEstimatorController(HighLevelHumanoidControllerToolbox highLevelControllerToolbox, TorqueOffsetPrinter torqueOffsetPrinter)
+   private final YoDouble timeForEstimatingOffset = new YoDouble("timeForEstimatingOffset", registry);
+
+   public JointTorqueOffsetEstimatorController(HighLevelHumanoidControllerToolbox highLevelControllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
+          TorqueOffsetPrinter torqueOffsetPrinter)
    {
       super(HighLevelController.CALIBRATION);
 
@@ -77,6 +81,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelControllerSta
       this.controllerToolbox = highLevelControllerToolbox;
       this.torqueOffsetPrinter = torqueOffsetPrinter;
       this.fullRobotModel = highLevelControllerToolbox.getFullRobotModel();
+      this.timeForEstimatingOffset.set(highLevelControllerParameters.getCalibrationDuration());
 
       ditherAmplitude.set(0.3);
       ditherFrequency.set(5.0);
@@ -364,11 +369,21 @@ public class JointTorqueOffsetEstimatorController extends HighLevelControllerSta
    public void doTransitionIntoAction()
    {
       initialize();
+      enableJointTorqueOffsetEstimationAtomic(true);
    }
 
    @Override
    public void doTransitionOutOfAction()
    {
+      enableJointTorqueOffsetEstimationAtomic(false);
+
+      torqueOffsetPrinter.printTorqueOffsets(this);
+   }
+
+   @Override
+   public boolean isDone()
+   {
+      return getTimeInCurrentState() > timeForEstimatingOffset.getDoubleValue();
    }
 
    public void transferTorqueOffsetsToOutputWriter()

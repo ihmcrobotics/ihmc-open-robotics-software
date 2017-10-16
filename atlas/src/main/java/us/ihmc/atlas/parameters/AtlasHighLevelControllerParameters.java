@@ -66,4 +66,10 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
    {
       return 0;
    }
+
+   @Override
+   public double getCalibrationDuration()
+   {
+      return 0;
+   }
 }

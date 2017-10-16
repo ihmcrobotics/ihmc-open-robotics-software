@@ -66,4 +66,10 @@ public class ThorHighLevelControllerParameters implements HighLevelControllerPar
    {
       return 0;
    }
+
+   @Override
+   public double getCalibrationDuration()
+   {
+      return 0;
+   }
 }
