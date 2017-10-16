@@ -451,7 +451,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelControllerSta
    @Override
    public String getDescription()
    {
-      return "Controller for estimating the joint torque offsets. It is based on " + DiagnosticsWhenHangingController.class.getSimpleName() + ".";
+      return "Controller for estimating the joint torque offsets. It is based on " + DiagnosticsWhenHangingControllerState.class.getSimpleName() + ".";
    }
 
    @Override

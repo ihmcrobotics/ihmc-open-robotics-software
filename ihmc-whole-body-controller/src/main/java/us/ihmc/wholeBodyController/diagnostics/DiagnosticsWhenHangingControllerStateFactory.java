@@ -10,7 +10,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 
-public class DiagnosticsWhenHangingControllerFactory implements HighLevelControllerStateFactory
+public class DiagnosticsWhenHangingControllerStateFactory implements HighLevelControllerStateFactory
 {
    private FullRobotModel fullRobotModel;
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
@@ -24,7 +24,7 @@ public class DiagnosticsWhenHangingControllerFactory implements HighLevelControl
    private final HumanoidJointPoseList humanoidJointPoseList;
    private DiagnosticsWhenHangingControllerState controller;
 
-   public DiagnosticsWhenHangingControllerFactory(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, TorqueOffsetPrinter torqueOffsetPrinter)
+   public DiagnosticsWhenHangingControllerStateFactory(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, TorqueOffsetPrinter torqueOffsetPrinter)
    {
       this.humanoidJointPoseList = humanoidJointPoseList;
       this.useArms = useArms;

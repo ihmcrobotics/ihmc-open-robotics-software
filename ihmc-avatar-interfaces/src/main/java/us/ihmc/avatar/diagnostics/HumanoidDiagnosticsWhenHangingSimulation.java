@@ -28,7 +28,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingController.DiagnosticsWhenHangingState;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerState.DiagnosticsWhenHangingState;
 
 import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController.*;
 
@@ -75,9 +75,9 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);
       controllerFactory.setInitialState(HighLevelController.DO_NOTHING_BEHAVIOR);
 
-      DiagnosticsWhenHangingControllerFactory diagnosticsWhenHangingControllerFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, useArms, robotIsHanging, null);
-      diagnosticsWhenHangingControllerFactory.setTransitionRequested(true);
-      controllerFactory.addCustomControlState(diagnosticsWhenHangingControllerFactory);
+      DiagnosticsWhenHangingControllerStateFactory diagnosticsWhenHangingControllerStateFactory = new DiagnosticsWhenHangingControllerStateFactory(humanoidJointPoseList, useArms, robotIsHanging, null);
+      diagnosticsWhenHangingControllerStateFactory.setTransitionRequested(true);
+      controllerFactory.addCustomControlState(diagnosticsWhenHangingControllerStateFactory);
 
       HumanoidGlobalDataProducer globalDataProducer = null;
 
@@ -105,7 +105,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       if(fullRobotModelCorruptor == null)
     	  throw new RuntimeException("This only works with model corruption on. Change DRCControllerThread.ALLOW_MODEL_CORRUPTION to true!");
 
-      controller = diagnosticsWhenHangingControllerFactory.getController();
+      controller = diagnosticsWhenHangingControllerStateFactory.getController();
       analyzer = new HumanoidDiagnosticsWhenHangingAnalyzer(simulationConstructionSet, controller, fullRobotModelCorruptor);
 
 
