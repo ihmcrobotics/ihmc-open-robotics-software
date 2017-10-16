@@ -215,6 +215,14 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          swingDurationShiftFractions.get(i).setToNaN();
       }
    }
+   
+   public void clearPlanWithoutClearingPlannedFootsteps()
+   {
+      referenceCoPGenerator.clearPlan();
+      referenceCMPGenerator.reset();
+      referenceICPGenerator.reset();
+      angularMomentumGenerator.clear();
+   }
 
    @Override
    /** {@inheritDoc} */
@@ -256,7 +264,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       isDoubleSupport.set(true);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
-      updateTransferPlan(true);
+      updateTransferPlan();
    }
 
    @Override
@@ -272,7 +280,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
 
-      updateTransferPlan(true);
+      updateTransferPlan();
    }
 
    @Override
@@ -288,7 +296,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    public void initializeForSingleSupport(double initialTime)
    {
       this.initialTime.set(initialTime);
-
       isStanding.set(false);
       isDoubleSupport.set(false);
 
@@ -299,7 +306,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
 
-      updateSingleSupportPlan(true);
+      updateSingleSupportPlan();
    }
 
    @Override
@@ -312,8 +319,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    @Override
    /** {@inheritDoc} */
-   protected void updateTransferPlan(boolean computeUpcomingFootstep)
+   protected void updateTransferPlan()
    {
+      clearPlanWithoutClearingPlannedFootsteps();
       RobotSide transferToSide = this.transferToSide.getEnumValue();
       if (transferToSide == null)
          transferToSide = RobotSide.LEFT;
@@ -362,8 +370,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
    @Override
    /** {@inheritDoc} */
-   protected void updateSingleSupportPlan(boolean computeUpcomingFootstep)
+   protected void updateSingleSupportPlan()
    {
+      clearPlanWithoutClearingPlannedFootsteps();
       RobotSide supportSide = this.supportSide.getEnumValue();
 
       // TODO set up the CoP Generator to be able to only update the current Support Feet CMPs

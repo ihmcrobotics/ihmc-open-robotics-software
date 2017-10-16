@@ -162,11 +162,11 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void updateCurrentPlan(boolean updateUpcomingCoPs)
+   public void updateCurrentPlan()
    {
       timeDelay.set(0.0);
       previousTime.set(getTimeInCurrentState());
-      icpPlanner.updateCurrentPlan(updateUpcomingCoPs);
+      icpPlanner.updateCurrentPlan();
    }
 
    /** {@inheritDoc} */

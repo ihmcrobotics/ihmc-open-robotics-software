@@ -208,32 +208,30 @@ public class PlanarRegionsListExamples
       return convexPolygon;
    }
 
-   public static PlanarRegionsList createSteppingStonesEnvironment()
+   public static PlanarRegionsList generateSteppingStonesEnvironment(double pathRadius)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      double cinderBlockWidth = 0.2;
-      double cinderBlockLength = 0.3;
-      double cinderBlockSeparationWidth = 0.5;
+      double cinderBlockWidth = 0.15;
+      double cinderBlockLength = 0.25;
+      double cinderBlockSeparationWidth = 0.2;
       double cinderBlockSeparationLength = 0.3;
-
-      double pathRadius = 2.5;
 
       double quarterCircleLength = 0.5 * Math.PI * pathRadius;
       int numberOfSteps = (int) Math.round(quarterCircleLength / cinderBlockSeparationLength);
       if(numberOfSteps % 2 != 1) numberOfSteps++;
 
       // starting block
-      generator.translate(0.0, -0.5, 0.0);
+      generator.translate(0.0, -0.5, 0.001);
       generator.addRectangle(2.0, 1.0);
       generator.identity();
 
       // ending block
-      generator.translate(pathRadius + 0.5, pathRadius, 0.0);
+      generator.translate(pathRadius + 0.5, pathRadius, 0.001);
       generator.addRectangle(1.0, 2.0);
       generator.identity();
 
       // cinder blocks
-      for (int i = 0; i < numberOfSteps; i++)
+      for (int i = 1; i < numberOfSteps; i++)
       {
          double percentageAlongCurve = ((double) i / (double) numberOfSteps);
 
@@ -241,7 +239,7 @@ public class PlanarRegionsListExamples
          double xPositionAlongCurve = pathRadius * (1.0 - Math.cos(angle));
          double yPositionAlongCurve = pathRadius * Math.sin(angle);
 
-         generator.translate(xPositionAlongCurve, yPositionAlongCurve, 0.0);
+         generator.translate(xPositionAlongCurve, yPositionAlongCurve, -0.001);
          generator.rotate(- angle, Axis.Z);
 
          double xTranslation = cinderBlockSeparationWidth * 0.5;

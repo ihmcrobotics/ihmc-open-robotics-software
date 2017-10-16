@@ -4,11 +4,12 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.*;
+import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeUtils;
+import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionBaseOfCliffAvoider;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -27,7 +28,7 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
    private BipedalFootstepPlannerListener listener;
    private PlanarRegionsList planarRegionsList;
    private FootstepNodeSnapAndWiggler snapAndWiggler;
-   private BipedalFootstepPlannerParameters parameters;
+   private YoFootstepPlannerParameters parameters;
    private final PlanarRegionBaseOfCliffAvoider baseOfCliffAvoider;
    private SideDependentList<ConvexPolygon2D> controllerPolygonsInSoleFrame;
    private final ConvexPolygon2D footholdIntersection = new ConvexPolygon2D();
@@ -45,7 +46,7 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
 
    public SnapAndWiggleBasedNodeChecker(SideDependentList<ConvexPolygon2D> footPolygons,
                                         BipedalFootstepPlannerListener listener,
-                                        BipedalFootstepPlannerParameters parameters,
+                                        YoFootstepPlannerParameters parameters,
                                         YoGraphicsListRegistry graphicsListRegistry)
    {
       this.snapAndWiggler = new FootstepNodeSnapAndWiggler(footPolygons, parameters, listener);
@@ -53,6 +54,7 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
       this.baseOfCliffAvoider = new PlanarRegionBaseOfCliffAvoider(registry, graphicsListRegistry);
    }
 
+   @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
@@ -192,5 +194,11 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
       {
          listener.nodeUnderConsiderationWasRejected(nodeToExpand, reason);
       }
+   }
+
+   @Override
+   public void addStartNode(FootstepNode startNode, RigidBodyTransform startNodeTransform)
+   {
+      snapAndWiggler.addSnapData(startNode, new FootstepNodeSnapData(startNodeTransform));
    }
 }

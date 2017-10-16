@@ -98,6 +98,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
          assertSingleWaypointExecuted(armJoints, desiredJointPositions, desiredJointVelocities, epsilon, scs);
       }
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testMultipleTrajectoryPoints() throws Exception
@@ -177,6 +178,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
          assertSingleWaypointExecuted(armJoints, desiredJointPositions, desiredJointVelocities, epsilon, scs);
       }
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
@@ -353,6 +356,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          desiredJointPositions[jointIndex] = armTrajectoryMessages.get(numberOfMessages - 1).getJointTrajectoryPointList(jointIndex).getLastTrajectoryPoint().getPosition();
 
       assertSingleWaypointExecuted(armJoints, desiredJointPositions, desiredJointVelocities, epsilon, scs);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testQueueWithWrongPreviousId() throws Exception
