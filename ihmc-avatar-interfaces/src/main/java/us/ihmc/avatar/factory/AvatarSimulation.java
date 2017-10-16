@@ -4,7 +4,6 @@ import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -22,7 +21,6 @@ public class AvatarSimulation
 {
    private SimulationConstructionSet simulationConstructionSet;
    private HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
-   private MomentumBasedControllerFactory momentumBasedControllerFactory;
    private YoVariableServer yoVariableServer;
    private AbstractThreadedRobotController threadedRobotController;
    private HumanoidGlobalDataProducer humanoidGlobalDataProducer;
@@ -117,11 +115,6 @@ public class AvatarSimulation
       return highLevelHumanoidControllerFactory;
    }
 
-   public MomentumBasedControllerFactory getMomentumBasedControllerFactory()
-   {
-      return momentumBasedControllerFactory;
-   }
-
    public HumanoidFloatingRootJointRobot getHumanoidFloatingRootJointRobot()
    {
       return humanoidFloatingRootJointRobot;
@@ -142,14 +135,9 @@ public class AvatarSimulation
       this.simulationConstructionSet = simulationConstructionSet;
    }
 
-   public void setMomentumBasedControllerFactory(HighLevelHumanoidControllerFactory momentumBasedControllerFactory)
+   public void setHighLevelHumanoidControllerFactory(HighLevelHumanoidControllerFactory momentumBasedControllerFactory)
    {
       this.highLevelHumanoidControllerFactory = momentumBasedControllerFactory;
-   }
-
-   public void setMomentumBasedControllerFactory(MomentumBasedControllerFactory momentumBasedControllerFactory)
-   {
-      this.momentumBasedControllerFactory = momentumBasedControllerFactory;
    }
 
    public void setYoVariableServer(YoVariableServer yoVariableServer)

@@ -9,7 +9,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class NewDoNothingControllerState extends HighLevelControllerState
+public class DoNothingControllerState extends HighLevelControllerState
 {
    private static final HighLevelController controllerState = HighLevelController.DO_NOTHING_BEHAVIOR;
 
@@ -18,7 +18,7 @@ public class NewDoNothingControllerState extends HighLevelControllerState
    private final OneDoFJoint[] allRobotJoints;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
 
-   public NewDoNothingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
+   public DoNothingControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
    {
       super(controllerState);
 

@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootste
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.NewHumanoidHighLevelControllerManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
@@ -35,6 +35,7 @@ import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.*;
@@ -304,7 +305,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public void useDefaultWalkingControlState()
    {
-      NewWalkingControllerStateFactory controllerStateFactory = new NewWalkingControllerStateFactory();
+      WalkingControllerStateFactory controllerStateFactory = new WalkingControllerStateFactory();
 
       controllerStateFactories.add(controllerStateFactory);
       controllerFactoriesMap.put(HighLevelController.WALKING, controllerStateFactory);
@@ -406,14 +407,14 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
       commandInputManager.registerConversionHelper(commandConversionHelper);
 
-      NewHumanoidHighLevelControllerManager highLevelHumanoidControllerManager = new NewHumanoidHighLevelControllerManager(commandInputManager, statusMessageOutputManager,
-                                                                                                                           initialControllerState, highLevelControllerParameters,
-                                                                                                                           walkingControllerParameters, icpPlannerParameters,
-                                                                                                                           requestedHighLevelControllerState, fallbackControllerForFailure,
-                                                                                                                           controllerFactoriesMap, stateTransitionFactories,
-                                                                                                                           managerFactory, controllerToolbox,
-                                                                                                                           centerOfPressureDataHolderForEstimator,
-                                                                                                                           forceSensorDataHolder, lowLevelControllerOutput);
+      HumanoidHighLevelControllerManager highLevelHumanoidControllerManager = new HumanoidHighLevelControllerManager(commandInputManager, statusMessageOutputManager,
+                                                                                                                     initialControllerState, highLevelControllerParameters,
+                                                                                                                     walkingControllerParameters, icpPlannerParameters,
+                                                                                                                     requestedHighLevelControllerState, fallbackControllerForFailure,
+                                                                                                                     controllerFactoriesMap, stateTransitionFactories,
+                                                                                                                     managerFactory, controllerToolbox,
+                                                                                                                     centerOfPressureDataHolderForEstimator,
+                                                                                                                     forceSensorDataHolder, lowLevelControllerOutput);
       highLevelHumanoidControllerManager.addYoVariableRegistry(registry);
       return highLevelHumanoidControllerManager;
    }
@@ -527,6 +528,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          controllerToolbox.attachControllerStateChangedListener(listener);
       else
          controllerStateChangedListenersToAttach.add(listener);
+   }
+
+   public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
+   {
+      controllerToolbox.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
 
    public void attachRobotMotionStatusChangedListener(RobotMotionStatusChangedListener listener)

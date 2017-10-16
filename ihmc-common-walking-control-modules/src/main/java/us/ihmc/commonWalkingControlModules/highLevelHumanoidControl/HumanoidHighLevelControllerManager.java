@@ -41,7 +41,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class NewHumanoidHighLevelControllerManager implements RobotController
+public class HumanoidHighLevelControllerManager implements RobotController
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -68,15 +68,15 @@ public class NewHumanoidHighLevelControllerManager implements RobotController
 
    private final ExecutionTimer highLevelControllerTimer = new ExecutionTimer("activeHighLevelControllerTimer", 1.0, registry);
 
-   public NewHumanoidHighLevelControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
-                                                HighLevelController initialControllerState, HighLevelControllerParameters highLevelControllerParameters,
-                                                WalkingControllerParameters walkingControllerParameters, ICPTrajectoryPlannerParameters icpPlannerParameters,
-                                                YoEnum<HighLevelController> requestedHighLevelControllerState, AtomicReference<HighLevelController> fallbackControllerForFailure,
-                                                EnumMap<HighLevelController, HighLevelControllerStateFactory> controllerStateFactories,
-                                                ArrayList<ControllerStateTransitionFactory<HighLevelController>> controllerTransitionFactories,
-                                                HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                                CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, ForceSensorDataHolderReadOnly forceSensorDataHolder,
-                                                LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
+   public HumanoidHighLevelControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
+                                             HighLevelController initialControllerState, HighLevelControllerParameters highLevelControllerParameters,
+                                             WalkingControllerParameters walkingControllerParameters, ICPTrajectoryPlannerParameters icpPlannerParameters,
+                                             YoEnum<HighLevelController> requestedHighLevelControllerState, AtomicReference<HighLevelController> fallbackControllerForFailure,
+                                             EnumMap<HighLevelController, HighLevelControllerStateFactory> controllerStateFactories,
+                                             ArrayList<ControllerStateTransitionFactory<HighLevelController>> controllerTransitionFactories,
+                                             HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
+                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                             LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
