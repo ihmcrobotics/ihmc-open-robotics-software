@@ -316,4 +316,12 @@ public interface ControllerCoreOptimizationSettings
    {
       return false;
    }
+
+   /**
+    * Sets the maximum number of iterations allowed in the solver before throwing a no convergence exception.
+    */
+   default int getMaxNumberOfSolverIterations()
+   {
+      return 10;
+   }
 }

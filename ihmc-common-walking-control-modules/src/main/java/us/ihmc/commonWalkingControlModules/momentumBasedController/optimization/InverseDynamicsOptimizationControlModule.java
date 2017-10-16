@@ -75,6 +75,7 @@ public class InverseDynamicsOptimizationControlModule
    private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
 
    private final YoBoolean useWarmStart = new YoBoolean("useWarmStartInSolver", registry);
+   private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterationsInSolver", registry);
 
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
@@ -136,8 +137,10 @@ public class InverseDynamicsOptimizationControlModule
       qpSolver.setJerkRegularizationWeight(optimizationSettings.getJointJerkWeight());
       qpSolver.setJointTorqueWeight(optimizationSettings.getJointTorqueWeight());
       qpSolver.setUseWarmStart(optimizationSettings.useWarmStartInSolver());
+      qpSolver.setMaxNumberOfIterations(optimizationSettings.getMaxNumberOfSolverIterations());
 
       useWarmStart.set(optimizationSettings.useWarmStartInSolver());
+      maximumNumberOfIterations.set(optimizationSettings.getMaxNumberOfSolverIterations());
 
       parentRegistry.addChild(registry);
    }
@@ -171,6 +174,7 @@ public class InverseDynamicsOptimizationControlModule
          qpSolver.setMaxJointAccelerations(qDDotMaxMatrix);
       }
 
+      qpSolver.setMaxNumberOfIterations(maximumNumberOfIterations.getIntegerValue());
       if (useWarmStart.getBooleanValue() && wrenchMatrixCalculator.hasContactStateChanged())
       {
          qpSolver.setUseWarmStart(useWarmStart.getBooleanValue());
