@@ -547,7 +547,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
 
       numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
       numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      assertEquals(2, numberOfIterations);
+      assertEquals(expectedNumberOfIterations2, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertTrue(Double.isNaN(solution[0]));
