@@ -205,11 +205,6 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
       sensorReader.attachControllerAPI(commandInputManager, statusOutputManager);
    }
 
-   public void attachForceSensorCalibrationModule(ForceSensorCalibrationModule forceSensorCalibrationModule)
-   {
-      sensorReader.attachForceSensorCalibrationModule(sensorInformation, forceSensorCalibrationModule);
-   }
-
    public void attachJointTorqueOffsetEstimator(JointTorqueOffsetEstimator jointTorqueOffsetEstimator)
    {
       sensorReader.attachJointTorqueOffsetEstimator(jointTorqueOffsetEstimator);

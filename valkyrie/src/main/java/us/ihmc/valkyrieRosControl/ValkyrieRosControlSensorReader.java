@@ -173,11 +173,6 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       lowlLevelController.attachControllerAPI(commandInputManager, statusOutputManager);
    }
 
-   public void attachForceSensorCalibrationModule(DRCRobotSensorInformation sensorInformation, ForceSensorCalibrationModule forceSensorCalibrationModule)
-   {
-      lowlLevelController.attachForceSensorCalibrationModule(sensorInformation, forceSensorCalibrationModule);
-   }
-
    public void attachJointTorqueOffsetEstimator(JointTorqueOffsetEstimator jointTorqueOffsetEstimator)
    {
       lowlLevelController.attachJointTorqueOffsetEstimator(jointTorqueOffsetEstimator);
