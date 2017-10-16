@@ -7,7 +7,6 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -122,6 +121,8 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
       assertTrue(success);
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public class TestingEnvironment implements CommonAvatarEnvironmentInterface

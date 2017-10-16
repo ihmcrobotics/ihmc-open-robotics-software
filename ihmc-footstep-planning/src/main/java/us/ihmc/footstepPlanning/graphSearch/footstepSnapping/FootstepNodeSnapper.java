@@ -1,9 +1,9 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
+import java.util.HashMap;
+
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-
-import java.util.HashMap;
 
 public abstract class FootstepNodeSnapper
 {
@@ -13,22 +13,31 @@ public abstract class FootstepNodeSnapper
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
+      snapDataHolder.clear();
    }
 
    public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode)
    {
-      if(planarRegionsList == null)
+      if (planarRegionsList == null)
       {
-         return FootstepNodeSnapData.emptyData();
+         return FootstepNodeSnapData.identityData();
       }
 
-      if(!snapDataHolder.containsKey(footstepNode))
+      if (!snapDataHolder.containsKey(footstepNode))
       {
          FootstepNodeSnapData snapData = snapInternal(footstepNode);
-         snapDataHolder.put(footstepNode, snapData);
+         addSnapData(footstepNode, snapData);
       }
 
       return snapDataHolder.get(footstepNode);
+   }
+
+   /**
+    * Can manually add snap data for a footstep node to bypass the snapper.
+    */
+   public void addSnapData(FootstepNode footstepNode, FootstepNodeSnapData snapData)
+   {
+      snapDataHolder.put(footstepNode, snapData);
    }
 
    protected abstract FootstepNodeSnapData snapInternal(FootstepNode footstepNode);

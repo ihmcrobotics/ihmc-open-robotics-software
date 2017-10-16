@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.5"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.9"
       classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
    }
 }
@@ -182,6 +182,45 @@ if (ihmc.isBuildRoot())
                }
             }
 
+            session(remotes.valkyrieNonRealtimeComputer) {
+               execute("rm -rf " + directory + "/lib")
+               execute("mkdir -p " + directory + "/lib")
+               execute("mkdir -p " + directory + "/Configurations")
+
+               configurations.runtime.each {
+                  put from: it, into: directory + '/lib'
+               }
+
+               put from: jar.archivePath, into: directory + '/ValkyrieController.jar'
+
+               def scriptDir = new File(projectDir, "launchScripts/")
+               def scriptDirCollection = files { scriptDir.listFiles() }
+               put from: scriptDirCollection, into: directory
+
+               scriptDirCollection.each {
+                  execute 'chmod 777 ' + directory + '/' + it.name
+               }
+            }
+         }
+      }
+   }
+
+   task deployNetworkProcessor(dependsOn: jar) {
+      def projectDir = project.buildscript.sourceFile.parent
+      def directory = 'valkyrie'
+
+      doLast {
+         if (!project.hasProperty('valkyrie_realtime_username') || !project.hasProperty('valkyrie_realtime_password'))
+         {
+            println("Please set valkyrie_realtime_username and valkyrie_realtime_password in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
+         }
+
+         if (!project.hasProperty('valkyrie_link_ip') || !project.hasProperty('valkyrie_zelda_ip'))
+         {
+            println("Please set valkyrie_link_ip and valkyrie_zelda_ip in ~/.gradle/gradle.properties. See https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_properties_and_system_properties for more information.")
+         }
+
+         ssh.run {
             session(remotes.valkyrieNonRealtimeComputer) {
                execute("rm -rf " + directory + "/lib")
                execute("mkdir -p " + directory + "/lib")

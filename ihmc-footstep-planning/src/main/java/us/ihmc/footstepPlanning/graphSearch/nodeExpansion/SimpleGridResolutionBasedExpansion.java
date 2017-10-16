@@ -7,7 +7,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 /**
  * This class expands nodes in a 8 connected way.
  * It does not account for turn footsteps. Yaw angle of potential footstep neighbour by default would be zero.
- * Very small 5cm steps. 
+ * Very small 5cm steps.
  */
 public class SimpleGridResolutionBasedExpansion implements FootstepNodeExpansion
 {
@@ -21,8 +21,8 @@ public class SimpleGridResolutionBasedExpansion implements FootstepNodeExpansion
          {
             if (i == 0 && j == 0)
                continue;
-            double xOffset = FootstepNode.gridSizeX * i;
-            double yOffset = FootstepNode.gridSizeY * j;
+            double xOffset = FootstepNode.gridSizeXY * i;
+            double yOffset = FootstepNode.gridSizeXY * j;
             neighbors.add(new FootstepNode(node.getX() + xOffset, node.getY() + yOffset));
          }
       }

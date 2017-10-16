@@ -25,7 +25,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly since they contain YoVariables.
-public abstract class YoFrameTuple<S, T extends FrameTuple3D<?, ?>> implements ReferenceFrameHolder, Clearable
+public abstract class YoFrameTuple<S, T extends FrameTuple3D<T, ?>> implements ReferenceFrameHolder, Clearable
 {
    private final String namePrefix;
    private final String nameSuffix;

@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -64,6 +65,8 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
 
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
+   private final EnumMap<BipedalFootstepPlannerNodeRejectionReason, YoInteger> rejectionReasonCount = new EnumMap<BipedalFootstepPlannerNodeRejectionReason, YoInteger>(BipedalFootstepPlannerNodeRejectionReason.class);
+
    private ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private TickAndUpdatable tickAndUpdatable;
@@ -74,6 +77,11 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
 
       ConvexPolygon2D leftFootInSoleFrame = feetPolygonsInSoleFrame.get(RobotSide.LEFT);
       ConvexPolygon2D rightFootInSoleFrame = feetPolygonsInSoleFrame.get(RobotSide.RIGHT);
+
+      for(BipedalFootstepPlannerNodeRejectionReason reason : BipedalFootstepPlannerNodeRejectionReason.values())
+      {
+         rejectionReasonCount.put(reason, new YoInteger(reason.name().toLowerCase() + "_count", registry));
+      }
 
       int maxNumberOfVertices = leftFootInSoleFrame.getNumberOfVertices();
 
@@ -315,6 +323,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
    public void nodeUnderConsiderationWasRejected(FootstepNode rejectedNode, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       plannerUpdateIndex.increment();
+      rejectionReasonCount.get(reason).increment();
 
       RobotSide robotSide = rejectedNode.getRobotSide();
       RigidBodyTransform soleTransform = new RigidBodyTransform();

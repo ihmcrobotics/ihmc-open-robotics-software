@@ -4,11 +4,14 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.AvatarICPOptimizationPushRecoveryTest;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -41,6 +44,12 @@ public class AtlasICPOptimizationPushRecoveryTest extends AvatarICPOptimizationP
                   return new AtlasICPOptimizationParameters(false);
                }
             };
+         }
+
+         @Override
+         public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
+         {
+            return new AtlasContinuousCMPPlannerParameters(new AtlasPhysicalProperties());
          }
       };
 
