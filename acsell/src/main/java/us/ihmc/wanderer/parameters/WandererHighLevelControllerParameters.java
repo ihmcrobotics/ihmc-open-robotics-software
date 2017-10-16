@@ -3,7 +3,7 @@ package us.ihmc.wanderer.parameters;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 
 public class WandererHighLevelControllerParameters implements HighLevelControllerParameters
 {
@@ -14,9 +14,21 @@ public class WandererHighLevelControllerParameters implements HighLevelControlle
    }
 
    @Override
-   public LowLevelJointControlMode getLowLevelJointControlMode(String joint, HighLevelController state)
+   public JointDesiredControlMode getJointDesiredControlMode(String joint, HighLevelController state)
    {
-      return LowLevelJointControlMode.FORCE_CONTROL;
+      return JointDesiredControlMode.EFFORT;
+   }
+
+   @Override
+   public double getDesiredJointStiffness(String joint)
+   {
+      return 0;
+   }
+
+   @Override
+   public double getDesiredJointDamping(String joint)
+   {
+      return 0;
    }
 
    @Override
