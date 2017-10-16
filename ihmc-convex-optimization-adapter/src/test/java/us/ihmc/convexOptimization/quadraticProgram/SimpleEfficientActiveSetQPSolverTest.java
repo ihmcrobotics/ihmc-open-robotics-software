@@ -118,6 +118,45 @@ public class SimpleEfficientActiveSetQPSolverTest extends AbstractSimpleActiveSe
       int numberOfIterations = solver.solve(solution);
 
       assertFalse(MatrixTools.containsNaN(solution));
-      assertEquals(numberOfIterations, 1);
+      assertEquals(1, numberOfIterations);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testFindValidSolutionForKiwiDatasetProblemWithWarmStart()
+   {
+      ActualDatasetFromKiwi20171015A datasetA = new ActualDatasetFromKiwi20171015A();
+      ActualDatasetFromKiwi20171015B datasetB = new ActualDatasetFromKiwi20171015B();
+      DenseMatrix64F solution = new DenseMatrix64F(datasetA.getProblemSize(), 1);
+
+      SimpleActiveSetQPSolverInterface solver = createSolverToTest();
+      solver.setUseWarmStart(true);
+
+
+      solver.clear();
+      solver.setQuadraticCostFunction(datasetA.getCostQuadraticMatrix(), datasetA.getCostLinearVector(), 0.0);
+      solver.setVariableBounds(datasetA.getVariableLowerBounds(), datasetA.getVariableUpperBounds());
+      solver.solve(solution);
+
+      solver.clear();
+      solver.setQuadraticCostFunction(datasetA.getCostQuadraticMatrix(), datasetA.getCostLinearVector(), 0.0);
+      solver.setVariableBounds(datasetA.getVariableLowerBounds(), datasetA.getVariableUpperBounds());
+      solver.solve(solution);
+
+      solver.clear();
+      solver.setQuadraticCostFunction(datasetB.getCostQuadraticMatrix(), datasetB.getCostLinearVector(), 0.0);
+      solver.setVariableBounds(datasetB.getVariableLowerBounds(), datasetB.getVariableUpperBounds());
+      int numberOfIterationsWithWarmStart = solver.solve(solution);
+
+      assertFalse(MatrixTools.containsNaN(solution));
+      //assertEquals(numberOfIterationsWithWarmStart, 1);
+
+      solver.setUseWarmStart(false);
+      solver.clear();
+      solver.setQuadraticCostFunction(datasetB.getCostQuadraticMatrix(), datasetB.getCostLinearVector(), 0.0);
+      solver.setVariableBounds(datasetB.getVariableLowerBounds(), datasetB.getVariableUpperBounds());
+      int numberOfIterationsWithoutWarmStart = solver.solve(solution);
+
+      assertTrue(numberOfIterationsWithWarmStart < numberOfIterationsWithoutWarmStart);
    }
 }

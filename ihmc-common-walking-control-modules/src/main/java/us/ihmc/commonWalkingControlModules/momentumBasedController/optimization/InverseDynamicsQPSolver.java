@@ -34,6 +34,9 @@ public class InverseDynamicsQPSolver
    private final DenseMatrix64F solverInput_H;
    private final DenseMatrix64F solverInput_f;
 
+   private final DenseMatrix64F solverInput_H_previous;
+   private final DenseMatrix64F solverInput_f_previous;
+
    private final DenseMatrix64F solverInput_Aeq;
    private final DenseMatrix64F solverInput_beq;
    private final DenseMatrix64F solverInput_Ain;
@@ -41,6 +44,9 @@ public class InverseDynamicsQPSolver
 
    private final DenseMatrix64F solverInput_lb;
    private final DenseMatrix64F solverInput_ub;
+
+   private final DenseMatrix64F solverInput_lb_previous;
+   private final DenseMatrix64F solverInput_ub_previous;
 
    private final DenseMatrix64F solverOutput;
    private final DenseMatrix64F solverOutput_jointAccelerations;
@@ -84,6 +90,9 @@ public class InverseDynamicsQPSolver
       solverInput_H = new DenseMatrix64F(problemSize, problemSize);
       solverInput_f = new DenseMatrix64F(problemSize, 1);
 
+      solverInput_H_previous = new DenseMatrix64F(problemSize, problemSize);
+      solverInput_f_previous = new DenseMatrix64F(problemSize, 1);
+
       solverInput_Aeq = new DenseMatrix64F(0, problemSize);
       solverInput_beq = new DenseMatrix64F(0, 1);
       solverInput_Ain = new DenseMatrix64F(0, problemSize);
@@ -91,6 +100,9 @@ public class InverseDynamicsQPSolver
 
       solverInput_lb = new DenseMatrix64F(problemSize, 1);
       solverInput_ub = new DenseMatrix64F(problemSize, 1);
+
+      solverInput_lb_previous = new DenseMatrix64F(problemSize, 1);
+      solverInput_ub_previous = new DenseMatrix64F(problemSize, 1);
 
       CommonOps.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
       CommonOps.fill(solverInput_ub, Double.POSITIVE_INFINITY);
@@ -435,15 +447,26 @@ public class InverseDynamicsQPSolver
             wrenchEquilibriumForceError.setZ(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
          }
       }
+
+      solverInput_H_previous.set(solverInput_H);
+      solverInput_f_previous.set(solverInput_f);
+
+      solverInput_lb_previous.set(solverInput_lb);
+      solverInput_ub_previous.set(solverInput_ub);
    }
 
    private void printForJerry()
    {
+      MatrixTools.printJavaForConstruction("H previous", solverInput_H_previous);
+      MatrixTools.printJavaForConstruction("f previous", solverInput_f_previous);
+      MatrixTools.printJavaForConstruction("lowerBounds previous", solverInput_lb_previous);
+      MatrixTools.printJavaForConstruction("upperBounds previous", solverInput_ub_previous);
+
       MatrixTools.printJavaForConstruction("H", solverInput_H);
       MatrixTools.printJavaForConstruction("f", solverInput_f);
       MatrixTools.printJavaForConstruction("lowerBounds", solverInput_lb);
       MatrixTools.printJavaForConstruction("upperBounds", solverInput_ub);
-      MatrixTools.printJavaForConstruction("solution", solverOutput);
+      //MatrixTools.printJavaForConstruction("solution", solverOutput);
    }
 
    public DenseMatrix64F getJointAccelerations()

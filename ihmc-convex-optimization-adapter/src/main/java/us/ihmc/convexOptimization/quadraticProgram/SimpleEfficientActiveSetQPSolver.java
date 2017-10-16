@@ -25,8 +25,8 @@ import us.ihmc.commons.PrintTools;
  */
 public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolverInterface
 {
-   private static final double violationFractionToAdd = 0.7;
-   private static final double violationFractionToRemove = 1.0;
+   private static final double violationFractionToAdd = 0.8;
+   private static final double violationFractionToRemove = 0.95;
    private double convergenceThreshold = 1e-10;
    private int maxNumberOfIterations = 10;
 
