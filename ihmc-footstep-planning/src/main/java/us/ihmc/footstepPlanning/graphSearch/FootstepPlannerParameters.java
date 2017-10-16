@@ -159,7 +159,7 @@ public interface FootstepPlannerParameters
     */
    public default double getMinimumFootholdPercent()
    {
-      return 0.8;
+      return 0.95;
    }
 
    /**
@@ -197,7 +197,7 @@ public interface FootstepPlannerParameters
     */
    public default boolean getRejectIfCannotFullyWiggleInside()
    {
-      return true;
+      return false;
    }
 
    /**
@@ -226,7 +226,7 @@ public interface FootstepPlannerParameters
     */
    public default double getMaximumZPenetrationOnValleyRegions()
    {
-      return 0.0;
+      return Double.POSITIVE_INFINITY;
    }
 
    /**
@@ -293,6 +293,6 @@ public interface FootstepPlannerParameters
     */
    public default double getCostPerStep()
    {
-      return 0.005;
+      return 0.15;
    }
 }

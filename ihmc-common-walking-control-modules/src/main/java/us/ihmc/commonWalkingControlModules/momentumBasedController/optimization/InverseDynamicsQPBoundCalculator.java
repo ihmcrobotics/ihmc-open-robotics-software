@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -28,12 +29,15 @@ public class InverseDynamicsQPBoundCalculator
    private final HashMap<OneDoFJoint, AlphaFilteredYoVariable> filteredLowerLimits = new HashMap<>();
    private final HashMap<OneDoFJoint, AlphaFilteredYoVariable> filteredUpperLimits = new HashMap<>();
 
+   private final YoBoolean areJointVelocityLimitsConsidered = new YoBoolean("areJointVelocityLimitsConsidered", registry);
+
    private final JointIndexHandler jointIndexHandler;
    private final OneDoFJoint[] oneDoFJoints;
 
    private final double controlDT;
 
-   public InverseDynamicsQPBoundCalculator(JointIndexHandler jointIndexHandler, double controlDT, YoVariableRegistry parentRegistry)
+   public InverseDynamicsQPBoundCalculator(JointIndexHandler jointIndexHandler, double controlDT, boolean considerJointVelocityLimits,
+                                           YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
       this.jointIndexHandler = jointIndexHandler;
@@ -43,6 +47,8 @@ public class InverseDynamicsQPBoundCalculator
       jointsRangeOfMotion = new DenseMatrix64F(numberOfDoFs, 1);
       jointLowerLimits = new DenseMatrix64F(numberOfDoFs, 1);
       jointUpperLimits = new DenseMatrix64F(numberOfDoFs, 1);
+
+      areJointVelocityLimitsConsidered.set(considerJointVelocityLimits);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -131,8 +137,19 @@ public class InverseDynamicsQPBoundCalculator
       double jointLimitLower = jointLowerLimits.get(index, 0);
       double jointLimitUpper = jointUpperLimits.get(index, 0);
 
-      double velocityLimitLower = joint.getVelocityLimitLower();
-      double velocityLimitUpper = joint.getVelocityLimitUpper();
+      double velocityLimitLower;
+      double velocityLimitUpper;
+
+      if (areJointVelocityLimitsConsidered.getBooleanValue())
+      {
+         velocityLimitLower = joint.getVelocityLimitLower();
+         velocityLimitUpper = joint.getVelocityLimitUpper();
+      }
+      else
+      {
+         velocityLimitLower = Double.NEGATIVE_INFINITY;
+         velocityLimitUpper = Double.POSITIVE_INFINITY;
+      }
 
       if (!Double.isInfinite(jointLimitLower) || !Double.isInfinite(velocityLimitLower))
       {
@@ -177,7 +194,7 @@ public class InverseDynamicsQPBoundCalculator
    }
 
    private void computeAccelerationLimitDefault(OneDoFJoint joint, double absoluteMaximumJointAcceleration, DenseMatrix64F qDDotMinToPack,
-         DenseMatrix64F qDDotMaxToPack)
+                                                DenseMatrix64F qDDotMaxToPack)
    {
       int index = jointIndexHandler.getOneDoFJointIndex(joint);
       double jointLimitLower = jointLowerLimits.get(index, 0);
@@ -186,8 +203,19 @@ public class InverseDynamicsQPBoundCalculator
       double qDDotMin = Double.NEGATIVE_INFINITY;
       double qDDotMax = Double.POSITIVE_INFINITY;
 
-      double velocityLimitLower = joint.getVelocityLimitLower();
-      double velocityLimitUpper = joint.getVelocityLimitUpper();
+      double velocityLimitLower;
+      double velocityLimitUpper;
+
+      if (areJointVelocityLimitsConsidered.getBooleanValue())
+      {
+         velocityLimitLower = joint.getVelocityLimitLower();
+         velocityLimitUpper = joint.getVelocityLimitUpper();
+      }
+      else
+      {
+         velocityLimitLower = Double.NEGATIVE_INFINITY;
+         velocityLimitUpper = Double.POSITIVE_INFINITY;
+      }
 
       if (!Double.isInfinite(jointLimitLower) || !Double.isInfinite(velocityLimitLower))
       {
@@ -210,14 +238,25 @@ public class InverseDynamicsQPBoundCalculator
    }
 
    private void computeAccelerationLimitRestrictive(OneDoFJoint joint, double absoluteMaximumJointAcceleration, DenseMatrix64F qDDotMinToPack,
-         DenseMatrix64F qDDotMaxToPack)
+                                                    DenseMatrix64F qDDotMaxToPack)
    {
       int index = jointIndexHandler.getOneDoFJointIndex(joint);
       double jointLimitLower = jointLowerLimits.get(index, 0);
       double jointLimitUpper = jointUpperLimits.get(index, 0);
 
-      double velocityLimitLower = joint.getVelocityLimitLower();
-      double velocityLimitUpper = joint.getVelocityLimitUpper();
+      double velocityLimitLower;
+      double velocityLimitUpper;
+
+      if (areJointVelocityLimitsConsidered.getBooleanValue())
+      {
+         velocityLimitLower = joint.getVelocityLimitLower();
+         velocityLimitUpper = joint.getVelocityLimitUpper();
+      }
+      else
+      {
+         velocityLimitLower = Double.NEGATIVE_INFINITY;
+         velocityLimitUpper = Double.POSITIVE_INFINITY;
+      }
 
       double qDDotMin = -absoluteMaximumJointAcceleration;
       double qDDotMax = absoluteMaximumJointAcceleration;

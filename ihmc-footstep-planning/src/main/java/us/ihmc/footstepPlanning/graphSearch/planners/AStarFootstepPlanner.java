@@ -6,6 +6,7 @@ import java.util.PriorityQueue;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -13,8 +14,13 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeUtils;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.*;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.GraphVisualization;
@@ -34,6 +40,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class AStarFootstepPlanner implements FootstepPlanner
 {
@@ -57,6 +64,10 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private final FootstepNodeSnapper snapper;
 
    private final YoDouble timeout;
+
+   private final YoLong numberOfExpandedNodes = new YoLong("NumberOfExpandedNodex", registry);
+   private final YoDouble percentRejectedNodes = new YoDouble("PercentRejectedNodes", registry);
+   private final YoLong itarationCount = new YoLong("ItarationCount", registry);
 
    public AStarFootstepPlanner(FootstepPlannerParameters parameters, FootstepNodeChecker nodeChecker, CostToGoHeuristics heuristics,
                                FootstepNodeExpansion expansion, FootstepCost stepCostCalculator, FootstepNodeSnapper snapper, YoVariableRegistry parentRegistry)
@@ -97,6 +108,21 @@ public class AStarFootstepPlanner implements FootstepPlanner
    public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide side)
    {
       startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), side);
+      RigidBodyTransform startNodeSnapTransform = computeSnapTransform(startNode, stanceFootPose.getGeometryObject());
+      snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransform));
+      nodeChecker.addStartNode(startNode, startNodeSnapTransform);
+   }
+
+   public static RigidBodyTransform computeSnapTransform(FootstepNode node, Pose3D footstepPose)
+   {
+      RigidBodyTransform snapTransform = new RigidBodyTransform();
+      RigidBodyTransform stepTransform = new RigidBodyTransform();
+      footstepPose.get(stepTransform);
+
+      BipedalFootstepPlannerNodeUtils.getSoleTransform(node, snapTransform);
+      snapTransform.preMultiplyInvertThis(stepTransform);
+
+      return snapTransform;
    }
 
    @Override
@@ -153,6 +179,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
          RigidBodyTransform snapTransform = snapData.getSnapTransform();
          snapTransform.transform(footstepPose);
          plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), footstepPose));
+
+//         if (!snapData.getCroppedFoothold().isEmpty())
+//            plan.getFootstep(i - 1).setFoothold(snapData.getCroppedFoothold());
       }
 
       return plan;
@@ -166,7 +195,6 @@ public class AStarFootstepPlanner implements FootstepPlanner
          throw new RuntimeException("Need to set goal before planning.");
 
       graph.initialize(startNode);
-      snapper.addStartNode(startNode);
       NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
 
@@ -198,8 +226,14 @@ public class AStarFootstepPlanner implements FootstepPlanner
    {
       long planningStartTime = System.nanoTime();
 
+      long rejectedNodesCount = 0;
+      long expandedNodesCount = 0;
+      long iterations = 0;
+
       while (!stack.isEmpty())
       {
+         iterations++;
+
          FootstepNode nodeToExpand = stack.poll();
          if (expandedNodes.contains(nodeToExpand))
             continue;
@@ -220,11 +254,15 @@ public class AStarFootstepPlanner implements FootstepPlanner
          }
 
          HashSet<FootstepNode> neighbors = nodeExpansion.expandNode(nodeToExpand);
+         expandedNodesCount += neighbors.size();
          for (FootstepNode neighbor : neighbors)
          {
             /** Checks if the footstep (center of the foot) is on a planar region*/
             if (!nodeChecker.isNodeValid(neighbor, nodeToExpand))
+            {
+               rejectedNodesCount++;
                continue;
+            }
 
             double cost = stepCostCalculator.compute(nodeToExpand, neighbor);
             graph.checkAndSetEdge(nodeToExpand, neighbor, cost);
@@ -235,6 +273,10 @@ public class AStarFootstepPlanner implements FootstepPlanner
          if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime) > timeout.getDoubleValue())
             break;
       }
+
+      percentRejectedNodes.set(100.0 * rejectedNodesCount / expandedNodesCount);
+      itarationCount.set(iterations);
+      numberOfExpandedNodes.set(expandedNodesCount / iterations);
    }
 
    private FootstepPlanningResult checkResult()

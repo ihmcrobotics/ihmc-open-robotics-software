@@ -18,7 +18,7 @@ import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.AlwaysValidNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.SimpleSideBasedExpansion;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.BodyPathCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
@@ -52,19 +52,20 @@ public class FootstepPlanningWithBodyPathTest
       WaypointDefinedBodyPathPlan bodyPath = new WaypointDefinedBodyPathPlan();
       List<Point2D> waypoints = new ArrayList<>();
       waypoints.add(new Point2D(0.0, 0.0));
-      waypoints.add(new Point2D(goalDistance / 3.0, 1.0));
-      waypoints.add(new Point2D(2.0 * goalDistance / 3.0, -1.0));
+      waypoints.add(new Point2D(goalDistance / 8.0, 2.0));
+      waypoints.add(new Point2D(2.0 * goalDistance / 3.0, -2.0));
+      waypoints.add(new Point2D(7.0 * goalDistance / 8.0, -2.0));
       waypoints.add(new Point2D(goalDistance, 0.0));
       bodyPath.setWaypoints(waypoints);
       bodyPath.compute(null, null);
 
       FootstepNodeChecker nodeChecker = new AlwaysValidNodeChecker();
       CostToGoHeuristics heuristics = new BodyPathHeuristics(registry, parameters, bodyPath);
-      FootstepNodeExpansion nodeExpansion = new SimpleSideBasedExpansion(parameters);
+      FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(parameters);
       FootstepCost stepCostCalculator = new BodyPathCost(parameters, bodyPath);
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
 
-      heuristics.setWeight(1.3);
+      heuristics.setWeight(1.5);
       FootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, nodeExpansion, stepCostCalculator, snapper, registry);
 
       FootstepPlan footstepPlan = PlanningTestTools.runPlanner(planner, initialStanceFootPose, initialStanceFootSide, goalPose, null, true);
