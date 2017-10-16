@@ -194,7 +194,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(footSide, 0.0, desiredPosition, desiredOrientation);
       drcSimulationTestHelper.send(footTrajectoryMessage);
-      drcSimulationTestHelper.send(new AutomaticManipulationAbortMessage(false));
+      //drcSimulationTestHelper.send(new AutomaticManipulationAbortMessage(false));
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
       assertTrue(success);
