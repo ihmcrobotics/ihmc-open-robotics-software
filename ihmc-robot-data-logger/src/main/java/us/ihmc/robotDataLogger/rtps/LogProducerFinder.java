@@ -25,7 +25,7 @@ public class LogProducerFinder
       {
          while ((announcement = sessions.take()) != null)
          {
-            if(announcement.getHostName().equals(hostName))
+            if(announcement.getHostNameAsString().equals(hostName))
             {
                return announcement;
             }
