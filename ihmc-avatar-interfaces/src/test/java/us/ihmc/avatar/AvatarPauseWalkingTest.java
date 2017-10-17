@@ -8,20 +8,14 @@ import org.junit.Before;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -29,7 +23,6 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 {
@@ -37,8 +30,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private DRCRobotModel robotModel;
    private YoBoolean walkPaused;
-
-   public abstract boolean keepSCSUp();
 
    public abstract double getSwingTime();
 
@@ -137,7 +128,6 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
          }
       };
       robotModel = getRobotModel();
-      simulationTestingParameters.setKeepSCSUp(keepSCSUp());
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
       drcSimulationTestHelper.setStartingLocation(startingLocation);
       drcSimulationTestHelper.setTestEnvironment(emptyEnvironment);
@@ -187,7 +177,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 //         if(condition && drcSimulationTestHelper.getSimulationConstructionSet().getTime() > getTimeForPausing() && drcSimulationTestHelper.getSimulationConstructionSet().getTime() < getTimeForResuming())
 //            condition &= (bipedSupportPolygons.getSupportPolygonInWorld().signedDistance(copPosition) < 0);
 //      }
-//      
+//
 //      public boolean didCoPRemainInsideTheSupportPolygon()
 //      {
 //         return condition;
