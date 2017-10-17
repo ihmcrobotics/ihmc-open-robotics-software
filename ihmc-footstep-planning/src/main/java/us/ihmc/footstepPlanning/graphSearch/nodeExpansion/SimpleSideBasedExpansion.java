@@ -27,7 +27,7 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
       double defaultStepLength = parameters.getIdealFootstepLength();
       double[] stepLengths = new double[] {parameters.getMinimumStepLength(), defaultStepLength - FootstepNode.gridSizeXY, defaultStepLength, defaultStepLength + FootstepNode.gridSizeXY, parameters.getMaximumStepReach()};
       double[] stepWidths = new double[] {parameters.getMinimumStepWidth(), defaultStepWidth - FootstepNode.gridSizeXY, defaultStepWidth, defaultStepWidth + FootstepNode.gridSizeXY, parameters.getMaximumStepWidth()};
-      double[] stepYaws = new double[] {0.0, FootstepNode.gridSizeYaw, maxYaw};
+      double[] stepYaws = new double[] {parameters.getMinimumStepYaw(), FootstepNode.gridSizeYaw, maxYaw};
 
       HashSet<FootstepNode> neighbors = new HashSet<>();
 
