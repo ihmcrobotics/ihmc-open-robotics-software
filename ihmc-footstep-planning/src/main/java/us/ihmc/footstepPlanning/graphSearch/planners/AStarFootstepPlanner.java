@@ -47,7 +47,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 public class AStarFootstepPlanner implements FootstepPlanner
 {
-   private static final boolean debug = true;
+   private static final boolean debug = false;
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
