@@ -30,6 +30,12 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    }
 
    @Override
+   public double getMinimumStepYaw()
+   {
+      return -0.15;
+   }
+
+   @Override
    public double getMinimumStepWidth()
    {
       return 0.15;

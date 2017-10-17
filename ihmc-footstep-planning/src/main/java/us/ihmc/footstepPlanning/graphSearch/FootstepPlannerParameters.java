@@ -98,6 +98,14 @@ public interface FootstepPlannerParameters
    }
 
    /**
+    * Minimum step yaw.
+    */
+   public default double getMinimumStepYaw()
+   {
+      return 0.0;
+   }
+
+   /**
     * Maximum step length when stepping forward and down.
     *
     * <p>
