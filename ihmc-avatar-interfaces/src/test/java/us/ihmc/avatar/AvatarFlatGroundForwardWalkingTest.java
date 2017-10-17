@@ -158,10 +158,15 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       addFootstep(footLocation, footOrientation, side, footMessage);
 
+      double intitialTransfer = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
+      double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
+      double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
+      int steps = footMessage.footstepDataList.size();
+
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       drcSimulationTestHelper.send(footMessage);
-      double simulationTime = 1 * footMessage.footstepDataList.size() + 1.0;
+      double simulationTime = intitialTransfer + (transfer + swing) * steps + 1.0;
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
       controllerSpy.assertCheckpointsReached();
