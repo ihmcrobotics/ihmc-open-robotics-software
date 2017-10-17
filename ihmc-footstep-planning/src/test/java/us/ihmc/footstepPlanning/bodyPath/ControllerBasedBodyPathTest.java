@@ -109,9 +109,8 @@ public class ControllerBasedBodyPathTest
    {
       private final YoDouble x = new YoDouble("x", registry);
       private final YoDouble y = new YoDouble("y", registry);
-      private final YoDouble yaw = new YoDouble("yaw", registry);
 
-      private static final int numberOfPoints = 10;
+      private static final int numberOfPoints = 5;
       private final List<YoFramePoint> points = new ArrayList<>();
 
       private final List<Point2D> waypoints = new ArrayList<>();
@@ -156,27 +155,24 @@ public class ControllerBasedBodyPathTest
             yoSteps.put(side, poses);
          }
 
-         planner.setWeight(3.0);
+         planner.setWeight(1.0);
          planner.setTimeout(1.0);
       }
 
       @Override
       public void doControl()
       {
-         double newX = Math.max(0.0, xValue.get()) * 0.5;
-         double newY = MathTools.clamp(yValue.get(), 0.5) * 0.5;
-         double newYaw = yawValue.get() * Math.toRadians(45.0);
+         double newX = Math.max(0.0, xValue.get());
+         double newY = MathTools.clamp(yValue.get(), 0.5);
 
-         if (newX != x.getDoubleValue() || newY != y.getDoubleValue() || newYaw != yaw.getDoubleValue())
+         if (newX != x.getDoubleValue() || newY != y.getDoubleValue())
          {
             x.set(newX);
             y.set(newY);
-            yaw.set(newYaw);
 
             double deadband = 0.2;
             boolean smallTranslation = Math.sqrt(newX * newX + newY * newY) < deadband;
-            boolean smallYaw = Math.abs(newYaw) < deadband;
-            if (smallTranslation && smallYaw)
+            if (smallTranslation)
             {
                for (RobotSide robotSide : RobotSide.values)
                {
@@ -193,8 +189,8 @@ public class ControllerBasedBodyPathTest
             }
 
             waypoints.clear();
-            xPoly.setCubic(0.0, 1.0, 0.0, 1.0, x.getDoubleValue(), Math.cos(yaw.getDoubleValue()));
-            yPoly.setCubic(0.0, 1.0, 0.0, 0.0, y.getDoubleValue(), Math.sin(yaw.getDoubleValue()));
+            xPoly.setQuadratic(0.0, 1.0, 0.0, 0.2, x.getDoubleValue());
+            yPoly.setQuadratic(0.0, 1.0, 0.0, 0.0, y.getDoubleValue());
             for (int i = 0; i < numberOfPoints; i++)
             {
                double percent = (double) i / (double) (numberOfPoints - 1);
@@ -234,7 +230,7 @@ public class ControllerBasedBodyPathTest
             FramePose goalPose = new FramePose();
             goalPose.setX(finalPose.getX());
             goalPose.setY(finalPose.getY());
-            goalPose.setYawPitchRoll(yaw.getDoubleValue(), 0.0, 0.0);
+            goalPose.setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
 
             FootstepPlannerGoal goal = new FootstepPlannerGoal();
             goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
@@ -287,6 +283,7 @@ public class ControllerBasedBodyPathTest
          CostToGoHeuristics heuristics = new BodyPathHeuristics(registry, parameters, bodyPath);
 //         CostToGoHeuristics heuristics = new DistanceAndYawBasedHeuristics(parameters, registry);
          FootstepNodeExpansion nodeExpansion = new ParameterBasedNodeExpansion(parameters);
+//         FootstepNodeExpansion nodeExpansion = new SimpleSideBasedExpansion(parameters);
          FootstepCost stepCostCalculator = new DistanceAndYawBasedCost(parameters);
          FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
          AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, nodeExpansion, stepCostCalculator, snapper, registry);
