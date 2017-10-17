@@ -28,13 +28,14 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 public class PlanarRegionsListDefinedEnvironmentExample
 {
 
-   public static void startEnvironmentVisualizationForPlanarRegionsList(PlanarRegionsList planarRegionsList, boolean visualizeGroundProfile,
+   public static void startEnvironmentVisualizationForPlanarRegionsList(PlanarRegionsList planarRegionsList, boolean generateGroundPlane, boolean visualizeGroundProfile,
          boolean visualizeTerrainLinkGraphics, boolean visualizeNormals, boolean visualizeBoundingBoxes)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("PlanarRegionsListEnvironmentVisualizationRobot"));
+      scs.setGroundVisible(false);
       YoVariableRegistry robotsYoVariableRegistry = scs.getRobots()[0].getRobotsYoVariableRegistry();
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment", planarRegionsList, 1e-5,
-                                                                                                true);
+                                                                                                generateGroundPlane);
       TerrainObject3D terrainObject3D = environment.getTerrainObject3D();
 
       if (visualizeNormals)
@@ -116,9 +117,12 @@ public class PlanarRegionsListDefinedEnvironmentExample
       double heightVariation = 0.1;
       //      Random random = new Random(1776L);
 
-      PlanarRegionsList planarRegionsList = PlanarRegionsListExamples
-            .generateCinderBlockField(startX, startY, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks, heightVariation);
+//      PlanarRegionsList planarRegionsList = PlanarRegionsListExamples
+//            .generateCinderBlockField(startX, startY, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks, heightVariation);
 
-      startEnvironmentVisualizationForPlanarRegionsList(planarRegionsList, true, true, true, true);
+      PlanarRegionsList planarRegionsList = PlanarRegionsListExamples
+            .generateSteppingStonesEnvironment(3.5);
+
+      startEnvironmentVisualizationForPlanarRegionsList(planarRegionsList, false, true, true, true, true);
    }
 }
