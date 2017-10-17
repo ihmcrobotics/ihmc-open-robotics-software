@@ -71,7 +71,7 @@ public class WalkingMessageHandler
    private final YoDouble finalTransferTime = new YoDouble("finalTransferTime", registry);
    private final YoDouble defaultSwingTime = new YoDouble("defaultSwingTime", registry);
    private final YoDouble defaultInitialTransferTime = new YoDouble("defaultInitialTransferTime", registry);
-   
+
    private final YoDouble defaultFinalTransferTime = new YoDouble("defaultFinalTransferTime", registry);
    private final YoLong lastCommandID = new YoLong("lastFootStepDataListCommandID", registry);
 
@@ -589,7 +589,7 @@ public class WalkingMessageHandler
          return getDefaultSwingTime();
       return upcomingFootstepTimings.get(0).getSwingTime();
    }
-   
+
    public double getInitialTransferTime()
    {
       return defaultInitialTransferTime.getDoubleValue();
@@ -704,7 +704,10 @@ public class WalkingMessageHandler
       double transferDuration = footstep.getTransferDuration();
       if (Double.isNaN(transferDuration) || transferDuration <= 0.0)
       {
-         transferDuration = defaultInitialTransferTime.getDoubleValue();
+         if (stepsInQueue == 0 && !isWalking.getBooleanValue() && executionMode != ExecutionMode.QUEUE)
+            transferDuration = defaultInitialTransferTime.getDoubleValue();
+         else
+            transferDuration = defaultTransferTime.getDoubleValue();
       }
 
       timingToSet.setTimings(swingDuration, transferDuration);
