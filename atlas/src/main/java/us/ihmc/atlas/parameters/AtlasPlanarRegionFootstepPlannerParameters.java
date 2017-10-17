@@ -1,16 +1,16 @@
-package us.ihmc.valkyrie.parameters;
+package us.ihmc.atlas.parameters;
 
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ReachableFootstepsBasedExpansion;
 
-public class ValkyrieFootstepPlannerParameters implements PlanarRegionFootstepPlanningParameters
+public class AtlasPlanarRegionFootstepPlannerParameters implements PlanarRegionFootstepPlanningParameters
 {
    private final double timeout = Double.POSITIVE_INFINITY;
 
    @Override
    public ReachableFootstepsBasedExpansion getReachableFootstepExpansion()
    {
-      return new ValkyrieReachableFootstepExpansion();
+      return new AtlasReachableFootstepExpansion();
    }
 
    @Override
@@ -18,5 +18,4 @@ public class ValkyrieFootstepPlannerParameters implements PlanarRegionFootstepPl
    {
       return timeout;
    }
-
 }
