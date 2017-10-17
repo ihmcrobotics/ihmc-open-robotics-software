@@ -55,7 +55,7 @@ import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
 import us.ihmc.valkyrie.parameters.ValkyrieCapturePointPlannerParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlannerParameters;
+import us.ihmc.valkyrie.parameters.ValkyriePlanarRegionFootstepPlannerParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlanningParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
@@ -176,7 +176,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-      planarRegionFootstepPlanningParameters = new ValkyrieFootstepPlannerParameters();
+      planarRegionFootstepPlanningParameters = new ValkyriePlanarRegionFootstepPlannerParameters();
       capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(runningOnRealRobot);
       walkingControllerParameters = new ValkyrieWalkingControllerParameters(jointMap, target);
       stateEstimatorParamaters = new ValkyrieStateEstimatorParameters(runningOnRealRobot, getEstimatorDT(), sensorInformation, jointMap);
