@@ -239,11 +239,6 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       message.add(footstepData);
    }
 
-   protected boolean keepSCSUp()
-   {
-      return false;
-   }
-
    private void setupCameraBackView()
    {
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
@@ -288,7 +283,6 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       String className = getClass().getSimpleName();
 
-      simulationTestingParameters.setKeepSCSUp(keepSCSUp());
       PrintTools.debug("simulationTestingParameters.getKeepSCSUp " + simulationTestingParameters.getKeepSCSUp());
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(flatGround);
