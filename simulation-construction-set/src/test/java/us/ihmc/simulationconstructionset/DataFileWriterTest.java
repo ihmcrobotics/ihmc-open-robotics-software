@@ -10,7 +10,6 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -173,6 +172,7 @@ public class DataFileWriterTest
       double doubleReadBack = inputStream.readDouble();
       String lineReadBack = inputStream.readLine();
       int integerReadBack = inputStream.readInt();
+      inputStream.close();
 
       assertTrue(testDouble == doubleReadBack);
       assertTrue(testString.equals(lineReadBack));
@@ -337,7 +337,7 @@ public class DataFileWriterTest
 	@Test(timeout = 30000)
    public void testWritingAndReadingADataFileWithLotsOfVariables() throws IOException
    {
-      File fileOne = new File("fileOne.state");
+      File fileOne = new File("fileOne.state.gz");
 
       if (fileOne.exists())
          fileOne.delete();
