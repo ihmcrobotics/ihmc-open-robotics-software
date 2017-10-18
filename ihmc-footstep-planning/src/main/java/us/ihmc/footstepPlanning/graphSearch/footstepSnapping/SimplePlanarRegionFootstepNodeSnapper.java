@@ -23,9 +23,6 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
    @Override
    public FootstepNodeSnapData snapInternal(FootstepNode footstepNode)
    {
-      if (planarRegionsList == null)
-         return FootstepNodeSnapData.emptyData();
-
       PlanarRegion planarRegionToPack = new PlanarRegion();
       ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(footstepNode.getRobotSide()));
       footstepPose.setRotationYawAndZeroTranslation(footstepNode.getYaw());
