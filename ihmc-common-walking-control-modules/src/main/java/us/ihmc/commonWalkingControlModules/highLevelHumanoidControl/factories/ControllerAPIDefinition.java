@@ -34,6 +34,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalking
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PrepareForLocomotionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -76,6 +77,7 @@ public abstract class ControllerAPIDefinition
       commands.add(HandComplianceControlParametersCommand.class);
       commands.add(HighLevelStateCommand.class);
       commands.add(AbortWalkingCommand.class);
+      commands.add(PrepareForLocomotionCommand.class);
       commands.add(PauseWalkingCommand.class);
       commands.add(WholeBodyTrajectoryCommand.class);
       commands.add(SpineDesiredAccelerationCommand.class);
