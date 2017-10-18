@@ -156,10 +156,4 @@ public class AtlasFlatGroundSideSteppingTest extends AvatarFlatGroundSideSteppin
    {
       return new FootstepDataListMessage(swingTime, transferTime, finalTransferTime);
    }
-
-   @Override
-   protected boolean keepSCSUp()
-   {
-      return true;
-   }
 }
