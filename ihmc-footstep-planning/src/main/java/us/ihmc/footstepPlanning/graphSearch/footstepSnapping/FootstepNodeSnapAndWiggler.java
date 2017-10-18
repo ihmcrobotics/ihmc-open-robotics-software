@@ -49,17 +49,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(currentFootPolygon, planarRegionsList,
                                                                                                         planarRegionToPack);
       if (snapTransform == null)
-      {
-         notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
          return FootstepNodeSnapData.emptyData();
-      }
-
-      if (Math.abs(snapTransform.getM22()) < parameters.getMinimumSurfaceInclineRadians())
-      {
-         notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode,
-                                                         BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
-         return FootstepNodeSnapData.emptyData();
-      }
 
       WiggleParameters wiggleParameters = new WiggleParameters();
       wiggleParameters.deltaInside = parameters.getWiggleInsideDelta();
@@ -173,12 +163,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       }
       return false;
    }
-
-   private boolean isTransformZUp(RigidBodyTransform soleTransformBeforeSnap)
-   {
-      return Math.abs(soleTransformBeforeSnap.getM22() - 1.0) < 1e-4;
-   }
-
+   
    private void notifyListenerNodeUnderConsiderationWasRejected(FootstepNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       if (listener != null)

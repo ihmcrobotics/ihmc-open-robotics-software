@@ -73,7 +73,18 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
       if (snapTransform.containsNaN())
+      {
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand,
+                                                         BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
          return false;
+      }
+
+      if (Math.abs(snapTransform.getM22()) < parameters.getMinimumSurfaceInclineRadians())
+      {
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand,
+                                                         BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
+         return false;
+      }
 
       RigidBodyTransform snappedSoleTransform = new RigidBodyTransform();
       FootstepNodeTools.getSnappedNodeTransform(nodeToExpand, snapTransform, snappedSoleTransform);
