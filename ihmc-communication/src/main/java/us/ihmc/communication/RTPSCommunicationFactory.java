@@ -17,7 +17,7 @@ import us.ihmc.pubsub.participant.Participant;
  */
 public class RTPSCommunicationFactory
 {
-   private static int START_OF_RANDOM_DOMAIN_RANGE = 800;
+   private static int START_OF_RANDOM_DOMAIN_RANGE = 200;
    private final Domain domain = DomainFactory.getDomain(DomainFactory.PubSubImplementation.FAST_RTPS);
    private final TIntObjectHashMap<Participant> participants = new TIntObjectHashMap<>();
    private final int defaultDomainID;
@@ -29,7 +29,7 @@ public class RTPSCommunicationFactory
     */
    public RTPSCommunicationFactory()
    {
-      int rtpsDomainID = new Random().nextInt(100) + START_OF_RANDOM_DOMAIN_RANGE;
+      int rtpsDomainID = new Random().nextInt(50) + START_OF_RANDOM_DOMAIN_RANGE;
       if (NetworkParameters.hasKey(NetworkParameterKeys.RTPSDomainID))
       {
          rtpsDomainID = NetworkParameters.getRTPSDomainID();
