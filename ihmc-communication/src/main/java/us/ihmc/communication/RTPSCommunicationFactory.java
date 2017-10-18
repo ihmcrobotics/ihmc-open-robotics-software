@@ -40,7 +40,7 @@ public class RTPSCommunicationFactory
          PrintTools.error("No RTPS Domain ID set in the NetworkParameters file. The entry should look like RTPSDomainID:15, setting the Default RTPS Domain ID to " + rtpsDomainID);
       }
       
-      defaultDomainID = rtpsDomainID;
+      defaultDomainID = 1;//rtpsDomainID;
       createParticipant(rtpsDomainID);
    }
    
@@ -80,12 +80,12 @@ public class RTPSCommunicationFactory
     * @param domainId the id to use for the domain
     * @return a new participant attached to the domain
     */
-   private Participant createParticipant(int domainId)
+   private void createParticipant(int domainId)
    {
       ParticipantAttributes attributes = domain.createParticipantAttributes(domainId, RTPSCommunicationFactory.class.getSimpleName());
       try
       {
-         return domain.createParticipant(attributes);
+         participants.put(domainId, domain.createParticipant(attributes));
       }
       catch (IOException e)
       {
