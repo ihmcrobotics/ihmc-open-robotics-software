@@ -40,24 +40,24 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    public FootstepNodeSnapData snapInternal(FootstepNode footstepNode)
    {
       RobotSide nodeSide = footstepNode.getRobotSide();
-      ConvexPolygon2D currentFootPolygon = new ConvexPolygon2D();
-      FootstepNodeTools.getFootPolygon(footstepNode, footPolygonsInSoleFrame.get(nodeSide), currentFootPolygon);
+      ConvexPolygon2D footPolygonInWorldFrame = new ConvexPolygon2D();
+      FootstepNodeTools.getFootPolygon(footstepNode, footPolygonsInSoleFrame.get(nodeSide), footPolygonInWorldFrame);
 
       PlanarRegion planarRegionToPack = new PlanarRegion();
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(currentFootPolygon, planarRegionsList,
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygonInWorldFrame, planarRegionsList,
                                                                                                         planarRegionToPack);
       if (snapTransform == null)
          return FootstepNodeSnapData.emptyData();
 
       updateWiggleParameters();
 
-      ConvexPolygon2D polygonToWiggleInRegionFrame = planarRegionToPack.snapPolygonIntoRegionAndChangeFrameToRegionFrame(currentFootPolygon, snapTransform);
+      ConvexPolygon2D footPolygonInRegionFrame = planarRegionToPack.snapPolygonIntoRegionAndChangeFrameToRegionFrame(footPolygonInWorldFrame, snapTransform);
 
       RigidBodyTransform wiggleTransformLocalToLocal = null;
       if (parameters.getWiggleIntoConvexHullOfPlanarRegions())
-         wiggleTransformLocalToLocal = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(polygonToWiggleInRegionFrame, planarRegionToPack, wiggleParameters);
+         wiggleTransformLocalToLocal = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegionFrame, planarRegionToPack, wiggleParameters);
       else
-         wiggleTransformLocalToLocal = PolygonWiggler.wigglePolygonIntoRegion(polygonToWiggleInRegionFrame, planarRegionToPack, wiggleParameters);
+         wiggleTransformLocalToLocal = PolygonWiggler.wigglePolygonIntoRegion(footPolygonInRegionFrame, planarRegionToPack, wiggleParameters);
 
       if (wiggleTransformLocalToLocal == null)
       {
@@ -68,30 +68,12 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
          {
             return FootstepNodeSnapData.emptyData();
          }
-
          else
          {
             return new FootstepNodeSnapData(snapTransform, new ConvexPolygon2D());
          }
       }
-
-      Point3D wiggleTranslation = new Point3D();
-      wiggleTransformLocalToLocal.transform(wiggleTranslation);
-      Vector3D wiggleVector = new Vector3D(wiggleTranslation);
-      if (wiggleVector.length() > parameters.getMaximumXYWiggleDistance())
-      {
-         wiggleVector.scale(parameters.getMaximumXYWiggleDistance() / wiggleVector.length());
-      }
-
-      Vector3D rotationEuler = new Vector3D();
-      wiggleTransformLocalToLocal.getRotationEuler(rotationEuler);
-      double yaw = rotationEuler.getZ();
-      yaw = MathTools.clamp(yaw, parameters.getMaximumYawWiggle());
-
-      rotationEuler.setZ(yaw);
-      wiggleTransformLocalToLocal.setRotationEulerAndZeroTranslation(rotationEuler);
-      wiggleTransformLocalToLocal.setTranslation(wiggleVector);
-
+      
       RigidBodyTransform wiggleTransformWorldToWorld = new RigidBodyTransform();
       RigidBodyTransform transformOne = new RigidBodyTransform();
       planarRegionToPack.getTransformToWorld(transformOne);
@@ -107,7 +89,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       snapAndWiggleTransform.multiply(snapTransform);
 
       // Ensure polygon will be completely above the planarRegions with this snap and wiggle:
-      ConvexPolygon2D checkFootPolygonInWorld = new ConvexPolygon2D(currentFootPolygon);
+      ConvexPolygon2D checkFootPolygonInWorld = new ConvexPolygon2D(footPolygonInWorldFrame);
       checkFootPolygonInWorld.applyTransformAndProjectToXYPlane(snapAndWiggleTransform);
 
       List<PlanarRegion> planarRegionsIntersectingSnappedAndWiggledPolygon = planarRegionsList.findPlanarRegionsIntersectingPolygon(checkFootPolygonInWorld);
@@ -164,9 +146,9 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    private void updateWiggleParameters()
    {
       wiggleParameters.deltaInside = parameters.getWiggleInsideDelta();
-      wiggleParameters.maxX = 0.5 * FootstepNode.gridSizeXY;
-      wiggleParameters.maxY = 0.5 * FootstepNode.gridSizeXY;
-      wiggleParameters.maxYaw = 0.5 * FootstepNode.gridSizeYaw;
+      wiggleParameters.maxX = parameters.getMaximumXYWiggleDistance();
+      wiggleParameters.maxY = parameters.getMaximumXYWiggleDistance();
+      wiggleParameters.maxYaw = parameters.getMaximumYawWiggle();
    }
 
    private void notifyListenerNodeUnderConsiderationWasRejected(FootstepNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
