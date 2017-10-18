@@ -3,6 +3,8 @@ package us.ihmc.footstepPlanning.graphSearch.graph;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -10,6 +12,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class FootstepNodeToolsTest
@@ -36,11 +39,11 @@ public class FootstepNodeToolsTest
 
          checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.0, 0.0);
          checkNodeTransform(x, y, yaw, robotSide, 0.4995 * FootstepNode.gridSizeXY, 0.0, 0.0);
-         checkNodeTransform(x, y, yaw, robotSide, - 0.4995 * FootstepNode.gridSizeXY, 0.0, 0.0);
+         checkNodeTransform(x, y, yaw, robotSide, -0.4995 * FootstepNode.gridSizeXY, 0.0, 0.0);
          checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.4995 * FootstepNode.gridSizeXY, 0.0);
-         checkNodeTransform(x, y, yaw, robotSide, 0.0, - 0.4995 * FootstepNode.gridSizeXY, 0.0);
+         checkNodeTransform(x, y, yaw, robotSide, 0.0, -0.4995 * FootstepNode.gridSizeXY, 0.0);
          checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.0, 0.4995 * FootstepNode.gridSizeYaw);
-         checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.0, - 0.4995 * FootstepNode.gridSizeYaw);
+         checkNodeTransform(x, y, yaw, robotSide, 0.0, 0.0, -0.4995 * FootstepNode.gridSizeYaw);
       }
    }
 
@@ -56,9 +59,35 @@ public class FootstepNodeToolsTest
 
       assertEquals(nodeTransform.getTranslationX(), x, epsilon);
       assertEquals(nodeTransform.getTranslationY(), y, epsilon);
-      assertEquals(nodeTransform.getTranslationZ(), 0.0,  epsilon);
+      assertEquals(nodeTransform.getTranslationZ(), 0.0, epsilon);
       assertEquals(AngleTools.trimAngleMinusPiToPi(rotationYawPitchRoll[0] - yaw), 0.0, epsilon);
       assertEquals(rotationYawPitchRoll[1], 0.0, epsilon);
       assertEquals(rotationYawPitchRoll[2], 0.0, epsilon);
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test
+   public void testGetSnappedNodeTransform()
+   {
+      int numTests = 10;
+
+      for (int i = 0; i < numTests; i++)
+      {
+         double x = EuclidCoreRandomTools.generateRandomDouble(random, 1.0);
+         double y = EuclidCoreRandomTools.generateRandomDouble(random, 1.0);
+         double yaw = EuclidCoreRandomTools.generateRandomDouble(random, 4.0);
+         RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
+
+         FootstepNode node = new FootstepNode(x, y, yaw, robotSide);
+         RigidBodyTransform snapTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         RigidBodyTransform snappedNodeTransform = new RigidBodyTransform();
+         FootstepNodeTools.getSnappedNodeTransform(node, snapTransform, snappedNodeTransform);
+
+         RigidBodyTransform expectedSnappedNodeTransform = new RigidBodyTransform();
+         FootstepNodeTools.getNodeTransform(node, expectedSnappedNodeTransform);
+         snapTransform.transform(expectedSnappedNodeTransform);
+
+         assertTrue(expectedSnappedNodeTransform.epsilonEquals(snappedNodeTransform, epsilon));
+      }
    }
 }
