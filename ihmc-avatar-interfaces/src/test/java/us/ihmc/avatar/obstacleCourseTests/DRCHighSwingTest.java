@@ -1,38 +1,36 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.dataProcessors.RobotAllJointsDataChecker;
 import us.ihmc.simulationConstructionSetTools.util.dataProcessors.ValueDataCheckerParameters;
 import us.ihmc.simulationConstructionSetTools.util.dataProcessors.YoVariableValueDataChecker;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * Created by agrabertilton on 4/15/15.
@@ -68,8 +66,6 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
    }
 
 
-	@ContinuousIntegrationTest(estimatedDuration = 81.8)
-   @Test(timeout = 410000)
    public void testWalkingWithHighSteps() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();

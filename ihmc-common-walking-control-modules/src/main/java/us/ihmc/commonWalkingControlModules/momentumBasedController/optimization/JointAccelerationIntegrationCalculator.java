@@ -11,7 +11,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 
 public class JointAccelerationIntegrationCalculator
 {
@@ -94,7 +94,7 @@ public class JointAccelerationIntegrationCalculator
       {
          OneDoFJoint joint = jointsToComputeDesiredPositionFor.get(jointIndex);
 
-         LowLevelJointData lowLevelJointData = lowLevelJointDataHolderToUpdate.getLowLevelJointData(joint);
+         JointDesiredOutput lowLevelJointData = lowLevelJointDataHolderToUpdate.getJointDesiredOutput(joint);
          if (lowLevelJointData == null)
         	 continue;
          if (!lowLevelJointData.hasDesiredVelocity())

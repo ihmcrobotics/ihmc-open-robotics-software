@@ -49,6 +49,20 @@ public class BlockingSimulationRunner
       checkIfControllerHasFailed();
    }
 
+   public boolean simulateNTicksAndBlockAndCatchExceptions(int numberOfTicks) throws SimulationExceededMaximumTimeException
+   {
+      try
+      {
+         simulateNTicksAndBlock(numberOfTicks);
+         return true;
+      }
+      catch (Exception e)
+      {
+         PrintTools.error(this, e.getMessage());
+         return false;
+      }
+   }
+
    public void simulateAndBlock(double simulateTime) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
 //    System.out.println("Starting Simulation for " + simulateTime);

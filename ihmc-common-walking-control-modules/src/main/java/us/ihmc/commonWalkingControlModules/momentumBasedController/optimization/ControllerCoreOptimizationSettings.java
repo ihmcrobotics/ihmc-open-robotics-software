@@ -307,4 +307,24 @@ public interface ControllerCoreOptimizationSettings
    {
       return new SimpleEfficientActiveSetQPSolver();
    }
+
+   /**
+    * Informs the active optimization module whether the joint velocity limits should be considered
+    * when calculating the desired joint accelerations or joint velocities.
+    * <p>
+    * If {@code true}:
+    * <ul>
+    * <li>if running in {@link WholeBodyControllerCoreMode#INVERSE_DYNAMICS} mode, the calculated
+    * desired joint accelerations do not require the joints to overshoot their limit at any time.
+    * <li>if running in {@link WholeBodyControllerCoreMode#INVERSE_KINEMATICS} mode, the calculated
+    * desired joint velocities remain between the joint velocity lower and upper bounds at all time.
+    * </ul>
+    * </p>
+    * 
+    * @return {@code true} if the joint velocity limits are to considered, {@code false} otherwise.
+    */
+   default boolean areJointVelocityLimitsConsidered()
+   {
+      return true;
+   }
 }

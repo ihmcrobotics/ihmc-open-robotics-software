@@ -165,7 +165,7 @@ public class PelvisLinearStateUpdater
       forceZInPercentThresholdToFilterFoot.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             double currentValue = forceZInPercentThresholdToFilterFoot.getDoubleValue();
             if (currentValue < 0.0)
@@ -178,7 +178,7 @@ public class PelvisLinearStateUpdater
       reinitialize.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (reinitialize.getBooleanValue())
                initialize();
@@ -260,7 +260,7 @@ public class PelvisLinearStateUpdater
          delayTimeBeforeTrustingFoot.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                int windowSize = (int) (delayTimeBeforeTrustingFoot.getDoubleValue() / estimatorDT);
                hasFootHitTheGroundFiltered.setWindowSize(windowSize);

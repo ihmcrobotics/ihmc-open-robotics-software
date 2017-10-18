@@ -14,7 +14,7 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -51,7 +51,7 @@ public class ValkyrieFingerSetController implements RobotController
 
    private final EnumMap<ValkyrieRealRobotFingerJoint, YoDouble> realRobotControlVariables = new EnumMap<>(ValkyrieRealRobotFingerJoint.class);
    private final EnumMap<ValkyrieSimulatedFingerJoint, RevoluteJoint> revoluteJointMap = new EnumMap<>(ValkyrieSimulatedFingerJoint.class);
-   private final EnumMap<ValkyrieSimulatedFingerJoint, LowLevelJointData> desiredOutputMap = new EnumMap<>(ValkyrieSimulatedFingerJoint.class);
+   private final EnumMap<ValkyrieSimulatedFingerJoint, JointDesiredOutput> desiredOutputMap = new EnumMap<>(ValkyrieSimulatedFingerJoint.class);
 
    private final YoEnum<HandConfiguration> handConfiguration;
    private final YoEnum<HandConfiguration> handDesiredConfiguration;
@@ -79,7 +79,7 @@ public class ValkyrieFingerSetController implements RobotController
       trajectoryTime.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             hasTrajectoryTimeChanged.set(true);
          }
@@ -114,7 +114,7 @@ public class ValkyrieFingerSetController implements RobotController
       for (ValkyrieSimulatedFingerJoint simulatedFingerJoint : ValkyrieSimulatedFingerJoint.values)
       {
          revoluteJointMap.put(simulatedFingerJoint, simulatedFingerJoint.getRelatedRevoluteJoint(robotSide, fullRobotModel));
-         desiredOutputMap.put(simulatedFingerJoint, lowLevelDesiredJointData.getLowLevelJointData(revoluteJointMap.get(simulatedFingerJoint)));
+         desiredOutputMap.put(simulatedFingerJoint, lowLevelDesiredJointData.getJointDesiredOutput(revoluteJointMap.get(simulatedFingerJoint)));
          
       }
 

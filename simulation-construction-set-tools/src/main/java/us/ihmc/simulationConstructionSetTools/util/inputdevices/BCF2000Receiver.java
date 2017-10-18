@@ -94,7 +94,7 @@ public class BCF2000Receiver implements Receiver
                for (int i = 0; i < variableChangedListeners.size(); i++)
                {
                   VariableChangedListener listener = variableChangedListeners.get(i);
-                  listener.variableChanged(ctrl.var);
+                  listener.notifyOfVariableChange(ctrl.var);
                }
             }
 

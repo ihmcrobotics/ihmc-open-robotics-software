@@ -1,40 +1,37 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.avatar.testTools.ScriptedHandstepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.environments.BigStepUpWithHandPlatformEnvironment;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
@@ -61,8 +58,6 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 26.8)
-	@Test(timeout = 130000)
    public void testBigStepUpWithHandPlatform() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -70,7 +65,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       double stepHeight = 0.2;
 
       BigStepUpWithHandPlatformEnvironment environment = new BigStepUpWithHandPlatformEnvironment(stepHeight);
-      
+
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(environment);
       drcSimulationTestHelper.createSimulation("testBigStepUpWithHandPlatform");
@@ -95,7 +90,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
     	  Vector3D surfaceNormal = new Vector3D();
     	  handstep.getPose(location, orientation);
           handstep.getSurfaceNormal(surfaceNormal);
-    	  
+
          HandstepPacket handstepPacket = new HandstepPacket(handstep.getRobotSide(),
         		 											location, orientation, surfaceNormal,
         		 											handstep.getSwingTrajectoryTime());
@@ -114,14 +109,14 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-      
+
       // Make sure that the hands are on the target...
       FloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
       YoDouble leftArmZForce = (YoDouble) robot.getVariable("gc_l_arm_wrx_0_fZ");
       YoDouble rightArmZForce = (YoDouble) robot.getVariable("gc_r_arm_wrx_0_fZ");
       assertTrue(leftArmZForce.getDoubleValue() > 50.0);
       assertTrue(rightArmZForce.getDoubleValue() > 50.0);
-      
+
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
@@ -143,7 +138,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       ArrayList<Handstep> ret = new ArrayList<Handstep>();
 
       double height = 0.9;
-      
+
       RobotSide robotSide = RobotSide.LEFT;
       Tuple3DBasics position = new Point3D(0.5, leftHandstepY, height);
       Vector3D surfaceNormal = new Vector3D(0.0, 0.0, 1.0);
@@ -152,7 +147,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
 
       Handstep handstep = scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal, swingTrajectoryTime);
       ret.add(handstep);
-      
+
       robotSide = RobotSide.RIGHT;
       position = new Point3D(0.5, rightHandstepY, height);
       surfaceNormal = new Vector3D(0.0, 0.0, 1.0);
@@ -163,7 +158,7 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
 
       return ret;
    }
-   
+
    private FootstepDataListMessage createFootstepsForStepOntoPlatform(RobotSide robotSide, double stepX, double stepY, double stepZ, ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]

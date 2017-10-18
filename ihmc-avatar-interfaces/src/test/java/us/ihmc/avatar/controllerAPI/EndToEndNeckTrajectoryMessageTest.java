@@ -1,30 +1,28 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -34,8 +32,6 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 18.8)
-   @Test(timeout = 94000)
    public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

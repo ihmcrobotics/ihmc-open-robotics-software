@@ -29,7 +29,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 
 public class JointTorqueOffsetEstimatorController extends HighLevelBehavior implements RobotController, JointTorqueOffsetEstimator
@@ -88,7 +88,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
 
       OneDoFJoint[] jointArray = fullRobotModel.getOneDoFJoints();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(jointArray);
-      lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(jointArray, LowLevelJointControlMode.FORCE_CONTROL);
+      lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(jointArray, JointDesiredControlMode.EFFORT);
 
       createHelpers(true);
 

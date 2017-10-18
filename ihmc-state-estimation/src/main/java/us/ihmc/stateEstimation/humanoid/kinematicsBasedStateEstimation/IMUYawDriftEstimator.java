@@ -135,7 +135,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       delayBeforeTrustingFoot.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             int windowSize = (int) (delayBeforeTrustingFoot.getDoubleValue() / estimatorDT);
             for (int i = 0; i < allFeet.size(); i++)

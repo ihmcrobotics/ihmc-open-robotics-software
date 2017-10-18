@@ -477,7 +477,7 @@ public class OneStepCaptureRegionCalculatorTest
       VariableChangedListener variableChangedListener = new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             FramePoint2D icp = yoICP.getFramePoint2dCopy();
             RobotSide supportSide = yoSupportSide.getEnumValue();
@@ -502,7 +502,7 @@ public class OneStepCaptureRegionCalculatorTest
 
       swingTimeRemaining.set(0.3);
       yoICP.set(0.1, 0.2);
-      variableChangedListener.variableChanged(null);
+      variableChangedListener.notifyOfVariableChange(null);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
 

@@ -31,7 +31,7 @@ public class UserDesiredPelvisHeightControllerCommandGenerators
       userDesiredSetPelvisHeightToActual.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (userDesiredSetPelvisHeightToActual.getBooleanValue())
             {
@@ -48,7 +48,7 @@ public class UserDesiredPelvisHeightControllerCommandGenerators
       
       userDoPelvisHeight.addVariableChangedListener(new VariableChangedListener()
       {
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (userDoPelvisHeight.getBooleanValue())
             {

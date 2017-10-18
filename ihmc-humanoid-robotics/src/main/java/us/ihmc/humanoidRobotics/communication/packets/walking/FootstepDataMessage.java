@@ -71,7 +71,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    @RosExportedField(documentation = "The transferDuration is the time spent with the feet in ground contact before a step."
          + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration.")
    public double transferDuration = -1.0;
-   
+
    /** the time to delay this command on the controller side before being executed **/
    public double executionDelayTime;
 
@@ -179,9 +179,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          {
             predictedContactPoints.clear();
          }
-         for (Point2D contactPoint : footstepContactPoints)
+         for (int i = 0; i < footstepContactPoints.size(); i++)
          {
-            predictedContactPoints.add(new Point2D(contactPoint));
+            Point2D point = new Point2D(footstepContactPoints.get(i));
+            predictedContactPoints.add(point);
          }
       }
       else
@@ -333,7 +334,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       return transferDuration;
    }
-   
+
    /**
     * returns the amount of time this command is delayed on the controller side before executing
     * @return the time to delay this command in seconds
@@ -342,7 +343,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       return executionDelayTime;
    }
-   
+
    /**
     * sets the amount of time this command is delayed on the controller side before executing
     * @param delayTime the time in seconds to delay after receiving the command before executing

@@ -9,7 +9,7 @@ import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;

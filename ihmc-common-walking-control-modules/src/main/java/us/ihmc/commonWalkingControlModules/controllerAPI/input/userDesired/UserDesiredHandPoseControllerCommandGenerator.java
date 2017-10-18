@@ -52,7 +52,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
       userDesiredSetHandPoseToActual.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (userDesiredSetHandPoseToActual.getBooleanValue())
             {
@@ -73,7 +73,7 @@ public class UserDesiredHandPoseControllerCommandGenerator
 
       userDoHandPose.addVariableChangedListener(new VariableChangedListener()
       {
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (userDoHandPose.getBooleanValue())
             {

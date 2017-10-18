@@ -55,7 +55,7 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
       VariableChangedListener listener = new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             hasChanged.set(true);
          }

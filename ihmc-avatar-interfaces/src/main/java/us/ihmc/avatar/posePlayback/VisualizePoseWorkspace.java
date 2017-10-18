@@ -76,7 +76,7 @@ public class VisualizePoseWorkspace
       }
 
 
-      public void variableChanged(YoVariable yoVariable)
+      public void notifyOfVariableChange(YoVariable yoVariable)
       {
          PlaybackPose pose = new PlaybackPose(fullRobotModelForSlider, sdfRobot);
 
@@ -117,7 +117,7 @@ public class VisualizePoseWorkspace
          this.scs = scs;
       }
 
-      public void variableChanged(YoVariable yoVariable)
+      public void notifyOfVariableChange(YoVariable yoVariable)
       {
          System.out.println("Load Sequence Listener");
 
@@ -155,7 +155,7 @@ public class VisualizePoseWorkspace
 
    private class SaveSequenceListener implements VariableChangedListener
    {
-      public void variableChanged(YoVariable yoVariable)
+      public void notifyOfVariableChange(YoVariable yoVariable)
       {
          System.out.println("saving file");
          PlaybackPoseSequenceWriter.promptWriteToFile(posePlaybackRobotPoseSequence);

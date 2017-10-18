@@ -382,7 +382,7 @@ public class PeaveyPC1600X implements Receiver, ExitActionListener
       for (int i = 0; i < variableChangedListeners.size(); i++)
       {
          VariableChangedListener listener = variableChangedListeners.get(i);
-         listener.variableChanged(variable);
+         listener.notifyOfVariableChange(variable);
       }
 
    }

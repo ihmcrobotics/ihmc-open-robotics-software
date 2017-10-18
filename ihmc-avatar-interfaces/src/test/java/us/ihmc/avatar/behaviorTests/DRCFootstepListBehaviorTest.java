@@ -8,13 +8,11 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -100,8 +98,6 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       robotDataReceiver = drcBehaviorTestHelper.getRobotDataReceiver();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 31.2)
-   @Test(timeout = 160000)
    public void testTwoStepsForwards() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -156,8 +152,6 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 31.9)
-   @Test(timeout = 160000)
    public void testSideStepping() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -213,8 +207,6 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 26.1)
-   @Test(timeout = 130000)
    public void testStepLongerThanMaxStepLength() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -286,8 +278,6 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       return footStepsAreTooFarApart;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 50.1)
-   @Test(timeout = 250000)
    public void testStop() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

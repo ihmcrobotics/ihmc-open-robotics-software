@@ -69,13 +69,15 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private final static double defaultTransferTime = 2.5;
    private final static double defaultChickenPercentage = 0.5;
 
+   private final static String chickenSupportName = "icpPlannerCoPTrajectoryGeneratorPercentageChickenSupport";
+
    private final YoVariableRegistry registry = new YoVariableRegistry("PointyRocksTest");
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private SideDependentList<YoFrameConvexPolygon2d> supportPolygons = null;
    private SideDependentList<ArrayList<Point2D>> footContactsInAnkleFrame = null;
 
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private PushRobotController pushController;
@@ -906,7 +908,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       YoBoolean doFootExplorationInTransferToStanding = (YoBoolean) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
       doFootExplorationInTransferToStanding.set(true);
 
-      YoDouble percentageChickenSupport = (YoDouble) drcSimulationTestHelper.getYoVariable("PercentageChickenSupport");
+      YoDouble percentageChickenSupport = (YoDouble) drcSimulationTestHelper.getYoVariable(chickenSupportName);
       percentageChickenSupport.set(chickenPercentage);
 
       YoDouble timeBeforeExploring = (YoDouble) drcSimulationTestHelper.getYoVariable("ExplorationState_TimeBeforeExploring");

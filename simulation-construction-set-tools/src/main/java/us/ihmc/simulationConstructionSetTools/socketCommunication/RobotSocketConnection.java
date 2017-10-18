@@ -304,7 +304,7 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
    }
 
    @Override
-   public void variableChanged(YoVariable<?> variable)
+   public void notifyOfVariableChange(YoVariable<?> variable)
    {
 //    System.out.println("commandListener.isConnected(): " + commandListener.isConnected());
 //    System.out.println("protocolListener: " + protocolListener);

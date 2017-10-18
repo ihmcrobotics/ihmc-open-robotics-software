@@ -1,9 +1,12 @@
 package us.ihmc.valkyrie.roughTerrainWalking;
 
+import org.junit.Test;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.EndToEndCinderBlockFieldTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -22,7 +25,7 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    @Override
    public double getPelvisOffsetHeight()
    {
-      return 0.13;
+      return 0.05;
    }
 
    @Override
@@ -32,6 +35,8 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    }
    
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 167.7)
+   @Test
    public void testWalkingOverCinderBlockField() throws Exception
    {
       super.testWalkingOverCinderBlockField();

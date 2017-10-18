@@ -26,7 +26,7 @@ public class SimpleICPOptimizationQPSolver
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
 
-   private static final int maxNumberOfIterations = 5;
+   private static final int maxNumberOfIterations = 10;
    private static final double convergenceThreshold = 1.0e-20;
 
    /** Index handler that manages the indices for the objectives and solutions in the quadratic program. */

@@ -2,17 +2,17 @@ package us.ihmc.sensorProcessing.diagnostic;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 
 public class OneDoFJointForceTrackingDelayEstimator implements DiagnosticUpdatable
 {
    private final YoVariableRegistry registry;
    private final OneDoFJoint joint;
-   private final LowLevelJointDataReadOnly output;
+   private final JointDesiredOutputReadOnly output;
    private final DelayEstimatorBetweenTwoSignals delayEstimator;
 
-   public OneDoFJointForceTrackingDelayEstimator(OneDoFJoint joint, LowLevelJointDataReadOnly outputDataToCheck, double dt, YoVariableRegistry parentRegistry)
+   public OneDoFJointForceTrackingDelayEstimator(OneDoFJoint joint, JointDesiredOutputReadOnly outputDataToCheck, double dt, YoVariableRegistry parentRegistry)
    {
       this.joint = joint;
       this.output = outputDataToCheck;

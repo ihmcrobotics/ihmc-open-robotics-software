@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 
 public class ControllerAPIDefinitionTest

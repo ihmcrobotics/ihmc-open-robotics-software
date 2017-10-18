@@ -442,4 +442,13 @@ public class WholeBodyTrajectoryMessage extends TrackablePacket<WholeBodyTraject
          wholeBodyPackets.add(rightFootTrajectoryMessage);
       return wholeBodyPackets;
    }
+
+   @Override
+   public String toString()
+   {
+      String string = getClass().getSimpleName() + ":";
+      for (Packet<?> packet : getPackets())
+         string += "\n" + packet.toString();
+      return string;
+   }
 }

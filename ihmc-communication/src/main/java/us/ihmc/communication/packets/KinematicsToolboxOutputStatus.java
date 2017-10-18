@@ -88,8 +88,11 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
       for (int i = 0; i < desiredJointAngles.length; i++)
          desiredJointAngles[i] = (float) newJointData[i].getqDesired();
 
-      rootJoint.getTranslation(desiredRootTranslation);
-      rootJoint.getRotation(desiredRootOrientation);
+      if (rootJoint != null)
+      {
+         rootJoint.getTranslation(desiredRootTranslation);
+         rootJoint.getRotation(desiredRootOrientation);
+      }
    }
 
    public void setDesiredJointState(List<OneDoFJoint> newJointData)

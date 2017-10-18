@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;

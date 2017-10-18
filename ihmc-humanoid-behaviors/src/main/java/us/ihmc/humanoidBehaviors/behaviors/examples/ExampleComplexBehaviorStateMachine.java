@@ -57,7 +57,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       {
 
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             System.out.println("ExampleComplexBehaviorStateMachine: Changing state to " + statemachine.getCurrentState());
          }

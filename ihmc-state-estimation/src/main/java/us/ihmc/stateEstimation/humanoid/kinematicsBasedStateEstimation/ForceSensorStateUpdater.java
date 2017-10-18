@@ -113,7 +113,7 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          calibrateFootForceSensors.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                if (calibrateFootForceSensors.getBooleanValue())
                   calibrateFootForceSensorsAtomic.set(true);

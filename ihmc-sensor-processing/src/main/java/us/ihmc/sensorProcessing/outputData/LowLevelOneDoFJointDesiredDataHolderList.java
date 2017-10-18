@@ -7,14 +7,14 @@ import us.ihmc.tools.lists.PairList;
 
 public class LowLevelOneDoFJointDesiredDataHolderList implements LowLevelOneDoFJointDesiredDataHolderReadOnly
 {
-   private final PairList<OneDoFJoint, LowLevelJointData> jointsAndData = new PairList<>();
-   private final HashMap<OneDoFJoint, LowLevelJointData> jointMap = new HashMap<>();
+   private final PairList<OneDoFJoint, JointDesiredOutput> jointsAndData = new PairList<>();
+   private final HashMap<OneDoFJoint, JointDesiredOutput> jointMap = new HashMap<>();
 
    public LowLevelOneDoFJointDesiredDataHolderList(OneDoFJoint[] joints)
    {
       for (OneDoFJoint joint : joints)
       {
-         LowLevelJointData data = new LowLevelJointData();
+         JointDesiredOutput data = new JointDesiredOutput();
          jointsAndData.add(joint, data);
          jointMap.put(joint, data);
       }
@@ -33,23 +33,23 @@ public class LowLevelOneDoFJointDesiredDataHolderList implements LowLevelOneDoFJ
    }
 
    @Override
-   public LowLevelJointData getLowLevelJointData(OneDoFJoint joint)
+   public JointDesiredOutput getJointDesiredOutput(OneDoFJoint joint)
    {
       return jointMap.get(joint);
    }
 
    @Override
-   public int getNumberOfJointsWithLowLevelData()
+   public int getNumberOfJointsWithDesiredOutput()
    {
       return jointsAndData.size();
    }
 
    @Override
-   public LowLevelJointData getLowLevelJointData(int index)
+   public JointDesiredOutput getJointDesiredOutput(int index)
    {
       return jointsAndData.second(index);
    }
-   
+
    public String getJointName(int index)
    {
       return jointsAndData.first(index).getName();
@@ -74,9 +74,9 @@ public class LowLevelOneDoFJointDesiredDataHolderList implements LowLevelOneDoFJ
       {
 
          OneDoFJoint joint = jointsAndData.first(i);
-         LowLevelJointData data = jointsAndData.second(i);
+         JointDesiredOutput data = jointsAndData.second(i);
 
-         LowLevelJointDataReadOnly otherData = other.getLowLevelJointData(joint);
+         JointDesiredOutputReadOnly otherData = other.getJointDesiredOutput(joint);
          if (otherData != null)
          {
             data.set(otherData);

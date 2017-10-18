@@ -213,7 +213,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
          showViz = new YoBoolean(namePrefix + "ShowViz", registry);
          showViz.addVariableChangedListener(new VariableChangedListener()
          {
-            public void variableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                boolean visible = showViz.getBooleanValue();
                currentPositionViz.setVisible(visible);

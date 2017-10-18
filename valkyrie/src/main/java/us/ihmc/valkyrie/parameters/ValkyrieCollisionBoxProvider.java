@@ -88,7 +88,7 @@ public class ValkyrieCollisionBoxProvider implements CollisionBoxProvider
                AxisAngle rotation = new AxisAngle();
                Vector3D translation = new Vector3D(0.0, robotSide.negateIfRightSide(0.00), -0.03);
                RigidBodyTransform pose = new RigidBodyTransform(rotation, translation);
-               collisions.get(jointName).add(new CollisionSphere(pose, 0.14));
+               collisions.get(jointName).add(new CollisionSphere(pose, 0.18));
             }
          }
 
@@ -97,9 +97,9 @@ public class ValkyrieCollisionBoxProvider implements CollisionBoxProvider
 
             { // Thigh
                AxisAngle rotation = new AxisAngle();
-               Vector3D translation = new Vector3D(0.02, robotSide.negateIfRightSide(0.09), -0.20);
+               Vector3D translation = new Vector3D(0.02, robotSide.negateIfRightSide(0.08), -0.20);
                RigidBodyTransform pose = new RigidBodyTransform(rotation, translation);
-               collisions.get(jointName).add(new CollisionBox(pose, 0.11, 0.1, 0.29));
+               collisions.get(jointName).add(new CollisionBox(pose, 0.13, 0.1, 0.29));
             }
          }
 
@@ -169,7 +169,7 @@ public class ValkyrieCollisionBoxProvider implements CollisionBoxProvider
             AxisAngle rotation = new AxisAngle();
             Vector3D translation = new Vector3D(0.0, 0.0, -0.25);
             RigidBodyTransform pose = new RigidBodyTransform(rotation, translation);
-            collisions.get(jointName).add(new CollisionBox(pose, 0.13, 0.05, 0.09));
+            collisions.get(jointName).add(new CollisionBox(pose, 0.17, 0.05, 0.09));
          }
       }
    }

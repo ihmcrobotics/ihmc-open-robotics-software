@@ -1,15 +1,83 @@
 package us.ihmc.valkyrie.controllerAPI;
 
+import org.junit.Test;
+
 import us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 
 public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajectoryMessageTest
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @Test
+   public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
+   {
+      super.testCustomControlFrame();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
+   @Test
+   public void testMessageWithTooManyTrajectoryPoints() throws Exception
+   {
+      super.testMessageWithTooManyTrajectoryPoints();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @Test
+   public void testMultipleTrajectoryPoints() throws Exception
+   {
+      super.testMultipleTrajectoryPoints();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 40.0)
+   @Test
+   public void testQueuedMessages() throws Exception
+   {
+      super.testQueuedMessages();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test
+   public void testQueueStoppedWithOverrideMessage() throws Exception
+   {
+      super.testQueueStoppedWithOverrideMessage();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
+   @Test
+   public void testQueueWithWrongPreviousId() throws Exception
+   {
+      super.testQueueWithWrongPreviousId();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @Test
+   public void testSingleTrajectoryPoint() throws Exception
+   {
+      super.testSingleTrajectoryPoint();
+   }
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test
+   public void testStopAllTrajectory() throws Exception
+   {
+      super.testStopAllTrajectory();
+   }
 
    @Override
    public DRCRobotModel getRobotModel()

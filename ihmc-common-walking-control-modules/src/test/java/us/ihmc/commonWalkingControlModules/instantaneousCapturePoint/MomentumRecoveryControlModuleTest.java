@@ -47,7 +47,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class MomentumRecoveryControlModuleTest
 {
-   private static final boolean showPlotter = true;
+   private static final boolean showPlotter = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();

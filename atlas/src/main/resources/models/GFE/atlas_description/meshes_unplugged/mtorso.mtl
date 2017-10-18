@@ -11,5 +11,5 @@ newmtl torso_diffuse
 	Kd 0.8000 0.8000 0.8000
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
-	map_Ka ./textures/torso_diffuse.png
-	map_Kd ./textures/torso_diffuse_unplugged.jpg
+	map_Ka ../materials/textures/torso_diffuse.png
+	map_Kd ../materials/textures/torso_diffuse_unplugged.jpg

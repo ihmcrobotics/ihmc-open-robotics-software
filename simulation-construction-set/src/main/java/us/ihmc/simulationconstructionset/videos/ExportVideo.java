@@ -330,7 +330,7 @@ public class ExportVideo implements ExportVideoCommandExecutor
    // while (last <= myDataBuffer.getOutPoint())
    // {
    // System.out.println("Here C");
-   // last = myDataBuffer.getIndex();
+   // last = myDataBuffer.ordinal();
    //
    // //        while ((currentTime = System.currentTimeMillis()) < nextWakeMillis)
    // //        {

@@ -1,10 +1,16 @@
 package us.ihmc.atlas.behaviorTests;
 
+import java.io.IOException;
+
+import org.junit.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.behaviorTests.WholeBodyPoseValidityTesterTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasWholeBodyPoseValidityTesterTest extends WholeBodyPoseValidityTesterTest
 {
@@ -22,4 +28,11 @@ public class AtlasWholeBodyPoseValidityTesterTest extends WholeBodyPoseValidityT
       return robotModel.getSimpleRobotName();
    }
 
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test
+   public void testACleaningMotion() throws SimulationExceededMaximumTimeException, IOException
+   {
+      super.testACleaningMotion();
+   }
 }

@@ -49,7 +49,7 @@ public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTe
    private int numberOfLidarScansConsumed = 0;
    private long numberOfLidarPointsConsumed = 0;
    private final ConcurrentLinkedQueue<AssertionError> errorQueue = new ConcurrentLinkedQueue<>();
-   private JMELidarScanVisualizer jmeLidarScanVisualizer;
+//   private JMELidarScanVisualizer jmeLidarScanVisualizer;
    private DRCSimulationTestHelper testHelper;
 
    @Before
@@ -82,7 +82,7 @@ public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTe
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      jmeLidarScanVisualizer = new JMELidarScanVisualizer();
+//      jmeLidarScanVisualizer = new JMELidarScanVisualizer();
 
       DRCNetworkModuleParameters drcNetworkModuleParameters = new DRCNetworkModuleParameters();
       drcNetworkModuleParameters.enableNetworkProcessor(true);
@@ -154,7 +154,7 @@ public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTe
       public void receivedPacket(PointCloudWorldPacket pointCloud)
       {
          numberOfLidarScansConsumed++;
-         jmeLidarScanVisualizer.addPointCloud(Arrays.asList(pointCloud.getDecayingWorldScan()));
+//         jmeLidarScanVisualizer.addPointCloud(Arrays.asList(pointCloud.getDecayingWorldScan()));
 
          try
          {

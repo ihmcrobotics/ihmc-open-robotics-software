@@ -12,6 +12,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 
 public class AtlasDynamicReachabilityCalculatorTest extends AvatarDynamicReachabilityCalculatorTest
 {
+   @Override
    protected DRCRobotModel getRobotModel()
    {
       AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false)

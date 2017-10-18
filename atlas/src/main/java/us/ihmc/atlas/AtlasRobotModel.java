@@ -10,6 +10,7 @@ import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.atlas.parameters.AtlasPlanarRegionFootstepPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
@@ -33,6 +34,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -78,7 +80,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final static double DESIRED_ATLAS_HEIGHT = 0.66;
    private final static double DESIRED_ATLAS_WEIGHT = 15;
 
-   private static final boolean USE_SMOOTH_CMP_PLANNER = false;
+   private final boolean USE_SMOOTH_CMP_PLANNER;
 
    private final double HARDSTOP_RESTRICTION_ANGLE = Math.toRadians(5.0);
 
@@ -125,6 +127,11 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints,
          boolean createAdditionalContactPoints)
    {
+      if(target == RobotTarget.SCS || target == RobotTarget.GAZEBO)
+         USE_SMOOTH_CMP_PLANNER = true;
+      else
+         USE_SMOOTH_CMP_PLANNER = false;
+
       if (SCALE_ATLAS)
       {
          atlasPhysicalProperties  = new AtlasPhysicalProperties(DESIRED_ATLAS_HEIGHT, DESIRED_ATLAS_WEIGHT);
@@ -159,7 +166,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       else
          capturePointPlannerParameters = new AtlasContinuousCMPPlannerParameters(atlasPhysicalProperties);
 
-      planarRegionFootstepPlannerParameters = new AtlasFootstepPlannerParameters();
+      planarRegionFootstepPlannerParameters = new AtlasPlanarRegionFootstepPlannerParameters();
 
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
@@ -788,7 +795,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       linkHolder.setInertia(inertia);
    }
-   
+
    /**
     * Adds robot specific footstep parameters
     */
@@ -797,17 +804,23 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       return planarRegionFootstepPlannerParameters;
    }
-   
+
+   @Override
+   public FootstepPlannerParameters getFootstepPlannerParameters()
+   {
+      return new AtlasFootstepPlannerParameters();
+   }
+
    @Override
    public DRCOutputProcessor getCustomSimulationOutputProcessor(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
    {
       return new DRCSimulationOutputWriterForControllerThread(humanoidFloatingRootJointRobot);
    }
-   
+
    @Override
    public LowLevelOutputWriter getCustomSimulationOutputWriter(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
    {
       return null;
    }
-   
+
 }

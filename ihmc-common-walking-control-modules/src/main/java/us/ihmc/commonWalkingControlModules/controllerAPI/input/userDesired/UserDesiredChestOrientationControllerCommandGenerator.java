@@ -29,7 +29,7 @@ public class UserDesiredChestOrientationControllerCommandGenerator
 
       userDoChestOrientation.addVariableChangedListener(new VariableChangedListener()
       {
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (userDoChestOrientation.getBooleanValue())
             {
@@ -47,7 +47,7 @@ public class UserDesiredChestOrientationControllerCommandGenerator
       userDesiredChestGoToHomeOrientation.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (userDesiredChestGoToHomeOrientation.getBooleanValue())
             {

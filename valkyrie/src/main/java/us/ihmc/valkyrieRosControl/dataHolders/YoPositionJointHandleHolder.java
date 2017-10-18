@@ -2,7 +2,7 @@ package us.ihmc.valkyrieRosControl.dataHolders;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -11,7 +11,7 @@ public class YoPositionJointHandleHolder
    private final String name;
    private final PositionJointHandle handle;
    private final OneDoFJoint joint;
-   private final LowLevelJointDataReadOnly desiredJointData;
+   private final JointDesiredOutputReadOnly desiredJointData;
 
    private final YoDouble q;
    private final YoDouble qd;
@@ -19,7 +19,8 @@ public class YoPositionJointHandleHolder
    private final YoDouble controllerPositionDesired;
    private final YoDouble positionDesired;
 
-   public YoPositionJointHandleHolder(PositionJointHandle handle, OneDoFJoint joint, LowLevelJointDataReadOnly desiredJointData, YoVariableRegistry parentRegistry)
+   public YoPositionJointHandleHolder(PositionJointHandle handle, OneDoFJoint joint, JointDesiredOutputReadOnly desiredJointData,
+                                      YoVariableRegistry parentRegistry)
    {
       this.name = handle.getName();
       YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -40,7 +41,9 @@ public class YoPositionJointHandleHolder
    {
       this.q.set(handle.getPosition());
       this.qd.set(handle.getVelocity());
-      this.controllerPositionDesired.set(desiredJointData.getDesiredPosition());
+      if (desiredJointData.hasDesiredPosition())
+         this.controllerPositionDesired.set(desiredJointData.getDesiredPosition());
+      // Otherwise, don't change the desired position
    }
 
    public void setDesiredPosition(double position)

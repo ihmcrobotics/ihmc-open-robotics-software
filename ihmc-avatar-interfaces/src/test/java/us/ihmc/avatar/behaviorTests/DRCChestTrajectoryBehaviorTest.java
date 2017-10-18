@@ -1,19 +1,18 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Test;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
@@ -21,9 +20,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMes
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -54,7 +53,7 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
    @AfterClass
    public static void printMemoryUsageAfterClass()
    {
@@ -77,14 +76,12 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 32.5)
-   @Test(timeout = 160000)
    public void testSingleRandomChestOrientationMove() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       ReferenceFrame pelvisZUpFrame = drcBehaviorTestHelper.getReferenceFrames().getPelvisZUpFrame();
-      
+
       Quaternion desiredChestQuat = new Quaternion(RandomGeometry.nextQuaternion(new Random(), 0.8 * MAX_ANGLE_TO_TEST_RAD));
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(1.0, desiredChestQuat, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
 
@@ -116,7 +113,7 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
       PrintTools.debug(this, " initial Chest Pose :\n" + initialChestPose);
       PrintTools.debug(this, " final Chest Pose :\n" + finalChestPose);
       FramePose desiredChestPose = new FramePose();
-      
+
       desiredChestPose.setPose(initialChestPose.getFramePointCopy().getPoint(), chestTrajectoryMessage.getLastTrajectoryPoint().orientation);
       assertPosesAreWithinThresholds(desiredChestPose, finalChestPose);
 

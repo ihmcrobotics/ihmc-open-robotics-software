@@ -241,7 +241,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       this.alphaFilter_BreakFrequency.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             alphaFilter_AlphaValue.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(alphaFilter_BreakFrequency.getDoubleValue(),
                   dt.getDoubleValue()));

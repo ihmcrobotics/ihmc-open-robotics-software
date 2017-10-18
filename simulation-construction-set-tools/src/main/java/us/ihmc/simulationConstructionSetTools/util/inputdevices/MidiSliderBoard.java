@@ -137,7 +137,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
             listener = new VariableChangedListener()
             {
                @Override
-               public void variableChanged(YoVariable<?> v)
+               public void notifyOfVariableChange(YoVariable<?> v)
                {
                   synchronized (self)
                   {

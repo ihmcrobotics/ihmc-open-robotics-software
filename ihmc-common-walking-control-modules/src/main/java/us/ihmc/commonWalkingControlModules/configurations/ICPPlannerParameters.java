@@ -7,7 +7,7 @@ public abstract class ICPPlannerParameters implements ICPTrajectoryPlannerParame
     * Sets which ICP planner to use.
     * </p>
     * <p>
-    * If true, uses the new {@link us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.SmoothCMPBasedICPPlanner}.
+    * If true, uses the new {@link us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner}.
     * If false, uses the traditional {@link us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner}.
     * </p>
     */

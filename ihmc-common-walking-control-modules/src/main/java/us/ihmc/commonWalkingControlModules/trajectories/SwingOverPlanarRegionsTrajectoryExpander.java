@@ -190,6 +190,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       midGroundPoint.scale(0.5);
 
+      adjustSwingEndIfCoincidentWithSwingStart();
+
       waypointAdjustmentPlane.set(swingStartPosition.getPoint(), adjustedWaypoints.get(0).getPoint(), swingEndPosition.getPoint());
 
       axisAngle.set(waypointAdjustmentPlane.getNormal(), Math.PI / 2.0);
@@ -227,6 +229,13 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       double maxSpeed = twoWaypointSwingGenerator.computeAndGetMaxSpeed();
       return maxSpeed;
+   }
+
+   // TODO figure out a better solution for coincident points and replace this
+   private void adjustSwingEndIfCoincidentWithSwingStart()
+   {
+      if(swingStartPosition.distance(swingEndPosition) < 1e-8)
+         swingEndPosition.add(1e-4, 1e-4, 1e-4);
    }
 
    private SwingOverPlanarRegionsTrajectoryExpansionStatus tryATrajectory(PlanarRegionsList planarRegionsList)

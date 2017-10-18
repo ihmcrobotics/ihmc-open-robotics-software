@@ -194,7 +194,7 @@ public class YoSliderpanel extends JPanel implements MouseListener, VariableChan
    }
 
    @Override
-   public void variableChanged(YoVariable<?> v)
+   public void notifyOfVariableChange(YoVariable<?> v)
    {
       value.setText(v.getValueAsDouble() + "");
       setSliderValueOnVariableChange();

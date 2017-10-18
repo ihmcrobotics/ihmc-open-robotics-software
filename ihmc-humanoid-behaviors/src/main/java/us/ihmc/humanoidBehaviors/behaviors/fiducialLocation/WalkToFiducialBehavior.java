@@ -21,6 +21,8 @@ public class WalkToFiducialBehavior extends AbstractBehavior
    private final FramePose goalPose = new FramePose();
    private final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> footstepPlanQueue = new ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus>(40);
 
+   private final FootstepPlanningRequestPacket.FootstepPlannerType plannerToUse = FootstepPlanningRequestPacket.FootstepPlannerType.PLANAR_REGION_BIPEDAL;
+
    public WalkToFiducialBehavior(CommunicationBridgeInterface communicationBridge)
    {
       super(communicationBridge);
@@ -33,7 +35,7 @@ public class WalkToFiducialBehavior extends AbstractBehavior
       if (!sentPlanningRequest.getBooleanValue())
       {
          FootstepPlanningRequestPacket request = new FootstepPlanningRequestPacket();
-         request.set(new FramePose(ReferenceFrame.getWorldFrame()), RobotSide.LEFT, goalPose);
+         request.set(new FramePose(ReferenceFrame.getWorldFrame()), RobotSide.LEFT, goalPose, plannerToUse);
          request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
          sendPacket(request);
       }

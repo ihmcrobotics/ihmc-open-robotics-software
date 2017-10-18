@@ -1,17 +1,15 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,16 +17,16 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRobotTestInterface
 {
@@ -63,8 +61,6 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    }
 
 
-	@ContinuousIntegrationTest(estimatedDuration = 38.6)
-	@Test(timeout = 190000)
    public void testStepOnCinderBlocks() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -105,9 +101,6 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-
-	@ContinuousIntegrationTest(estimatedDuration = 47.3)
-   @Test(timeout = 240000)
    public void testStepOnCinderBlocksSlowlyWithDisturbance() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -170,7 +163,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       scs.applyDataProcessingFunction(dataProcessingFunction);
    }
 
-   // @Test(timeout=300000), we don't need step on/off two layer CinderBlocks anymore
+   // We don't need step on/off two layer CinderBlocks anymore
    //Note: this test will fail because of bounding box that needs to be "tuned"
    public void testStepOnAndOffCinderBlocks() throws SimulationExceededMaximumTimeException
    {

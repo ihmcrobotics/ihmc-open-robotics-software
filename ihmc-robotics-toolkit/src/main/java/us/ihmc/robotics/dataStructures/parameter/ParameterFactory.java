@@ -78,7 +78,7 @@ public class ParameterFactory
          variable.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                parameter.set(((YoBoolean) v).getBooleanValue());
             }
@@ -109,7 +109,7 @@ public class ParameterFactory
          variable.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                parameter.set(((YoDouble) v).getDoubleValue());
             }
@@ -143,7 +143,7 @@ public class ParameterFactory
             variable.addVariableChangedListener(new VariableChangedListener()
             {
                @Override
-               public void variableChanged(YoVariable<?> v)
+               public void notifyOfVariableChange(YoVariable<?> v)
                {
                   parameter.set(count, ((YoDouble) v).getDoubleValue());
                }
@@ -175,7 +175,7 @@ public class ParameterFactory
          variable.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                parameter.set(((YoInteger) v).getIntegerValue());
             }
@@ -209,7 +209,7 @@ public class ParameterFactory
             variable.addVariableChangedListener(new VariableChangedListener()
             {
                @Override
-               public void variableChanged(YoVariable<?> v)
+               public void notifyOfVariableChange(YoVariable<?> v)
                {
                   parameter.set(count, ((YoInteger) v).getIntegerValue());
                }

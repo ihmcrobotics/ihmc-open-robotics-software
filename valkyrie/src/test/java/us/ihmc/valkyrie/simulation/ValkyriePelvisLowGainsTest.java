@@ -1,9 +1,12 @@
 package us.ihmc.valkyrie.simulation;
 
+import org.junit.Test;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCPelvisLowGainsTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
@@ -11,6 +14,7 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -28,6 +32,14 @@ public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
          return createHumanoidFloatingRootJointRobot(createCollisionMeshes, enableJointDamping);
       }
    };
+
+   @Override
+   @ContinuousIntegrationTest(estimatedDuration = 38.0)
+   @Test
+   public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException
+   {
+      super.testStandingWithLowPelvisOrientationGains();
+   }
 
    @Override
    public DRCRobotModel getRobotModel()

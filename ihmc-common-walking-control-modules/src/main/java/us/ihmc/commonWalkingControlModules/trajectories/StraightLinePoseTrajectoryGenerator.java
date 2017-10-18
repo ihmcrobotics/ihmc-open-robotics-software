@@ -156,7 +156,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
          showViz = new YoBoolean(namePrefix + "ShowViz", registry);
          showViz.addVariableChangedListener(new VariableChangedListener()
          {
-            public void variableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                boolean visible = showViz.getBooleanValue();
                currentPositionViz.setVisible(visible);

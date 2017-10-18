@@ -1,0 +1,2431 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+<model name="thor">
+  <plugin name="gz_comms_manager" filename="libgz_comms_manager.so" />
+  <plugin name="gz_pose_manager" filename="libgz_pose_manager.so" />
+  <static>false</static>
+
+  
+  
+
+  <link name="pelvis">
+    <pose>-0.0085 0 1.0180015 0 0 0</pose>
+    <collision name="pelvis_collision">
+      <geometry>
+        <box>
+          <size>0.25 0.3 0.3299971</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="pelvis_visual">
+      <pose>0.0085 -0 -1.0180015 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/pelvis.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-0.02034476 -0.000339931 0.014065804 0 0 0</pose>
+      <mass>12.227102888619</mass>
+      <inertia>
+        <ixx>0.168786051</ixx>
+        <iyy>0.151804339</iyy>
+        <izz>0.183945912</izz>
+        <iyz>0.000299081</iyz>
+        <ixz>0.000191055</ixz>
+        <ixy>0.000230307</ixy>
+      </inertia>
+    </inertial>
+    <sensor name="imu_sensor" type="imu">
+      <pose>0 0 0 0 0 1.5707963</pose>
+      <always_on>1</always_on>
+        <imu>
+          <noise>
+            <type>gaussian</type>
+            <rate>
+              <mean>0</mean>
+              <stddev>0.0002</stddev>
+              <bias_mean>7.5e-06</bias_mean>
+              <bias_stddev>8e-07</bias_stddev>
+            </rate>
+            <accel>
+              <mean>0</mean>
+              <stddev>0.017</stddev>
+              <bias_mean>0.1</bias_mean>
+              <bias_stddev>0.001</bias_stddev>
+            </accel>
+          </noise>
+        </imu>
+      <visualize>1</visualize>
+      <topic>imu_sensor</topic>
+    </sensor>
+  </link>
+
+
+  <link name="l_thigh">
+    <pose>-0.002281 0.117675 0.6903315 0 0 0</pose>
+    <collision name="l_thigh_collision">
+      <geometry>
+        <box>
+          <size>0.1 0.18965 0.4496629</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="l_thigh_visual">
+      <pose>0.0 -0.1 -0.8925 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/l_thigh.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-0.01776384 0.009771943 -0.017537909 0 0 0</pose>
+      <mass>5.13807864986</mass>
+      <inertia>
+        <ixx>0.050251535</ixx>
+        <iyy>0.04823009</iyy>
+        <izz>0.01825638</izz>
+        <iyz>0.000428731</iyz>
+        <ixz>-0.00485734</ixz>
+        <ixy>-0.000369726</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_thigh">
+    <pose>-0.002281 -0.117675 0.6903315 0 0 0</pose>
+    <collision name="r_thigh_collision">
+      <geometry>
+        <box>
+          <size>0.1 0.18965 0.4496629</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="r_thigh_visual">
+      <pose>0.0 0.1 -0.8925 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/r_thigh.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-0.017750387 -0.009800579 -0.017576732 0 0 0</pose>
+      <mass>5.1402729320628</mass>
+      <inertia>
+        <ixx>0.050266937</ixx>
+        <iyy>0.048269843</iyy>
+        <izz>0.018232029</izz>
+        <iyz>-0.000479151</iyz>
+        <ixz>-0.004868597</ixz>
+        <ixy>0.000400241</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+
+  <link name="l_shin">
+    <pose>0.0190724 0.1021182 0.2811108 0 0 0</pose>
+    <collision name="l_shin_collision">
+      <geometry>
+        <box>
+          <size>0.1 0.13 0.4512008</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="l_shin_visual">
+      <!--<pose>-0.0190724 -0.1021182 -0.2811108 0 0 0</pose>-->
+      <pose>-0.0 -0.10 -0.4825 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/l_shin.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.016452175 -0.001617389 0.041544431 0 0 0</pose>
+      <mass>4.2301928995278</mass>
+      <inertia>
+        <ixx>0.042672286</ixx>
+        <iyy>0.043770804</iyy>
+        <izz>0.012910027</izz>
+        <iyz>-0.000372327</iyz>
+        <ixz>0.005863435</ixz>
+        <ixy>-4.6942e-05</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_shin">
+    <pose>0.0190724 -0.1021182 0.2811108 0 0 0</pose>
+    <collision name="r_shin_collision">
+      <geometry>
+        <box>
+          <size>0.1 0.13 0.4512008</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="r_shin_visual">
+      <!--<pose>-0.0190724 0.1021182 -0.2811108 0 0 0</pose>-->
+      <pose>-0.0 0.10 -0.4825 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/r_shin.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.016452169 0.001835239 0.041544431 0 0 0</pose>
+      <mass>4.2301928995278</mass>
+      <inertia>
+        <ixx>0.042672987</ixx>
+        <iyy>0.043770806</iyy>
+        <izz>0.012910729</izz>
+        <iyz>0.000406027</iyz>
+        <ixz>0.005863442</ixz>
+        <ixy>6.7751e-05</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+
+  <link name="l_foot">
+    <pose>0.025 0.1 0.0266724 0 0 0</pose>
+    <collision name="l_foot_collision">
+      <geometry>
+        <box>
+          <size>0.25 0.1485 0.05493235</size>
+        </box>
+      </geometry>
+      <!-- From atlas model -->
+      <surface>
+        <friction>
+          <ode>
+            <mu>0.9</mu>
+            <mu2>0.9</mu2>
+            <fdir1>1 0 0</fdir1>
+          </ode>
+        </friction>
+        <contact>
+          <ode>
+            <max_vel>1.0</max_vel>
+            <min_depth>0.003</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+    <visual name="l_foot_visual">
+      <!--<pose>-0.025 -0.1 -0.0266724 0 0 0</pose>-->
+      <pose>-0.0 -0.1 -0.0725 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/l_foot.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-0.028042516 0.00096434599999999 0.005344341 0 0 0</pose>
+      <mass>1.7169625926048</mass>
+      <inertia>
+        <ixx>0.00336244</ixx>
+        <iyy>0.006955959</iyy>
+        <izz>0.007417438</izz>
+        <iyz>3.0838e-05</iyz>
+        <ixz>-0.001236319</ixz>
+        <ixy>5.764e-06</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_foot">
+    <pose>0.025 -0.10075 0.0266724 0 0 0</pose>
+    <collision name="r_foot_collision">
+      <geometry>
+        <box>
+          <size>0.25 0.1485 0.05493235</size>
+        </box>
+      </geometry>
+      <!-- From atlas model -->
+      <surface>
+        <friction>
+          <ode>
+            <mu>0.9</mu>
+            <mu2>0.9</mu2>
+            <fdir1>1 0 0</fdir1>
+          </ode>
+        </friction>
+        <contact>
+          <ode>
+            <max_vel>1.0</max_vel>
+            <min_depth>0.003</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+    <visual name="r_foot_visual">
+      <!--<pose>-0.025 0.10075 -0.0266724 0 0 0</pose>-->
+      <pose>-0.0 0.1 -0.0725 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/r_foot.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-0.027942557 -0.00019983899999999 0.005337142 0 0 0</pose>
+      <mass>1.7201733736363</mass>
+      <inertia>
+        <ixx>0.003363358</ixx>
+        <iyy>0.006961913</iyy>
+        <izz>0.007424205</izz>
+        <iyz>-3.0884e-05</iyz>
+        <ixz>-0.001236643</ixz>
+        <ixy>-3.631e-06</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+
+  <link name="l_hip_yaw_trunnion">
+    <pose>0 0.1 0.8925 0 0 0</pose>
+    <!-- Axis = "z", -->
+    <inertial>
+      <mass>0.051573426573425</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_hip_yaw_trunnion">
+    <pose>0 -0.1 0.8925 0 0 0</pose>
+    <!-- Axis = "z", -->
+    <inertial>
+      <mass>0.051573426573425</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+
+  <link name="l_hip_pitch_trunnion">
+    <pose>0 0.1 0.8925 0 0 0</pose>
+    <!-- Axis = "y", -->
+    <inertial>
+      <pose>0 0 0 1.5707963267949 0 0</pose>
+      <mass>0.051573426573425</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_hip_pitch_trunnion">
+    <pose>0 -0.1 0.8925 0 0 0</pose>
+    <!-- Axis = "y", -->
+    <inertial>
+      <pose>0 0 0 1.5707963267949 0 0</pose>
+      <mass>0.051573426573425</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+
+  <link name="l_ankle_pitch_trunnion">
+    <pose>0 0.1 0.0725 0 0 0</pose>
+    <!-- Axis = "y", -->
+    <inertial>
+      <pose>0 0 0 1.5707963267949 0 0</pose>
+      <mass>0.051573426573425</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_ankle_pitch_trunnion">
+    <pose>0 -0.1 0.0725 0 0 0</pose>
+    <!-- Axis = "y", -->
+    <inertial>
+      <pose>0 0 0 1.5707963267949 0 0</pose>
+      <mass>0.051573426573425</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="l_hip_yaw" type="revolute">
+    <parent>
+      pelvis
+    </parent>
+    <child>
+      l_hip_yaw_trunnion
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-0.34906585039887</lower>
+        <upper>0.78539816339745</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_hip_yaw" type="revolute">
+    <parent>
+      pelvis
+    </parent>
+    <child>
+      r_hip_yaw_trunnion
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-0.78539816339745</lower>
+        <upper>0.34906585039887</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="l_hip_roll" type="revolute">
+    <parent>
+      l_hip_yaw_trunnion
+    </parent>
+    <child>
+      l_hip_pitch_trunnion
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-0.5235987755983</lower>
+        <upper>0.78539816339745</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_hip_roll" type="revolute">
+    <parent>
+      r_hip_yaw_trunnion
+    </parent>
+    <child>
+      r_hip_pitch_trunnion
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-0.78539816339745</lower>
+        <upper>0.5235987755983</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="l_hip_pitch" type="revolute">
+    <pose>0.002281 -0.017675 0.2021685 0 0 0</pose>
+    <parent>
+      l_hip_pitch_trunnion
+    </parent>
+    <child>
+      l_thigh
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-2.0943951023932</lower>
+        <upper>0.5235987755983</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_hip_pitch" type="revolute">
+    <pose>0.002281 0.017675 0.2021685 0 0 0</pose>
+    <parent>
+      r_hip_pitch_trunnion
+    </parent>
+    <child>
+      r_thigh
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-2.0943951023932</lower>
+        <upper>0.5235987755983</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="l_knee_pitch" type="revolute">
+    <pose>-0.0190724 -0.0021182 0.2013892 0 0 0</pose>
+    <parent>
+      l_thigh
+    </parent>
+    <child>
+      l_shin
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>0</lower>
+        <upper>2.3561944901923</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_knee_pitch" type="revolute">
+    <pose>-0.0190724 0.0021182 0.2013892 0 0 0</pose>
+    <parent>
+      r_thigh
+    </parent>
+    <child>
+      r_shin
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>0</lower>
+        <upper>2.3561944901923</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="l_ankle_pitch" type="revolute">
+    <parent>
+      l_shin
+    </parent>
+    <child>
+      l_ankle_pitch_trunnion
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-0.95993108859688</lower>
+        <upper>0.61086523819802</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_ankle_pitch" type="revolute">
+    <parent>
+      r_shin
+    </parent>
+    <child>
+      r_ankle_pitch_trunnion
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-0.95993108859688</lower>
+        <upper>0.61086523819802</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="l_ankle_roll" type="revolute">
+    <pose>-0.025 0 0.0458276 0 0 0</pose>
+    <parent>
+      l_ankle_pitch_trunnion
+    </parent>
+    <child>
+      l_foot
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-0.5235987755983</lower>
+        <upper>0.5235987755983</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <provide_feedback>1</provide_feedback>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+    <sensor name="l_foot_contact_sensor" type="force_torque">
+      <pose>0.025 0.1 0.0266724 0 0 0</pose>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <force_torque>
+          <frame>sensor</frame>
+        </force_torque>
+    </sensor>
+  </joint>
+
+  <joint name="r_ankle_roll" type="revolute">
+    <pose>-0.025 0.00075 0.0458276 0 0 0</pose>
+    <parent>
+      r_ankle_pitch_trunnion
+    </parent>
+    <child>
+      r_foot
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-0.5235987755983</lower>
+        <upper>0.5235987755983</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <provide_feedback>1</provide_feedback>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+    <sensor name="r_foot_contact_sensor" type="force_torque">
+      <pose>0.025 -0.10075 0.0266724 0 0 0</pose>
+      <always_on>1</always_on>
+      <contact>
+        <collision>r_foot_collision</collision>
+      </contact>
+    </sensor>
+  </joint>
+
+
+  <joint name="torso_yaw" type="revolute">
+    <parent>
+      pelvis
+    </parent>
+    <child>
+      waist_pitch_trunnion
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-0.78539816339745</lower>
+        <upper>0.78539816339745</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="waist_pitch_trunnion">
+    <pose>0 0 1.2575 0 0 0</pose>
+    <!-- Axis = "y", -->
+    <inertial>
+      <pose>0 0 0 1.5707963267949 0 0</pose>
+      <mass>0.051573426573425</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="torso_pitch" type="revolute">
+    <pose>-0.001 0 -0.09375 0 0 0</pose>
+    <parent>
+      waist_pitch_trunnion
+    </parent>
+    <child>
+      chest
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-0.34906585039887</lower>
+        <upper>0.34906585039887</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="chest">
+    <pose>0.001 0 1.35125 0 0 0</pose>
+    <collision name="chest_collision">
+      <geometry>
+        <box>
+          <size>0.25 0.3 0.3685</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="chest_visual">
+      <!--<pose>-0.001 -0 -1.35125 0 0 0</pose>-->
+      <pose>-0.001 -0 -1.2575 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/chest.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-0.010475235 0.003477582 0.016042633 0 0 0</pose>
+      <mass>8.9112224908039</mass>
+      <inertia>
+        <ixx>0.212139518</ixx>
+        <iyy>0.177608078</iyy>
+        <izz>0.082558505</izz>
+        <iyz>0.000482353</iyz>
+        <ixz>-0.001780773</ixz>
+        <ixy>0.000361146</ixy>
+      </inertia>
+    </inertial>
+    <sensor name="camera.ptgrey" type="camera">
+      <pose>0.1323009 -0.0675 0.2217387 0 0.611 0</pose>
+      <camera>
+        <horizontal_fov>1.75</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.5</near>
+          <far>30</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise is sampled independently per pixel on each frame.
+               That pixel's noise value is added to each of its color
+               channels, which at that point lie in the range [0,1]. -->
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>30.0</updateRate>
+        <cameraName>chest/camera</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera.ptgrey</frameName>
+        <hackBaseline>0.0</hackBaseline>
+        <distortionK1>-0.293600</distortionK1>
+        <distortionK2>0.212124</distortionK2>
+        <distortionK3>-0.138326</distortionK3>
+        <distortionT1>0.000764</distortionT1>
+        <distortionT2>-0.000452</distortionT2>
+      </plugin>
+    </sensor>
+  </link>
+
+  <joint name="chest_lidar_pitch" type="revolute">
+    <pose>-0.021 0.0075 -0.00099999999999989 0 0 0</pose>
+    <parent>
+      chest
+    </parent>
+    <child>
+      chest_lidar
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-1.5707963267949</lower>
+        <upper>1.5707963267949</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="chest_lidar">
+    <pose>0.1491 -0.0075 1.41085 0 0 0</pose>
+    <collision name="chest_lidar_collision">
+      <geometry>
+        <box>
+          <size>0.092 0.075 0.062</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="chest_lidar_visual">
+      <pose>-0.1491 0.0075 -1.41085 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/chest_lidar.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Black</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-0.009435154 0.00438778 -0.00088571400000004 0 0 0</pose>
+      <mass>0.051573426573425</mass>
+      <inertia>
+        <ixx>0.000203256</ixx>
+        <iyy>0.00035346</iyy>
+        <izz>0.000382989</izz>
+        <iyz>1.17e-07</iyz>
+        <ixz>2.32e-07</ixz>
+        <ixy>2.6199e-05</ixy>
+      </inertia>
+    </inertial>
+    <sensor name="lidar.chest_hokuyo" type="ray">
+      <!-- Hokuyo UTM-30LX-EW -->
+      <always_on>1</always_on>
+      <update_rate>40</update_rate>
+      <pose>0.0195 0.0495 -0.00099999999999989 0 1.57079633 0</pose>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>1081</samples>
+            <resolution>1</resolution>
+            <min_angle>-2.35619449</min_angle>
+            <max_angle>2.35619449</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>.1</min>
+          <max>70</max>
+          <resolution>.05</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_chest_hokuyo" filename="libgazebo_ros_laser.so">
+        <topicName>/chest/laser/scan/</topicName>
+        <frameName>chest_lidar_emitter</frameName>
+      </plugin>
+    </sensor>
+  </link>
+
+  <joint name="neck_yaw" type="revolute">
+    <pose>0 -0.003 -0.024025 0 0 0</pose>
+    <parent>
+      chest
+    </parent>
+    <child>
+      neck
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-1.5707963267949</lower>
+        <upper>1.5707963267949</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="neck">
+    <pose>0 0.003 1.559525 0 0 0</pose>
+    <collision name="neck_collision">
+      <geometry>
+        <box>
+          <size>0.0541 0.096 0.05405</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="neck_visual">
+      <!--<pose>-0 -0.003 -1.559525 0 0 0</pose>-->
+      <pose>-0 0.0 -1.5625 0 0 0</pose>-->
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/neck.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>1.2e-08 -0.002875317 0.00050305599999989 0 0 0</pose>
+      <mass>0.42837005699299</mass>
+      <inertia>
+        <ixx>0.000336505</ixx>
+        <iyy>0.000143407</iyy>
+        <izz>0.000323735</izz>
+        <iyz>-8.463e-06</iyz>
+        <ixz>0</ixz>
+        <ixy>-0</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="neck_pitch" type="revolute">
+    <pose>0.0142568 0 -0.08855 0 0 0</pose>
+    <parent>
+      neck
+    </parent>
+    <child>
+      head
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-0.5235987755983</lower>
+        <upper>1.0471975511966</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="head">
+    <pose>-0.0142568 0 1.65105 0 0 0</pose>
+    <collision name="head_collision">
+      <geometry>
+        <box>
+          <size>0.155386 0.102 0.2191</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="head_visual">
+      <!--<pose>0.0142568 -0 -1.65105 0 0 0</pose>-->
+      <pose>0.0 -0 -1.5625 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/head.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-0.004959974 4.1336e-05 0.056361706 0 0 0</pose>
+      <mass>2.2650798087587</mass>
+      <inertia>
+        <ixx>0.013808097</ixx>
+        <iyy>0.011370053</iyy>
+        <izz>0.007199137</izz>
+        <iyz>-9.74e-06</iyz>
+        <ixz>0.002271466</ixz>
+        <ixy>1.389e-06</ixy>
+      </inertia>
+    </inertial>
+      <sensor name='stereo_camera' type='multicamera'>
+        <update_rate>10</update_rate>
+        <camera name='left'>
+          <horizontal_fov>1.39626</horizontal_fov>
+          <image>
+            <width>1024</width>
+            <height>544</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.02</near>
+            <far>300</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+        </camera>
+        <camera name='right'>
+          <pose frame=''>0 -0.07 0 0 -0 0</pose>
+          <horizontal_fov>1.39626</horizontal_fov>
+          <image>
+            <width>1024</width>
+            <height>544</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.02</near>
+            <far>300</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+        </camera>
+        <pose frame=''>0.183847 -0.035 0.0773366 -3.14159 0.1309 5.33964e-23</pose>
+      </sensor>
+</link>
+
+
+  <joint name="head_hokuyo_joint" type="revolute">
+    <pose>-0.0098 0 0 0 0 0</pose>
+    <parent>
+      head
+    </parent>
+    <child>
+      head_hokuyo_link
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-1e+16</lower>
+        <upper>1e+16</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="head_hokuyo_link">
+    <pose>0.0098 0 1.6515 0 0 0</pose>
+    <collision name="head_hokuyo_link_collision">
+      <geometry>
+        <box>
+          <size>0.1395 0.06 0.093</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="head_hokuyo_link_visual">
+      <pose>-0.0098 -0 -1.6515 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/head_lidar.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Black</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.015857021 -2.21e-06 -0.0076187240000001 0 0 0</pose>
+      <mass>0.44774993965034</mass>
+      <inertia>
+        <ixx>0.000368817</ixx>
+        <iyy>0.00087532</iyy>
+        <izz>0.000707833</izz>
+        <iyz>-2.1e-08</iyz>
+        <ixz>-7.653e-06</ixz>
+        <ixy>5.5e-08</ixy>
+      </inertia>
+    </inertial>
+    <sensor name="lidar.head_hokuyo" type="ray">
+      <!-- Hokuyo UTM-30LX-EW -->
+      <always_on>1</always_on>
+      <update_rate>40</update_rate>
+      <pose>0.0397 0 0.02 0 0 0</pose>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>1081</samples>
+            <resolution>1</resolution>
+            <min_angle>-2.35619449</min_angle>
+            <max_angle>2.35619449</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>.1</min>
+          <max>70</max>
+          <resolution>.05</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_head_hokuyo" filename="libgazebo_ros_laser.so">
+        <topicName>/laser/scan/</topicName>
+        <frameName>head_lidar_emitter</frameName>
+      </plugin>
+    </sensor>
+  </link>
+
+
+  <joint name="l_shoulder_pitch" type="revolute">
+    <parent>
+      chest
+    </parent>
+    <child>
+      l_shoulder_pitch_trunnion
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-0.7418</lower>
+        <upper>1.5707963267949</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_shoulder_pitch" type="revolute">
+    <parent>
+      chest
+    </parent>
+    <child>
+      r_shoulder_pitch_trunnion
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-0.7418</lower>
+        <upper>1.5707963267949</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+
+  <link name="l_shoulder_pitch_trunnion">
+    <pose>0 0.2375 1.4715 0 0 0</pose>
+    <!-- Axis = "y", -->
+    <inertial>
+      <pose>0 0 0 1.5707963267949 0 0</pose>
+      <mass>0.051573426573425</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_shoulder_pitch_trunnion">
+    <pose>0 -0.2375 1.4715 0 0 0</pose>
+    <!-- Axis = "y", -->
+    <collision name="r_shoulder_pitch_trunnion_collision">
+      <pose>0 0 0 1.5707963267949 0 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.01</radius>
+          <length>0.1</length>
+        </cylinder>
+      </geometry>
+    </collision>
+<!--
+    <visual name="r_shoulder_pitch_trunnion_visual">
+      <pose>0 0 0 1.5707963267949 0 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.01</radius>
+          <length>0.1</length>
+        </cylinder>
+      </geometry>
+    </visual>
+-->
+    <inertial>
+      <pose>0 0 0 1.5707963267949 0 0</pose>
+      <mass>0.051573426573425</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+
+  <joint name="l_shoulder_roll" type="revolute">
+    <parent>
+      l_shoulder_pitch_trunnion
+    </parent>
+    <child>
+      l_shoulder_yaw_trunnion
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>0</lower>
+        <upper>3.1415926535898</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_shoulder_roll" type="revolute">
+    <parent>
+      r_shoulder_pitch_trunnion
+    </parent>
+    <child>
+      r_shoulder_yaw_trunnion
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-3.1415926535898</lower>
+        <upper>0</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+
+  <link name="l_shoulder_yaw_trunnion">
+    <pose>0 0.2375 1.4715 0 0 0</pose>
+    <!-- Axis = "z", -->
+    <inertial>
+      <mass>0.051573426573425</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_shoulder_yaw_trunnion">
+    <pose>0 -0.2375 1.4715 0 0 0</pose>
+    <!-- Axis = "z", -->
+    <collision name="r_shoulder_yaw_trunnion_collision">
+      <geometry>
+        <cylinder>
+          <radius>0.01</radius>
+          <length>0.1</length>
+        </cylinder>
+      </geometry>
+    </collision>
+<!--
+    <visual name="r_shoulder_yaw_trunnion_visual">
+      <geometry>
+        <cylinder>
+          <radius>0.01</radius>
+          <length>0.1</length>
+        </cylinder>
+      </geometry>
+    </visual>
+-->
+    <inertial>
+      <mass>0.051573426573425</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+
+  <joint name="l_shoulder_yaw" type="revolute">
+    <pose>0 0 0.1398848 0 0 0</pose>
+    <parent>
+      l_shoulder_yaw_trunnion
+    </parent>
+    <child>
+      l_arm
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-3.1415926535898</lower>
+        <upper>3.1415926535898</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_shoulder_yaw" type="revolute">
+    <pose>0 0 0.1398848 0 0 0</pose>
+    <parent>
+      r_shoulder_yaw_trunnion
+    </parent>
+    <child>
+      r_arm
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-3.1415926535898</lower>
+        <upper>3.1415926535898</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+
+  <link name="l_arm">
+    <pose>0 0.2375 1.3316152 0 0 0</pose>
+    <collision name="l_arm_collision">
+      <geometry>
+        <box>
+          <size>0.144 0.114 0.3337695</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="l_arm_visual">
+      <!--<pose>-0 -0.2375 -1.3316152 0 0 0</pose>-->
+      <pose>-0 -0.2375 -1.4715 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/l_arm.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Black</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.007214087 -0.001779321 0.027015869 0 0 0</pose>
+      <mass>3.0258177870279</mass>
+      <inertia>
+        <ixx>0.038478468</ixx>
+        <iyy>0.039609455</iyy>
+        <izz>0.004412843</izz>
+        <iyz>-0.000681544</iyz>
+        <ixz>-0.003774572</ixz>
+        <ixy>4.9829e-05</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_arm">
+    <pose>0 -0.2375 1.3316152 0 0 0</pose>
+    <collision name="r_arm_collision">
+      <geometry>
+        <box>
+          <size>0.144 0.114 0.3337695</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="r_arm_visual">
+      <!--<pose>-0 0.2375 -1.3316152 0 0 0</pose>-->
+      <pose>-0 0.2375 -1.4715 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/r_arm.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Black</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.007213335 0.001779321 0.027015869 0 0 0</pose>
+      <mass>3.0258177870279</mass>
+      <inertia>
+        <ixx>0.038478468</ixx>
+        <iyy>0.039609764</iyy>
+        <izz>0.004413151</izz>
+        <iyz>0.000681544</iyz>
+        <ixz>-0.003774703</ixz>
+        <ixy>-4.9825e-05</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+
+  <joint name="l_elbow_pitch" type="revolute">
+    <pose>0.0257566 0 0.1107567 0 0 0</pose>
+    <parent>
+      l_arm
+    </parent>
+    <child>
+      l_forearm
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-2.763</lower>
+        <upper>0</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_elbow_pitch" type="revolute">
+    <pose>0.0257566 0 0.1107567 0 0 0</pose>
+    <parent>
+      r_arm
+    </parent>
+    <child>
+      r_forearm
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-2.763</lower>
+        <upper>0</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+
+  <link name="l_forearm">
+    <pose>0.0042434 0.2375 1.0907433 0 0 0</pose>
+    <collision name="l_forearm_collision">
+      <geometry>
+        <box>
+          <size>0.0984867 0.12 0.2684867</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="l_forearm_visual">
+      <!--<pose>-0.0042434 -0.2375 -1.0907433 0 0 0</pose>-->
+      <pose>-0.03 -0.2375 -1.2015 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/l_forearm.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Black</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-0.004787739 0.00037668700000001 -0.024396152 0 0 0</pose>
+      <mass>1.5466488026748</mass>
+      <inertia>
+        <ixx>0.006819683</ixx>
+        <iyy>0.006750973</iyy>
+        <izz>0.001205454</izz>
+        <iyz>4.3534e-05</iyz>
+        <ixz>0.000101312</ixz>
+        <ixy>5.676e-06</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_forearm">
+    <pose>0.0042434 -0.2375 1.0907433 0 0 0</pose>
+    <collision name="r_forearm_collision">
+      <geometry>
+        <box>
+          <size>0.0984867 0.12 0.2684867</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="r_forearm_visual">
+      <!--<pose>-0.0042434 0.2375 -1.0907433 0 0 0</pose>-->
+      <pose>-0.03 0.2375 -1.2015 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/r_forearm.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Black</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-0.004787739 8.3232999999988e-05 -0.024396152 0 0 0</pose>
+      <mass>1.5466488026748</mass>
+      <inertia>
+        <ixx>0.006819886</ixx>
+        <iyy>0.006750973</iyy>
+        <izz>0.001205657</izz>
+        <iyz>3.9504e-05</iyz>
+        <ixz>0.000101316</ixz>
+        <ixy>4.675e-06</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="l_foreforearm">
+    <pose>0 0.2375 0.885 0 0 0</pose>
+    <collision name="l_foreforearm_collision">
+      <geometry>
+        <box>
+          <size>0.096 0.048 0.15</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="l_foreforearm_visual">
+      <!--<pose>-0 -0.2375 -0.885 0 0 0</pose>-->
+      <pose>-0 -0.2375 -0.9775 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/l_foreforearm.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Black</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.000452337 0 0.013026871 0 0 0</pose>
+      <mass>0.4784829261888</mass>
+      <inertia>
+        <ixx>0.000584304</ixx>
+        <iyy>0.000662668</iyy>
+        <izz>0.000222334</izz>
+        <iyz>-0</iyz>
+        <ixz>1.3796e-05</ixz>
+        <ixy>-0</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_foreforearm">
+    <pose>0 -0.2375 0.885 0 0 0</pose>
+    <collision name="r_foreforearm_collision">
+      <geometry>
+        <box>
+          <size>0.096 0.048 0.15</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="r_foreforearm_visual">
+      <!--<pose>-0 0.2375 -0.885 0 0 0</pose>-->
+      <pose>-0 0.2375 -0.9775 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/r_foreforearm.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Black</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.000452337 0 0.013026871 0 0 0</pose>
+      <mass>0.4784829261888</mass>
+      <inertia>
+        <ixx>0.000584304</ixx>
+        <iyy>0.000662668</iyy>
+        <izz>0.000222334</izz>
+        <iyz>-0</iyz>
+        <ixz>1.3796e-05</ixz>
+        <ixy>-0</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="l_wrist_yaw" type="revolute">
+    <parent>
+      l_forearm
+    </parent>
+    <child>
+      l_wrist_yaw_trunnion
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-3.1415926535898</lower>
+        <upper>2.2165</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_wrist_yaw" type="revolute">
+    <parent>
+      r_forearm
+    </parent>
+    <child>
+      r_wrist_yaw_trunnion
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-2.2165</lower>
+        <upper>3.1415926535898</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+
+  <link name="l_wrist_yaw_trunnion">
+    <pose>0 0.2375 0.9775 0 0 0</pose>
+    <!-- Axis = "z", -->
+    <inertial>
+      <mass>0.051573426573425</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_wrist_yaw_trunnion">
+    <pose>0 -0.2375 0.9775 0 0 0</pose>
+    <!-- Axis = "z", -->
+    <inertial>
+      <mass>0.051573426573425</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+
+  <joint name="l_wrist_roll" type="revolute">
+    <pose>0 0 0.0925 0 0 0</pose>
+    <parent>
+      l_wrist_yaw_trunnion
+    </parent>
+    <child>
+      l_foreforearm
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-1.5675</lower>
+        <upper>1.5675</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_wrist_roll" type="revolute">
+    <pose>0 0 0.0925 0 0 0</pose>
+    <parent>
+      r_wrist_yaw_trunnion
+    </parent>
+    <child>
+      r_foreforearm
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-1.5675</lower>
+        <upper>1.5675</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="l_wrist_pitch" type="revolute">
+    <pose>0.0155 0 0.0528 0 0 0</pose>
+    <parent>
+      l_foreforearm
+    </parent>
+    <child>
+      l_palm
+    </child>
+    <axis>
+      <!-- This is intentionally a yaw joint to match the current YRY wrist -->
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-3.1415926535898</lower>
+        <upper>3.1415926535898</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <provide_feedback>1</provide_feedback>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_wrist_pitch" type="revolute">
+    <pose>0.0155 0 0.0528 0 0 0</pose>
+    <parent>
+      r_foreforearm
+    </parent>
+    <child>
+      r_palm
+    </child>
+    <axis>
+      <!-- This is intentionally a yaw joint to match the current YRY wrist -->
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-3.1415926535898</lower>
+        <upper>3.1415926535898</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <provide_feedback>1</provide_feedback>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+
+  <link name="l_palm">
+    <self_collide>1</self_collide>
+    <pose>-0.0155 0.2375 0.7897 0 0 0</pose>
+    <collision name="l_palm_collision">
+      <geometry>
+        <box>
+          <size>0.1 0.115 0.045</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="l_palm_visual">
+      <!--<pose>0.0155 -0.2375 -0.7897 0 0 0</pose>-->
+      <pose>0.0 -0.2375 -0.8425 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/l_palm.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <!-- These are the inertial properties of the hand, but we're storing them in the palm -->
+      <pose>0.014102342 -0.003533558 0.002211669 0 0 0</pose>
+      <mass>0.6948956863811</mass>
+      <inertia>
+        <ixx>0.001226466</ixx>
+        <iyy>0.000902363</iyy>
+        <izz>0.000978176</izz>
+        <iyz>-1.6886e-05</iyz>
+        <ixz>1.73e-06</ixz>
+        <ixy>2.295e-06</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_palm">
+    <self_collide>1</self_collide>
+    <pose>-0.0155 -0.2375 0.7897 0 0 0</pose>
+    <collision name="r_palm_collision">
+      <geometry>
+        <box>
+          <size>0.1 0.115 0.045</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="r_palm_visual">
+      <!--<pose>0.0155 0.2375 -0.7897 0 0 0</pose>-->
+      <pose>0.0 0.2375 -0.8425 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/r_palm.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <!-- These are the inertial properties of the hand, but we're storing them in the palm -->
+      <pose>0.014210541 0.003590313 0.0024129810000001 0 0 0</pose>
+      <mass>0.69091040863634</mass>
+      <inertia>
+        <ixx>0.001216336</ixx>
+        <iyy>0.000886794</iyy>
+        <izz>0.000967611</izz>
+        <iyz>1.3538e-05</iyz>
+        <ixz>-4.852e-06</ixz>
+        <ixy>-5.455e-06</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+
+  <joint name="l_pinky_finger" type="revolute">
+    <pose>0.006 0.0114 0.045 0 0 0</pose>
+    <parent>
+      l_palm
+    </parent>
+    <child>
+      l_finger_link
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-1.3131</lower>
+        <upper>2.0448</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_pinky_finger" type="revolute">
+    <pose>0.006 -0.0114 0.045 0 0 0</pose>
+    <parent>
+      r_palm
+    </parent>
+    <child>
+      r_finger_link
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-2.0448</lower>
+        <upper>1.3131</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+
+  <link name="l_finger_link">
+    <pose>0.0245 0.19 0.7222 0 0 0</pose>
+    <self_collide>1</self_collide>
+    <collision name="l_finger_link_collision">
+      <geometry>
+        <box>
+          <size>0.02 0.02 0.09</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="l_finger_link_visual">
+      <pose>-0.0245 -0.19 -0.7222 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/l_finger.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.008130973 0.009188406 0.014190547 0 0 0</pose>
+      <mass>0.06553488744755</mass>
+      <inertia>
+        <ixx>4.5416e-05</ixx>
+        <iyy>4.2966e-05</iyy>
+        <izz>5.913e-06</izz>
+        <iyz>-1.243e-06</iyz>
+        <ixz>1.898e-06</ixz>
+        <ixy>-3.89e-07</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_finger_link">
+    <pose>0.0245 -0.19 0.7222 0 0 0</pose>
+    <self_collide>1</self_collide>
+    <collision name="r_finger_link_collision">
+      <geometry>
+        <box>
+          <size>0.02 0.02 0.09</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="r_finger_link_visual">
+      <pose>-0.0245 0.19 -0.7222 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/r_finger.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.007840062 -0.00946279 0.013079409 0 0 0</pose>
+      <mass>0.16729933036713</mass>
+      <inertia>
+        <ixx>0.000117267</ixx>
+        <iyy>0.000110685</iyy>
+        <izz>1.4689e-05</izz>
+        <iyz>2.888e-06</iyz>
+        <ixz>4.075e-06</ixz>
+        <ixy>9.96e-07</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+
+  <joint name="l_index_finger" type="revolute">
+    <pose>0.0225 0.0114 0.05 0 0 0</pose>
+    <parent>
+      l_palm
+    </parent>
+    <child>
+      l_gripper_link
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-1.3131</lower>
+        <upper>2.0448</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_index_finger" type="revolute">
+    <pose>0.0225 -0.0114 0.05 0 0 0</pose>
+    <parent>
+      r_palm
+    </parent>
+    <child>
+      r_gripper_link
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-2.0448</lower>
+        <upper>1.3131</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+
+  <link name="l_gripper_link">
+    <pose>-0.0555 0.19 0.7172 0 0 0</pose>
+    <self_collide>1</self_collide>
+    <collision name="l_gripper_link_collision">
+      <geometry>
+        <box>
+          <size>0.02 0.02 0.1</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="l_gripper_link_visual">
+      <pose>0.0555 -0.19 -0.7172 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/l_gripper.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.020948456 0.009653928 0.014489612 0 0 0</pose>
+      <mass>0.15047602807692</mass>
+      <inertia>
+        <ixx>9.5861e-05</ixx>
+        <iyy>9.1176e-05</iyy>
+        <izz>1.2994e-05</izz>
+        <iyz>-2.408e-06</iyz>
+        <ixz>-2.577e-06</ixz>
+        <ixy>9.41e-07</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_gripper_link">
+    <pose>-0.0555 -0.19 0.7172 0 0 0</pose>
+    <self_collide>1</self_collide>
+    <collision name="r_gripper_link_collision">
+      <geometry>
+        <box>
+          <size>0.02 0.02 0.1</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="r_gripper_link_visual">
+      <pose>0.0555 0.19 -0.7172 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://thor_description/model/meshes/r_gripper.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.021009684 -0.009386331 0.021940508 0 0 0</pose>
+      <mass>0.071959428391606</mass>
+      <inertia>
+        <ixx>5.1654e-05</ixx>
+        <iyy>4.9064e-05</iyy>
+        <izz>6.653e-06</izz>
+        <iyz>8.56e-07</iyz>
+        <ixz>-6.44e-07</ixz>
+        <ixy>-4.79e-07</ixy>
+      </inertia>
+    </inertial>
+  </link>
+</model>
+</sdf>
+
+

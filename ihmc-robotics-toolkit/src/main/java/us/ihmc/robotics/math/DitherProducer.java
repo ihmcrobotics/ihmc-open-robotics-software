@@ -30,7 +30,7 @@ public class DitherProducer
       desiredDitherFrequency.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             checkFrequency();
          }

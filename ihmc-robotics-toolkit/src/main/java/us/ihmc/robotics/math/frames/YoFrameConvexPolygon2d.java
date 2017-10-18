@@ -287,7 +287,7 @@ public class YoFrameConvexPolygon2d implements ReferenceFrameHolder, VariableCha
    }
 
    @Override
-   public void variableChanged(YoVariable<?> v)
+   public void notifyOfVariableChange(YoVariable<?> v)
    {
       hasChanged.set(true);
    }

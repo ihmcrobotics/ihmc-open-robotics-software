@@ -4,7 +4,7 @@ import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorT
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ANGULAR_VELOCITY;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_LINEAR_ACCELERATION;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ORIENTATION;
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_VELOCITY;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_TAU;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.TORQUE_SENSOR;
 
 import java.util.ArrayList;
@@ -13,8 +13,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -27,6 +25,8 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AtlasStateEstimatorParameters extends StateEstimatorParameters
 {
@@ -46,6 +46,7 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    private SensorNoiseParameters sensorNoiseParameters = null;
 
    private final boolean doElasticityCompensation;
+   private final double jointElasticityFilterFrequencyHz;
    private final double defaultJointStiffness;
    private final HashMap<String, Double> jointSpecificStiffness = new HashMap<>();
 
@@ -76,6 +77,7 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
 
       applyJointPositionPolynomialApproximation = runningOnRealRobot;
       doElasticityCompensation = runningOnRealRobot;
+      jointElasticityFilterFrequencyHz = 20.0;
       defaultJointStiffness = 20000.0;
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -125,19 +127,27 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
       YoDouble angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", defaultFilterBreakFrequency);
       YoDouble linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", defaultFilterBreakFrequency);
 
+      // 1- Compute joint velocities with finite difference and a low-pass filter
+      sensorProcessing.computeJointVelocityFromFiniteDifferenceWithJointsToIgnore(jointVelocityAlphaFilter, false, armAndBackJoints);
+      sensorProcessing.computeJointVelocityFromFiniteDifferenceOnlyForSpecifiedJoints(backXFilter, false, backXName);
+      sensorProcessing.computeJointVelocityFromFiniteDifferenceOnlyForSpecifiedJoints(armJointVelocityAlphaFilter1, false, armJointNames);
+
+      // 2- Add elasticity compensation
       if (doElasticityCompensation)
       {
+         YoDouble elasticityAlphaFilter = sensorProcessing.createAlphaFilter("jointDeflectionDotAlphaFilter", jointElasticityFilterFrequencyHz);
          YoDouble maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", 0.1);
          Map<OneDoFJoint, YoDouble> jointPositionStiffness = sensorProcessing.createStiffnessWithJointsToIgnore("stiffness", defaultJointStiffness, jointSpecificStiffness, armJointNames);
-         sensorProcessing.addJointPositionElasticyCompensatorWithJointsToIgnore(jointPositionStiffness, maxDeflection, false, armJointNames);
+
+         Map<String, Integer> filteredTauForElasticity = sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(elasticityAlphaFilter, true, JOINT_TAU, armJointNames);
+         sensorProcessing.addJointPositionElasticyCompensatorWithJointsToIgnore(jointPositionStiffness, maxDeflection, filteredTauForElasticity, false, armJointNames);
+         sensorProcessing.addJointVelocityElasticyCompensatorWithJointsToIgnore(jointPositionStiffness, maxDeflection, filteredTauForElasticity, false, armJointNames);
       }
 
-      sensorProcessing.computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(jointVelocityAlphaFilter, jointVelocitySlopTime, false, armAndBackJoints);
-      sensorProcessing.computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(backXFilter, backXSlopTime, false, backXName);
-      sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(jointVelocityAlphaFilter, false, JOINT_VELOCITY, armJointNames);
-
-      sensorProcessing.computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(armJointVelocityAlphaFilter1, armJointVelocitySlopTime, false, armJointNames);
-//      sensorProcessing.addJointVelocityAlphaFilterOnlyForSpecifiedJoints(armJointVelocityAlphaFilter2, false, armJointNames);
+      // 3- Add backlash compensator
+      sensorProcessing.addJointVelocityBacklashFilterWithJointsToIgnore(jointVelocitySlopTime, false, armAndBackJoints);
+      sensorProcessing.addJointVelocityBacklashFilterOnlyForSpecifiedJoints(backXSlopTime, false, backXName);
+      sensorProcessing.addJointVelocityBacklashFilterOnlyForSpecifiedJoints(armJointVelocitySlopTime, false, armJointNames);
 
       sensorProcessing.computeJointAccelerationFromFiniteDifference(jointVelocityAlphaFilter, false);
 

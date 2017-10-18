@@ -44,7 +44,7 @@ public class SpringPinJoint extends PinJoint
       kp.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             setKp(kp.getDoubleValue());
          }
@@ -52,7 +52,7 @@ public class SpringPinJoint extends PinJoint
       kd.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             setKd(kd.getDoubleValue());
          }

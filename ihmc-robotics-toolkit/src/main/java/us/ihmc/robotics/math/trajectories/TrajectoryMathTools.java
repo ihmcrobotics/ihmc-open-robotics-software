@@ -6,6 +6,7 @@ import java.util.List;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.robotics.math.FastFourierTransform;
 
@@ -22,7 +23,7 @@ public class TrajectoryMathTools
 
    public TrajectoryMathTools(int maxNumberOfCoefficients)
    {
-      this.maxNumberOfCoefficients = (int) Math.pow(2, Math.ceil( Math.log(maxNumberOfCoefficients) / Math.log(2.0)) ); // Rounding up the nearest power of two
+      this.maxNumberOfCoefficients = (int) Math.pow(2, Math.ceil(Math.log(maxNumberOfCoefficients) / Math.log(2.0))); // Rounding up the nearest power of two
       this.tempTraj1 = new Trajectory(this.maxNumberOfCoefficients);
       this.tempTraj2 = new Trajectory(this.maxNumberOfCoefficients);
       this.tempTraj3D = new Trajectory3D(this.maxNumberOfCoefficients);
@@ -306,16 +307,16 @@ public class TrajectoryMathTools
          multiplyByTrimming(trajToPack.getTrajectory(direction), traj1.getTrajectory(direction), traj2.getTrajectory(direction));
    }
 
-   public void dotProduct(Trajectory trajToPackX, Trajectory trajToPackY, Trajectory trajToPackZ, Trajectory traj1X, Trajectory traj1Y,
-                                 Trajectory traj1Z, Trajectory traj2X, Trajectory traj2Y, Trajectory traj2Z)
+   public void dotProduct(Trajectory trajToPackX, Trajectory trajToPackY, Trajectory trajToPackZ, Trajectory traj1X, Trajectory traj1Y, Trajectory traj1Z,
+                          Trajectory traj2X, Trajectory traj2Y, Trajectory traj2Z)
    {
       multiply(trajToPackX, traj1X, traj2X);
       multiply(trajToPackY, traj1Y, traj2Y);
       multiply(trajToPackZ, traj1Z, traj2Z);
    }
 
-   public void dotProductByTrimming(Trajectory trajToPackX, Trajectory trajToPackY, Trajectory trajToPackZ, Trajectory traj1X,
-                                           Trajectory traj1Y, Trajectory traj1Z, Trajectory traj2X, Trajectory traj2Y, Trajectory traj2Z)
+   public void dotProductByTrimming(Trajectory trajToPackX, Trajectory trajToPackY, Trajectory trajToPackZ, Trajectory traj1X, Trajectory traj1Y,
+                                    Trajectory traj1Z, Trajectory traj2X, Trajectory traj2Y, Trajectory traj2Z)
    {
       multiplyByTrimming(trajToPackX, traj1X, traj2X);
       multiplyByTrimming(trajToPackY, traj1Y, traj2Y);
@@ -365,33 +366,28 @@ public class TrajectoryMathTools
    }
 
    /*
-   public void crossProductByTrimming(Trajectory3D trajToPack, Trajectory3D traj1, Trajectory3D traj2)
-   {
-      crossProductByTrimming(trajToPack.getTrajectoryX(), trajToPack.getTrajectoryY(), trajToPack.getTrajectoryZ(), traj1.getTrajectoryX(),
-                             traj1.getTrajectoryY(), traj1.getTrajectoryZ(), traj2.getTrajectoryX(), traj2.getTrajectoryY(), traj2.getTrajectoryZ());
-   }
-
-
-   public void crossProductByTrimming(Trajectory trajToPackX, Trajectory trajToPackY, Trajectory trajToPackZ, Trajectory traj1X,
-                                             Trajectory traj1Y, Trajectory traj1Z, Trajectory traj2X, Trajectory traj2Y, Trajectory traj2Z)
-   {
-      multiplyByTrimming(tempTraj1, traj1Y, traj2Z);
-      multiplyByTrimming(tempTraj2, traj1Z, traj2Y);
-      subtractByTrimming(tempTraj3.xTrajectory, tempTraj1, tempTraj2);
-
-      multiplyByTrimming(tempTraj1, traj1X, traj2Z);
-      multiplyByTrimming(tempTraj2, traj1Z, traj2X);
-      subtractByTrimming(tempTraj3.yTrajectory, tempTraj2, tempTraj1);
-
-      multiplyByTrimming(tempTraj1, traj1X, traj2Y);
-      multiplyByTrimming(tempTraj2, traj1Y, traj2X);
-      subtractByTrimming(tempTraj3.zTrajectory, tempTraj1, tempTraj2);
-
-      trajToPackX.set(tempTraj3.xTrajectory);
-      trajToPackY.set(tempTraj3.yTrajectory);
-      trajToPackZ.set(tempTraj3.zTrajectory);
-   }
-   */
+    * public void crossProductByTrimming(Trajectory3D trajToPack, Trajectory3D
+    * traj1, Trajectory3D traj2) {
+    * crossProductByTrimming(trajToPack.getTrajectoryX(),
+    * trajToPack.getTrajectoryY(), trajToPack.getTrajectoryZ(),
+    * traj1.getTrajectoryX(), traj1.getTrajectoryY(), traj1.getTrajectoryZ(),
+    * traj2.getTrajectoryX(), traj2.getTrajectoryY(), traj2.getTrajectoryZ()); }
+    * public void crossProductByTrimming(Trajectory trajToPackX, Trajectory
+    * trajToPackY, Trajectory trajToPackZ, Trajectory traj1X, Trajectory traj1Y,
+    * Trajectory traj1Z, Trajectory traj2X, Trajectory traj2Y, Trajectory
+    * traj2Z) { multiplyByTrimming(tempTraj1, traj1Y, traj2Z);
+    * multiplyByTrimming(tempTraj2, traj1Z, traj2Y);
+    * subtractByTrimming(tempTraj3.xTrajectory, tempTraj1, tempTraj2);
+    * multiplyByTrimming(tempTraj1, traj1X, traj2Z);
+    * multiplyByTrimming(tempTraj2, traj1Z, traj2X);
+    * subtractByTrimming(tempTraj3.yTrajectory, tempTraj2, tempTraj1);
+    * multiplyByTrimming(tempTraj1, traj1X, traj2Y);
+    * multiplyByTrimming(tempTraj2, traj1Y, traj2X);
+    * subtractByTrimming(tempTraj3.zTrajectory, tempTraj1, tempTraj2);
+    * trajToPackX.set(tempTraj3.xTrajectory);
+    * trajToPackY.set(tempTraj3.yTrajectory);
+    * trajToPackZ.set(tempTraj3.zTrajectory); }
+    */
 
    public static void validateTrajectoryTimes(Trajectory traj1, Trajectory traj2)
    {
@@ -641,7 +637,7 @@ public class TrajectoryMathTools
    }
 
    public static void addSegmentedTrajectories(SegmentedFrameTrajectory3D trajToPack, SegmentedFrameTrajectory3D traj1, SegmentedFrameTrajectory3D traj2,
-                                        double TIME_EPSILON)
+                                               double TIME_EPSILON)
    {
       double currentTime = Math.min(traj1.getSegment(0).getInitialTime(), traj2.getSegment(0).getInitialTime());
       for (int i = 0, j = 0; i < traj1.getNumberOfSegments() || j < traj2.getNumberOfSegments();)
@@ -697,7 +693,41 @@ public class TrajectoryMathTools
 
    public static void getDerivative(FrameTrajectory3D trajectoryToPack, FrameTrajectory3D trajectoryToDifferentiate)
    {
-      for(int i = 0; i < 3; i++)
+      for (int i = 0; i < 3; i++)
          getDerivative(trajectoryToPack.getTrajectory(i), trajectoryToDifferentiate.getTrajectory(i));
+   }
+
+   public static boolean epsilonEquals(FrameTrajectory3D trajectory1, FrameTrajectory3D trajectory2, double epsilon)
+   {
+      return (trajectory1.getReferenceFrame() == trajectory2.getReferenceFrame() && epsilonEquals((Trajectory3D)trajectory1, (Trajectory3D)trajectory2, epsilon));
+   }
+
+   public static boolean epsilonEquals(Trajectory3D trajectory1, Trajectory3D trajectory2, double epsilon)
+   {
+      return (epsilonEquals(trajectory1.getTrajectoryX(), trajectory2.getTrajectoryX(), epsilon)
+            && epsilonEquals(trajectory1.getTrajectoryY(), trajectory2.getTrajectoryY(), epsilon)
+            && epsilonEquals(trajectory1.getTrajectoryZ(), trajectory2.getTrajectoryZ(), epsilon));
+   }
+
+   public static boolean epsilonEquals(Trajectory trajectory1, Trajectory trajectory2, double epsilon)
+   {
+      boolean result = true;
+      if (!MathTools.epsilonEquals(trajectory1.getInitialTime(), trajectory2.getInitialTime(), epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(trajectory1.getFinalTime(), trajectory2.getFinalTime(), epsilon))
+         return false;
+      for (int i = 0; i < 3; i++)
+      {
+         result &= trajectory1.getNumberOfCoefficients() == trajectory2.getNumberOfCoefficients();
+         if (result)
+         {
+            for (int j = 0; j < trajectory1.getNumberOfCoefficients(); j++)
+               result &= MathTools.epsilonEquals(trajectory1.getCoefficient(j), trajectory2.getCoefficient(j), epsilon);
+         }
+         else
+            return false;
+      }
+
+      return result;
    }
 }

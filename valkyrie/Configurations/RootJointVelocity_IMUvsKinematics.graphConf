@@ -2,7 +2,7 @@
 <GraphGroup>
 	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistX,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityX,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.rootJointIMUBasedLinearVelocityInWorldX</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistX,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityX,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.rootJointIMUBasedLinearVelocityInWorldX</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -14,7 +14,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistY,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityY,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.rootJointIMUBasedLinearVelocityInWorldY</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistY,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityY,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.rootJointIMUBasedLinearVelocityInWorldY</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -26,7 +26,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistZ,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityZ,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.rootJointIMUBasedLinearVelocityInWorldZ</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistZ,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityZ,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.rootJointIMUBasedLinearVelocityInWorldZ</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -38,7 +38,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistX,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedRootJointLinearVelocityX</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistX,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedRootJointLinearVelocityX</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -50,7 +50,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistY,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedRootJointLinearVelocityY</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistY,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedRootJointLinearVelocityY</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -62,7 +62,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistZ,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedRootJointLinearVelocityZ</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.estimatedRootJointVelocityNewTwistZ,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedRootJointLinearVelocityZ</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -74,7 +74,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedRootJointLinearVelocityX,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.rootJointIMUBasedLinearVelocityInWorldX</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedRootJointLinearVelocityX,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.rootJointIMUBasedLinearVelocityInWorldX</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -86,7 +86,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedRootJointLinearVelocityY,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.rootJointIMUBasedLinearVelocityInWorldY</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedRootJointLinearVelocityY,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.rootJointIMUBasedLinearVelocityInWorldY</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -98,7 +98,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedRootJointLinearVelocityZ,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.rootJointIMUBasedLinearVelocityInWorldZ</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedRootJointLinearVelocityZ,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.rootJointIMUBasedLinearVelocityInWorldZ</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -110,7 +110,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedIMULinearVelocityX,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearVelocityInWorldX</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedIMULinearVelocityX,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearVelocityInWorldX</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -122,7 +122,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedIMULinearVelocityY,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearVelocityInWorldY</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedIMULinearVelocityY,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearVelocityInWorldY</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -134,7 +134,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedIMULinearVelocityZ,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearVelocityInWorldZ</Variables>
+		<Variables>root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuOnlyIntegratedIMULinearVelocityZ,root.main.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisIMUBasedLinearStateCalculator.imuLinearVelocityInWorldZ</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>

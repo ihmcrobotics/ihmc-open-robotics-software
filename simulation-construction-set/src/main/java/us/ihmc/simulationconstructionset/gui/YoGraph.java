@@ -1,6 +1,5 @@
 package us.ihmc.simulationconstructionset.gui;
 
-import javafx.application.Platform;
 import us.ihmc.yoVariables.dataBuffer.DataEntry;
 import us.ihmc.yoVariables.dataBuffer.DataEntryHolder;
 import us.ihmc.yoVariables.dataBuffer.TimeDataHolder;
@@ -22,9 +21,8 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+@SuppressWarnings("serial")
 public class YoGraph extends JPanel implements MouseListener, MouseMotionListener, KeyListener, FocusListener {
-    private static final long serialVersionUID = -2801526140874071236L;
-
     private static final int DONT_PLOT_BOTTOM_PIXELS = 25;
     private static final int PIXELS_PER_BOTTOM_ROW = 14;    // 16;
     private static final int DONT_PLOT_TIMELINE_BOTTOM_PIXELS = 16;
@@ -362,7 +360,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
 
         for (int i = 0; i < numVars; i++) {
             DataEntry entry = entriesOnThisGraph.get(i);
-            ret = (ret || entry.minMaxChanged());
+            ret = (ret || entry.hasMinMaxChanged());
         }
 
         return ret;
@@ -1169,7 +1167,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
         if ((evt.getClickCount() == 2) && (!entriesOnThisGraph.isEmpty())) {
             // System.out.println("Double Clicked!!!");
             if (parentFrame != null) {
-                Platform.runLater(() -> new GraphPropertiesDialog(parentFrame, this));
+                new GraphPropertiesDialog(parentFrame, this);
 
                 // parentFrame.repaint(); // This is a horrible way to get the graphs to repaint...
             }

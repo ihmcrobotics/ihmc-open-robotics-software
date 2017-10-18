@@ -38,7 +38,7 @@ public class MidiSliderBoardTest
       midiSliderBoard.setSlider(3, yoVariable, 1.5, 2.5); //set scale
       yoVariable.addVariableChangedListener(new VariableChangedListener()
       {
-         @Override public void variableChanged(YoVariable<?> v)
+         @Override public void notifyOfVariableChange(YoVariable<?> v)
          {
             System.out.println(v.getValueAsDouble());
          }

@@ -31,9 +31,9 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       System.out.println("Connecting to host " + host);
 
       SCSVisualizer scsVisualizer = new SCSVisualizer(BUFFER_SIZE);
-      scsVisualizer.setDisplayOneInNPackets(3);
+      scsVisualizer.setDisplayOneInNPackets(5);
       scsVisualizer.addSCSVisualizerStateListener(this);
-      scsVisualizer.setShowOverheadView(false);
+      scsVisualizer.setShowOverheadView(true);
 
       YoVariableClient client = new YoVariableClient(scsVisualizer);
       client.start();
@@ -77,7 +77,7 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       requestLowlLevelControlMode.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             int selectedIndex = requestControlModeComboBox.getSelectedIndex();
             int ordinal = requestLowlLevelControlMode.getOrdinal() + 1;

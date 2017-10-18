@@ -14,8 +14,9 @@ public class ValkyrieEndToEndHeadTrajectoryMessageTest extends EndToEndHeadTraje
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 17.9)
-   @Test(timeout = 89000)
+   @Test
    public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
       super.testSingleWaypoint();

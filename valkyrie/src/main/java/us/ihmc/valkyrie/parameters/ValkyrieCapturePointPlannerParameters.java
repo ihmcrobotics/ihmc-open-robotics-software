@@ -40,7 +40,7 @@ public class ValkyrieCapturePointPlannerParameters extends ContinuousCMPICPPlann
 
       Vector2D entryOffset, exitOffset;
       if (runningOnRealRobot)
-         entryOffset = new Vector2D(0.01, 0.02);
+         entryOffset = new Vector2D(0.01, 0.01);
       else
          entryOffset = new Vector2D(0.0, 0.006);
 

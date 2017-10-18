@@ -100,7 +100,7 @@ public class YoEntryBox extends JPanel implements MouseListener, ActionListener,
       for (int i = 0; i < variableChangedListeners.size(); i++)
       {
          VariableChangedListener listener = variableChangedListeners.get(i);
-         listener.variableChanged(variableChanged);
+         listener.notifyOfVariableChange(variableChanged);
       }
    }
 

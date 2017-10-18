@@ -62,7 +62,7 @@ public abstract class AbstractEncoderProcessor implements EncoderProcessor
          this.multiplicationFactor = multiplicationFactor;
       }
 
-      public void variableChanged(YoVariable variable)
+      public void notifyOfVariableChange(YoVariable variable)
       {
          output.setValueFromDouble(variable.getValueAsDouble() * multiplicationFactor);
       }

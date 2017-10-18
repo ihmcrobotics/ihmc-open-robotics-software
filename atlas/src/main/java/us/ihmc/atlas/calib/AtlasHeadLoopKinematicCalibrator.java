@@ -130,7 +130,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       scs.getDataBuffer().attachIndexChangedListener(new IndexChangedListener()
       {
          @Override
-         public void indexChanged(int newIndex, double newTime)
+         public void notifyOfIndexChange(int newIndex)
          {
             int index = (newIndex + q.size() - 1) % q.size();
             CalibUtil.setRobotModelFromData(fullRobotModel, q.get(index), qbias);

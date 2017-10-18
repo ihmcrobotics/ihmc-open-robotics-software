@@ -8,16 +8,13 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyUserControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -36,8 +33,6 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 14.8)
-   @Test(timeout = 74000)
    public void testSimpleCommands() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

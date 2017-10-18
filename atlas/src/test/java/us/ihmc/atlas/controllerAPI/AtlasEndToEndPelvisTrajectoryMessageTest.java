@@ -1,10 +1,13 @@
 package us.ihmc.atlas.controllerAPI;
 
+import org.junit.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.controllerAPI.EndToEndPelvisTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
 public class AtlasEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTrajectoryMessageTest
@@ -23,44 +26,58 @@ public class AtlasEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraj
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
-   
+
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 18.0)
+   @Test
    public void testHeightModeSwitchWhileWalking() throws Exception
    {
       super.testHeightModeSwitchWhileWalking();
    }
-   
+
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 18.0)
+   @Test
    public void testHeightUsingMultipleWaypoints() throws Exception
    {
       super.testHeightUsingMultipleWaypoints();
    }
-   
+
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 18.0)
+   @Test
    public void testHeightUsingMultipleWaypointsWhileWalking() throws Exception
    {
       super.testHeightUsingMultipleWaypointsWhileWalking();
    }
-   
+
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 18.0)
+   @Test
    public void testMultipleWaypoints() throws Exception
    {
       super.testMultipleWaypoints();
    }
-   
+
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @Test
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();
    }
-   
+
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @Test
    public void testSingleWaypointAndWalk() throws Exception
    {
       super.testSingleWaypointAndWalk();
    }
-   
+
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();

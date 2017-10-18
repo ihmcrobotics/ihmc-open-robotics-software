@@ -12,11 +12,12 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieReferenceFrameHashTest extends ReferenceFrameHashTest
 {
+   @Override
    public DRCRobotModel getRobotModel()
    {
       return new ValkyrieRobotModel(RobotTarget.SCS, true);
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 5.0)
    @Test(timeout = 15000, expected = IllegalArgumentException.class)
@@ -24,7 +25,7 @@ public class ValkyrieReferenceFrameHashTest extends ReferenceFrameHashTest
    {
       super.testAddingTwoFramesWithTheSameNameThrowsException();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 5.0)
    @Test(timeout = 15000)
@@ -32,7 +33,7 @@ public class ValkyrieReferenceFrameHashTest extends ReferenceFrameHashTest
    {
       super.testAllFramesGottenFromFullRobotModelMethodsAreInTheHashList();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 5.0)
    @Test(timeout = 15000)
@@ -41,7 +42,7 @@ public class ValkyrieReferenceFrameHashTest extends ReferenceFrameHashTest
    {
       super.testAllFramesGottenFromHumanoidReferenceFrameMethodsAreInTheHashList();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 5.0)
    @Test(timeout = 15000)
@@ -49,7 +50,7 @@ public class ValkyrieReferenceFrameHashTest extends ReferenceFrameHashTest
    {
       super.testAllFramesInFullRobotModelMatchHumanoidReferenceFramesThroughHashCode();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 5.0)
    @Test(timeout = 15000)

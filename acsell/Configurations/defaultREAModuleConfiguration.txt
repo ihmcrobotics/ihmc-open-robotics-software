@@ -1,0 +1,9 @@
+#
+#Tue Oct 10 11:32:49 CDT 2017
+REA/Module/Lidar/Range/Max=5.0
+REA/Module/Lidar/Range/Min=0.2
+REA/Module/NormalEstimation/Enable=true
+REA/Module/NormalEstimation/Parameters=search radius\: 0.08, max distance from plane\: 0.02, min consensus ratio\: 0.5, max average deviation ratio\: 0.75, number of iterations\: 1, least squares estimation\: true
+REA/Module/OcTree/BoundingBox/Enable=true
+REA/Module/OcTree/BoundingBox/Parameters=min\: (-1.0, -2.0, -3.0), max\: (5.0, 2.0, 0.5)
+REA/Module/OcTree/Enable=true

@@ -6,6 +6,7 @@ import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -26,6 +27,23 @@ public abstract class JavaFXTools
       affineToModify.setMzx(rotation.getM20());
       affineToModify.setMzy(rotation.getM21());
       affineToModify.setMzz(rotation.getM22());
+   }
+   
+   public static void convertEuclidAffineToJavaFXAffine(AffineTransform euclidAffine, Affine javaFxAffineToPack)
+   {
+      javaFxAffineToPack.setMxx(euclidAffine.getM00());
+      javaFxAffineToPack.setMxy(euclidAffine.getM01());
+      javaFxAffineToPack.setMxz(euclidAffine.getM02());
+      javaFxAffineToPack.setMyx(euclidAffine.getM10());
+      javaFxAffineToPack.setMyy(euclidAffine.getM11());
+      javaFxAffineToPack.setMyz(euclidAffine.getM12());
+      javaFxAffineToPack.setMzx(euclidAffine.getM20());
+      javaFxAffineToPack.setMzy(euclidAffine.getM21());
+      javaFxAffineToPack.setMzz(euclidAffine.getM22());
+
+      javaFxAffineToPack.setTx(euclidAffine.getM03());
+      javaFxAffineToPack.setTy(euclidAffine.getM13());
+      javaFxAffineToPack.setTz(euclidAffine.getM23());
    }
 
    public static void convertTransformToRotationMatrix(Transform transform, RotationMatrix rotationToPack)

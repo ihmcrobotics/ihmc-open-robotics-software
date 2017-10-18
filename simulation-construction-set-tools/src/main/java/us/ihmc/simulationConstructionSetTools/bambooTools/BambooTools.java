@@ -23,11 +23,11 @@ import us.ihmc.tools.FormattingTools;
 
 public class BambooTools
 {
-   private final static String[] possibleRootDirectoriesForBambooDataAndVideos = new String[] { "C:/BambooDataAndVideos/", "D:/BambooDataAndVideos/",
+   private final static String[] possibleRootDirectoriesForBambooDataAndVideos = new String[] { "C:/videos/", "D:/BambooDataAndVideos/",
          "../BambooDataAndVideos/", "~/bamboo-videos" };
 
    private final static String eraseableBambooDataAndVideosDirectoryLinux = "~/bamboo-videos";
-   private final static String eraseableBambooDataAndVideosDirectoryWindows = "X:/EraseableBambooDataAndVideos/";
+   private final static String eraseableBambooDataAndVideosDirectoryWindows = "C:/videos/";
 
    private static final String UPLOADED_VIDEOS_LOG = "uploaded-videos.log";
 
@@ -63,50 +63,40 @@ public class BambooTools
       return ((buildType != null) && (buildType.equals("isolated")));
    }
 
-   public static void createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(String simplifiedRobotModelName, SimulationConstructionSet scs)
-   {
-      createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName, scs, 1);
-   }
-
-   public static void createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(String simplifiedRobotModelName, SimulationConstructionSet scs,
-         int additionalStackDepthForRelevantCallingMethod)
-   {
-      PrintTools.info("Trying to create video!");
-      try
-      {
-         String rootDirectoryToUse = determineEraseableBambooDataAndVideosRootDirectoryToUse();
-
-         if (rootDirectoryToUse == null)
-         {
-            reportErrorMessage("Couldn't find a BambooDataAndVideos directory (for share drive)!", scs.getSimulationConstructionSetParameters().getShowWindows());
-
-            return;
-         }
-
-         reportOutMessage("Automatically creating video and data and saving to " + rootDirectoryToUse, scs.getSimulationConstructionSetParameters().getShowWindows());
-
-         createVideoWithDateTimeClassMethod(rootDirectoryToUse, simplifiedRobotModelName, scs, true, additionalStackDepthForRelevantCallingMethod + 2);
-      }
-      catch (Throwable t)
-      {
-         reportErrorMessage("createVideoAndData failed with " + t.toString(), scs.getSimulationConstructionSetParameters().getShowWindows());
-         t.printStackTrace();
-         System.err.flush();
-         if (t instanceof Error)
-         {
-            throw (Error) t;
-         }
-         else
-         {
-            throw (RuntimeException) t;
-         }
-      }
-   }
-
+   /**
+    * This method will generate videos of the current simulation and store it in the default path defined in this class. 
+    * It will use the stack trace to find the class name and method name to generate the file name. The additionalStackDepthForRelevantCallingMethod allows you to specify 
+    * how far up the stack trace the method will search to find the class and test name.
+    * @param simplifiedRobotModelName the name of the robot, used in the file name of the exported video
+    * @param scs the simulation used to create the video
+    * @param additionalStackDepthForRelevantCallingMethod the index of the stack trace to pull the class and test name
+    */
    public static void createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(String simplifiedRobotModelName, SimulationConstructionSet scs,
          int additionalStackDepthForRelevantCallingMethod)
    {
-      PrintTools.info("Trying to create video!");
+      //Get file name from stack trace
+      String classAndMethodName = getClassAndMethodName(additionalStackDepthForRelevantCallingMethod + 1);
+      String fileName = simplifiedRobotModelName + "_" + classAndMethodName;
+      
+      createVideoWithDateTimeAndStoreInDefaultDirectory(scs, fileName);
+   }
+
+   /**
+    * This method will generate videos of the current simulation and store it in the default path defined in this class. 
+    * It will append a date and time to the video name and add the video extension for you. Our video tools are pretty dependent 
+    * on this convention so please double check the output is correct
+    * 
+    * To be consistent with the auto generated name, please use the following format:
+    * RobotName_ClassName.TestMethodName
+    * 
+    * example:
+    * 
+    * Atlas_AtlasEndToEndFootTrajectoryMessageTest.testSingleWaypoint
+    */
+   public static void createVideoWithDateTimeAndStoreInDefaultDirectory(SimulationConstructionSet scs, String videoName)
+   {
+      PrintTools.info("Trying to create " +  videoName + " video!");
+      
       try
       {
          String rootDirectoryToUse = determineEraseableBambooDataAndVideosRootDirectoryToUse();
@@ -114,13 +104,12 @@ public class BambooTools
          if (rootDirectoryToUse == null)
          {
             reportErrorMessage("Couldn't find a BambooDataAndVideos directory (for share drive)!", scs.getSimulationConstructionSetParameters().getShowWindows());
-            
             return;
          }
          
          reportOutMessage("Automatically creating video and data and saving to " + rootDirectoryToUse, scs.getSimulationConstructionSetParameters().getShowWindows());
-         
-         createVideoWithDateTimeClassMethod(rootDirectoryToUse, simplifiedRobotModelName, scs, false, additionalStackDepthForRelevantCallingMethod + 2);
+
+         createVideoWithDateTimeAndName(rootDirectoryToUse, scs, false, videoName);
       }
       catch (Throwable t)
       {
@@ -136,6 +125,62 @@ public class BambooTools
             throw (RuntimeException) t;
          }
       }
+   }
+   
+   
+   /**
+    * Internal method that calls on scs to create video and data
+    * @param rootDirectory - directory to store the video and data
+    * @param scs - the sim to use to create the video
+    * @param writeData - whether or not to create sim data
+    * @param videoName - the name of the video (does not include date,time, and extension yet)
+    * @return File handles to the directory, video file, and the data file, in that order. Access to the file handle does not mean the file was created successfully. 
+    */
+   private static File[] createVideoWithDateTimeAndName(String rootDirectory, SimulationConstructionSet scs, boolean writeData, String videoName)
+   {
+      String dateString = FormattingTools.getDateString();
+      String directoryName = rootDirectory + dateString + "/";
+
+      File directory = new File(directoryName);
+      if (!directory.exists())
+      {
+         directory.mkdir();
+      }
+
+      String timeString = FormattingTools.getTimeString();
+      String dateTimeString = dateString + "_" + timeString;
+     
+      String videoFilename = dateTimeString + "_" + videoName + ".mp4";
+
+      PrintTools.debug(videoFilename);
+      
+      File videoFile = scs.createVideo(directoryName + videoFilename);
+
+      String dataFilename = directoryName + dateTimeString + ".data.gz";
+
+      File dataFile = new File(dataFilename);
+
+      if(writeData)
+      {
+         try
+         {
+            scs.writeData(dataFile);
+         }
+         catch (Exception e)
+         {
+            System.err.println("Error in writing data file in BambooTools.createVideoAndDataWithDateTimeClassMethod()");
+            e.printStackTrace();
+         }
+      }
+
+      if (doVideoUpload())
+      {
+         throw new RuntimeException("Youtube API v2 got deleted. Re-implement using v3 API");
+      }
+
+      scs.gotoOutPointNow();
+
+      return new File[] { directory, videoFile, dataFile };      
    }
 
    private static String determineBambooDataAndVideosRootDirectoryToUse()
@@ -265,59 +310,6 @@ public class BambooTools
       return fileAlphabeticalComparator;
    }
 
-   private static File[] createVideoWithDateTimeClassMethod(String rootDirectory, String simplifiedRobotModelName, SimulationConstructionSet scs,
-         boolean writeData, int stackDepthForRelevantCallingMethod)
-   {
-      String dateString = FormattingTools.getDateString();
-      String directoryName = rootDirectory + dateString + "/";
-
-      File directory = new File(directoryName);
-      if (!directory.exists())
-      {
-         directory.mkdir();
-      }
-
-      String classAndMethodName = getClassAndMethodName(stackDepthForRelevantCallingMethod);
-
-      String timeString = FormattingTools.getTimeString();
-      String filenameStart = dateString + "_" + timeString;
-      if (!simplifiedRobotModelName.equals(""))
-      {
-         filenameStart += "_" + simplifiedRobotModelName;
-      }
-      filenameStart += "_" + classAndMethodName;
-      String videoFilename = filenameStart + ".mp4";
-
-      //    String videoFilename = filenameStart + ".mov";
-      File videoFile = scs.createVideo(directoryName + videoFilename);
-
-      String dataFilename = directoryName + filenameStart + ".data.gz";
-
-      File dataFile = new File(dataFilename);
-
-      if(writeData)
-      {
-         try
-         {
-            scs.writeData(dataFile);
-         }
-         catch (Exception e)
-         {
-            System.err.println("Error in writing data file in BambooTools.createVideoAndDataWithDateTimeClassMethod()");
-            e.printStackTrace();
-         }
-      }
-
-      if (doVideoUpload())
-      {
-         throw new RuntimeException("Youtube API v2 got deleted. Re-implement using v3 API");
-      }
-
-      scs.gotoOutPointNow();
-
-      return new File[] { directory, videoFile, dataFile };
-   }
-
    private static void writeVideoUrlToVideoLog(String fileName, String videoUrl)
    {
       String artifactsOut = System.getProperty("artifacts.out");
@@ -343,7 +335,7 @@ public class BambooTools
          System.err.println("Failed to write video url to " + file.getAbsolutePath() + "\n" + e.toString());
       }
    }
-
+   
    public static String getClassAndMethodName()
    {
       return getClassAndMethodName(1);
@@ -351,6 +343,9 @@ public class BambooTools
 
    public static String getClassAndMethodName(int stackDepthZeroIfCallingMethod)
    {
+      //Print out some helpful info, if the stack depth is wrong you need to look at the whole stack trace to find the source
+      printStackTrace(5);
+      
       int stackDepthForRelevantCallingMethod = stackDepthZeroIfCallingMethod + 2;
 
       StackTraceElement[] elements = Thread.currentThread().getStackTrace();
@@ -361,6 +356,27 @@ public class BambooTools
       String classAndMethodName = className + "." + methodName;
 
       return classAndMethodName;
+   }
+   
+   private static void printStackTrace(int depth)
+   {
+      StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+      
+      for(int i = 0; i < depth; i++)
+      {
+         if(elements.length > i)
+         {
+            StackTraceElement stackTraceElement = elements[i];
+            if(stackTraceElement != null)
+            {
+               String methodName = stackTraceElement.getMethodName();
+               String className = stackTraceElement.getClassName();
+               className = className.substring(className.lastIndexOf('.') + 1);
+               String classAndMethodName = className + "." + methodName;
+               PrintTools.info(classAndMethodName);
+            }
+         }
+      }
    }
 
    private static void writeSuccessLogFile(String successString, String logFilename)
@@ -582,5 +598,4 @@ public class BambooTools
    {
       M2V2, R2, VALKYRIE, ATLAS, BONO, SPOKED_RUNNER, V2EXOSKELETON,V3EXOSKELETON
    }
-
 }

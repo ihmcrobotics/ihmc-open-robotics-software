@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -50,7 +50,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
       userUpdateDesiredPelvisPose.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (userUpdateDesiredPelvisPose.getBooleanValue())
             {
@@ -65,7 +65,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
       userDoPelvisPose.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (userDoPelvisPose.getBooleanValue())
             {
@@ -80,7 +80,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
       userStreamPelvisPose.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (userStreamPelvisPose.getBooleanValue())
             {
@@ -93,7 +93,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
       userStreamPelvisOrientation.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (userStreamPelvisOrientation.getBooleanValue())
             {
@@ -106,7 +106,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
       userDesiredPelvisPose.attachVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (userStreamPelvisPose.getBooleanValue())
                sendPelvisTrajectoryCommand();
@@ -116,7 +116,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
       userDesiredPelvisPose.getOrientation().attachVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if (userStreamPelvisOrientation.getBooleanValue())
                sendPelvisOrientationTrajectoryCommand();

@@ -9,6 +9,7 @@ import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
@@ -20,7 +21,6 @@ public class JMEGeometryUtils
 {
    private final static Quaternion zUpToYup = new Quaternion();
    private final static Quaternion yUpToZup = new Quaternion();
-
 
    static
    {
@@ -44,7 +44,8 @@ public class JMEGeometryUtils
    private final static RigidBodyTransform yUpToZupTransform = new RigidBodyTransform(JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(yUpToZup), new Vector3D());
 
    /*
-    * Be careful with the multLocal and mult functions. The documentation is not always correct in what arguments are safe to pass
+    * Be careful with the multLocal and mult functions. The documentation is not
+    * always correct in what arguments are safe to pass
     */
 
    public static void transformFromZupToJMECoordinates(Vector3f point)
@@ -103,17 +104,17 @@ public class JMEGeometryUtils
       RigidBodyTransform modifiedTransform = new RigidBodyTransform(zUpToYupTransform);
       modifiedTransform.multiply(transform);
 
-      return j3dTransform3DToJMETransform( modifiedTransform );
+      return j3dTransform3DToJMETransform(modifiedTransform);
    }
-   
-  /*
+
+   /*
    * 
    */
    public static void transform(Transform matrixToModify, Transform transformToApply)
    {
       matrixToModify.combineWithParent(transformToApply);
    }
-   
+
    public static Transform multiply(Transform matrix, Transform transformToApply)
    {
       Transform temp = new Transform();
@@ -121,39 +122,38 @@ public class JMEGeometryUtils
       temp.combineWithParent(transformToApply);
       return temp;
    }
-   
+
    public static void multiply(Transform matrix, Transform transformToApply, Transform result)
    {
       result.set(matrix);
       result.combineWithParent(transformToApply);
    }
-   
-/*   public static Transform multiply(Transform a, Transform b)
-   {
-      RigidBodyTransform A = jmeTransformToTransform3D(a);
-      RigidBodyTransform B = jmeTransformToTransform3D(b);
-      A.multiply(B);
-      return j3dTransform3DToJMETransform( A );
-   }*/
 
-// public static Vector2d projectOntoZupXY(Vector3f vector)
-// {
-//    Vector3f vectorZup = new Vector3f(vector);
-//    JMEGeometryUtils.transformFromJMECoordinatesToZup(vectorZup);
-//    Vector2d vectorZup2d = new Vector2d(vectorZup.x, vectorZup.y);
-//    return vectorZup2d;
-// }
-// public static Vector3f unProjectFromZupXY(Vector2d vector)
-// {
-//    Vector3f vector3f = new Vector3f( (float)vector.x,(float)vector.y,0.0f);
-//    transformFromZupToJMECoordinates(vector3f);
-//    return vector3f;
-// }
-   
+   /*
+    * public static Transform multiply(Transform a, Transform b) {
+    * RigidBodyTransform A = jmeTransformToTransform3D(a); RigidBodyTransform B
+    * = jmeTransformToTransform3D(b); A.multiply(B); return
+    * j3dTransform3DToJMETransform( A ); }
+    */
+
+   // public static Vector2d projectOntoZupXY(Vector3f vector)
+   // {
+   //    Vector3f vectorZup = new Vector3f(vector);
+   //    JMEGeometryUtils.transformFromJMECoordinatesToZup(vectorZup);
+   //    Vector2d vectorZup2d = new Vector2d(vectorZup.x, vectorZup.y);
+   //    return vectorZup2d;
+   // }
+   // public static Vector3f unProjectFromZupXY(Vector2d vector)
+   // {
+   //    Vector3f vector3f = new Vector3f( (float)vector.x,(float)vector.y,0.0f);
+   //    transformFromZupToJMECoordinates(vector3f);
+   //    return vector3f;
+   // }
+
    /// under no circumstances change this to public. This method is dangerous and misleading.
    private static Transform j3dTransform3DToJMETransform(RigidBodyTransform transform3D)
    {
-      us.ihmc.euclid.tuple4D.Quaternion32   quat   = new us.ihmc.euclid.tuple4D.Quaternion32();
+      us.ihmc.euclid.tuple4D.Quaternion32 quat = new us.ihmc.euclid.tuple4D.Quaternion32();
       us.ihmc.euclid.tuple3D.Vector3D32 vector = new us.ihmc.euclid.tuple3D.Vector3D32();
       transform3D.get(quat, vector);
       Vector3f jmeVector = new Vector3f(vector.getX32(), vector.getY32(), vector.getZ32());
@@ -168,7 +168,7 @@ public class JMEGeometryUtils
    {
       Quaternion jmeQuat = jmeTransform.getRotation();
       Vector3f jmeVect = jmeTransform.getTranslation();
-      us.ihmc.euclid.tuple4D.Quaternion quat = new  us.ihmc.euclid.tuple4D.Quaternion(jmeQuat.getX(), jmeQuat.getY(), jmeQuat.getZ(), jmeQuat.getW());
+      us.ihmc.euclid.tuple4D.Quaternion quat = new us.ihmc.euclid.tuple4D.Quaternion(jmeQuat.getX(), jmeQuat.getY(), jmeQuat.getZ(), jmeQuat.getW());
       Vector3D vect = new Vector3D(jmeVect.getX(), jmeVect.getY(), jmeVect.getZ());
       RigidBodyTransform ret = new RigidBodyTransform(quat, vect);
       return ret;
@@ -182,44 +182,58 @@ public class JMEGeometryUtils
 
       return ret;
    }
-   
+
    public static Transform invert(Transform transform)
    {
       RigidBodyTransform transform3D = jmeTransformToTransform3D(transform);
       transform3D.invert();
-      return transform.set(  j3dTransform3DToJMETransform(transform3D ) );
+      return transform.set(j3dTransform3DToJMETransform(transform3D));
    }
-   
+
    static public boolean epsilonEquals(Transform a, Transform b, double epsilon)
    {
       RigidBodyTransform A = jmeTransformToTransform3D(a);
       RigidBodyTransform B = jmeTransformToTransform3D(b);
-      return A.epsilonEquals(B, epsilon);    
+      return A.epsilonEquals(B, epsilon);
    }
-   
+
    public static JMEGraphics3DNode addNodesRecursively(Graphics3DNode graphics3dNode, Node parentNode, SimpleApplication simpleApplication)
    {
-     
-      
-         JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode,simpleApplication.getAssetManager(), simpleApplication, null);
 
-         jmeNode.update();
+      JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode, simpleApplication.getAssetManager(), simpleApplication, null);
 
-         Graphics3DNodeType nodeType = graphics3dNode.getNodeType();
+      jmeNode.update();
 
-         jmeNode.setType(nodeType);
+      Graphics3DNodeType nodeType = graphics3dNode.getNodeType();
 
-         parentNode.attachChild(jmeNode);
+      jmeNode.setType(nodeType);
 
-         for (Graphics3DNode child : graphics3dNode.getChildrenNodes())
-         {
-            addNodesRecursively(child, jmeNode, simpleApplication);
-         }
+      parentNode.attachChild(jmeNode);
 
-         return jmeNode;
-      
+      for (Graphics3DNode child : graphics3dNode.getChildrenNodes())
+      {
+         addNodesRecursively(child, jmeNode, simpleApplication);
+      }
+
+      return jmeNode;
+
    }
 
+   public static void linkNodeAToNodeB(Node a, Node b)
+   {
+
+      RigidBodyTransform aTransform = JMEDataTypeUtils.jmeTransformToTransform3D(a.getWorldTransform());
+      RigidBodyTransform bTransform = JMEDataTypeUtils.jmeTransformToTransform3D(b.getWorldTransform());
+      ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformToParent("nodeA", ReferenceFrame.getWorldFrame(), aTransform);
+      ReferenceFrame frameB = ReferenceFrame.constructFrameWithUnchangingTransformToParent("nodeB", ReferenceFrame.getWorldFrame(), bTransform);
+
+      RigidBodyTransform aToBTransform = frameA.getTransformToDesiredFrame(frameB);
+
+      Transform aTransformJME = JMEDataTypeUtils.j3dTransform3DToJMETransform(aToBTransform);
+      a.removeFromParent();
+      a.setLocalTransform(aTransformJME);
+      b.attachChild(a);
+   }
 
    public static void main(String[] args)
    {

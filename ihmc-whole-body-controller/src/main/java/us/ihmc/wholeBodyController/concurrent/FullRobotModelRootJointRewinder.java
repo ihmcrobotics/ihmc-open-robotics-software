@@ -39,7 +39,7 @@ public class FullRobotModelRootJointRewinder implements RewoundListener
    }
 
    @Override
-   public void wasRewound()
+   public void notifyOfRewind()
    {      
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       

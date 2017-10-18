@@ -25,9 +25,9 @@ import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.gui.DataBufferChangeListener;
 
 
+@SuppressWarnings("serial")
 public class DataBufferPropertiesDialog extends JDialog implements ActionListener
 {
-   private static final long serialVersionUID = 3689240296926827447L;
    private JTextField maxTextField, currentTextField;
    private JRadioButton wrapButton, enlargeButton;
 

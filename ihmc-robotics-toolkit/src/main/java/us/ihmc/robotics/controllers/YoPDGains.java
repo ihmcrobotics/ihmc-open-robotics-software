@@ -154,7 +154,7 @@ public class YoPDGains implements PDGainsInterface
       VariableChangedListener kdUpdater = new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             kd.set(GainCalculator.computeDerivativeGain(kp.getDoubleValue(), zeta.getDoubleValue()));
          }
@@ -163,7 +163,7 @@ public class YoPDGains implements PDGainsInterface
       kp.addVariableChangedListener(kdUpdater);
       zeta.addVariableChangedListener(kdUpdater);
 
-      if (updateNow) kdUpdater.variableChanged(null);
+      if (updateNow) kdUpdater.notifyOfVariableChange(null);
    }
 
    public void set(YoPDGains other)

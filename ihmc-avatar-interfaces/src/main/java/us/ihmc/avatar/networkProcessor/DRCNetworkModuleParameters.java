@@ -35,6 +35,7 @@ public class DRCNetworkModuleParameters
    private boolean useRobotEnvironmentAwarenessModule;
    private boolean useHeightQuadTreeToolbox;
    private boolean useRemoteObjectDetectionFeedback;
+   private boolean useLidarScanLogger;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
 
@@ -111,6 +112,11 @@ public class DRCNetworkModuleParameters
    public boolean isHeightQuadTreeToolboxEnabled()
    {
       return useHeightQuadTreeToolbox;
+   }
+
+   public boolean isLidarScanLoggerEnabled()
+   {
+      return useLidarScanLogger;
    }
 
    public void enableMultisenseManualTestModule(boolean b)
@@ -290,6 +296,11 @@ public class DRCNetworkModuleParameters
    public boolean isRemoteObjectDetectionFeedbackEnabled()
    {
       return useRemoteObjectDetectionFeedback;
+   }
+
+   public void enableLidarScanLogger(boolean enableLidarScanLogger)
+   {
+      this.useLidarScanLogger = enableLidarScanLogger;
    }
 
    public void setUseRemoteObjectDetectionFeedbackEnabled(boolean useRemoteObjectDetectionFeedback)

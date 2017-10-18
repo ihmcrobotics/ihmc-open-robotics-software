@@ -16,6 +16,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.BipedalStepAdjustmentCostCalculator;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;

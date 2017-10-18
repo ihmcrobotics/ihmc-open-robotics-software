@@ -95,13 +95,13 @@ public class ValkyrieRosControlSensorReaderFactory implements SensorReaderFactor
             if (effortJointHandles.containsKey(joint.getName()))
             {
                YoEffortJointHandleHolder holder = new YoEffortJointHandleHolder(effortJointHandles.get(joint.getName()), oneDoFJoint,
-                     estimatorDesiredJointDataHolder.getLowLevelJointData(oneDoFJoint), sensorReaderRegistry);
+                     estimatorDesiredJointDataHolder.getJointDesiredOutput(oneDoFJoint), sensorReaderRegistry);
                yoEffortJointHandleHolders.add(holder);
             }
             else if (positionJointHandles.containsKey(joint.getName()))
             {
                YoPositionJointHandleHolder holder = new YoPositionJointHandleHolder(positionJointHandles.get(joint.getName()), oneDoFJoint,
-                     estimatorDesiredJointDataHolder.getLowLevelJointData(oneDoFJoint), sensorReaderRegistry);
+                     estimatorDesiredJointDataHolder.getJointDesiredOutput(oneDoFJoint), sensorReaderRegistry);
                yoPositionJointHandleHolders.add(holder);
             }
             else if(jointStateHandles.containsKey(joint.getName()))

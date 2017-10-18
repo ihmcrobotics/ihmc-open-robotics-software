@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -20,8 +19,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTool
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -36,7 +33,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
@@ -51,6 +47,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterface
 {
@@ -82,9 +79,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   // Invoked manually to test memory & thread leaks
-	@ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.MANUAL)
-	@Test
    public void testForMemoryLeaks() throws Exception
    {
       for (int i = 0; i < 10; i++)
@@ -95,8 +89,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 15.3)
-	@Test
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -125,8 +117,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 19.0)
-	@Test
    public void testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -165,8 +155,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 39.4)
-	@Test
    public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -209,8 +197,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	  @ContinuousIntegrationTest(estimatedDuration = 39.9)
-	   @Test
 	   public void testSimpleScripts() throws SimulationExceededMaximumTimeException, IOException
 	   {
 	      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -270,9 +256,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 	   }
 
-
-	  @ContinuousIntegrationTest(estimatedDuration = 29.1)
-	   @Test
 	   public void testACoupleStepsUsingQueuedControllerCommands() throws SimulationExceededMaximumTimeException
 	   {
 	      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -371,9 +354,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 	      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
 	   }
 
-
-     @ContinuousIntegrationTest(estimatedDuration = 31.9)
-     @Test
      public void testACoupleQueuedControllerCommands() throws SimulationExceededMaximumTimeException
      {
         BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -482,9 +462,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
      }
 
-
-     @ContinuousIntegrationTest(estimatedDuration = 38.5)
-     @Test
      public void testACoupleMoreQueuedControllerCommands() throws SimulationExceededMaximumTimeException
      {
         BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -549,8 +526,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
      }
 
 
-	@ContinuousIntegrationTest(estimatedDuration = 52.3)
-	@Test
    public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -606,8 +581,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       drcSimulationTestHelper.loadScriptFile(scriptInputStream, leftSoleFrame);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 20.8)
-	@Test
    public void testStandingWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -649,8 +622,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 42.8)
-	@Test
    public void testLongStepsMaxHeightPauseAndResume() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -684,8 +655,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 34.4)
-	@Test
    public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -729,8 +698,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 33.1)
-	@Test
    public void testSideStepsWithRandomSlipping() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -776,9 +743,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   // TODO re-enable that test when we have polygon to polygon contact model for SCS
-	@ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.EXCLUDE)
-	@Test
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -823,8 +787,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
 
    // Added for fixing DRC-866. Does not work for fast walking
-	@ContinuousIntegrationTest(estimatedDuration = 50.0)
-	@Test
    public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -852,8 +814,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 39.0)
-	@Test
    public void testWalkingUpToRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -885,8 +845,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 36.5)
-	@Test
    public void testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -923,8 +881,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 65.6)
-	@Test
    public void testTurningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

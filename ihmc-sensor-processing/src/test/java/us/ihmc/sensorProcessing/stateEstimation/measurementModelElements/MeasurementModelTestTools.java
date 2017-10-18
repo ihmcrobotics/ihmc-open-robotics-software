@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FrameOrientation;
 
 public class MeasurementModelTestTools
@@ -37,10 +37,10 @@ public class MeasurementModelTestTools
                                                                  FramePoint3D nominalState, double perturbationMagnitude, double tolerance, Runnable runnable)
    {
       DenseMatrix64F outputMatrixBlock = modelElement.getOutputMatrixBlock(statePort);
-      for (Direction direction : Direction.values())
+      for (Axis axis : Axis.values())
       {
          FrameVector3D perturbationVector = new FrameVector3D(nominalState.getReferenceFrame());
-         perturbationVector.setElement(direction.ordinal(), perturbationMagnitude);
+         perturbationVector.setElement(axis.ordinal(), perturbationMagnitude);
 
          DenseMatrix64F perturbationEjmlVector = new DenseMatrix64F(3, 1);
          perturbationVector.getVector().get(perturbationEjmlVector);
@@ -62,10 +62,10 @@ public class MeasurementModelTestTools
            FrameVector3D nominalState, double perturbationMagnitude, double tolerance, Runnable runnable)
    {
       DenseMatrix64F outputMatrixBlock = modelElement.getOutputMatrixBlock(statePort);
-      for (Direction direction : Direction.values())
+      for (Axis axis : Axis.values())
       {
          FrameVector3D perturbationVector = new FrameVector3D(nominalState.getReferenceFrame());
-         perturbationVector.setElement(direction.ordinal(), perturbationMagnitude);
+         perturbationVector.setElement(axis.ordinal(), perturbationMagnitude);
 
          DenseMatrix64F perturbationEjmlVector = new DenseMatrix64F(3, 1);
          perturbationVector.getVector().get(perturbationEjmlVector);
@@ -87,10 +87,10 @@ public class MeasurementModelTestTools
            FrameOrientation nominalState, double perturbationMagnitude, double tolerance, Runnable runnable)
    {
       DenseMatrix64F outputMatrixBlock = modelElement.getOutputMatrixBlock(statePort);
-      for (Direction direction : Direction.values())
+      for (Axis axis : Axis.values())
       {
          Vector3D perturbationRotationVector = new Vector3D();
-         Direction.set(perturbationRotationVector, direction, perturbationMagnitude);
+         Axis.set(perturbationRotationVector, axis, perturbationMagnitude);
 
          DenseMatrix64F perturbationEjmlVector = new DenseMatrix64F(3, 1);
          perturbationRotationVector.get(perturbationEjmlVector);

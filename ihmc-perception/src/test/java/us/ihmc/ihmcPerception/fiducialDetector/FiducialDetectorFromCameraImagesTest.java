@@ -159,7 +159,7 @@ public class FiducialDetectorFromCameraImagesTest
       time.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             double t = time.getDoubleValue();
             double ampX = 0.05;

@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
@@ -14,27 +15,25 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
+import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlanarRegionBipedalFootstepPlannerVisualizer;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -42,12 +41,15 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.YoStopwatch;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 {
    private final String prefix = "planFootsteps";
 
-   private final FullHumanoidRobotModel fullRobotModel;
    private final HumanoidReferenceFrames referenceFrames;
 
    private final ConcurrentListeningQueue<PlanarRegionsListMessage> planarRegionsListQueue = new ConcurrentListeningQueue<>(10);
@@ -59,7 +61,7 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
    private final YoEnum<RobotSide> nextSideToSwing;
 
-   private final PlanarRegionBipedalFootstepPlanner footstepPlanner;
+   private final DepthFirstFootstepPlanner footstepPlanner;
    private FootstepPlan plan = null;
 
    private final YoFramePose footstepPlannerInitialStepPose;
@@ -76,14 +78,12 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
    private final Quaternion tempFirstFootstepPoseOrientation = new Quaternion();
    private final YoStopwatch plannerTimer;
 
-   public PlanHumanoidFootstepsBehavior(YoDouble yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
-                                        HumanoidReferenceFrames referenceFrames)
+   public PlanHumanoidFootstepsBehavior(YoDouble yoTime, CommunicationBridge behaviorCommunicationBridge, HumanoidReferenceFrames referenceFrames)
    {
       super(PlanHumanoidFootstepsBehavior.class.getSimpleName(), behaviorCommunicationBridge);
 
       shorterGoalLength.set(1.5);
 
-      this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
 
       footstepPlanner = createFootstepPlanner();
@@ -102,37 +102,15 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
       requestedPlanarRegion.set(false);
    }
 
-   private PlanarRegionBipedalFootstepPlanner createFootstepPlanner()
+   private DepthFirstFootstepPlanner createFootstepPlanner()
    {
-      BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registry);
-
-      parameters.setMaximumStepReach(0.65); //0.55); //(0.4);
-      parameters.setMaximumStepZ(0.25); //0.4); //0.25);
-
-      // Atlas has ankle pitch range of motion limits, which hit when taking steps forward and down. Similar to a human.
-      // Whereas a human gets on its toes nicely to avoid the limits, this is challenging with a robot.
-      // So for now, have really conservative forward and down limits on height.
-      parameters.setMaximumStepXWhenForwardAndDown(0.2);
-      parameters.setMaximumStepWidth(0.4);
-      parameters.setMaximumStepZWhenForwardAndDown(0.10);
-
-      parameters.setMaximumStepYaw(0.15); //0.25);
-      parameters.setMinimumStepWidth(0.15);
-      parameters.setMinimumFootholdPercent(0.95);
-
-      parameters.setWiggleInsideDelta(0.02); //0.08);
-      parameters.setMaximumXYWiggleDistance(1.0);
-      parameters.setMaximumYawWiggle(0.1);
-
-      parameters.setRejectIfCannotFullyWiggleInside(true);
-
-      double idealFootstepLength = 0.45; //0.3; //0.4;
-      double idealFootstepWidth = 0.26; //0.2; //0.25;
-      parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
-
-      PlanarRegionBipedalFootstepPlanner planner = new PlanarRegionBipedalFootstepPlanner(parameters, registry);
+      YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters());
 
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = createDefaultFootPolygons();
+      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygonsInSoleFrame);
+      SnapAndWiggleBasedNodeChecker nodeChecker = new SnapAndWiggleBasedNodeChecker(footPolygonsInSoleFrame, null, parameters, null);
+      ConstantFootstepCost footstepCost = new ConstantFootstepCost(1.0);
+      DepthFirstFootstepPlanner planner = new DepthFirstFootstepPlanner(parameters, snapper, nodeChecker, footstepCost, registry);
       planner.setFeetPolygons(footPolygonsInSoleFrame);
 
       planner.setMaximumNumberOfNodesToExpand(500);

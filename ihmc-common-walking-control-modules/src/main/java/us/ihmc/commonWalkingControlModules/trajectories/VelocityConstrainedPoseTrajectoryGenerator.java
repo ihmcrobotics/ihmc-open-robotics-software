@@ -270,7 +270,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
          showViz = new YoBoolean(namePrefix + "ShowViz", registry);
          showViz.addVariableChangedListener(new VariableChangedListener()
          {
-            public void variableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                boolean visible = showViz.getBooleanValue();
                currentVelocityViz.setVisible(visible);

@@ -1,6 +1,6 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -9,18 +9,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
-import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -88,8 +83,6 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
    private YoBoolean allowUsingHighMomentumWeight;
    private YoBoolean doToeOffIfPossible;
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 300000)
    public void testWalkingOnStraightSidewayLines() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -141,8 +134,6 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 300000)
    public void testWalkingOnStraightForwardLines() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -194,8 +185,6 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
-   @Test(timeout = 300000)
    public void testWalkingOnLines() throws SimulationExceededMaximumTimeException
    {
       Random random = new Random(49039845179L);

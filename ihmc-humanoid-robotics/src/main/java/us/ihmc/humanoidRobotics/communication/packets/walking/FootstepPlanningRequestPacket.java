@@ -17,6 +17,14 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public Point3D32 goalPositionInWorld;
    public Quaternion32 goalOrientationInWorld;
    public boolean assumeFlatGround = true;
+   public FootstepPlannerType requestedPlannerType;
+
+   public enum FootstepPlannerType
+   {
+      PLANAR_REGION_BIPEDAL,
+      PLAN_THEN_SNAP,
+      A_STAR
+   }
 
    public FootstepPlanningRequestPacket()
    {
@@ -25,10 +33,15 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
    public FootstepPlanningRequestPacket(FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose)
    {
-      set(initialStanceFootPose, initialStanceSide, goalPose);
+      this(initialStanceFootPose, initialStanceSide, goalPose, FootstepPlannerType.PLANAR_REGION_BIPEDAL);
    }
 
-   public void set(FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose)
+   public FootstepPlanningRequestPacket(FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, FootstepPlannerType requestedPlannerType)
+   {
+      set(initialStanceFootPose, initialStanceSide, goalPose, requestedPlannerType);
+   }
+
+   public void set(FramePose initialStanceFootPose, RobotSide initialStanceSide, FramePose goalPose, FootstepPlannerType requestedPlannerType)
    {
       this.initialStanceSide = initialStanceSide;
 
@@ -44,6 +57,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       goalPose.getOrientation(tempOrientation);
       goalPositionInWorld = new Point3D32(tempPoint);
       goalOrientationInWorld = new Quaternion32(tempOrientation);
+
+      this.requestedPlannerType = requestedPlannerType;
    }
 
    public void setAssumeFlatGround(boolean assumeFlatGround)
@@ -63,6 +78,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if (!goalPositionInWorld.epsilonEquals(other.goalPositionInWorld, (float) epsilon))
          return false;
       if (!RotationTools.quaternionEpsilonEquals(goalOrientationInWorld, other.goalOrientationInWorld, (float) epsilon))
+         return false;
+      if(this.requestedPlannerType != other.requestedPlannerType)
          return false;
       return true;
    }

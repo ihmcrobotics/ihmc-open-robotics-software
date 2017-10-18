@@ -25,7 +25,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 
 public class WholeBodyInverseKinematicsSolver
 {
@@ -51,7 +51,7 @@ public class WholeBodyInverseKinematicsSolver
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
-      lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, LowLevelJointControlMode.FORCE_CONTROL);
+      lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, JointDesiredControlMode.EFFORT);
 
       optimizationControlModule = new InverseKinematicsOptimizationControlModule(toolbox, registry);
       integrator = new RobotJointVelocityAccelerationIntegrator(toolbox.getControlDT());

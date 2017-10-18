@@ -80,7 +80,7 @@ public class SimulationRewoundListenerTest
    {
       private int count = 0;
       @Override
-      public void wasRewound()
+      public void notifyOfRewind()
       {
 //         System.out.println(count + ": Sim was rewound");
          count++;

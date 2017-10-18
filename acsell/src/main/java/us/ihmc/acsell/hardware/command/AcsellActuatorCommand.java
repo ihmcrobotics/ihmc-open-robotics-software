@@ -49,7 +49,7 @@ public abstract class AcsellActuatorCommand
       rawCurrentDesired.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
         	 if(v.getValueAsDouble()>currentLimit) v.setValueFromDouble(currentLimit);
         	 if(v.getValueAsDouble()<-currentLimit) v.setValueFromDouble(-currentLimit);        	 
