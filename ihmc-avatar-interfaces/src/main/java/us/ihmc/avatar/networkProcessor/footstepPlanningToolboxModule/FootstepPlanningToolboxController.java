@@ -266,6 +266,16 @@ public class FootstepPlanningToolboxController extends ToolboxController
       goal.setGoalPoseBetweenFeet(goalPose);
       planner.setGoal(goal);
 
+      double timeout = request.getTimeout();
+      if (timeout > 0.0 && Double.isFinite(timeout))
+      {
+         planner.setTimeout(timeout);
+      }
+      else
+      {
+         planner.setTimeout(Double.POSITIVE_INFINITY);
+      }
+
       return true;
    }
 

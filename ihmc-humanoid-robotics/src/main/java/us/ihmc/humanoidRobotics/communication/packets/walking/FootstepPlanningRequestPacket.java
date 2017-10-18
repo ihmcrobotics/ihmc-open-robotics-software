@@ -18,6 +18,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public Quaternion32 goalOrientationInWorld;
    public boolean assumeFlatGround = true;
    public FootstepPlannerType requestedPlannerType;
+   public double timeout;
 
    public enum FootstepPlannerType
    {
@@ -64,6 +65,16 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public void setAssumeFlatGround(boolean assumeFlatGround)
    {
       this.assumeFlatGround = assumeFlatGround;
+   }
+
+   public void setTimeout(double timeout)
+   {
+      this.timeout = timeout;
+   }
+
+   public double getTimeout()
+   {
+      return timeout;
    }
 
    @Override
