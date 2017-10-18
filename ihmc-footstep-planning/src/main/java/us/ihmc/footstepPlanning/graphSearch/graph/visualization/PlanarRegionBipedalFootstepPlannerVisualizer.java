@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningUtils;
 import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeUtils;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPlanarRegionsList;
@@ -239,7 +239,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
 //      drawPlanUpToNodeSelected(nodeToExpand);
 
       RigidBodyTransform soleTransform = new RigidBodyTransform();
-      BipedalFootstepPlannerNodeUtils.getSoleTransform(nodeToExpand, soleTransform);
+      FootstepNodeTools.getNodeTransform(nodeToExpand, soleTransform);
 
       if (verbose)
       {
@@ -265,7 +265,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       hideExpandingFootstepViz();
       
       RigidBodyTransform soleTransform = new RigidBodyTransform();
-      BipedalFootstepPlannerNodeUtils.getSoleTransform(startNode, soleTransform);
+      FootstepNodeTools.getNodeTransform(startNode, soleTransform);
 
       YoGraphicPolygon startNodeViz = footstepStartsViz.get(robotSide);
       startNodeViz.setTransformToWorld(soleTransform);
@@ -297,7 +297,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
    {
       RobotSide robotSide = acceptedNode.getRobotSide();
       RigidBodyTransform soleTransform = new RigidBodyTransform();
-      BipedalFootstepPlannerNodeUtils.getSoleTransform(acceptedNode, soleTransform);
+      FootstepNodeTools.getNodeTransform(acceptedNode, soleTransform);
 
       if (verbose)
       {
@@ -327,7 +327,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
 
       RobotSide robotSide = rejectedNode.getRobotSide();
       RigidBodyTransform soleTransform = new RigidBodyTransform();
-      BipedalFootstepPlannerNodeUtils.getSoleTransform(rejectedNode, soleTransform);
+      FootstepNodeTools.getNodeTransform(rejectedNode, soleTransform);
 
       if (verbose)
       {

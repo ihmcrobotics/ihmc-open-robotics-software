@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeUtils;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -44,7 +44,8 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
          RigidBodyTransform regionToWorld = new RigidBodyTransform();
          planarRegionToPack.getTransformToWorld(regionToWorld);
 
-         RigidBodyTransform soleTransform = BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(footstepNode, snapTransform);
+         RigidBodyTransform soleTransform = new RigidBodyTransform();
+         FootstepNodeTools.getSnappedNodeTransform(footstepNode, snapTransform, soleTransform);
 
          RigidBodyTransform regionToSole = new RigidBodyTransform();
          regionToSole.setAndInvert(soleTransform);
