@@ -105,6 +105,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       heuristics.setWeight(weight);
    }
 
+   @Override
    public void setTimeout(double timeoutInSeconds)
    {
       timeout.set(timeoutInSeconds);

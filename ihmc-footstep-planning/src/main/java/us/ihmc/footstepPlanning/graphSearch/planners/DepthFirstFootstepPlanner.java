@@ -98,6 +98,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
       this.maximumNumberOfNodesToExpand.set(maximumNumberOfNodesToExpand);
    }
 
+   @Override
    public void setTimeout(double timeoutInSeconds)
    {
       this.timeout.set(timeoutInSeconds);
