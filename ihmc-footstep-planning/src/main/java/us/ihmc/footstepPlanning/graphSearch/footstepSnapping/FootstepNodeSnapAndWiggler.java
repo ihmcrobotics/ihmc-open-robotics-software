@@ -26,6 +26,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    private final BipedalFootstepPlannerListener listener;
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
    private final FootstepPlannerParameters parameters;
+   private final WiggleParameters wiggleParameters = new WiggleParameters();
 
    public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParameters parameters,
                                      BipedalFootstepPlannerListener listener)
@@ -36,11 +37,11 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    }
 
    @Override
-   public FootstepNodeSnapData snapInternal(FootstepNode bipedalFootstepPlannerNode)
+   public FootstepNodeSnapData snapInternal(FootstepNode footstepNode)
    {
-      RobotSide nodeSide = bipedalFootstepPlannerNode.getRobotSide();
+      RobotSide nodeSide = footstepNode.getRobotSide();
       ConvexPolygon2D currentFootPolygon = new ConvexPolygon2D();
-      FootstepNodeTools.getFootPolygon(bipedalFootstepPlannerNode, footPolygonsInSoleFrame.get(nodeSide), currentFootPolygon);
+      FootstepNodeTools.getFootPolygon(footstepNode, footPolygonsInSoleFrame.get(nodeSide), currentFootPolygon);
 
       PlanarRegion planarRegionToPack = new PlanarRegion();
       RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(currentFootPolygon, planarRegionsList,
@@ -48,8 +49,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       if (snapTransform == null)
          return FootstepNodeSnapData.emptyData();
 
-      WiggleParameters wiggleParameters = new WiggleParameters();
-      wiggleParameters.deltaInside = parameters.getWiggleInsideDelta();
+      updateWiggleParameters();
 
       ConvexPolygon2D polygonToWiggleInRegionFrame = planarRegionToPack.snapPolygonIntoRegionAndChangeFrameToRegionFrame(currentFootPolygon, snapTransform);
 
@@ -61,7 +61,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
       if (wiggleTransformLocalToLocal == null)
       {
-         notifyListenerNodeUnderConsiderationWasRejected(bipedalFootstepPlannerNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
+         notifyListenerNodeUnderConsiderationWasRejected(footstepNode, BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_WIGGLE_INSIDE);
 
          //TODO: Possibly have different node costs depending on how firm on ground they are.
          if (parameters.getRejectIfCannotFullyWiggleInside())
@@ -112,7 +112,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
       List<PlanarRegion> planarRegionsIntersectingSnappedAndWiggledPolygon = planarRegionsList.findPlanarRegionsIntersectingPolygon(checkFootPolygonInWorld);
 
-      if (checkForTooMuchPenetrationAfterWiggle(bipedalFootstepPlannerNode, planarRegionToPack, checkFootPolygonInWorld,
+      if (checkForTooMuchPenetrationAfterWiggle(footstepNode, planarRegionToPack, checkFootPolygonInWorld,
                                                 planarRegionsIntersectingSnappedAndWiggledPolygon))
          return FootstepNodeSnapData.emptyData();
 
@@ -159,6 +159,14 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
          }
       }
       return false;
+   }
+
+   private void updateWiggleParameters()
+   {
+      wiggleParameters.deltaInside = parameters.getWiggleInsideDelta();
+      wiggleParameters.maxX = 0.5 * FootstepNode.gridSizeXY;
+      wiggleParameters.maxY = 0.5 * FootstepNode.gridSizeXY;
+      wiggleParameters.maxYaw = 0.5 * FootstepNode.gridSizeYaw;
    }
 
    private void notifyListenerNodeUnderConsiderationWasRejected(FootstepNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
