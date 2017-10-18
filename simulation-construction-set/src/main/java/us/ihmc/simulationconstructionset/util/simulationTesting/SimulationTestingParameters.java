@@ -11,7 +11,7 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
    private boolean checkNothingChangedInSimulation = false;
 
    // this should always be false on bamboo
-   private boolean keepSCSUp = !false;
+   private boolean keepSCSUp = false;
 
    public SimulationTestingParameters()
    {
