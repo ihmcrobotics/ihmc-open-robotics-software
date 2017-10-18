@@ -24,10 +24,9 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
    public FootstepNodeSnapData snapInternal(FootstepNode footstepNode)
    {
       PlanarRegion planarRegionToPack = new PlanarRegion();
-      ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(footstepNode.getRobotSide()));
-      footstepPose.setRotationYawAndZeroTranslation(footstepNode.getYaw());
-      footstepPose.setTranslation(footstepNode.getX(), footstepNode.getY(), 0.0);
-      footPolygon.applyTransformAndProjectToXYPlane(footstepPose);
+      ConvexPolygon2D footPolygon = new ConvexPolygon2D();
+      FootstepNodeTools.getFootPolygon(footstepNode, footPolygons.get(footstepNode.getRobotSide()), footPolygon);
+
       RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, planarRegionToPack);
 
       if (snapTransform == null)
