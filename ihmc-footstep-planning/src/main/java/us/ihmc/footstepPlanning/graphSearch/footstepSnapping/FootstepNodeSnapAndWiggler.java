@@ -39,11 +39,8 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    public FootstepNodeSnapData snapInternal(FootstepNode bipedalFootstepPlannerNode)
    {
       RobotSide nodeSide = bipedalFootstepPlannerNode.getRobotSide();
-      RigidBodyTransform soleTransformBeforeSnap = new RigidBodyTransform();
-      FootstepNodeTools.getNodeTransform(bipedalFootstepPlannerNode, soleTransformBeforeSnap);
-
-      ConvexPolygon2D currentFootPolygon = new ConvexPolygon2D(footPolygonsInSoleFrame.get(nodeSide));
-      currentFootPolygon.applyTransformAndProjectToXYPlane(soleTransformBeforeSnap);
+      ConvexPolygon2D currentFootPolygon = new ConvexPolygon2D();
+      FootstepNodeTools.getFootPolygon(bipedalFootstepPlannerNode, footPolygonsInSoleFrame.get(nodeSide), currentFootPolygon);
 
       PlanarRegion planarRegionToPack = new PlanarRegion();
       RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(currentFootPolygon, planarRegionsList,
@@ -163,7 +160,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       }
       return false;
    }
-   
+
    private void notifyListenerNodeUnderConsiderationWasRejected(FootstepNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
    {
       if (listener != null)

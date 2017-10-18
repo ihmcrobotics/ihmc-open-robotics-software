@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -41,5 +42,22 @@ public class FootstepNodeTools
    {
       getNodeTransform(node, transformToPack);
       snapTransform.transform(transformToPack);
+   }
+
+   /**
+    * Computes the foot polygon in world frame that corresponds to the give footstep node
+    *
+    * @param node
+    * @param footPolygonInSoleFrame
+    * @param footPolygonToPack
+    */
+   public static void getFootPolygon(FootstepNode node, ConvexPolygon2D footPolygonInSoleFrame, ConvexPolygon2D footPolygonToPack)
+   {
+      footPolygonToPack.setAndUpdate(footPolygonInSoleFrame);
+
+      RigidBodyTransform nodeTransform = new RigidBodyTransform();
+      FootstepNodeTools.getNodeTransform(node, nodeTransform);
+
+      footPolygonToPack.applyTransform(nodeTransform);
    }
 }
