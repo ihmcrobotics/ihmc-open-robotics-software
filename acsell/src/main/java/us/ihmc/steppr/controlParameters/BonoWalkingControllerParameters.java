@@ -337,12 +337,6 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
    }
 
    @Override
-   public boolean doPrepareManipulationForLocomotion()
-   {
-      return true;
-   }
-
-   @Override
    public double getDefaultTransferTime()
    {
       if (runningOnRealRobot)
