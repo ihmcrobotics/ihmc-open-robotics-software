@@ -40,7 +40,7 @@ public class RTPSCommunicationFactory
          PrintTools.error("No RTPS Domain ID set in the NetworkParameters file. The entry should look like RTPSDomainID:15, setting the Default RTPS Domain ID to " + rtpsDomainID);
       }
       
-      defaultDomainID = 1;//rtpsDomainID;
+      defaultDomainID = rtpsDomainID;
       createParticipant(rtpsDomainID);
    }
    
