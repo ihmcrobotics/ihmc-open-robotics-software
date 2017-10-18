@@ -16,24 +16,25 @@ public class FootstepNodeTools
    }
 
    /**
-    * Computes a RigidBodyTransform from the node's x, y and yaw. This transform
+    * Computes a node-to-world RigidBodyTransform from the node's x, y and yaw. This transform
     * will always have no z translation, pitch and roll.
     * @param node
-    * @param transformToPack
+    * @param nodeToWorldTransformToPack
     */
-   public static void getNodeTransform(FootstepNode node, RigidBodyTransform transformToPack)
+   public static void getNodeTransform(FootstepNode node, RigidBodyTransform nodeToWorldTransformToPack)
    {
       double soleYaw = node.getYaw();
       Point3D solePosition = new Point3D(node.getX(), node.getY(), 0.0);
-      transformToPack.setRotationYawAndZeroTranslation(soleYaw);
-      transformToPack.setTranslation(solePosition);
+      nodeToWorldTransformToPack.setRotationYawAndZeroTranslation(soleYaw);
+      nodeToWorldTransformToPack.setTranslation(solePosition);
    }
 
    /**
-    * Computes a RigidBodyTransform by applying {@snapTransform} to the given node's transform
+    * Computes a node-to-world RigidBodyTransform which transforms from node frame to world frame
+    * by applying {@snapTransform} to the given node's transform
     *
     * @param node
-    * @param snapTransform
+    * @param snapTransform pre-snap to post-snap transform
     * @param transformToPack
     */
    public static void getSnappedNodeTransform(FootstepNode node, RigidBodyTransform snapTransform, RigidBodyTransform transformToPack)
