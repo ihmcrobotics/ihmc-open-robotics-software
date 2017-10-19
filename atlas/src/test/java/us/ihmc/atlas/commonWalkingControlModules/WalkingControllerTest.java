@@ -415,8 +415,9 @@ public class WalkingControllerTest
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, defaultFinalTransferTime, feet,
-                                                                              statusOutputManager, yoTime, yoGraphicsListRegistry, registry);
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
+                                                                              defaultFinalTransferTime, feet, statusOutputManager, yoTime,
+                                                                              yoGraphicsListRegistry, registry);
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
@@ -424,7 +425,7 @@ public class WalkingControllerTest
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
 
       walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
-                                                                 capturePointPlannerParameters, controllerToolbox);
+                                                                 controllerToolbox);
    }
 
    @SuppressWarnings("unchecked")
