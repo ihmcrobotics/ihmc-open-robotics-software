@@ -29,13 +29,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    @Override
    public JointDesiredControlMode getJointDesiredControlMode(String jointName, HighLevelController state)
    {
-      switch(state)
-      {
-      case DO_NOTHING_BEHAVIOR:
-         return JointDesiredControlMode.DISABLED;
-      default:
-         return JointDesiredControlMode.EFFORT;
-      }
+      return JointDesiredControlMode.EFFORT;
    }
 
    @Override
@@ -53,13 +47,13 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    @Override
    public HighLevelController getDefaultInitialControllerState()
    {
-      return HighLevelController.WALKING;
+      return runningOnRealRobot ? HighLevelController.STAND_READY : HighLevelController.WALKING;
    }
 
    @Override
    public HighLevelController getFallbackControllerState()
    {
-      return HighLevelController.DO_NOTHING_BEHAVIOR;
+      return runningOnRealRobot ? HighLevelController.STAND_READY : HighLevelController.DO_NOTHING_BEHAVIOR;
    }
 
    @Override

@@ -1,5 +1,10 @@
 package us.ihmc.valkyrieRosControl;
 
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController.STAND_PREP_STATE;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController.STAND_READY;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController.STAND_TRANSITION_STATE;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController.WALKING;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,7 +16,9 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -48,9 +55,6 @@ import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotControll
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRobotControlElementCoordinator;
 import us.ihmc.wholeBodyController.concurrent.SynchronousMultiThreadedRobotController;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
-import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimatorControllerFactory;
-
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController.*;
 
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {
@@ -97,8 +101,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       }
    }
 
-   public static final String[] readForceTorqueSensors = { "leftFootSixAxis", "rightFootSixAxis" };
-   public static final String[] forceTorqueSensorModelNames = { "leftAnkleRoll", "rightAnkleRoll" };
+   public static final String[] readForceTorqueSensors = {"leftFootSixAxis", "rightFootSixAxis"};
+   public static final String[] forceTorqueSensorModelNames = {"leftAnkleRoll", "rightAnkleRoll"};
 
    public static final double gravity = 9.80665;
 
@@ -125,7 +129,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    private ValkyrieCalibrationControllerStateFactory calibrationStateFactory = null;
 
    private HighLevelHumanoidControllerFactory createHighLevelControllerFactory(ValkyrieRobotModel robotModel, PacketCommunicator packetCommunicator,
-                                                                         DRCRobotSensorInformation sensorInformation)
+                                                                               DRCRobotSensorInformation sensorInformation)
    {
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
 
@@ -137,14 +141,15 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, feetForceSensorNames,
-                                                                                            feetContactSensorNames, wristForceSensorNames, highLevelControllerParameters,
-                                                                                            walkingControllerParameters, capturePointPlannerParameters);
+                                                                                                    feetContactSensorNames, wristForceSensorNames,
+                                                                                                    highLevelControllerParameters, walkingControllerParameters,
+                                                                                                    capturePointPlannerParameters);
 
       PeriodicRealtimeThreadScheduler networkSubscriberScheduler = new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY);
       controllerFactory.createControllerNetworkSubscriber(networkSubscriberScheduler, packetCommunicator);
 
       // setup states
-      controllerFactory.useDefaultDoNothingControlState();
+      controllerFactory.setInitialState(highLevelControllerParameters.getDefaultInitialControllerState());
       controllerFactory.useDefaultStandPrepControlState();
       controllerFactory.useDefaultStandReadyControlState();
       controllerFactory.useDefaultStandTransitionControlState();
@@ -156,33 +161,23 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       controllerFactory.addCustomControlState(calibrationStateFactory);
 
       // setup transitions
-      HighLevelController fallbackControllerState = robotModel.getHighLevelControllerParameters().getFallbackControllerState();
+      HighLevelController fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
 
-      controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, STAND_PREP_STATE);
-      controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, calibrationStateFactory.getStateEnum());
-
-      controllerFactory.addRequestableTransition(calibrationStateFactory.getStateEnum(), DO_NOTHING_BEHAVIOR);
-      controllerFactory.addFinishedTransition(calibrationStateFactory.getStateEnum(), DO_NOTHING_BEHAVIOR);
+      controllerFactory.addRequestableTransition(calibrationStateFactory.getStateEnum(), STAND_PREP_STATE);
+      controllerFactory.addFinishedTransition(calibrationStateFactory.getStateEnum(), STAND_PREP_STATE);
 
       controllerFactory.addRequestableTransition(STAND_PREP_STATE, STAND_READY);
-      controllerFactory.addRequestableTransition(STAND_PREP_STATE, DO_NOTHING_BEHAVIOR);
       controllerFactory.addFinishedTransition(STAND_PREP_STATE, STAND_READY);
 
       controllerFactory.addRequestableTransition(STAND_READY, STAND_TRANSITION_STATE);
-      controllerFactory.addRequestableTransition(STAND_READY, DO_NOTHING_BEHAVIOR);
       controllerFactory.addControllerFailureTransition(STAND_READY, fallbackControllerState);
-      controllerFactory.addCustomStateTransition(new FeetLoadedToWalkingStandTransitionFactory(STAND_READY, STAND_TRANSITION_STATE, controllerFactory.getRequestedControlStateEnum(),
-                                                                                               sensorInformation.getFeetForceSensorNames()));
 
       controllerFactory.addRequestableTransition(STAND_TRANSITION_STATE, WALKING);
-      controllerFactory.addRequestableTransition(STAND_TRANSITION_STATE, DO_NOTHING_BEHAVIOR);
       controllerFactory.addFinishedTransition(STAND_TRANSITION_STATE, WALKING);
       controllerFactory.addControllerFailureTransition(STAND_TRANSITION_STATE, fallbackControllerState);
 
       controllerFactory.addRequestableTransition(WALKING, STAND_PREP_STATE);
-      controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
       controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);
-
 
       if (walkingProvider == WalkingProvider.VELOCITY_HEADING_COMPONENT)
          controllerFactory.createComponentBasedFootstepDataMessageGenerator();
@@ -258,7 +253,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
        */
 
       ValkyrieRobotModel robotModel;
-      if(isGazebo)
+      if (isGazebo)
       {
          robotModel = new ValkyrieRobotModel(RobotTarget.GAZEBO, true);
       }
@@ -272,8 +267,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       /*
        * Create network servers/clients
        */
-      PacketCommunicator controllerPacketCommunicator = PacketCommunicator
-            .createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator controllerPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT,
+                                                                                                             new IHMCCommunicationKryoNetClassList());
       PeriodicRealtimeThreadSchedulerFactory yoVariableServerScheduler = new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.LOGGER_PRIORITY);
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
       LogSettings logSettings = robotModel.getLogSettings();
@@ -288,7 +283,9 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
       ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(timestampProvider, stateEstimatorParameters,
-            effortJointHandles, positionJointHandles, jointStateHandles, imuHandles, forceTorqueSensorHandles, sensorInformation);
+                                                                                                            effortJointHandles, positionJointHandles,
+                                                                                                            jointStateHandles, imuHandles,
+                                                                                                            forceTorqueSensorHandles, sensorInformation);
 
       /*
        * Create controllers
@@ -296,7 +293,6 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       HighLevelHumanoidControllerFactory controllerFactory = createHighLevelControllerFactory(robotModel, controllerPacketCommunicator, sensorInformation);
       CommandInputManager commandInputManager = controllerFactory.getCommandInputManager();
       StatusMessageOutputManager statusOutputManager = controllerFactory.getStatusOutputManager();
-
 
       /*
        * Create output writer
@@ -322,10 +318,11 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       RobotContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
       PeriodicRealtimeThreadScheduler estimatorScheduler = new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.POSECOMMUNICATOR_PRIORITY);
       DRCEstimatorThread estimatorThread = new DRCEstimatorThread(sensorInformation, contactPointParameters, stateEstimatorParameters, sensorReaderFactory,
-            threadDataSynchronizer, estimatorScheduler, dataProducer, valkyrieLowLevelOutputWriter, yoVariableServer, gravity);
+                                                                  threadDataSynchronizer, estimatorScheduler, dataProducer, valkyrieLowLevelOutputWriter,
+                                                                  yoVariableServer, gravity);
       estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, sensorInformation, controllerFactory, threadDataSynchronizer, drcOutputWriter,
-            dataProducer, yoVariableServer, gravity, estimatorDT);
+                                                                     dataProducer, yoVariableServer, gravity, estimatorDT);
 
       ValkyrieCalibrationControllerState calibrationControllerState = calibrationStateFactory.getCalibrationControllerState();
       calibrationControllerState.attachForceSensorCalibrationModule(estimatorThread.getForceSensorCalibrationModule());
