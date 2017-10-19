@@ -10,31 +10,31 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
 {
-   private final SideDependentList<ConvexPolygon2D> footPolygons;
+   private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
 
    private final PlanarRegion planarRegionToPack = new PlanarRegion();
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
 
-   public SimplePlanarRegionFootstepNodeSnapper(SideDependentList<ConvexPolygon2D> footPolygons)
+   public SimplePlanarRegionFootstepNodeSnapper(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame)
    {
-      this.footPolygons = footPolygons;
+      this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
    }
 
    @Override
    public FootstepNodeSnapData snapInternal(FootstepNode footstepNode)
    {
-      FootstepNodeTools.getFootPolygon(footstepNode, footPolygons.get(footstepNode.getRobotSide()), footPolygon);
+      FootstepNodeTools.getFootPolygon(footstepNode, footPolygonsInSoleFrame.get(footstepNode.getRobotSide()), footPolygon);
       RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, planarRegionToPack);
 
       if (snapTransform == null)
          return FootstepNodeSnapData.emptyData();
 
-      ConvexPolygon2D intersectionPolygon = FootstepNodeSnappingTools.getConvexHullOfPolygonIntersections(planarRegionToPack, footPolygon, snapTransform);
+      ConvexPolygon2D footholdPolygon = FootstepNodeSnappingTools.getConvexHullOfPolygonIntersections(planarRegionToPack, footPolygon, snapTransform);
 
-      if (intersectionPolygon.isEmpty())
+      if (footholdPolygon.isEmpty())
          return FootstepNodeSnapData.emptyData();
 
-      FootstepNodeSnappingTools.changeFromRegionToSoleFrame(planarRegionToPack, footstepNode, snapTransform, intersectionPolygon);
-      return new FootstepNodeSnapData(snapTransform, intersectionPolygon);
+      FootstepNodeSnappingTools.changeFromRegionToSoleFrame(planarRegionToPack, footstepNode, snapTransform, footholdPolygon);
+      return new FootstepNodeSnapData(snapTransform, footholdPolygon);
    }
 }
