@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -50,31 +51,42 @@ public class JointControlBlender
       velocityStepSizeLimiter.updateOutput(qd, qd);
    }
 
-   public void computeAndUpdateJointControl(JointDesiredOutput outputDataToPack, JointDesiredOutputReadOnly positionControllerDesireds,
-                                            JointDesiredOutputReadOnly walkingControllerDesireds,
-                                            double forceControlBlendingFactor)
+   /**
+    * Blend two joint desired outputs and pack the result in {@code outputDataToPack}.
+    * <p>
+    * Pseudo-code:
+    * {@code outputDataToPack = (1.0 - alpha) * outputData0 + alpha * outputData1}.
+    * </p>
+    * 
+    * @param outputDataToPack the output data in which the result is stored. Modified.
+    * @param outputData0 the first output data to be blended. Not modified.
+    * @param outputData1 the second output data to be blended. Not modified.
+    * @param blendingFactor the blending factor.
+    */
+   public void computeAndUpdateJointControl(JointDesiredOutput outputDataToPack, JointDesiredOutputReadOnly outputData0, JointDesiredOutputReadOnly outputData1,
+                                            double blendingFactor)
    {
-      forceControlBlendingFactor = MathTools.clamp(forceControlBlendingFactor, 0.0, 1.0);
+      blendingFactor = MathTools.clamp(blendingFactor, 0.0, 1.0);
 
       if (ENABLE_TAU_SCALE)
-         forceControlBlendingFactor *= tauScale.getDoubleValue();
+         blendingFactor *= tauScale.getDoubleValue();
 
-      double holdPosition = (1.0 - forceControlBlendingFactor) * positionControllerDesireds.getDesiredPosition();
-      double controllerPosition = forceControlBlendingFactor * walkingControllerDesireds.getDesiredPosition();
+      double desiredPosition0 = outputData0.hasDesiredPosition() ? outputData0.getDesiredPosition() : oneDoFJoint.getQ();
+      double desiredPosition1 = outputData1.hasDesiredPosition() ? outputData1.getDesiredPosition() : oneDoFJoint.getQ();
 
-      double holdVelocity = (1.0 - forceControlBlendingFactor) * positionControllerDesireds.getDesiredVelocity();
-      double controllerVelocity = forceControlBlendingFactor * walkingControllerDesireds.getDesiredVelocity();
+      double desiredVelocity0 = outputData0.hasDesiredVelocity() ? outputData0.getDesiredVelocity() : oneDoFJoint.getQd();
+      double desiredVelocity1 = outputData1.hasDesiredVelocity() ? outputData1.getDesiredVelocity() : oneDoFJoint.getQd();
 
-      double holdAcceleration = (1.0 - forceControlBlendingFactor) * positionControllerDesireds.getDesiredAcceleration();
-      double controllerAcceleration = forceControlBlendingFactor * walkingControllerDesireds.getDesiredAcceleration();
+      double desiredAcceleration0 = outputData0.hasDesiredAcceleration() ? outputData0.getDesiredAcceleration() : 0.0;
+      double desiredAcceleration1 = outputData1.hasDesiredAcceleration() ? outputData1.getDesiredAcceleration() : 0.0;
 
-      double positionControlTau = (1.0 - forceControlBlendingFactor) * positionControllerDesireds.getDesiredTorque();
-      double walkingControlTau = forceControlBlendingFactor * walkingControllerDesireds.getDesiredTorque();
+      double desiredTorque0 = outputData0.hasDesiredTorque() ? outputData0.getDesiredTorque() : 0.0;
+      double desiredTorque1 = outputData1.hasDesiredTorque() ? outputData1.getDesiredTorque() : 0.0;
 
-      double desiredPosition = holdPosition + controllerPosition;
-      double desiredVelocity = holdVelocity + controllerVelocity;
-      double desiredAcceleration = holdAcceleration + controllerAcceleration;
-      double controlTorque = positionControlTau + walkingControlTau;
+      double desiredPosition = TupleTools.interpolate(desiredPosition0, desiredPosition1, blendingFactor);
+      double desiredVelocity = TupleTools.interpolate(desiredVelocity0, desiredVelocity1, blendingFactor);
+      double desiredAcceleration = TupleTools.interpolate(desiredAcceleration0, desiredAcceleration1, blendingFactor);
+      double desiredTorque = TupleTools.interpolate(desiredTorque0, desiredTorque1, blendingFactor);
 
       double currentJointAngle = oneDoFJoint.getQ();
       double currentJointVelocity = oneDoFJoint.getQd();
@@ -84,6 +96,6 @@ public class JointControlBlender
       outputDataToPack.setDesiredPosition(positionStepSizeLimiter.getDoubleValue());
       outputDataToPack.setDesiredVelocity(velocityStepSizeLimiter.getDoubleValue());
       outputDataToPack.setDesiredAcceleration(desiredAcceleration);
-      outputDataToPack.setDesiredTorque(controlTorque);
+      outputDataToPack.setDesiredTorque(desiredTorque);
    }
 }
