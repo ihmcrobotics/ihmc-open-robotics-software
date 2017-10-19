@@ -77,7 +77,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       drcSimulationTestHelper.send(pelvisHeightTrajectoryMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 + trajectoryTime);
       assertTrue(success);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
