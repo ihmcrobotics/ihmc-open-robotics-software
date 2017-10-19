@@ -26,7 +26,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.outputData.LowLevelOutputWriter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
@@ -330,7 +330,7 @@ public class AvatarSimulationFactory
             FullRobotModel controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
             OneDoFJoint controllerJoint = controllerFullRobotModel.getOneDoFJointByName(positionControlledJointName);
             LowLevelOneDoFJointDesiredDataHolderList controllerLowLevelDataList = threadDataSynchronizer.getControllerDesiredJointDataHolder();
-            LowLevelJointData controllerLowLevelJointData = controllerLowLevelDataList.getLowLevelJointData(controllerJoint);
+            JointDesiredOutput controllerJointDesiredOutput = controllerLowLevelDataList.getJointDesiredOutput(controllerJoint);
 
             JointRole jointRole = robotModel.get().getJointMap().getJointRole(positionControlledJointName);
             boolean isUpperBodyJoint = ((jointRole != JointRole.LEG) && (jointRole != JointRole.SPINE));
@@ -340,7 +340,7 @@ public class AvatarSimulationFactory
                continue;
 
             JointLowLevelJointControlSimulator positionControlSimulator = new JointLowLevelJointControlSimulator(simulatedJoint, controllerJoint,
-                                                                                                                 controllerLowLevelJointData,
+                                                                                                                 controllerJointDesiredOutput,
                                                                                                                  isUpperBodyJoint, isBackJoint, false,
                                                                                                                  controllerFullRobotModel.getTotalMass(), robotModel.get().getSimulateDT());
             humanoidFloatingRootJointRobot.setController(positionControlSimulator);
