@@ -699,13 +699,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
-   public boolean doPrepareManipulationForLocomotion()
-   {
-      //this allows me to walk with hand poses locked in a reference frame
-      return false;
-   }
-
-   @Override
    public double getDefaultTransferTime()
    {
       return (runningOnRealRobot ? 0.8 : 0.25); //Math.sqrt(jointMap.getModelScale()) *

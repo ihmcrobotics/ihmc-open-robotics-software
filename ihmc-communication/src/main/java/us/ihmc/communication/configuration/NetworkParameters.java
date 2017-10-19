@@ -139,6 +139,25 @@ public class NetworkParameters
          }
       }
    }
+   
+   public static int getRTPSDomainID()
+   {
+      if(hasKey(NetworkParameterKeys.RTPSDomainID))
+      {
+         String value = getInstance().parameters.get(NetworkParameterKeys.RTPSDomainID);
+         if(value != null)
+         {
+            int rtpsDomainID = Integer.parseInt(value);
+            if(rtpsDomainID >= 0)
+            {
+               return rtpsDomainID;
+            }
+         }
+      }
+      PrintTools.error("Tried to load the RTPS Domain ID from the Network Parameter file, but either the key didn't exist or after parsing the string it returned a negative number. Please check the rtps domain ID and try again. It should look like RTPSDomainID:15 Returning a domain ID of 1");
+      return 1;
+   
+   }
 
    public static boolean hasKey(NetworkParameterKeys key)
    {

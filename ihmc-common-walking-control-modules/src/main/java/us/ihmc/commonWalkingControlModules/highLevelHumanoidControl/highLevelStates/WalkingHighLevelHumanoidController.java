@@ -445,6 +445,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    public void initialize()
    {
+      controllerCoreCommand.requestReinitialization();
       controllerToolbox.initialize();
       managerFactory.initializeManagers();
 
