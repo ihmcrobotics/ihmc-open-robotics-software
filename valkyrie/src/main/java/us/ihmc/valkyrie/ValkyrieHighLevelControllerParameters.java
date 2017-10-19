@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 
 public class ValkyrieHighLevelControllerParameters implements HighLevelControllerParameters
 {
@@ -12,12 +13,12 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
 
    private final boolean runningOnRealRobot;
 
-   public ValkyrieHighLevelControllerParameters(boolean runningOnRealRobot)
+   public ValkyrieHighLevelControllerParameters(boolean runningOnRealRobot, ValkyrieJointMap jointMap)
    {
       this.runningOnRealRobot = runningOnRealRobot;
 
       standPrepParameters = new ValkyrieStandPrepParameters();
-      positionControlParameters = new ValkyriePositionControlParameters();
+      positionControlParameters = new ValkyriePositionControlParameters(jointMap);
    }
 
    @Override

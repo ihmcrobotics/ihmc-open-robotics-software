@@ -126,7 +126,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
       jointMap = new ValkyrieJointMap();
       contactPointParameters = new ValkyrieContactPointParameters(jointMap, simulationContactPoints);
       sensorInformation = new ValkyrieSensorInformation(target);
-      highLevelControllerParameters = new ValkyrieHighLevelControllerParameters(target == RobotTarget.REAL_ROBOT);
+      highLevelControllerParameters = new ValkyrieHighLevelControllerParameters(target == RobotTarget.REAL_ROBOT, jointMap);
       InputStream sdf = null;
 
       if(model.equalsIgnoreCase("DEFAULT"))
