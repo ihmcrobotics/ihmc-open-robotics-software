@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.yaml.snakeyaml.Yaml;
@@ -22,22 +21,18 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelCon
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.humanoidRobotics.communication.packets.valkyrie.ValkyrieLowLevelControlModeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.tools.TimestampProvider;
+import us.ihmc.tools.taskExecutor.TaskExecutor;
+import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
+import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
+import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
-import us.ihmc.tools.TimestampProvider;
-import us.ihmc.tools.taskExecutor.Task;
-import us.ihmc.tools.taskExecutor.TaskExecutor;
-import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
-import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
-import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
 
 public class ValkyrieRosControlLowLevelController
 {
