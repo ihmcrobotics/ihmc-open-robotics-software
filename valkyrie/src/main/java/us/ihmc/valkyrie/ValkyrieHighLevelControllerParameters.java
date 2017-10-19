@@ -1,8 +1,14 @@
 package us.ihmc.valkyrie;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 
@@ -12,6 +18,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    private final ValkyriePositionControlParameters positionControlParameters;
 
    private final boolean runningOnRealRobot;
+   private final Set<String> positionControlledJoints = new HashSet<>();
 
    public ValkyrieHighLevelControllerParameters(boolean runningOnRealRobot, ValkyrieJointMap jointMap)
    {
@@ -19,6 +26,16 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
 
       standPrepParameters = new ValkyrieStandPrepParameters();
       positionControlParameters = new ValkyriePositionControlParameters(jointMap);
+
+      positionControlledJoints.add(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH));
+      positionControlledJoints.add(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH));
+      positionControlledJoints.add(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW));
+      positionControlledJoints.add(jointMap.getArmJointName(RobotSide.LEFT, ArmJointName.ELBOW_ROLL));
+      positionControlledJoints.add(jointMap.getArmJointName(RobotSide.LEFT, ArmJointName.WRIST_ROLL));
+      positionControlledJoints.add(jointMap.getArmJointName(RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH));
+      positionControlledJoints.add(jointMap.getArmJointName(RobotSide.RIGHT, ArmJointName.ELBOW_ROLL));
+      positionControlledJoints.add(jointMap.getArmJointName(RobotSide.RIGHT, ArmJointName.WRIST_ROLL));
+      positionControlledJoints.add(jointMap.getArmJointName(RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH));
    }
 
    @Override
@@ -30,6 +47,12 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    @Override
    public JointDesiredControlMode getJointDesiredControlMode(String jointName, HighLevelController state)
    {
+      if (runningOnRealRobot)
+      {
+         if (positionControlledJoints.contains(jointName))
+            return JointDesiredControlMode.POSITION;
+      }
+
       return JointDesiredControlMode.EFFORT;
    }
 
