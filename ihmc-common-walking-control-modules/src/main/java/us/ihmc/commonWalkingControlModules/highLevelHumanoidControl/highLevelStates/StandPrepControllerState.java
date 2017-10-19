@@ -21,7 +21,6 @@ public class StandPrepControllerState extends HighLevelControllerState
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final PairList<OneDoFJoint, TrajectoryData> jointsData = new PairList<>();
@@ -39,7 +38,6 @@ public class StandPrepControllerState extends HighLevelControllerState
    {
       super(controllerState);
 
-      this.controllerToolbox = controllerToolbox;
       this.timeToPrepareForStanding.set(highLevelControllerParameters.getTimeToMoveInStandPrep());
       this.minimumTimeDoneWithStandPrep.set(minimumTimeDoneWithStandPrep);
 
