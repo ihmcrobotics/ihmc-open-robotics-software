@@ -85,6 +85,7 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    public KinematicsToolboxRigidBodyMessage()
    {
       // empty constructor for deserialization
+      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -392,7 +393,8 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
     */
    public void setSelectionMatrixForLinearControl()
    {
-      angularSelectionMatrix = null;
+      angularSelectionMatrix = new SelectionMatrix3DMessage();
+      angularSelectionMatrix.setAxisSelection(false, false, false);
       linearSelectionMatrix = new SelectionMatrix3DMessage();
    }
 
@@ -403,7 +405,8 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    public void setSelectionMatrixForAngularControl()
    {
       angularSelectionMatrix = new SelectionMatrix3DMessage();
-      linearSelectionMatrix = null;
+      linearSelectionMatrix = new SelectionMatrix3DMessage();
+      linearSelectionMatrix.setAxisSelection(false, false, false);
    }
 
    /**

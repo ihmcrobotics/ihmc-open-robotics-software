@@ -97,8 +97,13 @@ public class PlanningTestTools
       Graphics3DObject graphics3DObject = new Graphics3DObject();
       graphics3DObject.addCoordinateSystem(0.3);
       if (planarRegionsList != null)
+      {
          graphics3DObject.addPlanarRegionsList(planarRegionsList, appearances);
+         scs.setGroundVisible(false);
+      }
       scs.addStaticLinkGraphics(graphics3DObject);
+      scs.setCameraPosition(-0.5, 0.0, 20.0);
+      scs.setCameraFix(0.0, 0.0, 0.1);
 
       YoVariableRegistry vizRegistry = new YoVariableRegistry("FootstepPlanningResult");
       YoGraphicsListRegistry vizGraphicsListRegistry = new YoGraphicsListRegistry();

@@ -1,15 +1,19 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -31,6 +35,27 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, new HumanoidReferenceFrames(fullRobotModel));
 
       RigidBody rootBody = ScrewTools.getRootBody(fullRobotModel.getElevator());
+      RigidBody[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
+      for (RigidBody rigidBody : allRigidBodies)
+         rigidBodyNamedBasedHashMap.put(rigidBody.getNameBasedHashCode(), rigidBody);
+   }
+
+   public KinematicsToolboxCommandConverter(RigidBody rootBody)
+   {
+      List<ReferenceFrame> referenceFrames = new ArrayList<>();
+      for (InverseDynamicsJoint joint : ScrewTools.computeSubtreeJoints(rootBody))
+      {
+         referenceFrames.add(joint.getFrameAfterJoint());
+         referenceFrames.add(joint.getFrameBeforeJoint());
+      }
+
+      for (RigidBody rigidBody : ScrewTools.computeSupportAndSubtreeSuccessors(rootBody))
+      {
+         referenceFrames.add(rigidBody.getBodyFixedFrame());
+      }
+
+      referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(referenceFrames);
+
       RigidBody[] allRigidBodies = ScrewTools.computeSupportAndSubtreeSuccessors(rootBody);
       for (RigidBody rigidBody : allRigidBodies)
          rigidBodyNamedBasedHashMap.put(rigidBody.getNameBasedHashCode(), rigidBody);

@@ -333,7 +333,10 @@ public abstract class WalkingControllerParameters
     * @return whether the manipulation control should get prepared
     *  for walking.
     */
-   public abstract boolean doPrepareManipulationForLocomotion();
+   public boolean doPrepareManipulationForLocomotion()
+   {
+      return true;
+   }
 
    /**
     * Specifies if the pelvis orientation controller should

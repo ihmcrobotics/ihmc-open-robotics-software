@@ -56,7 +56,7 @@ public class PlanThenSnapPlanner implements FootstepPlanner
 
       if (planarRegionsList == null)
          return result;
-      
+
       snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
 
       int numberOfFootsteps = footstepPlan.getNumberOfSteps();
@@ -86,6 +86,13 @@ public class PlanThenSnapPlanner implements FootstepPlanner
    public FootstepPlan getPlan()
    {
       return footstepPlan;
+   }
+
+   @Override
+   public void setTimeout(double timeout)
+   {
+      // TODO Auto-generated method stub
+
    }
 
 }
