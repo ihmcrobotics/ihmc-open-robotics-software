@@ -191,6 +191,12 @@ public class PlanarRegionsList
       return regions.get(index);
    }
 
+   /** Retrieves the planar regions as a {@code List}. */
+   public List<PlanarRegion> getPlanarRegionsAsList()
+   {
+      return regions;
+   }
+
    /**
     * Retrieves the last planar region of this list.
     * Special case: returns null when the list is empty.
@@ -202,7 +208,7 @@ public class PlanarRegionsList
       else
          return getPlanarRegion(getNumberOfPlanarRegions() - 1);
    }
-   
+
    /** Retrieves the i<sup>th</sup> planar region of this list and removes it from this list. */
    public PlanarRegion pollPlanarRegion(int index)
    {
@@ -233,7 +239,7 @@ public class PlanarRegionsList
 
       return new PlanarRegionsList(planarRegionsCopy);
    }
-   
+
    /**
     * Transforms the planar regions list
     * @param rigidBodyTransform transform from current frame to desired frame
