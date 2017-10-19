@@ -55,8 +55,8 @@ public class FootstepNodeSnappingTools
     * @param snapTransform
     * @param footPolygonInRegionFrame
     */
-   public static void changeFromRegionToSoleFrame(PlanarRegion planarRegion, FootstepNode footstepNode, RigidBodyTransform snapTransform,
-                                                   ConvexPolygon2D footPolygonInRegionFrame)
+   public static void changeFromPlanarRegionToSoleFrame(PlanarRegion planarRegion, FootstepNode footstepNode, RigidBodyTransform snapTransform,
+                                                        ConvexPolygon2D footPolygonInRegionFrame)
    {
       RigidBodyTransform regionToWorld = new RigidBodyTransform();
       planarRegion.getTransformToWorld(regionToWorld);

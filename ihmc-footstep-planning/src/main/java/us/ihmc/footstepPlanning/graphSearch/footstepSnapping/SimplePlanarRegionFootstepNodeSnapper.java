@@ -34,7 +34,7 @@ public class SimplePlanarRegionFootstepNodeSnapper extends FootstepNodeSnapper
       if (footholdPolygon.isEmpty())
          return FootstepNodeSnapData.emptyData();
 
-      FootstepNodeSnappingTools.changeFromRegionToSoleFrame(planarRegionToPack, footstepNode, snapTransform, footholdPolygon);
+      FootstepNodeSnappingTools.changeFromPlanarRegionToSoleFrame(planarRegionToPack, footstepNode, snapTransform, footholdPolygon);
       return new FootstepNodeSnapData(snapTransform, footholdPolygon);
    }
 }
