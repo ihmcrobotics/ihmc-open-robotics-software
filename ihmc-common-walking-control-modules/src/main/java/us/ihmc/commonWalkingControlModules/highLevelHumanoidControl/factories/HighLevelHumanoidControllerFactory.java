@@ -67,7 +67,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
-
    private final ArrayList<HighLevelControllerStateFactory> controllerStateFactories = new ArrayList<>();
    private final EnumMap<HighLevelController, HighLevelControllerStateFactory> controllerFactoriesMap = new EnumMap<>(HighLevelController.class);
 
@@ -110,8 +109,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public HighLevelHumanoidControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
                                              SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
-                                             HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters,
-                                             ICPWithTimeFreezingPlannerParameters icpPlannerParameters)
+                                             HighLevelControllerParameters highLevelControllerParameters,
+                                             WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters icpPlannerParameters)
    {
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
@@ -135,7 +134,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    }
 
    /**
-    * Specifies whether the inverse dynamics module of the {@link WholeBodyControllerCore} should be created or not.
+    * Specifies whether the inverse dynamics module of the {@link WholeBodyControllerCore} should be
+    * created or not.
     * <p>
     * This module is created by default as the {@link WalkingHighLevelHumanoidController} needs it.
     * </p>
@@ -148,7 +148,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    }
 
    /**
-    * Specifies whether the inverse kinematics module of the {@link WholeBodyControllerCore} should be created or not.
+    * Specifies whether the inverse kinematics module of the {@link WholeBodyControllerCore} should
+    * be created or not.
     * <p>
     * This module is not created by default to prevent creating unused {@link YoVariable}s.
     * </p>
@@ -161,7 +162,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    }
 
    /**
-    * Specifies whether the virtual model control module of the {@link WholeBodyControllerCore} should be created or not.
+    * Specifies whether the virtual model control module of the {@link WholeBodyControllerCore}
+    * should be created or not.
     * <p>
     * This module is not created by default to prevent creating unused {@link YoVariable}s.
     * </p>
@@ -195,7 +197,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
          CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
          double controlDT = controllerToolbox.getControlDT();
-         ComponentBasedFootstepDataMessageGenerator footstepGenerator = new ComponentBasedFootstepDataMessageGenerator(commandInputManager, statusMessageOutputManager,
+         ComponentBasedFootstepDataMessageGenerator footstepGenerator = new ComponentBasedFootstepDataMessageGenerator(commandInputManager,
+                                                                                                                       statusMessageOutputManager,
                                                                                                                        walkingControllerParameters,
                                                                                                                        headingAndVelocityEvaluationScriptParameters,
                                                                                                                        referenceFrames, contactableFeet,
@@ -335,7 +338,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public void addRequestableTransition(HighLevelController currentControlStateEnum, HighLevelController nextControlStateEnum)
    {
-      stateTransitionFactories.add(new RequestedControllerStateTransitionFactory<>(requestedHighLevelControllerState, currentControlStateEnum, nextControlStateEnum));
+      stateTransitionFactories.add(new RequestedControllerStateTransitionFactory<>(requestedHighLevelControllerState, currentControlStateEnum,
+                                                                                   nextControlStateEnum));
    }
 
    public void addControllerFailureTransition(HighLevelController currentControlStateEnum, HighLevelController fallbackControlStateEnum)
@@ -385,7 +389,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       // Setup the HighLevelHumanoidControllerToolbox /////////////////////////////////////////////
       double omega0 = walkingControllerParameters.getOmega0();
       controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, centerOfMassDataHolder, wristForceSensors,
-                                                                 yoTime, gravityZ, omega0, feet, controlDT, updatables, contactablePlaneBodies, yoGraphicsListRegistry, jointsToIgnore);
+                                                                 yoTime, gravityZ, omega0, feet, controlDT, updatables, contactablePlaneBodies,
+                                                                 yoGraphicsListRegistry, jointsToIgnore);
       controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createComponentBasedFootstepDataMessageGenerator)
@@ -400,8 +405,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, defaultFinalTransferTime,
-                                                                              feet, statusMessageOutputManager, yoTime, yoGraphicsListRegistry, registry);
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
+                                                                              defaultFinalTransferTime, feet, statusMessageOutputManager, yoTime,
+                                                                              yoGraphicsListRegistry, registry);
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
@@ -410,14 +416,13 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
       commandInputManager.registerConversionHelper(commandConversionHelper);
 
-      humanoidHighLevelControllerManager = new HumanoidHighLevelControllerManager(commandInputManager, statusMessageOutputManager,
-                                                                                                                     initialControllerState, highLevelControllerParameters,
-                                                                                                                     walkingControllerParameters, icpPlannerParameters,
-                                                                                                                     requestedHighLevelControllerState, fallbackControllerForFailure,
-                                                                                                                     controllerFactoriesMap, stateTransitionFactories,
-                                                                                                                     managerFactory, controllerToolbox,
-                                                                                                                     centerOfPressureDataHolderForEstimator,
-                                                                                                                     forceSensorDataHolder, lowLevelControllerOutput);
+      humanoidHighLevelControllerManager = new HumanoidHighLevelControllerManager(commandInputManager, statusMessageOutputManager, initialControllerState,
+                                                                                  highLevelControllerParameters, walkingControllerParameters,
+                                                                                  icpPlannerParameters, requestedHighLevelControllerState,
+                                                                                  fallbackControllerForFailure, controllerFactoriesMap,
+                                                                                  stateTransitionFactories, managerFactory, controllerToolbox,
+                                                                                  centerOfPressureDataHolderForEstimator, forceSensorDataHolder,
+                                                                                  lowLevelControllerOutput);
       humanoidHighLevelControllerManager.addYoVariableRegistry(registry);
       return humanoidHighLevelControllerManager;
    }
