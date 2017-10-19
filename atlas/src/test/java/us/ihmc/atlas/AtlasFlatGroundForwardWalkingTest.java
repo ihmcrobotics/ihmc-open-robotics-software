@@ -157,10 +157,4 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
    {
       return new FootstepDataListMessage(swingTime, transferTime, finalTransferTime);
    }
-
-   @Override
-   protected boolean keepSCSUp()
-   {
-      return false;
-   }
 }

@@ -343,12 +343,6 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public boolean doPrepareManipulationForLocomotion()
-   {
-      return true;
-   }
-
-   @Override
    public double getDefaultTransferTime()
    {
       if (runningOnRealRobot)

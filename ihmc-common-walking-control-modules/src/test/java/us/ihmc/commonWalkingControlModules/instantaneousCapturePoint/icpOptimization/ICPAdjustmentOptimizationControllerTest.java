@@ -509,13 +509,6 @@ public class ICPAdjustmentOptimizationControllerTest
       }
 
       @Override
-      public boolean doPrepareManipulationForLocomotion()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
       public double defaultOffsetHeightAboveAnkle()
       {
          // TODO Auto-generated method stub

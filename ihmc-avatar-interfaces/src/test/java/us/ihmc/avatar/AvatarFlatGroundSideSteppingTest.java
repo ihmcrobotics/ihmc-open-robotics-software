@@ -236,11 +236,6 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       message.add(footstepData);
    }
 
-   protected boolean keepSCSUp()
-   {
-      return false;
-   }
-
    private void setupCameraBackView()
    {
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
@@ -292,7 +287,6 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
             return location;
          }
       };
-      simulationTestingParameters.setKeepSCSUp(keepSCSUp());
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(flatGround);
       drcSimulationTestHelper.setStartingLocation(startingLocation);

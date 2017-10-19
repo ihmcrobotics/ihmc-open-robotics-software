@@ -41,6 +41,7 @@ public abstract class ControllerAPIDefinition
       commands.add(HandComplianceControlParametersCommand.class);
       commands.add(HighLevelControllerStateCommand.class);
       commands.add(AbortWalkingCommand.class);
+      commands.add(PrepareForLocomotionCommand.class);
       commands.add(PauseWalkingCommand.class);
       commands.add(WholeBodyTrajectoryCommand.class);
       commands.add(SpineDesiredAccelerationCommand.class);

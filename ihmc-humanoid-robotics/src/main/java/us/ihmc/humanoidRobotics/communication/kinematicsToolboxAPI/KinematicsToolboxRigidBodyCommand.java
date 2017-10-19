@@ -2,8 +2,6 @@ package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
