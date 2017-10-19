@@ -294,4 +294,10 @@ public class WandererRobotModel implements DRCRobotModel
    {
       return null;
    }
+
+   @Override
+   public InputStream getWholeBodyControllerParametersFile()
+   {
+      return null;
+   }
 }
