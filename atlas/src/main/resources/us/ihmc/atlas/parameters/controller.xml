@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<parameters>
+    <registry name="DRCControllerThread">
+        <registry name="DRCMomentumBasedController">
+            <registry name="HighLevelHumanoidControllerManager">
+                <registry name="MomentumBasedControllerFactory">
+                    <registry name="HighLevelControlManagerFactory">
+                        <registry name="FeetManager">
+                            <registry name="leftFootControlModule">
+<parameter name="leftFootSwingFinalHeightOffset" type="DoubleParameter" min="-0.01" max="0.005" value="0.0"/>
+                            </registry>
+                            <registry name="rightFootControlModule">
+<parameter name="rightFootSwingFinalHeightOffset" type="DoubleParameter" min="-0.01" max="0.005" value="0.0"/>
+                            </registry>
+                        </registry>
+                    </registry>
+                </registry>
+            </registry>
+        </registry>
+    </registry>
+</parameters>
