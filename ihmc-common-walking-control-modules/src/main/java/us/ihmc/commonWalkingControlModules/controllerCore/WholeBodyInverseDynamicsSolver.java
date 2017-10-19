@@ -153,6 +153,13 @@ public class WholeBodyInverseDynamicsSolver
          inverseDynamicsCalculator.compute();
    }
 
+   public void reinitialize()
+   {
+      initialize();
+      for (int i = 0; i < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); i++)
+         lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(i).clear();
+   }
+
    public void compute()
    {
       if (USE_DYNAMIC_MATRIX_CALCULATOR)
