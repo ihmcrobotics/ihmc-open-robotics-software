@@ -533,6 +533,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(InvalidPacketNotificationPacket.class);
 
       registerPacketClass(AtlasLowLevelControlModeMessage.class);
+      registerPacketField(AtlasLowLevelControlModeMessage.ControlMode.class);
       registerPacketClass(AtlasWristSensorCalibrationRequestPacket.class);
       registerPacketClass(AtlasElectricMotorEnablePacket.class);
       registerPacketField(AtlasElectricMotorPacketEnum.class);
