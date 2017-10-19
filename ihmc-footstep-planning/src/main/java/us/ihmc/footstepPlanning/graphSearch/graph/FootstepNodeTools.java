@@ -32,7 +32,7 @@ public class FootstepNodeTools
 
    /**
     * Computes a node-to-world RigidBodyTransform which transforms from node frame to world frame
-    * by applying {@snapTransform} to the given node's transform
+    * by applying snapTransform to the given node's transform
     *
     * @param node
     * @param snapTransform pre-snap to post-snap transform
