@@ -1,5 +1,9 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.concurrent.atomic.AtomicReference;
+
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -37,10 +41,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.concurrent.atomic.AtomicReference;
-
 public class HumanoidHighLevelControllerManager implements RobotController
 {
    private final String name = getClass().getSimpleName();
@@ -52,7 +52,6 @@ public class HumanoidHighLevelControllerManager implements RobotController
 
    private final YoBoolean isListeningToHighLevelStateMessage = new YoBoolean("isListeningToHighLevelStateMessage", registry);
    private final YoEnum<HighLevelController> requestedHighLevelControllerState;
-   private final AtomicReference<HighLevelController> fallbackControllerForFailure;
    private final YoLowLevelOneDoFJointDesiredDataHolder yoLowLevelOneDoFJointDesiredDataHolder;
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
@@ -82,7 +81,6 @@ public class HumanoidHighLevelControllerManager implements RobotController
       this.statusMessageOutputManager = statusMessageOutputManager;
       this.controllerToolbox = controllerToolbox;
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
-      this.fallbackControllerForFailure = fallbackControllerForFailure;
       this.initialControllerState = initialControllerState;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
       this.lowLevelControllerOutput = lowLevelControllerOutput;
