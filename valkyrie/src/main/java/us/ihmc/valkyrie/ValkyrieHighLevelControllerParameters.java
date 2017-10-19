@@ -36,13 +36,19 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    @Override
    public double getDesiredJointStiffness(String jointName, HighLevelController state)
    {
-      return positionControlParameters.getProportionalGain(jointName);
+      if (state != HighLevelController.WALKING)
+         return positionControlParameters.getProportionalGain(jointName);
+      else
+         return 0.0;
    }
 
    @Override
    public double getDesiredJointDamping(String jointName, HighLevelController state)
    {
-      return positionControlParameters.getDerivativeGain(jointName);
+      if (state != HighLevelController.WALKING)
+         return positionControlParameters.getDerivativeGain(jointName);
+      else
+         return 0.0;
    }
 
    @Override

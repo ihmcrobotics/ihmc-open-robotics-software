@@ -59,7 +59,10 @@ public class StandPrepControllerState extends HighLevelControllerState
          jointsData.add(controlledJoint, jointData);
 
          JointDesiredControlMode jointControlMode = highLevelControllerParameters.getJointDesiredControlMode(controlledJoint.getName(), controllerState);
-         lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(controlledJoint, jointControlMode);
+         JointDesiredOutput jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(controlledJoint);
+         jointDesiredOutput.setControlMode(jointControlMode);
+         jointDesiredOutput.setStiffness(highLevelControllerParameters.getDesiredJointStiffness(controlledJoint.getName(), controllerState));
+         jointDesiredOutput.setDamping(highLevelControllerParameters.getDesiredJointDamping(controlledJoint.getName(), controllerState));
       }
 
    }

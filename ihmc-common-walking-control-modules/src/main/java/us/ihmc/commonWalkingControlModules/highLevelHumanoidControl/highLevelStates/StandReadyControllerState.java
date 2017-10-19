@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 
 public class StandReadyControllerState extends HoldPositionControllerState
@@ -17,10 +18,14 @@ public class StandReadyControllerState extends HoldPositionControllerState
       super(controllerState, controllerToolbox, highLevelControllerOutput);
 
       OneDoFJoint[] oneDoFJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
+
       for (OneDoFJoint joint : oneDoFJoints)
       {
          JointDesiredControlMode jointControlMode = highLevelControllerParameters.getJointDesiredControlMode(joint.getName(), controllerState);
-         lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(joint, jointControlMode);
+         JointDesiredOutput jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+         jointDesiredOutput.setControlMode(jointControlMode);
+         jointDesiredOutput.setStiffness(highLevelControllerParameters.getDesiredJointStiffness(joint.getName(), controllerState));
+         jointDesiredOutput.setDamping(highLevelControllerParameters.getDesiredJointDamping(joint.getName(), controllerState));
       }
    }
 }

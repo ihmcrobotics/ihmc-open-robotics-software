@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import java.util.ArrayList;
+
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -22,19 +24,16 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.util.ArrayList;
 
 public class WalkingControllerState extends HighLevelControllerState
 {
    private final static HighLevelController controllerState = HighLevelController.WALKING;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WholeBodyControllerCore controllerCore;
    private final WalkingHighLevelHumanoidController walkingController;
 
@@ -44,13 +43,13 @@ public class WalkingControllerState extends HighLevelControllerState
    private boolean setupInverseKinematicsSolver = false;
    private boolean setupVirtualModelControlSolver = false;
 
-   public WalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, HighLevelControlManagerFactory managerFactory,
-                                 HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
-                                 WalkingControllerParameters walkingControllerParameters)
+   private final LowLevelOneDoFJointDesiredDataHolderList jointStiffnessAndDamping;
+
+   public WalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
+                                 HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
+                                 HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters)
    {
       super(controllerState);
-
-      this.controllerToolbox = controllerToolbox;
 
       // create walking controller
       walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
@@ -77,20 +76,24 @@ public class WalkingControllerState extends HighLevelControllerState
          toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controlledBodies, controllerToolbox.getContactablePlaneBodies());
       }
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
-      LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput = new LowLevelOneDoFJointDesiredDataHolderList(controllerToolbox.getFullRobotModel().getOneDoFJoints());
+      LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput = new LowLevelOneDoFJointDesiredDataHolderList(controllerToolbox.getFullRobotModel()
+                                                                                                                                        .getOneDoFJoints());
       controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
       walkingController.setControllerCoreOutput(controllerCoreOutput);
 
       OneDoFJoint[] controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
+      jointStiffnessAndDamping = new LowLevelOneDoFJointDesiredDataHolderList(controlledJoints);
+
       for (OneDoFJoint controlledJoint : controlledJoints)
       {
-         JointDesiredControlMode jointControlMode = highLevelControllerParameters.getJointDesiredControlMode(controlledJoint.getName(), controllerState);
+         JointDesiredOutput jointDesiredOutput = jointStiffnessAndDamping.getJointDesiredOutput(controlledJoint);
+         jointDesiredOutput.setStiffness(highLevelControllerParameters.getDesiredJointStiffness(controlledJoint.getName(), controllerState));
+         jointDesiredOutput.setDamping(highLevelControllerParameters.getDesiredJointDamping(controlledJoint.getName(), controllerState));
       }
 
       registry.addChild(walkingController.getYoVariableRegistry());
    }
-
 
    public void initialize()
    {
@@ -103,18 +106,18 @@ public class WalkingControllerState extends HighLevelControllerState
       walkingController.initializeDesiredHeightToCurrent();
    }
 
-
    @Override
    public void doAction()
    {
       walkingController.doAction();
 
       ControllerCoreCommand controllerCoreCommand = walkingController.getControllerCoreCommand();
+      controllerCoreCommand.completeLowLevelJointData(jointStiffnessAndDamping);
+
       controllerCoreTimer.startMeasurement();
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
       controllerCoreTimer.stopMeasurement();
-
    }
 
    public void reinitializePelvisOrientation(boolean reinitialize)
@@ -155,10 +158,10 @@ public class WalkingControllerState extends HighLevelControllerState
       walkingController.doTransitionIntoAction();
 
       walkingController.getOrderedWalkingStatesForWarmup(states);
-      for(WalkingStateEnum state : states)
+      for (WalkingStateEnum state : states)
       {
          PrintTools.info(this, "Warming up " + state);
-         for(int i = 0; i < iterations; i++)
+         for (int i = 0; i < iterations; i++)
          {
             walkingController.warmupStateIteration(state);
             ControllerCoreCommand controllerCoreCommandList = walkingController.getControllerCoreCommand();
@@ -171,7 +174,6 @@ public class WalkingControllerState extends HighLevelControllerState
       walkingController.getControllerCoreCommand().clear();
       PrintTools.info(this, "Finished JIT walking warmup routine");
    }
-
 
    /**
     * Returns the currently active walking state. This is used for unit testing.
