@@ -57,7 +57,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
          }
          else
          {
-            FootstepNodeSnappingTools.changeFromRegionToSoleFrame(planarRegionToPack, footstepNode, snapTransform, footholdPolygonInLocalFrame);
+            FootstepNodeSnappingTools.changeFromPlanarRegionToSoleFrame(planarRegionToPack, footstepNode, snapTransform, footholdPolygonInLocalFrame);
             return new FootstepNodeSnapData(snapTransform, footholdPolygonInLocalFrame);
          }
       }
