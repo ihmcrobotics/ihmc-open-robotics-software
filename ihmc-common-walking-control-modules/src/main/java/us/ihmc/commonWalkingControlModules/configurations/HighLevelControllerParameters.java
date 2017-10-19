@@ -9,8 +9,8 @@ public interface HighLevelControllerParameters
    StandPrepParameters getStandPrepParameters();
 
    JointDesiredControlMode getJointDesiredControlMode(String joint, HighLevelController state);
-   double getDesiredJointStiffness(String joint);
-   double getDesiredJointDamping(String joint);
+   double getDesiredJointStiffness(String joint, HighLevelController state);
+   double getDesiredJointDamping(String joint, HighLevelController state);
 
    HighLevelController getDefaultInitialControllerState();
    HighLevelController getFallbackControllerState();

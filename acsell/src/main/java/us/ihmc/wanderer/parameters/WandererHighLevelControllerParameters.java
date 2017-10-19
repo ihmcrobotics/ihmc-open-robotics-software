@@ -20,13 +20,13 @@ public class WandererHighLevelControllerParameters implements HighLevelControlle
    }
 
    @Override
-   public double getDesiredJointStiffness(String joint)
+   public double getDesiredJointStiffness(String joint, HighLevelController state)
    {
       return 0;
    }
 
    @Override
-   public double getDesiredJointDamping(String joint)
+   public double getDesiredJointDamping(String joint, HighLevelController state)
    {
       return 0;
    }

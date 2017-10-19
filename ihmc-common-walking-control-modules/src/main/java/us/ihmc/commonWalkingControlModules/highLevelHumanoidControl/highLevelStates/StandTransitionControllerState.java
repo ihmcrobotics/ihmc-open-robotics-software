@@ -47,8 +47,8 @@ public class StandTransitionControllerState extends HighLevelControllerState
 
          String jointName = controlledJoint.getName();
          JointDesiredControlMode jointControlMode = highLevelControllerParameters.getJointDesiredControlMode(jointName, controllerState);
-         double jointStiffness = highLevelControllerParameters.getDesiredJointStiffness(jointName);
-         double jointDamping = highLevelControllerParameters.getDesiredJointDamping(jointName);
+         double jointStiffness = highLevelControllerParameters.getDesiredJointStiffness(jointName, null);
+         double jointDamping = highLevelControllerParameters.getDesiredJointDamping(jointName, null);
 
          JointDesiredOutput lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(controlledJoint);
          lowLevelJointData.setControlMode(jointControlMode);
