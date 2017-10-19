@@ -432,7 +432,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
    }
 
    @Override
-   public JointDesiredOutputReadOnly getJointDesiredOutput(int index)
+   public JointDesiredOutput getJointDesiredOutput(int index)
    {
       return getJointDesiredOutput(getOneDoFJoint(index));
    }

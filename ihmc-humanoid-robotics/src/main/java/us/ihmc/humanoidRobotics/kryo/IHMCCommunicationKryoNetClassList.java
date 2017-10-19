@@ -60,6 +60,7 @@ import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
+import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlModeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorCommandPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIRobotBehavior;
@@ -531,6 +532,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(ControllerCrashNotificationPacket.CrashLocation.class);
       registerPacketClass(InvalidPacketNotificationPacket.class);
 
+      registerPacketClass(AtlasLowLevelControlModeMessage.class);
+      registerPacketField(AtlasLowLevelControlModeMessage.ControlMode.class);
       registerPacketClass(AtlasWristSensorCalibrationRequestPacket.class);
       registerPacketClass(AtlasElectricMotorEnablePacket.class);
       registerPacketField(AtlasElectricMotorPacketEnum.class);
