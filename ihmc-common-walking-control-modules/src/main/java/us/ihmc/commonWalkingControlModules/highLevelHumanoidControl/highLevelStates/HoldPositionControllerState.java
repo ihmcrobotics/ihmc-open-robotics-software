@@ -53,7 +53,10 @@ public class HoldPositionControllerState extends HighLevelControllerState
          OneDoFJoint joint = jointSetpoints.get(jointIndex).getLeft();
          YoDouble setpoint = jointSetpoints.get(jointIndex).getRight();
          JointDesiredOutput lowLevelJointData = highLevelControllerOutput.getJointDesiredOutput(joint);
-         setpoint.set(lowLevelJointData.getDesiredPosition());
+         if (lowLevelJointData.hasDesiredPosition())
+            setpoint.set(lowLevelJointData.getDesiredPosition());
+         else
+            setpoint.set(joint.getQ());
       }
    }
 
