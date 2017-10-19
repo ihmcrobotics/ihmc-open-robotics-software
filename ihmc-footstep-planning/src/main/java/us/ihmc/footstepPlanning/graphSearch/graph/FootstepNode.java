@@ -89,7 +89,7 @@ public class FootstepNode
    @Override
    public String toString()
    {
-      return "Node: x=" + getX() + ", y=" + getY();
+      return "Node: x=" + getX() + ", y=" + getY() + ", yaw=" + getYaw();
    }
 
 }
