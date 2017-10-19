@@ -752,12 +752,6 @@ public class StepAdjustmentExampleGraphic
          }
 
          @Override
-         public boolean doPrepareManipulationForLocomotion()
-         {
-            return false;
-         }
-
-         @Override
          public double getDefaultTransferTime()
          {
             return 0;

@@ -17,6 +17,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoDouble maximumStepWidth = new YoDouble("maximumStepWidth", registry);
    private final YoDouble minimumStepWidth = new YoDouble("minimumStepWidth", registry);
    private final YoDouble minimumStepLength = new YoDouble("minimumStepLength", registry);
+   private final YoDouble minimumStepYaw = new YoDouble("minimumStepYaw", registry);
    private final YoDouble maximumStepXWhenForwardAndDown = new YoDouble("maximumStepXWhenForwardAndDown", registry);
    private final YoDouble maximumStepZWhenForwardAndDown = new YoDouble("maximumStepZWhenForwardAndDown", registry);
    private final YoDouble wiggleInsideDelta = new YoDouble("wiggleInsideDelta", registry);
@@ -48,6 +49,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       maximumStepWidth.set(defaults.getMaximumStepWidth());
       minimumStepWidth.set(defaults.getMinimumStepWidth());
       minimumStepLength.set(defaults.getMinimumStepLength());
+      minimumStepYaw.set(defaults.getMinimumStepYaw());
       maximumStepXWhenForwardAndDown.set(defaults.getMaximumStepXWhenForwardAndDown());
       maximumStepZWhenForwardAndDown.set(defaults.getMaximumStepZWhenForwardAndDown());
       wiggleInsideDelta.set(defaults.getWiggleInsideDelta());
@@ -103,6 +105,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public double getMinimumStepLength()
    {
       return minimumStepLength.getDoubleValue();
+   }
+
+   @Override
+   public double getMinimumStepYaw()
+   {
+      return minimumStepYaw.getDoubleValue();
    }
 
    @Override

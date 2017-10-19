@@ -2747,7 +2747,10 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
             }
          }
 
-         myDataBuffer.notifyRewindListeners();
+         if(myDataBuffer != null)
+         {
+            myDataBuffer.notifyRewindListeners();
+         }
       }
 
    }
