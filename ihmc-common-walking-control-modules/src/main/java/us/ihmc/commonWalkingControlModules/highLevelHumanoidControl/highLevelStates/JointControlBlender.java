@@ -4,6 +4,7 @@ import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -83,19 +84,42 @@ public class JointControlBlender
       double desiredTorque0 = outputData0.hasDesiredTorque() ? outputData0.getDesiredTorque() : 0.0;
       double desiredTorque1 = outputData1.hasDesiredTorque() ? outputData1.getDesiredTorque() : 0.0;
 
+      double stiffness0 = outputData0.hasStiffness() ? outputData0.getStiffness() : 0.0;
+      double stiffness1 = outputData1.hasStiffness() ? outputData1.getStiffness() : 0.0;
+      
+      double damping0 = outputData0.hasDamping() ? outputData0.getDamping() : 0.0;
+      double damping1 = outputData1.hasDamping() ? outputData1.getDamping() : 0.0;
+
       double desiredPosition = TupleTools.interpolate(desiredPosition0, desiredPosition1, blendingFactor);
       double desiredVelocity = TupleTools.interpolate(desiredVelocity0, desiredVelocity1, blendingFactor);
       double desiredAcceleration = TupleTools.interpolate(desiredAcceleration0, desiredAcceleration1, blendingFactor);
       double desiredTorque = TupleTools.interpolate(desiredTorque0, desiredTorque1, blendingFactor);
+      double stiffness = TupleTools.interpolate(stiffness0, stiffness1, blendingFactor);
+      double damping = TupleTools.interpolate(damping0, damping1, blendingFactor);
 
       double currentJointAngle = oneDoFJoint.getQ();
       double currentJointVelocity = oneDoFJoint.getQd();
       positionStepSizeLimiter.updateOutput(currentJointAngle, desiredPosition);
       velocityStepSizeLimiter.updateOutput(currentJointVelocity, desiredVelocity);
 
-      outputDataToPack.setDesiredPosition(positionStepSizeLimiter.getDoubleValue());
-      outputDataToPack.setDesiredVelocity(velocityStepSizeLimiter.getDoubleValue());
-      outputDataToPack.setDesiredAcceleration(desiredAcceleration);
-      outputDataToPack.setDesiredTorque(desiredTorque);
+      JointDesiredControlMode controlMode = outputDataToPack.getControlMode();
+
+      outputDataToPack.clear();
+
+      outputDataToPack.setControlMode(controlMode);
+
+      if (outputData0.hasDesiredPosition() || outputData1.hasDesiredPosition())
+         outputDataToPack.setDesiredPosition(positionStepSizeLimiter.getDoubleValue());
+      if (outputData0.hasDesiredVelocity() || outputData1.hasDesiredVelocity())
+         outputDataToPack.setDesiredVelocity(velocityStepSizeLimiter.getDoubleValue());
+      if (outputData0.hasDesiredAcceleration() || outputData1.hasDesiredAcceleration())
+         outputDataToPack.setDesiredAcceleration(desiredAcceleration);
+      if (outputData0.hasDesiredTorque() || outputData1.hasDesiredTorque())
+         outputDataToPack.setDesiredTorque(desiredTorque);
+      if (outputData0.hasStiffness() || outputData1.hasStiffness())
+      outputDataToPack.setStiffness(stiffness);
+      if (outputData0.hasDamping() || outputData1.hasDamping())
+         outputDataToPack.setDamping(damping);
+      outputDataToPack.setResetIntegrators(outputData0.pollResetIntegratorsRequest() || outputData1.pollResetIntegratorsRequest());
    }
 }
