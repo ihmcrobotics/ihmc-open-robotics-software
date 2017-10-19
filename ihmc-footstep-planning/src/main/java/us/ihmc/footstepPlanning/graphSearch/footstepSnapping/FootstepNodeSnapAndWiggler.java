@@ -73,7 +73,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
             return new FootstepNodeSnapData(snapTransform, new ConvexPolygon2D());
          }
       }
-      
+
       RigidBodyTransform wiggleTransformWorldToWorld = new RigidBodyTransform();
       RigidBodyTransform transformOne = new RigidBodyTransform();
       planarRegionToPack.getTransformToWorld(transformOne);
