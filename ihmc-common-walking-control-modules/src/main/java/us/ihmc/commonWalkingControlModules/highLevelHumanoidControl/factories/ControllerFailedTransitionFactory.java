@@ -1,15 +1,14 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import java.util.EnumMap;
+
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.ControllerFailedTransition;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.util.EnumMap;
 
 public class ControllerFailedTransitionFactory implements ControllerStateTransitionFactory<HighLevelController>
 {
