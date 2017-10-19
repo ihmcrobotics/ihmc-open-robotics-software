@@ -252,10 +252,7 @@ public interface FootstepPlannerParameters
     * If this value is too low, the planner will unnecessarily reject footsteps. If too high, footsteps might not be kinematically feasible.
     * </p>
     */
-   public default double getMaximumStepWidth()
-   {
-      return Double.POSITIVE_INFINITY;
-   }
+   public abstract double getMaximumStepWidth();
 
    /**
     * The planner can be setup to shift footsteps away from "cliffs". When the footstep has a planar region

@@ -47,4 +47,9 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
       return 0.1;
    }
 
+   @Override
+   public double getMaximumStepWidth()
+   {
+      return 0.4;
+   }
 }

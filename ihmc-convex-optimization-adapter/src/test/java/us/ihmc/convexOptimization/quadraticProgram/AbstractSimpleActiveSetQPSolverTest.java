@@ -1529,7 +1529,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
     * It seems that the problem is related to the fact that the robot has 6 contact points per foot.
     * The solver still fails when increasing the max number of iterations.
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFindValidSolutionForKiwiDataset20170712()
    {

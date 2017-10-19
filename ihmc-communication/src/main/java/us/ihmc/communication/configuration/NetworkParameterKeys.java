@@ -11,7 +11,8 @@ public enum NetworkParameterKeys
    leftHand("Hostname/IP of the left hand.", "", true),
    rightHand("Hostname/IP of the right hand.", "", true),
    
-   loggedCameras("Cameras to be recorded by the logger. Should be a comma seperated list", "", false);
+   loggedCameras("Cameras to be recorded by the logger. Should be a comma seperated list", "", false), 
+   RTPSDomainID("RTPS Domain ID used for rtps publishers and subscribers", "-1", false);
    
    
    private final String description;
@@ -24,7 +25,6 @@ public enum NetworkParameterKeys
       this.defaultValue = defaultValue;
       this.isIPAddress = isIPAddress;
    }
-   
    
    public String getDescription()
    {

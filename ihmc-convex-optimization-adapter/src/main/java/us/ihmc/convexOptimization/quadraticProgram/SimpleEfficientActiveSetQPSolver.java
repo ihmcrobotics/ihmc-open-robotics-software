@@ -6,6 +6,7 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commons.PrintTools;
 
 /**
  * Solves a Quadratic Program using a simple active set method.
@@ -24,6 +25,7 @@ import gnu.trove.list.array.TIntArrayList;
  */
 public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolverInterface
 {
+   private double fractionToAdd = 0.90;
    private double convergenceThreshold = 1e-10;
    private int maxNumberOfIterations = 10;
 
@@ -99,6 +101,9 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
+   private final DenseMatrix64F lowerBoundViolations = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F upperBoundViolations = new DenseMatrix64F(0, 0);
+
    private boolean useWarmStart = false;
 
    private int previousNumberOfVariables = 0;
@@ -111,6 +116,11 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
    public void setConvergenceThreshold(double convergenceThreshold)
    {
       this.convergenceThreshold = convergenceThreshold;
+   }
+
+   public void setFractionOfViolatedConstraintsToAdd(double fractionToAdd)
+   {
+      this.fractionToAdd = fractionToAdd;
    }
 
    @Override
@@ -133,6 +143,9 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
       variableLowerBounds.reshape(0, 0);
       variableUpperBounds.reshape(0, 0);
+
+      lowerBoundViolations.reshape(0, 0);
+      upperBoundViolations.reshape(0, 0);
    }
 
    @Override
@@ -142,6 +155,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          throw new RuntimeException("variableLowerBounds.getNumRows() != quadraticCostQMatrix.getNumRows()");
 
       this.variableLowerBounds.set(variableLowerBounds);
+      this.lowerBoundViolations.reshape(variableLowerBounds.numRows, 1);
    }
 
    @Override
@@ -151,6 +165,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          throw new RuntimeException("variableUpperBounds.getNumRows() != quadraticCostQMatrix.getNumRows()");
 
       this.variableUpperBounds.set(variableUpperBounds);
+      this.upperBoundViolations.reshape(variableUpperBounds.numRows, 1);
    }
 
    @Override
@@ -262,8 +277,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          throw new RuntimeException("lagrangeInequalityConstraintMultipliersToPack.length != numberOfInequalityConstraints");
 
       if (lagrangeLowerBoundsConstraintMultipliersToPack.length != numberOfLowerBoundConstraints)
-         throw new RuntimeException("lagrangeLowerBoundsConstraintMultipliersToPack.length != numberOfLowerBoundConstraints. numberOfLowerBoundConstraints = "
-               + numberOfLowerBoundConstraints);
+         throw new RuntimeException("lagrangeLowerBoundsConstraintMultipliersToPack.length != numberOfLowerBoundConstraints. numberOfLowerBoundConstraints = " + numberOfLowerBoundConstraints);
       if (lagrangeUpperBoundsConstraintMultipliersToPack.length != numberOfUpperBoundConstraints)
          throw new RuntimeException("lagrangeUpperBoundsConstraintMultipliersToPack.length != numberOfUpperBoundConstraints");
 
@@ -383,8 +397,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       //      System.out.println(numberOfInequalityConstraints + ", " + numberOfLowerBoundConstraints + ", " + numberOfUpperBoundConstraints);
       if ((numberOfInequalityConstraints == 0) && (numberOfLowerBoundConstraints == 0) && (numberOfUpperBoundConstraints == 0))
          return numberOfIterations;
-
-      // Test the inequality constraints:
 
       for (int i = 0; i < maxNumberOfIterations; i++)
       {
@@ -544,28 +556,33 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       boolean activeSetWasModified = false;
 
       int numberOfVariables = quadraticCostQMatrix.getNumRows();
-      //      int numberOfEqualityConstraints = linearEqualityConstraintsAMatrix.getNumRows();
       int numberOfInequalityConstraints = linearInequalityConstraintsCMatrixO.getNumRows();
       int numberOfLowerBoundConstraints = variableLowerBounds.getNumRows();
       int numberOfUpperBoundConstraints = variableUpperBounds.getNumRows();
 
+      // check inequality constraints
       inequalityIndicesToAddToActiveSet.reset();
       inequalityIndicesToRemoveFromActiveSet.reset();
       if (numberOfInequalityConstraints != 0)
       {
-
          linearInequalityConstraintsCheck.reshape(numberOfInequalityConstraints, 1);
          CommonOps.mult(linearInequalityConstraintsCMatrixO, solutionToPack, linearInequalityConstraintsCheck);
          CommonOps.subtractEquals(linearInequalityConstraintsCheck, linearInequalityConstraintsDVectorO);
 
-         for (int i = 0; i < numberOfInequalityConstraints; i++)
+         double maxViolation = CommonOps.elementMax(linearInequalityConstraintsCheck);
+
+         if (maxViolation > convergenceThreshold)
          {
-            if (activeInequalityIndices.contains(i))
-               continue; // Only check violation on those that are not active. Otherwise check should just return 0.0, but roundoff could cause problems.
-            if (linearInequalityConstraintsCheck.get(i, 0) > convergenceThreshold)
+            for (int i = 0; i < numberOfInequalityConstraints; i++)
             {
-               activeSetWasModified = true;
-               inequalityIndicesToAddToActiveSet.add(i);
+               if (activeInequalityIndices.contains(i))
+                  continue; // Only check violation on those that are not active. Otherwise check should just return 0.0, but roundoff could cause problems.
+
+               if (linearInequalityConstraintsCheck.get(i, 0) > (1.0 - fractionToAdd) * maxViolation + convergenceThreshold)
+               {
+                  activeSetWasModified = true;
+                  inequalityIndicesToAddToActiveSet.add(i);
+               }
             }
          }
 
@@ -574,7 +591,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
             int indexToCheck = activeInequalityIndices.get(i);
 
             double lagrangeMultiplier = lagrangeInequalityConstraintMultipliersToPack.get(indexToCheck);
-            if (lagrangeMultiplier < 0.0)
+            if (lagrangeMultiplier < -convergenceThreshold)
             {
                activeSetWasModified = true;
                inequalityIndicesToRemoveFromActiveSet.add(indexToCheck);
@@ -582,34 +599,53 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          }
       }
 
-      // Check the Bounds
+      // Check the lower bounds
       lowerBoundIndicesToAddToActiveSet.reset();
-      for (int i = 0; i < numberOfLowerBoundConstraints; i++)
+      if (numberOfLowerBoundConstraints != 0)
       {
-         if (activeLowerBoundIndices.contains(i))
-            continue; // Only check violation on those that are not active. Otherwise check should just return 0.0, but roundoff could cause problems.
+         CommonOps.subtract(variableLowerBounds, solutionToPack, lowerBoundViolations);
+         double maxViolation = CommonOps.elementMax(lowerBoundViolations);
 
-         double solutionVariable = solutionToPack.get(i, 0);
-         double lowerBound = this.variableLowerBounds.get(i, 0);
-         if (solutionVariable < lowerBound - convergenceThreshold)
+         if (maxViolation > convergenceThreshold)
          {
-            activeSetWasModified = true;
-            lowerBoundIndicesToAddToActiveSet.add(i);
+            for (int i = 0; i < numberOfLowerBoundConstraints; i++)
+            {
+               if (activeLowerBoundIndices.contains(i))
+                  continue; // Only check violation on those that are not active. Otherwise check should just return 0.0, but roundoff could cause problems.
+
+               double violation = lowerBoundViolations.get(i, 0);
+
+               if (violation > (1.0 - fractionToAdd) * maxViolation + convergenceThreshold)
+               {
+                  activeSetWasModified = true;
+                  lowerBoundIndicesToAddToActiveSet.add(i);
+               }
+            }
          }
       }
 
+      // Check the upper bounds
       upperBoundIndicesToAddToActiveSet.reset();
-      for (int i = 0; i < numberOfUpperBoundConstraints; i++)
+      if (numberOfUpperBoundConstraints != 0)
       {
-         if (activeUpperBoundIndices.contains(i))
-            continue; // Only check violation on those that are not active. Otherwise check should just return 0.0, but roundoff could cause problems.
+         CommonOps.subtract(solutionToPack, variableUpperBounds, upperBoundViolations);
+         double maxViolation = CommonOps.elementMax(upperBoundViolations);
 
-         double solutionVariable = solutionToPack.get(i, 0);
-         double upperBound = this.variableUpperBounds.get(i, 0);
-         if (solutionVariable > upperBound + convergenceThreshold)
+         if (maxViolation > convergenceThreshold)
          {
-            activeSetWasModified = true;
-            upperBoundIndicesToAddToActiveSet.add(i);
+            for (int i = 0; i < numberOfUpperBoundConstraints; i++)
+            {
+               if (activeUpperBoundIndices.contains(i))
+                  continue; // Only check violation on those that are not active. Otherwise check should just return 0.0, but roundoff could cause problems.
+
+               double violation = upperBoundViolations.get(i, 0);
+
+               if (violation > (1.0 - fractionToAdd) * maxViolation + convergenceThreshold)
+               {
+                  activeSetWasModified = true;
+                  upperBoundIndicesToAddToActiveSet.add(i);
+               }
+            }
          }
       }
 
@@ -619,7 +655,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          int indexToCheck = activeLowerBoundIndices.get(i);
 
          double lagrangeMultiplier = lagrangeLowerBoundConstraintMultipliersToPack.get(indexToCheck);
-         if (lagrangeMultiplier < 0.0)
+         if (lagrangeMultiplier < -convergenceThreshold)
          {
             activeSetWasModified = true;
             lowerBoundIndicesToRemoveFromActiveSet.add(indexToCheck);
@@ -633,7 +669,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
          double lagrangeMultiplier = lagrangeUpperBoundConstraintMultipliersToPack.get(indexToCheck);
          //         if ((lagrangeMultiplier < 0) || (Double.isInfinite(lagrangeMultiplier)))
-         if (lagrangeMultiplier < 0.0)
+         if (lagrangeMultiplier < -convergenceThreshold)
          {
             activeSetWasModified = true;
             upperBoundIndicesToRemoveFromActiveSet.add(indexToCheck);
@@ -715,10 +751,54 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          row++;
       }
 
+      //printSetChanges();
+
       solveEqualityConstrainedSubproblemEfficiently(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
                                                     lagrangeLowerBoundConstraintMultipliersToPack, lagrangeUpperBoundConstraintMultipliersToPack);
 
       return true;
+   }
+
+   private void printSetChanges()
+   {
+      if (!lowerBoundIndicesToAddToActiveSet.isEmpty())
+      {
+         PrintTools.info("Lower bound indices added : ");
+         for (int i = 0; i < lowerBoundIndicesToAddToActiveSet.size(); i++)
+            PrintTools.info("" + lowerBoundIndicesToAddToActiveSet.get(i));
+      }
+      if (!lowerBoundIndicesToRemoveFromActiveSet.isEmpty())
+      {
+         PrintTools.info("Lower bound indices removed : ");
+         for (int i = 0; i < lowerBoundIndicesToRemoveFromActiveSet.size(); i++)
+            PrintTools.info("" + lowerBoundIndicesToRemoveFromActiveSet.get(i));
+      }
+
+      if (!upperBoundIndicesToAddToActiveSet.isEmpty())
+      {
+         PrintTools.info("Upper bound indices added : ");
+         for (int i = 0; i < upperBoundIndicesToAddToActiveSet.size(); i++)
+            PrintTools.info("" + upperBoundIndicesToAddToActiveSet.get(i));
+      }
+      if (!upperBoundIndicesToRemoveFromActiveSet.isEmpty())
+      {
+         PrintTools.info("Upper bound indices removed : ");
+         for (int i = 0; i < upperBoundIndicesToRemoveFromActiveSet.size(); i++)
+            PrintTools.info("" + upperBoundIndicesToRemoveFromActiveSet.get(i));
+      }
+
+      if (!inequalityIndicesToAddToActiveSet.isEmpty())
+      {
+         PrintTools.info("Inequality constraint indices added : ");
+         for (int i = 0; i < inequalityIndicesToAddToActiveSet.size(); i++)
+            PrintTools.info("" + inequalityIndicesToAddToActiveSet.get(i));
+      }
+      if (!inequalityIndicesToRemoveFromActiveSet.isEmpty())
+      {
+         PrintTools.info("Inequality constraint indices removed : ");
+         for (int i = 0; i < inequalityIndicesToRemoveFromActiveSet.size(); i++)
+            PrintTools.info("" + inequalityIndicesToRemoveFromActiveSet.get(i));
+      }
    }
 
    private boolean containsNaN(DenseMatrix64F solution)

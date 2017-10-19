@@ -180,6 +180,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajec
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PlanOffsetStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PrepareForLocomotionMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
@@ -373,6 +374,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(FootstepStatus.Status.class);
       registerPacketField(WalkingStatusMessage.Status.class);
       registerPacketClass(AbortWalkingMessage.class);
+      registerPacketClass(PrepareForLocomotionMessage.class);
 
       // Planar regions
       registerPacketClass(PlanarRegionsListMessage.class);

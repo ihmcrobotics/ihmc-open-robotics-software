@@ -41,4 +41,10 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
       return 0.25;
    }
 
+   @Override
+   public double getMaximumStepWidth()
+   {
+      return 0.4;
+   }
+
 }

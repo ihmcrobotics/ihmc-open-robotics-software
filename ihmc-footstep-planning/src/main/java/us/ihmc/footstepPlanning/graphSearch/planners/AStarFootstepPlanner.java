@@ -105,6 +105,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       heuristics.setWeight(weight);
    }
 
+   @Override
    public void setTimeout(double timeoutInSeconds)
    {
       timeout.set(timeoutInSeconds);
@@ -316,7 +317,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       return FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
    }
 
-   private void checkGoalType(FootstepPlannerGoal goal)
+   public static void checkGoalType(FootstepPlannerGoal goal)
    {
       FootstepPlannerGoalType supportedGoalType = FootstepPlannerGoalType.POSE_BETWEEN_FEET;
       if (!(goal.getFootstepPlannerGoalType() == supportedGoalType))
