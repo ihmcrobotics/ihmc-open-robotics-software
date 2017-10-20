@@ -35,7 +35,6 @@ public class ValkyrieRosControlLowLevelController
    private final YoDouble wakeUpTime = new YoDouble("lowLevelControlWakeUpTime", registry);
 
    private final ValkyrieTorqueHysteresisCompensator torqueHysteresisCompensator;
-   private final ValkyrieAccelerationIntegration accelerationIntegration;
 
    private final AtomicReference<HighLevelController> currentHighLevelControllerState = new AtomicReference<HighLevelController>(null);
 
@@ -50,7 +49,6 @@ public class ValkyrieRosControlLowLevelController
       wakeUpTime.set(Double.NaN);
 
       torqueHysteresisCompensator = new ValkyrieTorqueHysteresisCompensator(yoEffortJointHandleHolders, yoTime, registry);
-      accelerationIntegration = new ValkyrieAccelerationIntegration(yoEffortJointHandleHolders, updateDT, registry);
 
       Map<String, Double> offsetMap = ValkyrieTorqueOffsetPrinter.loadTorqueOffsetsFromFile();
 
@@ -85,8 +83,6 @@ public class ValkyrieRosControlLowLevelController
       if (currentHighLevelControllerState.get() == HighLevelController.WALKING)
       {
          torqueHysteresisCompensator.compute();
-         if (ValkyrieRosControlController.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
-            accelerationIntegration.compute();
       }
 
       updateCommandCalculators();

@@ -1,7 +1,7 @@
 package us.ihmc.valkyrieRosControl;
 
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -50,7 +50,7 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
 
    public void computeAndUpdateJointTorque()
    {
-      JointDesiredOutput desiredOutput = yoEffortJointHandleHolder.getDesiredJointData();
+      JointDesiredOutputReadOnly desiredOutput = yoEffortJointHandleHolder.getDesiredJointData();
       pidController.setProportionalGain(desiredOutput.hasStiffness() ? desiredOutput.getStiffness() : 0.0);
       pidController.setDerivativeGain(desiredOutput.hasDamping() ? desiredOutput.getDamping() : 0.0);
 
@@ -60,7 +60,7 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
       double qdDesired = desiredOutput.hasDesiredVelocity() ? desiredOutput.getDesiredVelocity() : qd;
 
       double fb_tau = pidController.compute(q, qDesired, qd, qdDesired, controlDT);
-      double ff_tau = yoEffortJointHandleHolder.getControllerTauDesired();
+      double ff_tau = desiredOutput.hasDesiredTorque() ? desiredOutput.getDesiredTorque() : 0.0;
 
       double desiredEffort = fb_tau + ff_tau + tauOffset.getDoubleValue();
       yoEffortJointHandleHolder.setDesiredEffort(desiredEffort);

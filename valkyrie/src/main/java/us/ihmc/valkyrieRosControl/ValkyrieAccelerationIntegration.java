@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoJointDesiredOutput;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 
@@ -32,9 +33,9 @@ public class ValkyrieAccelerationIntegration
    /**
     * Need to be extracted to a config file
     */
-   private final String[] jointShortNamesToProcess = new String[]{"Hip", "Knee", "Ankle", "Shoulder", "Elbow", "Torso"};
-   private final String[] legs = new String[]{"Hip", "Knee", "Ankle"};
-   private final String[] arms = new String[]{"Shoulder", "Elbow"};
+   private final String[] jointShortNamesToProcess = new String[] {"Hip", "Knee", "Ankle", "Shoulder", "Elbow", "Torso"};
+   private final String[] legs = new String[] {"Hip", "Knee", "Ankle"};
+   private final String[] arms = new String[] {"Shoulder", "Elbow"};
 
    public ValkyrieAccelerationIntegration(List<YoEffortJointHandleHolder> yoEffortJointHandleHolders, double updateDT, YoVariableRegistry parentRegistry)
    {
@@ -96,7 +97,7 @@ public class ValkyrieAccelerationIntegration
 
          boolean enabled = joint.getIntegrateDesiredAccelerations();
          enabledList.get(i).set(enabled);
-         
+
          if (enabled && !joint.getResetDesiredAccelerationIntegrator())
             computeAndApplyDesiredTauOffset(i);
          else
@@ -108,15 +109,18 @@ public class ValkyrieAccelerationIntegration
    {
       YoEffortJointHandleHolder jointHandle = processedJointHandles.get(index);
       OneDoFJoint joint = jointHandle.getOneDoFJoint();
+      YoJointDesiredOutput desiredJointData = jointHandle.getDesiredJointData();
+      if (!desiredJointData.hasDesiredAcceleration())
+         return;
       double alpha = alphaAccelerationIntegration.getDoubleValue();
       double qd = joint.getQd();
       double qd_d_previous = desiredVelocityList.get(index).getDoubleValue();
-      double qdd_d = jointHandle.getControllerQddDesired();
+      double qdd_d = desiredJointData.getDesiredAcceleration();
 
       double qd_d_new = alpha * (qd_d_previous + qdd_d * updateDT) + (1.0 - alpha) * qd;
       double tau_vel = kVelocityList.get(index).getDoubleValue() * (qd_d_new - qd);
 
-      jointHandle.addOffetControllerTauDesired(tau_vel);
+      desiredJointData.setDesiredTorque(desiredJointData.getDesiredTorque() + tau_vel);
 
       desiredVelocityList.get(index).set(qd_d_new);
       tauFromVelocityList.get(index).set(tau_vel);
