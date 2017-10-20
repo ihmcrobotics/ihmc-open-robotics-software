@@ -225,7 +225,7 @@ public class PlanarRegion
    {
       return getPolygonIntersectionAreaWhenSnapped(convexPolygon2d, snappingTransform, null);
    }
-   
+
    /**
     * Returns all of the intersections when the convexPolygon is snapped onto this PlanarRegion with the snappingTransform.
     * @param convexPolygon2d Polygon to snap.
@@ -238,7 +238,7 @@ public class PlanarRegion
    {
       ConvexPolygon2D projectedPolygon = snapPolygonIntoRegionAndChangeFrameToRegionFrame(convexPolygon2d, snappingTransform);
       double intersectionArea = 0.0;
-      
+
       if (intersectionPolygonToPack != null)
       {
          intersectionPolygonToPack.clear();
@@ -249,7 +249,7 @@ public class PlanarRegion
       RigidBodyTransform regionToPolygonTransform = new RigidBodyTransform();
       regionToPolygonTransform.set(inverseSnappingTransform);
       regionToPolygonTransform.multiply(fromLocalToWorldTransform);
-      
+
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
@@ -258,7 +258,7 @@ public class PlanarRegion
          if (intersectingPolygon != null)
          {
             intersectionArea += intersectingPolygon.getArea();
-            
+
             if (intersectionPolygonToPack != null)
             {
                intersectingPolygon.applyTransformAndProjectToXYPlane(regionToPolygonTransform);
@@ -266,12 +266,12 @@ public class PlanarRegion
             }
          }
       }
-      
+
       if (intersectionPolygonToPack != null)
       {
          intersectionPolygonToPack.update();
       }
-      
+
       return intersectionArea;
    }
 
@@ -332,7 +332,7 @@ public class PlanarRegion
       return projectedPolygon;
    }
 
-   
+
    /**
     * Projects the input LineSegment2d to the plane defined by this PlanarRegion by translating each vertex in world z.
     * Then puts each vertex in local frame. In doing so, the length of the rotated lineSegment will actually increase on tilted PlanarRegions.
@@ -369,7 +369,7 @@ public class PlanarRegion
       LineSegment2D projectedLineSegment = new LineSegment2D(snappedEndpoints);
       return projectedLineSegment;
    }
-   
+
    /**
     * Computes if the point is in the region projected onto the world xy-plane.
     * Note that the z-coordinate of the query is ignored.
@@ -835,13 +835,19 @@ public class PlanarRegion
    /**
     * Transforms the planar region
     * @param rigidBodyTransform transform from current frame to desired frame
-    */   
+    */
    public void transform(RigidBodyTransform fromDesiredToCurrentTransform)
    {
       fromLocalToWorldTransform.multiply(fromDesiredToCurrentTransform);
       fromWorldToLocalTransform.set(fromLocalToWorldTransform);
       fromWorldToLocalTransform.invert();
-      
+
+      updateBoundingBox();
+      updateConvexHull();
+   }
+
+   public void update()
+   {
       updateBoundingBox();
       updateConvexHull();
    }
