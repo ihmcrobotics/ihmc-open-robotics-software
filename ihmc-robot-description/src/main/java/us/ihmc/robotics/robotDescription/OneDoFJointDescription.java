@@ -2,8 +2,8 @@ package us.ihmc.robotics.robotDescription;
 
 import java.util.List;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.Axis;
 
 public class OneDoFJointDescription extends JointDescription
 {

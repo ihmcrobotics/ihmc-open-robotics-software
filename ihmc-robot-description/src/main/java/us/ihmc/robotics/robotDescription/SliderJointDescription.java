@@ -1,7 +1,7 @@
 package us.ihmc.robotics.robotDescription;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.Axis;
 
 public class SliderJointDescription extends OneDoFJointDescription
 {
