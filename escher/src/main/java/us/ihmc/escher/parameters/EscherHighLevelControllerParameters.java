@@ -1,14 +1,14 @@
 package us.ihmc.escher.parameters;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 
 public class EscherHighLevelControllerParameters implements HighLevelControllerParameters
 {
    @Override
-   public StandPrepParameters getStandPrepParameters()
+   public WholeBodySetpointParameters getStandPrepParameters()
    {
       return null;
    }
