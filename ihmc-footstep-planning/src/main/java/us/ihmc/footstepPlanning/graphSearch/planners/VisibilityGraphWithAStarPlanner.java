@@ -44,6 +44,8 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    private static final double defaultHeuristicWeight = 3.0;
    private static final double planningHorizon = 2.0;
 
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
    private final FootstepPlannerParameters parameters;
    private final WaypointDefinedBodyPathPlan bodyPath;
    private final BodyPathHeuristics heuristics;
@@ -59,8 +61,9 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    private final List<YoFramePoint> bodyPathPoints = new ArrayList<>();
 
    public VisibilityGraphWithAStarPlanner(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons,
-                                          YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
+                                          YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
+      parentRegistry.addChild(registry);
       this.parameters = parameters;
       bodyPath = new WaypointDefinedBodyPathPlan();
       heuristics = new BodyPathHeuristics(registry, parameters, bodyPath);
@@ -129,16 +132,26 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    @Override
    public FootstepPlanningResult plan()
    {
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(planarRegionsList.getPlanarRegionsAsList());
-      Point3D startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
-      Point3D goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
-      ArrayList<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
-
       waypoints.clear();
-      for (Point3D waypoint3d : path)
+
+      if (planarRegionsList == null)
       {
-         waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
+         waypoints.add(new Point2D(bodyStartPose.getX(), bodyStartPose.getY()));
+         waypoints.add(new Point2D(bodyGoalPose.getX(), bodyGoalPose.getY()));
       }
+      else
+      {
+         NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(planarRegionsList.getPlanarRegionsAsList());
+         Point3D startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
+         Point3D goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
+         ArrayList<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+
+         for (Point3D waypoint3d : path)
+         {
+            waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
+         }
+      }
+
       bodyPath.setWaypoints(waypoints);
       bodyPath.compute(null, null);
 
