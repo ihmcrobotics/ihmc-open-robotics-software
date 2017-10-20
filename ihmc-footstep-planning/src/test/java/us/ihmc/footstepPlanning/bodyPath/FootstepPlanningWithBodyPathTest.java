@@ -32,6 +32,7 @@ import us.ihmc.javaFXToolkit.shapes.TextureColorPalette;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
 import us.ihmc.pathPlanning.tools.PointCloudTools;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
+import us.ihmc.pathPlanning.visibilityGraphs.PlanarRegionTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -82,59 +83,58 @@ public class FootstepPlanningWithBodyPathTest
    @Test
    public void testMaze()
    {
-      throw new IllegalAccessError("Fix PlanarRegionTools import issue");
-//      WaypointDefinedBodyPathPlan bodyPath = new WaypointDefinedBodyPathPlan();
-//      List<Point2D> waypoints = new ArrayList<>();
-//
-//      ArrayList<PlanarRegion> regions = PointCloudTools.loadPlanarRegionsFromFile("resources/PlanarRegions_NRI_Maze.txt");
-//      Point3D startPos = new Point3D(9.5, 9, 0);
-//      Point3D goalPos = new Point3D(0.5, 0.5, 0);
-//      startPos = PlanarRegionTools.projectPointToPlanes(startPos, new PlanarRegionsList(regions));
-//      goalPos = PlanarRegionTools.projectPointToPlanes(goalPos, new PlanarRegionsList(regions));
-//
-//      TextureColorPalette colorPalette = new TextureColorAdaptivePalette();
-//      JavaFXMultiColorMeshBuilder javaFXMultiColorMeshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
-//      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(regions, javaFXMultiColorMeshBuilder);
-//      ArrayList<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
-//      for (Point3D waypoint3d : path)
-//      {
-//         waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
-//      }
-//      bodyPath.setWaypoints(waypoints);
-//      bodyPath.compute(null, null);
-//
-//      Pose2D startPose = new Pose2D();
-//      bodyPath.getPointAlongPath(0.0, startPose);
-//      Pose2D finalPose = new Pose2D();
-//      bodyPath.getPointAlongPath(1.0, finalPose);
-//
-//      YoVariableRegistry registry = new YoVariableRegistry(name.getMethodName());
-//      FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
-//      double defaultStepWidth = parameters.getIdealFootstepWidth();
-//
-//      FramePose initialMidFootPose = new FramePose();
-//      initialMidFootPose.setX(startPos.getX());
-//      initialMidFootPose.setY(startPos.getY());
-//      initialMidFootPose.setYawPitchRoll(startPose.getYaw(), 0.0, 0.0);
-//      PoseReferenceFrame midFootFrame = new PoseReferenceFrame("InitialMidFootFrame", initialMidFootPose);
-//
-//      RobotSide initialStanceFootSide = RobotSide.RIGHT;
-//      FramePose initialStanceFootPose = new FramePose(midFootFrame);
-//      initialStanceFootPose.setY(initialStanceFootSide.negateIfRightSide(defaultStepWidth / 2.0));
-//      initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-//
-//      FramePose goalPose = new FramePose();
-//      goalPose.setX(finalPose.getX());
-//      goalPose.setY(finalPose.getY());
-//      goalPose.setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
-//
-//      PlanarRegionsList planarRegionsList = new PlanarRegionsList(regions);
-//      AStarFootstepPlanner planner = createBodyPathBasedPlanner(registry, parameters, bodyPath);
-//      planner.setTimeout(1.0);
-//      FootstepPlan footstepPlan = PlanningTestTools.runPlanner(planner, initialStanceFootPose, initialStanceFootSide, goalPose, planarRegionsList, true);
-//
-//      if (visualize)
-//         PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose, bodyPath);
+      WaypointDefinedBodyPathPlan bodyPath = new WaypointDefinedBodyPathPlan();
+      List<Point2D> waypoints = new ArrayList<>();
+
+      ArrayList<PlanarRegion> regions = PointCloudTools.loadPlanarRegionsFromFile("resources/PlanarRegions_NRI_Maze.txt");
+      Point3D startPos = new Point3D(9.5, 9, 0);
+      Point3D goalPos = new Point3D(0.5, 0.5, 0);
+      startPos = PlanarRegionTools.projectPointToPlanes(startPos, new PlanarRegionsList(regions));
+      goalPos = PlanarRegionTools.projectPointToPlanes(goalPos, new PlanarRegionsList(regions));
+
+      TextureColorPalette colorPalette = new TextureColorAdaptivePalette();
+      JavaFXMultiColorMeshBuilder javaFXMultiColorMeshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
+      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(regions, javaFXMultiColorMeshBuilder);
+      ArrayList<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+      for (Point3D waypoint3d : path)
+      {
+         waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
+      }
+      bodyPath.setWaypoints(waypoints);
+      bodyPath.compute(null, null);
+
+      Pose2D startPose = new Pose2D();
+      bodyPath.getPointAlongPath(0.0, startPose);
+      Pose2D finalPose = new Pose2D();
+      bodyPath.getPointAlongPath(1.0, finalPose);
+
+      YoVariableRegistry registry = new YoVariableRegistry(name.getMethodName());
+      FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
+      double defaultStepWidth = parameters.getIdealFootstepWidth();
+
+      FramePose initialMidFootPose = new FramePose();
+      initialMidFootPose.setX(startPos.getX());
+      initialMidFootPose.setY(startPos.getY());
+      initialMidFootPose.setYawPitchRoll(startPose.getYaw(), 0.0, 0.0);
+      PoseReferenceFrame midFootFrame = new PoseReferenceFrame("InitialMidFootFrame", initialMidFootPose);
+
+      RobotSide initialStanceFootSide = RobotSide.RIGHT;
+      FramePose initialStanceFootPose = new FramePose(midFootFrame);
+      initialStanceFootPose.setY(initialStanceFootSide.negateIfRightSide(defaultStepWidth / 2.0));
+      initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FramePose goalPose = new FramePose();
+      goalPose.setX(finalPose.getX());
+      goalPose.setY(finalPose.getY());
+      goalPose.setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
+
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList(regions);
+      AStarFootstepPlanner planner = createBodyPathBasedPlanner(registry, parameters, bodyPath);
+      planner.setTimeout(1.0);
+      FootstepPlan footstepPlan = PlanningTestTools.runPlanner(planner, initialStanceFootPose, initialStanceFootSide, goalPose, planarRegionsList, true);
+
+      if (visualize)
+         PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose, bodyPath);
    }
 
    private AStarFootstepPlanner createBodyPathBasedPlanner(YoVariableRegistry registry, FootstepPlannerParameters parameters,
