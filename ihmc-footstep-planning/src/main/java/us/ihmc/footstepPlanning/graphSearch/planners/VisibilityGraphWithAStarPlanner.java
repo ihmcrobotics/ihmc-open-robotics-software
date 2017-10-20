@@ -24,12 +24,16 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.PlanarRegionTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -50,7 +54,12 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    private final FramePose bodyGoalPose = new FramePose();
    private final List<Point2D> waypoints = new ArrayList<>();
 
-   public VisibilityGraphWithAStarPlanner(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons, YoVariableRegistry registry)
+   private final boolean visualizing;
+   private static final int bodyPathPointsForVisualization = 100;
+   private final List<YoFramePoint> bodyPathPoints = new ArrayList<>();
+
+   public VisibilityGraphWithAStarPlanner(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons,
+                                          YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
       this.parameters = parameters;
       bodyPath = new WaypointDefinedBodyPathPlan();
@@ -64,6 +73,24 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
       heuristics.setWeight(defaultHeuristicWeight);
       footstepPlanner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, postProcessingSnapper, registry);
+
+      visualizing = graphicsListRegistry != null;
+      if (visualizing)
+      {
+         setupVisualization(graphicsListRegistry, registry);
+      }
+   }
+
+   private void setupVisualization(YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
+   {
+      for (int i = 0; i < bodyPathPointsForVisualization; i++)
+      {
+         YoFramePoint point = new YoFramePoint("BodyPathPoint" + i, ReferenceFrame.getWorldFrame(), registry);
+         point.setToNaN();
+         bodyPathPoints.add(point);
+         YoGraphicPosition pointVisualization = new YoGraphicPosition("BodyPathPoint" + i, point, 0.02, YoAppearance.Yellow());
+         graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), pointVisualization);
+      }
    }
 
    @Override
@@ -115,6 +142,11 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       bodyPath.setWaypoints(waypoints);
       bodyPath.compute(null, null);
 
+      if (visualizing)
+      {
+         updateBodyPathVisualization();
+      }
+
       Pose2D goalPose2d = new Pose2D();
       double pathLength = bodyPath.computePathLength(0.0);
       double alpha = MathTools.clamp(planningHorizon / pathLength, 0.0, 1.0);
@@ -131,6 +163,19 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       footstepPlanner.setGoal(goal);
 
       return footstepPlanner.plan();
+   }
+
+   private void updateBodyPathVisualization()
+   {
+      Pose2D tempPose = new Pose2D();
+      for (int i = 0; i < bodyPathPointsForVisualization; i++)
+      {
+         double percent = (double) i / (double) (bodyPathPointsForVisualization - 1);
+         bodyPath.getPointAlongPath(percent, tempPose);
+         Point3D position = new Point3D();
+         position.set(tempPose.getPosition());
+         bodyPathPoints.get(i).set(PlanarRegionTools.projectPointToPlanesVertically(position, planarRegionsList));
+      }
    }
 
    @Override
