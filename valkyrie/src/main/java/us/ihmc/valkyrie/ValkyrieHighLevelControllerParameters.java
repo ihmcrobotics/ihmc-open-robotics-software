@@ -15,6 +15,7 @@ import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 public class ValkyrieHighLevelControllerParameters implements HighLevelControllerParameters
 {
    private final ValkyrieStandPrepParameters standPrepParameters;
+   private final ValkyrieWalkingPositionControlParameters walkingParameters;
 
    private final boolean runningOnRealRobot;
    private final Set<String> positionControlledJoints = new HashSet<>();
@@ -24,6 +25,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       this.runningOnRealRobot = runningOnRealRobot;
 
       standPrepParameters = new ValkyrieStandPrepParameters(jointMap);
+      walkingParameters = new ValkyrieWalkingPositionControlParameters(jointMap);
 
       positionControlledJoints.add(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH));
       positionControlledJoints.add(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH));
