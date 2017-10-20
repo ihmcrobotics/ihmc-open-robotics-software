@@ -72,54 +72,98 @@ public class JointControlBlender
       if (ENABLE_TAU_SCALE)
          blendingFactor *= tauScale.getDoubleValue();
 
-      double desiredPosition0 = outputData0.hasDesiredPosition() ? outputData0.getDesiredPosition() : oneDoFJoint.getQ();
-      double desiredPosition1 = outputData1.hasDesiredPosition() ? outputData1.getDesiredPosition() : oneDoFJoint.getQ();
-
-      double desiredVelocity0 = outputData0.hasDesiredVelocity() ? outputData0.getDesiredVelocity() : oneDoFJoint.getQd();
-      double desiredVelocity1 = outputData1.hasDesiredVelocity() ? outputData1.getDesiredVelocity() : oneDoFJoint.getQd();
-
-      double desiredAcceleration0 = outputData0.hasDesiredAcceleration() ? outputData0.getDesiredAcceleration() : 0.0;
-      double desiredAcceleration1 = outputData1.hasDesiredAcceleration() ? outputData1.getDesiredAcceleration() : 0.0;
-
-      double desiredTorque0 = outputData0.hasDesiredTorque() ? outputData0.getDesiredTorque() : 0.0;
-      double desiredTorque1 = outputData1.hasDesiredTorque() ? outputData1.getDesiredTorque() : 0.0;
-
-      double stiffness0 = outputData0.hasStiffness() ? outputData0.getStiffness() : 0.0;
-      double stiffness1 = outputData1.hasStiffness() ? outputData1.getStiffness() : 0.0;
-      
-      double damping0 = outputData0.hasDamping() ? outputData0.getDamping() : 0.0;
-      double damping1 = outputData1.hasDamping() ? outputData1.getDamping() : 0.0;
-
-      double desiredPosition = TupleTools.interpolate(desiredPosition0, desiredPosition1, blendingFactor);
-      double desiredVelocity = TupleTools.interpolate(desiredVelocity0, desiredVelocity1, blendingFactor);
-      double desiredAcceleration = TupleTools.interpolate(desiredAcceleration0, desiredAcceleration1, blendingFactor);
-      double desiredTorque = TupleTools.interpolate(desiredTorque0, desiredTorque1, blendingFactor);
-      double stiffness = TupleTools.interpolate(stiffness0, stiffness1, blendingFactor);
-      double damping = TupleTools.interpolate(damping0, damping1, blendingFactor);
+      JointDesiredControlMode controlMode = outputDataToPack.getControlMode();
+      outputDataToPack.clear();
+      outputDataToPack.setControlMode(controlMode);
 
       double currentJointAngle = oneDoFJoint.getQ();
       double currentJointVelocity = oneDoFJoint.getQd();
-      positionStepSizeLimiter.updateOutput(currentJointAngle, desiredPosition);
-      velocityStepSizeLimiter.updateOutput(currentJointVelocity, desiredVelocity);
 
-      JointDesiredControlMode controlMode = outputDataToPack.getControlMode();
-
-      outputDataToPack.clear();
-
-      outputDataToPack.setControlMode(controlMode);
-
-      if (outputData0.hasDesiredPosition() || outputData1.hasDesiredPosition())
+      if (hasDesiredPosition(outputData0) || hasDesiredPosition(outputData1))
+      {
+         double desiredPosition0 = hasDesiredPosition(outputData0) ? outputData0.getDesiredPosition() : oneDoFJoint.getQ();
+         double desiredPosition1 = hasDesiredPosition(outputData1) ? outputData1.getDesiredPosition() : oneDoFJoint.getQ();
+         double desiredPosition = TupleTools.interpolate(desiredPosition0, desiredPosition1, blendingFactor);
+         positionStepSizeLimiter.updateOutput(currentJointAngle, desiredPosition);
          outputDataToPack.setDesiredPosition(positionStepSizeLimiter.getDoubleValue());
-      if (outputData0.hasDesiredVelocity() || outputData1.hasDesiredVelocity())
+      }
+
+      if (hasDesiredVelocity(outputData0) || hasDesiredVelocity(outputData1))
+      {
+         double desiredVelocity0 = hasDesiredVelocity(outputData0) ? outputData0.getDesiredVelocity() : oneDoFJoint.getQd();
+         double desiredVelocity1 = hasDesiredVelocity(outputData1) ? outputData1.getDesiredVelocity() : oneDoFJoint.getQd();
+         double desiredVelocity = TupleTools.interpolate(desiredVelocity0, desiredVelocity1, blendingFactor);
+         velocityStepSizeLimiter.updateOutput(currentJointVelocity, desiredVelocity);
          outputDataToPack.setDesiredVelocity(velocityStepSizeLimiter.getDoubleValue());
-      if (outputData0.hasDesiredAcceleration() || outputData1.hasDesiredAcceleration())
+      }
+
+      if (hasDesiredAcceleration(outputData0) || hasDesiredAcceleration(outputData1))
+      {
+         double desiredAcceleration0 = hasDesiredAcceleration(outputData0) ? outputData0.getDesiredAcceleration() : 0.0;
+         double desiredAcceleration1 = hasDesiredAcceleration(outputData1) ? outputData1.getDesiredAcceleration() : 0.0;
+         double desiredAcceleration = TupleTools.interpolate(desiredAcceleration0, desiredAcceleration1, blendingFactor);
          outputDataToPack.setDesiredAcceleration(desiredAcceleration);
-      if (outputData0.hasDesiredTorque() || outputData1.hasDesiredTorque())
+      }
+
+      if (hasDesiredTorque(outputData0) || hasDesiredTorque(outputData1))
+      {
+         double desiredTorque0 = hasDesiredTorque(outputData0) ? outputData0.getDesiredTorque() : 0.0;
+         double desiredTorque1 = hasDesiredTorque(outputData1) ? outputData1.getDesiredTorque() : 0.0;
+         double desiredTorque = TupleTools.interpolate(desiredTorque0, desiredTorque1, blendingFactor);
          outputDataToPack.setDesiredTorque(desiredTorque);
-      if (outputData0.hasStiffness() || outputData1.hasStiffness())
-      outputDataToPack.setStiffness(stiffness);
-      if (outputData0.hasDamping() || outputData1.hasDamping())
+      }
+
+      if (hasStiffness(outputData0) || hasStiffness(outputData1))
+      {
+         double stiffness0 = hasStiffness(outputData0) ? outputData0.getStiffness() : 0.0;
+         double stiffness1 = hasStiffness(outputData1) ? outputData1.getStiffness() : 0.0;
+         double stiffness = TupleTools.interpolate(stiffness0, stiffness1, blendingFactor);
+         outputDataToPack.setStiffness(stiffness);
+      }
+
+      if (hasDamping(outputData0) || hasDamping(outputData1))
+      {
+         double damping0 = hasDamping(outputData0) ? outputData0.getDamping() : 0.0;
+         double damping1 = hasDamping(outputData1) ? outputData1.getDamping() : 0.0;
+         double damping = TupleTools.interpolate(damping0, damping1, blendingFactor);
          outputDataToPack.setDamping(damping);
-      outputDataToPack.setResetIntegrators(outputData0.pollResetIntegratorsRequest() || outputData1.pollResetIntegratorsRequest());
+      }
+
+      outputDataToPack.setResetIntegrators(pollResetIntegratorsRequest(outputData0) || pollResetIntegratorsRequest(outputData1));
+   }
+
+   private boolean hasDesiredPosition(JointDesiredOutputReadOnly outputData)
+   {
+      return outputData != null && outputData.hasDesiredPosition();
+   }
+
+   private boolean hasDesiredVelocity(JointDesiredOutputReadOnly outputData)
+   {
+      return outputData != null && outputData.hasDesiredVelocity();
+   }
+
+   private boolean hasDesiredAcceleration(JointDesiredOutputReadOnly outputData)
+   {
+      return outputData != null && outputData.hasDesiredAcceleration();
+   }
+
+   private boolean hasDesiredTorque(JointDesiredOutputReadOnly outputData)
+   {
+      return outputData != null && outputData.hasDesiredTorque();
+   }
+
+   private boolean hasStiffness(JointDesiredOutputReadOnly outputData)
+   {
+      return outputData != null && outputData.hasStiffness();
+   }
+
+   private boolean hasDamping(JointDesiredOutputReadOnly outputData)
+   {
+      return outputData != null && outputData.hasDamping();
+   }
+
+   private boolean pollResetIntegratorsRequest(JointDesiredOutputReadOnly outputData)
+   {
+      return outputData != null && outputData.pollResetIntegratorsRequest();
    }
 }
