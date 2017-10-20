@@ -26,7 +26,6 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
-import us.ihmc.pathPlanning.visibilityGraphs.PlanarRegionTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -102,35 +101,36 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    @Override
    public FootstepPlanningResult plan()
    {
-      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(planarRegionsList.getPlanarRegionsAsList());
-      Point3D startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
-      Point3D goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
-      ArrayList<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
-
-      waypoints.clear();
-      for (Point3D waypoint3d : path)
-      {
-         waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
-      }
-      bodyPath.setWaypoints(waypoints);
-      bodyPath.compute(null, null);
-
-      Pose2D goalPose2d = new Pose2D();
-      double pathLength = bodyPath.computePathLength(0.0);
-      double alpha = MathTools.clamp(planningHorizon / pathLength, 0.0, 1.0);
-      bodyPath.getPointAlongPath(alpha, goalPose2d);
-      heuristics.setGoalAlpha(alpha);
-
-      FramePose footstepPlannerGoal = new FramePose();
-      footstepPlannerGoal.setPosition(goalPose2d.getX(), goalPose2d.getY(), 0.0);
-      footstepPlannerGoal.setYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
-
-      FootstepPlannerGoal goal = new FootstepPlannerGoal();
-      goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
-      goal.setGoalPoseBetweenFeet(footstepPlannerGoal);
-      footstepPlanner.setGoal(goal);
-
-      return footstepPlanner.plan();
+      throw new IllegalAccessError("Fix PlanarRegionTools import issue");
+//      NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(planarRegionsList.getPlanarRegionsAsList());
+//      Point3D startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
+//      Point3D goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
+//      ArrayList<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+//
+//      waypoints.clear();
+//      for (Point3D waypoint3d : path)
+//      {
+//         waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
+//      }
+//      bodyPath.setWaypoints(waypoints);
+//      bodyPath.compute(null, null);
+//
+//      Pose2D goalPose2d = new Pose2D();
+//      double pathLength = bodyPath.computePathLength(0.0);
+//      double alpha = MathTools.clamp(planningHorizon / pathLength, 0.0, 1.0);
+//      bodyPath.getPointAlongPath(alpha, goalPose2d);
+//      heuristics.setGoalAlpha(alpha);
+//
+//      FramePose footstepPlannerGoal = new FramePose();
+//      footstepPlannerGoal.setPosition(goalPose2d.getX(), goalPose2d.getY(), 0.0);
+//      footstepPlannerGoal.setYawPitchRoll(goalPose2d.getYaw(), 0.0, 0.0);
+//
+//      FootstepPlannerGoal goal = new FootstepPlannerGoal();
+//      goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
+//      goal.setGoalPoseBetweenFeet(footstepPlannerGoal);
+//      footstepPlanner.setGoal(goal);
+//
+//      return footstepPlanner.plan();
    }
 
    @Override
