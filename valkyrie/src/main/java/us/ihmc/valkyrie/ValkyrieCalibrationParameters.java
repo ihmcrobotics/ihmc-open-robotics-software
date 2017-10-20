@@ -2,7 +2,7 @@ package us.ihmc.valkyrie;
 
 import java.util.HashMap;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CalibrationParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -10,7 +10,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap;
 
-public class ValkyrieCalibrationParameters implements CalibrationParameters
+public class ValkyrieCalibrationParameters implements WholeBodySetpointParameters
 {
    private final HashMap<String, Double> setPoints = new HashMap<>();
    private final ValkyrieJointMap jointMap;

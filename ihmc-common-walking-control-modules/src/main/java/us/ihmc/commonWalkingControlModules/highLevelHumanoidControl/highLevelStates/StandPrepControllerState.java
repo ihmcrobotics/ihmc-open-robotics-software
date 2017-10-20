@@ -41,7 +41,7 @@ public class StandPrepControllerState extends HighLevelControllerState
       this.timeToPrepareForStanding.set(highLevelControllerParameters.getTimeToMoveInStandPrep());
       this.minimumTimeDoneWithStandPrep.set(minimumTimeDoneWithStandPrep);
 
-      StandPrepParameters standPrepParameters = highLevelControllerParameters.getStandPrepParameters();
+      WholeBodySetpointParameters standPrepParameters = highLevelControllerParameters.getStandPrepParameters();
       OneDoFJoint[] controlledJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
