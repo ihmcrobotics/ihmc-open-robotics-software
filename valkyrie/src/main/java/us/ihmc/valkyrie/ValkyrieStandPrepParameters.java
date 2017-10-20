@@ -1,27 +1,38 @@
 package us.ihmc.valkyrie;
 
-import org.yaml.snakeyaml.Yaml;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.yaml.snakeyaml.Yaml;
+
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepParameters;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
+import us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap;
+
 public class ValkyrieStandPrepParameters implements StandPrepParameters
 {
-   private static HashMap<String, Double> setPoints = new HashMap<>();
+   private final HashMap<String, Double> setPoints = new HashMap<>();
+   private final ValkyrieJointMap jointMap;
 
-   static
+   public ValkyrieStandPrepParameters(ValkyrieJointMap jointMap)
    {
+      this.jointMap = jointMap;
       useDefaultAngles();
       loadCustomSetPoints();
    }
 
-   private static void loadCustomSetPoints()
+   private void loadCustomSetPoints()
    {
       Yaml yaml = new Yaml();
       InputStream setpointsStream = ValkyrieStandPrepParameters.class.getClassLoader().getResourceAsStream("standPrep/setpoints.yaml");
+      @SuppressWarnings("unchecked")
       Map<String, Double> setPointMap = (Map<String, Double>) yaml.load(setpointsStream);
 
       for (String jointName : ValkyrieOrderedJointMap.jointNames)
@@ -39,66 +50,53 @@ public class ValkyrieStandPrepParameters implements StandPrepParameters
       }
    }
 
-   private static void useDefaultAngles()
-   {                                      
-      setSetpoint(ValkyrieOrderedJointMap.LeftHipYaw         ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.LeftHipRoll        ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.LeftHipPitch       , -0.6);
-      setSetpoint(ValkyrieOrderedJointMap.LeftKneePitch      ,  1.3);
-      setSetpoint(ValkyrieOrderedJointMap.LeftAnklePitch     ,  -0.65);
-      setSetpoint(ValkyrieOrderedJointMap.LeftAnkleRoll      ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.RightHipYaw        ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.RightHipRoll       ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.RightHipPitch      , -0.6);
-      setSetpoint(ValkyrieOrderedJointMap.RightKneePitch     ,  1.3);
-      setSetpoint(ValkyrieOrderedJointMap.RightAnklePitch    ,  -0.65);
-      setSetpoint(ValkyrieOrderedJointMap.RightAnkleRoll     ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.TorsoYaw           ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.TorsoPitch         ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.TorsoRoll          ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.LeftShoulderPitch  , -0.2);
-      setSetpoint(ValkyrieOrderedJointMap.LeftShoulderRoll   , -1.2);
-      setSetpoint(ValkyrieOrderedJointMap.LeftShoulderYaw    ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.LeftElbowPitch     , -1.5);
-      setSetpoint(ValkyrieOrderedJointMap.LeftForearmYaw     ,  1.3);
-      setSetpoint(ValkyrieOrderedJointMap.LeftWristRoll      ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.LeftWristPitch     ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.LowerNeckPitch     ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.NeckYaw            ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.UpperNeckPitch     ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.RightShoulderPitch , -0.2);
-      setSetpoint(ValkyrieOrderedJointMap.RightShoulderRoll  ,  1.2);
-      setSetpoint(ValkyrieOrderedJointMap.RightShoulderYaw   ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.RightElbowPitch    ,  1.5);
-      setSetpoint(ValkyrieOrderedJointMap.RightForearmYaw    ,  1.3);
-      setSetpoint(ValkyrieOrderedJointMap.RightWristRoll     ,  0.0);
-      setSetpoint(ValkyrieOrderedJointMap.RightWristPitch    ,  0.0);
-   }
-
-
-   private static void setSetpoint(int jointIndex, double value)
+   private void useDefaultAngles()
    {
-      String jointName = ValkyrieOrderedJointMap.jointNames[jointIndex];
-      setSetpoint(jointName, value);
-   }
+      setSetpoint(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), 0.0);
+      setSetpoint(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW), 0.0);
+      setSetpoint(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH), 0.0);
 
-   private static void setSetpoint(String jointName, double value)
-   {
-      if(setPoints.containsKey(jointName))
+      setSetpoint(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 0.0);
+      setSetpoint(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), 0.0);
+      setSetpoint(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 0.0);
+      
+      for (RobotSide robotSide : RobotSide.values)
       {
-         setPoints.remove(jointName);
+         setSetpoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 0.0);
+         setSetpoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 0.0);
+         setSetpoint(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.6);
+         setSetpoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 1.3);
+         setSetpoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.65);
+         setSetpoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), 0.0);
+
+         setSetpoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), -0.2);
+         setSetpoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfLeftSide(1.2));
+         setSetpoint(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), 0.0);
+         setSetpoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), robotSide.negateIfLeftSide(1.5));
+         setSetpoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), 1.3);
+         setSetpoint(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), 0.0);
+         setSetpoint(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), 0.0);
       }
+   }
+
+   private void setSetpoint(String jointName, double value)
+   {
       setPoints.put(jointName, value);
    }
 
+   @Override
    public double getSetpoint(int jointIndex)
    {
       String jointName = ValkyrieOrderedJointMap.jointNames[jointIndex];
       return getSetpoint(jointName);
    }
 
+   @Override
    public double getSetpoint(String jointName)
    {
-      return setPoints.get(jointName);
+      if (setPoints.containsKey(jointName))
+         return setPoints.get(jointName);
+      else
+         return 0.0;
    }
 }
