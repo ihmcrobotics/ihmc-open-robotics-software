@@ -15,7 +15,6 @@ import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 public class ValkyrieHighLevelControllerParameters implements HighLevelControllerParameters
 {
    private final ValkyrieStandPrepParameters standPrepParameters;
-   private final ValkyriePositionControlParameters positionControlParameters;
 
    private final boolean runningOnRealRobot;
    private final Set<String> positionControlledJoints = new HashSet<>();
@@ -25,7 +24,6 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       this.runningOnRealRobot = runningOnRealRobot;
 
       standPrepParameters = new ValkyrieStandPrepParameters(jointMap);
-      positionControlParameters = new ValkyriePositionControlParameters(jointMap);
 
       positionControlledJoints.add(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH));
       positionControlledJoints.add(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH));
@@ -60,7 +58,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    public double getDesiredJointStiffness(String jointName, HighLevelController state)
    {
       if (state != HighLevelController.WALKING)
-         return positionControlParameters.getProportionalGain(jointName);
+         return standPrepParameters.getProportionalGain(jointName);
       else
          return 0.0;
    }
@@ -69,7 +67,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    public double getDesiredJointDamping(String jointName, HighLevelController state)
    {
       if (state != HighLevelController.WALKING)
-         return positionControlParameters.getDerivativeGain(jointName);
+         return standPrepParameters.getDerivativeGain(jointName);
       else
          return 0.0;
    }
