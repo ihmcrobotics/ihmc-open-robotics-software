@@ -56,7 +56,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       FramePoint3D desiredRandomPelvisPosition = new FramePoint3D(pelvis.getBodyFixedFrame());
       desiredRandomPelvisPosition.set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
-      desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ() - 0.15);
+      desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ() - 0.1);
       Point3D desiredPosition = new Point3D();
 
       desiredRandomPelvisPosition.get(desiredPosition);
@@ -115,7 +115,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       FramePoint3D desiredRandomPelvisPosition = new FramePoint3D(pelvis.getBodyFixedFrame());
       desiredRandomPelvisPosition.set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
-      desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ() - 0.15);
+      desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ() - 0.05);
       Point3D desiredPosition = new Point3D();
 
       desiredRandomPelvisPosition.get(desiredPosition);
