@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
+import java.util.EnumMap;
+import java.util.concurrent.atomic.AtomicReference;
+
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -10,11 +13,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import java.util.EnumMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class HighLevelControllerFactoryHelper
 {
@@ -26,15 +25,9 @@ public class HighLevelControllerFactoryHelper
    private ICPTrajectoryPlannerParameters icpPlannerParameters;
    private CommandInputManager commandInputManager;
    private StatusMessageOutputManager statusMessageOutputManager;
-   private LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput;
    private YoEnum<HighLevelController> requestedHighLevelControllerState;
    private AtomicReference<HighLevelController> fallbackControllerForFailure;
    private ForceSensorDataHolderReadOnly forceSensorDataHolder;
-
-   public void setLowLevelControllerOutput(LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
-   {
-      this.lowLevelControllerOutput = lowLevelControllerOutput;
-   }
 
    public void setControllerFactories(EnumMap<HighLevelController, HighLevelControllerStateFactory> controllerFactories)
    {
@@ -122,11 +115,6 @@ public class HighLevelControllerFactoryHelper
    public StatusMessageOutputManager getStatusMessageOutputManager()
    {
       return statusMessageOutputManager;
-   }
-
-   public LowLevelOneDoFJointDesiredDataHolderList getLowLevelControllerOutput()
-   {
-      return lowLevelControllerOutput;
    }
 
    public YoEnum<HighLevelController> getRequestedHighLevelControllerState()

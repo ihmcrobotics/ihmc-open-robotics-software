@@ -93,7 +93,6 @@ public class HumanoidHighLevelControllerManager implements RobotController
       controllerFactoryHelper.setStatusMessageOutputManager(statusMessageOutputManager);
       controllerFactoryHelper.setParameters(highLevelControllerParameters, walkingControllerParameters, icpPlannerParameters);
       controllerFactoryHelper.setHighLevelHumanoidControllerToolbox(controllerToolbox);
-      controllerFactoryHelper.setLowLevelControllerOutput(lowLevelControllerOutput);
       controllerFactoryHelper.setRequestedHighLevelControllerState(requestedHighLevelControllerState);
       controllerFactoryHelper.setFallbackControllerForFailure(fallbackControllerForFailure);
       controllerFactoryHelper.setForceSensorDataHolder(forceSensorDataHolder);
