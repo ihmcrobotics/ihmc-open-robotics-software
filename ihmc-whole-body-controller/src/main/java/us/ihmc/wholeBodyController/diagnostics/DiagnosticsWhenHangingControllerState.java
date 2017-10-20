@@ -986,12 +986,6 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
    // }
 
    @Override
-   public void enableJointTorqueOffsetEstimationAtomic(boolean enable)
-   {
-      adaptTorqueOffset.set(enable);
-   }
-
-   @Override
    public double getEstimatedJointTorqueOffset(OneDoFJoint joint)
    {
       DiagnosticsWhenHangingHelper helper = helpers.get(joint);

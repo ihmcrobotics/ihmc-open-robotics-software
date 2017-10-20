@@ -113,18 +113,6 @@ public class JointTorqueOffsetEstimatorController extends HighLevelControllerSta
       setDefaultPDControllerGains();
    }
 
-   private final AtomicBoolean enableEstimationAtomic = new AtomicBoolean(false);
-   private final AtomicBoolean disableEstimationAtomic = new AtomicBoolean(false);
-
-   @Override
-   public void enableJointTorqueOffsetEstimationAtomic(boolean enable)
-   {
-      if (enable)
-         enableEstimationAtomic.set(true);
-      else
-         disableEstimationAtomic.set(true);
-   }
-
    private void initializeDesiredPositions()
    {
       HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
@@ -183,11 +171,6 @@ public class JointTorqueOffsetEstimatorController extends HighLevelControllerSta
    @Override
    public void doControl()
    {
-      if (enableEstimationAtomic.getAndSet(false))
-         estimateTorqueOffset.set(true);
-      if (disableEstimationAtomic.getAndSet(false))
-         estimateTorqueOffset.set(false);
-
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
       controllerToolbox.update();
 
@@ -365,14 +348,13 @@ public class JointTorqueOffsetEstimatorController extends HighLevelControllerSta
    public void doTransitionIntoAction()
    {
       initialize();
-      enableJointTorqueOffsetEstimationAtomic(true);
+      estimateTorqueOffset.set(true);
    }
 
    @Override
    public void doTransitionOutOfAction()
    {
-      enableJointTorqueOffsetEstimationAtomic(false);
-
+      estimateTorqueOffset.set(false);
       torqueOffsetPrinter.printTorqueOffsets(this);
    }
 
