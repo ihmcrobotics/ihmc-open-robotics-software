@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import org.junit.Test;
-import us.ihmc.commons.Conversions;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -9,7 +8,6 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.thread.ThreadTools;
 
 import java.util.Random;
 
@@ -22,14 +20,14 @@ public class FootstepNodeSnapperTest
    private final double epsilon = 1e-8;
 
    private int[] xIndices = new int[]{-30, 0, 23, 87, -100, 42};
-   private int[] yIndices = new int[]{-30, 0, 23, 87, -100, 42};
+   private int[] yIndices = new int[]{-35, 0, -777, 87, -50, 28};
    private int[] yawIndices = new int[]{-2, 4, 0};
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test
    public void testFootstepCacheing()
    {
-      DelayIdentitySnapper testSnapper = new DelayIdentitySnapper();
+      TestSnapper testSnapper = new TestSnapper();
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(new PlanarRegion());
       testSnapper.setPlanarRegions(planarRegionsList);
 
@@ -56,7 +54,7 @@ public class FootstepNodeSnapperTest
    @Test
    public void testWithoutPlanarRegions()
    {
-      DelayIdentitySnapper testSnapper = new DelayIdentitySnapper();
+      TestSnapper testSnapper = new TestSnapper();
 
       for (int i = 0; i < xIndices.length; i++)
       {
@@ -76,7 +74,7 @@ public class FootstepNodeSnapperTest
       }
    }
 
-   private class DelayIdentitySnapper extends FootstepNodeSnapper
+   private class TestSnapper extends FootstepNodeSnapper
    {
       boolean dirtyBit = false;
 
