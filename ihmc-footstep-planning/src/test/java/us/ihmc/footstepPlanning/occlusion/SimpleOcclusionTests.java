@@ -14,6 +14,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
@@ -31,13 +32,17 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.pathPlanning.visibilityGraphs.PlanarRegionTools;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -47,6 +52,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class SimpleOcclusionTests
 {
@@ -55,7 +61,11 @@ public class SimpleOcclusionTests
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int maxSteps = 100;
-   private static final int maxPolygons = 10;
+   private static final int rays = 500;
+   private static final int maxPolygonsToVisualize = 10;
+   private static final int maxPolygonsVertices = 50;
+   private static final int stepsPerSideToVisualize = 4;
+   private static final double maxAllowedSolveTime = 1.0;
 
    @Rule
    public TestName name = new TestName();
@@ -64,37 +74,40 @@ public class SimpleOcclusionTests
    public void testSimpleOcclusions()
    {
       YoVariableRegistry registry = new YoVariableRegistry(name.getMethodName());
+      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       FramePose startPose = new FramePose();
       FramePose goalPose = new FramePose();
       PlanarRegionsList regions = createSimpleOcclusionField(startPose, goalPose);
 
       FootstepPlannerParameters parameters = getParameters();
-      FootstepPlanner planner = getPlanner(parameters, registry);
+      FootstepPlanner planner = getPlanner(parameters, graphicsListRegistry, registry);
 
       FramePose stancePose = new FramePose();
       RobotSide stanceSide = computeStanceFootPose(startPose, parameters, stancePose);
 
       FootstepPlannerGoal goal = createPlannerGoal(goalPose);
 
-      int stepsToShowPerSide = 4;
       SimulationConstructionSet scs = null;
       SideDependentList<List<YoFramePose>> solePosesForVisualization = null;
       List<YoFramePose> stepPosesTaken = null;
       YoFramePose startStep = null;
 
+      YoFramePoint observerPoint = null;
+      List<YoFramePoint> rayIntersectionVisualizations = null;
       List<YoFrameConvexPolygon2d> visiblePolygons = null;
       List<YoFramePose> visiblePolygonPoses = null;
       List<YoGraphicPolygon> polygonVisualizations = null;
 
+      YoBoolean plannerFailed = new YoBoolean("PlannerFailed", registry);
+
       if (visualize)
       {
-         YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
          YoFrameConvexPolygon2d defaultPolygon = new YoFrameConvexPolygon2d("DefaultFootPolygon", worldFrame, 4, registry);
          defaultPolygon.setConvexPolygon2d(PlanningTestTools.createDefaultFootPolygon());
 
          solePosesForVisualization = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
-         for (int i = 0; i < stepsToShowPerSide; i++)
+         for (int i = 0; i < stepsPerSideToVisualize; i++)
          {
             for (RobotSide robotSide : RobotSide.values)
             {
@@ -126,9 +139,9 @@ public class SimpleOcclusionTests
          visiblePolygons = new ArrayList<>();
          visiblePolygonPoses = new ArrayList<>();
          polygonVisualizations = new ArrayList<>();
-         for (int i = 0; i < maxPolygons; i++)
+         for (int i = 0; i < maxPolygonsToVisualize; i++)
          {
-            YoFrameConvexPolygon2d polygon = new YoFrameConvexPolygon2d("Polygon" + i, worldFrame, 10, registry);
+            YoFrameConvexPolygon2d polygon = new YoFrameConvexPolygon2d("Polygon" + i, worldFrame, maxPolygonsVertices, registry);
             YoFramePose pose = new YoFramePose("PolygonPose" + i, worldFrame, registry);
             pose.setToNaN();
             visiblePolygons.add(polygon);
@@ -137,7 +150,23 @@ public class SimpleOcclusionTests
                                                                   new YoAppearanceRGBColor(Color.BLUE, 0.8));
             polygonVisualizations.add(visualization);
             graphicsListRegistry.registerYoGraphic("viz", visualization);
+            graphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(visualization);
          }
+
+         rayIntersectionVisualizations = new ArrayList<>();
+         for (int i = 0; i < rays; i++)
+         {
+            YoFramePoint point = new YoFramePoint("RayIntersection" + i, ReferenceFrame.getWorldFrame(), registry);
+            point.setToNaN();
+            YoGraphicPosition visualization = new YoGraphicPosition("RayIntersection" + i, point, 0.02, YoAppearance.Blue());
+            rayIntersectionVisualizations.add(point);
+            graphicsListRegistry.registerYoGraphic("viz", visualization);
+         }
+
+         observerPoint = new YoFramePoint("Observer", worldFrame, registry);
+         observerPoint.setToNaN();
+         YoGraphicPosition observerVisualization = new YoGraphicPosition("Observer", observerPoint, 0.05, YoAppearance.Red());
+         graphicsListRegistry.registerYoGraphic("viz", observerVisualization);
 
          scs = setupSCS(name.getMethodName(), registry, regions, startPose, goalPose);
          scs.addYoGraphicsListRegistry(graphicsListRegistry);
@@ -149,39 +178,45 @@ public class SimpleOcclusionTests
       double maxSolveTime = 0.0;
       boolean reachedGoal = false;
 
+      // Add the ground plane here so the visibility graph works. Remove that later.
+      PlanarRegionsList visiblePlanarRegions = new PlanarRegionsList(regions.getPlanarRegion(0));
+
       for (int i = 0; i < maxSteps; i++)
       {
-         Point3D observer = computeBodyPoint(stancePose, stanceSide, parameters, 0.5);
-         PlanarRegionsList visiblePlanarRegions = createVisibleRegions(regions, observer);
+         Point3D observer = computeBodyPoint(stancePose, stanceSide, parameters, 0.8);
+         visiblePlanarRegions = createVisibleRegions(regions, observer, visiblePlanarRegions, rayIntersectionVisualizations);
 
          if (visualize)
          {
-            for (int polygonIdx = 0; polygonIdx < maxPolygons; polygonIdx++)
+            observerPoint.set(PlanarRegionTools.projectPointToPlanesVertically(observer, regions));
+
+            for (int polygonIdx = 0; polygonIdx < maxPolygonsToVisualize; polygonIdx++)
             {
                visiblePolygonPoses.get(polygonIdx).setToNaN();
             }
-            int polygons = Math.min(maxPolygons, visiblePlanarRegions.getNumberOfPlanarRegions());
+            int polygons = Math.min(maxPolygonsToVisualize, visiblePlanarRegions.getNumberOfPlanarRegions());
             RigidBodyTransform transformToWorld = new RigidBodyTransform();
             FramePose pose = new FramePose();
             for (int polygonIdx = 0; polygonIdx < polygons; polygonIdx++)
             {
                PlanarRegion planarRegion = visiblePlanarRegions.getPlanarRegion(polygonIdx);
+               if (planarRegion.getConvexHull().getNumberOfVertices() > visiblePolygons.get(polygonIdx).getMaxNumberOfVertices())
+               {
+                  throw new RuntimeException("Increase max number of vertices for visualization.");
+               }
                planarRegion.getTransformToWorld(transformToWorld);
                pose.setPose(transformToWorld);
                visiblePolygonPoses.get(polygonIdx).set(pose);
                visiblePolygons.get(polygonIdx).setConvexPolygon2d(planarRegion.getConvexHull());
-            }
-            for (int polygonIdx = 0; polygonIdx < maxPolygons; polygonIdx++)
-            {
-               polygonVisualizations.get(polygonIdx).update();
             }
          }
 
          planner.setPlanarRegions(visiblePlanarRegions);
          planner.setInitialStanceFoot(stancePose, stanceSide);
          planner.setGoal(goal);
-         planner.setTimeout(1.0);
+         planner.setTimeout(maxAllowedSolveTime + 5.0);
 
+         boolean haveNewPlan = false;
          try
          {
             long startTime = System.currentTimeMillis();
@@ -195,18 +230,36 @@ public class SimpleOcclusionTests
 
             if (result.validForExecution())
             {
+               haveNewPlan = true;
                plan = planner.getPlan();
+            }
+            else
+            {
+               PrintTools.info("Planner failed: " + result);
             }
          }
          catch (Exception e)
+         {
+            // The catch needs to be removed once the visibility graph is improved.
+            PrintTools.info("Planner threw exception.");
+         }
+
+         plannerFailed.set(!haveNewPlan);
+         if (plannerFailed.getBooleanValue())
          {
             plan.remove(0);
             failCount++;
          }
 
+         if (plan == null || plan.getNumberOfSteps() < 1)
+         {
+            PrintTools.info("Failed");
+            break;
+         }
+
          if (visualize)
          {
-            for (int hideIdx = 0; hideIdx < stepsToShowPerSide; hideIdx++)
+            for (int hideIdx = 0; hideIdx < stepsPerSideToVisualize; hideIdx++)
             {
                for (RobotSide robotSide : RobotSide.values)
                {
@@ -215,7 +268,7 @@ public class SimpleOcclusionTests
             }
 
             startStep.set(stancePose);
-            int stepsToShow = Math.min(plan.getNumberOfSteps(), 2 * stepsToShowPerSide);
+            int stepsToShow = Math.min(plan.getNumberOfSteps(), 2 * stepsPerSideToVisualize);
             for (int stepIdx = 0; stepIdx < stepsToShow; stepIdx++)
             {
                SimpleFootstep footstep = plan.getFootstep(stepIdx);
@@ -260,12 +313,11 @@ public class SimpleOcclusionTests
       }
       else
       {
-         double maxAllowedSolveTime = 1.0;
          Assert.assertTrue("Planner took too long: " + maxSolveTime + "s.", maxSolveTime < maxAllowedSolveTime);
          Assert.assertTrue("Did not reach goal.", reachedGoal);
 
-         // Add that after the visibility graph is fixed.
-//         Assert.assertTrue("Planner failed at least once.", failCount == 0);
+         // Add that after the visibility graph is fixed to deal with start points in no-go-zones.
+         // Assert.assertTrue("Planner failed at least once.", failCount == 0);
       }
    }
 
@@ -346,24 +398,123 @@ public class SimpleOcclusionTests
       return bodyPoint;
    }
 
-   private PlanarRegionsList createVisibleRegions(PlanarRegionsList regions, Point3D observer)
+   private PlanarRegionsList createVisibleRegions(PlanarRegionsList regions, Point3D observer, PlanarRegionsList knownRegions,
+                                                  List<YoFramePoint> rayPointsToPack)
+   {
+      Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(observer, 1.0, rays);
+      List<ConvexPolygon2D> visiblePolygons = new ArrayList<>();
+      for (int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
+      {
+         visiblePolygons.add(new ConvexPolygon2D());
+      }
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      for (int rayIndex = 0; rayIndex < rays; rayIndex++)
+      {
+         Point3D pointOnSphere = pointsOnSphere[rayIndex];
+         Vector3D rayDirection = new Vector3D();
+         rayDirection.sub(pointOnSphere, observer);
+         Point3D intersection = PlanarRegionTools.intersectRegionsWithRay(regions, observer, rayDirection);
+         if (intersection == null)
+         {
+            if (rayPointsToPack != null)
+            {
+               rayPointsToPack.get(rayIndex).setToNaN();
+            }
+            continue;
+         }
+
+         if (rayPointsToPack != null)
+         {
+            rayPointsToPack.get(rayIndex).set(intersection);
+         }
+         for (int regionIdx = 0; regionIdx < regions.getNumberOfPlanarRegions(); regionIdx++)
+         {
+            PlanarRegion region = regions.getPlanarRegion(regionIdx);
+            if (PlanarRegionTools.isPointOnRegion(region, intersection, 0.01))
+            {
+               region.getTransformToWorld(transform);
+               Point3D pointOnPlane = new Point3D(intersection);
+               pointOnPlane.applyInverseTransform(transform);
+
+               Point2D newVertex = new Point2D();
+               newVertex.set(pointOnPlane);
+
+               visiblePolygons.get(regionIdx).addVertex(newVertex);
+            }
+         }
+      }
+
+      PlanarRegionsList visible = new PlanarRegionsList();
+      for (int i = 0; i < visiblePolygons.size(); i++)
+      {
+         ConvexPolygon2D polygon = visiblePolygons.get(i);
+         polygon.update();
+         if (polygon.getNumberOfVertices() < 2)
+         {
+            continue;
+         }
+
+         PlanarRegion originalRegion = regions.getPlanarRegion(i);
+         originalRegion.getTransformToWorld(transform);
+         PlanarRegion newRegion = new PlanarRegion(transform, polygon);
+         visible.addPlanarRegion(newRegion);
+      }
+
+      return combine(knownRegions, visible);
+   }
+
+   private PlanarRegionsList combine(PlanarRegionsList regionsA, PlanarRegionsList regionsB)
    {
       PlanarRegionsList ret = new PlanarRegionsList();
-      ret.addPlanarRegion(regions.getPlanarRegion(0));
-      ret.addPlanarRegion(regions.getPlanarRegion(1));
 
-      if (observer.getX() > -1.0)
+      boolean[] added = new boolean[regionsB.getNumberOfPlanarRegions()];
+      for (int regionBIdx = 0; regionBIdx < regionsB.getNumberOfPlanarRegions(); regionBIdx++)
       {
-         ret.addPlanarRegion(regions.getPlanarRegion(2));
+         added[regionBIdx] = false;
+      }
+
+      for (PlanarRegion regionA : regionsA.getPlanarRegionsAsList())
+      {
+         RigidBodyTransform transformA = new RigidBodyTransform();
+         regionA.getTransformToWorld(transformA);
+         boolean foundMatchingRegion = false;
+
+         for (int regionBIdx = 0; regionBIdx < regionsB.getNumberOfPlanarRegions(); regionBIdx++)
+         {
+            PlanarRegion regionB = regionsB.getPlanarRegion(regionBIdx);
+            RigidBodyTransform transformB = new RigidBodyTransform();
+            regionB.getTransformToWorld(transformB);
+            if (transformA.epsilonEquals(transformB, 0.01))
+            {
+               ConvexPolygon2D newHull = new ConvexPolygon2D(regionA.getConvexHull(), regionB.getConvexHull());
+               ret.addPlanarRegion(new PlanarRegion(transformA, newHull));
+               foundMatchingRegion = true;
+               added[regionBIdx] = true;
+            }
+         }
+
+         if (!foundMatchingRegion)
+         {
+            ret.addPlanarRegion(new PlanarRegion(transformA, new ConvexPolygon2D(regionA.getConvexHull())));
+         }
+      }
+
+      for (int regionBIdx = 0; regionBIdx < regionsB.getNumberOfPlanarRegions(); regionBIdx++)
+      {
+         if (!added[regionBIdx])
+         {
+            ret.addPlanarRegion(regionsB.getPlanarRegion(regionBIdx));
+         }
       }
 
       return ret;
    }
 
-   private FootstepPlanner getPlanner(FootstepPlannerParameters parameters, YoVariableRegistry registry)
+   private FootstepPlanner getPlanner(FootstepPlannerParameters parameters, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
       SideDependentList<ConvexPolygon2D> footPloygons = PlanningTestTools.createDefaultFootPolygons();
-      return new VisibilityGraphWithAStarPlanner(parameters, footPloygons, registry);
+      return new VisibilityGraphWithAStarPlanner(parameters, footPloygons, graphicsListRegistry, registry);
    }
 
    private FootstepPlannerParameters getParameters()
