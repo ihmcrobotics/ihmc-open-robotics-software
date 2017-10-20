@@ -104,28 +104,16 @@ public class ValkyriePositionControlParameters implements PositionControlParamet
 
    private void setProportionalGain(String jointName, double value)
    {
-      if (proportionalGain.containsKey(jointName))
-      {
-         proportionalGain.remove(jointName);
-      }
       proportionalGain.put(jointName, value);
    }
 
    private void setDerivativeGain(String jointName, double value)
    {
-      if (derivativeGain.containsKey(jointName))
-      {
-         derivativeGain.remove(jointName);
-      }
       derivativeGain.put(jointName, value);
    }
 
    private void setIntegralGain(String jointName, double value)
    {
-      if (integralGain.containsKey(jointName))
-      {
-         integralGain.remove(jointName);
-      }
       integralGain.put(jointName, value);
    }
 
@@ -139,7 +127,10 @@ public class ValkyriePositionControlParameters implements PositionControlParamet
    @Override
    public double getProportionalGain(String jointName)
    {
-      return proportionalGain.get(jointName);
+      if (proportionalGain.containsKey(jointName))
+         return proportionalGain.get(jointName);
+      else
+         return 0.0;
    }
 
    @Override
@@ -152,7 +143,10 @@ public class ValkyriePositionControlParameters implements PositionControlParamet
    @Override
    public double getDerivativeGain(String jointName)
    {
-      return derivativeGain.get(jointName);
+      if (derivativeGain.containsKey(jointName))
+         return derivativeGain.get(jointName);
+      else
+         return 0.0;
    }
 
    @Override
@@ -165,7 +159,10 @@ public class ValkyriePositionControlParameters implements PositionControlParamet
    @Override
    public double getIntegralGain(String jointName)
    {
-      return integralGain.get(jointName);
+      if (integralGain.containsKey(jointName))
+         return integralGain.get(jointName);
+      else
+         return 0.0;
    }
 
    @Override

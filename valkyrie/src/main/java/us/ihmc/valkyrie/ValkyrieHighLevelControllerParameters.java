@@ -24,7 +24,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    {
       this.runningOnRealRobot = runningOnRealRobot;
 
-      standPrepParameters = new ValkyrieStandPrepParameters();
+      standPrepParameters = new ValkyrieStandPrepParameters(jointMap);
       positionControlParameters = new ValkyriePositionControlParameters(jointMap);
 
       positionControlledJoints.add(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH));
