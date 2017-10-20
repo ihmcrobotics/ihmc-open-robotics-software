@@ -4,16 +4,19 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelCon
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.valkyrie.ValkyrieCalibrationParameters;
 import us.ihmc.wholeBodyController.diagnostics.TorqueOffsetPrinter;
 
 public class ValkyrieCalibrationControllerStateFactory implements HighLevelControllerStateFactory
 {
    private final TorqueOffsetPrinter torqueOffsetPrinter;
    private ValkyrieCalibrationControllerState calibrationControllerState;
+   private ValkyrieCalibrationParameters calibrationParameters;
 
-   public ValkyrieCalibrationControllerStateFactory(TorqueOffsetPrinter torqueOffsetPrinter)
+   public ValkyrieCalibrationControllerStateFactory(TorqueOffsetPrinter torqueOffsetPrinter, ValkyrieCalibrationParameters calibrationParameters)
    {
       this.torqueOffsetPrinter = torqueOffsetPrinter;
+      this.calibrationParameters = calibrationParameters;
    }
 
    @Override
@@ -23,7 +26,7 @@ public class ValkyrieCalibrationControllerStateFactory implements HighLevelContr
          return calibrationControllerState;
 
       calibrationControllerState = new ValkyrieCalibrationControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
-                                                                          controllerFactoryHelper.getHighLevelControllerParameters(),
+                                                                          controllerFactoryHelper.getHighLevelControllerParameters(), calibrationParameters,
                                                                           torqueOffsetPrinter);
       return calibrationControllerState;
    }
