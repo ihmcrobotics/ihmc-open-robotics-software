@@ -25,7 +25,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       PLANAR_REGION_BIPEDAL,
       PLAN_THEN_SNAP,
       A_STAR,
-      SIMPLE_BODY_PATH
+      SIMPLE_BODY_PATH,
+      VIS_GRAPH_WITH_A_STAR
    }
 
    public FootstepPlanningRequestPacket()
