@@ -1,0 +1,12 @@
+[Unit]
+Description=IHMC Logger
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStart=/home/shadylady/IHMCLogger/bin/IHMCLogger
+User=shadylady
+Group=shadylady
+
+[Install]
+WantedBy=multi-user.target
