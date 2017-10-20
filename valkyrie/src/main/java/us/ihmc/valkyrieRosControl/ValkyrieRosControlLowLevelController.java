@@ -11,23 +11,16 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
-import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelControllerStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
-import us.ihmc.humanoidRobotics.communication.packets.valkyrie.ValkyrieLowLevelControlModeMessage;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.tools.taskExecutor.TaskExecutor;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 public class ValkyrieRosControlLowLevelController
 {
@@ -41,21 +34,10 @@ public class ValkyrieRosControlLowLevelController
    private final YoDouble yoTime = new YoDouble("lowLevelControlTime", registry);
    private final YoDouble wakeUpTime = new YoDouble("lowLevelControlWakeUpTime", registry);
 
-   private final YoEnum<ValkyrieLowLevelControlModeMessage.ControlMode> requestedLowLevelControlMode = new YoEnum<>("requestedLowLevelControlMode", registry,
-                                                                                                                    ValkyrieLowLevelControlModeMessage.ControlMode.class,
-                                                                                                                    true);
-   private final AtomicReference<ValkyrieLowLevelControlModeMessage.ControlMode> requestedLowLevelControlModeAtomic = new AtomicReference<>(null);
-
    private final ValkyrieTorqueHysteresisCompensator torqueHysteresisCompensator;
    private final ValkyrieAccelerationIntegration accelerationIntegration;
 
-   private CommandInputManager commandInputManager;
-   private final AtomicReference<HighLevelController> previousHighLevelControllerState = new AtomicReference<HighLevelController>(null);
    private final AtomicReference<HighLevelController> currentHighLevelControllerState = new AtomicReference<HighLevelController>(null);
-
-   private final HighLevelControllerStateCommand highLevelControllerStateCommand = new HighLevelControllerStateCommand();
-
-   private final TaskExecutor taskExecutor = new TaskExecutor();
 
    private JointTorqueOffsetEstimator jointTorqueOffsetEstimator;
 
@@ -69,16 +51,6 @@ public class ValkyrieRosControlLowLevelController
 
       torqueHysteresisCompensator = new ValkyrieTorqueHysteresisCompensator(yoEffortJointHandleHolders, yoTime, registry);
       accelerationIntegration = new ValkyrieAccelerationIntegration(yoEffortJointHandleHolders, updateDT, registry);
-
-      requestedLowLevelControlMode.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
-         {
-            if (requestedLowLevelControlMode.getEnumValue() != null)
-               requestedLowLevelControlModeAtomic.set(requestedLowLevelControlMode.getEnumValue());
-         }
-      });
 
       Map<String, Double> offsetMap = ValkyrieTorqueOffsetPrinter.loadTorqueOffsetsFromFile();
 
@@ -110,46 +82,11 @@ public class ValkyrieRosControlLowLevelController
 
       yoTime.set(Conversions.nanosecondsToSeconds(timestamp) - wakeUpTime.getDoubleValue());
 
-      taskExecutor.doControl();
-      ValkyrieLowLevelControlModeMessage.ControlMode newRequest = requestedLowLevelControlModeAtomic.getAndSet(null);
-      requestedLowLevelControlMode.set(null);
-
-      switch (currentHighLevelControllerState.get())
+      if (currentHighLevelControllerState.get() == HighLevelController.WALKING)
       {
-      case STAND_READY:
-         if (newRequest == null)
-            break;
-
-         switch (newRequest)
-         {
-         case CALIBRATION:
-            highLevelControllerStateCommand.setHighLevelController(HighLevelController.CALIBRATION);
-            commandInputManager.submitCommand(highLevelControllerStateCommand);
-            break;
-         case HIGH_LEVEL_CONTROL:
-            highLevelControllerStateCommand.setHighLevelController(HighLevelController.STAND_TRANSITION_STATE);
-            commandInputManager.submitCommand(highLevelControllerStateCommand);
-            break;
-         default:
-            break;
-         }
-         break;
-      case STAND_TRANSITION_STATE:
-      case WALKING:
-         if (newRequest != null && newRequest == ValkyrieLowLevelControlModeMessage.ControlMode.STAND_PREP)
-         {
-            highLevelControllerStateCommand.setHighLevelController(HighLevelController.STAND_PREP_STATE);
-            commandInputManager.submitCommand(highLevelControllerStateCommand);
-            break;
-         }
-
          torqueHysteresisCompensator.compute();
          if (ValkyrieRosControlController.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
             accelerationIntegration.compute();
-         break;
-      default:
-         break;
-
       }
 
       updateCommandCalculators();
@@ -189,8 +126,6 @@ public class ValkyrieRosControlLowLevelController
 
    public void attachControllerAPI(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager)
    {
-      this.commandInputManager = commandInputManager;
-
       StatusMessageListener<HighLevelStateChangeStatusMessage> highLevelStateChangeListener = new StatusMessageListener<HighLevelStateChangeStatusMessage>()
       {
          @Override
@@ -198,10 +133,9 @@ public class ValkyrieRosControlLowLevelController
          {
             if (statusMessage != null)
             {
-               previousHighLevelControllerState.set(statusMessage.initialState);
                currentHighLevelControllerState.set(statusMessage.endState);
 
-               if (previousHighLevelControllerState.get() == HighLevelController.CALIBRATION)
+               if (statusMessage.initialState == HighLevelController.CALIBRATION)
                   writeTorqueOffsets();
             }
          }
@@ -216,14 +150,5 @@ public class ValkyrieRosControlLowLevelController
 
    public void setupLowLevelControlWithPacketCommunicator(PacketCommunicator packetCommunicator)
    {
-      packetCommunicator.attachListener(ValkyrieLowLevelControlModeMessage.class, new PacketConsumer<ValkyrieLowLevelControlModeMessage>()
-      {
-         @Override
-         public void receivedPacket(ValkyrieLowLevelControlModeMessage packet)
-         {
-            if (packet != null && packet.getRequestedControlMode() != null)
-               requestedLowLevelControlModeAtomic.set(packet.getRequestedControlMode());
-         }
-      });
    }
 }
