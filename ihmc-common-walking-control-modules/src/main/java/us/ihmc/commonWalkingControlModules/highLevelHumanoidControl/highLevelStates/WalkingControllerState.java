@@ -88,6 +88,7 @@ public class WalkingControllerState extends HighLevelControllerState
       for (OneDoFJoint controlledJoint : controlledJoints)
       {
          JointDesiredOutput jointDesiredOutput = jointStiffnessAndDamping.getJointDesiredOutput(controlledJoint);
+         jointDesiredOutput.setControlMode(highLevelControllerParameters.getJointDesiredControlMode(controlledJoint.getName(), controllerState));
          jointDesiredOutput.setStiffness(highLevelControllerParameters.getDesiredJointStiffness(controlledJoint.getName(), controllerState));
          jointDesiredOutput.setDamping(highLevelControllerParameters.getDesiredJointDamping(controlledJoint.getName(), controllerState));
       }
