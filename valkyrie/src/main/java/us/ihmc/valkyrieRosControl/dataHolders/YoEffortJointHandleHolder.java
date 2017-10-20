@@ -15,6 +15,7 @@ public class YoEffortJointHandleHolder
    private final JointDesiredOutput desiredJointData;
    private final YoJointDesiredOutput yoDesiredJointData;
 
+   private final YoDouble tauDesired;
    private final YoDouble tauMeasured;
    private final YoDouble q;
    private final YoDouble qd;
@@ -30,6 +31,7 @@ public class YoEffortJointHandleHolder
 
       yoDesiredJointData = new YoJointDesiredOutput(name, registry, "JointHandle");
 
+      this.tauDesired = new YoDouble(name + "TauDesired", registry);
       this.tauMeasured = new YoDouble(name + "TauMeasured", registry);
       this.q = new YoDouble(name + "_q", registry);
       this.qd = new YoDouble(name + "_qd", registry);
@@ -47,6 +49,7 @@ public class YoEffortJointHandleHolder
 
    public void setDesiredEffort(double effort)
    {
+      tauDesired.set(effort);
       handle.setDesiredEffort(effort);
    }
 
