@@ -24,6 +24,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
@@ -31,7 +32,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class JointTorqueOffsetEstimatorController extends HighLevelControllerState implements RobotController, JointTorqueOffsetEstimator
+public class JointTorqueOffsetEstimatorController implements RobotController, JointTorqueOffsetEstimator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -66,18 +67,19 @@ public class JointTorqueOffsetEstimatorController extends HighLevelControllerSta
    private final YoBoolean hasReachedMaximumTorqueOffset = new YoBoolean("hasReachedMaximumTorqueOffset", registry);
 
    private final YoDouble timeForEstimatingOffset = new YoDouble("timeForEstimatingOffset", registry);
+   private final YoDouble initialTime = new YoDouble("initialTimeInJointTorqueOffsetEstimator", registry);
+   private final YoDouble currentTime;
 
    public JointTorqueOffsetEstimatorController(HighLevelHumanoidControllerToolbox highLevelControllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
           TorqueOffsetPrinter torqueOffsetPrinter)
-   {
-      super(HighLevelController.CALIBRATION);
-
+   {      
       this.bipedSupportPolygons = highLevelControllerToolbox.getBipedSupportPolygons();
       this.footContactStates = highLevelControllerToolbox.getFootContactStates();
       this.controllerToolbox = highLevelControllerToolbox;
       this.torqueOffsetPrinter = torqueOffsetPrinter;
       this.fullRobotModel = highLevelControllerToolbox.getFullRobotModel();
       this.timeForEstimatingOffset.set(highLevelControllerParameters.getCalibrationDuration());
+      this.currentTime = highLevelControllerToolbox.getYoTime();
 
       ditherAmplitude.set(0.3);
       ditherFrequency.set(5.0);
@@ -338,30 +340,32 @@ public class JointTorqueOffsetEstimatorController extends HighLevelControllerSta
       }
    }
 
-   @Override
    public void doAction()
    {
       doControl();
    }
-
-   @Override
+   
    public void doTransitionIntoAction()
    {
       initialize();
       estimateTorqueOffset.set(true);
+      initialTime.set(currentTime.getDoubleValue());
    }
-
-   @Override
+   
    public void doTransitionOutOfAction()
    {
       estimateTorqueOffset.set(false);
       torqueOffsetPrinter.printTorqueOffsets(this);
    }
 
-   @Override
    public boolean isDone()
    {
       return getTimeInCurrentState() > timeForEstimatingOffset.getDoubleValue();
+   }
+   
+   public double getTimeInCurrentState()
+   {
+      return currentTime.getDoubleValue() - initialTime.getDoubleValue();
    }
 
    public void transferTorqueOffsetsToOutputWriter()
@@ -382,7 +386,6 @@ public class JointTorqueOffsetEstimatorController extends HighLevelControllerSta
       }
    }
 
-   @Override
    public LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController()
    {
       return lowLevelOneDoFJointDesiredDataHolder;
@@ -432,8 +435,4 @@ public class JointTorqueOffsetEstimatorController extends HighLevelControllerSta
       return "Controller for estimating the joint torque offsets. It is based on " + DiagnosticsWhenHangingControllerState.class.getSimpleName() + ".";
    }
 
-   @Override
-   public void warmup(int iterations)
-   {
-   }
 }

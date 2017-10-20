@@ -157,7 +157,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
       ValkyrieTorqueOffsetPrinter valkyrieTorqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();
       valkyrieTorqueOffsetPrinter.setRobotName(robotModel.getFullRobotName());
-      calibrationStateFactory = new ValkyrieCalibrationControllerStateFactory(valkyrieTorqueOffsetPrinter);
+      calibrationStateFactory = new ValkyrieCalibrationControllerStateFactory(valkyrieTorqueOffsetPrinter, robotModel.getCalibrationParameters());
       controllerFactory.addCustomControlState(calibrationStateFactory);
 
       // setup transitions
@@ -329,7 +329,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       calibrationControllerState.attachForceSensorCalibrationModule(estimatorThread.getForceSensorCalibrationModule());
 
       sensorReaderFactory.attachControllerAPI(commandInputManager, statusOutputManager);
-      sensorReaderFactory.attachJointTorqueOffsetEstimator(calibrationControllerState);
+      sensorReaderFactory.attachJointTorqueOffsetEstimator(calibrationControllerState.getJointTorqueOffsetEstimatorController());
       sensorReaderFactory.setupLowLevelControlWithPacketCommunicator(controllerPacketCommunicator);
 
       /*
