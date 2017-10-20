@@ -228,7 +228,9 @@ public class HumanoidHighLevelControllerManager implements RobotController
          @Override
          public void stateChanged(State<HighLevelController> oldState, State<HighLevelController> newState, double time)
          {
-            highLevelStateChangeStatusMessage.setStateChange(oldState.getStateEnum(), newState.getStateEnum());
+            HighLevelController oldStateEnum = oldState == null ? null : oldState.getStateEnum();
+            HighLevelController newStateEnum = newState == null ? null : newState.getStateEnum();
+            highLevelStateChangeStatusMessage.setStateChange(oldStateEnum, newStateEnum);
             statusMessageOutputManager.reportStatusMessage(highLevelStateChangeStatusMessage);
          }
       });
