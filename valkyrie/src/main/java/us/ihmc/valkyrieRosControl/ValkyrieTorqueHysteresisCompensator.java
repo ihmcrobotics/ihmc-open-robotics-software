@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoJointDesiredOutput;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
@@ -62,10 +63,12 @@ public class ValkyrieTorqueHysteresisCompensator
          TorqueHysteresisCompensatorYoVariable hysteresisCompensator = hysteresisCompensators.get(i);
          YoEffortJointHandleHolder jointHandle = processedJointHandles.get(i);
          
-         jointHandle.getDesiredJointData().setDesiredAcceleration(jointHandle.getControllerQddDesired());
          hysteresisCompensator.update();
          
-         jointHandle.addOffetControllerTauDesired(hysteresisCompensator.getDoubleValue());
+         YoJointDesiredOutput desiredJointData = jointHandle.getDesiredJointData();
+         double desiredTorque = desiredJointData.getDesiredTorque();
+         desiredTorque += hysteresisCompensator.getDoubleValue();
+         desiredJointData.setDesiredTorque(desiredTorque);
       }
    }
 
