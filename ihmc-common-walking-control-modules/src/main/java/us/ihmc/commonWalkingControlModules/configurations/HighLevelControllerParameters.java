@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 
 public interface HighLevelControllerParameters
 {
-   StandPrepParameters getStandPrepParameters();
+   WholeBodySetpointParameters getStandPrepParameters();
 
    JointDesiredControlMode getJointDesiredControlMode(String joint, HighLevelController state);
    double getDesiredJointStiffness(String joint, HighLevelController state);

@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -39,7 +39,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    }
 
    @Override
-   public StandPrepParameters getStandPrepParameters()
+   public WholeBodySetpointParameters getStandPrepParameters()
    {
       return standPrepParameters;
    }

@@ -205,11 +205,6 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
          {
             return random.nextDouble();
          }
-         
-         @Override
-         public void enableJointTorqueOffsetEstimationAtomic(boolean enable)
-         {
-         }
       };
       printer.printTorqueOffsets(jointTorqueOffsetEstimator);
    }

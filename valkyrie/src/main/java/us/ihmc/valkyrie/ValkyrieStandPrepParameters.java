@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -16,7 +16,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap;
 
-public class ValkyrieStandPrepParameters implements StandPrepParameters
+public class ValkyrieStandPrepParameters implements WholeBodySetpointParameters
 {
    private final HashMap<String, Double> setPoints = new HashMap<>();
    private final ValkyrieJointMap jointMap;
