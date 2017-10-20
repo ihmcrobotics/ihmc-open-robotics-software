@@ -14,7 +14,7 @@ public class FreezeControllerStateFactory implements HighLevelControllerStateFac
    {
       if (freezeControllerState == null)
          freezeControllerState = new FreezeControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
-                                                           controllerFactoryHelper.getHighLevelControllerParameters(), controllerFactoryHelper.getLowLevelControllerOutput());
+                                                           controllerFactoryHelper.getHighLevelControllerParameters());
 
       return freezeControllerState;
    }

@@ -6,16 +6,14 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 
 public class StandReadyControllerState extends HoldPositionControllerState
 {
    private static final HighLevelController controllerState = HighLevelController.STAND_READY;
 
-   public StandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
-                                    LowLevelOneDoFJointDesiredDataHolderList highLevelControllerOutput)
+   public StandReadyControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
    {
-      super(controllerState, controllerToolbox, highLevelControllerOutput);
+      super(controllerState, controllerToolbox);
 
       OneDoFJoint[] oneDoFJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
 
