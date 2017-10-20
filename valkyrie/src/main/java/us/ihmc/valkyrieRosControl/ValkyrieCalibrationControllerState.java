@@ -2,7 +2,6 @@ package us.ihmc.valkyrieRosControl;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimatorController;
 import us.ihmc.wholeBodyController.diagnostics.TorqueOffsetPrinter;
