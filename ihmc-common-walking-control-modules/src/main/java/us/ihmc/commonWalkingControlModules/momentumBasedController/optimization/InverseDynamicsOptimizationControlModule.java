@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -51,7 +53,6 @@ public class InverseDynamicsOptimizationControlModule
 
    private final BasisVectorVisualizer basisVectorVisualizer;
    private final InverseDynamicsQPSolver qpSolver;
-   private final MotionQPInput motionQPInput;
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final InverseDynamicsQPBoundCalculator boundCalculator;
    private final ExternalWrenchHandler externalWrenchHandler;
@@ -59,6 +60,8 @@ public class InverseDynamicsOptimizationControlModule
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final int numberOfDoFs;
    private final int rhoSize;
+
+   private final static int defaultSize = 50;
 
    private final OneDoFJoint[] oneDoFJoints;
    private final DenseMatrix64F qDDotMinMatrix, qDDotMaxMatrix;
@@ -72,6 +75,9 @@ public class InverseDynamicsOptimizationControlModule
 
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
+
+   private final ArrayList<MotionQPInput> motionQPInputsToAdd = new ArrayList<>();
+   private final ArrayList<MotionQPInput> motionQPInputsPool = new ArrayList<>();
 
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
@@ -105,7 +111,9 @@ public class InverseDynamicsOptimizationControlModule
       else
          basisVectorVisualizer = null;
 
-      motionQPInput = new MotionQPInput(numberOfDoFs);
+      for (int i = 0; i < defaultSize; i++)
+         motionQPInputsPool.add(new MotionQPInput(numberOfDoFs));
+
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, toolbox.getTotalRobotMass(), contactablePlaneBodies);
 
       motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -138,13 +146,18 @@ public class InverseDynamicsOptimizationControlModule
 
    public void initialize()
    {
-      qpSolver.reset();
       externalWrenchHandler.reset();
       motionQPInputCalculator.initialize();
+      motionQPInputsToAdd.clear();
    }
 
    public MomentumModuleSolution compute() throws MomentumControlModuleException
    {
+      qpSolver.reset();
+
+      for (int inputIndex = 0; inputIndex < motionQPInputsToAdd.size(); inputIndex++)
+         qpSolver.addMotionInput(motionQPInputsToAdd.get(inputIndex));
+
       wrenchMatrixCalculator.computeMatrices();
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer.visualize(wrenchMatrixCalculator.getBasisVectors(), wrenchMatrixCalculator.getBasisVectorsOrigin());
@@ -188,7 +201,7 @@ public class InverseDynamicsOptimizationControlModule
       DenseMatrix64F qDDotSolution = qpSolver.getJointAccelerations();
       DenseMatrix64F rhoSolution = qpSolver.getRhos();
 
-      Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
+      Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution); // FIXME
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
       SpatialForceVector centroidalMomentumRateSolution = motionQPInputCalculator.computeCentroidalMomentumRateFromSolution(qDDotSolution);
@@ -198,7 +211,7 @@ public class InverseDynamicsOptimizationControlModule
       momentumModuleSolution.setCentroidalMomentumRateSolution(centroidalMomentumRateSolution);
       momentumModuleSolution.setExternalWrenchSolution(externalWrenchSolution);
       momentumModuleSolution.setJointAccelerations(qDDotSolution);
-      momentumModuleSolution.setRhoSolution(rhoSolution);
+      momentumModuleSolution.setRhoSolution(rhoSolution); // FIXME
       momentumModuleSolution.setJointsToOptimizeFor(jointsToOptimizeFor);
       momentumModuleSolution.setRigidBodiesWithExternalWrench(rigidBodiesWithExternalWrench);
 
@@ -228,9 +241,11 @@ public class InverseDynamicsOptimizationControlModule
 
    private void computePrivilegedJointAccelerations()
    {
+      int nextIndex = motionQPInputsToAdd.size();
+      MotionQPInput motionQPInput = motionQPInputsPool.get(nextIndex);
       boolean success = motionQPInputCalculator.computePrivilegedJointAccelerations(motionQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         motionQPInputsToAdd.add(motionQPInput);
    }
 
    private void setupRhoTasks()
@@ -269,23 +284,29 @@ public class InverseDynamicsOptimizationControlModule
 
    public void submitSpatialAccelerationCommand(SpatialAccelerationCommand command)
    {
+      int nextIndex = motionQPInputsToAdd.size();
+      MotionQPInput motionQPInput = motionQPInputsPool.get(nextIndex);
       boolean success = motionQPInputCalculator.convertSpatialAccelerationCommand(command, motionQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         motionQPInputsToAdd.add(motionQPInput);
    }
 
    public void submitJointspaceAccelerationCommand(JointspaceAccelerationCommand command)
    {
+      int nextIndex = motionQPInputsToAdd.size();
+      MotionQPInput motionQPInput = motionQPInputsPool.get(nextIndex);
       boolean success = motionQPInputCalculator.convertJointspaceAccelerationCommand(command, motionQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         motionQPInputsToAdd.add(motionQPInput);
    }
 
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
+      int nextIndex = motionQPInputsToAdd.size();
+      MotionQPInput motionQPInput = motionQPInputsPool.get(nextIndex);
       boolean success = motionQPInputCalculator.convertMomentumRateCommand(command, motionQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         motionQPInputsToAdd.add(motionQPInput);
    }
 
    public void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
