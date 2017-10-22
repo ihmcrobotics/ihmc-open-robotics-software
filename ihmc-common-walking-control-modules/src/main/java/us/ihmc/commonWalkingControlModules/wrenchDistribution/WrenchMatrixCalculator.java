@@ -34,6 +34,7 @@ public class WrenchMatrixCalculator
    private final int copTaskSize;
 
    private int currentRhoSize;
+   private int currentCoPTaskSize;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -85,7 +86,8 @@ public class WrenchMatrixCalculator
       numberOfBasisVectorsPerContactPoint = toolbox.getNumberOfBasisVectorsPerContactPoint(); 
       rhoSize = toolbox.getRhoSize();
       currentRhoSize = rhoSize;
-      copTaskSize = 2 * nContactableBodies; 
+      copTaskSize = 2 * nContactableBodies;
+      currentCoPTaskSize = copTaskSize;
       
       rhoJacobianMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, rhoSize);
       copJacobianMatrix = new DenseMatrix64F(copTaskSize, rhoSize);            
@@ -172,15 +174,20 @@ public class WrenchMatrixCalculator
 
       int previousRhoSize = currentRhoSize;
       currentRhoSize = 0;
+      currentCoPTaskSize = 0;
       for (int i = 0; i < rigidBodies.size(); i++)
       {
          RigidBody rigidBody = rigidBodies.get(i);
          PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(rigidBody);
-         currentRhoSize += helper.computeCurrentRhoSize();
+         int numberOfRhos = helper.computeCurrentRhoSize();
+         if (numberOfRhos > 0)
+            currentCoPTaskSize += 2;
+         currentRhoSize += numberOfRhos;
+
       }
 
       if (previousRhoSize != currentRhoSize)
-         reshape(currentRhoSize);
+         reshape(currentRhoSize, currentCoPTaskSize);
 
       for (int i = 0; i < rigidBodies.size(); i++)
       {
@@ -206,26 +213,26 @@ public class WrenchMatrixCalculator
          CommonOps.insert(helper.getDesiredCoPWeightMatrix(), desiredCoPWeightMatrix, copStartIndex, copStartIndex);
          CommonOps.insert(helper.getCoPRateWeightMatrix(), copRateWeightMatrix, copStartIndex, copStartIndex);
 
-         rhoStartIndex += helper.getRhoSize();
+         rhoStartIndex += helper.getCurrentRhoSize();
          copStartIndex += 2;
       }
    }
 
-   private void reshape(int rhoSize)
+   private void reshape(int rhoSize, int copTaskSize)
    {
-      // FIXME add in stuff about CoP
-      rhoJacobianMatrix.reshape(SpatialForceVector.SIZE, currentRhoSize);
+      rhoJacobianMatrix.reshape(SpatialForceVector.SIZE, rhoSize);
       copJacobianMatrix.reshape(copTaskSize, rhoSize);
       rhoPreviousMatrix.reshape(rhoSize, 1);
 
-      //desiredCoPMatrix = new DenseMatrix64F(copTaskSize, 1);
-      //previousCoPMatrix = new DenseMatrix64F(copTaskSize, 1);
+      desiredCoPMatrix.reshape(copTaskSize, 1);
+      previousCoPMatrix.reshape(copTaskSize, 1);
 
       rhoMaxMatrix.reshape(rhoSize, 1);
       rhoWeightMatrix.reshape(rhoSize, rhoSize);
       rhoRateWeightMatrix.reshape(rhoSize, rhoSize);
-      //desiredCoPWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);
-      //copRateWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);
+
+      desiredCoPWeightMatrix.reshape(copTaskSize, copTaskSize);
+      copRateWeightMatrix.reshape(copTaskSize, copTaskSize);
    }
 
    public Map<RigidBody, Wrench> computeWrenchesFromRho(DenseMatrix64F rho)
@@ -251,7 +258,7 @@ public class WrenchMatrixCalculator
          wrenchFromRho.changeFrame(bodyFixedFrame);
          wrenchesFromRho.get(rigidBody).add(wrenchFromRho);
 
-         rhoStartIndex += helper.getRhoSize();
+         rhoStartIndex += helper.getCurrentRhoSize();
       }
 
       return wrenchesFromRho;

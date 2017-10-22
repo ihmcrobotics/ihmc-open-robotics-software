@@ -415,6 +415,11 @@ public class PlaneContactStateToWrenchMatrixHelper
       return rhoSize;
    }
 
+   public int getCurrentRhoSize()
+   {
+      return currentRhoSize;
+   }
+
    public DenseMatrix64F getLastRho()
    {
       return rhoMatrix;

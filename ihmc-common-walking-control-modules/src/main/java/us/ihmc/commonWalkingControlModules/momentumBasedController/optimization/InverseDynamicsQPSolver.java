@@ -310,7 +310,6 @@ public class InverseDynamicsQPSolver
 
       if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
       {
-         //tempWrenchConstraint_J.reshape(Wrench.SIZE, problemSize);
          tempWrenchConstraint_J.reshape(Wrench.SIZE, currentProblemSize);
          MatrixTools.setMatrixBlock(tempWrenchConstraint_J, 0, 0, centroidalMomentumMatrix, 0, 0, Wrench.SIZE, numberOfDoFs, -1.0);
          CommonOps.insert(rhoJacobian, tempWrenchConstraint_J, 0, numberOfDoFs);
