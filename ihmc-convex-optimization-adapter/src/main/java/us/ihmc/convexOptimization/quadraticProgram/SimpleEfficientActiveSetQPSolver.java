@@ -25,7 +25,8 @@ import us.ihmc.commons.PrintTools;
  */
 public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolverInterface
 {
-   private double fractionToAdd = 0.90;
+   private static final double violationFractionToAdd = 0.8;
+   private static final double violationFractionToRemove = 0.95;
    private double convergenceThreshold = 1e-10;
    private int maxNumberOfIterations = 10;
 
@@ -116,11 +117,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
    public void setConvergenceThreshold(double convergenceThreshold)
    {
       this.convergenceThreshold = convergenceThreshold;
-   }
-
-   public void setFractionOfViolatedConstraintsToAdd(double fractionToAdd)
-   {
-      this.fractionToAdd = fractionToAdd;
    }
 
    @Override
@@ -555,43 +551,115 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
       boolean activeSetWasModified = false;
 
+      // find the constraints to add
       int numberOfVariables = quadraticCostQMatrix.getNumRows();
       int numberOfInequalityConstraints = linearInequalityConstraintsCMatrixO.getNumRows();
       int numberOfLowerBoundConstraints = variableLowerBounds.getNumRows();
       int numberOfUpperBoundConstraints = variableUpperBounds.getNumRows();
 
-      // check inequality constraints
-      inequalityIndicesToAddToActiveSet.reset();
-      inequalityIndicesToRemoveFromActiveSet.reset();
+      double maxInequalityViolation = Double.NEGATIVE_INFINITY, maxLowerBoundViolation = Double.NEGATIVE_INFINITY, maxUpperBoundViolation = Double.NEGATIVE_INFINITY;
       if (numberOfInequalityConstraints != 0)
       {
          linearInequalityConstraintsCheck.reshape(numberOfInequalityConstraints, 1);
          CommonOps.mult(linearInequalityConstraintsCMatrixO, solutionToPack, linearInequalityConstraintsCheck);
          CommonOps.subtractEquals(linearInequalityConstraintsCheck, linearInequalityConstraintsDVectorO);
 
-         double maxViolation = CommonOps.elementMax(linearInequalityConstraintsCheck);
+         maxInequalityViolation = CommonOps.elementMax(linearInequalityConstraintsCheck);
+      }
 
-         if (maxViolation > convergenceThreshold)
+      if (numberOfLowerBoundConstraints != 0)
+      {
+         CommonOps.subtract(variableLowerBounds, solutionToPack, lowerBoundViolations);
+         maxLowerBoundViolation = CommonOps.elementMax(lowerBoundViolations);
+      }
+
+      if (numberOfUpperBoundConstraints != 0)
+      {
+         CommonOps.subtract(solutionToPack, variableUpperBounds, upperBoundViolations);
+         maxUpperBoundViolation = CommonOps.elementMax(upperBoundViolations);
+      }
+
+      double maxConstraintViolation = Math.max(maxInequalityViolation, Math.max(maxLowerBoundViolation, maxUpperBoundViolation));
+      double minViolationToAdd = (1.0 - violationFractionToAdd) * maxConstraintViolation + convergenceThreshold;
+
+      // check inequality constraints
+      inequalityIndicesToAddToActiveSet.reset();
+      if (maxInequalityViolation > minViolationToAdd)
+      {
+         for (int i = 0; i < numberOfInequalityConstraints; i++)
          {
-            for (int i = 0; i < numberOfInequalityConstraints; i++)
-            {
-               if (activeInequalityIndices.contains(i))
-                  continue; // Only check violation on those that are not active. Otherwise check should just return 0.0, but roundoff could cause problems.
+            if (activeInequalityIndices.contains(i))
+               continue; // Only check violation on those that are not active. Otherwise check should just return 0.0, but roundoff could cause problems.
 
-               if (linearInequalityConstraintsCheck.get(i, 0) > (1.0 - fractionToAdd) * maxViolation + convergenceThreshold)
-               {
-                  activeSetWasModified = true;
-                  inequalityIndicesToAddToActiveSet.add(i);
-               }
+            if (linearInequalityConstraintsCheck.get(i, 0) > minViolationToAdd)
+            {
+               activeSetWasModified = true;
+               inequalityIndicesToAddToActiveSet.add(i);
             }
          }
+      }
 
+      // Check the lower bounds
+      lowerBoundIndicesToAddToActiveSet.reset();
+      if (maxLowerBoundViolation > minViolationToAdd)
+      {
+         for (int i = 0; i < numberOfLowerBoundConstraints; i++)
+         {
+            if (activeLowerBoundIndices.contains(i))
+               continue; // Only check violation on those that are not active. Otherwise check should just return 0.0, but roundoff could cause problems.
+
+            if (lowerBoundViolations.get(i, 0) > minViolationToAdd)
+            {
+               activeSetWasModified = true;
+               lowerBoundIndicesToAddToActiveSet.add(i);
+            }
+         }
+      }
+
+
+      // Check the upper bounds
+      upperBoundIndicesToAddToActiveSet.reset();
+      if (maxUpperBoundViolation > minViolationToAdd)
+      {
+         for (int i = 0; i < numberOfUpperBoundConstraints; i++)
+         {
+            if (activeUpperBoundIndices.contains(i))
+               continue; // Only check violation on those that are not active. Otherwise check should just return 0.0, but roundoff could cause problems.
+
+            if (upperBoundViolations.get(i, 0) > minViolationToAdd)
+            {
+               activeSetWasModified = true;
+               upperBoundIndicesToAddToActiveSet.add(i);
+            }
+         }
+      }
+
+      // find the constraints to remove
+      int numberOfActiveInequalityConstraints = activeInequalityIndices.size();
+      int numberOfActiveUpperBounds = activeUpperBoundIndices.size();
+      int numberOfActiveLowerBounds = activeLowerBoundIndices.size();
+
+      double minLagrangeInequalityMultiplier = Double.POSITIVE_INFINITY, minLagrangeLowerBoundMultiplier = Double.POSITIVE_INFINITY, minLagrangeUpperBoundMultiplier = Double.POSITIVE_INFINITY;
+
+      if (numberOfActiveInequalityConstraints != 0)
+         minLagrangeInequalityMultiplier = CommonOps.elementMin(lagrangeInequalityConstraintMultipliersToPack);
+      if (numberOfActiveLowerBounds != 0)
+         minLagrangeLowerBoundMultiplier = CommonOps.elementMin(lagrangeLowerBoundConstraintMultipliersToPack);
+      if (numberOfActiveUpperBounds != 0)
+         minLagrangeUpperBoundMultiplier = CommonOps.elementMin(lagrangeUpperBoundConstraintMultipliersToPack);
+
+      double minLagrangeMultiplier = Math.min(minLagrangeInequalityMultiplier, Math.min(minLagrangeLowerBoundMultiplier, minLagrangeUpperBoundMultiplier));
+      double maxLagrangeMultiplierToRemove = -(1.0 - violationFractionToRemove) * minLagrangeMultiplier - convergenceThreshold;
+
+      inequalityIndicesToRemoveFromActiveSet.reset();
+      if (minLagrangeInequalityMultiplier < maxLagrangeMultiplierToRemove)
+      {
          for (int i = 0; i < activeInequalityIndices.size(); i++)
          {
             int indexToCheck = activeInequalityIndices.get(i);
 
             double lagrangeMultiplier = lagrangeInequalityConstraintMultipliersToPack.get(indexToCheck);
-            if (lagrangeMultiplier < -convergenceThreshold)
+            if (lagrangeMultiplier < maxLagrangeMultiplierToRemove)
             {
                activeSetWasModified = true;
                inequalityIndicesToRemoveFromActiveSet.add(indexToCheck);
@@ -599,80 +667,35 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          }
       }
 
-      // Check the lower bounds
-      lowerBoundIndicesToAddToActiveSet.reset();
-      if (numberOfLowerBoundConstraints != 0)
-      {
-         CommonOps.subtract(variableLowerBounds, solutionToPack, lowerBoundViolations);
-         double maxViolation = CommonOps.elementMax(lowerBoundViolations);
-
-         if (maxViolation > convergenceThreshold)
-         {
-            for (int i = 0; i < numberOfLowerBoundConstraints; i++)
-            {
-               if (activeLowerBoundIndices.contains(i))
-                  continue; // Only check violation on those that are not active. Otherwise check should just return 0.0, but roundoff could cause problems.
-
-               double violation = lowerBoundViolations.get(i, 0);
-
-               if (violation > (1.0 - fractionToAdd) * maxViolation + convergenceThreshold)
-               {
-                  activeSetWasModified = true;
-                  lowerBoundIndicesToAddToActiveSet.add(i);
-               }
-            }
-         }
-      }
-
-      // Check the upper bounds
-      upperBoundIndicesToAddToActiveSet.reset();
-      if (numberOfUpperBoundConstraints != 0)
-      {
-         CommonOps.subtract(solutionToPack, variableUpperBounds, upperBoundViolations);
-         double maxViolation = CommonOps.elementMax(upperBoundViolations);
-
-         if (maxViolation > convergenceThreshold)
-         {
-            for (int i = 0; i < numberOfUpperBoundConstraints; i++)
-            {
-               if (activeUpperBoundIndices.contains(i))
-                  continue; // Only check violation on those that are not active. Otherwise check should just return 0.0, but roundoff could cause problems.
-
-               double violation = upperBoundViolations.get(i, 0);
-
-               if (violation > (1.0 - fractionToAdd) * maxViolation + convergenceThreshold)
-               {
-                  activeSetWasModified = true;
-                  upperBoundIndicesToAddToActiveSet.add(i);
-               }
-            }
-         }
-      }
-
       lowerBoundIndicesToRemoveFromActiveSet.reset();
-      for (int i = 0; i < activeLowerBoundIndices.size(); i++)
+      if (minLagrangeLowerBoundMultiplier < maxLagrangeMultiplierToRemove)
       {
-         int indexToCheck = activeLowerBoundIndices.get(i);
-
-         double lagrangeMultiplier = lagrangeLowerBoundConstraintMultipliersToPack.get(indexToCheck);
-         if (lagrangeMultiplier < -convergenceThreshold)
+         for (int i = 0; i < activeLowerBoundIndices.size(); i++)
          {
-            activeSetWasModified = true;
-            lowerBoundIndicesToRemoveFromActiveSet.add(indexToCheck);
+            int indexToCheck = activeLowerBoundIndices.get(i);
+
+            double lagrangeMultiplier = lagrangeLowerBoundConstraintMultipliersToPack.get(indexToCheck);
+            if (lagrangeMultiplier < maxLagrangeMultiplierToRemove)
+            {
+               activeSetWasModified = true;
+               lowerBoundIndicesToRemoveFromActiveSet.add(indexToCheck);
+            }
          }
       }
 
       upperBoundIndicesToRemoveFromActiveSet.reset();
-      for (int i = 0; i < activeUpperBoundIndices.size(); i++)
+      if (minLagrangeUpperBoundMultiplier < maxLagrangeMultiplierToRemove)
       {
-         int indexToCheck = activeUpperBoundIndices.get(i);
-
-         double lagrangeMultiplier = lagrangeUpperBoundConstraintMultipliersToPack.get(indexToCheck);
-         //         if ((lagrangeMultiplier < 0) || (Double.isInfinite(lagrangeMultiplier)))
-         if (lagrangeMultiplier < -convergenceThreshold)
+         for (int i = 0; i < activeUpperBoundIndices.size(); i++)
          {
-            activeSetWasModified = true;
-            upperBoundIndicesToRemoveFromActiveSet.add(indexToCheck);
+            int indexToCheck = activeUpperBoundIndices.get(i);
+
+            double lagrangeMultiplier = lagrangeUpperBoundConstraintMultipliersToPack.get(indexToCheck);
+            if (lagrangeMultiplier < maxLagrangeMultiplierToRemove)
+            {
+               activeSetWasModified = true;
+               upperBoundIndicesToRemoveFromActiveSet.add(indexToCheck);
+            }
          }
       }
 

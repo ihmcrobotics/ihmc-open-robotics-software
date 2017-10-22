@@ -6,7 +6,7 @@ public class SimpleActiveSetQPSolver extends AbstractActiveSetQPSolver
 {
    // Uses the algorithm and naming convention found in MIT Paper
    // "An efficiently solvable quadratic program for stabilizing dynamic locomotion"
-   // by Scott Kuindersma, Frank Permenter, and Russ Tedrake.
+   // by Scott Kuindersma, Frank Permenter, and Russ Tedrakenv.
 
    SimpleActiveSetQPStandaloneSolver solver = new SimpleActiveSetQPStandaloneSolver();
    DenseMatrix64F solutionVector = new DenseMatrix64F(0);
