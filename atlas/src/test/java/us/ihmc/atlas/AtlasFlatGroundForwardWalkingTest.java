@@ -60,6 +60,7 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
    private final double forceDelay2 = 0.5 * swingTime;
    private final Vector3D forceDirection2 = new Vector3D(1.0, 0.0, 0.0);
 
+
    @Override
    @Test
    public void testForwardWalk() throws SimulationExceededMaximumTimeException
@@ -161,6 +162,6 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
    @Override
    protected boolean keepSCSUp()
    {
-      return false;
+      return true;
    }
 }

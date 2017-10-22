@@ -39,7 +39,6 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final int numberOfBasisVectorsPerContactPoint;
    private final double basisVectorAngleIncrement;
 
-   private final int rhoSize;
    private int currentRhoSize;
 
    private final DenseMatrix64F rhoMatrix;
@@ -95,7 +94,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       this.maxNumberOfContactPoints = maxNumberOfContactPoints;
       this.numberOfBasisVectorsPerContactPoint = numberOfBasisVectorsPerContactPoint;
 
-      rhoSize = maxNumberOfContactPoints * numberOfBasisVectorsPerContactPoint;
+      int rhoSize = maxNumberOfContactPoints * numberOfBasisVectorsPerContactPoint;
       currentRhoSize = rhoSize;
       basisVectorAngleIncrement = 2.0 * Math.PI / numberOfBasisVectorsPerContactPoint;
 
@@ -276,10 +275,8 @@ public class PlaneContactStateToWrenchMatrixHelper
       resetRequested.set(false);
 
       // Should not get there as long as the number of contact points of the contactable body is less or equal to maxNumberOfContactPoints.
-      /*
-      for (; rhoIndex < rhoSize; rhoIndex++)
+      for (; rhoIndex < currentRhoSize; rhoIndex++)
          clear(rhoIndex);
-         */
 
       return currentRhoSize;
    }
@@ -408,11 +405,6 @@ public class PlaneContactStateToWrenchMatrixHelper
    public int computeCurrentRhoSize()
    {
       return numberOfBasisVectorsPerContactPoint * yoPlaneContactState.getNumberOfContactPointsInContact();
-   }
-
-   public int getRhoSize()
-   {
-      return rhoSize;
    }
 
    public int getCurrentRhoSize()

@@ -31,7 +31,6 @@ public class WrenchMatrixCalculator
    private final int maxNumberOfContactPoints;
    private final int numberOfBasisVectorsPerContactPoint;
    private final int rhoSize;
-   private final int copTaskSize;
 
    private int currentRhoSize;
    private int currentCoPTaskSize;
@@ -86,7 +85,7 @@ public class WrenchMatrixCalculator
       numberOfBasisVectorsPerContactPoint = toolbox.getNumberOfBasisVectorsPerContactPoint(); 
       rhoSize = toolbox.getRhoSize();
       currentRhoSize = rhoSize;
-      copTaskSize = 2 * nContactableBodies;
+      int copTaskSize = 2 * nContactableBodies;
       currentCoPTaskSize = copTaskSize;
       
       rhoJacobianMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, rhoSize);
@@ -150,14 +149,14 @@ public class WrenchMatrixCalculator
       helper.setCenterOfPressureCommand(command);
    }
 
-   private final Vector2D tempDeisredCoPWeight = new Vector2D();
+   private final Vector2D tempDesiredCoPWeight = new Vector2D();
    private final Vector2D tempCoPRateWeight = new Vector2D();
 
    public void computeMatrices()
    {
       double rhoWeight = this.rhoWeight.getDoubleValue();
       double rhoRateWeight;
-      desiredCoPWeight.get(tempDeisredCoPWeight);
+      desiredCoPWeight.get(tempDesiredCoPWeight);
       if (useForceRateHighWeight.getBooleanValue())
       {
          rhoRateWeight = rhoRateHighWeight.getDoubleValue();
@@ -183,7 +182,6 @@ public class WrenchMatrixCalculator
          if (numberOfRhos > 0)
             currentCoPTaskSize += 2;
          currentRhoSize += numberOfRhos;
-
       }
 
       if (previousRhoSize != currentRhoSize)
@@ -194,12 +192,11 @@ public class WrenchMatrixCalculator
          RigidBody rigidBody = rigidBodies.get(i);
          PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(rigidBody);
 
-         int rhosInContact = helper.computeMatrices(rhoWeight, rhoRateWeight, tempDeisredCoPWeight, tempCoPRateWeight);
+         int rhosInContact = helper.computeMatrices(rhoWeight, rhoRateWeight, tempDesiredCoPWeight, tempCoPRateWeight);
 
          if (rhosInContact < 1)
             continue;
 
-         // FIXME add in stuff about CoP
          CommonOps.insert(helper.getLastRho(), rhoPreviousMatrix, rhoStartIndex, 0);
          CommonOps.insert(helper.getDesiredCoPMatrix(), desiredCoPMatrix, copStartIndex, 0);
          CommonOps.insert(helper.getPreviousCoPMatrix(), previousCoPMatrix, copStartIndex, 0);
