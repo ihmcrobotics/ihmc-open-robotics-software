@@ -329,5 +329,3 @@ root.atlas.ActualCMPComputer*false*false
 root.atlas.ExactCoMCalcualtor*false*false
 root.atlas.LinearGroundContactModel*false*false
 root.atlas.back_bkx_PushRobotController*false*false
-root.ThreadDataSynchronizerRegistry*false*false
-root.ThreadDataSynchronizerRegistry.FullRobotModelRootJointRewinder*false*false

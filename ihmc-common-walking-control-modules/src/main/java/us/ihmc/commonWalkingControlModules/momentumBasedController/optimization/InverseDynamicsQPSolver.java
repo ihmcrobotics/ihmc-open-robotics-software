@@ -60,18 +60,24 @@ public class InverseDynamicsQPSolver
    private final DenseMatrix64F tempTorqueTask_H;
 
    private final int numberOfDoFs;
-   private final int rhoSize;
-   private final int problemSize;
+   //private final int rhoSize;
+   //private final int problemSize;
    private final boolean hasFloatingBase;
    private boolean hasWrenchesEquilibriumConstraintBeenSetup = false;
+
+   private int currentRhoSize;
+   private int currentProblemSize;
 
    public InverseDynamicsQPSolver(ActiveSetQPSolver qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase, YoVariableRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.numberOfDoFs = numberOfDoFs;
-      this.rhoSize = rhoSize;
+      //this.rhoSize = rhoSize;
       this.hasFloatingBase = hasFloatingBase;
-      this.problemSize = numberOfDoFs + rhoSize;
+
+      int problemSize = numberOfDoFs + rhoSize;
+      this.currentRhoSize = rhoSize;
+      this.currentProblemSize = problemSize;
 
       firstCall.set(true);
 
@@ -149,15 +155,26 @@ public class InverseDynamicsQPSolver
 
    public void reset()
    {
+      currentProblemSize = numberOfDoFs + currentRhoSize;
+
+      regularizationMatrix.reshape(currentProblemSize, currentProblemSize);
       for (int i = 0; i < numberOfDoFs; i++)
          regularizationMatrix.set(i, i, jointAccelerationRegularization.getDoubleValue());
 
-      solverInput_H.zero();
 
+      solverInput_H.zero();
       solverInput_f.zero();
 
-      solverInput_Aeq.reshape(0, problemSize);
+      solverInput_H.reshape(currentProblemSize, currentProblemSize);
+      solverInput_f.reshape(currentProblemSize, 1);
+
+      solverInput_Aeq.reshape(0, currentProblemSize);
       solverInput_beq.reshape(0, 1);
+
+      solverInput_lb.reshape(currentProblemSize, 1);
+      solverInput_ub.reshape(currentProblemSize, 1);
+
+      //solverInput_Ain.reshape(0, currentProblemSize);
 
       if (!firstCall.getBooleanValue())
          addJointJerkRegularization();
@@ -226,7 +243,8 @@ public class InverseDynamicsQPSolver
       int previousSize = solverInput_beq.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      solverInput_Aeq.reshape(previousSize + taskSize, problemSize, true);
+      //solverInput_Aeq.reshape(previousSize + taskSize, problemSize, true);
+      solverInput_Aeq.reshape(previousSize + taskSize, currentProblemSize, true); // FIXME
       solverInput_beq.reshape(previousSize + taskSize, 1, true);
 
       CommonOps.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
@@ -253,7 +271,8 @@ public class InverseDynamicsQPSolver
    {
       int taskSize = torqueObjective.getNumRows();
 
-      tempTorqueTask_H.reshape(taskSize, problemSize);
+      //tempTorqueTask_H.reshape(taskSize, problemSize);
+      tempTorqueTask_H.reshape(taskSize, currentProblemSize);
       CommonOps.insert(torqueQddotJacobian, tempTorqueTask_H, 0, 0);
       CommonOps.insert(torqueRhoJacobian, tempTorqueTask_H, 0, numberOfDoFs);
 
@@ -291,19 +310,21 @@ public class InverseDynamicsQPSolver
 
       if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
       {
-         tempWrenchConstraint_J.reshape(Wrench.SIZE, problemSize);
+         //tempWrenchConstraint_J.reshape(Wrench.SIZE, problemSize);
+         tempWrenchConstraint_J.reshape(Wrench.SIZE, currentProblemSize);
          MatrixTools.setMatrixBlock(tempWrenchConstraint_J, 0, 0, centroidalMomentumMatrix, 0, 0, Wrench.SIZE, numberOfDoFs, -1.0);
          CommonOps.insert(rhoJacobian, tempWrenchConstraint_J, 0, numberOfDoFs);
 
-         tempWrenchConstraintJtW.reshape(problemSize, Wrench.SIZE);
+         tempWrenchConstraintJtW.reshape(currentProblemSize, Wrench.SIZE);
          CommonOps.transpose(tempWrenchConstraint_J, tempWrenchConstraintJtW);
          double weight = 150.0;
          CommonOps.scale(weight, tempWrenchConstraintJtW);
-         tempWrenchConstraint_H.reshape(problemSize, problemSize);
+         tempWrenchConstraint_H.reshape(currentProblemSize, currentProblemSize);
          CommonOps.mult(tempWrenchConstraintJtW, tempWrenchConstraint_J, tempWrenchConstraint_H);
          CommonOps.addEquals(solverInput_H, tempWrenchConstraint_H);
 
-         tempWrenchConstraint_f.reshape(problemSize, 1);
+         //tempWrenchConstraint_f.reshape(problemSize, 1);
+         tempWrenchConstraint_f.reshape(currentProblemSize, 1);
          CommonOps.mult(tempWrenchConstraintJtW, tempWrenchConstraint_RHS, tempWrenchConstraint_f);
          CommonOps.subtractEquals(solverInput_f, tempWrenchConstraint_f);
       }
@@ -313,7 +334,8 @@ public class InverseDynamicsQPSolver
          int previousSize = solverInput_beq.getNumRows();
 
          // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-         solverInput_Aeq.reshape(previousSize + constraintSize, problemSize, true);
+         //solverInput_Aeq.reshape(previousSize + constraintSize, problemSize, true);
+         solverInput_Aeq.reshape(previousSize + constraintSize, currentProblemSize, true);// fixme
          solverInput_beq.reshape(previousSize + constraintSize, 1, true);
 
          MatrixTools.setMatrixBlock(solverInput_Aeq, previousSize, 0, centroidalMomentumMatrix, 0, 0, constraintSize, numberOfDoFs, -1.0);
@@ -334,26 +356,29 @@ public class InverseDynamicsQPSolver
 
    public void addRhoTask(DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
    {
-      MatrixTools.addMatrixBlock(solverInput_H, numberOfDoFs, numberOfDoFs, taskWeight, 0, 0, rhoSize, rhoSize, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_H, numberOfDoFs, numberOfDoFs, taskWeight, 0, 0, currentRhoSize, currentRhoSize, 1.0);
 
+      tempRhoTask_f.reshape(currentRhoSize, 1);
       CommonOps.mult(taskWeight, taskObjective, tempRhoTask_f);
-      MatrixTools.addMatrixBlock(solverInput_f, numberOfDoFs, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
+      MatrixTools.addMatrixBlock(solverInput_f, numberOfDoFs, 0, tempRhoTask_f, 0, 0, currentRhoSize, 1, -1.0);
    }
 
    public void addRhoTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
    {
       int taskSize = taskJacobian.getNumRows();
+
       // J^T W
-      tempJtW.reshape(rhoSize, taskSize);
+      tempJtW.reshape(currentRhoSize, taskSize);
       CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
 
       // Compute: H += J^T W J
+      tempRhoTask_H.reshape(currentRhoSize, currentRhoSize);
       CommonOps.mult(tempJtW, taskJacobian, tempRhoTask_H);
-      MatrixTools.addMatrixBlock(solverInput_H, numberOfDoFs, numberOfDoFs, tempRhoTask_H, 0, 0, rhoSize, rhoSize, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_H, numberOfDoFs, numberOfDoFs, tempRhoTask_H, 0, 0, currentRhoSize, currentRhoSize, 1.0);
 
       // Compute: f += - J^T W Objective
       CommonOps.mult(tempJtW, taskObjective, tempRhoTask_f);
-      MatrixTools.addMatrixBlock(solverInput_f, numberOfDoFs, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
+      MatrixTools.addMatrixBlock(solverInput_f, numberOfDoFs, 0, tempRhoTask_f, 0, 0, currentRhoSize, 1, -1.0);
    }
 
    public void solve() throws NoConvergenceException
@@ -364,7 +389,7 @@ public class InverseDynamicsQPSolver
       addRegularization();
 
       numberOfEqualityConstraints.set(solverInput_Aeq.getNumRows());
-      numberOfInequalityConstraints.set(solverInput_Ain.getNumRows());
+      //numberOfInequalityConstraints.set(solverInput_Ain.getNumRows());
       numberOfConstraints.set(solverInput_Aeq.getNumRows() + solverInput_Ain.getNumRows());
 
       qpSolverTimer.startMeasurement();
@@ -373,7 +398,7 @@ public class InverseDynamicsQPSolver
 
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
       qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
-      qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+      //qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
 
       numberOfIterations.set(qpSolver.solve(solverOutput));
@@ -386,7 +411,8 @@ public class InverseDynamicsQPSolver
          throw new NoConvergenceException(numberOfIterations.getIntegerValue());
 
       CommonOps.extract(solverOutput, 0, numberOfDoFs, 0, 1, solverOutput_jointAccelerations, 0, 0);
-      CommonOps.extract(solverOutput, numberOfDoFs, problemSize, 0, 1, solverOutput_rhos, 0, 0);
+      //CommonOps.extract(solverOutput, numberOfDoFs, problemSize, 0, 1, solverOutput_rhos, 0, 0);
+      CommonOps.extract(solverOutput, numberOfDoFs, currentProblemSize, 0, 1, solverOutput_rhos, 0, 0);
 
       firstCall.set(false);
 
@@ -442,6 +468,11 @@ public class InverseDynamicsQPSolver
          solverInput_ub.set(i, 0, qDDotMax);
    }
 
+   public void setNumberOfActiveRhos(int numberOfActiveRhos)
+   {
+      currentRhoSize = numberOfActiveRhos;
+   }
+
    public void setMaxJointAccelerations(DenseMatrix64F qDDotMax)
    {
       CommonOps.insert(qDDotMax, solverInput_ub, 0, 0);
@@ -449,7 +480,8 @@ public class InverseDynamicsQPSolver
 
    public void setMinRho(double rhoMin)
    {
-      for (int i = numberOfDoFs; i < problemSize; i++)
+      //for (int i = numberOfDoFs; i < problemSize; i++)
+      for (int i = numberOfDoFs; i < currentProblemSize; i++)
          solverInput_lb.set(i, 0, rhoMin);
    }
 
@@ -460,12 +492,18 @@ public class InverseDynamicsQPSolver
 
    public void setMaxRho(double rhoMax)
    {
-      for (int i = numberOfDoFs; i < problemSize; i++)
+      //for (int i = numberOfDoFs; i < problemSize; i++)
+      for (int i = numberOfDoFs; i < currentProblemSize; i++)
          solverInput_ub.set(i, 0, rhoMax);
    }
 
    public void setMaxRho(DenseMatrix64F rhoMax)
    {
       CommonOps.insert(rhoMax, solverInput_ub, numberOfDoFs, 0);
+   }
+
+   public int getCurrentRhoSize()
+   {
+      return currentRhoSize;
    }
 }

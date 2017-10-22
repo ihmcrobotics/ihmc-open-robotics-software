@@ -153,14 +153,15 @@ public class InverseDynamicsOptimizationControlModule
 
    public MomentumModuleSolution compute() throws MomentumControlModuleException
    {
+      wrenchMatrixCalculator.computeMatrices();
+      if (VISUALIZE_RHO_BASIS_VECTORS)
+         basisVectorVisualizer.visualize(wrenchMatrixCalculator.getBasisVectors(), wrenchMatrixCalculator.getBasisVectorsOrigin());
+
+      qpSolver.setNumberOfActiveRhos(wrenchMatrixCalculator.getCurrentRhoSize());
       qpSolver.reset();
 
       for (int inputIndex = 0; inputIndex < motionQPInputsToAdd.size(); inputIndex++)
          qpSolver.addMotionInput(motionQPInputsToAdd.get(inputIndex));
-
-      wrenchMatrixCalculator.computeMatrices();
-      if (VISUALIZE_RHO_BASIS_VECTORS)
-         basisVectorVisualizer.visualize(wrenchMatrixCalculator.getBasisVectors(), wrenchMatrixCalculator.getBasisVectorsOrigin());
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
       if (SETUP_RHO_TASKS)
          setupRhoTasks();
@@ -254,6 +255,7 @@ public class InverseDynamicsOptimizationControlModule
       DenseMatrix64F rhoRateWeight = wrenchMatrixCalculator.getRhoRateWeightMatrix();
       qpSolver.addRhoTask(rhoPrevious, rhoRateWeight);
 
+      /* FIXME
       DenseMatrix64F copJacobian = wrenchMatrixCalculator.getCopJacobianMatrix();
 
       DenseMatrix64F previousCoP = wrenchMatrixCalculator.getPreviousCoPMatrix();
@@ -263,6 +265,7 @@ public class InverseDynamicsOptimizationControlModule
       DenseMatrix64F desiredCoP = wrenchMatrixCalculator.getDesiredCoPMatrix();
       DenseMatrix64F desiredCoPWeight = wrenchMatrixCalculator.getDesiredCoPWeightMatrix();
       qpSolver.addRhoTask(copJacobian, desiredCoP, desiredCoPWeight);
+      */
    }
 
    private void setupWrenchesEquilibriumConstraint()

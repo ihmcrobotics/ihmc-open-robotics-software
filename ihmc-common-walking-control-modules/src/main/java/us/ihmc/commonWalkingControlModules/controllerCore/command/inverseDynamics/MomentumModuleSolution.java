@@ -28,6 +28,7 @@ public class MomentumModuleSolution
    {
       this.jointAccelerations = jointAccelerations;
    }
+
    public void setRhoSolution(DenseMatrix64F rhoSolution)
    {
       this.rhoSolution = rhoSolution;
