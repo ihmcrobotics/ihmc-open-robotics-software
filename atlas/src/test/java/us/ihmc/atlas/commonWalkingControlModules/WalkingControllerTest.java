@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
+import org.jcodec.common.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,12 +33,14 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -168,6 +171,13 @@ public class WalkingControllerTest
             scs.setTime(yoTime.getDoubleValue());
             scs.tickAndUpdate();
          }
+         else
+         {
+            Tuple3DReadOnly rootPosition = fullRobotModel.getRootJoint().getTranslationForReading();
+            BoundingBox3D boundingBox = new BoundingBox3D(new Point3D(-1.0, -1.0, 0.0), new Point3D(1.0, 1.0, 2.0));
+            boolean insideInclusive = boundingBox.isInsideInclusive(rootPosition.getX(), rootPosition.getY(), rootPosition.getZ());
+            Assert.assertTrue("Robot drifted away.", insideInclusive);
+         }
       }
    }
 
@@ -279,7 +289,7 @@ public class WalkingControllerTest
          OneDoFJoint joint = oneDoFJoints[i];
          JointDesiredOutputReadOnly jointDesireds = controllerOutput.getJointDesiredOutput(joint);
 
-         if (jointDesireds.hasControlMode())
+         if (jointDesireds.hasDesiredAcceleration())
          {
             double q = joint.getQ();
             double qd = joint.getQd();
