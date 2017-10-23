@@ -103,9 +103,22 @@ public class WalkingControllerTest
             {
                return true;
             };
+
+            @Override
+            public double getMaxICPErrorBeforeSingleSupportX()
+            {
+               return 1.0;
+            };
+
+            @Override
+            public double getMaxICPErrorBeforeSingleSupportY()
+            {
+               return 1.0;
+            };
          };
       };
    };
+
    private static final double gravityZ = 9.81;
    private static final double controlDT = robotModel.getControllerDT();
    private static final double velocityDecay = 0.98;
@@ -198,11 +211,12 @@ public class WalkingControllerTest
       for (RobotSide robotSide : RobotSide.values)
       {
          MovingReferenceFrame soleFrame = referenceFrames.getSoleZUpFrame(robotSide);
-         FramePoint3D location = new FramePoint3D(soleFrame, 0.6, 0.0, 0.0);
+         FramePoint3D location = new FramePoint3D(soleFrame, 0.0, 0.0, 0.0);
          FrameOrientation orientation = new FrameOrientation(soleFrame);
 
          location.changeFrame(stanceFrame);
          location.setZ(0.0);
+         location.setX(0.2);
 
          location.changeFrame(ReferenceFrame.getWorldFrame());
          orientation.changeFrame(ReferenceFrame.getWorldFrame());
@@ -429,13 +443,15 @@ public class WalkingControllerTest
       HighLevelHumanoidControllerToolbox controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, null,
                                                                                                     yoTime, gravityZ, omega0, feet, controlDT, null,
                                                                                                     contactableBodies, yoGraphicsListRegistry);
+      registry.addChild(controllerToolbox.getYoVariableRegistry());
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, defaultFinalTransferTime, feet,
-                                                                              statusOutputManager, yoTime, yoGraphicsListRegistry, registry);
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
+                                                                              defaultFinalTransferTime, feet, statusOutputManager, yoTime,
+                                                                              yoGraphicsListRegistry, registry);
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
