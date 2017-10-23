@@ -91,7 +91,6 @@ public class GroundContactForceOptimizationControlModule
 
    public void initialize()
    {
-      qpSolver.reset();
    }
 
    private Map<RigidBody, Wrench> solutionWrenches;
