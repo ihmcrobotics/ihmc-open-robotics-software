@@ -249,6 +249,8 @@ public class WrenchMatrixCalculator
       copRateWeightMatrix.reshape(copTaskSize, copTaskSize);
 
       // these guys aren't completely overwritten, so need zeroing
+      copJacobianMatrix.zero();
+
       rhoMaxMatrix.zero();
       rhoWeightMatrix.zero();
       rhoRateWeightMatrix.zero();

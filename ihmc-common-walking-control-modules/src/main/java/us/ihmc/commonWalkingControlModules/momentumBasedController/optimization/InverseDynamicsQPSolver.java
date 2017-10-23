@@ -19,7 +19,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class InverseDynamicsQPSolver
 {
-   private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = false;
+   private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -69,8 +69,6 @@ public class InverseDynamicsQPSolver
    private final DenseMatrix64F tempTorqueTask_H;
 
    private final int numberOfDoFs;
-   //private final int rhoSize;
-   //private final int problemSize;
    private final boolean hasFloatingBase;
    private boolean hasWrenchesEquilibriumConstraintBeenSetup = false;
 
@@ -85,7 +83,6 @@ public class InverseDynamicsQPSolver
    {
       this.qpSolver = qpSolver;
       this.numberOfDoFs = numberOfDoFs;
-      //this.rhoSize = rhoSize;
       this.hasFloatingBase = hasFloatingBase;
 
       int problemSize = numberOfDoFs + rhoSize;
@@ -202,7 +199,6 @@ public class InverseDynamicsQPSolver
       for (int i = 0; i < numberOfDoFs; i++)
          regularizationMatrix.set(i, i, jointAccelerationRegularization.getDoubleValue());
 
-
       solverInput_H.zero();
       solverInput_f.zero();
 
@@ -214,8 +210,6 @@ public class InverseDynamicsQPSolver
 
       solverInput_lb.reshape(currentProblemSize, 1);
       solverInput_ub.reshape(currentProblemSize, 1);
-
-      //solverInput_Ain.reshape(0, currentProblemSize);
 
       if (!firstCall.getBooleanValue())
          addJointJerkRegularization();
@@ -312,7 +306,6 @@ public class InverseDynamicsQPSolver
    {
       int taskSize = torqueObjective.getNumRows();
 
-      //tempTorqueTask_H.reshape(taskSize, problemSize);
       tempTorqueTask_H.reshape(taskSize, currentProblemSize);
       CommonOps.insert(torqueQddotJacobian, tempTorqueTask_H, 0, 0);
       CommonOps.insert(torqueRhoJacobian, tempTorqueTask_H, 0, numberOfDoFs);
@@ -363,7 +356,6 @@ public class InverseDynamicsQPSolver
          CommonOps.mult(tempWrenchConstraintJtW, tempWrenchConstraint_J, tempWrenchConstraint_H);
          CommonOps.addEquals(solverInput_H, tempWrenchConstraint_H);
 
-         //tempWrenchConstraint_f.reshape(problemSize, 1);
          tempWrenchConstraint_f.reshape(currentProblemSize, 1);
          CommonOps.mult(tempWrenchConstraintJtW, tempWrenchConstraint_RHS, tempWrenchConstraint_f);
          CommonOps.subtractEquals(solverInput_f, tempWrenchConstraint_f);
@@ -460,7 +452,6 @@ public class InverseDynamicsQPSolver
       }
 
       CommonOps.extract(solverOutput, 0, numberOfDoFs, 0, 1, solverOutput_jointAccelerations, 0, 0);
-      //CommonOps.extract(solverOutput, numberOfDoFs, problemSize, 0, 1, solverOutput_rhos, 0, 0);
       CommonOps.extract(solverOutput, numberOfDoFs, currentProblemSize, 0, 1, solverOutput_rhos, 0, 0);
 
       firstCall.set(false);
@@ -535,7 +526,6 @@ public class InverseDynamicsQPSolver
 
    public void setMinRho(double rhoMin)
    {
-      //for (int i = numberOfDoFs; i < problemSize; i++)
       for (int i = numberOfDoFs; i < currentProblemSize; i++)
          solverInput_lb.set(i, 0, rhoMin);
    }
@@ -547,7 +537,6 @@ public class InverseDynamicsQPSolver
 
    public void setMaxRho(double rhoMax)
    {
-      //for (int i = numberOfDoFs; i < problemSize; i++)
       for (int i = numberOfDoFs; i < currentProblemSize; i++)
          solverInput_ub.set(i, 0, rhoMax);
    }
