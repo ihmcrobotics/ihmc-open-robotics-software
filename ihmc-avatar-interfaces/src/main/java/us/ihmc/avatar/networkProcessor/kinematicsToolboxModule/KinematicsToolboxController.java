@@ -204,8 +204,6 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final YoInteger numberOfActiveCommands = new YoInteger("numberOfActiveCommands", registry);
 
-   private final YoInteger countUpdateInternal = new YoInteger("countUpdateInternal", registry);
-
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                       FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] oneDoFJoints, YoGraphicsListRegistry yoGraphicsListRegistry,
                                       YoVariableRegistry parentRegistry)
@@ -236,29 +234,10 @@ public class KinematicsToolboxController extends ToolboxController
       inverseKinematicsSolution = new KinematicsToolboxOutputStatus(oneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
 
-<<<<<<< HEAD
-      gains.setProportionalGains(1.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
-=======
       gains.setProportionalGains(1200.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
->>>>>>> refs/heads/develop
 
-<<<<<<< HEAD
-      footWeight.set(50.0);
-      momentumWeight.set(1.0);
-      privilegedWeight.set(0.02);
-      privilegedConfigurationGain.set(0.02);
-
-      //      gains.setProportionalGain(800.0); // Gains used for everything. It is as high as possible to reduce the convergence time.
-      //
-      //      footWeight.set(200.0);
-      //      momentumWeight.set(1.0);
-      //      privilegedWeight.set(1.0);
-      //      privilegedConfigurationGain.set(50.0);
-
-=======
       privilegedWeight.set(1.0);
       privilegedConfigurationGain.set(50.0);
->>>>>>> refs/heads/develop
       privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
    }
 
@@ -317,11 +296,6 @@ public class KinematicsToolboxController extends ToolboxController
    private WholeBodyControllerCore createControllerCore(Collection<RigidBody> controllableRigidBodies)
    {
       KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
-<<<<<<< HEAD
-      //      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
-      //                                                                            null, registry);
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(1.0, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
-=======
       InverseDynamicsJoint[] controlledJoints;
       if (rootJoint != null)
       {
@@ -334,7 +308,6 @@ public class KinematicsToolboxController extends ToolboxController
          controlledJoints = oneDoFJoints;
       }
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
->>>>>>> refs/heads/develop
                                                                             null, registry);
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       toolbox.setupForInverseKinematicsSolver();
@@ -421,7 +394,6 @@ public class KinematicsToolboxController extends ToolboxController
    @Override
    protected void updateInternal()
    {
-      countUpdateInternal.increment();
       // Updating the reference frames and twist calculator.
       updateTools();
 
@@ -439,9 +411,8 @@ public class KinematicsToolboxController extends ToolboxController
       FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
 
       /*
-       * Submitting and requesting the controller core to run the feedback
-       * controllers, formulate and solve the optimization problem for this
-       * control tick.
+       * Submitting and requesting the controller core to run the feedback controllers, formulate
+       * and solve the optimization problem for this control tick.
        */
       controllerCore.reset();
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
@@ -456,7 +427,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       if (tickCount++ == numberOfTicksToSendSolution)
       { // Packing and sending the solution every N control ticks, with N = numberOfTicksToSendSolution.
-         inverseKinematicsSolution.setDesiredJointState(rootJoint, oneDoFJoints, true);
+         inverseKinematicsSolution.setDesiredJointState(rootJoint, oneDoFJoints, false);
          inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
          reportMessage(inverseKinematicsSolution);
          tickCount = 0;
@@ -487,9 +458,9 @@ public class KinematicsToolboxController extends ToolboxController
          KinematicsToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxConfigurationCommand.class);
 
          /*
-          * If there is a new privileged configuration, the desired robot state
-          * is updated alongside with the privileged configuration and the
-          * initial center of mass position and foot poses.
+          * If there is a new privileged configuration, the desired robot state is updated alongside
+          * with the privileged configuration and the initial center of mass position and foot
+          * poses.
           */
          KinematicsToolboxHelper.setRobotStateFromPrivilegedConfigurationData(command, rootJoint, jointNameBasedHashCodeMap);
          if (command.hasPrivilegedJointAngles() || command.hasPrivilegedRootJointPosition() || command.hasPrivilegedRootJointOrientation())
@@ -517,10 +488,9 @@ public class KinematicsToolboxController extends ToolboxController
 
       FeedbackControlCommandList inputs = new FeedbackControlCommandList();
       /*
-       * By using the map, we ensure that there is only one command per
-       * end-effector (including the center of mass). The map is also useful for
-       * remembering commands received during the previous control ticks of the
-       * same run.
+       * By using the map, we ensure that there is only one command per end-effector (including the
+       * center of mass). The map is also useful for remembering commands received during the
+       * previous control ticks of the same run.
        */
       userFeedbackCommands.values().forEach(inputs::addCommand);
       return inputs;
