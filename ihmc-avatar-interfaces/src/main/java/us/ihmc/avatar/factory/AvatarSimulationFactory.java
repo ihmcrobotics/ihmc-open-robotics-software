@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.avatar.DRCEstimatorThread;
-import us.ihmc.avatar.SimulatedLowLevelOutputWriter;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
@@ -190,7 +189,7 @@ public class AvatarSimulationFactory
    private void setupStateEstimationThread()
    {
       stateEstimationThread = new DRCEstimatorThread(robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(),
-                                                     robotModel.get().getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer,
+                                                     robotModel.get(), robotModel.get().getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer,
                                                      new PeriodicNonRealtimeThreadScheduler("DRCSimGazeboYoVariableServer"), humanoidGlobalDataProducer.get(),
                                                      simulationOutputWriter, yoVariableServer, gravity.get());
 
@@ -371,6 +370,8 @@ public class AvatarSimulationFactory
 
    private void initializeSimulationConstructionSet()
    {
+      simulationConstructionSet.setParameterRootPath(threadedRobotController.getYoVariableRegistry());
+      
       humanoidFloatingRootJointRobot.setDynamicIntegrationMethod(scsInitialSetup.get().getDynamicIntegrationMethod());
       scsInitialSetup.get().initializeSimulation(simulationConstructionSet);
 

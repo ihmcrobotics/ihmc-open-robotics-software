@@ -48,12 +48,6 @@ public class DefaultFootstepPlanningParameters implements FootstepPlannerParamet
    }
 
    @Override
-   public double getMinimumSurfaceInclineRadians()
-   {
-      return Math.toRadians(45.0);
-   }
-
-   @Override
    public double getMaximumStepWidth()
    {
       return 0.4;

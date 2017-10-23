@@ -158,10 +158,15 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       addFootstep(footLocation, footOrientation, side, footMessage);
 
+      double intitialTransfer = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
+      double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
+      double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
+      int steps = footMessage.footstepDataList.size();
+
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       drcSimulationTestHelper.send(footMessage);
-      double simulationTime = 1 * footMessage.footstepDataList.size() + 1.0;
+      double simulationTime = intitialTransfer + (transfer + swing) * steps + 1.0;
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
       controllerSpy.assertCheckpointsReached();
@@ -234,11 +239,6 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       message.add(footstepData);
    }
 
-   protected boolean keepSCSUp()
-   {
-      return false;
-   }
-
    private void setupCameraBackView()
    {
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
@@ -284,6 +284,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       String className = getClass().getSimpleName();
 
       simulationTestingParameters.setKeepSCSUp(keepSCSUp());
+
       PrintTools.debug("simulationTestingParameters.getKeepSCSUp " + simulationTestingParameters.getKeepSCSUp());
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(flatGround);
@@ -329,6 +330,11 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       }
 
       ThreadTools.sleep(1000);
+   }
+
+   protected boolean keepSCSUp()
+   {
+      return false;
    }
 
    protected double getForcePointOffsetZInChestFrame()

@@ -264,4 +264,11 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    {
       return footstepPlan;
    }
+
+   @Override
+   public void setTimeout(double timeout)
+   {
+      // TODO Auto-generated method stub
+
+   }
 }

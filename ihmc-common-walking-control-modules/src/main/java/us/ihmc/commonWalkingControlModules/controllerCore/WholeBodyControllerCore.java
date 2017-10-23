@@ -134,6 +134,7 @@ public class WholeBodyControllerCore
       controllerCoreSubmitTimer.startMeasurement();
       reset();
 
+      boolean reinitializationRequested = controllerCoreCommand.isReinitializationRequested();
       currentMode.set(controllerCoreCommand.getControllerCoreMode());
 
       switch (currentMode.getEnumValue())
@@ -141,6 +142,8 @@ public class WholeBodyControllerCore
       case INVERSE_DYNAMICS:
          if (inverseDynamicsSolver != null)
          {
+            if (reinitializationRequested)
+               inverseDynamicsSolver.reinitialize();
             feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
             inverseDynamicsSolver.submitInverseDynamicsCommandList(controllerCoreCommand.getInverseDynamicsCommandList());
          }

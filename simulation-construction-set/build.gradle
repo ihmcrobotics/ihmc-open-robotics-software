@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.9"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.10"
    }
 }
 plugins {
@@ -53,7 +53,7 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
    compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.1.1'
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
-   compile group: 'us.ihmc', name: 'euclid', version: '0.6.0'
+   compile group: 'us.ihmc', name: 'euclid', version: '0.6.1'
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robot-description", version: groupDependencyVersion

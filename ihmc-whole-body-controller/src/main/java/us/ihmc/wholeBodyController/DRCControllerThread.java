@@ -16,7 +16,6 @@ import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
-import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -37,6 +36,7 @@ import us.ihmc.simulationconstructionset.InverseDynamicsMechanismReferenceFrameV
 import us.ihmc.simulationconstructionset.JointAxisVisualizer;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
+import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -162,6 +162,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       lastEstimatorStartTime.set(Long.MIN_VALUE);
       expectedEstimatorTick.set(estimatorDTInNS);
+      
+      ParameterLoaderHelper.loadParameters(this, robotModel.getWholeBodyControllerParametersFile(), registry);
 
       if (robotVisualizer != null)
       {
@@ -457,4 +459,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    {
       closeableAndDisposableRegistry.closeAndDispose();
    }
+   
+
 }

@@ -52,7 +52,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       {
          for (double y = parameters.getMinimumStepWidth(); y < parameters.getMaximumStepWidth(); y += FootstepNode.gridSizeXY)
          {
-            for (double yaw = 0.0; yaw < parameters.getMaximumStepYaw(); yaw += FootstepNode.gridSizeYaw)
+            for (double yaw = parameters.getMinimumStepYaw(); yaw < parameters.getMaximumStepYaw(); yaw += FootstepNode.gridSizeYaw)
             {
                FootstepNode offsetNode = constructNodeInPreviousNodeFrame(x, nextSide.negateIfRightSide(y), nextSide.negateIfRightSide(yaw), node);
                expansion.add(offsetNode);

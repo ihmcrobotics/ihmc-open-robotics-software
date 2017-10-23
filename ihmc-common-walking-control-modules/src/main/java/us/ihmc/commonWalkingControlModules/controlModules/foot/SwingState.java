@@ -41,6 +41,7 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -120,7 +121,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoDouble maxInitialLinearVelocityMagnitude;
    private final YoDouble maxInitialAngularVelocityMagnitude;
 
-   private final YoDouble finalSwingHeightOffset;
+   private final DoubleParameter finalSwingHeightOffset;
    private final double controlDT;
 
    private final YoDouble minHeightDifferenceForObstacleClearance;
@@ -172,8 +173,8 @@ public class SwingState extends AbstractUnconstrainedState
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
       swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
 
-      finalSwingHeightOffset = new YoDouble(namePrefix + "SwingFinalHeightOffset", registry);
-      finalSwingHeightOffset.set(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
+      finalSwingHeightOffset = new DoubleParameter(namePrefix + "SwingFinalHeightOffset", registry, swingTrajectoryParameters.getDesiredTouchdownHeightOffset(), -0.01, 0.005);
+      //finalSwingHeightOffset.set(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
       replanTrajectory = new YoBoolean(namePrefix + "SwingReplanTrajectory", registry);
 
       minHeightDifferenceForObstacleClearance = new YoDouble(namePrefix + "MinHeightDifferenceForObstacleClearance", registry);
@@ -620,7 +621,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       footstep.getPose(footstepPose);
       footstepPose.changeFrame(worldFrame);
-      footstepPose.setZ(footstepPose.getZ() + finalSwingHeightOffset.getDoubleValue());
+      footstepPose.setZ(footstepPose.getZ() + finalSwingHeightOffset.getValue()); //getDoubleValue());
 
       // if replanning do not change the original trajectory type or waypoints
       if (replanTrajectory.getBooleanValue())

@@ -24,9 +24,10 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
    {
       double maxYaw = parameters.getMaximumStepYaw();
       double defaultStepWidth = parameters.getIdealFootstepWidth();
-      double[] stepLengths = new double[] {0.0, FootstepNode.gridSizeXY, 0.1, 0.2, 0.4};
-      double[] stepWidths = new double[] {0.15, defaultStepWidth - FootstepNode.gridSizeXY, defaultStepWidth + FootstepNode.gridSizeXY};
-      double[] stepYaws = new double[] {0.0, FootstepNode.gridSizeYaw, maxYaw};
+      double defaultStepLength = parameters.getIdealFootstepLength();
+      double[] stepLengths = new double[] {parameters.getMinimumStepLength(), defaultStepLength - FootstepNode.gridSizeXY, defaultStepLength, defaultStepLength + FootstepNode.gridSizeXY, parameters.getMaximumStepReach()};
+      double[] stepWidths = new double[] {parameters.getMinimumStepWidth(), defaultStepWidth - FootstepNode.gridSizeXY, defaultStepWidth, defaultStepWidth + FootstepNode.gridSizeXY, parameters.getMaximumStepWidth()};
+      double[] stepYaws = new double[] {parameters.getMinimumStepYaw(), FootstepNode.gridSizeYaw, maxYaw};
 
       HashSet<FootstepNode> neighbors = new HashSet<>();
 
@@ -52,12 +53,6 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
             forwardStep.setY(ySign * defaultStepWidth);
             forwardStep.changeFrame(worldFrame);
             neighbors.add(new FootstepNode(forwardStep.getX(), forwardStep.getY(), node.getYaw() + ySign * yaw, stepSide));
-
-            FramePose backwardStep = new FramePose(stanceFrame);
-            backwardStep.setX(-stepLength);
-            backwardStep.setY(ySign * defaultStepWidth);
-            backwardStep.changeFrame(worldFrame);
-            neighbors.add(new FootstepNode(backwardStep.getX(), backwardStep.getY(), node.getYaw() + ySign * yaw, stepSide));
          }
       }
 

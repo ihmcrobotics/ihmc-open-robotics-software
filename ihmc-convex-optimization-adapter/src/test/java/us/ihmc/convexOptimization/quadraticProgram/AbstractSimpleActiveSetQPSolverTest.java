@@ -12,6 +12,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -546,7 +547,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
 
       numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
       numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      assertEquals(2, numberOfIterations);
+      assertEquals(expectedNumberOfIterations2, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertTrue(Double.isNaN(solution[0]));
@@ -1529,11 +1530,31 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
     * It seems that the problem is related to the fact that the robot has 6 contact points per foot.
     * The solver still fails when increasing the max number of iterations.
     */
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFindValidSolutionForKiwiDataset20170712()
    {
       ActualDatasetFromKiwi20170712 dataset = new ActualDatasetFromKiwi20170712();
+      SimpleActiveSetQPSolverInterface solver = createSolverToTest();
+      solver.clear();
+      solver.setQuadraticCostFunction(dataset.getCostQuadraticMatrix(), dataset.getCostLinearVector(), 0.0);
+      solver.setVariableBounds(dataset.getVariableLowerBounds(), dataset.getVariableUpperBounds());
+      DenseMatrix64F solution = new DenseMatrix64F(dataset.getProblemSize(), 1);
+      solver.solve(solution);
+
+      assertFalse(MatrixTools.containsNaN(solution));
+   }
+
+   /**
+    * Test with dataset of a Kiwi simulation walking backward.
+    * It seems that the problem is related to the fact that the robot has 6 contact points per foot.
+    * The solver still fails when increasing the max number of iterations.
+    */
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testFindValidSolutionForKiwiDataset20171013()
+   {
+      ActualDatasetFromKiwi20171013 dataset = new ActualDatasetFromKiwi20171013();
       SimpleActiveSetQPSolverInterface solver = createSolverToTest();
       solver.clear();
       solver.setQuadraticCostFunction(dataset.getCostQuadraticMatrix(), dataset.getCostLinearVector(), 0.0);
@@ -1596,7 +1617,6 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(6.0, solution[1], 1e-7);
       assertEquals(14.0, solution[2], 1e-7);
       /** These lagrange multipliers cause problems */
-      /*
       assertEquals(8.0, lagrangeEqualityMultipliers[0], 1e-7);
       assertEquals(28.0, lagrangeInequalityMultipliers[0], 1e-7);
 
@@ -1607,7 +1627,6 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(0.0, lagrangeUpperBoundMultipliers[0], 1e-7);
       assertEquals(0.0, lagrangeUpperBoundMultipliers[1], 1e-7);
       assertEquals(0.0, lagrangeUpperBoundMultipliers[2], 1e-7);
-      */
 
       DenseMatrix64F solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);

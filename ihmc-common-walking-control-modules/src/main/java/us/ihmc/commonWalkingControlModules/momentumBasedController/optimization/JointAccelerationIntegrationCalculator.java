@@ -95,7 +95,7 @@ public class JointAccelerationIntegrationCalculator
          OneDoFJoint joint = jointsToComputeDesiredPositionFor.get(jointIndex);
 
          JointDesiredOutput lowLevelJointData = lowLevelJointDataHolderToUpdate.getJointDesiredOutput(joint);
-         if (lowLevelJointData == null)
+         if (lowLevelJointData == null || !lowLevelJointData.hasDesiredAcceleration())
         	 continue;
          if (!lowLevelJointData.hasDesiredVelocity())
             lowLevelJointData.setDesiredVelocity(joint.getQd());

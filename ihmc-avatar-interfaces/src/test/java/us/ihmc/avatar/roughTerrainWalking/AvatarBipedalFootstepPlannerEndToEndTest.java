@@ -42,7 +42,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsLis
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.tools.MemoryTools;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -54,7 +54,7 @@ import static org.junit.Assert.fail;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
 public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private DRCNetworkModuleParameters networkModuleParameters;
@@ -77,6 +77,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
    private volatile boolean planCompleted = false;
    private AtomicReference<FootstepPlanningToolboxOutputStatus> outputStatus;
+   private BlockingSimulationRunner blockingSimulationRunner;
 
    @Before
    public void setup()
@@ -97,8 +98,6 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullHumanoidRobotModel.getForceSensorDefinitions()));
       humanoidRobotDataReceiver = new HumanoidRobotDataReceiver(fullHumanoidRobotModel, forceSensorDataHolder);
       planCompleted = false;
-
-      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @After
@@ -112,6 +111,23 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       toolboxCommunicator.disconnect();
       toolboxCommunicator = null;
       planCompleted = false;
+
+      humanoidRobotDataReceiver = null;
+
+      // Do this here in case a test fails. That way the memory will be recycled.
+      if (drcSimulationTestHelper != null)
+      {
+         drcSimulationTestHelper.destroySimulation();
+         drcSimulationTestHelper = null;
+      }
+
+//      if (blockingSimulationRunner != null)
+//      {
+//         blockingSimulationRunner.destroySimulation();
+//         blockingSimulationRunner = null;
+//      }
+
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -119,7 +135,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    public void testShortCinderBlockFieldWithAStar() throws IOException
    {
       double courseLength = CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS * CINDER_BLOCK_SIZE + CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
-      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup();
+      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, 0.0, 0.007);
       FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame(), new Pose3D(courseLength, 0.0, 0.0, 0.0, 0.0, 0.0));
 
       runEndToEndTest(FootstepPlanningRequestPacket.FootstepPlannerType.A_STAR, cinderBlockField, startingLocation, goalPose);
@@ -130,7 +146,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    public void testShortCinderBlockFieldWithPlanarRegionBipedalPlanner() throws IOException
    {
       double courseLength = CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS * CINDER_BLOCK_SIZE + CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
-      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup();
+      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, 0.0, 0.007);
       FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame(), new Pose3D(courseLength, 0.0, 0.0, 0.0, 0.0, 0.0));
 
       runEndToEndTest(FootstepPlanningRequestPacket.FootstepPlannerType.PLANAR_REGION_BIPEDAL, cinderBlockField, startingLocation, goalPose);
@@ -140,7 +156,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    @Test
    public void testSteppingStonesWithAStar() throws IOException
    {
-      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, -0.75, 0.0, 0.5 * Math.PI);
+      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, -0.75, 0.007, 0.5 * Math.PI);
       FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame(), new Pose3D(STEPPING_STONE_PATH_RADIUS + 0.5, STEPPING_STONE_PATH_RADIUS, 0.0, 0.0, 0.0, 0.0));
 
       runEndToEndTest(FootstepPlanningRequestPacket.FootstepPlannerType.A_STAR, steppingStoneField, startingLocation, goalPose);
@@ -150,7 +166,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    @Test
    public void testSteppingStonesWithPlanarRegionBipedalPlanner() throws IOException
    {
-      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, -0.75, 0.0, 0.5 * Math.PI);
+      DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, -0.75, 0.007, 0.5 * Math.PI);
       FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame(), new Pose3D(STEPPING_STONE_PATH_RADIUS + 0.5, STEPPING_STONE_PATH_RADIUS, 0.0, 0.0, 0.0, 0.0));
 
       runEndToEndTest(FootstepPlanningRequestPacket.FootstepPlannerType.PLANAR_REGION_BIPEDAL, steppingStoneField, startingLocation, goalPose);
@@ -178,11 +194,11 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       toolboxCommunicator.connect();
       toolboxCommunicator.attachListener(FootstepPlanningToolboxOutputStatus.class, this::setOutputStatus);
 
-      drcSimulationTestHelper.getControllerCommunicator().connect();
+//      drcSimulationTestHelper.getControllerCommunicator().connect();
       drcSimulationTestHelper.getControllerCommunicator().attachListener(RobotConfigurationData.class, humanoidRobotDataReceiver);
       drcSimulationTestHelper.getControllerCommunicator().attachListener(WalkingStatusMessage.class, this::listenForWalkingComplete);
 
-      BlockingSimulationRunner blockingSimulationRunner = drcSimulationTestHelper.getBlockingSimulationRunner();
+      blockingSimulationRunner = drcSimulationTestHelper.getBlockingSimulationRunner();
       ToolboxStateMessage wakeUpMessage = new ToolboxStateMessage(ToolboxStateMessage.ToolboxState.WAKE_UP);
       toolboxCommunicator.send(wakeUpMessage);
 

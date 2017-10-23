@@ -45,4 +45,9 @@ public class FootstepPlan
    {
       footsteps.clear();
    }
+
+   public void remove(int footstepIndex)
+   {
+      footsteps.remove(footstepIndex);
+   }
 }

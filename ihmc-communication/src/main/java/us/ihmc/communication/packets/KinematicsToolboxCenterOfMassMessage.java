@@ -63,6 +63,7 @@ public class KinematicsToolboxCenterOfMassMessage extends TrackablePacket<Kinema
    public KinematicsToolboxCenterOfMassMessage(Point3DReadOnly desiredPosition)
    {
       setDesiredPosition(desiredPosition);
+      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**

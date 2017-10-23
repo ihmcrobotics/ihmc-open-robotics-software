@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
 {
    AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-   
+
    @Override
    public DRCRobotModel getRobotModel()
    {
@@ -24,12 +24,6 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    public String getSimpleRobotName()
    {
       return robotModel.getSimpleRobotName();
-   }
-
-   @Override
-   public boolean keepSCSUp()
-   {
-      return false;
    }
 
    @Override
@@ -67,7 +61,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    {
       return 0.1;
    }
-   
+
    @Override
    public int getNumberOfFoosteps()
    {

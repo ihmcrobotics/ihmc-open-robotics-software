@@ -42,15 +42,15 @@ public class AtlasFlatGroundSideSteppingTest extends AvatarFlatGroundSideSteppin
    };
 
    private final int numberOfSteps = 10;
-   private final double stepWidth = 0.25;
-   private final double stepLength = 0.5;
+   private final double stepWidth = 0.225;
+   private final double stepLength = 0.4;
 
    private final double swingTime = 0.6;
    private final double transferTime = 0.2;
    private final double finalTransferTime = 1.0;
 
-   private final double forcePercentageOfWeight1 = 0.025;
-   private final double forceDuration1 = 1.0;
+   private final double forcePercentageOfWeight1 = 0.0125;
+   private final double forceDuration1 = 0.75;
    private final double forceDelay1 = 0.0 * swingTime;
    private final Vector3D forceDirection1 = new Vector3D(0.0, -1.0, 0.0);
 
@@ -155,11 +155,5 @@ public class AtlasFlatGroundSideSteppingTest extends AvatarFlatGroundSideSteppin
    protected FootstepDataListMessage getFootstepDataListMessage()
    {
       return new FootstepDataListMessage(swingTime, transferTime, finalTransferTime);
-   }
-
-   @Override
-   protected boolean keepSCSUp()
-   {
-      return false;
    }
 }

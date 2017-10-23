@@ -4,6 +4,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -26,10 +29,13 @@ public class InverseDynamicsQPSolver
    private final YoFrameVector wrenchEquilibriumTorqueError;
 
    private final YoBoolean firstCall = new YoBoolean("firstCall", registry);
-   private final ActiveSetQPSolver qpSolver;
+   private final SimpleActiveSetQPSolverInterface qpSolver;
 
    private final DenseMatrix64F solverInput_H;
    private final DenseMatrix64F solverInput_f;
+
+   private final DenseMatrix64F solverInput_H_previous;
+   private final DenseMatrix64F solverInput_f_previous;
 
    private final DenseMatrix64F solverInput_Aeq;
    private final DenseMatrix64F solverInput_beq;
@@ -38,6 +44,9 @@ public class InverseDynamicsQPSolver
 
    private final DenseMatrix64F solverInput_lb;
    private final DenseMatrix64F solverInput_ub;
+
+   private final DenseMatrix64F solverInput_lb_previous;
+   private final DenseMatrix64F solverInput_ub_previous;
 
    private final DenseMatrix64F solverOutput;
    private final DenseMatrix64F solverOutput_jointAccelerations;
@@ -68,7 +77,11 @@ public class InverseDynamicsQPSolver
    private int currentRhoSize;
    private int currentProblemSize;
 
-   public InverseDynamicsQPSolver(ActiveSetQPSolver qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase, YoVariableRegistry parentRegistry)
+   private boolean resetActiveSet = false;
+   private boolean useWarmStart = false;
+   private int maxNumberOfIterations = 100;
+
+   public InverseDynamicsQPSolver(SimpleActiveSetQPSolverInterface qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase, YoVariableRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.numberOfDoFs = numberOfDoFs;
@@ -84,6 +97,9 @@ public class InverseDynamicsQPSolver
       solverInput_H = new DenseMatrix64F(problemSize, problemSize);
       solverInput_f = new DenseMatrix64F(problemSize, 1);
 
+      solverInput_H_previous = new DenseMatrix64F(problemSize, problemSize);
+      solverInput_f_previous = new DenseMatrix64F(problemSize, 1);
+
       solverInput_Aeq = new DenseMatrix64F(0, problemSize);
       solverInput_beq = new DenseMatrix64F(0, 1);
       solverInput_Ain = new DenseMatrix64F(0, problemSize);
@@ -91,6 +107,9 @@ public class InverseDynamicsQPSolver
 
       solverInput_lb = new DenseMatrix64F(problemSize, 1);
       solverInput_ub = new DenseMatrix64F(problemSize, 1);
+
+      solverInput_lb_previous = new DenseMatrix64F(problemSize, 1);
+      solverInput_ub_previous = new DenseMatrix64F(problemSize, 1);
 
       CommonOps.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
       CommonOps.fill(solverInput_ub, Double.POSITIVE_INFINITY);
@@ -151,6 +170,28 @@ public class InverseDynamicsQPSolver
    public void setRhoRegularizationWeight(DenseMatrix64F weight)
    {
       CommonOps.insert(weight, regularizationMatrix, numberOfDoFs, numberOfDoFs);
+   }
+
+   public void setUseWarmStart(boolean useWarmStart)
+   {
+      this.useWarmStart = useWarmStart;
+   }
+
+   public void setMaxNumberOfIterations(int maxNumberOfIterations)
+   {
+      this.maxNumberOfIterations = maxNumberOfIterations;
+   }
+
+   public void notifyResetActiveSet()
+   {
+      this.resetActiveSet = true;
+   }
+
+   private boolean pollResetActiveSet()
+   {
+      boolean ret = resetActiveSet;
+      resetActiveSet = false;
+      return ret;
    }
 
    public void reset()
@@ -395,6 +436,11 @@ public class InverseDynamicsQPSolver
 
       qpSolver.clear();
 
+      qpSolver.setUseWarmStart(useWarmStart);
+      qpSolver.setMaxNumberOfIterations(maxNumberOfIterations);
+      if (useWarmStart && pollResetActiveSet())
+         qpSolver.resetActiveConstraints();
+
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
       qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
       //qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
@@ -403,6 +449,7 @@ public class InverseDynamicsQPSolver
       numberOfIterations.set(qpSolver.solve(solverOutput));
 
       qpSolverTimer.stopMeasurement();
+
       
       hasWrenchesEquilibriumConstraintBeenSetup = false;
 
@@ -432,6 +479,12 @@ public class InverseDynamicsQPSolver
             wrenchEquilibriumForceError.setZ(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
          }
       }
+
+      solverInput_H_previous.set(solverInput_H);
+      solverInput_f_previous.set(solverInput_f);
+
+      solverInput_lb_previous.set(solverInput_lb);
+      solverInput_ub_previous.set(solverInput_ub);
    }
 
    private void printForJerry()

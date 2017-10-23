@@ -644,12 +644,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
-   public boolean doPrepareManipulationForLocomotion()
-   {
-      return true;
-   }
-
-   @Override
    public double getDefaultTransferTime()
    {
       return target == RobotTarget.REAL_ROBOT ? 1.00 : 0.25;

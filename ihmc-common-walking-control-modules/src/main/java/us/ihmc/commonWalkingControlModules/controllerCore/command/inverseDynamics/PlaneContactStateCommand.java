@@ -17,13 +17,13 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
 {
    private RigidBody rigidBody;
    private String rigidBodyName;
-   private long id = -1L;
    private double coefficientOfFriction = Double.NaN;
    private final int initialSize = 8;
    private final FrameTupleArrayList<FramePoint3D> contactPoints = FrameTupleArrayList.createFramePointArrayList(initialSize);
    private final FrameVector3D contactNormal = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
 
    private boolean useHighCoPDamping = false;
+   private boolean hasContactStateChanged;
 
    private boolean hasMaxContactPointNormalForce = false;
    private final RecyclingArrayList<MutableDouble> maxContactPointNormalForces = new RecyclingArrayList<>(initialSize, MutableDouble.class);
@@ -32,9 +32,9 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    {
    }
 
-   public void setId(long id)
+   public void setHasContactStateChanged(boolean hasContactStateChanged)
    {
-      this.id = id;
+      this.hasContactStateChanged = hasContactStateChanged;
    }
 
    public void setContactingRigidBody(RigidBody rigidBody)
@@ -101,11 +101,6 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       this.useHighCoPDamping = useHighCoPDamping;
    }
 
-   public long getId()
-   {
-      return id;
-   }
-
    public boolean isEmpty()
    {
       return contactPoints.isEmpty();
@@ -151,6 +146,11 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       return hasMaxContactPointNormalForce;
    }
 
+   public boolean getHasContactStateChanged()
+   {
+      return hasContactStateChanged;
+   }
+
    public double getMaxContactPointNormalForce(int pointIndex)
    {
       return maxContactPointNormalForces.get(pointIndex).doubleValue();
@@ -165,6 +165,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       contactPoints.copyFromListAndTrimSize(other.contactPoints);
       contactNormal.setIncludingFrame(other.contactNormal);
       useHighCoPDamping = other.useHighCoPDamping;
+      hasContactStateChanged = other.hasContactStateChanged;
 
       hasMaxContactPointNormalForce = other.hasMaxContactPointNormalForce;
       for (int i = 0; i < other.contactPoints.size(); i++)

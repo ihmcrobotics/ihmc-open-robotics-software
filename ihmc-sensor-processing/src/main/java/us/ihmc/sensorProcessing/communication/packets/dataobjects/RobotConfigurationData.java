@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.communication.packets.dataobjects;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.zip.CRC32;
 
@@ -8,8 +8,9 @@ import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -106,7 +107,7 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       this.auxiliaryRobotData = auxiliaryRobotData;
    }
 
-   public void setJointState(ArrayList<OneDoFJoint> newJointData)
+   public void setJointState(List<? extends OneDoFJoint> newJointData)
    {
       if (newJointData.size() != jointAngles.length)
          throw new RuntimeException("Array size does not match");
@@ -119,12 +120,12 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       }
    }
 
-   public void setRootTranslation(Vector3D rootTranslation)
+   public void setRootTranslation(Tuple3DReadOnly rootTranslation)
    {
       this.rootTranslation.set(rootTranslation);
    }
 
-   public void setRootOrientation(Quaternion rootOrientation)
+   public void setRootOrientation(QuaternionReadOnly rootOrientation)
    {
       this.rootOrientation.set(rootOrientation);
    }

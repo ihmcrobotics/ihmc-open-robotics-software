@@ -4,7 +4,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import org.apache.commons.math3.util.Precision;
+
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -44,6 +47,8 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 public class AStarFootstepPlanner implements FootstepPlanner
 {
+   private static final boolean debug = false;
+
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
@@ -65,6 +70,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
    private final YoDouble timeout;
 
+   private final YoDouble planningTime = new YoDouble("PlanningTime", registry);
    private final YoLong numberOfExpandedNodes = new YoLong("NumberOfExpandedNodex", registry);
    private final YoDouble percentRejectedNodes = new YoDouble("PercentRejectedNodes", registry);
    private final YoLong itarationCount = new YoLong("ItarationCount", registry);
@@ -99,6 +105,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       heuristics.setWeight(weight);
    }
 
+   @Override
    public void setTimeout(double timeoutInSeconds)
    {
       timeout.set(timeoutInSeconds);
@@ -155,7 +162,16 @@ public class AStarFootstepPlanner implements FootstepPlanner
    {
       initialize();
       planInternal();
-      return checkResult();
+      FootstepPlanningResult result = checkResult();
+      if (debug)
+      {
+         PrintTools.info("Planning statistics for " + result);
+         System.out.println("   Finished planning after " + Precision.round(planningTime.getDoubleValue(), 2) + " seconds.");
+         System.out.println("   Expanded each node to an average of " + numberOfExpandedNodes.getLongValue() + " children nodes.");
+         System.out.println("   Planning took a total of "+ itarationCount.getLongValue() + " iterations.");
+         System.out.println("   During the planning " + percentRejectedNodes.getDoubleValue() + "% of nodes were rejected as invalid.");
+      }
+      return result;
    }
 
    @Override
@@ -180,8 +196,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
          snapTransform.transform(footstepPose);
          plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), footstepPose));
 
-//         if (!snapData.getCroppedFoothold().isEmpty())
-//            plan.getFootstep(i - 1).setFoothold(snapData.getCroppedFoothold());
+         //         if (!snapData.getCroppedFoothold().isEmpty())
+         //            plan.getFootstep(i - 1).setFoothold(snapData.getCroppedFoothold());
       }
 
       return plan;
@@ -274,6 +290,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
             break;
       }
 
+      long timeInNano = System.nanoTime();
+      planningTime.set(Conversions.nanosecondsToSeconds(timeInNano - planningStartTime));
       percentRejectedNodes.set(100.0 * rejectedNodesCount / expandedNodesCount);
       itarationCount.set(iterations);
       numberOfExpandedNodes.set(expandedNodesCount / iterations);
@@ -299,7 +317,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       return FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
    }
 
-   private void checkGoalType(FootstepPlannerGoal goal)
+   public static void checkGoalType(FootstepPlannerGoal goal)
    {
       FootstepPlannerGoalType supportedGoalType = FootstepPlannerGoalType.POSE_BETWEEN_FEET;
       if (!(goal.getFootstepPlannerGoalType() == supportedGoalType))
@@ -333,7 +351,8 @@ public class AStarFootstepPlanner implements FootstepPlanner
 
       heuristics.setWeight(1.5);
 
-      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, postProcessingSnapper, viz, registry);
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, postProcessingSnapper, viz,
+                                                              registry);
       return planner;
    }
 }
