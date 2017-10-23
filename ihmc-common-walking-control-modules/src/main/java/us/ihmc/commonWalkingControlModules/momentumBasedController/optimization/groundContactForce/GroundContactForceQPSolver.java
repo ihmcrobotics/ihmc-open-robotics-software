@@ -43,12 +43,12 @@ public class GroundContactForceQPSolver
    private final DenseMatrix64F tempRhoTask_H;
    private final DenseMatrix64F tempRhoTask_f;
 
-   private final int rhoSize;
+   private int currentRhoSize;
 
    public GroundContactForceQPSolver(ActiveSetQPSolver qpSolver, int rhoSize, YoVariableRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
-      this.rhoSize = rhoSize;
+      this.currentRhoSize = rhoSize;
 
       solverInput_H = new DenseMatrix64F(rhoSize, rhoSize);
       solverInput_f = new DenseMatrix64F(rhoSize, 1);
@@ -79,6 +79,11 @@ public class GroundContactForceQPSolver
       parentRegistry.addChild(registry);
    }
 
+   public void setNumberOfActiveRhos(int currentRhoSize)
+   {
+      this.currentRhoSize = currentRhoSize;
+   }
+
    public void setRhoRegularizationWeight(DenseMatrix64F weight)
    {
       CommonOps.insert(weight, regularizationMatrix, 0, 0);
@@ -87,10 +92,15 @@ public class GroundContactForceQPSolver
    public void reset()
    {
       solverInput_H.zero();
-
       solverInput_f.zero();
 
-      solverInput_Aeq.reshape(0, rhoSize);
+      solverInput_H.reshape(currentRhoSize, currentRhoSize);
+      solverInput_f.reshape(currentRhoSize, 1);
+
+      solverInput_lb.reshape(currentRhoSize, 1);
+      solverInput_ub.reshape(currentRhoSize, 1);
+
+      solverInput_Aeq.reshape(0, currentRhoSize);
       solverInput_beq.reshape(0, 1);
    }
 
@@ -104,7 +114,7 @@ public class GroundContactForceQPSolver
       int taskSize = taskJacobian.getNumRows();
 
       // J^T W
-      tempJtW.reshape(rhoSize, taskSize);
+      tempJtW.reshape(currentRhoSize, taskSize);
       CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
 
       addMomentumTaskInternal(tempJtW, taskJacobian, taskObjective);
@@ -113,36 +123,41 @@ public class GroundContactForceQPSolver
    public void addMomentumTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
       // Compute: H += J^T W J
+      tempRhoTask_H.reshape(currentRhoSize, currentRhoSize);
       CommonOps.mult(taskJtW, taskJacobian, tempRhoTask_H);
-      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempRhoTask_H, 0, 0, rhoSize, rhoSize, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempRhoTask_H, 0, 0, currentRhoSize, currentRhoSize, 1.0);
 
       // Compute f += -J^T W Objective
+      tempRhoTask_f.reshape(currentRhoSize, 1);
       CommonOps.mult(taskJtW, taskObjective, tempRhoTask_f);
-      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
+      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, currentRhoSize, 1, -1.0);
    }
 
    public void addRhoTask(DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
    {
-      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, taskWeight, 0, 0, rhoSize, rhoSize, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, taskWeight, 0, 0, currentRhoSize, currentRhoSize, 1.0);
 
+      tempRhoTask_f.reshape(currentRhoSize, 1);
       CommonOps.mult(taskWeight, taskObjective, tempRhoTask_f);
-      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
+      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, currentRhoSize, 1, -1.0);
    }
 
    public void addRhoTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, DenseMatrix64F taskWeight)
    {
       int taskSize = taskJacobian.getNumRows();
+
       // J^T W
-      tempJtW.reshape(rhoSize, taskSize);
+      tempJtW.reshape(currentRhoSize, taskSize);
       CommonOps.multTransA(taskJacobian, taskWeight, tempJtW);
 
       // Compute: H += J^T W J
+      tempRhoTask_H.reshape(currentRhoSize, currentRhoSize);
       CommonOps.mult(tempJtW, taskJacobian, tempRhoTask_H);
-      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempRhoTask_H, 0, 0, rhoSize, rhoSize, 1.0);
+      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempRhoTask_H, 0, 0, currentRhoSize, currentRhoSize, 1.0);
 
       // Compute: f += - J^T W Objective
       CommonOps.mult(tempJtW, taskObjective, tempRhoTask_f);
-      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
+      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, currentRhoSize, 1, -1.0);
    }
 
    public void solve() throws NoConvergenceException
@@ -157,7 +172,7 @@ public class GroundContactForceQPSolver
 
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
       qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
-      qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+      //qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
 
       numberOfIterations.set(qpSolver.solve(solverOutput_rhos));
@@ -177,7 +192,7 @@ public class GroundContactForceQPSolver
 
    public void setMinRho(double rhoMin)
    {
-      for (int i = 0; i < rhoSize; i++)
+      for (int i = 0; i < currentRhoSize; i++)
          solverInput_lb.set(i, 0, rhoMin);
    }
 
@@ -188,7 +203,7 @@ public class GroundContactForceQPSolver
 
    public void setMaxRho(double rhoMax)
    {
-      for (int i = 0; i < rhoSize; i++)
+      for (int i = 0; i < currentRhoSize; i++)
          solverInput_ub.set(i, 0, rhoMax);
    }
 

@@ -97,6 +97,9 @@ public class GroundContactForceOptimizationControlModule
    private Map<RigidBody, Wrench> solutionWrenches;
    public void compute(Map<RigidBody, Wrench> groundReactionWrenchesToPack) throws NoConvergenceException
    {
+      qpSolver.setNumberOfActiveRhos(wrenchMatrixCalculator.getCurrentRhoSize());
+      qpSolver.reset();
+
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
       qpSolver.addRegularization();
 
