@@ -17,6 +17,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -245,6 +247,14 @@ public class WrenchMatrixCalculator
 
       desiredCoPWeightMatrix.reshape(copTaskSize, copTaskSize);
       copRateWeightMatrix.reshape(copTaskSize, copTaskSize);
+
+      // these guys aren't completely overwritten, so need zeroing
+      rhoMaxMatrix.zero();
+      rhoWeightMatrix.zero();
+      rhoRateWeightMatrix.zero();
+
+      desiredCoPWeightMatrix.zero();
+      copRateWeightMatrix.zero();
    }
 
    public Map<RigidBody, Wrench> computeWrenchesFromRho(DenseMatrix64F rho)

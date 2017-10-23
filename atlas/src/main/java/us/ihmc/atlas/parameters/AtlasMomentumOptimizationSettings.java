@@ -21,7 +21,7 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private static final double defaultRhoRateDefaultWeight = 0.002;
    private static final double defaultRhoRateHighWeight = 0.05;
 
-   private static final boolean useWarmStartInSolver = true;
+   private static final boolean useWarmStartInSolver = false;
 
    private final Vector3D linearMomentumWeight = new Vector3D(0.05, 0.05, 0.01);
    private final Vector3D highLinearMomentumWeightForRecovery = new Vector3D(0.5, 0.5, 0.05);
