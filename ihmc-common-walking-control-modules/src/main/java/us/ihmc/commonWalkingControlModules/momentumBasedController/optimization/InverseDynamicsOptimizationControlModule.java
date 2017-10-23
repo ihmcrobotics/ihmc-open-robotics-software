@@ -271,7 +271,6 @@ public class InverseDynamicsOptimizationControlModule
       DenseMatrix64F rhoRateWeight = wrenchMatrixCalculator.getRhoRateWeightMatrix();
       qpSolver.addRhoTask(rhoPrevious, rhoRateWeight);
 
-      /*
       DenseMatrix64F copJacobian = wrenchMatrixCalculator.getCopJacobianMatrix();
       DenseMatrix64F previousCoP = wrenchMatrixCalculator.getPreviousCoPMatrix();
       DenseMatrix64F copRateWeight = wrenchMatrixCalculator.getCopRateWeightMatrix();
@@ -280,7 +279,6 @@ public class InverseDynamicsOptimizationControlModule
       DenseMatrix64F desiredCoP = wrenchMatrixCalculator.getDesiredCoPMatrix();
       DenseMatrix64F desiredCoPWeight = wrenchMatrixCalculator.getDesiredCoPWeightMatrix();
       qpSolver.addRhoTask(copJacobian, desiredCoP, desiredCoPWeight);
-      */
    }
 
    private void setupWrenchesEquilibriumConstraint()
