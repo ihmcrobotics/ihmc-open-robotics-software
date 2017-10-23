@@ -79,6 +79,7 @@ import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFact
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
+import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -131,6 +132,8 @@ public class WalkingControllerTest
    private WholeBodyControllerCore controllerCore;
    private LowLevelOneDoFJointDesiredDataHolderList controllerOutput;
 
+   private static final double maxDriftRate = 0.2;
+
    @Test
    public void testForGarbage()
    {
@@ -174,7 +177,13 @@ public class WalkingControllerTest
          else
          {
             Tuple3DReadOnly rootPosition = fullRobotModel.getRootJoint().getTranslationForReading();
-            BoundingBox3D boundingBox = new BoundingBox3D(new Point3D(-1.0, -1.0, 0.0), new Point3D(1.0, 1.0, 2.0));
+            Point3D min = new Point3D(-0.1, -0.1, 0.5);
+            Point3D max = new Point3D(0.1, 0.1, 1.0);
+            Vector3D drift = new Vector3D(maxDriftRate, maxDriftRate, maxDriftRate);
+            drift.scale(yoTime.getDoubleValue());
+            min.sub(drift);
+            max.add(drift);
+            BoundingBox3D boundingBox = new BoundingBox3D(min, max);
             boolean insideInclusive = boundingBox.isInsideInclusive(rootPosition.getX(), rootPosition.getY(), rootPosition.getZ());
             Assert.assertTrue("Robot drifted away.", insideInclusive);
          }
@@ -469,6 +478,8 @@ public class WalkingControllerTest
          YoEnum<ConstraintType> footState = (YoEnum<ConstraintType>) registry.getVariable(name);
          footStates.put(robotSide, footState);
       }
+
+      ParameterLoaderHelper.loadParameters(this, robotModel.getWholeBodyControllerParametersFile(), registry);
 
       if (showSCS)
       {
