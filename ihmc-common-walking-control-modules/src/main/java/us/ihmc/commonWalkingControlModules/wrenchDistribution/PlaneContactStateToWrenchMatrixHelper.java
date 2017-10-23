@@ -194,7 +194,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
 
       int previousRhoSize = currentRhoSize;
-      currentRhoSize = numberOfBasisVectorsPerContactPoint * yoPlaneContactState.getNumberOfContactPointsInContact();
+      currentRhoSize = computeCurrentRhoSize();
 
       if (previousRhoSize != currentRhoSize)
          reset(currentRhoSize);

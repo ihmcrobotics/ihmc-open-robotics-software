@@ -278,8 +278,7 @@ public class InverseDynamicsQPSolver
       int previousSize = solverInput_beq.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      //solverInput_Aeq.reshape(previousSize + taskSize, problemSize, true);
-      solverInput_Aeq.reshape(previousSize + taskSize, currentProblemSize, true); // FIXME
+      solverInput_Aeq.reshape(previousSize + taskSize, currentProblemSize, true);
       solverInput_beq.reshape(previousSize + taskSize, 1, true);
 
       CommonOps.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
@@ -366,9 +365,8 @@ public class InverseDynamicsQPSolver
          int previousSize = solverInput_beq.getNumRows();
 
          // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-         //solverInput_Aeq.reshape(previousSize + constraintSize, problemSize, true);
-         solverInput_Aeq.reshape(previousSize + constraintSize, currentProblemSize, true);// fixme
-         solverInput_beq.reshape(previousSize + constraintSize, 1, true);
+         solverInput_Aeq.reshape(previousSize + constraintSize, currentProblemSize, true);
+         solverInput_beq.reshape(previousSize + constraintSize, 1);
 
          MatrixTools.setMatrixBlock(solverInput_Aeq, previousSize, 0, centroidalMomentumMatrix, 0, 0, constraintSize, numberOfDoFs, -1.0);
          CommonOps.insert(rhoJacobian, solverInput_Aeq, previousSize, numberOfDoFs);
