@@ -113,11 +113,13 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime);
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, scs, epsilon);
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testWalking() throws SimulationExceededMaximumTimeException
    {
-      double epsilon = 1.0e-4;
+      double epsilon = 1.0e-3;
       int steps = 4;
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
@@ -132,11 +134,13 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       midFeetOrientation.changeFrame(worldFrame);
       String pelvisName = fullRobotModel.getPelvis().getName();
       EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, midFeetOrientation.getQuaternion(), zeroVector, scs, epsilon);
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testWalkingAfterTrajectory() throws SimulationExceededMaximumTimeException
    {
-      double epsilon = 1.0e-4;
+      double epsilon = 1.0e-3;
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       if (!walkingControllerParameters.doPreparePelvisForLocomotion())
@@ -160,12 +164,14 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       double walkingTime = createWalkingMessage(steps, footsteps, false);
       drcSimulationTestHelper.send(footsteps);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingTime + 0.5);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingTime + 1.0);
       assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
 
       humanoidReferenceFrames.updateFrames();
       desiredAfterTrajectory.changeFrame(worldFrame);
       EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, desiredAfterTrajectory.getQuaternion(), zeroVector, scs, epsilon);
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testMultipleTrajectoryPoints() throws SimulationExceededMaximumTimeException
@@ -234,6 +240,8 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
       SO3TrajectoryPointMessage waypoint = message.getTrajectoryPoint(numberOfPoints - 1);
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, waypoint, scs, epsilon);
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testWalkingWithUserControl() throws SimulationExceededMaximumTimeException
@@ -291,6 +299,8 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       String pelvisName = fullRobotModel.getPelvis().getName();
       EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, desiredChestOrientation, zeroVector, scs, epsilon);
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    @SuppressWarnings("unchecked")
@@ -368,6 +378,11 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
+      
+      fullRobotModel = null;
+      humanoidReferenceFrames = null;
+      scs = null;
+
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }

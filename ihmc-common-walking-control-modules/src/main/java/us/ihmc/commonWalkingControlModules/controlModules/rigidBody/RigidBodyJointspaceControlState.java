@@ -13,7 +13,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class RigidBodyJointspaceControlState extends RigidBodyControlState
 {
-   public static final int maxPoints = 1000;
+   public static final int maxPoints = 10000;
    public static final int maxPointsInGenerator = 5;
 
    private final RigidBodyJointControlHelper jointControlHelper;

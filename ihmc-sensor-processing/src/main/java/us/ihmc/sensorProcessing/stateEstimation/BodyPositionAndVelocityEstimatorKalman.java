@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -13,13 +14,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.kalman.KalmanFilter;
 import us.ihmc.kalman.YoKalmanFilter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.robotController.SensorProcessor;
 import us.ihmc.sensorProcessing.sensors.ProcessedBodyPositionSensorsWriteOnlyInterface;
 import us.ihmc.sensorProcessing.sensors.ProcessedIMUSensorsReadOnlyInterface;
 import us.ihmc.sensorProcessing.sensors.ProcessedTimeSensorsReadOnlyInterface;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVelocityEstimator
 {
@@ -36,12 +36,12 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
    private final LinkedHashMap<BodyVelocityEstimator, Integer> bodyVelocityEstimatorIndices = new LinkedHashMap<BodyVelocityEstimator, Integer>();
    private final BodyPositionEstimator bodyPositionEstimatorVicon;
 
-   private final EnumMap<Direction, KalmanFilter> kalmanFilters = new EnumMap<Direction, KalmanFilter>(Direction.class);
+   private final EnumMap<Axis, KalmanFilter> kalmanFilters = new EnumMap<Axis, KalmanFilter>(Axis.class);
 
-   private final EnumMap<Direction, DenseMatrix64F> processCovariances = new EnumMap<Direction, DenseMatrix64F>(Direction.class);
-   private final EnumMap<Direction, DenseMatrix64F> measurementCovariances = new EnumMap<Direction, DenseMatrix64F>(Direction.class);
-   private final EnumMap<Direction, DenseMatrix64F> inputs = new EnumMap<Direction, DenseMatrix64F>(Direction.class);
-   private final EnumMap<Direction, DenseMatrix64F> measurements = new EnumMap<Direction, DenseMatrix64F>(Direction.class);
+   private final EnumMap<Axis, DenseMatrix64F> processCovariances = new EnumMap<Axis, DenseMatrix64F>(Axis.class);
+   private final EnumMap<Axis, DenseMatrix64F> measurementCovariances = new EnumMap<Axis, DenseMatrix64F>(Axis.class);
+   private final EnumMap<Axis, DenseMatrix64F> inputs = new EnumMap<Axis, DenseMatrix64F>(Axis.class);
+   private final EnumMap<Axis, DenseMatrix64F> measurements = new EnumMap<Axis, DenseMatrix64F>(Axis.class);
 
    private final YoDouble accelerationCovariance = new YoDouble("accelerationCovariance", registry);
    private final YoDouble velocityCovariance = new YoDouble("velocityCovariance", registry);
@@ -109,23 +109,23 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
          bodyPositionEstimatorVicon.getCovariance(covariance.getVector());
       }
 
-      for (Direction direction : Direction.values())
+      for (Axis axis : Axis.values())
       {
-         double viconCovariance = covariance.getElement(direction.ordinal());
+         double viconCovariance = covariance.getElement(axis.ordinal());
          DenseMatrix64F P = new DenseMatrix64F(nStates, nStates);
          DenseMatrix64F x = new DenseMatrix64F(nStates, 1);
 
          if (!Double.isInfinite(viconCovariance))
          {
             P.set(positionIndex, positionIndex, viconCovariance);
-            x.set(positionIndex, bodyPosition.getElement(direction.ordinal()));
+            x.set(positionIndex, bodyPosition.getElement(axis.ordinal()));
          }
          else
          {
-            x.set(positionIndex, initialPositionIfNotUsingVicon.getElement(direction.ordinal()));
+            x.set(positionIndex, initialPositionIfNotUsingVicon.getElement(axis.ordinal()));
          }
 
-         kalmanFilters.get(direction).setState(x, P);
+         kalmanFilters.get(axis).setState(x, P);
       }
 
       setProcessedSensors();
@@ -172,9 +172,9 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
       FrameVector3D bodyAcceleration = processedIMUSensors.getAcceleration(bodyIMUIndex);
       bodyAcceleration.checkReferenceFrameMatch(world);
 
-      for (Direction direction : Direction.values())
+      for (Axis axis : Axis.values())
       {
-         inputs.get(direction).set(0, bodyAcceleration.getElement(direction.ordinal()));
+         inputs.get(axis).set(0, bodyAcceleration.getElement(axis.ordinal()));
       }
    }
 
@@ -186,12 +186,12 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
          bodyPositionEstimator.getBodyPosition(tempEstimatedPosition);
          tempEstimatedPosition.checkReferenceFrameMatch(world);
          int index = bodyPositionEstimatorIndices.get(bodyPositionEstimator);
-         for (Direction direction : Direction.values())
+         for (Axis axis : Axis.values())
          {
-            double estimatedPosition = tempEstimatedPosition.getElement(direction.ordinal());
+            double estimatedPosition = tempEstimatedPosition.getElement(axis.ordinal());
             if (Double.isNaN(estimatedPosition))
                estimatedPosition = 0.0;    // otherwise the Kalman filter math won't work; happens e.g. when vicon is not turned on
-            measurements.get(direction).set(index, estimatedPosition);
+            measurements.get(axis).set(index, estimatedPosition);
          }
       }
 
@@ -201,24 +201,24 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
          bodyVelocityEstimator.getBodyVelocity(tempEstimatedVelocity);
          tempEstimatedVelocity.checkReferenceFrameMatch(world);
          int index = bodyVelocityEstimatorIndices.get(bodyVelocityEstimator);
-         for (Direction direction : Direction.values())
+         for (Axis axis : Axis.values())
          {
-            double estimatedVelocity = tempEstimatedVelocity.getElement(direction.ordinal());
+            double estimatedVelocity = tempEstimatedVelocity.getElement(axis.ordinal());
             if (Double.isNaN(estimatedVelocity))
                estimatedVelocity = 0.0;    // otherwise the Kalman filter math won't work; happens e.g. when vicon is not turned on
-            measurements.get(direction).set(index, estimatedVelocity);
+            measurements.get(axis).set(index, estimatedVelocity);
          }
       }
    }
 
    private void setProcessNoiseCovariance()
    {
-      for (Direction direction : Direction.values())
+      for (Axis axis : Axis.values())
       {
-         DenseMatrix64F processCovariance = processCovariances.get(direction);
+         DenseMatrix64F processCovariance = processCovariances.get(axis);
          processCovariance.set(velocityIndex, velocityIndex, accelerationCovariance.getDoubleValue());
          processCovariance.set(positionIndex, positionIndex, velocityCovariance.getDoubleValue());
-         kalmanFilters.get(direction).setProcessNoiseCovariance(processCovariance);
+         kalmanFilters.get(axis).setProcessNoiseCovariance(processCovariance);
       }
    }
 
@@ -230,41 +230,41 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
       {
          bodyPositionEstimator.getCovariance(covariance);
          int index = bodyPositionEstimatorIndices.get(bodyPositionEstimator);
-         measurementCovariances.get(Direction.X).set(index, index, covariance.getX());
-         measurementCovariances.get(Direction.Y).set(index, index, covariance.getY());
-         measurementCovariances.get(Direction.Z).set(index, index, covariance.getZ());
+         measurementCovariances.get(Axis.X).set(index, index, covariance.getX());
+         measurementCovariances.get(Axis.Y).set(index, index, covariance.getY());
+         measurementCovariances.get(Axis.Z).set(index, index, covariance.getZ());
       }
 
       for (BodyVelocityEstimator bodyVelocityEstimator : bodyVelocityEstimatorIndices.keySet())
       {
          bodyVelocityEstimator.getCovariance(covariance);
          int index = bodyVelocityEstimatorIndices.get(bodyVelocityEstimator);
-         measurementCovariances.get(Direction.X).set(index, index, covariance.getX());
-         measurementCovariances.get(Direction.Y).set(index, index, covariance.getY());
-         measurementCovariances.get(Direction.Z).set(index, index, covariance.getZ());
+         measurementCovariances.get(Axis.X).set(index, index, covariance.getX());
+         measurementCovariances.get(Axis.Y).set(index, index, covariance.getY());
+         measurementCovariances.get(Axis.Z).set(index, index, covariance.getZ());
       }
 
-      for (Direction direction : Direction.values())
+      for (Axis axis : Axis.values())
       {
-         kalmanFilters.get(direction).setMeasurementNoiseCovariance(measurementCovariances.get(direction));
+         kalmanFilters.get(axis).setMeasurementNoiseCovariance(measurementCovariances.get(axis));
       }
    }
 
    private void doKalmanFiltering()
    {
-      for (Direction direction : Direction.values())
+      for (Axis axis : Axis.values())
       {
-         KalmanFilter kalmanFilter = kalmanFilters.get(direction);
-         kalmanFilter.predict(inputs.get(direction));
-         kalmanFilter.update(measurements.get(direction));
+         KalmanFilter kalmanFilter = kalmanFilters.get(axis);
+         kalmanFilter.predict(inputs.get(axis));
+         kalmanFilter.update(measurements.get(axis));
       }
    }
 
    private void setProcessedSensors()
    {
-      DenseMatrix64F xState = kalmanFilters.get(Direction.X).getState();
-      DenseMatrix64F yState = kalmanFilters.get(Direction.Y).getState();
-      DenseMatrix64F zState = kalmanFilters.get(Direction.Z).getState();
+      DenseMatrix64F xState = kalmanFilters.get(Axis.X).getState();
+      DenseMatrix64F yState = kalmanFilters.get(Axis.Y).getState();
+      DenseMatrix64F zState = kalmanFilters.get(Axis.Z).getState();
 
       bodyPosition.set(xState.get(positionIndex), yState.get(positionIndex), zState.get(positionIndex));
       bodyVelocity.set(xState.get(velocityIndex), yState.get(velocityIndex), zState.get(velocityIndex));
@@ -280,11 +280,11 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
 
    private void configureKalmanFilters(double controlDT)
    {
-      for (Direction direction : Direction.values())
+      for (Axis axis : Axis.values())
       {
-         YoKalmanFilter kalmanFilter = new YoKalmanFilter("kalman" + direction, registry);
+         YoKalmanFilter kalmanFilter = new YoKalmanFilter("kalman" + axis, registry);
          updateKalmanFilterConfiguration(kalmanFilter, controlDT);
-         kalmanFilters.put(direction, kalmanFilter);
+         kalmanFilters.put(axis, kalmanFilter);
       }
    }
    
@@ -318,20 +318,20 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
    
    private void updateAllKalmanFilterConfigurations(double controlDT)
    {
-      for (Direction direction : Direction.values())
+      for (Axis axis : Axis.values())
       {
-         updateKalmanFilterConfiguration(kalmanFilters.get(direction), controlDT);
+         updateKalmanFilterConfiguration(kalmanFilters.get(axis), controlDT);
       }
    }
 
    private void populateMatrices()
    {
-      for (Direction direction : Direction.values())
+      for (Axis axis : Axis.values())
       {
-         processCovariances.put(direction, new DenseMatrix64F(nStates, nStates));
-         measurementCovariances.put(direction, new DenseMatrix64F(nMeasurements, nMeasurements));
-         inputs.put(direction, new DenseMatrix64F(nInputs, 1));
-         measurements.put(direction, new DenseMatrix64F(nMeasurements, 1));
+         processCovariances.put(axis, new DenseMatrix64F(nStates, nStates));
+         measurementCovariances.put(axis, new DenseMatrix64F(nMeasurements, nMeasurements));
+         inputs.put(axis, new DenseMatrix64F(nInputs, 1));
+         measurements.put(axis, new DenseMatrix64F(nMeasurements, 1));
       }
    }
 

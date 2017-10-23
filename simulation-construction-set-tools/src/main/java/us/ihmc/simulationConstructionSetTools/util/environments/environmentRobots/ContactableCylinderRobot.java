@@ -2,6 +2,7 @@ package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobo
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -12,7 +13,6 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.simulationconstructionset.FloatingJoint;

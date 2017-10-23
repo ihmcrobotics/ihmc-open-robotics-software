@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.5"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.10"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -23,8 +23,8 @@ testSuites {
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
-   compile group: 'us.ihmc', name: 'euclid', version: '0.6.0'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.3'
+   compile group: 'us.ihmc', name: 'euclid', version: '0.6.1'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
    compile group: 'org.ejml', name: 'dense64', version: '0.30'
    compile group: 'org.ejml', name: 'core', version: '0.30'
    compile "org.apache.commons:commons-lang3:3.4"

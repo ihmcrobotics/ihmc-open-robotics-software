@@ -1,12 +1,10 @@
 package us.ihmc.exampleSimulations.agileHexapod;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.robotics.Axis;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -16,6 +14,8 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.CollisionGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 //February 17, 1996: Ann Torres and Jerry Pratt.  Agile Hexapod created using MIT Leg Laboratory Creature Library.
 //June 8, 2001:  Jerry Pratt.

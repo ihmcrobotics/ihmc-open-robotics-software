@@ -3,7 +3,7 @@ package us.ihmc.robotics.controllers.pidGains.implementations;
 import java.util.EnumMap;
 import java.util.Map;
 
-import us.ihmc.robotics.Axis;
+import us.ihmc.euclid.Axis;
 import us.ihmc.robotics.controllers.pidGains.DampingUpdater;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;

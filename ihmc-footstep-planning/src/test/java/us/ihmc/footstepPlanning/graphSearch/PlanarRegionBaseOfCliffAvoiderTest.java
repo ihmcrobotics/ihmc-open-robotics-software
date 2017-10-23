@@ -7,17 +7,20 @@ import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionBaseOfCliffAvoider;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class PlanarRegionBaseOfCliffAvoiderTest
 {
@@ -41,11 +44,22 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       PlanarRegionBaseOfCliffAvoider avoider = new PlanarRegionBaseOfCliffAvoider(registry, yoGraphicsListRegistry);
-
-      BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registry);
-      parameters.setCliffHeightToShiftAwayFrom(0.01);
       double minimumDistanceFromCliffBottom = 0.22;
-      parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
+
+      YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters()
+      {
+         @Override
+         public double getCliffHeightToShiftAwayFrom()
+         {
+            return 0.01;
+         }
+
+         @Override
+         public double getMinimumDistanceFromCliffBottoms()
+         {
+            return minimumDistanceFromCliffBottom;
+         }
+      });
 
       SimulationConstructionSet scs = null;
       if (visualize)
@@ -64,7 +78,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       double x = 0.9;
       double y = 0.0;
       doAQuery(planarRegionsList, avoider, parameters, minimumDistanceFromCliffBottom, scs, footstepSide, x, y);
-      
+
       x = 0.9;
       y = -0.375;
       doAQuery(planarRegionsList, avoider, parameters, minimumDistanceFromCliffBottom, scs, footstepSide, x, y);
@@ -92,11 +106,22 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       PlanarRegionBaseOfCliffAvoider avoider = new PlanarRegionBaseOfCliffAvoider(registry, yoGraphicsListRegistry);
-
-      BipedalFootstepPlannerParameters parameters = new BipedalFootstepPlannerParameters(registry);
-      parameters.setCliffHeightToShiftAwayFrom(0.01);
       double minimumDistanceFromCliffBottom = 0.22;
-      parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
+
+      YoFootstepPlannerParameters parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters()
+      {
+         @Override
+         public double getCliffHeightToShiftAwayFrom()
+         {
+            return 0.01;
+         }
+
+         @Override
+         public double getMinimumDistanceFromCliffBottoms()
+         {
+            return minimumDistanceFromCliffBottom;
+         }
+      });
 
       SimulationConstructionSet scs = null;
       if (visualize)
@@ -127,41 +152,36 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       }
    }
 
-   private void doAQuery(PlanarRegionsList planarRegionsList, PlanarRegionBaseOfCliffAvoider avoider, BipedalFootstepPlannerParameters parameters,
+   private void doAQuery(PlanarRegionsList planarRegionsList, PlanarRegionBaseOfCliffAvoider avoider, YoFootstepPlannerParameters parameters,
                          double minimumDistanceFromCliffBottom, SimulationConstructionSet scs, RobotSide footstepSide, double x, double y)
    {
       RigidBodyTransform soleTransform = new RigidBodyTransform();
       soleTransform.setTranslation(x, y, 0.0);
-      BipedalFootstepPlannerNode node = new BipedalFootstepPlannerNode(footstepSide, soleTransform);
-      avoider.shiftAwayFromCliffBottoms(parameters, planarRegionsList, node);
+      FootstepNode node = new FootstepNode(x, y, 0.0, footstepSide);
+      RigidBodyTransform newSoleTransform = new RigidBodyTransform(soleTransform);
+      avoider.shiftAwayFromCliffBottoms(parameters, planarRegionsList, newSoleTransform);
 
-      RigidBodyTransform newSoleTransform = new RigidBodyTransform();
-      node.getSoleTransform(newSoleTransform);
-
-      if ((x > 1.0 - minimumDistanceFromCliffBottom) && (x < 1.0 - 0.1 - 1e-6) && (Math.abs(y) < 0.5-1e-6)) // Close to first cliff
+      if ((x > 1.0 - minimumDistanceFromCliffBottom) && (x < 1.0 - 0.1 - 1e-6) && (Math.abs(y) < 0.5 - 1e-6)) // Close to first cliff
       {
-         Point3D solePosition = node.getSolePosition();
-
+         Vector3DReadOnly newSolePosition = newSoleTransform.getTranslationVector();
          if (doAsserts)
-            assertEquals("x = " + x + ", y = " + y, 1.0 - minimumDistanceFromCliffBottom, solePosition.getX(), 1e-7);
-
+            assertEquals("x = " + x + ", y = " + y, 1.0 - minimumDistanceFromCliffBottom, newSolePosition.getX(), 1e-7);
       }
-      
-      if ((y > -0.5 - minimumDistanceFromCliffBottom) && (y < -0.5 - 0.1 - 1e-6) && (Math.abs(x - 1.5) < 0.5-1e-6)) // Close to left side cliff
+
+      if ((y > -0.5 - minimumDistanceFromCliffBottom) && (y < -0.5 - 0.1 - 1e-6) && (Math.abs(x - 1.5) < 0.5 - 1e-6)) // Close to left side cliff
       {
-         Point3D solePosition = node.getSolePosition();
+         Vector3DReadOnly newSolePosition = newSoleTransform.getTranslationVector();
 
          if (doAsserts)
-            assertEquals("x = " + x + ", y = " + y, -0.5 - minimumDistanceFromCliffBottom, solePosition.getY(), 1e-7);
-
+            assertEquals("x = " + x + ", y = " + y, -0.5 - minimumDistanceFromCliffBottom, newSolePosition.getY(), 1e-7);
       }
-      
-      if ((y < 0.5 + minimumDistanceFromCliffBottom) && (y > 0.5 + 0.1 + 1e-6) && (Math.abs(x - 1.5) < 0.5-1e-6)) // Close to right side cliff
+
+      if ((y < 0.5 + minimumDistanceFromCliffBottom) && (y > 0.5 + 0.1 + 1e-6) && (Math.abs(x - 1.5) < 0.5 - 1e-6)) // Close to right side cliff
       {
-         Point3D solePosition = node.getSolePosition();
+         Vector3DReadOnly newSolePosition = newSoleTransform.getTranslationVector();
 
          if (doAsserts)
-            assertEquals("x = " + x + ", y = " + y, 0.5 + minimumDistanceFromCliffBottom, solePosition.getY(), 1e-7);
+            assertEquals("x = " + x + ", y = " + y, 0.5 + minimumDistanceFromCliffBottom, newSolePosition.getY(), 1e-7);
       }
 
       if (visualize)

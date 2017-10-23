@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -153,6 +154,14 @@ public abstract class WalkingControllerParameters
     * @see #allowAutomaticManipulationAbort()
     */
    public double getICPErrorThresholdForManipulationAbort()
+   {
+      return 0.04;
+   }
+   
+   /**
+    * This parameter sets the buffer around the support polygon to constrain the offset ICP used in {@link PelvisICPBasedTranslationManager}. It's defined in meters.
+    */
+   public double getPelvisTranslationICPSupportPolygonSafeMargin()
    {
       return 0.04;
    }
@@ -324,7 +333,10 @@ public abstract class WalkingControllerParameters
     * @return whether the manipulation control should get prepared
     *  for walking.
     */
-   public abstract boolean doPrepareManipulationForLocomotion();
+   public boolean doPrepareManipulationForLocomotion()
+   {
+      return true;
+   }
 
    /**
     * Specifies if the pelvis orientation controller should
@@ -632,6 +644,49 @@ public abstract class WalkingControllerParameters
    public boolean controlToeDuringSwing()
    {
       return false;
+   }
+
+   /**
+    * Specifies whether or not the z-component of the swing initial angular velocity expressed in world
+    * should be zeroed out.
+    * <p>
+    * This can be helpful in scenarios where a foot during toe-off causing a large velocity and
+    * resulting in an undesired trajectory.
+    * </p>
+    * 
+    * @return whether the z-component swing initial angular velocity should be zeroed out or not.
+    */
+   public boolean ignoreSwingInitialAngularVelocityZ()
+   {
+      return false;
+   }
+
+   /**
+    * Determines the maximum allowable magnitude for the swing initial linear velocity.
+    * <p>
+    * This can be helpful in scenarios where a foot during toe-off causing a large velocity and
+    * resulting in an undesired trajectory.
+    * </p>
+    * 
+    * @return the swing initial linear velocity maximum magnitude.
+    */
+   public double getMaxSwingInitialLinearVelocityMagnitude()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   /**
+    * Determines the maximum allowable magnitude for the swing initial angular velocity.
+    * <p>
+    * This can be helpful in scenarios where a foot during toe-off causing a large velocity and
+    * resulting in an undesired trajectory.
+    * </p>
+    * 
+    * @return the swing initial angular velocity maximum magnitude.
+    */
+   public double getMaxSwingInitialAngularVelocityMagnitude()
+   {
+      return Double.POSITIVE_INFINITY;
    }
 
    /**

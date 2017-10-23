@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.5"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.10"
    }
 }
 plugins {
@@ -29,7 +29,7 @@ mainDependencies {
    compile group: 'net.wimpi', name: 'jamod', version: '1.2'
    compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.3'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion

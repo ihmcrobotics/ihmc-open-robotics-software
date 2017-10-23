@@ -32,7 +32,7 @@ public class EnumYoVariableDependentInputManager<T extends Enum<T>>
       yoEnum.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             updateListeners(yoEnum);
          }

@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,7 +17,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
@@ -26,7 +26,7 @@ import us.ihmc.robotics.screwTheory.PrismaticJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.simulationconstructionset.KinematicPoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -328,7 +328,7 @@ public class MovingBaseRobotArm extends Robot
       for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
          OneDoFJoint oneDoFJoint = pair.getKey();
-         LowLevelJointDataReadOnly data = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(oneDoFJoint); 
+         JointDesiredOutputReadOnly data = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(oneDoFJoint); 
 
          if (data.hasDesiredTorque())
          {
@@ -343,7 +343,7 @@ public class MovingBaseRobotArm extends Robot
       for (Entry<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointMap.entrySet())
       {
          OneDoFJoint oneDoFJoint = pair.getKey();
-         LowLevelJointDataReadOnly data = lowLevelOneDoFJointDesiredDataHolder.getLowLevelJointData(oneDoFJoint); 
+         JointDesiredOutputReadOnly data = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(oneDoFJoint); 
 
          if (data.hasDesiredPosition())
          {

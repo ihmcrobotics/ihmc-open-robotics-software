@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commons.Epsilons;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoTrajectory3D
@@ -235,9 +235,9 @@ public class YoTrajectory3D
       return integralResult;
    }
 
-   public YoTrajectory getYoTrajectory(Direction direction)
+   public YoTrajectory getYoTrajectory(Axis axis)
    {
-      return getYoTrajectory(direction.ordinal());
+      return getYoTrajectory(axis.ordinal());
    }
 
    public YoTrajectory getYoTrajectory(int index)
@@ -312,7 +312,7 @@ public class YoTrajectory3D
       }
    }
 
-   public double getInitialTime(Direction dir)
+   public double getInitialTime(Axis dir)
    {
       return getYoTrajectory(dir).getInitialTime();
    }
@@ -322,7 +322,7 @@ public class YoTrajectory3D
       return getYoTrajectory(index).getInitialTime();
    }
 
-   public double getFinalTime(Direction dir)
+   public double getFinalTime(Axis dir)
    {
       return getYoTrajectory(dir).getFinalTime();
    }
@@ -356,7 +356,7 @@ public class YoTrajectory3D
          return -1;
    }
 
-   public int getNumberOfCoefficients(Direction dir)
+   public int getNumberOfCoefficients(Axis dir)
    {
       return getYoTrajectory(dir).getNumberOfCoefficients();
    }

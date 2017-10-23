@@ -20,7 +20,7 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
 {
 
    private static final String STRAIGHT_PATH_NAME = "Forward Path";
-   private static final double STRAIGHT_STEP_LENGTH = 0.3; // For Steppr: 0.30;
+   private static final double STRAIGHT_STEP_LENGTH = 0.45; // For Steppr: 0.30;
    private static final double STRAIGHT_STEP_WIDTH = 0.3; // For Steppr: 0.35;
    private static final String REVERSE_PATH_NAME = "Reverse Path";
    private static final double REVERSE_ANGLE = Math.PI;
@@ -263,5 +263,12 @@ public class TurnWalkTurnPlanner implements FootstepPlanner
    public FootstepPlan getPlan()
    {
       return footstepPlan;
+   }
+
+   @Override
+   public void setTimeout(double timeout)
+   {
+      // TODO Auto-generated method stub
+
    }
 }

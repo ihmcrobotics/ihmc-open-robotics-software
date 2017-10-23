@@ -9,21 +9,25 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
-import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.configurations.ContinuousCMPICPPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
+import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -47,7 +51,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
    protected final static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private static final double swingStartTimeEpsilon = 0.04 * 4.0;
+   private static final double swingStartTimeEpsilon = 0.016;
 
    public void testTakingStepsWithAbsoluteTimings() throws SimulationExceededMaximumTimeException
    {
@@ -62,6 +66,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       scs.setCameraPosition(8.0, -8.0, 5.0);
       scs.setCameraFix(1.5, 0.0, 0.8);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+      Random random = new Random();
 
       double swingStartInterval = 1.125;
       int steps = 20;
@@ -70,11 +75,25 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       double stepWidth = (walkingControllerParameters.getSteppingParameters().getMinStepWidth()
             + walkingControllerParameters.getSteppingParameters().getMaxStepWidth()) / 2.0;
       double stepLength = walkingControllerParameters.getSteppingParameters().getDefaultStepLength() / 2.0;
-      double swingTime = walkingControllerParameters.getDefaultSwingTime();
-      double transferTime = walkingControllerParameters.getDefaultTransferTime();
+      double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
+      double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double finalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime, transferTime, finalTransferTime);
-      footsteps.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS);
+      
+      FootstepDataListMessage footstepMessage1 = new FootstepDataListMessage();
+      footstepMessage1.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS);
+      footstepMessage1.setExecutionMode(ExecutionMode.OVERRIDE);
+      footstepMessage1.setUniqueId(1);
+
+      FootstepDataListMessage footstepMessage2 = new FootstepDataListMessage();
+      footstepMessage2.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS);
+      footstepMessage2.setExecutionMode(ExecutionMode.QUEUE, 1);
+      footstepMessage2.setUniqueId(2);
+      
+      double takeOffTime = 0.0;
+      double previousSwingTime = 0.0;
+      double timeToSendSecondMessage = scs.getTime();
+      
+      
       for (int stepIndex = 0; stepIndex < steps; stepIndex++)
       {
          RobotSide side = stepIndex % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
@@ -82,23 +101,58 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          Point3D location = new Point3D(stepIndex * stepLength, y, 0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
+         double transferTime = defaultTransferTime + random.nextDouble() * 0.5;
+         double swingTime = defaultSwingTime + random.nextDouble() * 0.5 - 0.2;
 
          if (stepIndex == 0)
+         {
             footstepData.setTransferDuration(swingStartInterval);
+         }
+         else if(stepIndex == 10)
+         {
+            footstepData.setTransferDuration(2.0);
+         }
          else
+         {
             footstepData.setTransferDuration(transferTime);
-         footstepData.setSwingDuration(swingStartInterval - transferTime);
-
-         footsteps.add(footstepData);
-      }
-
+         }
+         
+         footstepData.setSwingDuration(swingTime);
+         
+         takeOffTime += previousSwingTime + footstepData.getTransferDuration();
+         PrintTools.info(stepIndex + ": " + takeOffTime);
+         
+         previousSwingTime = footstepData.getSwingDuration();
+         
+         if(stepIndex == 9)
+         {
+            timeToSendSecondMessage += takeOffTime + previousSwingTime + 1.0;
+         }
+         
+         if(stepIndex < 10)
+         {
+            footstepMessage1.add(footstepData);
+         }
+         else
+         {
+            footstepMessage2.add(footstepData);
+         }
+      } 
+      
       YoVariable<?> yoTime = drcSimulationTestHelper.getSimulationConstructionSet().getVariable("t");
-      TimingChecker timingChecker = new TimingChecker(scs, footsteps);
-      yoTime.addVariableChangedListener(timingChecker);
+      TimingChecker timingChecker1 = new TimingChecker(scs, footstepMessage1, footstepMessage2);
+      yoTime.addVariableChangedListener(timingChecker1);
 
-      drcSimulationTestHelper.send(footsteps);
-      while (!timingChecker.isDone())
+      drcSimulationTestHelper.send(footstepMessage1);
+
+      boolean hasMessageBeenSent = false;
+      while (!timingChecker1.isDone())
       {
+         if(scs.getTime() > timeToSendSecondMessage && !hasMessageBeenSent)
+         {
+            drcSimulationTestHelper.send(footstepMessage2);
+            hasMessageBeenSent = true;
+         }
          assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.2));
       }
    }
@@ -112,18 +166,21 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       private WalkingStateEnum previousWalkingState = WalkingStateEnum.STANDING;
 
       private final SimulationConstructionSet scs;
-      private final FootstepDataListMessage footsteps;
+      private final FootstepDataListMessage footstepMessage1;
+      private final FootstepDataListMessage footstepMessage2;
 
       private boolean isDone = false;
 
-      public TimingChecker(SimulationConstructionSet scs, FootstepDataListMessage footsteps)
+
+      public TimingChecker(SimulationConstructionSet scs, FootstepDataListMessage footstepMessage1, FootstepDataListMessage footstepMessage2)
       {
          this.scs = scs;
-         this.footsteps = footsteps;
+         this.footstepMessage1 = footstepMessage1;
+         this.footstepMessage2 = footstepMessage2;
       }
 
       @Override
-      public void variableChanged(YoVariable<?> v)
+      public void notifyOfVariableChange(YoVariable<?> v)
       {
          if (isDone)
          {
@@ -140,17 +197,45 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
                expectedStartTimeOfNextStep = time;
             }
 
+            
+            //added this to allow the test to keep going with printouts if you comment out the assert
+            boolean success = MathTools.epsilonEquals(expectedStartTimeOfNextStep, time, swingStartTimeEpsilon);
+            if(!success)
+            {
+               PrintTools.error(stepCount + " expected: " + expectedStartTimeOfNextStep + " but was: " + time);
+            }
+            
             assertEquals(failMessage, expectedStartTimeOfNextStep, time, swingStartTimeEpsilon);
 
-            if (stepCount > footsteps.getDataList().size() - 2)
+            if (stepCount > footstepMessage1.size() + footstepMessage2.size() - 2)
             {
                isDone = true;
                return;
             }
-
-            double swingTime = footsteps.get(stepCount).getSwingDuration();
-            double transferTime = footsteps.get(stepCount + 1).getTransferDuration();
-            expectedStartTimeOfNextStep += swingTime + transferTime;
+            
+            if(stepCount < footstepMessage1.size())
+            {
+               double swingTime = footstepMessage1.get(stepCount).getSwingDuration();
+               
+               double transferTime = Double.NaN;
+               if(stepCount == footstepMessage1.size() - 1)
+               {
+                  transferTime = footstepMessage2.get(0).getTransferDuration();
+               }
+               else
+               {
+                  transferTime = footstepMessage1.get(stepCount + 1).getTransferDuration();
+               }
+               
+               expectedStartTimeOfNextStep += swingTime + transferTime;
+            }
+            else
+            {
+               double swingTime = footstepMessage2.get(stepCount - footstepMessage1.size()).getSwingDuration();
+               double transferTime = footstepMessage2.get(stepCount + 1 - footstepMessage1.size()).getTransferDuration();
+               expectedStartTimeOfNextStep += swingTime + transferTime;
+            }
+            
             stepCount++;
          }
 
@@ -200,7 +285,11 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
    private void checkTransferTimes(SimulationConstructionSet scs, double minimumTransferTime)
    {
-      YoDouble firstTransferTime = getDoubleYoVariable(scs, "icpPlannerTransferDuration0", ContinuousCMPBasedICPPlanner.class.getSimpleName());
+      YoDouble firstTransferTime = null; 
+      if(getRobotModel().getCapturePointPlannerParameters() instanceof SmoothCMPPlannerParameters)
+         firstTransferTime = getDoubleYoVariable(scs, "icpPlannerTransferDuration0", SmoothCMPBasedICPPlanner.class.getSimpleName());
+      else if(getRobotModel().getCapturePointPlannerParameters() instanceof ContinuousCMPICPPlannerParameters)
+         firstTransferTime = getDoubleYoVariable(scs, "icpPlannerTransferDuration0", ContinuousCMPBasedICPPlanner.class.getSimpleName());
       assertTrue("Executing transfer that is faster then allowed.", firstTransferTime.getDoubleValue() >= minimumTransferTime);
    }
 

@@ -27,7 +27,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;

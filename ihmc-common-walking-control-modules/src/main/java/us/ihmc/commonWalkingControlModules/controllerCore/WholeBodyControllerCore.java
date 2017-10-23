@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 
@@ -134,6 +134,7 @@ public class WholeBodyControllerCore
       controllerCoreSubmitTimer.startMeasurement();
       reset();
 
+      boolean reinitializationRequested = controllerCoreCommand.isReinitializationRequested();
       currentMode.set(controllerCoreCommand.getControllerCoreMode());
 
       switch (currentMode.getEnumValue())
@@ -141,6 +142,8 @@ public class WholeBodyControllerCore
       case INVERSE_DYNAMICS:
          if (inverseDynamicsSolver != null)
          {
+            if (reinitializationRequested)
+               inverseDynamicsSolver.reinitialize();
             feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
             inverseDynamicsSolver.submitInverseDynamicsCommandList(controllerCoreCommand.getInverseDynamicsCommandList());
          }

@@ -420,7 +420,12 @@ public class WalkingCommandConsumer
          if (handManagers.get(robotSide) != null)
             handManagers.get(robotSide).handleStopAllTrajectoryCommand(command);
       }
-      chestManager.handleStopAllTrajectoryCommand(command);
+      
+      if(chestManager != null)
+      {
+         chestManager.handleStopAllTrajectoryCommand(command);
+      }
+      
       feetManager.handleStopAllTrajectoryCommand(command);
       comHeightManager.handleStopAllTrajectoryCommand(command);
       balanceManager.handleStopAllTrajectoryCommand(command);

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,7 +19,6 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
-import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
@@ -51,7 +51,9 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, stairCase, assertPlannerReturnedResult);
       if (visualize())
          PlanningTestTools.visualizeAndSleep(stairCase, footstepPlan, goalPose);
-      assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
+
+      if(assertPlannerReturnedResult)
+         assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
    }
 
    public void testOverCinderBlockField()
@@ -75,6 +77,29 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
       FramePose initialStanceFootPose = new FramePose(worldFrame);
       initialStanceFootPose.setPosition(0.0, -0.7, 0.0);
+      RobotSide initialStanceSide = RobotSide.RIGHT;
+
+      FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, cinderBlockField, assertPlannerReturnedResult);
+
+      if (visualize())
+      {
+         PlanningTestTools.visualizeAndSleep(cinderBlockField, footstepPlan, goalPose);
+      }
+
+      assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
+   }
+
+   public void testSteppingStones(boolean assertPlannerReturnedResult)
+   {
+      double pathRadius = 3.5;
+      PlanarRegionsList cinderBlockField = PlanarRegionsListExamples.generateSteppingStonesEnvironment(pathRadius);
+
+      FramePose goalPose = new FramePose(worldFrame);
+      goalPose.setPosition(pathRadius + 0.5, pathRadius, 0.0);
+
+      FramePose initialStanceFootPose = new FramePose(worldFrame);
+      initialStanceFootPose.setPosition(0.0, -0.7, 0.0);
+      initialStanceFootPose.appendYawRotation(0.5 * Math.PI);
       RobotSide initialStanceSide = RobotSide.RIGHT;
 
       FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, cinderBlockField, assertPlannerReturnedResult);

@@ -45,7 +45,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -105,7 +105,7 @@ public class WholeBodyInverseDynamicsSolver
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
-      lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, LowLevelJointControlMode.FORCE_CONTROL);
+      lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, JointDesiredControlMode.EFFORT);
 
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
@@ -151,6 +151,13 @@ public class WholeBodyInverseDynamicsSolver
          dynamicsMatrixCalculator.reset();
       else
          inverseDynamicsCalculator.compute();
+   }
+
+   public void reinitialize()
+   {
+      initialize();
+      for (int i = 0; i < lowLevelOneDoFJointDesiredDataHolder.getNumberOfJointsWithDesiredOutput(); i++)
+         lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(i).clear();
    }
 
    public void compute()

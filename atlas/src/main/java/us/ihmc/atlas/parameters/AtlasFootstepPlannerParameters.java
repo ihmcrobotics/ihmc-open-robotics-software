@@ -1,21 +1,50 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
-import us.ihmc.footstepPlanning.aStar.implementations.ReachableFootstepsBasedExpansion;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 
-public class AtlasFootstepPlannerParameters implements PlanarRegionFootstepPlanningParameters
+public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
 {
-   private final double timeout = Double.POSITIVE_INFINITY;
 
    @Override
-   public ReachableFootstepsBasedExpansion getReachableFootstepExpansion()
+   public double getIdealFootstepWidth()
    {
-      return new AtlasReachableFootstepExpansion();
+      return 0.22;
    }
 
    @Override
-   public double getTimeout()
+   public double getIdealFootstepLength()
    {
-      return timeout;
+      return 0.3;
    }
+
+   @Override
+   public double getMaximumStepReach()
+   {
+      return 0.45;
+   }
+
+   @Override
+   public double getMaximumStepYaw()
+   {
+      return 0.4;
+   }
+
+   @Override
+   public double getMinimumStepWidth()
+   {
+      return 0.15;
+   }
+
+   @Override
+   public double getMaximumStepZ()
+   {
+      return 0.25;
+   }
+
+   @Override
+   public double getMaximumStepWidth()
+   {
+      return 0.4;
+   }
+
 }

@@ -10,8 +10,8 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.Axis;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;

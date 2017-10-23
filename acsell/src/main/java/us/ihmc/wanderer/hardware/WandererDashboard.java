@@ -172,7 +172,7 @@ public class WandererDashboard extends JPanel implements PlaybackListener
       VariableChangedListener robotOnGroundChecker = new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             if((leftFootForce.getDoubleValue() + rightFootForce.getDoubleValue()) > 400.0)
             {	
@@ -290,7 +290,7 @@ public class WandererDashboard extends JPanel implements PlaybackListener
    }
 
    @Override
-   public void indexChanged(int newIndex, double newTime)
+   public void notifyOfIndexChange(int newIndex)
    {
       int row = 0;
       for (WandererActuator actuator : WandererActuator.values)

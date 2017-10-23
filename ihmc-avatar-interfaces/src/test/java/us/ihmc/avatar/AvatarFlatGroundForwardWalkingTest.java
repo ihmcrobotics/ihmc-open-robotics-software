@@ -158,10 +158,15 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       Quaternion footOrientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       addFootstep(footLocation, footOrientation, side, footMessage);
 
+      double intitialTransfer = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
+      double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
+      double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
+      int steps = footMessage.footstepDataList.size();
+
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       drcSimulationTestHelper.send(footMessage);
-      double simulationTime = 1 * footMessage.footstepDataList.size() + 1.0;
+      double simulationTime = intitialTransfer + (transfer + swing) * steps + 1.0;
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
       controllerSpy.assertCheckpointsReached();
@@ -209,13 +214,13 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
 
-      magnitude1 = 40; //TODO: overwritten
+//      magnitude1 = 40; //TODO: overwritten
       PrintTools.info("Force magnitude = " + magnitude1 + "N along " + forceDirection1.toString());
       pushRobotController.applyForceDelayed(firstPushCondition, delay1, forceDirection1, magnitude1, duration1);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
 
-      magnitude2 = 50; //TODO:overwritten
+//      magnitude2 = 50; //TODO:overwritten
       PrintTools.info("Force magnitude = " + magnitude2 + "N along " + forceDirection2.toString());
       pushRobotController.applyForceDelayed(secondPushCondition, delay2, forceDirection2, magnitude2, duration2);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
@@ -232,11 +237,6 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       footstepData.setOrientation(orient);
       footstepData.setRobotSide(robotSide);
       message.add(footstepData);
-   }
-
-   protected boolean keepSCSUp()
-   {
-      return false;
    }
 
    private void setupCameraBackView()
@@ -283,7 +283,6 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       String className = getClass().getSimpleName();
 
-      simulationTestingParameters.setKeepSCSUp(keepSCSUp());
       PrintTools.debug("simulationTestingParameters.getKeepSCSUp " + simulationTestingParameters.getKeepSCSUp());
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(flatGround);

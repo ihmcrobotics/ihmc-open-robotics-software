@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.5"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.10"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -26,7 +26,7 @@ mainDependencies {
    compile group: 'org.ejml', name: 'core', version: '0.30'
    compile group: 'org.ejml', name: 'simple', version: '0.30'
    compile group: 'org.ejml', name: 'dense64', version: '0.30'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.3'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
 }
 

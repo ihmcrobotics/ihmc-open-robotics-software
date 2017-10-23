@@ -1,0 +1,2741 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+<model name="escher">
+  <plugin name="gz_comms_manager" filename="libgz_comms_manager.so" />
+  <plugin name="gz_pose_manager" filename="libgz_pose_manager.so" />
+  <static>false</static>
+
+  
+  
+
+  <link name="pelvis">
+    <pose>-0.03035 0 1.055 0 0 0</pose>
+    <collision name="pelvis_collision">
+      <geometry>
+        <box>
+          <size>0.307 0.41 0.26</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="pelvis_visual">
+      <pose>0.03035 -0 -1.055 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/torso.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.002803478 -8.1528e-05 -0.021648112 0 0 0</pose>
+      <mass>12.662540836356</mass>
+      <inertia>
+        <ixx>0.189594996</ixx>
+        <iyy>0.165226373</iyy>
+        <izz>0.191129536</izz>
+        <iyz>2.491e-05</iyz>
+        <ixz>-0.00084363</ixz>
+        <ixy>0.000243698</ixy>
+      </inertia>
+    </inertial>
+    <sensor name="imu_sensor" type="imu">
+      <pose>-0.176191689 0 -0.055105834 0 0 0</pose>
+      <always_on>1</always_on>
+        <imu>
+          <noise>
+            <type>gaussian</type>
+            <rate>
+              <mean>0</mean>
+              <stddev>0.0002</stddev>
+              <bias_mean>7.5e-06</bias_mean>
+              <bias_stddev>8e-07</bias_stddev>
+            </rate>
+            <accel>
+              <mean>0</mean>
+              <stddev>0.017</stddev>
+              <bias_mean>0.1</bias_mean>
+              <bias_stddev>0.001</bias_stddev>
+            </accel>
+          </noise>
+        </imu>
+      <visualize>1</visualize>
+      <topic>imu_sensor</topic>
+    </sensor>
+    <sensor name="kvh_sensor" type="imu">
+      <pose>-0.15365 0 -0.045645 0 0 1.5707963267949</pose>
+      <always_on>1</always_on>
+      <visualize>1</visualize>
+      <update_rate>100.0</update_rate>
+      <imu>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise parameters from Boston Dynamics
+               (http://gazebosim.org/wiki/Sensor_noise):
+                 rates (rad/s): mean=0, stddev=2e-4
+                 accels (m/s/s): mean=0, stddev=1.7e-2
+                 rate bias (rad/s): 5e-6 - 1e-5
+                 accel bias (m/s/s): 1e-1
+               Experimentally, simulation provide rates with noise of
+               about 1e-3 rad/s and accels with noise of about 1e-1 m/s/s.
+               So we don't expect to see the noise unless number of inner iterations
+               are increased.
+
+               We will add bias.  In this model, bias is sampled once for rates
+               and once for accels at startup; the sign (negative or positive)
+               of each bias is then switched with equal probability.  Thereafter,
+               the biases are fixed additive offsets.  We choose
+               bias means and stddevs to produce biases close to the provided
+               data. -->
+          <rate>
+            <mean>0.0</mean>
+            <stddev>2e-4</stddev>
+            <bias_mean>0.0000075</bias_mean>
+            <bias_stddev>0.0000008</bias_stddev>
+          </rate>
+          <accel>
+            <mean>0.0</mean>
+            <stddev>1.7e-2</stddev>
+            <bias_mean>0.1</bias_mean>
+            <bias_stddev>0.001</bias_stddev>
+          </accel>
+        </noise>
+      </imu>
+      <topic>kvh_sensor</topic>
+    </sensor>
+  </link>
+
+  <link name="l_thigh">
+    <pose>-0.0169442 0.132 0.67 0 0 0</pose>
+    <collision name="l_thigh_collision">
+      <pose>0 0 0 0 -0.15 0</pose>
+      <geometry>
+        <box>
+          <size>0.28 0.21 0.45</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="l_thigh_visual">
+      <!--<pose>0.0169442 -0.132 -0.67 0 0 0</pose>-->
+      <pose>0.0 -0.1 -0.90 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/l_thigh.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.004050399 -0.010804671 0.022905819 0 0 0</pose>
+      <mass>7.1064153123855</mass>
+      <inertia>
+        <ixx>0.079832533</ixx>
+        <iyy>0.090497961</iyy>
+        <izz>0.04397275</izz>
+        <iyz>-0.003214845</iyz>
+        <ixz>-0.014464827</ixz>
+        <ixy>0.005608169</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_thigh">
+    <pose>-0.0169442 -0.132 0.67 0 0 0</pose>
+    <collision name="r_thigh_collision">
+      <pose>0 0 0 0 -0.18 0</pose>
+      <geometry>
+        <box>
+          <size>0.28 0.21 0.45</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="r_thigh_visual">
+      <!--<pose>0.0169442 0.132 -0.67 0 0 0</pose>-->
+      <pose>0.0 0.1 -0.90 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/r_thigh.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.003909661 0.011175576 0.022998937 0 0 0</pose>
+      <mass>7.0991535785875</mass>
+      <inertia>
+        <ixx>0.079523937</ixx>
+        <iyy>0.090222577</iyy>
+        <izz>0.044391657</izz>
+        <iyz>0.003378144</iyz>
+        <ixz>-0.014386485</ixz>
+        <ixy>-0.005865006</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="l_shin">
+    <pose>0.0190724 0.1021182 0.2811108 0 0 0</pose>
+    <collision name="l_shin_collision">
+      <pose>0 0 0 0 0.28 0</pose>
+      <geometry>
+        <box>
+          <size>0.13 0.16 0.4512008</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="l_shin_visual">
+      <!--<pose>-0.0190724 -0.1021182 -0.2811108 0 0 0</pose>-->
+      <pose>-0.0 -0.10 -0.49 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/l_shin.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.020130801 -0.001731145 0.054724821 0 0 0</pose>
+      <mass>4.891550698374</mass>
+      <inertia>
+        <ixx>0.049926224</ixx>
+        <iyy>0.051902624</iyy>
+        <izz>0.017996958</izz>
+        <iyz>-0.000412746</iyz>
+        <ixz>0.008459786</ixz>
+        <ixy>-6.1882e-05</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_shin">
+    <pose>0.0190724 -0.1021182 0.2811108 0 0 0</pose>
+    <collision name="r_shin_collision">
+      <pose>0 0 0 0 0.28 0</pose>
+      <geometry>
+        <box>
+          <size>0.13 0.16 0.4512008</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="r_shin_visual">
+      <!--<pose>-0.0190724 0.1021182 -0.2811108 0 0 0</pose>-->
+      <pose>-0.0 0.10 -0.49 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/r_shin.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.020130693 0.001836368 0.05472448 0 0 0</pose>
+      <mass>4.8915506176771</mass>
+      <inertia>
+        <ixx>0.049926754</ixx>
+        <iyy>0.051902784</iyy>
+        <izz>0.01799724</izz>
+        <iyz>0.000377725</iyz>
+        <ixz>0.008459765</ixz>
+        <ixy>8.0717e-05</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="l_foot">
+    <pose>0.025 0.1 0.026724 0 0 0</pose>
+    <collision name="l_foot_collision">
+      <geometry>
+        <box>
+          <size>0.25 0.1485 0.05493235</size>
+        </box>
+      </geometry>
+      <!-- From atlas model -->
+      <surface>
+        <friction>
+          <ode>
+            <mu>0.9</mu>
+            <mu2>0.9</mu2>
+            <fdir1>1 0 0</fdir1>
+          </ode>
+        </friction>
+        <contact>
+          <ode>
+            <max_vel>1.0</max_vel>
+            <min_depth>0.003</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+    <visual name="l_foot_visual">
+      <!--<pose>-0.025 -0.1 -0.026724 0 0 0</pose>-->
+      <pose>-0.0 -0.1 -0.08 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/l_foot.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-0.028540497 0.00037102999999999 0.009582518 0 0 0</pose>
+      <mass>1.7980371518612</mass>
+      <inertia>
+        <ixx>0.003629189</ixx>
+        <iyy>0.007181627</iyy>
+        <izz>0.007515445</izz>
+        <iyz>2.3132e-05</iyz>
+        <ixz>-0.001366256</ixz>
+        <ixy>1.3079e-05</ixy>
+      </inertia>
+    </inertial>
+    <sensor name="l_foot_contact_sensor" type="contact">
+      <always_on>1</always_on>
+      <contact>
+        <collision>l_foot_collision</collision>
+      </contact>
+    </sensor>
+  </link>
+
+  <link name="r_foot">
+    <pose>0.025 -0.1 0.0266724 0 0 0</pose>
+    <collision name="r_foot_collision">
+      <geometry>
+        <box>
+          <size>0.25 0.1485 0.05493235</size>
+        </box>
+      </geometry>
+      <!-- From atlas model -->
+      <surface>
+        <friction>
+          <ode>
+            <mu>0.9</mu>
+            <mu2>0.9</mu2>
+            <fdir1>1 0 0</fdir1>
+          </ode>
+        </friction>
+        <contact>
+          <ode>
+            <max_vel>1.0</max_vel>
+            <min_depth>0.003</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
+    <visual name="r_foot_visual">
+      <!--<pose>-0.025 0.1 -0.0266724 0 0 0</pose>-->
+      <pose>-0.0 0.1 -0.08 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/r_foot.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-0.028252817 -0.00035825099999999 0.009635153 0 0 0</pose>
+      <mass>1.8019124983577</mass>
+      <inertia>
+        <ixx>0.003638673</ixx>
+        <iyy>0.007191304</iyy>
+        <izz>0.007526564</izz>
+        <iyz>-2.3098e-05</iyz>
+        <ixz>-0.001360529</ixz>
+        <ixy>8.912e-06</ixy>
+      </inertia>
+    </inertial>
+    <sensor name="r_foot_contact_sensor" type="contact">
+      <always_on>1</always_on>
+      <contact>
+        <collision>r_foot_collision</collision>
+      </contact>
+    </sensor>
+  </link>
+
+  <link name="l_hip_yaw_trunnion">
+    <pose>0 0.1 0.9 0 0 0</pose>
+    <!-- Axis = "z", -->
+    <inertial>
+      <mass>0.051728795245815</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_hip_yaw_trunnion">
+    <pose>0 -0.1 0.9 0 0 0</pose>
+    <!-- Axis = "z", -->
+    <inertial>
+      <mass>0.051728795245815</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="l_hip_pitch_trunnion">
+    <pose>0 0.1 0.9 0 0 0</pose>
+    <!-- Axis = "y", -->
+    <inertial>
+      <pose>0 0 0 1.5707963267949 0 0</pose>
+      <mass>0.051728795245815</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_hip_pitch_trunnion">
+    <pose>0 -0.1 0.9 0 0 0</pose>
+    <!-- Axis = "y", -->
+    <inertial>
+      <pose>0 0 0 1.5707963267949 0 0</pose>
+      <mass>0.051728795245815</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+
+  <link name="l_ankle_pitch_trunnion">
+    <pose>0 0.1 0.08 0 0 0</pose>
+    <!-- Axis = "y", -->
+    <inertial>
+      <pose>0 0 0 1.5707963267949 0 0</pose>
+      <mass>0.051728795245815</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_ankle_pitch_trunnion">
+    <pose>0 -0.1 0.08 0 0 0</pose>
+    <!-- Axis = "y", -->
+    <inertial>
+      <pose>0 0 0 1.5707963267949 0 0</pose>
+      <mass>0.051728795245815</mass>
+      <inertia>
+        <ixx>0.0085833333333333</ixx>
+        <iyy>0.0085833333333333</iyy>
+        <izz>0.00075</izz>
+        <ixy>0</ixy>
+        <ixz>0</ixz>
+        <iyz>0</iyz>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="l_hip_yaw" type="revolute">
+    <parent>
+      pelvis
+    </parent>
+    <child>
+      l_hip_yaw_trunnion
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-0.34906585039887</lower>
+        <upper>0.78539816339745</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_hip_yaw" type="revolute">
+    <parent>
+      pelvis
+    </parent>
+    <child>
+      r_hip_yaw_trunnion
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-0.78539816339745</lower>
+        <upper>0.34906585039887</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="l_hip_roll" type="revolute">
+    <parent>
+      l_hip_yaw_trunnion
+    </parent>
+    <child>
+      l_hip_pitch_trunnion
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-0.5235987755983</lower>
+        <upper>0.78539816339745</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_hip_roll" type="revolute">
+    <parent>
+      r_hip_yaw_trunnion
+    </parent>
+    <child>
+      r_hip_pitch_trunnion
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-0.78539816339745</lower>
+        <upper>0.5235987755983</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="l_hip_pitch" type="revolute">
+    <pose>0.0169442 -0.032 0.23 0 0 0</pose>
+    <parent>
+      l_hip_pitch_trunnion
+    </parent>
+    <child>
+      l_thigh
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-2.0943951023932</lower>
+        <upper>0.5235987755983</upper>
+        <effort>200</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_hip_pitch" type="revolute">
+    <pose>0.0169442 0.032 0.23 0 0 0</pose>
+    <parent>
+      r_hip_pitch_trunnion
+    </parent>
+    <child>
+      r_thigh
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-2.0943951023932</lower>
+        <upper>0.5235987755983</upper>
+        <effort>200</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="l_knee_pitch" type="revolute">
+    <pose>-0.0190724 -0.0021182 0.2088892 0 0 0</pose>
+    <parent>
+      l_thigh
+    </parent>
+    <child>
+      l_shin
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>0</lower>
+        <upper>2.3561944901923</upper>
+        <effort>300</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_knee_pitch" type="revolute">
+    <pose>-0.0190724 0.0021182 0.2088892 0 0 0</pose>
+    <parent>
+      r_thigh
+    </parent>
+    <child>
+      r_shin
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>0</lower>
+        <upper>2.3561944901923</upper>
+        <effort>300</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="l_ankle_pitch" type="revolute">
+    <parent>
+      l_shin
+    </parent>
+    <child>
+      l_ankle_pitch_trunnion
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-0.95993108859688</lower>
+        <upper>0.61086523819802</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_ankle_pitch" type="revolute">
+    <parent>
+      r_shin
+    </parent>
+    <child>
+      r_ankle_pitch_trunnion
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-0.95993108859688</lower>
+        <upper>0.61086523819802</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="l_ankle_roll" type="revolute">
+    <pose>-0.025 0 0.053276 0 0 0</pose>
+    <parent>
+      l_ankle_pitch_trunnion
+    </parent>
+    <child>
+      l_foot
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-0.5235987755983</lower>
+        <upper>0.5235987755983</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <provide_feedback>1</provide_feedback>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_ankle_roll" type="revolute">
+    <pose>-0.025 0 0.0533276 0 0 0</pose>
+    <parent>
+      r_ankle_pitch_trunnion
+    </parent>
+    <child>
+      r_foot
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-0.5235987755983</lower>
+        <upper>0.5235987755983</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <provide_feedback>1</provide_feedback>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+
+  <joint name="torso_yaw" type="revolute">
+    <parent>
+      pelvis
+    </parent>
+    <child>
+      chest
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-0.78539816339745</lower>
+        <upper>0.78539816339745</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="chest">
+    <pose>-0.02515 0 1.3455 0 0 0</pose>
+    <collision name="chest_collision">
+      <geometry>
+        <box>
+          <size>0.24 0.43 0.325</size>
+        </box>
+      </geometry>
+    </collision>
+    <collision name="chest_collision_2">
+      <pose>0.02515 0.139 0.3125 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.1 0.08 0.33</size>
+        </box>
+      </geometry>
+    </collision>
+    <collision name="chest_collision_3">
+      <pose>0.02515 -0.139 0.3125 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.1 0.08 0.33</size>
+        </box>
+      </geometry>
+    </collision>
+    <collision name="chest_collision_4">
+      <pose>0.02515 0 0.4795 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.05 0.22 0.045</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="chest_visual">
+      <!--<pose>0.02515 -0 -1.3455 0 0 0</pose>-->
+      <pose>0.0 -0 -1.3455 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/chest.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.000498614 -0.000572102 0.0010705200000001 0 0 0</pose>
+      <mass>15.967544717148</mass>
+      <inertia>
+        <ixx>0.320061097</ixx>
+        <iyy>0.258881187</iyy>
+        <izz>0.19263458</izz>
+        <iyz>0.005595512</iyz>
+        <ixz>-0.006857708</ixz>
+        <ixy>-0.001679142</ixy>
+      </inertia>
+    </inertial>
+    <sensor name="camera.ptgrey" type="camera">
+      <pose>0.1323009 -0.0675 0.2217387 0 0.611 0</pose>
+      <camera>
+        <horizontal_fov>1.75</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.5</near>
+          <far>30</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <!-- Noise is sampled independently per pixel on each frame.
+               That pixel's noise value is added to each of its color
+               channels, which at that point lie in the range [0,1]. -->
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>30.0</updateRate>
+        <cameraName>chest/camera</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>camera.ptgrey</frameName>
+        <hackBaseline>0.0</hackBaseline>
+        <distortionK1>-0.293600</distortionK1>
+        <distortionK2>0.212124</distortionK2>
+        <distortionK3>-0.138326</distortionK3>
+        <distortionT1>0.000764</distortionT1>
+        <distortionT2>-0.000452</distortionT2>
+      </plugin>
+    </sensor>
+  </link>
+
+  <joint name="neck_yaw" type="revolute">
+    <pose>0 -0.003 -0.021525 0 0 0</pose>
+    <parent>
+      chest
+    </parent>
+    <child>
+      neck
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-1.5707963267949</lower>
+        <upper>1.5707963267949</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="neck">
+    <pose>0 0.003 1.559525 0 0 0</pose>
+    <collision name="neck_collision">
+      <geometry>
+        <box>
+          <size>0.0541 0.096 0.05405</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="neck_visual">
+      <!--<pose>-0 -0.003 -1.559525 0 0 0</pose>-->
+      <pose>-0 0.0 -1.538 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/neck.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/FlatBlack</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-1e-08 -0.002711219 0.004186325 0 0 0</pose>
+      <mass>0.4430192306267</mass>
+      <inertia>
+        <ixx>0.000347468</ixx>
+        <iyy>0.000151286</iyy>
+        <izz>0.000333572</izz>
+        <iyz>-8.157e-06</iyz>
+        <ixz>-0</ixz>
+        <ixy>0</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="neck_pitch" type="revolute">
+    <pose>0.0142568 0 -0.07445 0 0 0</pose>
+    <parent>
+      neck
+    </parent>
+    <child>
+      head
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-0.5235987755983</lower>
+        <upper>1.0471975511966</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="head">
+    <pose>-0.0142568 0 1.64105 0 0 0</pose>
+    <collision name="head_collision">
+      <geometry>
+        <box>
+          <size>0.155386 0.122 0.2991</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="head_visual">
+      <!--<pose>0.0142568 -0 -1.64105 0 0 0</pose>-->
+      <pose>0.0 0.0 -1.5666 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/head.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Gray</name>
+        </script>
+      </material>
+    </visual>
+    <sensor type="multicamera" name="camera_multisense">
+      <update_rate>10.0</update_rate>
+      <camera name="left">
+        <pose>0 0 0 0 0 0</pose>
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>800</width>
+          <height>800</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <camera name="right">
+        <pose>0 -0.07 0 0 0 0</pose>
+        <horizontal_fov>1.3962634</horizontal_fov>
+        <image>
+          <width>800</width>
+          <height>800</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.02</near>
+          <far>300</far>
+        </clip>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.007</stddev>
+        </noise>
+      </camera>
+      <plugin name="stereo_camera_controller" filename="libgazebo_ros_multicamera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>0.0</updateRate>
+        <cameraName>multisense</cameraName>
+        <imageTopicName>image_raw</imageTopicName>
+        <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+        <frameName>/multisense/left_camera_optical_frame</frameName>
+        <!--<rightFrameName>/multisense/right_camera_optical_frame</rightFrameName>-->
+        <hackBaseline>0.07</hackBaseline>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+      </plugin>
+    </sensor>
+    <inertial>
+      <pose>-0.004786718 1.1808e-05 0.064075812 0 0 0</pose>
+      <mass>1.7856228555403</mass>
+      <inertia>
+        <ixx>0.009989911</ixx>
+        <iyy>0.010295295</iyy>
+        <izz>0.003904584</izz>
+        <iyz>-8.541e-06</iyz>
+        <ixz>0.002192988</ixz>
+        <ixy>3.49e-06</ixy>
+      </inertia>
+    </inertial>
+</link>
+
+  <joint name="head_hokuyo_joint" type="revolute">
+    <pose>-0.0098 0 0 0 0 0</pose>
+    <parent>
+      head
+    </parent>
+    <child>
+      head_hokuyo_link
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-1e+16</lower>
+        <upper>1e+16</upper>
+        <effort>150</effort>
+        <velocity>12</velocity>
+      </limit>
+      <dynamics>
+        <damping>1.0</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="head_hokuyo_link">
+    <pose>0.0098 0 1.6556 0 0 0</pose>
+    <collision name="head_hokuyo_link_collision">
+      <geometry>
+        <box>
+          <size>0.1395 0.06 0.093</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="head_hokuyo_link_visual">
+      <pose>0 0 0 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/head_lidar.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/FlatBlack</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.015563303 -2.21e-06 -0.007631224 0 0 0</pose>
+      <mass>0.44909881868181</mass>
+      <inertia>
+        <ixx>0.000368817</ixx>
+        <iyy>0.000869352</iyy>
+        <izz>0.000701866</izz>
+        <iyz>-2.1e-08</iyz>
+        <ixz>-8.417e-06</ixz>
+        <ixy>5.5e-08</ixy>
+      </inertia>
+    </inertial>
+    <sensor name="lidar.head_hokuyo" type="ray">
+      <!-- Hokuyo UTM-30LX-EW -->
+      <always_on>1</always_on>
+      <update_rate>40</update_rate>
+      <pose>0.0397 0 0.0115 0 0 0</pose>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>1081</samples>
+            <resolution>1</resolution>
+            <min_angle>-2.35619449</min_angle>
+            <max_angle>2.35619449</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>.1</min>
+          <max>30</max>
+          <resolution>.05</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_head_hokuyo" filename="libgazebo_ros_laser.so">
+        <topicName>/laser/scan/</topicName>
+        <frameName>head_lidar_receiver</frameName>
+      </plugin>
+    </sensor>
+  </link>
+
+  <joint name="l_shoulder_pitch" type="revolute">
+    <parent>
+      chest
+    </parent>
+    <child>
+      l_shoulder
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-3.1415926535898</lower>
+        <upper>1.0471975511966</upper>
+        <effort>60</effort>
+        <velocity>2.0944</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_shoulder_pitch" type="revolute">
+    <parent>
+      chest
+    </parent>
+    <child>
+      r_shoulder
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-3.1415926535898</lower>
+        <upper>1.0471975511966</upper>
+        <effort>60</effort>
+        <velocity>2.0944</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="l_shoulder">
+    <pose>0 0.1275 1.4534 0 0 0</pose>
+    <collision name="l_shoulder_collision">
+      <pose>0 0.102 3.7499999999913e-05 1.5707963267949 0 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.05</radius>
+          <length>0.2</length>
+        </cylinder>
+      </geometry>
+    </collision>
+    <visual name="l_shoulder_visual">
+      <pose>-0 -0.1275 -1.4534 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/ShoulderPitchLeft.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Green</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.000688524 0.082497455 -0.00011075299999996 0 0 0</pose>
+      <mass>1.3908820991708</mass>
+      <inertia>
+        <ixx>0.002733115</ixx>
+        <iyy>0.001266362</iyy>
+        <izz>0.002795471</izz>
+        <iyz>-1.541e-06</iyz>
+        <ixz>1.54e-07</ixz>
+        <ixy>7.3154e-05</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_shoulder">
+    <pose>0 -0.1275 1.4534 0 0 0</pose>
+    <collision name="r_shoulder_collision">
+      <pose>0 -0.102 3.7499999999913e-05 1.5707963267949 0 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.05</radius>
+          <length>0.2</length>
+        </cylinder>
+      </geometry>
+    </collision>
+    <visual name="r_shoulder_visual">
+      <pose>-0 0.1275 -1.4534 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/ShoulderPitchRight.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Green</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.000693283 -0.082497455 -0.00011074799999999 0 0 0</pose>
+      <mass>1.3908820991708</mass>
+      <inertia>
+        <ixx>0.002733115</ixx>
+        <iyy>0.001266353</iyy>
+        <izz>0.002795463</izz>
+        <iyz>1.541e-06</iyz>
+        <ixz>1.21e-07</ixz>
+        <ixy>-7.2667e-05</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="l_shoulder_roll" type="revolute">
+    <parent>
+      l_shoulder
+    </parent>
+    <child>
+      l_shoulder_roll_link
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-0.5235987755983</lower>
+        <upper>3.1415926535898</upper>
+        <effort>60</effort>
+        <velocity>2.0944</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_shoulder_roll" type="revolute">
+    <parent>
+      r_shoulder
+    </parent>
+    <child>
+      r_shoulder_roll_link
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-3.1415926535898</lower>
+        <upper>0.5235987755983</upper>
+        <effort>60</effort>
+        <velocity>2.0944</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="l_shoulder_roll_link">
+    <pose>0 0.2905 1.4534 0 0 0</pose>
+    <visual name="l_shoulder_roll_link_visual">
+      <pose>-0 -0.2905 -1.4534375 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/ShoulderRollLeft.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Grey</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-0.000157497 -6.628799999997e-05 -0.015018902 0 0 0</pose>
+      <mass>0.73371135570505</mass>
+      <inertia>
+        <ixx>0.000940092</ixx>
+        <iyy>0.000866608</iyy>
+        <izz>0.000365724</izz>
+        <iyz>2.817e-06</iyz>
+        <ixz>-1.865e-06</ixz>
+        <ixy>-7e-09</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_shoulder_roll_link">
+    <pose>0 -0.2905 1.4534 0 0 0</pose>
+    <visual name="r_shoulder_roll_link_visual">
+      <pose>-0 0.2905 -1.4534375 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/ShoulderRollRight.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Grey</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.000157497 6.628799999997e-05 -0.015018902 0 0 0</pose>
+      <mass>0.73371135570505</mass>
+      <inertia>
+        <ixx>0.000940092</ixx>
+        <iyy>0.000866608</iyy>
+        <izz>0.000365724</izz>
+        <iyz>-2.817e-06</iyz>
+        <ixz>1.865e-06</ixz>
+        <ixy>-7e-09</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="l_shoulder_yaw" type="revolute">
+    <parent>
+      l_shoulder_roll_link
+    </parent>
+    <child>
+      l_arm
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-2.0943951023932</lower>
+        <upper>2.0943951023932</upper>
+        <effort>60</effort>
+        <velocity>2.0944</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_shoulder_yaw" type="revolute">
+    <parent>
+      r_shoulder_roll_link
+    </parent>
+    <child>
+      r_arm
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-2.0943951023932</lower>
+        <upper>2.0943951023932</upper>
+        <effort>60</effort>
+        <velocity>2.0944</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="l_arm">
+    <pose>0 0.2905 1.4534 0 0 0</pose>
+    <collision name="l_arm_collision">
+      <pose>0 0 -0.21829375 0 0 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.05</radius>
+          <length>0.32</length>
+        </cylinder>
+      </geometry>
+    </collision>
+    <visual name="l_arm_visual">
+      <pose>-0 -0.2905 -1.4534 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/ShoulderYawLeft.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Green</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>4e-09 0.00094170500000001 -0.209115474 0 0 0</pose>
+      <mass>1.3364954742869</mass>
+      <inertia>
+        <ixx>0.007190942</ixx>
+        <iyy>0.007116565</iyy>
+        <izz>0.000965322</izz>
+        <iyz>-0.000130703</iyz>
+        <ixz>-0</ixz>
+        <ixy>-1e-09</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_arm">
+    <pose>0 -0.2905 1.4534 0 0 0</pose>
+    <collision name="r_arm_collision">
+      <pose>0 0 -0.21829375 0 0 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.05</radius>
+          <length>0.32</length>
+        </cylinder>
+      </geometry>
+    </collision>
+    <visual name="r_arm_visual">
+      <pose>-0 0.2905 -1.4534 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/ShoulderYawRight.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Green</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-4e-09 -0.00094170500000001 -0.209115474 0 0 0</pose>
+      <mass>1.3364954742869</mass>
+      <inertia>
+        <ixx>0.007190942</ixx>
+        <iyy>0.007116565</iyy>
+        <izz>0.000965322</izz>
+        <iyz>0.000130703</iyz>
+        <ixz>0</ixz>
+        <ixy>-1e-09</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="l_elbow_pitch" type="revolute">
+    <parent>
+      l_arm
+    </parent>
+    <child>
+      l_elbow_link
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-0.5235987755983</lower>
+        <upper>3.6651914291881</upper>
+        <effort>60</effort>
+        <velocity>2.0944</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_elbow_pitch" type="revolute">
+    <parent>
+      r_arm
+    </parent>
+    <child>
+      r_elbow_link
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-0.5235987755983</lower>
+        <upper>3.6651914291881</upper>
+        <effort>60</effort>
+        <velocity>2.0944</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="l_elbow_link">
+    <pose>0 0.2905 1.1348 0 0 0</pose>
+    <visual name="l_elbow_link_visual">
+      <pose>-0 -0.2905 -1.1348 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/ElbowLeft.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/FlatBlack</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.014760471 0.00015822900000001 -3.8344000000023e-05 0 0 0</pose>
+      <mass>0.95581435823612</mass>
+      <inertia>
+        <ixx>0.000477001</ixx>
+        <iyy>0.001214959</iyy>
+        <izz>0.001118907</izz>
+        <iyz>1.1e-08</iyz>
+        <ixz>-4.205e-06</ixz>
+        <ixy>-2.405e-06</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_elbow_link">
+    <pose>0 -0.2905 1.1348 0 0 0</pose>
+    <visual name="r_elbow_link_visual">
+      <pose>-0 0.2905 -1.1348 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/ElbowRight.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/FlatBlack</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.014760471 0.00015822899999995 -3.8344000000023e-05 0 0 0</pose>
+      <mass>0.95581435823612</mass>
+      <inertia>
+        <ixx>0.000477001</ixx>
+        <iyy>0.001214959</iyy>
+        <izz>0.001118907</izz>
+        <iyz>1.1e-08</iyz>
+        <ixz>-4.205e-06</ixz>
+        <ixy>-2.405e-06</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="l_elbow_roll" type="revolute">
+    <parent>
+      l_elbow_link
+    </parent>
+    <child>
+      l_forearm
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-2.0943951023932</lower>
+        <upper>2.0943951023932</upper>
+        <effort>60</effort>
+        <velocity>2.0944</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_elbow_roll" type="revolute">
+    <parent>
+      r_elbow_link
+    </parent>
+    <child>
+      r_forearm
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-2.0943951023932</lower>
+        <upper>2.0943951023932</upper>
+        <effort>60</effort>
+        <velocity>2.0944</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="l_forearm">
+    <pose>0 0.2905 1.1348 0 0 0</pose>
+    <collision name="l_forearm_collision">
+      <pose>0.1126 0 3.7499999999913e-05 0 1.5707963267949 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.05</radius>
+          <length>0.1</length>
+        </cylinder>
+      </geometry>
+    </collision>
+    <visual name="l_forearm_visual">
+      <pose>-0 -0.2905 -1.1348 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/WristYawLeft.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Green</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.145307207 -0.00075732699999997 5.1295999999867e-05 0 0 0</pose>
+      <mass>1.0227212903647</mass>
+      <inertia>
+        <ixx>0.000942831</ixx>
+        <iyy>0.001534454</iyy>
+        <izz>0.001587995</izz>
+        <iyz>4.3e-07</iyz>
+        <ixz>2.35e-07</ixz>
+        <ixy>-3.4005e-05</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_forearm">
+    <pose>0 -0.2905 1.1348 0 0 0</pose>
+    <collision name="r_forearm_collision">
+      <pose>0.1126 0 3.7499999999913e-05 0 1.5707963267949 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.05</radius>
+          <length>0.1</length>
+        </cylinder>
+      </geometry>
+    </collision>
+    <visual name="r_forearm_visual">
+      <pose>-0 0.2905 -1.1348 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/WristYawRight.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/Green</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.145307207 0.00072781699999996 -5.9229999999966e-05 0 0 0</pose>
+      <mass>1.0227212903647</mass>
+      <inertia>
+        <ixx>0.000942865</ixx>
+        <iyy>0.001532968</iyy>
+        <izz>0.001589516</izz>
+        <iyz>2.168e-06</iyz>
+        <ixz>-5.48e-07</ixz>
+        <ixy>3.3796e-05</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="l_wrist_pitch" type="revolute">
+    <parent>
+      l_forearm
+    </parent>
+    <child>
+      l_foreforearm
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-1.5707963267949</lower>
+        <upper>1.5707963267949</upper>
+        <effort>60</effort>
+        <velocity>2.0944</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_wrist_pitch" type="revolute">
+    <parent>
+      r_forearm
+    </parent>
+    <child>
+      r_foreforearm
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-1.5707963267949</lower>
+        <upper>1.5707963267949</upper>
+        <effort>60</effort>
+        <velocity>2.0944</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="l_foreforearm">
+    <pose>0.2071 0.2905 1.1348 0 0 0</pose>
+    <collision name="l_foreforearm_collision">
+      <pose>0.00205 0 3.7449999999994e-05 1.5707963267949 0 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.05</radius>
+          <length>0.08</length>
+        </cylinder>
+      </geometry>
+    </collision>
+    <collision name="l_foreforearm_collision2">
+      <pose>0.07705 0 3.7449999999994e-05 0 0 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.05</radius>
+          <length>0.08</length>
+        </cylinder>
+      </geometry>
+    </collision>
+    <visual name="l_foreforearm_visual">
+      <pose>-0.2071 -0.2905 -1.1348 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/WristPitchRollLeft.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/FlatBlack</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.037049556 -6.1067999999997e-05 9.8300999999967e-05 0 0 0</pose>
+      <mass>1.1603440741032</mass>
+      <inertia>
+        <ixx>0.000543674</ixx>
+        <iyy>0.002086265</iyy>
+        <izz>0.002086264</izz>
+        <iyz>-3.6e-08</iyz>
+        <ixz>4.323e-06</ixz>
+        <ixy>4.334e-06</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_foreforearm">
+    <pose>0.2071 -0.2905 1.1348 0 0 0</pose>
+    <collision name="r_foreforearm_collision">
+      <pose>0.00205 0 3.7449999999994e-05 1.5707963267949 0 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.05</radius>
+          <length>0.08</length>
+        </cylinder>
+      </geometry>
+    </collision>
+    <collision name="r_foreforearm_collision2">
+      <pose>0.07705 0 3.7449999999994e-05 0 0 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.05</radius>
+          <length>0.08</length>
+        </cylinder>
+      </geometry>
+    </collision>
+    <visual name="r_foreforearm_visual">
+      <pose>-0.2071 0.2905 -1.1348 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/WristPitchRollRight.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/FlatBlack</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.037049556 6.1067999999997e-05 -2.330099999992e-05 0 0 0</pose>
+      <mass>1.1603440741032</mass>
+      <inertia>
+        <ixx>0.000543674</ixx>
+        <iyy>0.002086265</iyy>
+        <izz>0.002086264</izz>
+        <iyz>-3.6e-08</iyz>
+        <ixz>-4.323e-06</ixz>
+        <ixy>-4.334e-06</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="l_wrist_yaw" type="revolute">
+    <parent>
+      l_foreforearm
+    </parent>
+    <child>
+      l_palm
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-1.5707963267949</lower>
+        <upper>1.5707963267949</upper>
+        <effort>60</effort>
+        <velocity>2.0944</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_wrist_yaw" type="revolute">
+    <parent>
+      r_foreforearm
+    </parent>
+    <child>
+      r_palm
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-1.5707963267949</lower>
+        <upper>1.5707963267949</upper>
+        <effort>60</effort>
+        <velocity>2.0944</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="l_palm">
+    <self_collide>1</self_collide>
+    <pose>0.2812 0.2905 1.1348 0 0 0</pose>
+    <collision name="l_palm_collision">
+      <pose>0.124749 0 0.0049999999999999 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.18 0.071 0.105</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="l_palm_visual">
+      <pose>-0.2812 -0.2905 -1.1348 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/PalmLeft.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/FlatBlack</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.119004029 -4.5050999999963e-05 -0.003953203 0 0 0</pose>
+      <mass>1.5249288992275</mass>
+      <inertia>
+        <ixx>0.001459459</ixx>
+        <iyy>0.007087323</iyy>
+        <izz>0.006366048</izz>
+        <iyz>-7.05e-07</iyz>
+        <ixz>8.297e-06</ixz>
+        <ixy>5.664e-06</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_palm">
+    <self_collide>1</self_collide>
+    <pose>0.2812 -0.2905 1.1348 0 0 0</pose>
+    <collision name="r_palm_collision">
+      <pose>0.124749 0 0.0049999999999999 0 0 0</pose>
+      <geometry>
+        <box>
+          <size>0.18 0.071 0.105</size>
+        </box>
+      </geometry>
+    </collision>
+    <visual name="r_palm_visual">
+      <pose>-0.2812 0.2905 -1.1348 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/PalmRight.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/FlatBlack</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.119004029 0.00010421999999999 -0.0047406059999999 0 0 0</pose>
+      <mass>1.5249288992275</mass>
+      <inertia>
+        <ixx>0.001449269</ixx>
+        <iyy>0.007077146</iyy>
+        <izz>0.006366035</izz>
+        <iyz>2.94e-07</iyz>
+        <ixz>0.000141321</ixz>
+        <ixy>-8.856e-06</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="l_index_yaw" type="revolute">
+    <parent>
+      l_palm
+    </parent>
+    <child>
+      l_index_link
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-1.5707963267949</lower>
+        <upper>0.78539816339745</upper>
+        <effort>4</effort>
+        <velocity>4.1888</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_index_yaw" type="revolute">
+    <parent>
+      r_palm
+    </parent>
+    <child>
+      r_index_link
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-0.78539816339745</lower>
+        <upper>1.5707963267949</upper>
+        <effort>4</effort>
+        <velocity>4.1888</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="l_index_link">
+    <pose>0.499698 0.2905 1.1618 0 0 0</pose>
+    <self_collide>1</self_collide>
+    <collision name="l_index_link_collision">
+      <pose>0.04442185 -0.00154045 4.2800000000121e-05 0 -1.5707963267949 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.025</radius>
+          <length>0.1</length>
+        </cylinder>
+      </geometry>
+    </collision>
+    <visual name="l_index_link_visual">
+      <pose>-0.499698 -0.2905 -1.1618 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/PointerLeft.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/FlatBlack</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.041090919 0.00061939700000002 5.9685999999948e-05 0 0 0</pose>
+      <!--
+      <mass>0.093812220707729</mass>
+      <inertia>
+        <ixx>9.743e-06</ixx>
+        <iyy>7.8687e-05</iyy>
+        <izz>7.5823e-05</izz>
+        <iyz>-1.3e-08</iyz>
+        <ixz>6.9e-08</ixz>
+        <ixy>-6.19e-07</ixy>
+      </inertia>
+      -->
+      <mass>0.010345759049163</mass>
+      <inertia>
+        <ixx>0.0005</ixx>
+        <iyy>0.0005</iyy>
+        <izz>0.0005</izz>
+        <iyz>0</iyz>
+        <ixz>0</ixz>
+        <ixy>0</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_index_link">
+    <pose>0.499698 -0.2905 1.1618 0 0 0</pose>
+    <self_collide>1</self_collide>
+    <collision name="r_index_link_collision">
+      <pose>0.04442185 0.00154045 4.2800000000121e-05 0 -1.5707963267949 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.025</radius>
+          <length>0.1</length>
+        </cylinder>
+      </geometry>
+    </collision>
+    <visual name="r_index_link_visual">
+      <pose>-0.499698 0.2905 -1.1618 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/PointerRight.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/FlatBlack</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.041090919 -0.00061939700000002 2.5814000000013e-05 0 0 0</pose>
+      <!--
+      <mass>0.093812220707729</mass>
+      <inertia>
+        <ixx>9.743e-06</ixx>
+        <iyy>7.8687e-05</iyy>
+        <izz>7.5823e-05</izz>
+        <iyz>-1.3e-08</iyz>
+        <ixz>-6.9e-08</ixz>
+        <ixy>6.19e-07</ixy>
+      </inertia>
+      -->
+      <mass>0.010345759049163</mass>
+      <inertia>
+        <ixx>0.0005</ixx>
+        <iyy>0.0005</iyy>
+        <izz>0.0005</izz>
+        <iyz>0</iyz>
+        <ixz>0</ixz>
+        <ixy>0</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="l_ring_yaw" type="revolute">
+    <parent>
+      l_palm
+    </parent>
+    <child>
+      l_ring_link
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-1.5707963267949</lower>
+        <upper>0.78539816339745</upper>
+        <effort>4</effort>
+        <velocity>4.1888</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_ring_yaw" type="revolute">
+    <parent>
+      r_palm
+    </parent>
+    <child>
+      r_ring_link
+    </child>
+    <axis>
+      <xyz>0 0 1</xyz>
+      <limit>
+        <lower>-0.78539816339745</lower>
+        <upper>1.5707963267949</upper>
+        <effort>4</effort>
+        <velocity>4.1888</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <link name="l_ring_link">
+    <pose>0.499698 0.2905 1.1078 0 0 0</pose>
+    <self_collide>1</self_collide>
+    <collision name="l_ring_link_collision">
+      <pose>0.04442185 -0.00154045 3.2300000000207e-05 0 -1.5707963267949 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.025</radius>
+          <length>0.1</length>
+        </cylinder>
+      </geometry>
+    </collision>
+    <visual name="l_ring_link_visual">
+      <pose>-0.499698 -0.2905 -1.1078 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/RingLeft.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/FlatBlack</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.041090919 0.00061939700000002 4.9186000000034e-05 0 0 0</pose>
+      <!--
+      <mass>0.093812220707729</mass>
+      <inertia>
+        <ixx>9.743e-06</ixx>
+        <iyy>7.8687e-05</iyy>
+        <izz>7.5823e-05</izz>
+        <iyz>-1.3e-08</iyz>
+        <ixz>6.9e-08</ixz>
+        <ixy>-6.19e-07</ixy>
+      </inertia>
+      -->
+      <mass>0.010345759049163</mass>
+      <inertia>
+        <ixx>0.0005</ixx>
+        <iyy>0.0005</iyy>
+        <izz>0.0005</izz>
+        <iyz>0</iyz>
+        <ixz>0</ixz>
+        <ixy>0</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_ring_link">
+    <pose>0.499698 -0.2905 1.1618 0 0 0</pose>
+    <self_collide>1</self_collide>
+    <collision name="r_ring_link_collision">
+      <pose>0.04442185 0.00154045 -0.0539677 0 -1.5707963267949 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.025</radius>
+          <length>0.1</length>
+        </cylinder>
+      </geometry>
+    </collision>
+    <visual name="r_ring_link_visual">
+      <pose>-0.499698 0.2905 -1.1618 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/RingRight.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/FlatBlack</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.041090919 -0.00061939700000002 -0.053984686 0 0 0</pose>
+      <!--
+      <mass>0.093812220707729</mass>
+      <inertia>
+        <ixx>9.743e-06</ixx>
+        <iyy>7.8687e-05</iyy>
+        <izz>7.5823e-05</izz>
+        <iyz>-1.3e-08</iyz>
+        <ixz>-6.9e-08</ixz>
+        <ixy>6.19e-07</ixy>
+      </inertia>
+      -->
+      <mass>0.010345759049163</mass>
+      <inertia>
+        <ixx>0.0005</ixx>
+        <iyy>0.0005</iyy>
+        <izz>0.0005</izz>
+        <iyz>0</iyz>
+        <ixz>0</ixz>
+        <ixy>0</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="l_thumb_roll" type="revolute">
+    <parent>
+      l_palm
+    </parent>
+    <child>
+      l_thumb_base
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-1.5707963267949</lower>
+        <upper>1.5707963267949</upper>
+        <upper>0</upper>
+        <effort>4</effort>
+        <velocity>4.1888</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+    <physics>
+      <ode>
+        <cfm_damping>1</cfm_damping>
+      </ode>
+    </physics>
+  </joint>
+
+  <joint name="r_thumb_roll" type="revolute">
+    <parent>
+      r_palm
+    </parent>
+    <child>
+      r_thumb_base
+    </child>
+    <axis>
+      <xyz>1 0 0</xyz>
+      <limit>
+        <lower>-1.5707963267949</lower>
+        <upper>1.5707963267949</upper>
+        <upper>0</upper>
+        <effort>4</effort>
+        <velocity>4.1888</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+  </joint>
+
+  <link name="l_thumb_base">
+    <pose>0.38659 0.2905 1.15009 0 0 0</pose>
+    <visual name="l_thumb_base_visual">
+      <pose>-0.38659 -0.2905 -1.15009 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/ThumbBaseLeft.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/FlatBlack</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.029033874 -4.4464999999994e-05 0.022101136 0 0 0</pose>
+      <mass>0.18707426326041</mass>
+      <inertia>
+        <ixx>7.244e-05</ixx>
+        <iyy>6.6527e-05</iyy>
+        <izz>4.7191e-05</izz>
+        <iyz>-2.64e-07</iyz>
+        <ixz>4.69e-07</ixz>
+        <ixy>-9e-09</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_thumb_base">
+    <pose>0.38659 -0.2905 1.15009 0 0 0</pose>
+    <visual name="r_thumb_base_visual">
+      <pose>-0.38659 0.2905 -1.15009 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/ThumbBaseRight.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/FlatBlack</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>0.029033874 4.4464999999994e-05 0.022101136 0 0 0</pose>
+      <mass>0.18707426326041</mass>
+      <inertia>
+        <ixx>7.244e-05</ixx>
+        <iyy>6.6527e-05</iyy>
+        <izz>4.7191e-05</izz>
+        <iyz>2.64e-07</iyz>
+        <ixz>4.69e-07</ixz>
+        <ixy>9e-09</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <joint name="l_thumb_pitch" type="revolute">
+    <parent>
+      l_thumb_base
+    </parent>
+    <child>
+      l_thumb_link
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-0.78539816339745</lower>
+        <upper>1.5707963267949</upper>
+        <upper>0</upper>
+        <effort>4</effort>
+        <velocity>4.1888</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+  </joint>
+
+  <joint name="r_thumb_pitch" type="revolute">
+    <parent>
+      r_thumb_base
+    </parent>
+    <child>
+      r_thumb_link
+    </child>
+    <axis>
+      <xyz>0 1 0</xyz>
+      <limit>
+        <lower>-0.78539816339745</lower>
+        <upper>1.5707963267949</upper>
+        <upper>0</upper>
+        <effort>4</effort>
+        <velocity>4.1888</velocity>
+      </limit>
+      <dynamics>
+        <damping>0.7</damping>
+        <friction>0</friction>
+      </dynamics>
+    </axis>
+  </joint>
+
+  <link name="l_thumb_link">
+    <self_collide>1</self_collide>
+    <pose>0.416683 0.288357 1.2074 0 0 0</pose>
+    <collision name="l_thumb_link_collision">
+      <pose>0.00154045 5.0000000001438e-07 0.05414235 0 0 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.025</radius>
+          <length>0.1</length>
+        </cylinder>
+      </geometry>
+    </collision>
+    <visual name="l_thumb_link_visual">
+      <pose>-0.416683 -0.288357 -1.2074 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/ThumbLeft.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/FlatBlack</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-0.00061939700000002 -1.6435999999953e-05 0.040811419 0 0 0</pose>
+      <!--
+      <mass>0.093812220707729</mass>
+      <inertia>
+        <ixx>7.8687e-05</ixx>
+        <iyy>7.5823e-05</iyy>
+        <izz>9.743e-06</izz>
+        <iyz>-6.9e-08</iyz>
+        <ixz>6.19e-07</ixz>
+        <ixy>-1.3e-08</ixy>
+      </inertia>
+      -->
+      <mass>0.010345759049163</mass>
+      <inertia>
+        <ixx>0.0005</ixx>
+        <iyy>0.0005</iyy>
+        <izz>0.0005</izz>
+        <iyz>0</iyz>
+        <ixz>0</ixz>
+        <ixy>0</ixy>
+      </inertia>
+    </inertial>
+  </link>
+
+  <link name="r_thumb_link">
+    <self_collide>1</self_collide>
+    <pose>0.416683 -0.288357 1.2074 0 0 0</pose>
+    <collision name="r_thumb_link_collision">
+      <pose>0.00154045 -5.0000000001438e-07 0.05414235 0 0 0</pose>
+      <geometry>
+        <cylinder>
+          <radius>0.025</radius>
+          <length>0.1</length>
+        </cylinder>
+      </geometry>
+    </collision>
+    <visual name="r_thumb_link_visual">
+      <pose>-0.416683 0.288357 -1.2074 0 0 0</pose>
+      <geometry>
+        <mesh>
+					<uri>file://escher_description/model/meshes/ThumbRight.stl</uri>
+					<scale>.001 .001 .001</scale>
+				</mesh>
+      </geometry>
+      <material>
+        <script>
+          <uri>file://media/materials/scripts/gazebo.material</uri>
+          <name>Gazebo/FlatBlack</name>
+        </script>
+      </material>
+    </visual>
+    <inertial>
+      <pose>-0.00061939700000002 -1.7436000000037e-05 0.040811419 0 0 0</pose>
+      <!--
+      <mass>0.093812220707729</mass>
+      <inertia>
+        <ixx>7.8687e-05</ixx>
+        <iyy>7.5823e-05</iyy>
+        <izz>9.743e-06</izz>
+        <iyz>-6.9e-08</iyz>
+        <ixz>6.19e-07</ixz>
+        <ixy>-1.3e-08</ixy>
+      </inertia>
+      -->
+      <mass>0.010345759049163</mass>
+      <inertia>
+        <ixx>0.0005</ixx>
+        <iyy>0.0005</iyy>
+        <izz>0.0005</izz>
+        <iyz>0</iyz>
+        <ixz>0</ixz>
+        <ixy>0</ixy>
+      </inertia>
+    </inertial>
+  </link>
+</model>
+</sdf>
+
+

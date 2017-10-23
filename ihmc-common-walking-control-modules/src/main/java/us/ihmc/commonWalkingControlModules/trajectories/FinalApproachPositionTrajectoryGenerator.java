@@ -141,7 +141,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
          showViz.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                boolean visible = showViz.getBooleanValue();
                currentPositionViz.setVisible(visible);
