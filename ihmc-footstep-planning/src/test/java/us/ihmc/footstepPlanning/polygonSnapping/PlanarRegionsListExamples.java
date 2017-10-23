@@ -1,16 +1,12 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
-import java.util.Random;
-
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -18,7 +14,8 @@ import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsLis
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+
+import java.util.Random;
 
 public class PlanarRegionsListExamples
 {
@@ -211,6 +208,106 @@ public class PlanarRegionsListExamples
       return convexPolygon;
    }
 
+   public static PlanarRegionsList generateSteppingStonesEnvironment(double pathRadius)
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      double cinderBlockWidth = 0.15;
+      double cinderBlockLength = 0.25;
+      double cinderBlockSeparationWidth = 0.2;
+      double cinderBlockSeparationLength = 0.3;
+
+      double quarterCircleLength = 0.5 * Math.PI * pathRadius;
+      int numberOfSteps = (int) Math.round(quarterCircleLength / cinderBlockSeparationLength);
+      if(numberOfSteps % 2 != 1) numberOfSteps++;
+
+      // starting block
+      generator.translate(0.0, -0.5, 0.001);
+      generator.addRectangle(2.0, 1.0);
+      generator.identity();
+
+      // ending block
+      generator.translate(pathRadius + 0.5, pathRadius, 0.001);
+      generator.addRectangle(1.0, 2.0);
+      generator.identity();
+
+      // cinder blocks
+      for (int i = 1; i < numberOfSteps; i++)
+      {
+         double percentageAlongCurve = ((double) i / (double) numberOfSteps);
+
+         double angle = percentageAlongCurve * 0.5 * Math.PI;
+         double xPositionAlongCurve = pathRadius * (1.0 - Math.cos(angle));
+         double yPositionAlongCurve = pathRadius * Math.sin(angle);
+
+         generator.translate(xPositionAlongCurve, yPositionAlongCurve, -0.001);
+         generator.rotate(- angle, Axis.Z);
+
+         double xTranslation = cinderBlockSeparationWidth * 0.5;
+         if(i % 2 == 0) xTranslation *= -1.0;
+         generator.translate(xTranslation, 0.0, 0.0);
+
+         generator.addRectangle(cinderBlockWidth, cinderBlockLength);
+         generator.identity();
+      }
+
+      return generator.getPlanarRegionsList();
+   }
+
+   public static PlanarRegionsList createMazeEnvironment()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      double extrusionDistance = -0.05;
+
+      // main ground plane
+      generator.translate(5.0, 5.0, 0.0);
+      generator.addRectangle(10.0, 10.0);
+      generator.identity();
+
+      // maze walls along the yz-plane
+      generator.translate(2.0, 5.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.addRectangle(2.0 + extrusionDistance, 6.0 + extrusionDistance);
+      generator.identity();
+
+      generator.translate(4.0, 4.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.addRectangle(2.0 + extrusionDistance, 4.0 + extrusionDistance);
+      generator.identity();
+
+      generator.translate(6.0, 6.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.addRectangle(2.0 + extrusionDistance, 4.0 + extrusionDistance);
+      generator.identity();
+
+      generator.translate(8.0, 4.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.addRectangle(2.0 + extrusionDistance, 4.0 + extrusionDistance);
+      generator.identity();
+
+      generator.translate(8.0, 9.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.addRectangle(2.0 + extrusionDistance, 2.0 + extrusionDistance);
+      generator.identity();
+
+      // maze walls along the xz-plane
+      generator.translate(6.0, 2.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.X);
+      generator.addRectangle(4.0 + extrusionDistance, 2.0 + extrusionDistance);
+      generator.identity();
+
+      generator.translate(9.0, 6.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.X);
+      generator.addRectangle(2.0 + extrusionDistance, 2.0 + extrusionDistance);
+      generator.identity();
+
+      generator.translate(5.0, 8.0, 1.0);
+      generator.rotate(0.5 * Math.PI, Axis.X);
+      generator.addRectangle(6.0 + extrusionDistance, 2.0 + extrusionDistance);
+      generator.identity();
+
+      return generator.getPlanarRegionsList();
+   }
+
    public static PlanarRegionsList createBodyPathPlannerTestEnvironment()
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
@@ -332,20 +429,20 @@ public class PlanarRegionsListExamples
    public static void main(String[] args)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("exampleRobot"));
-      PlanarRegionsList planarRegionsList = createBodyPathPlannerTestEnvironment();
+      PlanarRegionsList planarRegionsList = createMazeEnvironment();
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment", planarRegionsList, 1e-5,
                                                                                                 false);
       TerrainObject3D terrainObject3D = environment.getTerrainObject3D();
       scs.addStaticLinkGraphics(terrainObject3D.getLinkGraphics());
       scs.setGroundVisible(false);
 
-      Graphics3DObject startAndEndGraphics = new Graphics3DObject();
-      startAndEndGraphics.translate(0.5, 0.5, 0.5);
-      startAndEndGraphics.addSphere(0.2, YoAppearance.Green());
-      startAndEndGraphics.identity();
-      startAndEndGraphics.translate(8.5, -3.5, 0.5);
-      startAndEndGraphics.addSphere(0.2, YoAppearance.Red());
-      scs.addStaticLinkGraphics(startAndEndGraphics);
+//      Graphics3DObject startAndEndGraphics = new Graphics3DObject();
+//      startAndEndGraphics.translate(0.0, 0.0, 0.5);
+//      startAndEndGraphics.addSphere(0.2, YoAppearance.Green());
+//      startAndEndGraphics.identity();
+//      startAndEndGraphics.translate(3.0, 2.5, 0.5);
+//      startAndEndGraphics.addSphere(0.2, YoAppearance.Red());
+//      scs.addStaticLinkGraphics(startAndEndGraphics);
 
       scs.startOnAThread();
    }

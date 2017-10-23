@@ -13,7 +13,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
@@ -89,11 +89,11 @@ public class PelvisICPBasedTranslationManager
    private final YoLong numberOfQueuedCommands;
    private final RecyclingArrayDeque<PelvisTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisTrajectoryCommand.class);
 
-   public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
+   public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox, double pelvisTranslationICPSupportPolygonSafeMargin, BipedSupportPolygons bipedSupportPolygons, YoVariableRegistry parentRegistry)
    {
-      supportPolygonSafeMargin.set(0.04);
+      supportPolygonSafeMargin.set(pelvisTranslationICPSupportPolygonSafeMargin);
       frozenOffsetDecayAlpha.set(0.998);
-
+      
       yoTime = controllerToolbox.getYoTime();
       controlDT = controllerToolbox.getControlDT();
       pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
@@ -115,7 +115,7 @@ public class PelvisICPBasedTranslationManager
       manualMode.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             initialize();
          }

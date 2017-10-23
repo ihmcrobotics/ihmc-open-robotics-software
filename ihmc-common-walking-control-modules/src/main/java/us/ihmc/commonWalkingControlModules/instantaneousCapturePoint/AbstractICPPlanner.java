@@ -256,17 +256,17 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
 
    @Override
    /** {@inheritDoc} */
-   public void updateCurrentPlan(boolean updateUpcomingCMPLocations)
+   public void updateCurrentPlan()
    {
       if (isDoubleSupport.getBooleanValue())
       {
          if (isHoldingPosition.getBooleanValue())
             requestedHoldPosition.set(true);
-         updateTransferPlan(updateUpcomingCMPLocations);
+         updateTransferPlan();
       }
       else
       {
-         updateSingleSupportPlan(updateUpcomingCMPLocations);
+         updateSingleSupportPlan();
       }
    }
 
@@ -341,8 +341,8 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    /** {@inheritDoc} */
    public abstract int getNumberOfFootstepsRegistered();
 
-   protected abstract void updateTransferPlan(boolean updateUpcomingCMPs);
-   protected abstract void updateSingleSupportPlan(boolean updateUpcomingCMPs);
+   protected abstract void updateTransferPlan();
+   protected abstract void updateSingleSupportPlan();
 
    private final FramePoint2D desiredICP2d = new FramePoint2D();
    private final FramePoint2D finalICP2d = new FramePoint2D();
@@ -421,11 +421,20 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       desiredCenterOfMassVelocityToPack.set(desiredCoMVelocity);
    }
    
+   public void getDesiredCenterOfMassVelocity(FrameVector3D desiredCenterOfMassVelocityToPack)
+   {
+      desiredCoMVelocity.getFrameTupleIncludingFrame(desiredCenterOfMassVelocityToPack);
+   }
+   
    public void getDesiredCenterOfMassAcceleration(YoFrameVector desiredCenterOfMassAccelerationToPack)
    {
       desiredCenterOfMassAccelerationToPack.set(desiredCoMAcceleration);
    }
 
+   public void getDesiredCenterOfMassAcceleration(FrameVector3D desiredCenterOfMassAccelerationToPack)
+   {
+      desiredCoMAcceleration.getFrameTupleIncludingFrame(desiredCenterOfMassAccelerationToPack);;
+   }
 
    @Override
    /** {@inheritDoc} */
@@ -541,6 +550,11 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    public void getDesiredCentroidalTorque(YoFrameVector desiredCentroidalTorqueToPack)
    {
       desiredCentroidalTorqueToPack.set(desiredCentroidalTorque);
+   }
+   
+   public void getDesiredCentroidalTorque(FrameVector3D desiredCentroidalTorqueToPack)
+   {
+      desiredCentroidalTorque.getFrameTupleIncludingFrame(desiredCentroidalTorqueToPack);
    }
 
    @Override

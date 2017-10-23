@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -25,7 +26,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.math.frames.YoFramePoint;

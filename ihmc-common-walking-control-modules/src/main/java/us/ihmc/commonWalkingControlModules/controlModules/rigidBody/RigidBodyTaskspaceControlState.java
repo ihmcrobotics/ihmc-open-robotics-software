@@ -20,7 +20,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTra
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
@@ -46,7 +46,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 {
-   public static final int maxPoints = 1000;
+   public static final int maxPoints = 10000;
    public static final int maxPointsInGenerator = 5;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -694,7 +694,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          PrintTools.warn(warningPrefix + "Was executing in ." + trajectoryFrame.getName() + " can't switch to " + command.getTrajectoryFrame() + " without override");
          return false;
       }
-      else if(!selectionMatrix.equals(command.getSelectionMatrix()))
+      else if(!selectionMatrix.getLinearPart().equals(command.getSelectionMatrix()))
       {
          PrintTools.warn(warningPrefix + "Received a change of selection matrix without an override");
          System.out.println("rbm:\n" + selectionMatrix);

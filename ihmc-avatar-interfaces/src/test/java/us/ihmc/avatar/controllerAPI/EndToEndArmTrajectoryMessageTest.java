@@ -17,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
@@ -98,6 +98,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
          assertSingleWaypointExecuted(armJoints, desiredJointPositions, desiredJointVelocities, epsilon, scs);
       }
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testMultipleTrajectoryPoints() throws Exception
@@ -177,6 +178,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
          assertSingleWaypointExecuted(armJoints, desiredJointPositions, desiredJointVelocities, epsilon, scs);
       }
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
@@ -353,6 +356,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          desiredJointPositions[jointIndex] = armTrajectoryMessages.get(numberOfMessages - 1).getJointTrajectoryPointList(jointIndex).getLastTrajectoryPoint().getPosition();
 
       assertSingleWaypointExecuted(armJoints, desiredJointPositions, desiredJointVelocities, epsilon, scs);
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testQueueWithWrongPreviousId() throws Exception

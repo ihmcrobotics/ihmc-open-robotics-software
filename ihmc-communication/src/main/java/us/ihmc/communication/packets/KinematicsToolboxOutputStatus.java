@@ -132,8 +132,11 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
          }
       }
 
-      rootJoint.getTranslation(desiredRootTranslation);
-      rootJoint.getRotation(desiredRootOrientation);
+      if (rootJoint != null)
+      {
+         rootJoint.getTranslation(desiredRootTranslation);
+         rootJoint.getRotation(desiredRootOrientation);
+      }
    }
 
    public void setRootTranslation(Vector3D rootTranslation)

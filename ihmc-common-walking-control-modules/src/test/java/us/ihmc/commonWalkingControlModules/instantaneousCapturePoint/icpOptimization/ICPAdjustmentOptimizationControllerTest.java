@@ -103,7 +103,7 @@ public class ICPAdjustmentOptimizationControllerTest
       icpPlanner.initializeForSingleSupport(0.0);
       icpOptimizationController.initializeForSingleSupport(0.0, supportSide, omega0);
 
-      icpPlanner.updateCurrentPlan(true);
+      icpPlanner.updateCurrentPlan();
       double currentTime = 0.5;
       FramePoint2D desiredICP = new FramePoint2D();
       FrameVector2D desiredICPVelocity = new FrameVector2D();
@@ -503,13 +503,6 @@ public class ICPAdjustmentOptimizationControllerTest
 
       @Override
       public boolean finishSingleSupportWhenICPPlannerIsDone()
-      {
-         // TODO Auto-generated method stub
-         return false;
-      }
-
-      @Override
-      public boolean doPrepareManipulationForLocomotion()
       {
          // TODO Auto-generated method stub
          return false;

@@ -13,7 +13,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.tools.lists.PairList;
@@ -59,15 +59,15 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
    private final YoDouble kPosArmJointTorque = new YoDouble("kPosArmJointTorque",
          "Gain for position control in order to achieve acceleration control using additional joint torque (Arms only)", registry);
 
-   private PairList<OneDoFJoint, LowLevelJointData> jointStateAndData;
-   private LinkedHashMap<LowLevelJointData, YoDouble> alphaDesiredVelocityMap;
-   private LinkedHashMap<LowLevelJointData, YoDouble> alphaDesiredPositionMap;
-   private LinkedHashMap<LowLevelJointData, YoDouble> velocityTorqueMap;
-   private LinkedHashMap<LowLevelJointData, YoDouble> positionTorqueMap;
-   private LinkedHashMap<LowLevelJointData, YoDouble> kVelJointTorqueMap;
-   private LinkedHashMap<LowLevelJointData, YoDouble> kPosJointTorqueMap;
-   private LinkedHashMap<LowLevelJointData, YoDouble> desiredVelocities;
-   private LinkedHashMap<LowLevelJointData, YoDouble> desiredPositions;
+   private PairList<OneDoFJoint, JointDesiredOutput> jointStateAndData;
+   private LinkedHashMap<JointDesiredOutput, YoDouble> alphaDesiredVelocityMap;
+   private LinkedHashMap<JointDesiredOutput, YoDouble> alphaDesiredPositionMap;
+   private LinkedHashMap<JointDesiredOutput, YoDouble> velocityTorqueMap;
+   private LinkedHashMap<JointDesiredOutput, YoDouble> positionTorqueMap;
+   private LinkedHashMap<JointDesiredOutput, YoDouble> kVelJointTorqueMap;
+   private LinkedHashMap<JointDesiredOutput, YoDouble> kPosJointTorqueMap;
+   private LinkedHashMap<JointDesiredOutput, YoDouble> desiredVelocities;
+   private LinkedHashMap<JointDesiredOutput, YoDouble> desiredPositions;
 
    private final double updateDT;
    private final boolean conservative;
@@ -175,7 +175,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
    {
       for (int i = 0; i < jointStateAndData.size(); i++)
       {
-         LowLevelJointData jointData = jointStateAndData.second(i);
+         JointDesiredOutput jointData = jointStateAndData.second(i);
          OneDoFJoint jointState = jointStateAndData.first(i);
          YoDouble qd_d_joint = desiredVelocities.get(jointData);
          YoDouble q_d_joint = desiredPositions.get(jointData);
@@ -188,8 +188,8 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
          {
             integrateAccelerationsToGetDesiredVelocities(jointState, jointData, qd_d_joint, q_d_joint);
             jointData.setDesiredVelocity(qd_d_joint.getDoubleValue());
-            jointData.setKd(0.0);
-            jointData.setKp(0.0);
+            jointData.setDamping(0.0);
+            jointData.setStiffness(0.0);
 
             double kVel = kVelJointTorqueMap.get(jointData).getDoubleValue();
             double kPos = kPosJointTorqueMap.get(jointData).getDoubleValue();
@@ -214,7 +214,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
       }
    }
 
-   private void integrateAccelerationsToGetDesiredVelocities(OneDoFJoint jointState, LowLevelJointData lowLevelJointData, YoDouble qd_d_joint, YoDouble q_d_joint)
+   private void integrateAccelerationsToGetDesiredVelocities(OneDoFJoint jointState, JointDesiredOutput lowLevelJointData, YoDouble qd_d_joint, YoDouble q_d_joint)
    {
       double currentPosition = jointState.getQ();
       double currentVelocity = jointState.getQd();
@@ -246,7 +246,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
       return alpha * (previousDesiredValue + desiredValueRate * updateDT) + (1.0 - alpha) * currentValue;
    }
 
-   private final LinkedHashMap<LowLevelJointData, YoBoolean> doAccelerationIntegrationMap = new LinkedHashMap<>();
+   private final LinkedHashMap<JointDesiredOutput, YoBoolean> doAccelerationIntegrationMap = new LinkedHashMap<>();
 
    @Override
    public void setLowLevelControllerCoreOutput(FullHumanoidRobotModel controllerRobotModel, LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerCoreOutput, RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
@@ -263,19 +263,19 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
          for (RobotSide robotSide : RobotSide.values)
          {
             for (LegJointName jointName : legJointsForIntegratingAcceleration)
-               jointStateAndData.add(controllerRobotModel.getLegJoint(robotSide, jointName), lowLevelControllerCoreOutput.getLowLevelJointData(controllerRobotModel.getLegJoint(robotSide, jointName)));
+               jointStateAndData.add(controllerRobotModel.getLegJoint(robotSide, jointName), lowLevelControllerCoreOutput.getJointDesiredOutput(controllerRobotModel.getLegJoint(robotSide, jointName)));
             for (ArmJointName jointName : armJointsForIntegratingAcceleration)
-               jointStateAndData.add(controllerRobotModel.getArmJoint(robotSide, jointName), lowLevelControllerCoreOutput.getLowLevelJointData(controllerRobotModel.getArmJoint(robotSide, jointName)));
+               jointStateAndData.add(controllerRobotModel.getArmJoint(robotSide, jointName), lowLevelControllerCoreOutput.getJointDesiredOutput(controllerRobotModel.getArmJoint(robotSide, jointName)));
          }
          
          for (SpineJointName jointName : spineJointsForIntegratingAcceleration)
-            jointStateAndData.add(controllerRobotModel.getSpineJoint(jointName), lowLevelControllerCoreOutput.getLowLevelJointData(controllerRobotModel.getSpineJoint(jointName)));
+            jointStateAndData.add(controllerRobotModel.getSpineJoint(jointName), lowLevelControllerCoreOutput.getJointDesiredOutput(controllerRobotModel.getSpineJoint(jointName)));
       }
       else
       {
-         for(int i = 0; i < lowLevelControllerCoreOutput.getNumberOfJointsWithLowLevelData(); i++)
+         for(int i = 0; i < lowLevelControllerCoreOutput.getNumberOfJointsWithDesiredOutput(); i++)
          {
-            jointStateAndData.add(lowLevelControllerCoreOutput.getOneDoFJoint(i), lowLevelControllerCoreOutput.getLowLevelJointData(lowLevelControllerCoreOutput.getOneDoFJoint(i)));
+            jointStateAndData.add(lowLevelControllerCoreOutput.getOneDoFJoint(i), lowLevelControllerCoreOutput.getJointDesiredOutput(lowLevelControllerCoreOutput.getOneDoFJoint(i)));
          }
       }
 
@@ -307,7 +307,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
       for (int i = 0; i < jointStateAndData.size(); i++)
       {
          final OneDoFJoint jointState = jointStateAndData.first(i);
-         final LowLevelJointData jointData = jointStateAndData.second(i);
+         final JointDesiredOutput jointData = jointStateAndData.second(i);
          
          final YoBoolean doAccelerationIntegration = new YoBoolean("doAccelerationIntegration_" + jointState.getName(), registry);
          YoDouble desiredVelocity = new YoDouble("qd_d_" + jointState.getName(), registry);
@@ -341,7 +341,7 @@ public class DRCOutputProcessorWithAccelerationIntegration implements DRCOutputP
          doAccelerationIntegration.addVariableChangedListener(new VariableChangedListener()
          {
             @Override
-            public void variableChanged(YoVariable<?> v)
+            public void notifyOfVariableChange(YoVariable<?> v)
             {
                jointState.setIntegrateDesiredAccelerations(doAccelerationIntegration.getBooleanValue());
             }

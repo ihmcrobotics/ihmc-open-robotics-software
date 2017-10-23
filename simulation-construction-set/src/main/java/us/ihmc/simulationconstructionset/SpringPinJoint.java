@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -44,7 +44,7 @@ public class SpringPinJoint extends PinJoint
       kp.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             setKp(kp.getDoubleValue());
          }
@@ -52,7 +52,7 @@ public class SpringPinJoint extends PinJoint
       kd.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             setKd(kd.getDoubleValue());
          }

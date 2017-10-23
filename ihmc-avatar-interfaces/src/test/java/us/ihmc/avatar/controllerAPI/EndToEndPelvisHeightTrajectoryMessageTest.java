@@ -77,7 +77,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       drcSimulationTestHelper.send(pelvisHeightTrajectoryMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 + trajectoryTime);
       assertTrue(success);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -88,6 +88,8 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       // Ending up doing a rough check on the actual height
       double pelvisHeight = scs.getVariable("PelvisLinearStateUpdater", "estimatedRootJointPositionZ").getValueAsDouble();
       assertEquals(desiredPosition.getZ(), pelvisHeight, 0.01);
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testSingleWaypointInUserMode() throws Exception
@@ -134,6 +136,8 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       double pelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getTranslationZ();
       assertEquals(desiredPosition.getZ(), pelvisHeight, 0.01);
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    @Before

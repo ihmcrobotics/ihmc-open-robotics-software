@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -58,7 +59,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -76,6 +77,7 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateChangedLis
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -467,6 +469,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    public void initialize()
    {
+      controllerCoreCommand.requestReinitialization();
       controllerToolbox.initialize();
       managerFactory.initializeManagers();
 
@@ -741,6 +744,26 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
             }
          }
          controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationCommand);
+      }
+
+      /*
+       * FIXME: This is mainly used for resetting the integrators at touchdown.
+       * It is done in SingleSupportState.doTransitionOutOfAction. Need to
+       * figure out how to use directly the joint data holder instead of
+       * OneDoFJoint.
+       */
+      LowLevelOneDoFJointDesiredDataHolder jointDesiredDataHolder = controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder();
+
+      for (int i = 0; i < allOneDoFjoints.length; i++)
+      {
+         OneDoFJoint joint = allOneDoFjoints[i];
+         if (joint.getResetDesiredAccelerationIntegrator())
+         {
+            JointDesiredOutput jointData = jointDesiredDataHolder.getJointDesiredOutput(joint);
+            if (jointData == null)
+               jointData = jointDesiredDataHolder.registerJointWithEmptyData(joint);
+            jointData.setResetIntegrators(true);
+         }
       }
    }
 

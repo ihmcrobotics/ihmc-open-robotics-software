@@ -86,7 +86,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       requestPowerOff.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             motorPowerStateRequest.setValueFromDouble(-1);
          }
@@ -134,7 +134,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       {
 
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
             sliderBoardConfigurationManager.loadConfiguration(selectedJointPair.getEnumValue().toString());
          }
@@ -183,7 +183,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       desiredVelX_Adjust.addVariableChangedListener(new VariableChangedListener()
       {         
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
            desiredVelocityX.set(v.getValueAsDouble()+desiredVelX_Setpoint.getDoubleValue());
          }
@@ -191,7 +191,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       desiredVelX_Setpoint.addVariableChangedListener(new VariableChangedListener()
       {         
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
            desiredVelocityX.set(v.getValueAsDouble()+desiredVelX_Adjust.getDoubleValue());
          }
@@ -199,7 +199,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       desiredVelocityX.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
-         public void variableChanged(YoVariable<?> v)
+         public void notifyOfVariableChange(YoVariable<?> v)
          {
          	if (v.getValueAsDouble() < minVelocityX)
             	 v.setValueFromDouble(minVelocityX, false);
@@ -256,7 +256,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
    }
 
    @Override
-   public void indexChanged(int newIndex, double newTime)
+   public void notifyOfIndexChange(int newIndex)
    {
       StepprStandPrepSetpoints joint = selectedJointPair.getEnumValue();
       allSetpoints.get(joint).update();

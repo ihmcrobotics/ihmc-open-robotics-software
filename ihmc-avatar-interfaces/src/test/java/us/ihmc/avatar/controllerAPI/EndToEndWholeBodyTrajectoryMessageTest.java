@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
@@ -72,6 +73,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(footSide, 0.0, desiredPosition, desiredOrientation);
       drcSimulationTestHelper.send(footTrajectoryMessage);
+      drcSimulationTestHelper.send(new AutomaticManipulationAbortMessage(false));
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
       assertTrue(success);
@@ -192,6 +194,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(footSide, 0.0, desiredPosition, desiredOrientation);
       drcSimulationTestHelper.send(footTrajectoryMessage);
+      //drcSimulationTestHelper.send(new AutomaticManipulationAbortMessage(false));
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
       assertTrue(success);

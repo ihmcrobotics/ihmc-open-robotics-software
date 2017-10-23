@@ -5,7 +5,7 @@ import java.util.EnumMap;
 import java.util.List;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointData;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 
 public class WandererUtil
@@ -14,7 +14,7 @@ public class WandererUtil
    {
       return createJointMap(Arrays.asList(jointList));
    }
-   
+
    public static EnumMap<WandererJoint, OneDoFJoint> createJointMap(List<OneDoFJoint> jointList)
    {
       EnumMap<WandererJoint, OneDoFJoint> wandererJoints = new EnumMap<>(WandererJoint.class);
@@ -30,17 +30,17 @@ public class WandererUtil
       }
       return wandererJoints;
    }
-   
-   public static EnumMap<WandererJoint, LowLevelJointData> createOutputMap(LowLevelOneDoFJointDesiredDataHolderList lowLevelOutuput)
+
+   public static EnumMap<WandererJoint, JointDesiredOutput> createOutputMap(LowLevelOneDoFJointDesiredDataHolderList lowLevelOutuput)
    {
-      EnumMap<WandererJoint, LowLevelJointData> wandererJoints = new EnumMap<>(WandererJoint.class);
-      for (int i = 0; i < lowLevelOutuput.getNumberOfJointsWithLowLevelData(); i++)
+      EnumMap<WandererJoint, JointDesiredOutput> wandererJoints = new EnumMap<>(WandererJoint.class);
+      for (int i = 0; i < lowLevelOutuput.getNumberOfJointsWithDesiredOutput(); i++)
       {
          for (WandererJoint joint : WandererJoint.values)
          {
             if (joint.getSdfName().equals(lowLevelOutuput.getJointName(i)))
             {
-               wandererJoints.put(joint, lowLevelOutuput.getLowLevelJointData(i));
+               wandererJoints.put(joint, lowLevelOutuput.getJointDesiredOutput(i));
             }
          }
       }

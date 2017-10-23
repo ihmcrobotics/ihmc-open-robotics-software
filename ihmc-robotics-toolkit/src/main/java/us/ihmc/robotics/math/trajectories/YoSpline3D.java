@@ -2,20 +2,20 @@ package us.ihmc.robotics.math.trajectories;
 
 import java.util.EnumMap;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 
 
 public class YoSpline3D
 {
-   public final EnumMap<Direction, YoPolynomial> polynomials;
+   public final EnumMap<Axis, YoPolynomial> polynomials;
    private final int arcLengthCalculatorDivisions;
    private final int numberOfCoefficientsPerPolynomial;
    private final ReferenceFrame referenceFrame;
@@ -37,7 +37,7 @@ public class YoSpline3D
 
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
-      polynomials = new EnumMap<Direction, YoPolynomial>(Direction.class);
+      polynomials = new EnumMap<Axis, YoPolynomial>(Axis.class);
       this.numberOfCoefficientsPerPolynomial = numberOfCoefficientsPerPolynomial;
       this.arcLengthCalculatorDivisions = arcLengthCalculatorDivisions;
       this.referenceFrame = referenceFrame;
@@ -48,9 +48,9 @@ public class YoSpline3D
       velocity = new YoFrameVector(namePrefix + "Velocity", referenceFrame, registry);
       acceleration = new YoFrameVector(namePrefix + "Acceleration", referenceFrame, registry);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-            polynomials.put(direction, new YoPolynomial(namePrefix + "Polynomial" + direction, numberOfCoefficientsPerPolynomial, registry));
+            polynomials.put(axis, new YoPolynomial(namePrefix + "Polynomial" + axis, numberOfCoefficientsPerPolynomial, registry));
       }
 
       for (int i = 0; i < arcLengthCalculatorDivisions + 1; i++)
@@ -65,9 +65,9 @@ public class YoSpline3D
       p0.checkReferenceFrameMatch(referenceFrame);
       pf.checkReferenceFrameMatch(referenceFrame);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).setLinear(t0, tf, p0.getElement(direction.ordinal()), pf.getElement(direction.ordinal()));
+         polynomials.get(axis).setLinear(t0, tf, p0.getElement(axis.ordinal()), pf.getElement(axis.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -79,9 +79,9 @@ public class YoSpline3D
       p0.checkReferenceFrameMatch(referenceFrame);
       pd0.checkReferenceFrameMatch(referenceFrame);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).setLinear(t0, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()));
+         polynomials.get(axis).setLinear(t0, p0.getElement(axis.ordinal()), pd0.getElement(axis.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -93,9 +93,9 @@ public class YoSpline3D
       pf.checkReferenceFrameMatch(referenceFrame);
       pdf.checkReferenceFrameMatch(referenceFrame);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).setLinear(tf, pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()));
+         polynomials.get(axis).setLinear(tf, pf.getElement(axis.ordinal()), pdf.getElement(axis.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -111,10 +111,11 @@ public class YoSpline3D
       pd1.checkReferenceFrameMatch(referenceFrame);
       pdf.checkReferenceFrameMatch(referenceFrame);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).setQuarticUsingIntermediateVelocity(t0, t1, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pd1.getElement(direction.ordinal()),
-                         pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()));
+         polynomials.get(axis).setQuarticUsingIntermediateVelocity(t0, t1, tf, p0.getElement(axis.ordinal()), pd0.getElement(axis.ordinal()), pd1.getElement(
+               axis.ordinal()),
+                                                                   pf.getElement(axis.ordinal()), pdf.getElement(axis.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -131,10 +132,12 @@ public class YoSpline3D
       pdf.checkReferenceFrameMatch(referenceFrame);
       pdd1.checkReferenceFrameMatch(referenceFrame);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).setQuinticUsingIntermediateVelocityAndAcceleration(t0, t1, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pd1.getElement(direction.ordinal()),
-                         pdd1.getElement(direction.ordinal()), pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()));
+         polynomials.get(axis).setQuinticUsingIntermediateVelocityAndAcceleration(t0, t1, tf, p0.getElement(axis.ordinal()), pd0.getElement(axis.ordinal()), pd1.getElement(
+               axis.ordinal()),
+                                                                                  pdd1.getElement(axis.ordinal()), pf.getElement(axis.ordinal()), pdf.getElement(
+                     axis.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -152,10 +155,11 @@ public class YoSpline3D
       pdf.checkReferenceFrameMatch(referenceFrame);
       pddf.checkReferenceFrameMatch(referenceFrame);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).setSexticUsingWaypoint(t0, t1, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pdd0.getElement(direction.ordinal()), p1.getElement(direction.ordinal()),
-                         pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()), pddf.getElement(direction.ordinal()));
+         polynomials.get(axis).setSexticUsingWaypoint(t0, t1, tf, p0.getElement(axis.ordinal()), pd0.getElement(axis.ordinal()), pdd0.getElement(axis.ordinal()), p1.getElement(
+               axis.ordinal()),
+                                                      pf.getElement(axis.ordinal()), pdf.getElement(axis.ordinal()), pddf.getElement(axis.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -173,10 +177,12 @@ public class YoSpline3D
       pdf.checkReferenceFrameMatch(referenceFrame);
       pdd1.checkReferenceFrameMatch(referenceFrame);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).setSexticUsingWaypointVelocityAndAcceleration(t0, t1, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pdd0.getElement(direction.ordinal()),
-                         pd1.getElement(direction.ordinal()), pdd1.getElement(direction.ordinal()), pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()));
+         polynomials.get(axis).setSexticUsingWaypointVelocityAndAcceleration(t0, t1, tf, p0.getElement(axis.ordinal()), pd0.getElement(axis.ordinal()), pdd0.getElement(
+               axis.ordinal()),
+                                                                             pd1.getElement(axis.ordinal()), pdd1.getElement(axis.ordinal()), pf.getElement(
+                     axis.ordinal()), pdf.getElement(axis.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -194,10 +200,12 @@ public class YoSpline3D
       pdd1.checkReferenceFrameMatch(referenceFrame);
       pddf.checkReferenceFrameMatch(referenceFrame);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).setSexticUsingWaypointVelocityAndAcceleration(tf, t1, t0, pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()), pddf.getElement(direction.ordinal()),
-                         pd1.getElement(direction.ordinal()), pdd1.getElement(direction.ordinal()), p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()));
+         polynomials.get(axis).setSexticUsingWaypointVelocityAndAcceleration(tf, t1, t0, pf.getElement(axis.ordinal()), pdf.getElement(axis.ordinal()), pddf.getElement(
+               axis.ordinal()),
+                                                                             pd1.getElement(axis.ordinal()), pdd1.getElement(axis.ordinal()), p0.getElement(
+                     axis.ordinal()), pd0.getElement(axis.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -212,9 +220,10 @@ public class YoSpline3D
       pdd0.checkReferenceFrameMatch(referenceFrame);
       pdf.checkReferenceFrameMatch(referenceFrame);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).setQuartic(t0, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pdd0.getElement(direction.ordinal()), pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()));
+         polynomials.get(axis).setQuartic(t0, tf, p0.getElement(axis.ordinal()), pd0.getElement(axis.ordinal()), pdd0.getElement(axis.ordinal()), pf.getElement(
+               axis.ordinal()), pdf.getElement(axis.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -229,9 +238,10 @@ public class YoSpline3D
       pdf.checkReferenceFrameMatch(referenceFrame);
       pddf.checkReferenceFrameMatch(referenceFrame);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).setQuartic(tf, t0, pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()), pddf.getElement(direction.ordinal()), p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()));
+         polynomials.get(axis).setQuartic(tf, t0, pf.getElement(axis.ordinal()), pdf.getElement(axis.ordinal()), pddf.getElement(axis.ordinal()), p0.getElement(
+               axis.ordinal()), pd0.getElement(axis.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -244,9 +254,9 @@ public class YoSpline3D
       pf.checkReferenceFrameMatch(referenceFrame);
       pd0.checkReferenceFrameMatch(referenceFrame);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).setQuadratic(t0, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pf.getElement(direction.ordinal()));
+         polynomials.get(axis).setQuadratic(t0, tf, p0.getElement(axis.ordinal()), pd0.getElement(axis.ordinal()), pf.getElement(axis.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -259,9 +269,9 @@ public class YoSpline3D
       pf.checkReferenceFrameMatch(referenceFrame);
       pdf.checkReferenceFrameMatch(referenceFrame);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).setQuadratic(tf, t0, pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()), p0.getElement(direction.ordinal()));
+         polynomials.get(axis).setQuadratic(tf, t0, pf.getElement(axis.ordinal()), pdf.getElement(axis.ordinal()), p0.getElement(axis.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -274,9 +284,9 @@ public class YoSpline3D
       pd0.checkReferenceFrameMatch(referenceFrame);
       pdd0.checkReferenceFrameMatch(referenceFrame);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).setQuadraticUsingInitialAcceleration(t0, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pdd0.getElement(direction.ordinal()));
+         polynomials.get(axis).setQuadraticUsingInitialAcceleration(t0, tf, p0.getElement(axis.ordinal()), pd0.getElement(axis.ordinal()), pdd0.getElement(axis.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -290,9 +300,10 @@ public class YoSpline3D
       pd0.checkReferenceFrameMatch(referenceFrame);
       pdf.checkReferenceFrameMatch(referenceFrame);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).setCubic(t0, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()));
+         polynomials.get(axis).setCubic(t0, tf, p0.getElement(axis.ordinal()), pd0.getElement(axis.ordinal()), pf.getElement(axis.ordinal()), pdf.getElement(
+               axis.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -306,10 +317,11 @@ public class YoSpline3D
       pdf.checkReferenceFrameMatch(referenceFrame);
       pddf.checkReferenceFrameMatch(referenceFrame);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).setCubicUsingFinalAccelerationButNotFinalPosition(t0, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()),
-                         pddf.getElement(direction.ordinal()));
+         polynomials.get(axis).setCubicUsingFinalAccelerationButNotFinalPosition(t0, tf, p0.getElement(axis.ordinal()), pd0.getElement(axis.ordinal()), pdf.getElement(
+               axis.ordinal()),
+                                                                                 pddf.getElement(axis.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -325,10 +337,11 @@ public class YoSpline3D
       pdf.checkReferenceFrameMatch(referenceFrame);
       pddf.checkReferenceFrameMatch(referenceFrame);
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).setQuintic(t0, tf, p0.getElement(direction.ordinal()), pd0.getElement(direction.ordinal()), pdd0.getElement(direction.ordinal()), pf.getElement(direction.ordinal()), pdf.getElement(direction.ordinal()),
-                         pddf.getElement(direction.ordinal()));
+         polynomials.get(axis).setQuintic(t0, tf, p0.getElement(axis.ordinal()), pd0.getElement(axis.ordinal()), pdd0.getElement(axis.ordinal()), pf.getElement(
+               axis.ordinal()), pdf.getElement(axis.ordinal()),
+                                          pddf.getElement(axis.ordinal()));
       }
 
       setYoVariables(t0, tf);
@@ -343,24 +356,24 @@ public class YoSpline3D
 
    public void compute(double t)
    {
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         polynomials.get(direction).compute(t);
+         polynomials.get(axis).compute(t);
       }
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         position.setElement(direction.ordinal(), polynomials.get(direction).getPosition());
+         position.setElement(axis.ordinal(), polynomials.get(axis).getPosition());
       }
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         velocity.setElement(direction.ordinal(), polynomials.get(direction).getVelocity());
+         velocity.setElement(axis.ordinal(), polynomials.get(axis).getVelocity());
       }
 
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         acceleration.setElement(direction.ordinal(), polynomials.get(direction).getAcceleration());
+         acceleration.setElement(axis.ordinal(), polynomials.get(axis).getAcceleration());
       }
    }
 

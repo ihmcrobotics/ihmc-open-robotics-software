@@ -10,10 +10,11 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -32,14 +33,14 @@ import us.ihmc.yoVariables.variable.YoVariableList;
 
 public class DataFileWriterTest
 {
-   private static final String TEST_DIRECTORY = "testResources/us/ihmc/simulationconstructionset/dataFileWriterTest/";
+   private static final String TEST_DIRECTORY = "us/ihmc/simulationconstructionset/dataFileWriterTest/";
 
    @Rule
    public ExpectedException expectedException = ExpectedException.none();
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.7)
 	@Test(timeout=300000)
-   public void testDataFileWriterAndReader() throws IOException
+   public void testDataFileWriterAndReader() throws IOException, URISyntaxException
    {
       int numDataPoints = 10000;
 
@@ -110,8 +111,7 @@ public class DataFileWriterTest
    }
 
    private void testDataWriteReadIsTheSame(DataBuffer dataBuffer, ArrayList<YoVariable<?>> allVariables, boolean binary, boolean compress,
-           boolean spreadsheetFormatted, Robot robot)
-           throws IOException
+           boolean spreadsheetFormatted, Robot robot) throws IOException, URISyntaxException
    {
       String filename = TEST_DIRECTORY + "testFile.data";
       if (spreadsheetFormatted)
@@ -119,7 +119,8 @@ public class DataFileWriterTest
       if (compress)
          filename = filename + ".gz";
 
-      File testFile = new File(filename);
+      URL resource = getClass().getClassLoader().getResource(filename);
+      File testFile = new File(resource.getFile());
 
       String model = "testModel";
       double recordDT = 0.001;
@@ -151,13 +152,15 @@ public class DataFileWriterTest
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
-   public void testFileReadAndWriteWithDataOutputStreamAndDataInputStream() throws IOException, FileNotFoundException, NullPointerException
+   public void testFileReadAndWriteWithDataOutputStreamAndDataInputStream() throws IOException, NullPointerException
    {
       Random rng = new Random();
       String testString = "This string tests readLine";
       double testDouble = rng.nextDouble();
       int testInteger = rng.nextInt();
-      File testFile = new File(TEST_DIRECTORY + "shortReadWriteTestFile.txt");
+      String filename = TEST_DIRECTORY + "shortReadWriteTestFile.txt";
+      URL resource = getClass().getClassLoader().getResource(filename);
+      File testFile = new File(resource.getFile());
 
       DataOutputStream outputStream = new DataOutputStream(new FileOutputStream(testFile));
       outputStream.writeDouble(testDouble);
@@ -169,6 +172,7 @@ public class DataFileWriterTest
       double doubleReadBack = inputStream.readDouble();
       String lineReadBack = inputStream.readLine();
       int integerReadBack = inputStream.readInt();
+      inputStream.close();
 
       assertTrue(testDouble == doubleReadBack);
       assertTrue(testString.equals(lineReadBack));
@@ -177,7 +181,7 @@ public class DataFileWriterTest
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
-   public void testFileReadAndWriteWithDataOutputStreamAndBufferedReader() throws FileNotFoundException, IOException
+   public void testFileReadAndWriteWithDataOutputStreamAndBufferedReader() throws IOException
    {
       expectedException.expect(EOFException.class);
 
@@ -185,7 +189,9 @@ public class DataFileWriterTest
       String testString = "This string tests readLine";
       double testDouble = rng.nextDouble();
       int testInteger = rng.nextInt();
-      File testFile = new File(TEST_DIRECTORY + "shortReadWriteTestFile.txt");
+      String filename = TEST_DIRECTORY + "shortReadWriteTestFile.txt";
+      URL resource = getClass().getClassLoader().getResource(filename);
+      File testFile = new File(resource.getFile());
 
       DataOutputStream outputStream = new DataOutputStream(new FileOutputStream(testFile));
       outputStream.writeDouble(testDouble);
@@ -219,7 +225,9 @@ public class DataFileWriterTest
       String testString = "This string tests readLine";
       double testDouble = rng.nextDouble();
       int testInteger = rng.nextInt();
-      File testFile = new File(TEST_DIRECTORY + "shortReadWriteTestFile.txt");
+      String filename = TEST_DIRECTORY + "shortReadWriteTestFile.txt";
+      URL resource = getClass().getClassLoader().getResource(filename);
+      File testFile = new File(resource.getFile());
 
       DataOutputStream outputStream = new DataOutputStream(new FileOutputStream(testFile));
       outputStream.writeDouble(testDouble);
@@ -252,7 +260,9 @@ public class DataFileWriterTest
       String string1 = "This is the first string";
       String string2 = "This is the second string";
       String string3 = "This is the third string";
-      File testFile = new File(TEST_DIRECTORY + "shortReadWriteTestFile.txt");
+      String filename = TEST_DIRECTORY + "shortReadWriteTestFile.txt";
+      URL resource = getClass().getClassLoader().getResource(filename);
+      File testFile = new File(resource.getFile());
 
       DataOutputStream outputStream = new DataOutputStream(new FileOutputStream(testFile));
       outputStream.writeBytes(string1 + "\n");
@@ -285,7 +295,7 @@ public class DataFileWriterTest
 	@Test(timeout = 30000)
    public void testWritingAndReadingALongStateFile() throws IOException
    {
-      File fileOne = new File(TEST_DIRECTORY + "fileOne.state");
+      File fileOne = new File("fileOne.state");
 
       if (fileOne.exists())
          fileOne.delete();
@@ -327,7 +337,7 @@ public class DataFileWriterTest
 	@Test(timeout = 30000)
    public void testWritingAndReadingADataFileWithLotsOfVariables() throws IOException
    {
-      File fileOne = new File(TEST_DIRECTORY + "fileOne.data.gz");
+      File fileOne = new File("fileOne.state.gz");
 
       if (fileOne.exists())
          fileOne.delete();

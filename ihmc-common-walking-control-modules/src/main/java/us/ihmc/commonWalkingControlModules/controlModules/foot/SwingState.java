@@ -41,6 +41,7 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.robotics.trajectories.providers.CurrentRigidBodyStateProvider;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -116,7 +117,11 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoBoolean addOrientationMidpointForClearance;
    private final YoDouble midpointOrientationInterpolationForClearance;
 
-   private final YoDouble finalSwingHeightOffset;
+   private final YoBoolean ignoreInitialAngularVelocityZ;
+   private final YoDouble maxInitialLinearVelocityMagnitude;
+   private final YoDouble maxInitialAngularVelocityMagnitude;
+
+   private final DoubleParameter finalSwingHeightOffset;
    private final double controlDT;
 
    private final YoDouble minHeightDifferenceForObstacleClearance;
@@ -168,8 +173,8 @@ public class SwingState extends AbstractUnconstrainedState
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
       swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
 
-      finalSwingHeightOffset = new YoDouble(namePrefix + "SwingFinalHeightOffset", registry);
-      finalSwingHeightOffset.set(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
+      finalSwingHeightOffset = new DoubleParameter(namePrefix + "SwingFinalHeightOffset", registry, swingTrajectoryParameters.getDesiredTouchdownHeightOffset(), -0.01, 0.005);
+      //finalSwingHeightOffset.set(swingTrajectoryParameters.getDesiredTouchdownHeightOffset());
       replanTrajectory = new YoBoolean(namePrefix + "SwingReplanTrajectory", registry);
 
       minHeightDifferenceForObstacleClearance = new YoDouble(namePrefix + "MinHeightDifferenceForObstacleClearance", registry);
@@ -201,6 +206,13 @@ public class SwingState extends AbstractUnconstrainedState
       midpointOrientationInterpolationForClearance = new YoDouble(namePrefix + "MidpointOrientationInterpolationForClearance", registry);
       addOrientationMidpointForClearance.set(swingTrajectoryParameters.addOrientationMidpointForObstacleClearance());
       midpointOrientationInterpolationForClearance.set(swingTrajectoryParameters.midpointOrientationInterpolationForObstacleClearance());
+
+      ignoreInitialAngularVelocityZ = new YoBoolean(namePrefix + "IgnoreInitialAngularVelocityZ", registry);
+      maxInitialLinearVelocityMagnitude = new YoDouble(namePrefix + "MaxInitialLinearVelocityMagnitude", registry);
+      maxInitialAngularVelocityMagnitude = new YoDouble(namePrefix + "MaxInitialAngularVelocityMagnitude", registry);
+      ignoreInitialAngularVelocityZ.set(walkingControllerParameters.ignoreSwingInitialAngularVelocityZ());
+      maxInitialLinearVelocityMagnitude.set(walkingControllerParameters.getMaxSwingInitialLinearVelocityMagnitude());
+      maxInitialAngularVelocityMagnitude.set(walkingControllerParameters.getMaxSwingInitialAngularVelocityMagnitude());
 
       // todo make a smarter distinction on this as a way to work with the push recovery module
       doContinuousReplanning = new YoBoolean(namePrefix + "DoContinuousReplanning", registry);
@@ -305,6 +317,13 @@ public class SwingState extends AbstractUnconstrainedState
       initialPose.setPosition(initialPosition);
       initialPose.changeFrame(initialOrientation.getReferenceFrame());
       initialPose.setOrientation(initialOrientation);
+      if (ignoreInitialAngularVelocityZ.getBooleanValue())
+      {
+         initialAngularVelocity.changeFrame(worldFrame);
+         initialAngularVelocity.setZ(0.0);
+      }
+      initialLinearVelocity.clipToMaxLength(maxInitialLinearVelocityMagnitude.getDoubleValue());
+      initialAngularVelocity.clipToMaxLength(maxInitialAngularVelocityMagnitude.getDoubleValue());
       stanceFootPosition.setToZero(oppositeSoleFrame);
 
       fillAndInitializeTrajectories(true);
@@ -602,7 +621,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       footstep.getPose(footstepPose);
       footstepPose.changeFrame(worldFrame);
-      footstepPose.setZ(footstepPose.getZ() + finalSwingHeightOffset.getDoubleValue());
+      footstepPose.setZ(footstepPose.getZ() + finalSwingHeightOffset.getValue()); //getDoubleValue());
 
       // if replanning do not change the original trajectory type or waypoints
       if (replanTrajectory.getBooleanValue())

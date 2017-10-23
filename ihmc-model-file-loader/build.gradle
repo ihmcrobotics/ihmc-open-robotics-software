@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.5"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.10"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -30,6 +30,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: groupDependencyVersion
 }
 
 testDependencies {

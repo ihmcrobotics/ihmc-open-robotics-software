@@ -19,7 +19,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMP.SmoothCMPBasedICPPlanner;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -56,7 +56,6 @@ public class BalanceManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean ENABLE_DYN_REACHABILITY = true;
-   private static final boolean UPDATE_UPCOMING_CoPs_IN_FEET_WHEN_WALKING = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -232,7 +231,9 @@ public class BalanceManager
       maxICPErrorBeforeSingleSupportX.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupportX());
       maxICPErrorBeforeSingleSupportY.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupportY());
 
-      pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(controllerToolbox, bipedSupportPolygons, registry);
+      double pelvisTranslationICPSupportPolygonSafeMargin = walkingControllerParameters.getPelvisTranslationICPSupportPolygonSafeMargin();
+      pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(controllerToolbox, pelvisTranslationICPSupportPolygonSafeMargin, bipedSupportPolygons, registry);
+      
 
       pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
@@ -773,7 +774,7 @@ public class BalanceManager
 
    public void updateCurrentICPPlan()
    {
-      icpPlanner.updateCurrentPlan(UPDATE_UPCOMING_CoPs_IN_FEET_WHEN_WALKING);
+      icpPlanner.updateCurrentPlan();
    }
 
    public void updateSwingTimeRemaining(double timeRemainingInSwing)

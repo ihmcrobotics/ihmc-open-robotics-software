@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.5"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.9.10"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -23,13 +23,13 @@ testSuites {
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.3'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
    compile "org.ejml:core:0.30"
    compile "org.ejml:dense64:0.30"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-path-planning", version: groupDependencyVersion
 }
 
 testDependencies {

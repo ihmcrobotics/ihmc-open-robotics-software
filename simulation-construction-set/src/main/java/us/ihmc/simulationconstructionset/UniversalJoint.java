@@ -1,9 +1,9 @@
 package us.ihmc.simulationconstructionset;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.Axis;
 
 public class UniversalJoint extends PinJoint
 {

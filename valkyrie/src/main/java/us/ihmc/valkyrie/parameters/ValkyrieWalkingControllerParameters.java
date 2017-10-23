@@ -116,9 +116,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    // USE THESE FOR Real Robot and sims when controlling pelvis height instead of CoM.
-   private final double minimumHeightAboveGround = 0.595 + 0.23;
-   private double nominalHeightAboveGround = 0.675 + 0.23 - 0.01;
-   private final double maximumHeightAboveGround = 0.735 + 0.23;
+   private final double minimumHeightAboveGround = 0.595 + 0.23 + 0.08;
+   private double nominalHeightAboveGround = 0.675 + 0.23 - 0.01 + 0.08;
+   private final double maximumHeightAboveGround = 0.735 + 0.23 + 0.08;
 
    @Override
    public double minimumHeightAboveAnkle()
@@ -154,6 +154,18 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public boolean controlToeDuringSwing()
    {
       return true;
+   }
+
+   @Override
+   public boolean ignoreSwingInitialAngularVelocityZ()
+   {
+      return true;
+   }
+
+   @Override
+   public double getMaxSwingInitialAngularVelocityMagnitude()
+   {
+      return 1.5;
    }
 
    @Override
@@ -629,12 +641,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
       return gains;
-   }
-
-   @Override
-   public boolean doPrepareManipulationForLocomotion()
-   {
-      return true;
    }
 
    @Override

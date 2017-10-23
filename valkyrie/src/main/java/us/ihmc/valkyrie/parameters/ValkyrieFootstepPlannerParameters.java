@@ -1,22 +1,55 @@
 package us.ihmc.valkyrie.parameters;
 
-import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
-import us.ihmc.footstepPlanning.aStar.implementations.ReachableFootstepsBasedExpansion;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 
-public class ValkyrieFootstepPlannerParameters implements PlanarRegionFootstepPlanningParameters
+public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParameters
 {
-   private final double timeout = Double.POSITIVE_INFINITY;
 
    @Override
-   public ReachableFootstepsBasedExpansion getReachableFootstepExpansion()
+   public double getIdealFootstepWidth()
    {
-      return new ValkyrieReachableFootstepExpansion();
+      return 0.2;
    }
 
    @Override
-   public double getTimeout()
+   public double getIdealFootstepLength()
    {
-      return timeout;
+      return 0.2;
    }
 
+   @Override
+   public double getMaximumStepReach()
+   {
+      return 0.4;
+   }
+
+   @Override
+   public double getMaximumStepYaw()
+   {
+      return 0.6;
+   }
+
+   @Override
+   public double getMinimumStepYaw()
+   {
+      return -0.15;
+   }
+
+   @Override
+   public double getMinimumStepWidth()
+   {
+      return 0.15;
+   }
+
+   @Override
+   public double getMaximumStepZ()
+   {
+      return 0.1;
+   }
+
+   @Override
+   public double getMaximumStepWidth()
+   {
+      return 0.4;
+   }
 }

@@ -5,9 +5,9 @@ import static us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVe
 import java.util.EnumMap;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVector;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -23,7 +23,7 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
    private final SimpleMovingAverageFilteredYoFrameVector localVelocityFiltered;
    private final SimpleMovingAverageFilteredYoFrameVector filteredVelocityToCheck;
 
-   private final EnumMap<Direction, DelayEstimatorBetweenTwoSignals> delayEstimators = new EnumMap<>(Direction.class);
+   private final EnumMap<Axis, DelayEstimatorBetweenTwoSignals> delayEstimators = new EnumMap<>(Axis.class);
 
    private final ReferenceFrame referenceFrameUsedForComparison;
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
@@ -51,9 +51,9 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
       DelayEstimatorBetweenTwoSignals yVelocityDelayEstimator = new DelayEstimatorBetweenTwoSignals(namePrefix + "WY", localVelocityFiltered.getYoY(), filteredVelocityToCheck.getYoY(), updateDT, registry);
       DelayEstimatorBetweenTwoSignals zVelocityDelayEstimator = new DelayEstimatorBetweenTwoSignals(namePrefix + "WZ", localVelocityFiltered.getYoZ(), filteredVelocityToCheck.getYoZ(), updateDT, registry);
 
-      delayEstimators.put(Direction.X, xVelocityDelayEstimator);
-      delayEstimators.put(Direction.Y, yVelocityDelayEstimator);
-      delayEstimators.put(Direction.Z, zVelocityDelayEstimator);
+      delayEstimators.put(Axis.X, xVelocityDelayEstimator);
+      delayEstimators.put(Axis.Y, yVelocityDelayEstimator);
+      delayEstimators.put(Axis.Z, zVelocityDelayEstimator);
 
       parentRegistry.addChild(registry);
    }
@@ -61,15 +61,15 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
    @Override
    public void enable()
    {
-      for (Direction direction : Direction.values)
-         delayEstimators.get(direction).enable();
+      for (Axis axis : Axis.values)
+         delayEstimators.get(axis).enable();
    }
 
    @Override
    public void disable()
    {
-      for (Direction direction : Direction.values)
-         delayEstimators.get(direction).disable();
+      for (Axis axis : Axis.values)
+         delayEstimators.get(axis).disable();
    }
 
    @Override
@@ -87,32 +87,32 @@ public class OrientationAngularVelocityConsistencyChecker implements DiagnosticU
       if (!localVelocityFiltered.getHasBufferWindowFilled())
          return;
 
-      for (Direction direction : Direction.values)
-         delayEstimators.get(direction).update();
+      for (Axis axis : Axis.values)
+         delayEstimators.get(axis).update();
    }
 
    public boolean isEstimatingDelayAll()
    {
-      for (Direction direction : Direction.values)
+      for (Axis axis : Axis.values)
       {
-         if (!delayEstimators.get(direction).isEstimatingDelay())
+         if (!delayEstimators.get(axis).isEstimatingDelay())
             return false;
       }
       return true;
    }
 
-   public boolean isEstimatingDelay(Direction direction)
+   public boolean isEstimatingDelay(Axis axis)
    {
-      return delayEstimators.get(direction).isEstimatingDelay();
+      return delayEstimators.get(axis).isEstimatingDelay();
    }
 
-   public double getCorrelation(Direction direction)
+   public double getCorrelation(Axis axis)
    {
-      return delayEstimators.get(direction).getCorrelationCoefficient();
+      return delayEstimators.get(axis).getCorrelationCoefficient();
    }
 
-   public double getEstimatedDelay(Direction direction)
+   public double getEstimatedDelay(Axis axis)
    {
-      return delayEstimators.get(direction).getEstimatedDelay();
+      return delayEstimators.get(axis).getEstimatedDelay();
    }
 }
