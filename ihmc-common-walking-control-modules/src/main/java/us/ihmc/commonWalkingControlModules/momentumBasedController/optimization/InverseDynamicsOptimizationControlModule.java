@@ -23,11 +23,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -77,8 +77,7 @@ public class InverseDynamicsOptimizationControlModule
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
 
-   private final ArrayList<MotionQPInput> motionQPInputsToAdd = new ArrayList<>();
-   private final ArrayList<MotionQPInput> motionQPInputsPool = new ArrayList<>();
+   private final RecyclingArrayList<MotionQPInput> motionQPInputs;
 
    private final YoBoolean useWarmStart = new YoBoolean("useWarmStartInSolver", registry);
    private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterationsInSolver", registry);
@@ -115,8 +114,7 @@ public class InverseDynamicsOptimizationControlModule
       else
          basisVectorVisualizer = null;
 
-      for (int i = 0; i < defaultSize; i++)
-         motionQPInputsPool.add(new MotionQPInput(numberOfDoFs));
+      motionQPInputs = new RecyclingArrayList<>(defaultSize, new MotionQPInputBuilder(numberOfDoFs));
 
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, toolbox.getTotalRobotMass(), contactablePlaneBodies);
 
@@ -157,7 +155,7 @@ public class InverseDynamicsOptimizationControlModule
    {
       externalWrenchHandler.reset();
       motionQPInputCalculator.initialize();
-      motionQPInputsToAdd.clear();
+      motionQPInputs.clear();
    }
 
    public MomentumModuleSolution compute() throws MomentumControlModuleException
@@ -169,8 +167,8 @@ public class InverseDynamicsOptimizationControlModule
       qpSolver.setNumberOfActiveRhos(wrenchMatrixCalculator.getCurrentRhoSize());
       qpSolver.reset();
 
-      for (int inputIndex = 0; inputIndex < motionQPInputsToAdd.size(); inputIndex++)
-         qpSolver.addMotionInput(motionQPInputsToAdd.get(inputIndex));
+      for (int inputIndex = 0; inputIndex < motionQPInputs.size(); inputIndex++)
+         qpSolver.addMotionInput(motionQPInputs.get(inputIndex));
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
       if (SETUP_RHO_TASKS)
          setupRhoTasks();
@@ -258,11 +256,10 @@ public class InverseDynamicsOptimizationControlModule
 
    private void computePrivilegedJointAccelerations()
    {
-      int nextIndex = motionQPInputsToAdd.size();
-      MotionQPInput motionQPInput = motionQPInputsPool.get(nextIndex);
+      MotionQPInput motionQPInput = motionQPInputs.add();
       boolean success = motionQPInputCalculator.computePrivilegedJointAccelerations(motionQPInput);
-      if (success)
-         motionQPInputsToAdd.add(motionQPInput);
+      if (!success)
+         motionQPInputs.remove(motionQPInputs.size() - 1);
    }
 
    private void setupRhoTasks()
@@ -300,29 +297,26 @@ public class InverseDynamicsOptimizationControlModule
 
    public void submitSpatialAccelerationCommand(SpatialAccelerationCommand command)
    {
-      int nextIndex = motionQPInputsToAdd.size();
-      MotionQPInput motionQPInput = motionQPInputsPool.get(nextIndex);
+      MotionQPInput motionQPInput = motionQPInputs.add();
       boolean success = motionQPInputCalculator.convertSpatialAccelerationCommand(command, motionQPInput);
-      if (success)
-         motionQPInputsToAdd.add(motionQPInput);
+      if (!success)
+         motionQPInputs.remove(motionQPInputs.size() - 1);
    }
 
    public void submitJointspaceAccelerationCommand(JointspaceAccelerationCommand command)
    {
-      int nextIndex = motionQPInputsToAdd.size();
-      MotionQPInput motionQPInput = motionQPInputsPool.get(nextIndex);
+      MotionQPInput motionQPInput = motionQPInputs.add();
       boolean success = motionQPInputCalculator.convertJointspaceAccelerationCommand(command, motionQPInput);
-      if (success)
-         motionQPInputsToAdd.add(motionQPInput);
+      if (!success)
+         motionQPInputs.remove(motionQPInputs.size() - 1);
    }
 
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
-      int nextIndex = motionQPInputsToAdd.size();
-      MotionQPInput motionQPInput = motionQPInputsPool.get(nextIndex);
+      MotionQPInput motionQPInput = motionQPInputs.add();
       boolean success = motionQPInputCalculator.convertMomentumRateCommand(command, motionQPInput);
-      if (success)
-         motionQPInputsToAdd.add(motionQPInput);
+      if (!success)
+         motionQPInputs.remove(motionQPInputs.size() - 1);
    }
 
    public void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
@@ -365,5 +359,19 @@ public class InverseDynamicsOptimizationControlModule
       RigidBody rigidBody = command.getRigidBody();
       Wrench wrench = command.getExternalWrench();
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
+   }
+
+   private class MotionQPInputBuilder extends GenericTypeBuilder<MotionQPInput>
+   {
+      private final int size;
+      public MotionQPInputBuilder(int size)
+      {
+         this.size = size;
+      }
+
+      public MotionQPInput newInstance()
+      {
+         return new MotionQPInput(size);
+      }
    }
 }
