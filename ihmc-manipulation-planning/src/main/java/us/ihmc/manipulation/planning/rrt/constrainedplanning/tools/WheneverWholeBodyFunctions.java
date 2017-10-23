@@ -34,7 +34,7 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.sensorProcessing.outputData.LowLevelJointDataReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 
 public class WheneverWholeBodyFunctions
@@ -158,8 +158,8 @@ public class WheneverWholeBodyFunctions
       {
          if (output.hasDataForJoint(joint))
          {
-            LowLevelJointDataReadOnly lowLevelJointData = output.getLowLevelJointData(joint);
-         joint.setQ(lowLevelJointData.getDesiredPosition());
+            JointDesiredOutputReadOnly lowLevelJointData = output.getJointDesiredOutput(joint);
+            joint.setQ(lowLevelJointData.getDesiredPosition());
             joint.setqDesired(lowLevelJointData.getDesiredPosition());
             joint.setQd(lowLevelJointData.getDesiredVelocity());
          }
