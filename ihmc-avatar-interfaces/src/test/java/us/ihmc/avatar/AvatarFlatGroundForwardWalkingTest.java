@@ -283,8 +283,6 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       String className = getClass().getSimpleName();
 
-      simulationTestingParameters.setKeepSCSUp(keepSCSUp());
-
       PrintTools.debug("simulationTestingParameters.getKeepSCSUp " + simulationTestingParameters.getKeepSCSUp());
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(flatGround);
@@ -330,11 +328,6 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       }
 
       ThreadTools.sleep(1000);
-   }
-
-   protected boolean keepSCSUp()
-   {
-      return false;
    }
 
    protected double getForcePointOffsetZInChestFrame()
