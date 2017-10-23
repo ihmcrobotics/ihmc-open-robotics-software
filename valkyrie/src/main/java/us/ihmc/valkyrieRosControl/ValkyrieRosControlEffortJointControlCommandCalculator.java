@@ -36,13 +36,6 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
       parentRegistry.addChild(registry);
    }
 
-   public void setGains(double kp, double ki, double kd)
-   {
-      pidController.setProportionalGain(kp);
-      pidController.setIntegralGain(ki);
-      pidController.setDerivativeGain(kd);
-   }
-
    public void initialize()
    {
       pidController.setCumulativeError(0.0);
