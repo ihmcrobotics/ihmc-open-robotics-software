@@ -77,7 +77,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    @Override
    public HighLevelController getDefaultInitialControllerState()
    {
-      return runningOnRealRobot ? HighLevelController.STAND_READY : HighLevelController.WALKING;
+      return runningOnRealRobot ? HighLevelController.STAND_PREP_STATE : HighLevelController.WALKING;
    }
 
    @Override
