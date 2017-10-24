@@ -2,8 +2,11 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameTuple2D;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -55,7 +58,7 @@ public class YoContactPoint implements ContactPointInterface
    }
 
    @Override
-   public void getPosition2d(FramePoint2D framePoint2dToPack)
+   public void getPosition2d(FrameTuple2D<?, ?> framePoint2dToPack)
    {
       yoPosition.getFrameTuple2dIncludingFrame(framePoint2dToPack);
    }
@@ -73,20 +76,19 @@ public class YoContactPoint implements ContactPointInterface
    }
 
    @Override
-   public void getPosition2d(Point2D position2d)
+   public void getPosition2d(Tuple2DBasics position2d)
    {
-      // TODO Auto-generated method stub
-
+      position2d.set(yoPosition.getX(), yoPosition.getY());
    }
 
    @Override
-   public void setPosition(FramePoint3D position)
+   public void setPosition(FrameTuple3D<?,?> position)
    {
       this.yoPosition.set(position);
    }
 
    @Override
-   public void setPosition2d(FramePoint2D position2d)
+   public void setPosition2d(FrameTuple2D<?,?> position2d)
    {
       yoPosition.set(position2d);
    }
