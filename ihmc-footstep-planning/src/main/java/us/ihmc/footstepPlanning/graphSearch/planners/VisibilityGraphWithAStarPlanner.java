@@ -41,8 +41,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 {
-   private static final double defaultHeuristicWeight = 3.0;
-   private static final double planningHorizon = 2.0;
+   private static final double defaultHeuristicWeight = 15.0;
+   private static final double planningHorizon = 1.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
