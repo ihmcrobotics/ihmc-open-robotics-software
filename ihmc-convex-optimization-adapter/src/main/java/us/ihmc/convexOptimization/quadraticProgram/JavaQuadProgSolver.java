@@ -99,6 +99,8 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    private final DenseMatrix64F upperBoundsCMatrix = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F upperBoundsDVector = new DenseMatrix64F(0, 0);
 
+   private final DenseMatrix64F activeVariables = new DenseMatrix64F(0, 0);
+
    private int problemSize;
    private int numberOfInequalityConstraints;
    private int totalNumberOfInequalityConstraints;
@@ -159,6 +161,25 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
 
       upperBoundsCMatrix.reshape(0, 0);
       upperBoundsDVector.reshape(0, 0);
+   }
+
+   @Override
+   public void setActiveVariables(DenseMatrix64F activeVariables)
+   {
+      if (activeVariables != null)
+      {
+         if (activeVariables.getNumRows() != quadraticCostQMatrix.getNumRows())
+            throw new RuntimeException("activeVariables.getNumRows() != quadraticCostQMatrix.getNumRows()");
+
+         this.activeVariables.set(activeVariables);
+      }
+   }
+
+   @Override
+   public void setAllVariablesActive()
+   {
+      activeVariables.reshape(quadraticCostQMatrix.getNumRows(), 1);
+      CommonOps.fill(activeVariables, 1.0);
    }
 
    @Override

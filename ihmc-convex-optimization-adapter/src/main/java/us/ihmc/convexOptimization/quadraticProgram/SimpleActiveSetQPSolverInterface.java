@@ -4,6 +4,10 @@ import org.ejml.data.DenseMatrix64F;
 
 public interface SimpleActiveSetQPSolverInterface extends ActiveSetQPSolver
 {
+   void setActiveVariables(DenseMatrix64F activeVariables);
+
+   void setAllVariablesActive();
+
    public abstract void setUseWarmStart(boolean useWarmStart);
 
    public abstract void resetActiveConstraints();

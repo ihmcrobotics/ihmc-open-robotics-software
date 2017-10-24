@@ -1020,6 +1020,27 @@ public class MatrixTools
       matrixToRemoveRowTo.reshape(matrixToRemoveRowTo.getNumRows() - 1, matrixToRemoveRowTo.getNumCols(), true);
    }
 
+   public static void removeColumn(DenseMatrix64F matrixToRemoveColumnTo, int indexOfColumnToRemove)
+   {
+      if (indexOfColumnToRemove >= matrixToRemoveColumnTo.getNumCols())
+         throw new RuntimeException("The index indexOfColumnToRemove was expected to be in [0, " + (matrixToRemoveColumnTo.getNumCols() - 1) + "], but was: " + indexOfColumnToRemove);
+
+      for (int rowIndex = 0; rowIndex < matrixToRemoveColumnTo.getNumCols(); rowIndex++)
+      {
+         for (int currentColumnIndex = indexOfColumnToRemove; currentColumnIndex < matrixToRemoveColumnTo.getNumCols() - 1; currentColumnIndex++)
+         {
+            int nextColumnIndex = currentColumnIndex + 1;
+            double valueOfNextColumn = matrixToRemoveColumnTo.get(rowIndex, nextColumnIndex);
+            double valueOfCurrentColumn = matrixToRemoveColumnTo.get(rowIndex, currentColumnIndex);
+
+            matrixToRemoveColumnTo.set(rowIndex, nextColumnIndex, valueOfCurrentColumn);
+            matrixToRemoveColumnTo.set(rowIndex, currentColumnIndex, valueOfNextColumn);
+         }
+      }
+
+      matrixToRemoveColumnTo.reshape(matrixToRemoveColumnTo.getNumRows(), matrixToRemoveColumnTo.getNumCols() - 1, true);
+   }
+
    /**
     * Removes the rows of the given matrix that contain only zeros to an {@code epsilon}.
     * <p>
