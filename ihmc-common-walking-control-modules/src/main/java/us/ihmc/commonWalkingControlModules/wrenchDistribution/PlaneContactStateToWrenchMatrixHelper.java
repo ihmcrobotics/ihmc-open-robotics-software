@@ -78,6 +78,7 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final List<FramePoint3D> basisVectorsOrigin = new ArrayList<>();
    private final List<FrameVector3D> basisVectors = new ArrayList<>();
    private final HashMap<YoContactPoint, YoDouble> maxContactForces = new HashMap<>();
+   private final HashMap<YoContactPoint, YoDouble> rhoWeights = new HashMap<>();
 
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
 
@@ -122,8 +123,11 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       for (int i = 0; i < contactPoints2d.size(); i++)
       {
+         YoDouble rhoWeight = new YoDouble(namePrefix + "RhoWeight" + i, registry);
          YoDouble maxContactForce = new YoDouble(namePrefix + "MaxContactForce" + i, registry);
          maxContactForce.set(Double.POSITIVE_INFINITY);
+         
+         rhoWeights.put(yoPlaneContactState.getContactPoints().get(i), rhoWeight);
          maxContactForces.put(yoPlaneContactState.getContactPoints().get(i), maxContactForce);
       }
 
@@ -158,10 +162,13 @@ public class PlaneContactStateToWrenchMatrixHelper
          lastCommandId.set(command.getId());
       }
 
-      if (command.hasMaxContactPointNormalForce())
+      for (int i = 0; i < command.getNumberOfContactPoints(); i++)
       {
-         for (int i = 0; i < command.getNumberOfContactPoints(); i++)
+         rhoWeights.get(yoPlaneContactState.getContactPoints().get(i)).set(command.getRhoWeight(i));         
+         if (command.hasMaxContactPointNormalForce())
+         {
             maxContactForces.get(yoPlaneContactState.getContactPoints().get(i)).set(command.getMaxContactPointNormalForce(i));
+         }
       }
    }
 
@@ -172,7 +179,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       hasReceivedCenterOfPressureCommand.set(true);
    }
 
-   public void computeMatrices(double rhoWeight, double rhoRateWeight, Vector2D desiredCoPWeight, Vector2D copRateWeight)
+   public void computeMatrices(double defaultRhoWeight, double rhoRateWeight, Vector2D desiredCoPWeight, Vector2D copRateWeight)
    {
       int numberOfContactPointsInContact = yoPlaneContactState.getNumberOfContactPointsInContact();
       if (numberOfContactPointsInContact > maxNumberOfContactPoints)
@@ -206,6 +213,12 @@ public class PlaneContactStateToWrenchMatrixHelper
                DenseMatrix64F singleRhoCoPJacobian = computeSingleRhoCoPJacobian(basisVectorOrigin, basisVector);
                CommonOps.insert(singleRhoCoPJacobian, copJacobianMatrix, 0, rhoIndex);
 
+               double rhoWeight = rhoWeights.get(yoPlaneContactState.getContactPoints().get(contactPointIndex)).getDoubleValue();
+               if(Double.isNaN(rhoWeight))
+               {
+                  rhoWeight = defaultRhoWeight;
+               }
+               
                rhoWeightMatrix.set(rhoIndex, rhoIndex, rhoWeight * (double) maxNumberOfContactPoints / (double) numberOfContactPointsInContact);
 
                if (resetRequested.getBooleanValue())
