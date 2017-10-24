@@ -676,6 +676,13 @@ public class SwingState extends AbstractUnconstrainedState
       setFootstep(newFootstep, swingTime);
       doContinuousReplanning.set(continuousReplan);
    }
+   
+   public void getDesireds(FramePose desiredPoseToPack, FrameVector3D desiredLinearVelocityToPack, FrameVector3D desiredAngularVelocityToPack)
+   {
+      desiredPoseToPack.setIncludingFrame(this.desiredPose);
+      desiredAngularVelocityToPack.setIncludingFrame(this.desiredAngularVelocity);
+      desiredLinearVelocityToPack.setIncludingFrame(this.desiredLinearVelocity);
+   };
 
    private double computeSwingTimeRemaining()
    {
@@ -739,5 +746,11 @@ public class SwingState extends AbstractUnconstrainedState
       yoDesiredSoleOrientation.setToNaN();
       yoDesiredSoleLinearVelocity.setToNaN();
       yoDesiredSoleAngularVelocity.setToNaN();
+   }
+   
+   @Override
+   public boolean isDone() 
+   {
+      return (getTimeInCurrentState() > 0.1 && controllerToolbox.getFootSwitches().get(robotSide).computeFootLoadPercentage() > 0.10);
    }
 }

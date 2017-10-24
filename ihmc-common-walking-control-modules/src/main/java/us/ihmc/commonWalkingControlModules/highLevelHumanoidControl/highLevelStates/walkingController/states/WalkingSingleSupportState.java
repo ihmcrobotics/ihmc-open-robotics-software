@@ -185,7 +185,13 @@ public class WalkingSingleSupportState extends SingleSupportState
    public boolean isDone()
    {
       if (super.isDone())
+      {
+         if (feetManager.isInTouchdown(swingSide) && !feetManager.isTouchdownFinished(swingSide))
+         {
+            return false;
+         }
          return true;
+      }
 
       return finishSingleSupportWhenICPPlannerIsDone.getBooleanValue() && balanceManager.isICPPlanDone();
    }

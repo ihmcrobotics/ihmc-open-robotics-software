@@ -524,4 +524,14 @@ public class FeetManager
    {
       return footControlModules.get(robotSideToCheck).isFootToeingOffSlipping();
    }
+
+   public boolean isInTouchdown(RobotSide swingFoot)
+   {
+      return footControlModules.get(swingFoot).getCurrentConstraintType().equals(ConstraintType.TOUCHDOWN);
+   }
+
+   public boolean isTouchdownFinished(RobotSide swingFoot)
+   {
+      return footControlModules.get(swingFoot).isTouchdownFinished();
+   }
 }
