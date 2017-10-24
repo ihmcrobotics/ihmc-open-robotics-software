@@ -277,22 +277,6 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
       referenceFrames.updateFrames();
 
-//      Quaternion initialOrientation = new Quaternion();
-//      initialOrientation.appendRollRotation(Math.PI * 0.5);
-//      initialOrientation.appendYawRotation(Math.PI * 0.5);
-//      initialOrientation.appendPitchRotation(-Math.PI * 0.4);
-//      HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, new Point3D(0.6, 0.35, 1.0), initialOrientation,
-//                                                                               referenceFrames.getMidFootZUpGroundFrame());
-//      drcBehaviorTestHelper.send(lhandTrajectoryMessage);
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
-//
-//      initialOrientation = new Quaternion();
-//      initialOrientation.appendPitchRotation(Math.PI * 0.4);
-//      HandTrajectoryMessage rhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2.0, new Point3D(-0.1, -0.5, 0.7), initialOrientation,
-//                                                                               referenceFrames.getMidFootZUpGroundFrame());
-//      drcBehaviorTestHelper.send(rhandTrajectoryMessage);
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(4.0);
-
       /*
        * Behavior create.
        */
@@ -316,42 +300,43 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       System.out.println("wallPosePacket Dispatch");
       drcBehaviorTestHelper.getBehaviorCommunicationBridge().sendPacketToBehavior(wallPosePacket);
       System.out.println("wallPosePacket Dispatch done");
-      
+
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
       double yoTime = 0.0;
-      while(yoTime < 100)
+      while (yoTime < 100)
       {
          drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
          yoTime = drcBehaviorTestHelper.getYoTime().getDoubleValue();
-         if(cuttingWallBehaviorStateMachine.getStateMachine().getCurrentStateEnum() == CuttingWallBehaviorState.WAITING_CONFIRM)
+         if (cuttingWallBehaviorStateMachine.getStateMachine().getCurrentStateEnum() == CuttingWallBehaviorState.WAITING_CONFIRM)
          {
             PrintTools.info("Motion START!");
-            
+
             SetBooleanParameterPacket confirmPacket = new SetBooleanParameterPacket("", true);
 
             System.out.println("confirmPacket Dispatch");
             drcBehaviorTestHelper.getBehaviorCommunicationBridge().sendPacketToBehavior(confirmPacket);
-            
+
             int numberOfDiplayedWayPoints = 10;
             ConstrainedWholeBodyPlanningToolboxOutputConverter converter = new ConstrainedWholeBodyPlanningToolboxOutputConverter(getRobotModel());
-            ConstrainedWholeBodyPlanningToolboxOutputStatus constrainedWholeBodyPlanningToolboxOutputStatus = cuttingWallBehaviorStateMachine.getPlanConstrainedWholeBodyTrajectoryBehavior().getConstrainedWholeBodyPlanningToolboxOutputStatus();
-                        
-            for(int i=0;i<numberOfDiplayedWayPoints;i++)
+            ConstrainedWholeBodyPlanningToolboxOutputStatus constrainedWholeBodyPlanningToolboxOutputStatus = cuttingWallBehaviorStateMachine.getPlanConstrainedWholeBodyTrajectoryBehavior()
+                                                                                                                                             .getConstrainedWholeBodyPlanningToolboxOutputStatus();
+
+            for (int i = 0; i < numberOfDiplayedWayPoints; i++)
             {
                int length = constrainedWholeBodyPlanningToolboxOutputStatus.getTrajectoryTimes().length;
-               double trajectoryTime = constrainedWholeBodyPlanningToolboxOutputStatus.getTrajectoryTimes()[length-1];
-               double time = trajectoryTime * (double)(i)/(double)(numberOfDiplayedWayPoints);
-               
+               double trajectoryTime = constrainedWholeBodyPlanningToolboxOutputStatus.getTrajectoryTimes()[length - 1];
+               double time = trajectoryTime * (double) (i) / (double) (numberOfDiplayedWayPoints);
+
                KinematicsToolboxOutputStatus robotConfiguration = converter.getRobotConfiguration(constrainedWholeBodyPlanningToolboxOutputStatus, time);
                KinematicsToolboxOutputConverter kinematicConverter = new KinematicsToolboxOutputConverter(getRobotModel());
                kinematicConverter.updateFullRobotModel(robotConfiguration);
-               
+
                FullHumanoidRobotModel robotModel = kinematicConverter.getFullRobotModel();
                Pose3D pose = new Pose3D(robotModel.getHand(RobotSide.LEFT).getBodyFixedFrame().getTransformToWorldFrame());
                pose.appendTranslation(0.0, -ConstrainedWholeBodyPlanningToolboxController.handCoordinateOffsetX, 0.0);
                scs.addStaticLinkGraphics(getXYZAxis(pose));
             }
-            
+
             break;
          }
       }
@@ -439,79 +424,4 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
 
    }
 
-//   //   @Test
-//   public void testForToolbox() throws SimulationExceededMaximumTimeException, IOException
-//   {
-//      if (visulaizerOn)
-//         ThreadTools.sleep(1000);
-//
-//      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-//      assertTrue(success);
-//
-//      drcBehaviorTestHelper.updateRobotModel();
-//      drcBehaviorTestHelper.getControllerFullRobotModel().updateFrames();
-//
-//      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
-//      sdfFullRobotModel.updateFrames();
-//      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
-//      referenceFrames.updateFrames();
-//
-//      /*
-//       * reaching initial configuration
-//       */
-//      Quaternion initialOrientation = new Quaternion();
-//      initialOrientation.appendRollRotation(Math.PI * 0.5);
-//      initialOrientation.appendYawRotation(Math.PI * 0.5);
-//      initialOrientation.appendPitchRotation(-Math.PI * 0.4);
-//      HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, new Point3D(0.6, 0.35, 1.0), initialOrientation,
-//                                                                               referenceFrames.getMidFootZUpGroundFrame());
-//      drcBehaviorTestHelper.send(lhandTrajectoryMessage);
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
-//
-//      initialOrientation = new Quaternion();
-//      initialOrientation.appendPitchRotation(Math.PI * 0.4);
-//      HandTrajectoryMessage rhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2.0, new Point3D(-0.1, -0.5, 0.7), initialOrientation,
-//                                                                               referenceFrames.getMidFootZUpGroundFrame());
-//      drcBehaviorTestHelper.send(rhandTrajectoryMessage);
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(4.0);
-//
-//      /*
-//       * run toolbox.
-//       */
-//      System.out.println("Start");
-//
-//      ToolboxStateMessage toolboxMessage;
-//
-//      toolboxMessage = new ToolboxStateMessage(ToolboxState.WAKE_UP);
-//      toolboxMessage.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
-//      toolboxCommunicator.send(toolboxMessage);
-//
-//      /*
-//       * constrained end effector trajectory.
-//       */
-//      System.out.println("Send packet " + drcBehaviorTestHelper.getYoTime());
-//      ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
-//
-//      ConstrainedWholeBodyPlanningToolboxRequestPacket packet = new ConstrainedWholeBodyPlanningToolboxRequestPacket();
-//
-//      PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
-//      packet.setNumberOfFindInitialGuess(200);
-//      packet.setNumberOfExpanding(600);
-//      packet.setNumberOfEndEffectorWayPoints(30);
-//      packet.setInitialRobotConfigration(sdfFullRobotModel);
-//
-//      packet.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
-//
-//      toolboxCommunicator.send(packet);
-//      System.out.println("Send packet done" + drcBehaviorTestHelper.getYoTime());
-//
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10.0);
-//
-//      /*
-//       * test motion.
-//       */
-//
-//      System.out.println("End");
-//
-//   }
 }

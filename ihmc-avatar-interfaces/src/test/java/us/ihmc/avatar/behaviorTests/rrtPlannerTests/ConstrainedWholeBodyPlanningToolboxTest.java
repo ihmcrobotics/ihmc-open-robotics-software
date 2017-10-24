@@ -18,8 +18,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.ToolboxStateMessage;
-import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -29,14 +27,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.RobotKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
@@ -203,87 +198,6 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       setupCWBPlanningToolboxModule();
    }
 
-   //   @Test
-   public void testForBehavior() throws SimulationExceededMaximumTimeException, IOException
-   {
-
-   }
-
-//   @Test
-//   public void testForToolbox() throws SimulationExceededMaximumTimeException, IOException
-//   {
-//      if (visulaizerOn)
-//         ThreadTools.sleep(1000);
-//
-//      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-//      assertTrue(success);
-//
-//      drcBehaviorTestHelper.updateRobotModel();
-//      drcBehaviorTestHelper.getControllerFullRobotModel().updateFrames();
-//
-//      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
-//      sdfFullRobotModel.updateFrames();
-//      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
-//      referenceFrames.updateFrames();
-//
-//      /*
-//       * reaching initial configuration
-//       */
-//      Quaternion initialOrientation = new Quaternion();
-//      initialOrientation.appendRollRotation(Math.PI * 0.5);
-//      initialOrientation.appendYawRotation(Math.PI * 0.5);
-//      initialOrientation.appendPitchRotation(-Math.PI * 0.4);
-//      HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, new Point3D(0.6, 0.35, 1.0), initialOrientation,
-//                                                                               referenceFrames.getMidFootZUpGroundFrame());
-//      drcBehaviorTestHelper.send(lhandTrajectoryMessage);
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
-//
-//      initialOrientation = new Quaternion();
-//      initialOrientation.appendPitchRotation(Math.PI * 0.4);
-//      HandTrajectoryMessage rhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2.0, new Point3D(-0.1, -0.5, 0.7), initialOrientation,
-//                                                                               referenceFrames.getMidFootZUpGroundFrame());
-//      drcBehaviorTestHelper.send(rhandTrajectoryMessage);
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(4.0);
-//
-//      /*
-//       * run toolbox.
-//       */
-//      System.out.println("Start");
-//
-//      ToolboxStateMessage toolboxMessage;
-//
-//      toolboxMessage = new ToolboxStateMessage(ToolboxState.WAKE_UP);
-//      toolboxMessage.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
-//      toolboxCommunicator.send(toolboxMessage);
-//
-//      /*
-//       * constrained end effector trajectory.
-//       */
-//      System.out.println("Send packet " + drcBehaviorTestHelper.getYoTime());
-//      ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
-//
-//      ConstrainedWholeBodyPlanningToolboxRequestPacket packet = new ConstrainedWholeBodyPlanningToolboxRequestPacket();
-//
-//      PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
-//      packet.setNumberOfFindInitialGuess(200);
-//      packet.setNumberOfExpanding(600);
-//      packet.setInitialRobotConfigration(sdfFullRobotModel);
-//
-//      packet.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
-//
-//      toolboxCommunicator.send(packet);
-//      System.out.println("Send packet done" + drcBehaviorTestHelper.getYoTime());
-//
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10.0);
-//
-//      /*
-//       * test motion.
-//       */
-//
-//      System.out.println("End");
-//
-//   }
-
    //      @Test
    public void testForInverseKinematicsToolbox() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -338,7 +252,7 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       System.out.println("End");
    }
 
-   //   @Test
+   @Test
    public void testForSolver() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -352,31 +266,25 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
       sdfFullRobotModel.updateFrames();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
       referenceFrames.updateFrames();
-
+      
       /*
        * reaching initial configuration
        */
+            
       Quaternion initialOrientation = new Quaternion();
-      initialOrientation.appendRollRotation(Math.PI * 0.5);
-      initialOrientation.appendYawRotation(Math.PI * 0.5);
-      initialOrientation.appendPitchRotation(-Math.PI * 0.3);
-      HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 2.0, new Point3D(0.6, 0.35, 1.0), initialOrientation,
+      initialOrientation.appendPitchRotation(Math.PI * 0.3);
+      HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 1.0, new Point3D(0.0, 0.4, 0.75), initialOrientation,
                                                                                referenceFrames.getMidFootZUpGroundFrame());
       drcBehaviorTestHelper.send(lhandTrajectoryMessage);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
 
       initialOrientation = new Quaternion();
       initialOrientation.appendPitchRotation(Math.PI * 0.3);
-      HandTrajectoryMessage rhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2.0, new Point3D(-0.1, -0.45, 0.8), initialOrientation,
+      HandTrajectoryMessage rhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 1.0, new Point3D(-0.0, -0.4, 0.75), initialOrientation,
                                                                                referenceFrames.getMidFootZUpGroundFrame());
       drcBehaviorTestHelper.send(rhandTrajectoryMessage);
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(4.0);
-
-      /*
-       * constrained end effector trajectory (WorldFrame).
-       */
-      DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
-
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      
       /*
        * solver.
        */
@@ -385,26 +293,46 @@ public abstract class ConstrainedWholeBodyPlanningToolboxTest implements MultiRo
 
       kinematicsSolver.initialize();
       kinematicsSolver.holdCurrentTrajectoryMessages();
-
-      Point3D desiredPoint = new Point3D(0.5, 0.35, 1.5);
+     
+      Point3D desiredPoint = new Point3D(0.7, 0.35, 1.0);
       Quaternion desiredOrientation = new Quaternion();
+      desiredOrientation.appendPitchRotation(-0.5*Math.PI);
       Pose3D desiredPose = new Pose3D(desiredPoint, desiredOrientation);
 
       kinematicsSolver.setDesiredHandPose(RobotSide.LEFT, desiredPose);
 
       kinematicsSolver.putTrajectoryMessages();
       PrintTools.info("" + kinematicsSolver.solve());
+            
+      
+      kinematicsSolver = new WheneverWholeBodyKinematicsSolver(getRobotModel());
+      kinematicsSolver.updateRobotConfigurationData(new KinematicsToolboxOutputStatus(sdfFullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel), false));
 
-      showUpFullRobotModelWithConfiguration(sdfFullRobotModel);
+      kinematicsSolver.initialize();
+      kinematicsSolver.holdCurrentTrajectoryMessages();
+     
+      desiredPoint = new Point3D(0.6, 0.35, 1.0);
+      desiredOrientation = new Quaternion();
+      desiredOrientation.appendPitchRotation(-0.5*Math.PI);
+      desiredPose = new Pose3D(desiredPoint, desiredOrientation);
 
-      showUpFullRobotModelWithConfiguration(kinematicsSolver.getDesiredFullRobotModel());
+      kinematicsSolver.setDesiredHandPose(RobotSide.LEFT, desiredPose);
 
-      scs.addStaticLinkGraphics(getXYZAxis(desiredPose));
+      kinematicsSolver.putTrajectoryMessages();
+      PrintTools.info("" + kinematicsSolver.solve());
+      
+      
+      
+//      showUpFullRobotModelWithConfiguration(sdfFullRobotModel);
+//
+//      showUpFullRobotModelWithConfiguration(kinematicsSolver.getDesiredFullRobotModel());
+//
+//      scs.addStaticLinkGraphics(getXYZAxis(desiredPose));
 
       System.out.println("End");
    }
 
-   @Test
+   // @Test
    public void testForConstrainedTrajectory() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();

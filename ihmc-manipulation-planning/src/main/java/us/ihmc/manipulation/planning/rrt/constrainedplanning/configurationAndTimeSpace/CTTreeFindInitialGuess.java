@@ -15,7 +15,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWh
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.CTTreeTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.RobotKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -29,7 +28,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class CTTreeFindInitialGuess
 {
    private final int numberOfSolvers;
-   
+
    private final List<WheneverWholeBodyKinematicsSolver> kinematicsSolvers = new ArrayList<>();
 
    private final List<YoInteger> cntKinematicsSolvers = new ArrayList<>();
@@ -46,6 +45,8 @@ public class CTTreeFindInitialGuess
 
    private CTTaskNode bestNode;
 
+   private FullHumanoidRobotModelFactory fullRobotModelFactory;
+
    public CTTreeFindInitialGuess(FullHumanoidRobotModelFactory fullRobotModelFactory, int numberOfThread, YoVariableRegistry registry)
    {
       this(fullRobotModelFactory, numberOfThread, numberOfThread, registry);
@@ -56,7 +57,9 @@ public class CTTreeFindInitialGuess
 
       this.numberOfSolvers = numberOfSolvers;
 
-      forkJoinPool = new ForkJoinPool(numberOfThread);
+      this.forkJoinPool = new ForkJoinPool(numberOfThread);
+
+      this.fullRobotModelFactory = fullRobotModelFactory;
 
       for (int i = 0; i < numberOfSolvers; i++)
       {
@@ -94,6 +97,7 @@ public class CTTreeFindInitialGuess
          {
             CTTaskNode initialGuessNode = initialGuessNodes.get(index);
             WheneverWholeBodyKinematicsSolver kinematicsSolver = kinematicsSolvers.get(index);
+            kinematicsSolver = new WheneverWholeBodyKinematicsSolver(fullRobotModelFactory);
             SideDependentList<YoFramePose> endeffectorPose = endeffectorPoses.get(index);
             YoInteger cntKinematicSolver = cntKinematicsSolvers.get(index);
 
@@ -125,9 +129,9 @@ public class CTTreeFindInitialGuess
 
    }
 
-   private static boolean updateValidity(CTTaskNode node, WheneverWholeBodyKinematicsSolver kinematicsSolver, KinematicsToolboxOutputStatus initialConfiguration,
-                                         ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory, double handCoordinateOffsetX,
-                                         SideDependentList<YoFramePose> endeffectorPose, YoInteger cntKinematicSolver)
+   private static boolean updateValidity(CTTaskNode node, WheneverWholeBodyKinematicsSolver kinematicsSolver,
+                                         KinematicsToolboxOutputStatus initialConfiguration, ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory,
+                                         double handCoordinateOffsetX, SideDependentList<YoFramePose> endeffectorPose, YoInteger cntKinematicSolver)
    {
       if (node.getParentNode() != null)
       {
@@ -152,7 +156,7 @@ public class CTTreeFindInitialGuess
       for (RobotSide robotSide : RobotSide.values)
       {
          configurationSpaces.put(robotSide, CTTreeTools.getConfigurationSpace(node, robotSide));
-         
+
          Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(node.getNodeData(0), robotSide, configurationSpaces.get(robotSide));
 
          endeffectorPose.get(robotSide).setPosition(desiredPose.getPosition());
