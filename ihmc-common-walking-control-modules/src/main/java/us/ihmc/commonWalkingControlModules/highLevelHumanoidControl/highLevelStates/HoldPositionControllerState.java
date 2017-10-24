@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -15,13 +15,13 @@ public class HoldPositionControllerState extends HighLevelControllerState
 {
    private final YoVariableRegistry registry;
 
-   private final LowLevelOneDoFJointDesiredDataHolderList highLevelControllerOutput;
+   private final LowLevelOneDoFJointDesiredDataHolderReadOnly highLevelControllerOutput;
    protected final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    private final PairList<OneDoFJoint, YoDouble> jointSetpoints = new PairList<>();
 
    public HoldPositionControllerState(HighLevelController stateEnum, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                      LowLevelOneDoFJointDesiredDataHolderList highLevelControllerOutput)
+                                      LowLevelOneDoFJointDesiredDataHolderReadOnly highLevelControllerOutput)
    {
       super(stateEnum);
 
@@ -52,7 +52,7 @@ public class HoldPositionControllerState extends HighLevelControllerState
       {
          OneDoFJoint joint = jointSetpoints.get(jointIndex).getLeft();
          YoDouble setpoint = jointSetpoints.get(jointIndex).getRight();
-         JointDesiredOutput lowLevelJointData = highLevelControllerOutput.getJointDesiredOutput(joint);
+         JointDesiredOutputReadOnly lowLevelJointData = highLevelControllerOutput.getJointDesiredOutput(joint);
          if (lowLevelJointData != null && lowLevelJointData.hasDesiredPosition())
             setpoint.set(lowLevelJointData.getDesiredPosition());
          else
