@@ -3,6 +3,8 @@ package us.ihmc.quadrupedRobotics.util;
 import java.util.Comparator;
 import java.util.List;
 
+import us.ihmc.tools.lists.ListSorter;
+
 @SuppressWarnings("unchecked")
 public class TimeIntervalTools
 {
