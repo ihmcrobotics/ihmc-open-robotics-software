@@ -9,6 +9,7 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -27,16 +28,19 @@ public class StandPrepControllerState extends HighLevelControllerState
 
    private final YoDouble timeToPrepareForStanding = new YoDouble("timeToPrepareForStanding", registry);
    private final YoDouble minimumTimeDoneWithStandPrep = new YoDouble("minimumTimeDoneWithStandPrep", registry);
+   private final LowLevelOneDoFJointDesiredDataHolderReadOnly highLevelControlOutput;
 
-   public StandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters)
+   public StandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
+                                   LowLevelOneDoFJointDesiredDataHolderReadOnly highLevelControlOutput)
    {
-      this(controllerToolbox, highLevelControllerParameters, MINIMUM_TIME_DONE_WITH_STAND_PREP);
+      this(controllerToolbox, highLevelControllerParameters, highLevelControlOutput, MINIMUM_TIME_DONE_WITH_STAND_PREP);
    }
 
    public StandPrepControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
-                                   double minimumTimeDoneWithStandPrep)
+                                   LowLevelOneDoFJointDesiredDataHolderReadOnly highLevelControlOutput, double minimumTimeDoneWithStandPrep)
    {
       super(controllerState);
+      this.highLevelControlOutput = highLevelControlOutput;
 
       this.timeToPrepareForStanding.set(highLevelControllerParameters.getTimeToMoveInStandPrep());
       this.minimumTimeDoneWithStandPrep.set(minimumTimeDoneWithStandPrep);
@@ -80,10 +84,15 @@ public class StandPrepControllerState extends HighLevelControllerState
          double desiredFinalPosition = standPrepFinal.getDoubleValue();
          double desiredFinalVelocity = 0.0;
 
-         double currentAngle = joint.getQ();
-         double currentVelocity = 0.0;
+         JointDesiredOutputReadOnly jointDesiredOutput = highLevelControlOutput.getJointDesiredOutput(joint);
+         double startAngle;
+         if (jointDesiredOutput != null && jointDesiredOutput.hasDesiredPosition())
+            startAngle = jointDesiredOutput.getDesiredPosition();
+         else
+            startAngle = joint.getQ();
+         double startVelocity = 0.0;
 
-         trajectory.setCubic(0.0, timeToPrepareForStanding.getDoubleValue(), currentAngle, currentVelocity, desiredFinalPosition, desiredFinalVelocity);
+         trajectory.setCubic(0.0, timeToPrepareForStanding.getDoubleValue(), startAngle, startVelocity, desiredFinalPosition, desiredFinalVelocity);
       }
    }
 

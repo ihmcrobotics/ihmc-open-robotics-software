@@ -14,7 +14,8 @@ public class StandPrepControllerStateFactory implements HighLevelControllerState
    {
       if (standPrepControllerState == null)
          standPrepControllerState = new StandPrepControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
-                                                                 controllerFactoryHelper.getHighLevelControllerParameters());
+                                                                 controllerFactoryHelper.getHighLevelControllerParameters(),
+                                                                 controllerFactoryHelper.getLowLevelControllerOutput());
 
       return standPrepControllerState;
    }
