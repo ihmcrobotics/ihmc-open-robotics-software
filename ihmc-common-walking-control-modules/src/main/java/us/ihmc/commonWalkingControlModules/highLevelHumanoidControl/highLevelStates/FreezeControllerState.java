@@ -6,14 +6,14 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
+import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 
 public class FreezeControllerState extends HoldPositionControllerState
 {
    private static final HighLevelController controllerState = HighLevelController.FREEZE_STATE;
 
    public FreezeControllerState(HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
-                                LowLevelOneDoFJointDesiredDataHolderList highLevelControllerOutput)
+                                LowLevelOneDoFJointDesiredDataHolderReadOnly highLevelControllerOutput)
    {
       super(controllerState, controllerToolbox, highLevelControllerOutput);
 
