@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.FOOT_SWING_WEIGHT;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -139,6 +140,9 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       {
          legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
       }
+
+      YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
+      contactState.notifyContactStateHasChanged();
 
       spatialFeedbackControlCommand.resetSecondaryTaskJointWeightScale();
 

@@ -28,6 +28,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    private FrameVector3D contactNormal = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
    private final double coefficientOfFriction = 0.8;
    private final int numberOfPointsInContact = 1;
+   private boolean hasContactStateChanged = false;
    private final double contactForceThreshold = 0.3;
    private final FramePoint3D touchdownPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final ReferenceFrame soleFrame;
@@ -43,12 +44,11 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
 
    public PlaneContactStateCommand getContactStateBasedOnContactForceThreshold()
    {
-      planeContactStateCommand.setId(NameBasedHashCodeTools.combineHashCodes(numberOfPointsInContact, rigidBody));
-
       planeContactStateCommand.clearContactPoints();
       planeContactStateCommand.setContactingRigidBody(rigidBody);
       planeContactStateCommand.setCoefficientOfFriction(coefficientOfFriction);
       planeContactStateCommand.setContactNormal(contactNormal);
+      planeContactStateCommand.setHasContactStateChanged(hasContactStateChanged);
 
       if (isFootInContact())
       {
@@ -63,12 +63,11 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
 
    public PlaneContactStateCommand getInContactState()
    {
-      planeContactStateCommand.setId(NameBasedHashCodeTools.combineHashCodes(numberOfPointsInContact, rigidBody));
-
       planeContactStateCommand.clearContactPoints();
       planeContactStateCommand.setContactingRigidBody(rigidBody);
       planeContactStateCommand.setCoefficientOfFriction(coefficientOfFriction);
       planeContactStateCommand.setContactNormal(contactNormal);
+      planeContactStateCommand.setHasContactStateChanged(hasContactStateChanged);
 
       YoFramePoint yoPosition = contactPoint.getYoPosition();
       yoPosition.getFrameTupleIncludingFrame(touchdownPoint);
@@ -80,7 +79,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
 
    public PlaneContactStateCommand getNotInContactState()
    {
-      planeContactStateCommand.setId(NameBasedHashCodeTools.combineHashCodes(numberOfPointsInContact, rigidBody));
+      planeContactStateCommand.setHasContactStateChanged(hasContactStateChanged);
 
       planeContactStateCommand.clearContactPoints();
       planeContactStateCommand.setContactingRigidBody(rigidBody);
@@ -185,6 +184,21 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    {
 
    }
+
+   @Override
+   public void notifyContactStateHasChanged()
+   {
+      hasContactStateChanged = true;
+   }
+
+   @Override
+   public boolean pollContactHasChangedNotification()
+   {
+      boolean ret = hasContactStateChanged;
+      hasContactStateChanged = false;
+      return ret;
+   }
+
 
    private class ContactPointWrapper implements ContactPointInterface
    {

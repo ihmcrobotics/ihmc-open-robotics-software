@@ -89,12 +89,11 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    @Override
    public void getPlaneContactStateCommand(PlaneContactStateCommand planeContactStateCommandToPack)
    {
-      planeContactStateCommandToPack.setId(NameBasedHashCodeTools.combineHashCodes(getNumberOfContactPointsInContact(), rigidBody));
-
       planeContactStateCommandToPack.clearContactPoints();
       planeContactStateCommandToPack.setContactingRigidBody(rigidBody);
       planeContactStateCommandToPack.setCoefficientOfFriction(coefficientOfFriction.getDoubleValue());
       planeContactStateCommandToPack.setContactNormal(contactNormalFrameVector);
+      planeContactStateCommandToPack.setHasContactStateChanged(hasContactStateChanged.getBooleanValue());
 
       if (!inContact())
          return;
@@ -127,6 +126,8 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
       coefficientOfFriction.set(planeContactStateCommand.getCoefficientOfFriction());
       planeContactStateCommand.getContactNormal(contactNormalFrameVector);
+
+      hasContactStateChanged.set(planeContactStateCommand.getHasContactStateChanged());
 
       if (planeContactStateCommand.isEmpty())
          clear();
@@ -499,11 +500,13 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       inContact.set(true);
    }
 
+   @Override
    public void notifyContactStateHasChanged()
    {
       hasContactStateChanged.set(true);
    }
 
+   @Override
    public boolean pollContactHasChangedNotification()
    {
       boolean ret = hasContactStateChanged.getBooleanValue();

@@ -276,6 +276,9 @@ public class OnToesState extends AbstractFootControlState
       else
          setControlPointPositionFromContactLine();
 
+      YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
+      contactState.notifyContactStateHasChanged();
+
       startOrientation.setToZero(contactableFoot.getFrameAfterParentJoint());
       startOrientation.changeFrame(worldFrame);
 
