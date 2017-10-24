@@ -26,7 +26,8 @@ public class ValkyrieCalibrationControllerStateFactory implements HighLevelContr
          return calibrationControllerState;
 
       calibrationControllerState = new ValkyrieCalibrationControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
-                                                                          controllerFactoryHelper.getHighLevelControllerParameters(), calibrationParameters,
+                                                                          controllerFactoryHelper.getHighLevelControllerParameters(),
+                                                                          controllerFactoryHelper.getLowLevelControllerOutput(), calibrationParameters,
                                                                           torqueOffsetPrinter);
       return calibrationControllerState;
    }
