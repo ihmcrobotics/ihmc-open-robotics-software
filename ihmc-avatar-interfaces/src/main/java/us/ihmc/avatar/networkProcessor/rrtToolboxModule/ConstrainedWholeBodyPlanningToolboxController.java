@@ -233,41 +233,41 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
           * generate WholeBodyTrajectoryMessage.
           */
          terminateToolboxController();
-         
+
          // TODO
          setOutputStatus(toolboxSolution, 4);
-         setOutputStatus(toolboxSolution, tree.getPath());         
-         
+         setOutputStatus(toolboxSolution, tree.getPath());
+
          toolboxSolution.setDestination(PacketDestination.BEHAVIOR_MODULE);
-         
+
          reportMessage(toolboxSolution);
       }
    }
-   
+
    // TODO
    private void setOutputStatus(ConstrainedWholeBodyPlanningToolboxOutputStatus outputStatusToPack, int planningResult)
    {
       outputStatusToPack.setPlanningResult(planningResult);
    }
-   
+
    private void setOutputStatus(ConstrainedWholeBodyPlanningToolboxOutputStatus outputStatusToPack, ArrayList<CTTaskNode> path)
    {
-      if(outputStatusToPack.getPlanningResult() == 4)
-      {  
+      if (outputStatusToPack.getPlanningResult() == 4)
+      {
          CTTaskNodeWholeBodyTrajectoryMessageFactory ctTaskNodeWholeBodyTrajectoryMessageFactory = new CTTaskNodeWholeBodyTrajectoryMessageFactory();
          ctTaskNodeWholeBodyTrajectoryMessageFactory.setCTTaskNodePath(tree.getPath(), constrainedEndEffectorTrajectory);
-         
+
          outputStatusToPack.setWholeBodyTrajectoryMessage(ctTaskNodeWholeBodyTrajectoryMessageFactory.getWholeBodyTrajectoryMessage());
-         
+
          outputStatusToPack.setRobotConfigurations(ctTaskNodeWholeBodyTrajectoryMessageFactory.getConfigurations());
-         outputStatusToPack.setTrajectoryTimes(ctTaskNodeWholeBodyTrajectoryMessageFactory.getTrajectoryTimes());                  
+         outputStatusToPack.setTrajectoryTimes(ctTaskNodeWholeBodyTrajectoryMessageFactory.getTrajectoryTimes());
       }
       else
       {
          PrintTools.info("Planning is Failed.");
       }
    }
-      
+
    /**
     * state = SHORTCUT_PATH
     */

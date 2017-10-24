@@ -31,7 +31,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.CTTaskNode;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.RobotKinematicsConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -138,7 +137,7 @@ public class WheneverWholeBodyKinematicsSolver
    private SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private FrameOrientation chestFrameOrientation = new FrameOrientation();
 
-   private static int maximumCntForUpdateInternal = 150;
+   private static int maximumCntForUpdateInternal = 200;
    private int cntForUpdateInternal = 0;
 
    public static int numberOfTest = 0;
@@ -177,14 +176,14 @@ public class WheneverWholeBodyKinematicsSolver
       inverseKinematicsSolution = new KinematicsToolboxOutputStatus(oneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
 
-      gains.setProportionalGains(1.0); // Gains used for everything. It is as
+      gains.setProportionalGains(1200.0); // Gains used for everything. It is as
       // high as possible to reduce the
       // convergence time.
 
-      footWeight.set(50.0);
+      footWeight.set(200.0); //50.0);
       momentumWeight.set(1.0);
-      privilegedWeight.set(0.02);
-      privilegedConfigurationGain.set(0.02);
+      privilegedWeight.set(1.0); //0.02);
+      privilegedConfigurationGain.set(50.0); //0.02);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -200,7 +199,7 @@ public class WheneverWholeBodyKinematicsSolver
       InverseDynamicsJoint[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(desiredFullRobotModel);
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       WheneverKinematicsSolverSetting optimizationSettings = new WheneverKinematicsSolverSetting();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(1.0, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(1.0e-3, 0.0, rootJoint, controlledJoints, centerOfMassFrame, optimizationSettings,
                                                                             null, registry);
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
@@ -251,8 +250,6 @@ public class WheneverWholeBodyKinematicsSolver
       return command;
    }
 
-   
-   
    public boolean initialize()
    {
       userFeedbackCommands.clear();
@@ -298,8 +295,6 @@ public class WheneverWholeBodyKinematicsSolver
    }
 
    private double deltaSolutionQuality = 0.0;
-   private double deltaSolutionQualityOld = 0.0;
-   private double accSolutionQuality = 0.0;
 
    private void updateInternal()
    {
@@ -338,13 +333,13 @@ public class WheneverWholeBodyKinematicsSolver
       inverseKinematicsSolution.setDesiredJointState(rootJoint, oneDoFJoints, false);
       inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
 
-      double solutionUltimateStableThresholdVEL = 1.0e-4;
-      double solutionUltimateStableThresholdACC = 1.0e-6;
-      double solutionStableThreshold = 0.0004;
+      //
+      double solutionStableThreshold = 0.00001;
       double solutionQualityThreshold = 0.005;
 
       deltaSolutionQuality = solutionQuality.getDoubleValue() - solutionQualityOld.getDoubleValue();
-      accSolutionQuality = deltaSolutionQuality - deltaSolutionQualityOld;
+
+      double generalizedDelta = deltaSolutionQuality / solutionQuality.getDoubleValue();
 
       boolean isSolutionStable = (Math.abs(deltaSolutionQuality) < solutionStableThreshold);
       boolean isSolutionGoodEnough = solutionQuality.getDoubleValue() < solutionQualityThreshold;
@@ -355,19 +350,14 @@ public class WheneverWholeBodyKinematicsSolver
          isSolved = true;
       }
 
-      boolean isSolutionUltimateStable = (Math.abs(accSolutionQuality) < solutionUltimateStableThresholdACC)
-            && (Math.abs(deltaSolutionQuality) < solutionUltimateStableThresholdVEL);
-
       if (DEBUG)
-         PrintTools.info("" + cntForUpdateInternal + " cur SQ " + solutionQuality.getDoubleValue() + " " + isSolutionGoodEnough + " " + isSolutionStable + " "
-               + isGoodSolutionCur + " " + isSolutionUltimateStable);
+         PrintTools.info("" + cntForUpdateInternal + " cur SQ " + solutionQuality.getDoubleValue() + " " + deltaSolutionQuality + " " + generalizedDelta);
 
-      if (!isSolutionGoodEnough && isSolutionUltimateStable && cntForUpdateInternal > 4)
+      if (!isSolutionGoodEnough && Math.abs(generalizedDelta) < 0.005)
       {
          isJointLimit = true;
       }
 
-      deltaSolutionQualityOld = deltaSolutionQuality;
       solutionQualityOld.set(solutionQuality.getDoubleValue());
       cntForUpdateInternal++;
    }
@@ -394,8 +384,7 @@ public class WheneverWholeBodyKinematicsSolver
          if (isJointLimit)
          {
             if (DEBUG)
-               PrintTools.info("cntForUpdateInternal " + " FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue() + " " + deltaSolutionQuality
-                     + " " + accSolutionQuality);
+               PrintTools.info("isJointLimit " + " FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue() + " " + deltaSolutionQuality);
 
             return false;
          }
@@ -409,12 +398,13 @@ public class WheneverWholeBodyKinematicsSolver
             if (DEBUG)
                PrintTools.info("cntForUpdateInternal " + " TRUE " + cntForUpdateInternal);
 
+            //printOutRobotModel(desiredFullRobotModel, referenceFrames.getMidFootZUpGroundFrame());
+
             return true;
          }
       }
       if (DEBUG)
-         PrintTools.info("cntForUpdateInternal " + " FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue() + " " + deltaSolutionQuality + " "
-               + accSolutionQuality);
+         PrintTools.info("timeOver " + " FALSE " + cntForUpdateInternal + " " + solutionQuality.getDoubleValue() + " " + deltaSolutionQuality);
 
       return false;
    }
@@ -665,7 +655,7 @@ public class WheneverWholeBodyKinematicsSolver
 
    public void setDesiredHandPose(RobotSide robotSide, Pose3D desiredPoseToMidZUp)
    { // TODO
-        // Consider adding the desired hand control frame to use when solving
+     // Consider adding the desired hand control frame to use when solving
       handSelectionMatrices.get(robotSide).clearSelection();
       handSelectionMatrices.get(robotSide).setLinearAxisSelection(true, true, true);
       handSelectionMatrices.get(robotSide).setAngularAxisSelection(true, true, true);

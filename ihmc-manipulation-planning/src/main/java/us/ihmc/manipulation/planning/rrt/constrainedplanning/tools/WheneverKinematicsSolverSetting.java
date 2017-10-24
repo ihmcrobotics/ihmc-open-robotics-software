@@ -9,7 +9,8 @@ public class WheneverKinematicsSolverSetting implements ControllerCoreOptimizati
    @Override
    public double getJointVelocityWeight()
    {
-      // return 3.0;
+      //return 10.0;
+      //return 3.0;
       return 0.00001;
    }
 
@@ -17,8 +18,15 @@ public class WheneverKinematicsSolverSetting implements ControllerCoreOptimizati
    @Override
    public double getJointAccelerationWeight()
    {
+      //return 1.0;
       //return 0.5;
       return 0.0;
+   }
+
+   @Override
+   public boolean areJointVelocityLimitsConsidered()
+   {
+      return false;
    }
 
    /** @inheritDoc */
