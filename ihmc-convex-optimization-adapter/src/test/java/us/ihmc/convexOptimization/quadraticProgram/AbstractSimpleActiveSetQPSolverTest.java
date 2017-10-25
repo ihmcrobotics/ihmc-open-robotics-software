@@ -245,7 +245,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       objectiveCost = solver.getObjectiveCost(solutionMatrix);
       assertEquals(4.0, objectiveCost, 1e-7);
 
-      // Minimize x^2 + y^2 subject to x + y = 1.0, x <= y - 1 (x - y <= -1.0)
+      // Minimize x^2 + y^2 subject to x + y = 1.0, x <= y - 1 (x - y <= -1.0), but with y as inactive
       solver.clear();
       costQuadraticMatrix = new double[][] { { 2.0, 0.0 }, { 0.0, 2.0 } };
       costLinearVector = new double[] { 0.0, 0.0 };
@@ -311,6 +311,188 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       solutionMatrix.setData(solution);
       objectiveCost = solver.getObjectiveCost(solutionMatrix);
       assertEquals(2.0, objectiveCost, 1e-7);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testSimpleCasesWithInequalityConstraintsAndInactiveVariables()
+   {
+      testSimpleCasesWithInequalityConstraintsAndInactiveVariables(1);
+   }
+
+   public void testSimpleCasesWithInequalityConstraintsAndInactiveVariables(int expectedNumberOfIterations)
+   {
+      SimpleActiveSetQPSolverInterface solver = createSolverToTest();
+
+      // Minimize x^T * x subject to x <= 1
+      double[][] costQuadraticMatrix = new double[][] { { 2.0 } };
+      double[] costLinearVector = new double[] { 0.0 };
+      double quadraticCostScalar = 0.0;
+      solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+
+      double[][] linearInequalityConstraintsCMatrix = new double[][] { { 1.0 } };
+      double[] linearInqualityConstraintsDVector = new double[] { 1.0 };
+      solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
+
+      double[] solution = new double[1];
+      double[] lagrangeEqualityMultipliers = new double[0];
+      double[] lagrangeInequalityMultipliers = new double[1];
+
+      int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      assertEquals(expectedNumberOfIterations, numberOfIterations);
+
+      assertEquals(1, solution.length);
+      assertEquals(0.0, solution[0], 1e-7);
+      assertEquals(0.0, lagrangeInequalityMultipliers[0], 1e-7);
+
+      // Minimize (x-5) * (x-5) + (y-3) * (y-3) = 1/2 * (2x^2 + 2y^2) - 10x -6y + 34 subject to x <= 7 y <= 1, with y inactive
+      solver.clear();
+      costQuadraticMatrix = new double[][] { { 2.0, 0.0 }, { 0.0, 2.0 } };
+      costLinearVector = new double[] { -10.0, -6.0 };
+      quadraticCostScalar = 34.0;
+      solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+
+      double[] activeVariables = new double[] {1.0, 0.0};
+      solver.setActiveVariables(activeVariables);
+
+      linearInequalityConstraintsCMatrix = new double[][] { { 1.0, 0.0 }, { 0.0, 1.0 } };
+      linearInqualityConstraintsDVector = new double[] { 7.0, 1.0 };
+      solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
+
+      solution = new double[2];
+      lagrangeEqualityMultipliers = new double[0];
+      lagrangeInequalityMultipliers = new double[2];
+      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      assertEquals(expectedNumberOfIterations, numberOfIterations);
+
+      assertEquals(2, solution.length);
+      assertEquals(5.0, solution[0], 1e-7);
+      assertEquals(0.0, solution[1], 1e-7);
+      assertEquals(0.0, lagrangeInequalityMultipliers[0], 1e-7);
+      assertEquals(0.0, lagrangeInequalityMultipliers[1], 1e-7);
+
+      DenseMatrix64F solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
+      solutionMatrix.setData(solution);
+      double objectiveCost = solver.getObjectiveCost(solutionMatrix);
+      assertEquals(9.0, objectiveCost, 1e-7);
+
+      // Minimize (x-5) * (x-5) + (y-3) * (y-3) = 1/2 * (2x^2 + 2y^2) - 10x -6y + 34 subject to x <= 7 y <= 1, with x inactive
+      solver.clear();
+      costQuadraticMatrix = new double[][] { { 2.0, 0.0 }, { 0.0, 2.0 } };
+      costLinearVector = new double[] { -10.0, -6.0 };
+      quadraticCostScalar = 34.0;
+      solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+
+      activeVariables = new double[] {0.0, 1.0};
+      solver.setActiveVariables(activeVariables);
+
+      linearInequalityConstraintsCMatrix = new double[][] { { 1.0, 0.0 }, { 0.0, 1.0 } };
+      linearInqualityConstraintsDVector = new double[] { 7.0, 1.0 };
+      solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
+
+      solution = new double[2];
+      lagrangeEqualityMultipliers = new double[0];
+      lagrangeInequalityMultipliers = new double[2];
+      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      assertEquals(expectedNumberOfIterations + 1, numberOfIterations);
+
+      assertEquals(2, solution.length);
+      assertEquals(0.0, solution[0], 1e-7);
+      assertEquals(1.0, solution[1], 1e-7);
+      assertEquals(0.0, lagrangeInequalityMultipliers[0], 1e-7);
+      assertEquals(4.0, lagrangeInequalityMultipliers[1], 1e-7);
+
+      solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
+      solutionMatrix.setData(solution);
+      objectiveCost = solver.getObjectiveCost(solutionMatrix);
+      assertEquals(29.0, objectiveCost, 1e-7);
+
+
+      // Minimize x^2 + y^2 subject to x + y = 1.0, x <= y - 1 (x - y <= -1.0), x inactive
+      solver.clear();
+      costQuadraticMatrix = new double[][] { { 2.0, 0.0 }, { 0.0, 2.0 } };
+      costLinearVector = new double[] { 0.0, 0.0 };
+      quadraticCostScalar = 0.0;
+      solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+
+      double[][] linearEqualityConstraintsAMatrix = new double[][] { { 1.0, 1.0 } };
+      double[] linearEqualityConstraintsBVector = new double[] { 1.0 };
+      solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
+
+      linearInequalityConstraintsCMatrix = new double[][] { { 1.0, -1.0 } };
+      linearInqualityConstraintsDVector = new double[] { -1.0 };
+      solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
+
+      activeVariables = new double[] { 1.0, 0.0 };
+      solver.setActiveVariables(activeVariables);
+
+      solution = new double[2];
+      lagrangeEqualityMultipliers = new double[1];
+      lagrangeInequalityMultipliers = new double[1];
+      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+
+      assertEquals(2, solution.length);
+      assertTrue(Double.isNaN(solution[0]));
+      assertTrue(Double.isNaN(solution[1]));
+
+      // Minimize x^2 + y^2 subject to x + y = 1.0, x <= y - 1 (x - y <= -1.0), y inactive
+      solver.clear();
+      costQuadraticMatrix = new double[][] { { 2.0, 0.0 }, { 0.0, 2.0 } };
+      costLinearVector = new double[] { 0.0, 0.0 };
+      quadraticCostScalar = 0.0;
+      solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+
+      linearEqualityConstraintsAMatrix = new double[][] { { 1.0, 1.0 } };
+      linearEqualityConstraintsBVector = new double[] { 1.0 };
+      solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
+
+      linearInequalityConstraintsCMatrix = new double[][] { { 1.0, -1.0 } };
+      linearInqualityConstraintsDVector = new double[] { -1.0 };
+      solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
+
+      activeVariables = new double[] { 0.0, 1.0 };
+      solver.setActiveVariables(activeVariables);
+
+      solution = new double[2];
+      lagrangeEqualityMultipliers = new double[1];
+      lagrangeInequalityMultipliers = new double[1];
+      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      assertEquals(expectedNumberOfIterations, numberOfIterations);
+
+      assertEquals(2, solution.length);
+      assertEquals(0.0 , solution[0], 1e-7);
+      assertEquals(1.0 , solution[1], 1e-7);
+      assertEquals(-2.0, lagrangeEqualityMultipliers[0], 1e-7);
+      assertEquals(0.0, lagrangeInequalityMultipliers[0], 1e-7);
+
+      // Minimize x^2 + y^2 subject to x + y = 2.0, 3x - 3y = 0.0, x <= 2, x <= 10, y <= 3, x active
+      solver.clear();
+      costQuadraticMatrix = new double[][] { { 2.0, 0.0 }, { 0.0, 2.0 } };
+      costLinearVector = new double[] { 0.0, 0.0 };
+      quadraticCostScalar = 0.0;
+      solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
+
+      linearEqualityConstraintsAMatrix = new double[][] { { 1.0, 1.0 }, { 3.0, -3.0 } };
+      linearEqualityConstraintsBVector = new double[] { 2.0, 0.0 };
+      solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
+
+      linearInequalityConstraintsCMatrix = new double[][] { { 1.0, 0.0 }, { 1.0, 0.0 }, { 0.0, 1.0 } };
+      linearInqualityConstraintsDVector = new double[] { 2.0, 10.0, 3.0 };
+      solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInqualityConstraintsDVector);
+
+      activeVariables = new double[] { 1.0, 0.0 };
+      solver.setActiveVariables(activeVariables);
+
+      solution = new double[2];
+      lagrangeEqualityMultipliers = new double[2];
+      lagrangeInequalityMultipliers = new double[3];
+      numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
+      assertEquals(expectedNumberOfIterations, numberOfIterations);
+
+      assertEquals(2, solution.length);
+      assertTrue(Double.isNaN(solution[0]));
+      assertTrue(Double.isNaN(solution[1]));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

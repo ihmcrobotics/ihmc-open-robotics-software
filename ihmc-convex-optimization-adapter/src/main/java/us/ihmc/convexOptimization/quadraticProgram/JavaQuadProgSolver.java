@@ -100,6 +100,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    private final DenseMatrix64F upperBoundsDVector = new DenseMatrix64F(0, 0);
 
    private final DenseMatrix64F activeVariables = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F activeVariableSolution = new DenseMatrix64F(0, 0);
 
    private int problemSize;
    private int numberOfInequalityConstraints;
@@ -149,6 +150,9 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       quadraticCostQMatrix.reshape(0, 0);
       decomposedQuadraticCostQMatrix.reshape(0, 0);
       quadraticCostQVector.reshape(0, 0);
+
+      activeVariables.reshape(0, 0);
+      activeVariableSolution.reshape(0, 0);
 
       linearEqualityConstraintsAMatrix.reshape(0, 0);
       linearEqualityConstraintsBVector.reshape(0, 0);
@@ -231,6 +235,8 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       this.quadraticCostQMatrix.set(costQuadraticMatrix);
       this.quadraticCostQVector.set(costLinearVector);
       this.quadraticCostScalar = quadraticCostScalar;
+
+      setAllVariablesActive();
    }
 
    @Override
@@ -416,6 +422,11 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       lagrangeUpperBoundMultipliersToPack.reshape(numberOfUpperBounds, 1);
       lagrangeUpperBoundMultipliersToPack.zero();
 
+      removeInactiveVariables();
+
+      activeVariableSolution.reshape(problemSize, 1);
+      activeVariableSolution.zero();
+
       reshape();
       zero();
 
@@ -468,7 +479,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
 
             tempMatrix.reshape(problemSize + numberOfEqualityConstraints, 1);
             CommonOps.mult(Q_augmented_inv, q_augmented, tempMatrix);
-            MatrixTools.setMatrixBlock(solutionToPack, 0, 0, tempMatrix, 0, 0, problemSize, 1, 1.0);
+            MatrixTools.setMatrixBlock(activeVariableSolution, 0, 0, tempMatrix, 0, 0, problemSize, 1, 1.0);
             MatrixTools.setMatrixBlock(lagrangeMultipliers, 0, 0, tempMatrix, problemSize, 0, numberOfEqualityConstraints, 1, 1.0);
 
             // Add equality constraints to the working set A
@@ -493,7 +504,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
             // x = -G^-1 * g0 = -J * J^T * g0
             tempMatrix.reshape(problemSize, 1);
             CommonOps.multTransA(J, quadraticCostQVector, tempMatrix);
-            CommonOps.mult(-1.0, J, tempMatrix, solutionToPack);
+            CommonOps.mult(-1.0, J, tempMatrix, activeVariableSolution);
 
             // Add equality constraints to the working set A
             numberOfActiveConstraints = 0;
@@ -508,7 +519,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
          // x = -G^-1 * g0 = -J * J^T * g0
          tempMatrix.reshape(problemSize, 1);
          CommonOps.multTransA(J, quadraticCostQVector, tempMatrix);
-         CommonOps.mult(-1.0, J, tempMatrix, solutionToPack);
+         CommonOps.mult(-1.0, J, tempMatrix, activeVariableSolution);
 
          // Add equality constraints to the working set A
          numberOfActiveConstraints = 0;
@@ -521,10 +532,10 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
             updateInfeasibilityMultiplier();
 
             // compute full step length: i.e., the minimum step in primal space s.t. the constraint becomes feasible
-            double stepLengthForEqualityConstraint = computeStepLengthForEqualityConstraint(solutionToPack, equalityConstraintIndex);
+            double stepLengthForEqualityConstraint = computeStepLengthForEqualityConstraint(activeVariableSolution, equalityConstraintIndex);
 
             // set x = x + minimumStepInPrimalSpace * stepDirectionInPrimalSpace
-            CommonOps.addEquals(solutionToPack, stepLengthForEqualityConstraint, stepDirectionInPrimalSpace);
+            CommonOps.addEquals(activeVariableSolution, stepLengthForEqualityConstraint, stepDirectionInPrimalSpace);
 
             // set u = u+
             lagrangeMultipliers.set(numberOfActiveConstraints, stepLengthForEqualityConstraint);
@@ -554,11 +565,12 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
          {
          case COMPUTE_CONSTRAINT_VIOLATIONS:
 
-            if (computeConstraintViolations(solutionToPack, c1, c2))
+            if (computeConstraintViolations(activeVariableSolution, c1, c2))
             { // numerically there are not infeasibilities anymore
                // the sum of all the constraint violations is negligible, so we are finished
                partitionLagrangeMultipliers(lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack, lagrangeLowerBoundMultipliersToPack,
                                             lagrangeUpperBoundMultipliersToPack);
+               copyActiveVariableSolutionToAllVariables(solutionToPack, activeVariableSolution);
                return numberOfIterations;
             }
 
@@ -591,6 +603,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
                { // we don't have any violations in the inactive set, so the current solution is valid, by assuming that the active set is satisfied
                   partitionLagrangeMultipliers(lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
                                                lagrangeLowerBoundMultipliersToPack, lagrangeUpperBoundMultipliersToPack);
+                  copyActiveVariableSolutionToAllVariables(solutionToPack, activeVariableSolution);
                   return numberOfIterations;
                }
             }
@@ -655,7 +668,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
 
             if (numberOfIterations > maxNumberOfIterations)
                break;
-            currentStep = takeStepInPrimalAndDualSpace(solutionToPack, stepLength, fullStepLength, mostViolatedConstraintIndex);
+            currentStep = takeStepInPrimalAndDualSpace(activeVariableSolution, stepLength, fullStepLength, mostViolatedConstraintIndex);
          }
       }
 
@@ -1120,5 +1133,42 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       temporaryMatrix.reshape(xVector.numCols, QMatrix.numCols);
       CommonOps.multTransA(xVector, QMatrix, temporaryMatrix);
       CommonOps.mult(temporaryMatrix, xVector, xTransposeQx);
+   }
+
+   private void removeInactiveVariables()
+   {
+      problemSize = 0;
+      for (int variableIndex = 0; variableIndex < activeVariables.getNumRows(); variableIndex++)
+      {
+         if (activeVariables.get(variableIndex) == 1.0)
+         {
+            problemSize++;
+            continue;
+         }
+
+         MatrixTools.removeRow(quadraticCostQMatrix, variableIndex);
+         MatrixTools.removeColumn(quadraticCostQMatrix, variableIndex);
+
+         MatrixTools.removeRow(quadraticCostQVector, variableIndex);
+
+         MatrixTools.removeColumn(linearEqualityConstraintsAMatrix, variableIndex);
+         MatrixTools.removeColumn(linearInequalityConstraintsCMatrix, variableIndex);
+
+         MatrixTools.removeRow(lowerBoundsCMatrix, variableIndex);
+         MatrixTools.removeRow(lowerBoundsCMatrix, variableIndex);
+      }
+   }
+
+   private void copyActiveVariableSolutionToAllVariables(DenseMatrix64F solutionToPack, DenseMatrix64F activeVariableSolution)
+   {
+      int activeVariableIndex = 0;
+      for (int variableIndex = 0; variableIndex < solutionToPack.getNumRows(); variableIndex++)
+      {
+         if (activeVariables.get(variableIndex) != 1.0)
+            continue;
+
+         solutionToPack.set(variableIndex, 0, activeVariableSolution.get(activeVariableIndex, 0));
+         activeVariableIndex++;
+      }
    }
 }
