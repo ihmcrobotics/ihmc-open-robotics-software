@@ -12,18 +12,18 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
    public int regionId = PlanarRegion.NO_REGION_ID;
    public Point3D32 regionOrigin;
    public Vector3D32 regionNormal;
-   public List<Point2D32[]> concaveHullsVertices;
+   public Point2D32[] concaveHullVertices;
    public List<Point2D32[]> convexPolygonsVertices;
 
    public PlanarRegionMessage()
    {
    }
 
-   public PlanarRegionMessage(Point3D32 regionOrigin, Vector3D32 regionNormal, List<Point2D32[]> concaveHullsVertices, List<Point2D32[]> convexPolygonsVertices)
+   public PlanarRegionMessage(Point3D32 regionOrigin, Vector3D32 regionNormal, Point2D32[] concaveHullVertices, List<Point2D32[]> convexPolygonsVertices)
    {
       this.regionOrigin = regionOrigin;
       this.regionNormal = regionNormal;
-      this.concaveHullsVertices = concaveHullsVertices;
+      this.concaveHullVertices = concaveHullVertices;
       this.convexPolygonsVertices = convexPolygonsVertices;
    }
 
@@ -47,9 +47,14 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
       return regionNormal;
    }
 
-   public List<Point2D32[]> getConcaveHullsVertices()
+   public int getConcaveHullSize()
    {
-      return concaveHullsVertices;
+      return concaveHullVertices.length;
+   }
+
+   public Point2D32[] getConcaveHullVertices()
+   {
+      return concaveHullVertices;
    }
 
    public List<Point2D32[]> getConvexPolygonsVertices()
@@ -68,24 +73,15 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
          return false;
       if (convexPolygonsVertices.size() != other.convexPolygonsVertices.size())
          return false;
-      if (concaveHullsVertices.size() != other.concaveHullsVertices.size())
+      if (concaveHullVertices.length != other.concaveHullVertices.length)
          return false;
 
-      for (int hullIndex = 0; hullIndex < concaveHullsVertices.size(); hullIndex++)
+      for (int vertexIndex = 0; vertexIndex < concaveHullVertices.length; vertexIndex++)
       {
-         Point2D32[] thisHull = concaveHullsVertices.get(hullIndex);
-         Point2D32[] otherHull = other.concaveHullsVertices.get(hullIndex);
-
-         if (thisHull.length != otherHull.length)
+         Point2D32 thisVertex = concaveHullVertices[vertexIndex];
+         Point2D32 otherVertex = other.concaveHullVertices[vertexIndex];
+         if (!thisVertex.epsilonEquals(otherVertex, (float) epsilon))
             return false;
-
-         for (int vertexIndex = 0; vertexIndex < thisHull.length; vertexIndex++)
-         {
-            Point2D32 thisVertex = thisHull[vertexIndex];
-            Point2D32 otherVertex = otherHull[vertexIndex];
-            if (!thisVertex.epsilonEquals(otherVertex, (float) epsilon))
-               return false;
-         }
       }
 
       for (int polygonIndex = 0; polygonIndex < convexPolygonsVertices.size(); polygonIndex++)

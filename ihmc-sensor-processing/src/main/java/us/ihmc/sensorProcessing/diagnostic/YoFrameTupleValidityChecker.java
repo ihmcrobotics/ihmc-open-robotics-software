@@ -2,8 +2,8 @@ package us.ihmc.sensorProcessing.diagnostic;
 
 import java.util.EnumMap;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameTuple;
 

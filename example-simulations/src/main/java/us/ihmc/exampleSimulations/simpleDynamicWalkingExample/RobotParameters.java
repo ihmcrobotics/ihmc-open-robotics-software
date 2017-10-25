@@ -2,9 +2,9 @@ package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
 import java.util.EnumMap;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.Axis;
 
 public class RobotParameters
 {

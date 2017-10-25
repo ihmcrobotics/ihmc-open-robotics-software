@@ -8,13 +8,9 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 import us.ihmc.euclid.geometry.Pose2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -34,18 +30,21 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
-import us.ihmc.pathPlanning.tools.PointCloudTools;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FootstepPlanningWithBodyPathTest
 {
-   private static final boolean visualize = false;
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final boolean visualize = simulationTestingParameters.getKeepSCSUp();
 
    @Rule
    public TestName name = new TestName();
@@ -90,13 +89,13 @@ public class FootstepPlanningWithBodyPathTest
       ArrayList<PlanarRegion> regions = PointCloudTools.loadPlanarRegionsFromFile("resources/PlanarRegions_NRI_Maze.txt");
       Point3D startPos = new Point3D(9.5, 9, 0);
       Point3D goalPos = new Point3D(0.5, 0.5, 0);
-      startPos = projectPointToPlane(startPos, regions.get(0));
-      goalPos = projectPointToPlane(goalPos, regions.get(0));
+      startPos = PlanarRegionTools.projectPointToPlanes(startPos, new PlanarRegionsList(regions));
+      goalPos = PlanarRegionTools.projectPointToPlanes(goalPos, new PlanarRegionsList(regions));
 
       TextureColorPalette colorPalette = new TextureColorAdaptivePalette();
       JavaFXMultiColorMeshBuilder javaFXMultiColorMeshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(regions, javaFXMultiColorMeshBuilder);
-      ArrayList<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+      List<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
       for (Point3D waypoint3d : path)
       {
          waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
@@ -136,50 +135,6 @@ public class FootstepPlanningWithBodyPathTest
 
       if (visualize)
          PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose, bodyPath);
-   }
-
-   public Point3D projectPointToPlane(Point3D pointToProject, PlanarRegion regionToProjectTo)
-   {
-      Vector3D normal = calculateNormal1(regionToProjectTo);
-      Point2D point2D = (Point2D) regionToProjectTo.getConvexHull().getVertex(0);
-      Point3D point3D = new Point3D(point2D.getX(), point2D.getY(), 0);
-
-      FramePoint3D fpt1 = new FramePoint3D();
-      fpt1.set(point3D);
-      RigidBodyTransform trans = new RigidBodyTransform();
-      regionToProjectTo.getTransformToWorld(trans);
-      fpt1.applyTransform(trans);
-
-      Point3D projectedPoint = new Point3D();
-      if (!EuclidGeometryTools.orthogonalProjectionOnPlane3D(pointToProject, fpt1.getPoint(), normal, projectedPoint))
-      {
-         projectedPoint = null;
-      }
-      return projectedPoint;
-   }
-
-   private Vector3D calculateNormal1(PlanarRegion region)
-   {
-      if (!region.getConvexHull().isEmpty())
-      {
-         FramePoint3D fpt1 = new FramePoint3D();
-         fpt1.set(new Point3D(region.getConvexHull().getVertex(0).getX(), region.getConvexHull().getVertex(0).getY(), 0));
-         RigidBodyTransform trans = new RigidBodyTransform();
-         region.getTransformToWorld(trans);
-         fpt1.applyTransform(trans);
-
-         FramePoint3D fpt2 = new FramePoint3D();
-         fpt2.set(new Point3D(region.getConvexHull().getVertex(1).getX(), region.getConvexHull().getVertex(1).getY(), 0));
-         fpt2.applyTransform(trans);
-
-         FramePoint3D fpt3 = new FramePoint3D();
-         fpt3.set(new Point3D(region.getConvexHull().getVertex(2).getX(), region.getConvexHull().getVertex(2).getY(), 0));
-         fpt3.applyTransform(trans);
-
-         Vector3D normal = EuclidGeometryTools.normal3DFromThreePoint3Ds(fpt1.getPoint(), fpt2.getPoint(), fpt3.getPoint());
-         return normal;
-      }
-      return null;
    }
 
    private AStarFootstepPlanner createBodyPathBasedPlanner(YoVariableRegistry registry, FootstepPlannerParameters parameters,
