@@ -263,12 +263,6 @@ public class HumanoidHighLevelControllerManager implements RobotController
 
          if (!lowLevelJointData.hasControlMode())
             throw new NullPointerException("Joint: " + controlledJoint.getName() + " has no control mode.");
-
-         // Zero out joint for testing purposes
-         controlledJoint.setqDesired(Double.NaN);
-         controlledJoint.setQdDesired(Double.NaN);
-         controlledJoint.setQddDesired(Double.NaN);
-         controlledJoint.setTau(Double.NaN);
       }
 
       yoLowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
