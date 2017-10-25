@@ -39,7 +39,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
  *     CE^T x = ce0
  *     CI^T x <= ci0
  */
-public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
+public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
 {
    private enum QuadProgStep {COMPUTE_CONSTRAINT_VIOLATIONS, FIND_MOST_VIOLATED_CONSTRAINT, COMPUTE_STEP_LENGTH}
 
@@ -79,16 +79,8 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
    private final CholeskyDecomposition<DenseMatrix64F> decomposer = DecompositionFactory.chol(defaultSize, false);
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(defaultSize);
 
-   private final DenseMatrix64F quadraticCostQMatrix = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F decomposedQuadraticCostQMatrix = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F quadraticCostQVector = new DenseMatrix64F(0, 0);
    private double quadraticCostScalar = 0.0;
-
-   private final DenseMatrix64F linearEqualityConstraintsAMatrix = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F linearEqualityConstraintsBVector = new DenseMatrix64F(0, 0);
-
-   private final DenseMatrix64F linearInequalityConstraintsCMatrix = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F linearInequalityConstraintsDVector = new DenseMatrix64F(0, 0);
 
    private final DenseMatrix64F totalLinearInequalityConstraintsCMatrix = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F totalLinearInequalityConstraintsDVector = new DenseMatrix64F(0, 0);
@@ -157,33 +149,14 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       linearEqualityConstraintsAMatrix.reshape(0, 0);
       linearEqualityConstraintsBVector.reshape(0, 0);
 
-      linearInequalityConstraintsCMatrix.reshape(0, 0);
-      linearInequalityConstraintsDVector.reshape(0, 0);
+      linearInequalityConstraintsCMatrixO.reshape(0, 0);
+      linearInequalityConstraintsDVectorO.reshape(0, 0);
 
       lowerBoundsCMatrix.reshape(0, 0);
       lowerBoundsDVector.reshape(0, 0);
 
       upperBoundsCMatrix.reshape(0, 0);
       upperBoundsDVector.reshape(0, 0);
-   }
-
-   @Override
-   public void setActiveVariables(DenseMatrix64F activeVariables)
-   {
-      if (activeVariables != null)
-      {
-         if (activeVariables.getNumRows() != quadraticCostQMatrix.getNumRows())
-            throw new RuntimeException("activeVariables.getNumRows() != quadraticCostQMatrix.getNumRows()");
-
-         this.activeVariables.set(activeVariables);
-      }
-   }
-
-   @Override
-   public void setAllVariablesActive()
-   {
-      activeVariables.reshape(quadraticCostQMatrix.getNumRows(), 1);
-      CommonOps.fill(activeVariables, 1.0);
    }
 
    @Override
@@ -235,8 +208,6 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       this.quadraticCostQMatrix.set(costQuadraticMatrix);
       this.quadraticCostQVector.set(costLinearVector);
       this.quadraticCostScalar = quadraticCostScalar;
-
-      setAllVariablesActive();
    }
 
    @Override
@@ -281,12 +252,12 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       if (linearInequalityConstraintCMatrix.getNumCols() != quadraticCostQMatrix.getNumCols())
          throw new RuntimeException("linearInequalityConstraintCMatrix.getNumCols() != quadraticCostQMatrix.getNumCols()");
 
-      this.linearInequalityConstraintsCMatrix.reshape(problemSize, numberOfInequalityConstraints);
-      CommonOps.transpose(linearInequalityConstraintCMatrix, this.linearInequalityConstraintsCMatrix);
-      CommonOps.scale(-1.0, this.linearInequalityConstraintsCMatrix);
+      this.linearInequalityConstraintsCMatrixO.reshape(problemSize, numberOfInequalityConstraints);
+      CommonOps.transpose(linearInequalityConstraintCMatrix, this.linearInequalityConstraintsCMatrixO);
+      CommonOps.scale(-1.0, this.linearInequalityConstraintsCMatrixO);
 
-      this.linearInequalityConstraintsDVector.reshape(numberOfInequalityConstraints, 1);
-      this.linearInequalityConstraintsDVector.set(linearInequalityConstraintDVector);
+      this.linearInequalityConstraintsDVectorO.reshape(numberOfInequalityConstraints, 1);
+      this.linearInequalityConstraintsDVectorO.set(linearInequalityConstraintDVector);
    }
 
    @Override
@@ -1012,7 +983,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
 
    public void reshape()
    {
-      int numberOfInequalityConstraints = linearInequalityConstraintsDVector.getNumRows();
+      int numberOfInequalityConstraints = linearInequalityConstraintsDVectorO.getNumRows();
       int numberOfLowerBounds = lowerBoundsDVector.getNumRows();
       int numberOfUpperBounds = upperBoundsDVector.getNumRows();
       int numberOfConstraints = numberOfEqualityConstraints + numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds;
@@ -1044,8 +1015,8 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
       totalLinearInequalityConstraintsDVector.reshape(numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds, 1);
 
       // add inequality constraints to total inequality constraint
-      MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsCMatrix, 0, 0, linearInequalityConstraintsCMatrix, 0, 0, problemSize, numberOfInequalityConstraints, 1.0);
-      MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsDVector, 0, 0, linearInequalityConstraintsDVector, 0, 0, numberOfInequalityConstraints, 1, 1.0);
+      MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsCMatrix, 0, 0, linearInequalityConstraintsCMatrixO, 0, 0, problemSize, numberOfInequalityConstraints, 1.0);
+      MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsDVector, 0, 0, linearInequalityConstraintsDVectorO, 0, 0, numberOfInequalityConstraints, 1, 1.0);
 
       // add lower bounds to total inequality constraint
       MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsCMatrix, 0, numberOfInequalityConstraints, lowerBoundsCMatrix, 0, 0, problemSize, numberOfLowerBounds, 1.0);
@@ -1152,7 +1123,7 @@ public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
          MatrixTools.removeRow(quadraticCostQVector, variableIndex);
 
          MatrixTools.removeColumn(linearEqualityConstraintsAMatrix, variableIndex);
-         MatrixTools.removeColumn(linearInequalityConstraintsCMatrix, variableIndex);
+         MatrixTools.removeColumn(linearInequalityConstraintsCMatrixO, variableIndex);
 
          MatrixTools.removeRow(lowerBoundsCMatrix, variableIndex);
          MatrixTools.removeRow(lowerBoundsCMatrix, variableIndex);

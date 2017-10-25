@@ -24,7 +24,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
  * @author JerryPratt
  *
  */
-public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolverInterface
+public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPSolver
 {
    //private static final double violationFractionToAdd = 0.8;
    //private static final double violationFractionToRemove = 0.95;
@@ -33,25 +33,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
    private double convergenceThreshold = 1e-10;
    private int maxNumberOfIterations = 10;
 
-   private final DenseMatrix64F quadraticCostQMatrix = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F quadraticCostQVector = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F reducedQuadraticCostQMatrix = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F reducedQuadraticCostQVector = new DenseMatrix64F(0, 0);
-   private double quadraticCostScalar;
-
-   private final DenseMatrix64F linearEqualityConstraintsAMatrix = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F linearEqualityConstraintsBVector = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F reducedLinearEqualityConstraintsAMatrix = new DenseMatrix64F(0, 0);
-
-   private final DenseMatrix64F linearInequalityConstraintsCMatrixO = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F linearInequalityConstraintsDVectorO = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F reducedLinearInequalityConstraintsCMatrixO = new DenseMatrix64F(0, 0);
-
-   private final DenseMatrix64F variableLowerBounds = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F variableUpperBounds = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F reducedVariableLowerBounds = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F reducedVariableUpperBounds = new DenseMatrix64F(0, 0);
-
    private final DenseMatrix64F activeVariables = new DenseMatrix64F(0, 0);
 
    private final TIntArrayList activeInequalityIndices = new TIntArrayList();
@@ -59,7 +40,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
    private final TIntArrayList activeLowerBoundIndices = new TIntArrayList();
 
    // Some temporary matrices:
-   private final DenseMatrix64F symmetricCostQuadraticMatrix = new DenseMatrix64F(0, 0);
+   protected final DenseMatrix64F symmetricCostQuadraticMatrix = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F negativeQuadraticCostQVector = new DenseMatrix64F(0, 0);
 
    private final DenseMatrix64F linearInequalityConstraintsCheck = new DenseMatrix64F(0, 0);
@@ -151,27 +132,8 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       variableLowerBounds.reshape(0, 0);
       variableUpperBounds.reshape(0, 0);
 
-      activeVariables.reshape(0, 0);
-      activeVariableSolution.reshape(0, 0);
-
       lowerBoundViolations.reshape(0, 0);
       upperBoundViolations.reshape(0, 0);
-   }
-
-   @Override
-   public void setActiveVariables(DenseMatrix64F activeVariables)
-   {
-      if (activeVariables.getNumRows() != quadraticCostQMatrix.getNumRows())
-         throw new RuntimeException("activeVariables.getNumRows() != quadraticCostQMatrix.getNumRows()");
-
-      this.activeVariables.set(activeVariables);
-   }
-
-   @Override
-   public void setAllVariablesActive()
-   {
-      activeVariables.reshape(quadraticCostQMatrix.getNumRows(), 1);
-      CommonOps.fill(activeVariables, 1.0);
    }
 
    @Override
@@ -181,7 +143,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          throw new RuntimeException("variableLowerBounds.getNumRows() != quadraticCostQMatrix.getNumRows()");
 
       this.variableLowerBounds.set(variableLowerBounds);
-      this.lowerBoundViolations.reshape(variableLowerBounds.numRows, 1);
    }
 
    @Override
@@ -191,7 +152,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          throw new RuntimeException("variableUpperBounds.getNumRows() != quadraticCostQMatrix.getNumRows()");
 
       this.variableUpperBounds.set(variableUpperBounds);
-      this.upperBoundViolations.reshape(variableUpperBounds.numRows, 1);
    }
 
    @Override
@@ -212,8 +172,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       this.quadraticCostQMatrix.set(symmetricCostQuadraticMatrix);
       this.quadraticCostQVector.set(costLinearVector);
       this.quadraticCostScalar = quadraticCostScalar;
-
-      setAllVariablesActive();
    }
 
    @Override
@@ -227,7 +185,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
    private final DenseMatrix64F temporaryMatrix = new DenseMatrix64F(0, 0);
 
-   private void multQuad(DenseMatrix64F xVector, DenseMatrix64F QMatrix, DenseMatrix64F xTransposeQx)
+   protected void multQuad(DenseMatrix64F xVector, DenseMatrix64F QMatrix, DenseMatrix64F xTransposeQx)
    {
 
       temporaryMatrix.reshape(xVector.numCols, QMatrix.numCols);
@@ -373,58 +331,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       activeLowerBoundIndices.reset();
    }
 
-   private void removeInactiveVariables()
-   {
-      reducedQuadraticCostQMatrix.set(quadraticCostQMatrix);
-      reducedQuadraticCostQVector.set(quadraticCostQVector);
-
-      reducedLinearEqualityConstraintsAMatrix.set(linearEqualityConstraintsAMatrix);
-      reducedLinearInequalityConstraintsCMatrixO.set(linearInequalityConstraintsCMatrixO);
-
-      reducedVariableLowerBounds.set(variableLowerBounds);
-      reducedVariableUpperBounds.set(variableUpperBounds);
-
-      for (int variableIndex = activeVariables.getNumRows() - 1; variableIndex >= 0; variableIndex--)
-      {
-         if (activeVariables.get(variableIndex) == 1.0)
-            continue;
-
-         MatrixTools.removeRow(reducedQuadraticCostQMatrix, variableIndex);
-         MatrixTools.removeColumn(reducedQuadraticCostQMatrix, variableIndex);
-
-         MatrixTools.removeRow(reducedQuadraticCostQVector, variableIndex);
-
-         if (reducedLinearEqualityConstraintsAMatrix.numRows > 0)
-            MatrixTools.removeColumn(reducedLinearEqualityConstraintsAMatrix, variableIndex);
-         if (reducedLinearInequalityConstraintsCMatrixO.numRows > 0)
-            MatrixTools.removeColumn(reducedLinearInequalityConstraintsCMatrixO, variableIndex);
-
-         if (reducedVariableLowerBounds.numRows > 0)
-            MatrixTools.removeRow(reducedVariableLowerBounds, variableIndex);
-         if (reducedVariableUpperBounds.numCols > 0)
-            MatrixTools.removeRow(reducedVariableUpperBounds, variableIndex);
-      }
-   }
-
-   private void copyActiveVariableSolutionToAllVariables(DenseMatrix64F solutionToPack, DenseMatrix64F activeVariableSolution)
-   {
-      if (containsNaN(activeVariableSolution))
-      {
-         CommonOps.fill(solutionToPack, Double.NaN);
-         return;
-      }
-
-      int activeVariableIndex = 0;
-      for (int variableIndex = 0; variableIndex < solutionToPack.getNumRows(); variableIndex++)
-      {
-         if (activeVariables.get(variableIndex) != 1.0)
-            continue;
-
-         solutionToPack.set(variableIndex, 0, activeVariableSolution.get(activeVariableIndex, 0));
-         activeVariableIndex++;
-      }
-   }
-
    private final DenseMatrix64F lagrangeEqualityConstraintMultipliersToThrowAway = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F lagrangeInequalityConstraintMultipliersToThrowAway = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F lagrangeLowerBoundMultipliersToThrowAway = new DenseMatrix64F(0, 0);
@@ -444,7 +350,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
                    lagrangeLowerBoundMultipliersToThrowAway, lagrangeUpperBoundMultipliersToThrowAway);
    }
 
-   private final DenseMatrix64F activeVariableSolution = new DenseMatrix64F(0, 0);
 
    @Override
    public int solve(DenseMatrix64F solutionToPack, DenseMatrix64F lagrangeEqualityConstraintMultipliersToPack,
@@ -462,11 +367,6 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       int numberOfLowerBoundConstraints = variableLowerBounds.getNumRows();
       int numberOfUpperBoundConstraints = variableUpperBounds.getNumRows();
 
-      removeInactiveVariables();
-
-      int numberOfActiveVariables = (int) CommonOps.elementSum(activeVariables);
-      activeVariableSolution.reshape(numberOfActiveVariables, 1);
-      activeVariableSolution.zero();
       solutionToPack.reshape(numberOfVariables, 1);
       lagrangeEqualityConstraintMultipliersToPack.reshape(numberOfEqualityConstraints, 1);
       lagrangeEqualityConstraintMultipliersToPack.zero();
@@ -479,28 +379,22 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
       computeQInverseAndAQInverse();
 
-      solveEqualityConstrainedSubproblemEfficiently(activeVariableSolution, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
+      solveEqualityConstrainedSubproblemEfficiently(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
                                                     lagrangeLowerBoundConstraintMultipliersToPack, lagrangeUpperBoundConstraintMultipliersToPack);
 
       //      System.out.println(numberOfInequalityConstraints + ", " + numberOfLowerBoundConstraints + ", " + numberOfUpperBoundConstraints);
       if ((numberOfInequalityConstraints == 0) && (numberOfLowerBoundConstraints == 0) && (numberOfUpperBoundConstraints == 0))
-      {
-         copyActiveVariableSolutionToAllVariables(solutionToPack, activeVariableSolution);
          return numberOfIterations;
-      }
 
       for (int i = 0; i < maxNumberOfIterations; i++)
       {
-         boolean activeSetWasModified = modifyActiveSetAndTryAgain(activeVariableSolution, lagrangeEqualityConstraintMultipliersToPack,
+         boolean activeSetWasModified = modifyActiveSetAndTryAgain(solutionToPack, lagrangeEqualityConstraintMultipliersToPack,
                                                                    lagrangeInequalityConstraintMultipliersToPack, lagrangeLowerBoundConstraintMultipliersToPack,
                                                                    lagrangeUpperBoundConstraintMultipliersToPack);
          numberOfIterations++;
 
          if (!activeSetWasModified)
-         {
-            copyActiveVariableSolutionToAllVariables(solutionToPack, activeVariableSolution);
             return numberOfIterations;
-         }
       }
 
       for (int i = 0; i < numberOfVariables; i++)
@@ -540,14 +434,14 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
    private void computeQInverseAndAQInverse()
    {
-      int numberOfVariables = reducedQuadraticCostQMatrix.getNumRows();
-      int numberOfEqualityConstraints = reducedLinearEqualityConstraintsAMatrix.getNumRows();
+      int numberOfVariables = quadraticCostQMatrix.getNumRows();
+      int numberOfEqualityConstraints = linearEqualityConstraintsAMatrix.getNumRows();
 
-      ATranspose.reshape(reducedLinearEqualityConstraintsAMatrix.getNumCols(), reducedLinearEqualityConstraintsAMatrix.getNumRows());
-      CommonOps.transpose(reducedLinearEqualityConstraintsAMatrix, ATranspose);
+      ATranspose.reshape(linearEqualityConstraintsAMatrix.getNumCols(), linearEqualityConstraintsAMatrix.getNumRows());
+      CommonOps.transpose(linearEqualityConstraintsAMatrix, ATranspose);
       QInverse.reshape(numberOfVariables, numberOfVariables);
 
-      solver.setA(reducedQuadraticCostQMatrix);
+      solver.setA(quadraticCostQMatrix);
       solver.invert(QInverse);
 
       AQInverse.reshape(numberOfEqualityConstraints, numberOfVariables);
@@ -556,7 +450,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
 
       if (numberOfEqualityConstraints > 0)
       {
-         CommonOps.mult(reducedLinearEqualityConstraintsAMatrix, QInverse, AQInverse);
+         CommonOps.mult(linearEqualityConstraintsAMatrix, QInverse, AQInverse);
          CommonOps.mult(QInverse, ATranspose, QInverseATranspose);
          CommonOps.mult(AQInverse, ATranspose, AQInverseATranspose);
       }
@@ -644,36 +538,39 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
                                               DenseMatrix64F lagrangeLowerBoundConstraintMultipliersToPack,
                                               DenseMatrix64F lagrangeUpperBoundConstraintMultipliersToPack)
    {
-      if (containsNaN(solutionToPack))
+      if (MatrixTools.containsNaN(solutionToPack))
          return false;
 
       boolean activeSetWasModified = false;
 
       // find the constraints to add
-      int numberOfVariables = reducedQuadraticCostQMatrix.getNumRows();
+      int numberOfVariables = quadraticCostQMatrix.getNumRows();
       int numberOfInequalityConstraints = linearInequalityConstraintsCMatrixO.getNumRows();
-      int numberOfLowerBoundConstraints = reducedVariableLowerBounds.getNumRows();
-      int numberOfUpperBoundConstraints = reducedVariableUpperBounds.getNumRows();
+      int numberOfLowerBoundConstraints = variableLowerBounds.getNumRows();
+      int numberOfUpperBoundConstraints = variableUpperBounds.getNumRows();
 
       double maxInequalityViolation = Double.NEGATIVE_INFINITY, maxLowerBoundViolation = Double.NEGATIVE_INFINITY, maxUpperBoundViolation = Double.NEGATIVE_INFINITY;
       if (numberOfInequalityConstraints != 0)
       {
          linearInequalityConstraintsCheck.reshape(numberOfInequalityConstraints, 1);
-         CommonOps.mult(reducedLinearInequalityConstraintsCMatrixO, solutionToPack, linearInequalityConstraintsCheck);
+         CommonOps.mult(linearInequalityConstraintsCMatrixO, solutionToPack, linearInequalityConstraintsCheck);
          CommonOps.subtractEquals(linearInequalityConstraintsCheck, linearInequalityConstraintsDVectorO);
 
          maxInequalityViolation = CommonOps.elementMax(linearInequalityConstraintsCheck);
       }
 
+
+      lowerBoundViolations.reshape(numberOfLowerBoundConstraints, 1);
       if (numberOfLowerBoundConstraints != 0)
       {
-         CommonOps.subtract(reducedVariableLowerBounds, solutionToPack, lowerBoundViolations);
+         CommonOps.subtract(variableLowerBounds, solutionToPack, lowerBoundViolations);
          maxLowerBoundViolation = CommonOps.elementMax(lowerBoundViolations);
       }
 
+      upperBoundViolations.reshape(numberOfUpperBoundConstraints, 1);
       if (numberOfUpperBoundConstraints != 0)
       {
-         CommonOps.subtract(solutionToPack, reducedVariableUpperBounds, upperBoundViolations);
+         CommonOps.subtract(solutionToPack, variableUpperBounds, upperBoundViolations);
          maxUpperBoundViolation = CommonOps.elementMax(upperBoundViolations);
       }
 
@@ -836,7 +733,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       for (int i = 0; i < sizeOfActiveSet; i++)
       {
          int inequalityConstraintIndex = activeInequalityIndices.get(i);
-         CommonOps.extract(reducedLinearInequalityConstraintsCMatrixO, inequalityConstraintIndex, inequalityConstraintIndex + 1, 0, numberOfVariables, CBar, i, 0);
+         CommonOps.extract(linearInequalityConstraintsCMatrixO, inequalityConstraintIndex, inequalityConstraintIndex + 1, 0, numberOfVariables, CBar, i, 0);
          CommonOps.extract(linearInequalityConstraintsDVectorO, inequalityConstraintIndex, inequalityConstraintIndex + 1, 0, 1, DBar, i, 0);
       }
 
@@ -859,7 +756,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
          int lowerBoundsConstraintIndex = activeLowerBoundIndices.get(i);
 
          CHat.set(row, lowerBoundsConstraintIndex, -1.0);
-         DHat.set(row, 0, -reducedVariableLowerBounds.get(lowerBoundsConstraintIndex));
+         DHat.set(row, 0, -variableLowerBounds.get(lowerBoundsConstraintIndex));
          row++;
       }
 
@@ -922,24 +819,13 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       }
    }
 
-   private boolean containsNaN(DenseMatrix64F solution)
-   {
-      for (int i = 0; i < solution.getNumRows(); i++)
-      {
-         if (Double.isNaN(solution.get(i, 0)))
-            return true;
-      }
-
-      return false;
-   }
-
    private void solveEqualityConstrainedSubproblemEfficiently(DenseMatrix64F xSolutionToPack, DenseMatrix64F lagrangeEqualityConstraintMultipliersToPack,
                                                               DenseMatrix64F lagrangeInequalityConstraintMultipliersToPack,
                                                               DenseMatrix64F lagrangeLowerBoundConstraintMultipliersToPack,
                                                               DenseMatrix64F lagrangeUpperBoundConstraintMultipliersToPack)
    {
-      int numberOfVariables = reducedQuadraticCostQMatrix.getNumRows();
-      int numberOfOriginalEqualityConstraints = reducedLinearEqualityConstraintsAMatrix.getNumRows();
+      int numberOfVariables = quadraticCostQMatrix.getNumRows();
+      int numberOfOriginalEqualityConstraints = linearEqualityConstraintsAMatrix.getNumRows();
 
       int numberOfActiveInequalityConstraints = activeInequalityIndices.size();
       int numberOfActiveLowerBoundConstraints = activeLowerBoundIndices.size();
@@ -948,7 +834,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       int numberOfAugmentedEqualityConstraints = numberOfOriginalEqualityConstraints + numberOfActiveInequalityConstraints + numberOfActiveLowerBoundConstraints
             + numberOfActiveUpperBoundConstraints;
 
-      negativeQuadraticCostQVector.set(reducedQuadraticCostQVector);
+      negativeQuadraticCostQVector.set(quadraticCostQVector);
       CommonOps.scale(-1.0, negativeQuadraticCostQVector);
 
       if (numberOfAugmentedEqualityConstraints == 0)
@@ -986,7 +872,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       if (numberOfOriginalEqualityConstraints > 0)
       {
          tempVector.reshape(numberOfOriginalEqualityConstraints, 1);
-         CommonOps.mult(AQInverse, reducedQuadraticCostQVector, tempVector);
+         CommonOps.mult(AQInverse, quadraticCostQVector, tempVector);
          CommonOps.addEquals(tempVector, linearEqualityConstraintsBVector);
          CommonOps.scale(-1.0, tempVector);
 
@@ -996,7 +882,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       if (numberOfActiveInequalityConstraints > 0)
       {
          tempVector.reshape(numberOfActiveInequalityConstraints, 1);
-         CommonOps.mult(CBarQInverse, reducedQuadraticCostQVector, tempVector);
+         CommonOps.mult(CBarQInverse, quadraticCostQVector, tempVector);
          CommonOps.addEquals(tempVector, DBar);
          CommonOps.scale(-1.0, tempVector);
 
@@ -1006,7 +892,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       if (numberOfActiveLowerBoundConstraints + numberOfActiveUpperBoundConstraints > 0)
       {
          tempVector.reshape(numberOfActiveLowerBoundConstraints + numberOfActiveUpperBoundConstraints, 1);
-         CommonOps.mult(CHatQInverse, reducedQuadraticCostQVector, tempVector);
+         CommonOps.mult(CHatQInverse, quadraticCostQVector, tempVector);
          CommonOps.addEquals(tempVector, DHat);
          CommonOps.scale(-1.0, tempVector);
 
@@ -1025,7 +911,7 @@ public class SimpleEfficientActiveSetQPSolver implements SimpleActiveSetQPSolver
       ATransposeMuAndCTransposeLambda.reshape(numberOfVariables, 1);
       CommonOps.mult(ATransposeAndCTranspose, augmentedLagrangeMultipliers, ATransposeMuAndCTransposeLambda);
 
-      tempVector.set(reducedQuadraticCostQVector);
+      tempVector.set(quadraticCostQVector);
       CommonOps.scale(-1.0, tempVector);
       CommonOps.subtractEquals(tempVector, ATransposeMuAndCTransposeLambda);
 
