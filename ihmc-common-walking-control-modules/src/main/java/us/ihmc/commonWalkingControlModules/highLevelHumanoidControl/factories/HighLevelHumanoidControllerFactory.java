@@ -103,6 +103,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private boolean useHeadingAndVelocityScript = true;
    private HeightMap heightMapForFootstepZ = null;
 
+   private boolean isListeningToHighLevelStatePackets = true;
+
    private ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
 
    private HumanoidHighLevelControllerManager humanoidHighLevelControllerManager;
@@ -424,6 +426,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                   centerOfPressureDataHolderForEstimator, forceSensorDataHolder,
                                                                                   lowLevelControllerOutput);
       humanoidHighLevelControllerManager.addYoVariableRegistry(registry);
+      humanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
       return humanoidHighLevelControllerManager;
    }
 
@@ -563,6 +566,21 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public HighLevelController getCurrentHighLevelControlState()
    {
       return humanoidHighLevelControllerManager.getCurrentHighLevelControlState();
+   }
+
+   public void reinitializeWalking(boolean keepPosition)
+   {
+      humanoidHighLevelControllerManager.requestHighLevelControllerState(HighLevelController.WALKING);
+      if (keepPosition)
+         humanoidHighLevelControllerManager.reinitializeWalking();
+   }
+
+   public void setListenToHighLevelStatePackets(boolean isListening)
+   {
+      if (humanoidHighLevelControllerManager != null)
+         humanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListening);
+      else
+         isListeningToHighLevelStatePackets = isListening;
    }
 
    public void warmupHighLevelControllers(int iterations)

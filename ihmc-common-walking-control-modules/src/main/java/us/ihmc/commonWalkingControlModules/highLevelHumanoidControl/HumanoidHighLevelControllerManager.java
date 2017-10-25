@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingControllerState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -58,6 +59,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
    private final LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput;
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
+   private final HighLevelControlManagerFactory managerFactory;
 
    private final HighLevelControllerFactoryHelper controllerFactoryHelper;
 
@@ -82,6 +84,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
       this.controllerToolbox = controllerToolbox;
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
       this.initialControllerState = initialControllerState;
+      this.managerFactory = managerFactory;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
       this.lowLevelControllerOutput = lowLevelControllerOutput;
 
@@ -272,5 +275,18 @@ public class HumanoidHighLevelControllerManager implements RobotController
    public HighLevelController getCurrentHighLevelControlState()
    {
       return stateMachine.getCurrentStateEnum();
+   }
+
+   public void reinitializeWalking()
+   {
+      WalkingControllerState walkingControllerState = (WalkingControllerState) stateMachine.getState(HighLevelController.WALKING);
+      if (walkingControllerState != null)
+      {
+         walkingControllerState.initializeDesiredHeightToCurrent();
+         walkingControllerState.reinitializePelvisOrientation(false);
+      }
+
+      if (managerFactory != null)
+         managerFactory.getOrCreatePelvisOrientationManager().setToHoldCurrentInWorldFrame();
    }
 }
