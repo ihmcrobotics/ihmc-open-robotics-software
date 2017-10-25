@@ -28,7 +28,7 @@ public class PlanarRegion
    private int regionId = NO_REGION_ID;
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
-   private final List<Point2D[]> concaveHullsVertices;
+   private final Point2D[] concaveHullsVertices;
    /**
     * List of the convex polygons representing this planar region. They are in the local frame of
     * the plane.
@@ -47,7 +47,7 @@ public class PlanarRegion
     */
    public PlanarRegion()
    {
-      concaveHullsVertices = new ArrayList<>();
+      concaveHullsVertices = new Point2D[0];
       convexPolygons = new ArrayList<>();
       updateBoundingBox();
       updateConvexHull();
@@ -64,7 +64,7 @@ public class PlanarRegion
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
-      concaveHullsVertices = new ArrayList<>();
+      concaveHullsVertices = new Point2D[0];
       convexPolygons = planarRegionConvexPolygons;
       updateBoundingBox();
       updateConvexHull();
@@ -82,26 +82,7 @@ public class PlanarRegion
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
-      this.concaveHullsVertices = new ArrayList<>();
-      concaveHullsVertices.add(concaveHullVertices);
-      convexPolygons = planarRegionConvexPolygons;
-      updateBoundingBox();
-      updateConvexHull();
-   }
-
-   /**
-    * Create a new planar region.
-    * 
-    * @param transformToWorld transform from the region local coordinate system to world.
-    * @param concaveHullVertices vertices of the concave hull of the region.
-    * @param planarRegionConvexPolygons the list of convex polygon that represents the planar
-    *           region. Expressed in local coordinate system.
-    */
-   public PlanarRegion(RigidBodyTransform transformToWorld, List<Point2D[]> concaveHullsVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
-   {
-      fromLocalToWorldTransform.set(transformToWorld);
-      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
-      this.concaveHullsVertices = concaveHullsVertices;
+      this.concaveHullsVertices = concaveHullVertices;
       convexPolygons = planarRegionConvexPolygons;
       updateBoundingBox();
       updateConvexHull();
@@ -118,7 +99,7 @@ public class PlanarRegion
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
-      concaveHullsVertices = new ArrayList<>();
+      concaveHullsVertices = new Point2D[0];
       convexPolygons = new ArrayList<>();
       convexPolygons.add(convexPolygon);
       updateBoundingBox();
@@ -587,35 +568,19 @@ public class PlanarRegion
       return convexPolygons.isEmpty();
    }
 
-   public int getNumberOfConcaveHulls()
-   {
-      return concaveHullsVertices.size();
-   }
-
-   public Point2D[] getFirstConcaveHull()
-   {
-      if (concaveHullsVertices.isEmpty())
-         return null;
-      else
-         return concaveHullsVertices.get(0);
-   }
-
-   public Point2D[] getLastConcaveHull()
-   {
-      if (concaveHullsVertices.isEmpty())
-         return null;
-      else
-         return concaveHullsVertices.get(getNumberOfConcaveHulls() - 1);
-   }
-
-   public Point2D[] getConcaveHull(int i)
-   {
-      return concaveHullsVertices.get(i);
-   }
-
-   public List<Point2D[]> getConcaveHulls()
+   public Point2D[] getConcaveHull()
    {
       return concaveHullsVertices;
+   }
+
+   public Point2D getConcaveHullVertex(int i)
+   {
+      return concaveHullsVertices[i];
+   }
+
+   public int getConcaveHullSize()
+   {
+      return concaveHullsVertices.length;
    }
 
    /** Returns the number of convex polygons representing this region. */
@@ -834,20 +799,15 @@ public class PlanarRegion
    public PlanarRegion copy()
    {
       RigidBodyTransform transformToWorldCopy = new RigidBodyTransform(fromLocalToWorldTransform);
-      List<Point2D[]> concaveHullsCopy = new ArrayList<>();
-      for (int hullIndex = 0; hullIndex < concaveHullsVertices.size(); hullIndex++)
-      {
-         Point2D[] hullVertices = new Point2D[concaveHullsVertices.get(hullIndex).length];
-         for (int i = 0; i < hullVertices.length; i++)
-            hullVertices[i] = new Point2D(concaveHullsVertices.get(hullIndex)[i]);
-         concaveHullsCopy.add(hullVertices);
-      }
+      Point2D[] concaveHullCopy = new Point2D[concaveHullsVertices.length];
+      for (int i = 0; i < concaveHullsVertices.length; i++)
+         concaveHullCopy[i] = new Point2D(concaveHullsVertices[i]);
 
       List<ConvexPolygon2D> convexPolygonsCopy = new ArrayList<>();
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
          convexPolygonsCopy.add(new ConvexPolygon2D(convexPolygons.get(i)));
 
-      PlanarRegion planarRegion = new PlanarRegion(transformToWorldCopy, concaveHullsCopy, convexPolygonsCopy);
+      PlanarRegion planarRegion = new PlanarRegion(transformToWorldCopy, concaveHullCopy, convexPolygonsCopy);
       planarRegion.setRegionId(regionId);
       return planarRegion;
    }
