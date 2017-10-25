@@ -145,6 +145,21 @@ public class WrenchMatrixCalculator
       helper.setCenterOfPressureCommand(command);
    }
 
+   public boolean hasContactStateChanged()
+   {
+      boolean hasContactStateChanged = false;
+      for (int i = 0; i < rigidBodies.size(); i++)
+      {
+         RigidBody rigidBody = rigidBodies.get(i);
+         PlaneContactStateToWrenchMatrixHelper helper = planeContactStateToWrenchMatrixHelpers.get(rigidBody);
+
+         if (helper.hasReset())
+            hasContactStateChanged = true;
+      }
+
+      return hasContactStateChanged;
+   }
+
    private final Vector2D tempDeisredCoPWeight = new Vector2D();
    private final Vector2D tempCoPRateWeight = new Vector2D();
 

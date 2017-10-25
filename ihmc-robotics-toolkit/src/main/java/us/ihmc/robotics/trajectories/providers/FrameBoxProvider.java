@@ -1,6 +1,6 @@
 package us.ihmc.robotics.trajectories.providers;
 
-import us.ihmc.robotics.Axis;
+import us.ihmc.euclid.Axis;
 import us.ihmc.robotics.geometry.shapes.FrameBox3d;
 
 public interface FrameBoxProvider
