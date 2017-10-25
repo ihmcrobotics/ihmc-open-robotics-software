@@ -95,7 +95,7 @@ public class FootstepPlanningWithBodyPathTest
       TextureColorPalette colorPalette = new TextureColorAdaptivePalette();
       JavaFXMultiColorMeshBuilder javaFXMultiColorMeshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(regions, javaFXMultiColorMeshBuilder);
-      ArrayList<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+      List<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
       for (Point3D waypoint3d : path)
       {
          waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
