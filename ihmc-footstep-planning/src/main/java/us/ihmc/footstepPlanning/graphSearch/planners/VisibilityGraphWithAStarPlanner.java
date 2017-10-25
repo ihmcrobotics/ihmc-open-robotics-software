@@ -144,7 +144,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
          NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(planarRegionsList.getPlanarRegionsAsList());
          Point3D startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
          Point3D goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
-         ArrayList<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+         List<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
 
          for (Point3D waypoint3d : path)
          {
