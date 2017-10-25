@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
@@ -20,6 +21,7 @@ public class StandTransitionControllerState extends HighLevelControllerState
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoDouble standTransitionDuration = new YoDouble("standTransitionDuration", registry);
+   private final YoDouble standTransitionGainRatio = new YoDouble("standTransitionGainRatio", registry);
    private final YoPolynomial walkingControlRatioTrajectory = new YoPolynomial("walkingControlRatioTrajectory", 2, registry);
 
    private final PairList<OneDoFJoint, JointControlBlender> jointCommandBlenders = new PairList<>();
@@ -67,8 +69,10 @@ public class StandTransitionControllerState extends HighLevelControllerState
       standReadyControllerState.doAction();
       walkingControllerState.doAction();
 
-      walkingControlRatioTrajectory.compute(getTimeInCurrentState());
+      double timeInBlending = MathTools.clamp(getTimeInCurrentState(), 0.0, standTransitionDuration.getDoubleValue());
+      walkingControlRatioTrajectory.compute(timeInBlending);
       double gainRatio = walkingControlRatioTrajectory.getPosition();
+      standTransitionGainRatio.set(gainRatio);
 
       LowLevelOneDoFJointDesiredDataHolderReadOnly standReadyJointCommand = standReadyControllerState.getOutputForLowLevelController();
       LowLevelOneDoFJointDesiredDataHolderReadOnly walkingJointCommand = walkingControllerState.getOutputForLowLevelController();
