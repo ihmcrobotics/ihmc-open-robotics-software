@@ -19,7 +19,7 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
    {
       super(trajectoryTime);
       
-      Point3D arcCenterPoint = new Point3D(0.53, 0.0, 1.2);
+      Point3D arcCenterPoint = new Point3D(0.56, 0.0, 1.1);
       Quaternion arcCenterOrientation = new Quaternion();
       arcCenterOrientation.appendPitchRotation(-Math.PI * 0.5);
       

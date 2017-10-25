@@ -28,7 +28,7 @@ public class ConstrainedWholeBodyPlanningToolboxRequestPacket extends Packet<Con
 
    public void setInitialRobotConfigration(FullHumanoidRobotModel fullRobotModel)
    {
-      initialConfiguration = new KinematicsToolboxOutputStatus(fullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel), false);
+      this.initialConfiguration = new KinematicsToolboxOutputStatus(fullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel), false);
    }
 
    public void setNumberOfExpanding(int value)
