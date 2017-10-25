@@ -5,9 +5,12 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class WayPointsPacket extends Packet<WayPointsPacket>
 {
+   public RobotSide robotSide;
+   
    public int numberOfWayPoints;
    
    public Point3D[] positionOfWayPoints;
@@ -21,6 +24,11 @@ public class WayPointsPacket extends Packet<WayPointsPacket>
    public WayPointsPacket()
    {
       
+   }
+   
+   public void setRobotSide(RobotSide robotSide)
+   {
+      this.robotSide = robotSide;
    }
    
    public void setWayPoints(Pose3D[] poseOfWayPoints, double trajectoryTime)
@@ -63,6 +71,9 @@ public class WayPointsPacket extends Packet<WayPointsPacket>
       }
       
       if(!MathTools.epsilonEquals(trajectoryTime, other.trajectoryTime, epsilon))
+         return false;
+      
+      if(!this.robotSide.equals(other.robotSide))
          return false;
             
       return true;
