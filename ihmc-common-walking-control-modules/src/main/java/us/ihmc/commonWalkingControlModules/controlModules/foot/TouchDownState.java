@@ -7,10 +7,12 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.contactPoints.ContactStateRhoRamping;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -35,6 +37,10 @@ import us.ihmc.tools.lists.ListSorter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * Attempts to soften the touchdown portion of swing. This state is only triggered if a touchdown duration is supplied with the footstep
+ * This state is triggered after the foot comes in contact with the ground
+ */
 public class TouchDownState extends AbstractFootControlState
 {
    private final String name = getClass().getSimpleName();
@@ -46,7 +52,7 @@ public class TouchDownState extends AbstractFootControlState
    private final SelectionMatrix6D feedbackControlSelectionMatrix = new SelectionMatrix6D();
 
    private final HermiteCurveBasedOrientationTrajectoryGenerator orientationTrajectory;
-   private final FootContactStateInterpolator footContactPointInterpolator;
+   private final ContactStateRhoRamping footContactRhoRamper;
 
    private final FrameLineSegment contactLine = new FrameLineSegment();
 
@@ -72,11 +78,24 @@ public class TouchDownState extends AbstractFootControlState
    private final MovingReferenceFrame footBodyFixedFrame;
    private final FramePose controlFramePose = new FramePose();
 
+   private final YoContactPointDistanceComparator comparator = new YoContactPointDistanceComparator();
+   private final FramePoint3D endPointA = new FramePoint3D();
+   private final FramePoint3D endPointB = new FramePoint3D();
+
+   /**
+    * Attempts to soften the touchdown portion of swing. This state is only triggered if a touchdown duration is supplied with the footstep
+    * This state is triggered after the foot comes in contact with the ground
+    * @param footControlHelper
+    * @param swingFootControlGains
+    * @param parentRegistry
+    */
    public TouchDownState(FootControlHelper footControlHelper, YoPIDSE3Gains swingFootControlGains, YoVariableRegistry parentRegistry)
    {
       super(ConstraintType.TOUCHDOWN, footControlHelper);
 
-      footContactPointInterpolator = new FootContactStateInterpolator(robotSide, contactState, controllerToolbox.getControlDT(), parentRegistry);
+      MomentumOptimizationSettings momentumOptimizationSettings = footControlHelper.getWalkingControllerParameters().getMomentumOptimizationSettings();
+      footContactRhoRamper = new ContactStateRhoRamping(robotSide, contactState, controllerToolbox.getControlDT(), momentumOptimizationSettings.getRhoWeight(),
+            parentRegistry);
 
       SideDependentList<FootSwitchInterface> footSwitches = controllerToolbox.getFootSwitches();
       footSwitch = footSwitches.get(robotSide);
@@ -122,48 +141,26 @@ public class TouchDownState extends AbstractFootControlState
       parentRegistry.addChild(registry);
    }
 
-   public void setWeight(double weight)
-   {
-      feedbackControlCommand.setWeightForSolver(weight);
-   }
-
-   public void setWeights(Vector3D angular, Vector3D linear)
-   {
-      feedbackControlCommand.setWeightsForSolver(angular, linear);
-   }
-
    @Override
    public void doSpecificAction()
    {
       double timeInCurrentState = getTimeInCurrentState();
 
       timeInContact.set(timeInCurrentState);
-      footContactPointInterpolator.update();
+      footContactRhoRamper.update();
 
       orientationTrajectory.compute(timeInCurrentState);
       orientationTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
    }
 
-   private void enableLineContact()
-   {
-      updateContactStateForLineContactBasedOnSensedCoP();
-      MovingReferenceFrame footFixedFrame = contactableFoot.getRigidBody().getBodyFixedFrame();
-      contactLine.changeFrame(footFixedFrame);
-      contactPointPosition.setToNaN(footFixedFrame);
-      contactLine.getMidpoint(contactPointPosition);
-      groundContactFrame.updateTranslation(contactPointPosition);
-
-      contactState.setContactNormalVector(footControlHelper.getFullyConstrainedNormalContactVector());
-      footContactPointInterpolator.initialize(desiredTouchdownDuration.getDoubleValue(), contactLine);
-   }
-
    /**
-    * This assumes flat ground, sets the final desired foot pose to assume flat ground and uses the foots current desired yaw
-    * @param desiredTouchdownDuration
-    * @param initialFootPose
-    * @param initialFootLinearVelocity
-    * @param initialFootAngularVelocity
+    * This assumes flat ground! sets the final desired foot pose to assume flat ground and uses the foot's current desired yaw.
+    * The pose initials should probably be the swing's final desireds.
+    * @param desiredTouchdownDuration the time the orientation trajectory and contact point rho ramping take to complete
+    * @param initialFootPose the current desired foot pose
+    * @param initialFootLinearVelocity the current desired foot linear velocity
+    * @param initialFootAngularVelocity the current desired foot angular velocity
     */
    public void initialize(double desiredTouchdownDuration, FramePose initialFootPose, FrameVector3D initialFootLinearVelocity,
          FrameVector3D initialFootAngularVelocity)
@@ -174,11 +171,21 @@ public class TouchDownState extends AbstractFootControlState
       initialize(desiredTouchdownDuration, initialFootPose, initialFootLinearVelocity, initialFootAngularVelocity, desiredOrientation);
    }
 
+   /**
+    * initialize the touchdown state. The pose initials should probably be the swing's final desireds.
+    * @param desiredTouchdownDuration  the time the orientation trajectory and contact point rho ramping take to complete
+    * @param initialFootPose the current desired foot pose
+    * @param initialFootLinearVelocity  the current desired foot linear velocity
+    * @param initialFootAngularVelocity the current desired foot angular velocity
+    * @param finalFootOrientation the final orientation trajectory desired, this should be the ground orientation. 
+    */
    public void initialize(double desiredTouchdownDuration, FramePose initialFootPose, FrameVector3D initialFootLinearVelocity,
          FrameVector3D initialFootAngularVelocity, FrameOrientation finalFootOrientation)
    {
       this.desiredTouchdownDuration.set(desiredTouchdownDuration);
 
+      //We're only using the orientation here. If you want to switch to holding X and Y, be careful, as the swing tracks position in a weird frame, 
+      //and once in contact, the desired position would need to be consistent with current desireds, but transformed to somewhere on the contact line
       initialFootPose.changeFrame(worldFrame);
       initialFootAngularVelocity.changeFrame(worldFrame);
       finalFootOrientation.changeFrame(worldFrame);
@@ -193,7 +200,8 @@ public class TouchDownState extends AbstractFootControlState
    {
       super.doTransitionIntoAction();
 
-      enableLineContact();
+      enableLineContactAndSetTheGroundContactFrame(contactPointPosition, groundContactFrame);
+      footContactRhoRamper.initialize(desiredTouchdownDuration.getDoubleValue());
 
       zeroAccelerationCommand.setSpatialAccelerationToZero(groundContactFrame);
       feedbackControlCommand.setControlFrameFixedInEndEffector(contactPointPosition);
@@ -209,20 +217,34 @@ public class TouchDownState extends AbstractFootControlState
    public void doTransitionOutOfAction()
    {
       super.doTransitionOutOfAction();
-      footContactPointInterpolator.resetContactState();
+      footContactRhoRamper.resetContactState();
    }
 
-   @Override
-   public boolean isDone()
+   /**
+    * extracts a line contact
+    * sets the contactPointPosition to the midpoint of the contact line
+    * initialized the rhoRamping and sets all contact points in contact
+    * @param groundContactFrameToUpdate 
+    * @param contactPointPositionToPack 
+    */
+   private void enableLineContactAndSetTheGroundContactFrame(FramePoint3D contactPointPositionToPack, TranslationReferenceFrame groundContactFrameToUpdate)
    {
-      return getTimeInCurrentState() > desiredTouchdownDuration.getDoubleValue();
+      //TODO: create option to use expected contact points from footstep or look into orientation of foot assuming flat ground
+      updateContactStateForLineContactBasedOnSensedCoP(contactState, contactPoints, contactLine);
+      MovingReferenceFrame footFixedFrame = contactableFoot.getRigidBody().getBodyFixedFrame();
+      contactLine.changeFrame(footFixedFrame);
+      contactPointPositionToPack.setToNaN(footFixedFrame);
+      contactLine.getMidpoint(contactPointPositionToPack);
+      groundContactFrameToUpdate.updateTranslation(contactPointPositionToPack);
    }
 
-   private final SearchDirectionFramePointComparator comparator = new SearchDirectionFramePointComparator();
-   private final FramePoint3D endPointA = new FramePoint3D();
-   private final FramePoint3D endPointB = new FramePoint3D();
-
-   private void updateContactStateForLineContactBasedOnSensedCoP()
+   /**
+    * Extracts a line contact based on the distance from the sensed CoP and activates the contacts
+    * @param contactState used to update the in contact state after enabled the contact points
+    * @param contactPoints used to find the closest contact points from the sensed CoP
+    * @param contactLineToPack the line contact found 
+    */
+   private void updateContactStateForLineContactBasedOnSensedCoP(YoPlaneContactState contactState, List<YoContactPoint> contactPoints, FrameLineSegment contactLineToPack)
    {
       footSwitch.computeAndPackCoP(sensedCoP);
       sensedCoP.changeFrame(soleFrame);
@@ -238,13 +260,18 @@ public class TouchDownState extends AbstractFootControlState
       yoContactPointB.getPosition(endPointB);
 
       contactState.updateInContact();
-      //      contactState.notifyContactStateHasChanged();
-      contactLine.setIncludingFrame(endPointA, endPointB);
+      contactLineToPack.setIncludingFrame(endPointA, endPointB);
+      contactState.setContactNormalVector(footControlHelper.getFullyConstrainedNormalContactVector());
    }
 
-   private void updateLineContactBasedOnInitialFootOrientation()
+   public void setWeight(double weight)
    {
-      //      contactLine.set(contactPoints2D.get(0), contactPoints2D.get(1));
+      feedbackControlCommand.setWeightForSolver(weight);
+   }
+
+   public void setWeights(Vector3D angular, Vector3D linear)
+   {
+      feedbackControlCommand.setWeightsForSolver(angular, linear);
    }
 
    @Override
@@ -259,7 +286,17 @@ public class TouchDownState extends AbstractFootControlState
       return feedbackControlCommand;
    }
 
-   private class SearchDirectionFramePointComparator implements Comparator<YoContactPoint>
+   @Override
+   public boolean isDone()
+   {
+      //TODO: set done if icp error is large
+      return getTimeInCurrentState() > desiredTouchdownDuration.getDoubleValue();
+   }
+
+   /**
+    * Compares YoContactPoints against the distance from a point (in this case the Center of Pressure)
+    */
+   private class YoContactPointDistanceComparator implements Comparator<YoContactPoint>
    {
       private final FrameVector2D cop = new FrameVector2D();
       private final FrameVector2D cp1 = new FrameVector2D();

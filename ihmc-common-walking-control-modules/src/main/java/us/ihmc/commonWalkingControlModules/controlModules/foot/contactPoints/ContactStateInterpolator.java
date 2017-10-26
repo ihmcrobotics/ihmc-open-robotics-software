@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.foot;
+package us.ihmc.commonWalkingControlModules.controlModules.foot.contactPoints;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,13 +10,15 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameLineSegment;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class FootContactStateInterpolator
+/**
+ * This class will project contact points on to a contact line and interpolate them back to the correct place over a specified duration.
+ * This would be similar to a rolling foot, where the contact polygon grows as the foot comes in contact.
+ */
+public class ContactStateInterpolator
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry;
@@ -35,12 +37,17 @@ public class FootContactStateInterpolator
    private final YoDouble alpha;
    private final YoDouble timeInTrajectory;
    private final YoDouble duration;
-   private final YoBoolean moveContactPoints;
-   private final YoPolynomial polynomial;
    private final double dt;
    
 
-   public FootContactStateInterpolator(RobotSide robotSide, YoPlaneContactState contactState, double dt, YoVariableRegistry parentRegistry)
+   /**
+    * This class will project contact points on to a contact line and interpolate them back to the correct place over a specified duration.
+    * @param robotSide - used for naming only
+    * @param contactState - the contact state to interpolate
+    * @param dt - the dt used to increment the time in trajectory
+    * @param parentRegistry
+    */
+   public ContactStateInterpolator(RobotSide robotSide, YoPlaneContactState contactState, double dt, YoVariableRegistry parentRegistry)
    {
       this.contactState = contactState;
       this.dt = dt;
@@ -54,10 +61,6 @@ public class FootContactStateInterpolator
       this.alpha = new YoDouble(prefix + "alpha", registry);
       this.timeInTrajectory = new YoDouble(prefix + "timeInTrajectory", registry);
       this.duration = new YoDouble(prefix + "duration", registry);
-      this.moveContactPoints = new YoBoolean("moveContactPoints", registry);
-      this.polynomial = new YoPolynomial("rhoWeightTraj", 3, registry);
-      
-      moveContactPoints.set(false);
       
       for(YoContactPoint yoContactPoint : contactPoints)
       {
@@ -71,6 +74,11 @@ public class FootContactStateInterpolator
       parentRegistry.addChild(registry);
    }
    
+   /**
+    * projects the contact points NOT in contact onto the contact line and sets them in contact
+    * @param duration - the time it takes to interpolate the contact points from the line to their original position
+    * @param contactLine the line formed by two contact points in contact
+    */
    public void initialize(double duration, FrameLineSegment contactLine)
    {
       contactLine.changeFrame(planeFrame);
@@ -78,8 +86,6 @@ public class FootContactStateInterpolator
       
       this.duration.set(duration);
       timeInTrajectory.set(0.0);
-      
-      polynomial.setQuadratic(0.0, duration, 1.0, -0.2,  0.00005);
       
       for(int i = 0; i < contactPoints.size(); i++)
       {
@@ -102,14 +108,13 @@ public class FootContactStateInterpolator
       contactState.updateInContact();
    }
 
+   /**
+    * moves the contact points from their projected positions to their original positions
+    */
    public void update()
    {
       timeInTrajectory.add(dt);
-      double time =  MathTools.clamp(timeInTrajectory.getDoubleValue(), 0.0, duration.getDoubleValue()) ;
-      polynomial.compute(time);
-      
-//      alpha.set(timeInTrajectory.getDoubleValue() / duration.getDoubleValue());
-      alpha.set(polynomial.getPosition());
+      alpha.set(timeInTrajectory.getDoubleValue() / duration.getDoubleValue());
       alpha.set(MathTools.clamp(alpha.getDoubleValue(), 0.0, 1.0));
       
       for(int i = 0; i < contactPoints.size(); i++)
@@ -117,8 +122,6 @@ public class FootContactStateInterpolator
          YoContactPoint yoContactPoint = contactPoints.get(i);
          if(contactPointInterpolationActivated[i])
          {
-            if(moveContactPoints.getBooleanValue())
-            {
                FramePoint2D initialPosition = initialPositions.get(yoContactPoint);
                FramePoint2D finalPosition = finalPositions.get(yoContactPoint);
                
@@ -126,20 +129,21 @@ public class FootContactStateInterpolator
                contactPointPosition.interpolate(initialPosition, finalPosition, alpha.getDoubleValue());
                contactPointPosition.changeFrame(yoContactPoint.getReferenceFrame());
                yoContactPoint.setPosition2d(contactPointPosition);
-            }
-            
-            contactState.setRhoWeight(yoContactPoint, alpha.getDoubleValue());
          }
       }
       
-//      contactState.notifyContactStateHasChanged();
+      //TODO: once the new icp planner handles replans, enable notifying the planner for a replan and test it out
+      //      contactState.notifyContactStateHasChanged();
    }
    
    public boolean isDone()
    {
-      return duration.getDoubleValue() - timeInTrajectory.getDoubleValue() <= 0 ;
+      return timeInTrajectory.getDoubleValue() >= duration.getDoubleValue();
    }
 
+   /**
+    * Moves the contact points back to there original positions
+    */
    public void resetContactState()
    {
       for(int i = 0; i < contactPoints.size(); i++)
@@ -149,8 +153,6 @@ public class FootContactStateInterpolator
          contactPointPosition.setIncludingFrame(finalPosition);
          contactPointPosition.changeFrame(yoContactPoint.getReferenceFrame());
          yoContactPoint.setPosition2d(contactPointPosition);
-         contactState.setRhoWeight(yoContactPoint, Double.NaN);
       }
    }
-   
 }
