@@ -2,15 +2,8 @@ package us.ihmc.convexOptimization.quadraticProgram;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import org.junit.Ignore;
 import org.junit.Test;
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.tools.exceptions.NoConvergenceException;
-
-import java.util.Random;
 
 import static org.junit.Assert.*;
 
@@ -18,7 +11,7 @@ public abstract class AbstractSimpleActiveSetQPSolverWithInactiveVariablesTest e
 {
    private static final boolean VERBOSE = false;
 
-   public abstract ActiveSetSolverWithInactiveVariablesInterface createSolverToTest();
+   public abstract ActiveSetQPSolverWithInactiveVariablesInterface createSolverToTest();
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -29,7 +22,7 @@ public abstract class AbstractSimpleActiveSetQPSolverWithInactiveVariablesTest e
 
    public void testSimpleCasesWithInequalityConstraintsAndInactiveVariables(int expectedNumberOfIterations)
    {
-      ActiveSetSolverWithInactiveVariablesInterface solver = createSolverToTest();
+      ActiveSetQPSolverWithInactiveVariablesInterface solver = createSolverToTest();
 
       // Minimize x^T * x subject to x <= 1
       double[][] costQuadraticMatrix = new double[][] { { 2.0 } };
@@ -212,7 +205,7 @@ public abstract class AbstractSimpleActiveSetQPSolverWithInactiveVariablesTest e
    public void testSimpleCasesWithBoundsConstraintsAndInactiveVariables(int expectedNumberOfIterations, int expectedNumberOfIterations2, int expectedNubmerOfIterations3,
                                                     boolean ignoreLagrangeMultipliers)
    {
-      ActiveSetSolverWithInactiveVariablesInterface solver = createSolverToTest();
+      ActiveSetQPSolverWithInactiveVariablesInterface solver = createSolverToTest();
 
       // Minimize x^T * x
       double[][] costQuadraticMatrix = new double[][] { { 2.0 } };

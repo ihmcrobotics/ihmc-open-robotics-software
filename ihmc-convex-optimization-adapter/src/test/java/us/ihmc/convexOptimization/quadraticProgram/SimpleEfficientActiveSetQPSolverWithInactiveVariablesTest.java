@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 public class SimpleEfficientActiveSetQPSolverWithInactiveVariablesTest extends AbstractSimpleActiveSetQPSolverWithInactiveVariablesTest
 {
    @Override
-   public ActiveSetSolverWithInactiveVariablesInterface createSolverToTest()
+   public ActiveSetQPSolverWithInactiveVariablesInterface createSolverToTest()
    {
       SimpleEfficientActiveSetQPSolverWithInactiveVariables simpleEfficientActiveSetQPSolver = new SimpleEfficientActiveSetQPSolverWithInactiveVariables();
       simpleEfficientActiveSetQPSolver.setUseWarmStart(false);
