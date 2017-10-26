@@ -279,7 +279,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       }
 
       double touchdownTime = 0.2;
-      feetManager.requestSwing(swingSide, nextFootstep, swingTime - touchdownTime, touchdownTime);
+      feetManager.requestSwing(swingSide, nextFootstep, swingTime, touchdownTime);
 
       legConfigurationManager.startSwing(swingSide);
       legConfigurationManager.useHighWeight(swingSide.getOppositeSide());
