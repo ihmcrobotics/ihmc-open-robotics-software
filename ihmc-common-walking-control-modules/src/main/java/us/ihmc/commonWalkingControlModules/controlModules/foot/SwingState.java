@@ -153,7 +153,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoFrameQuaternion yoDesiredSoleOrientation;
    private final YoFrameVector yoDesiredSoleLinearVelocity;
    private final YoFrameVector yoDesiredSoleAngularVelocity;
-
+   
    private final SwingTrajectoryParameters swingTrajectoryParameters;
 
    public SwingState(FootControlHelper footControlHelper, YoFrameVector yoTouchdownVelocity, YoFrameVector yoTouchdownAcceleration,
@@ -751,6 +751,6 @@ public class SwingState extends AbstractUnconstrainedState
    @Override
    public boolean isDone() 
    {
-      return (getTimeInCurrentState() > 0.1 && controllerToolbox.getFootSwitches().get(robotSide).computeFootLoadPercentage() > 0.10);
+      return (getTimeInCurrentState() > 0.1 && controllerToolbox.getFootSwitches().get(robotSide).hasFootHitGround());
    }
 }
