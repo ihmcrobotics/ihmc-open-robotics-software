@@ -288,7 +288,7 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
    {
       removeInactiveVariables();
 
-      activeVariableSolution.reshape(quadraticCostQMatrix.numRows, 1);
+      solutionToPack.reshape(originalQuadraticCostQMatrix.numRows, 1);
 
       int numberOfIterations = super.solve(activeVariableSolution, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
                   lagrangeLowerBoundConstraintMultipliersToPack, lagrangeUpperBoundConstraintMultipliersToPack);
