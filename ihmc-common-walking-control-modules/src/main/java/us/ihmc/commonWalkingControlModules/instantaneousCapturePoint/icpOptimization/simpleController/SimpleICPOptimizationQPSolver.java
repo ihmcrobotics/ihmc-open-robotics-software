@@ -676,7 +676,7 @@ public class SimpleICPOptimizationQPSolver
     */
    private void addFeedbackTask()
    {
-      inputCalculator.computeFeedbackTask(feedbackTaskInput, feedbackWeight);
+      SimpleICPQPInputCalculator.computeFeedbackTask(feedbackTaskInput, feedbackWeight);
 
       if (hasFeedbackRegularizationTerm)
          inputCalculator.computeFeedbackRegularizationTask(feedbackTaskInput, feedbackRegularizationWeight, previousFeedbackDeltaSolution);
@@ -689,7 +689,7 @@ public class SimpleICPOptimizationQPSolver
     */
    private void addAngularMomentumMinimizationTask()
    {
-      inputCalculator.computeAngularMomentumMinimizationTask(angularMomentumMinimizationTask, angularMomentumMinimizationWeight);
+      SimpleICPQPInputCalculator.computeAngularMomentumMinimizationTask(angularMomentumMinimizationTask, angularMomentumMinimizationWeight);
       inputCalculator.submitAngularMomentumMinimizationTask(angularMomentumMinimizationTask, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 

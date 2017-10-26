@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.MatrixFeatures;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPQPOptimizationSolver;
 
 /**
@@ -49,5 +50,10 @@ public class ICPQPInput
       quadraticTerm.zero();
       linearTerm.zero();
       residualCost.zero();
+   }
+
+   public boolean equals(ICPQPInput other)
+   {
+      return MatrixFeatures.isEquals(quadraticTerm, other.quadraticTerm) && MatrixFeatures.isEquals(linearTerm, other.linearTerm) && MatrixFeatures.isEquals(residualCost, other.residualCost);
    }
 }
