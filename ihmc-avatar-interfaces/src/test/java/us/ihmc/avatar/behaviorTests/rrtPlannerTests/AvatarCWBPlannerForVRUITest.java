@@ -31,6 +31,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WayPointsByVRUIBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WayPointsByVRUIBehaviorStateMachine.WayPointsByVRUIBehaviorState;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.ConstrainedWholeBodyPlanningToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WayPointsPacket;
@@ -311,6 +312,8 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
                pose.appendTranslation(0.0, -ConstrainedWholeBodyPlanningToolboxController.handCoordinateOffsetX, 0.0);
                scs.addStaticLinkGraphics(getXYZAxis(pose, 0.075));
             }
+            
+            scs.addStaticLinkGraphics(getXYZAxis(PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory.getEndEffectorPose(0.0, RobotSide.RIGHT, new ConfigurationSpace()), 0.2));
 
             break;
          }

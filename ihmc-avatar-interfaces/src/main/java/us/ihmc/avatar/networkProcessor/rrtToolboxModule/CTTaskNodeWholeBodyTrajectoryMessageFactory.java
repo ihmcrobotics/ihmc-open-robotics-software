@@ -69,6 +69,7 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
             ConfigurationSpace configurationSpace = CTTreeTools.getConfigurationSpace(trajectoryNode, robotSide);
 
             Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(trajectoryNode.getNodeData(0), robotSide, configurationSpace);
+            PrintTools.info(""+robotSide+" "+desiredPose);
 
             euclideanTrajectoryPointCalculator.appendTrajectoryPoint(new Point3D(desiredPose.getPosition()));
          }
