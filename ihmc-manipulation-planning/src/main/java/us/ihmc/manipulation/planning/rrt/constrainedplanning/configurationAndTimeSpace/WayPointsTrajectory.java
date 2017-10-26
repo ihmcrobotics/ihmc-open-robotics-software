@@ -30,13 +30,17 @@ public class WayPointsTrajectory extends ConstrainedEndEffectorTrajectory
       Pose3D[] poseOfWayPoints = new Pose3D[wayPointsPacket.numberOfWayPoints];
       
       for(int i=0;i<wayPointsPacket.numberOfWayPoints;i++)
-      {
+      {         
+         poseOfWayPoints[i] = new Pose3D();
+         
          poseOfWayPoints[i].setPosition(wayPointsPacket.positionOfWayPoints[i]);
          poseOfWayPoints[i].setOrientation(wayPointsPacket.orientationOfWayPoints[i]);
       }   
       this.poseOfWayPoints = poseOfWayPoints; 
       
       this.robotSide = wayPointsPacket.robotSide;
+      
+      this.configurationBuildOrders = redefineConfigurationBuildOrders();
    }
    
    public WayPointsTrajectory(RobotSide robotSide, Pose3D[] poseOfWayPoints, double trajectoryTime)
@@ -44,6 +48,8 @@ public class WayPointsTrajectory extends ConstrainedEndEffectorTrajectory
       super(trajectoryTime);
       this.poseOfWayPoints = poseOfWayPoints;
       this.robotSide = robotSide;
+      
+      this.configurationBuildOrders = redefineConfigurationBuildOrders();
    }
 
    @Override
@@ -82,7 +88,7 @@ public class WayPointsTrajectory extends ConstrainedEndEffectorTrajectory
          configurationBuildOrders.put(robotSide,
                                       new ConfigurationBuildOrder(ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z,
                                                                   ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL));
-
+     
       return configurationBuildOrders;
    }
 
@@ -128,15 +134,12 @@ public class WayPointsTrajectory extends ConstrainedEndEffectorTrajectory
       for(int i=0;i<segmentDistance.length;i++)
       {
          segmentDistance[i] = getSegmentDistance(poseOfWayPoints[i], poseOfWayPoints[i+1]);
-         totalDistance = totalDistance + segmentDistance[i];
-         
-         //PrintTools.info("segment distance "+ i +" " + segmentDistance[i] +" " + totalDistance);
+         totalDistance = totalDistance + segmentDistance[i];         
       }
       
       for(int i=0;i<segmentTimes.length;i++)
       {
          segmentTimes[i] = this.trajectoryTime * segmentDistance[i] / totalDistance;
-         //PrintTools.info("segment time "+ i +" " + segmentTimes[i]);
       }
     
       int indexOfSegment = 0;
@@ -153,7 +156,6 @@ public class WayPointsTrajectory extends ConstrainedEndEffectorTrajectory
             
             alpha = leftTime / segmentTimes[i];
             
-            //PrintTools.info("alpha is " + alpha);
             break;
          }
          if(i==segmentTimes.length - 1)
@@ -168,11 +170,7 @@ public class WayPointsTrajectory extends ConstrainedEndEffectorTrajectory
       
       Vector3D interpolatedOrientationYPR = new Vector3D();
       YawPitchRollConversion.convertQuaternionToYawPitchRoll(interpolatedOrientation, interpolatedOrientationYPR);
-      
-      
-      
-      
-      
+            
       SideDependentList<ConfigurationSpace> configurationSpaces = new SideDependentList<>();
 
       if(robotSide == RobotSide.LEFT)
@@ -180,7 +178,7 @@ public class WayPointsTrajectory extends ConstrainedEndEffectorTrajectory
          ConfigurationSpace holdingConfiguration = new ConfigurationSpace();
          
          holdingConfiguration.setTranslation(0.0, -0.4, 0.75);
-         holdingConfiguration.setRotation(0.0, 0.3 * Math.PI, 0.0);
+         holdingConfiguration.setRotation(0.5 * Math.PI, 0.0, -0.5 * Math.PI);
 
          configurationSpaces.put(RobotSide.RIGHT, holdingConfiguration);
          
@@ -190,21 +188,14 @@ public class WayPointsTrajectory extends ConstrainedEndEffectorTrajectory
          controlConfiguration.setTranslation(interpolatedPoint);
          controlConfiguration.setRotation(interpolatedOrientationYPR.getX(), interpolatedOrientationYPR.getY(), interpolatedOrientationYPR.getZ());
 
-         configurationSpaces.put(RobotSide.LEFT, controlConfiguration);
-         
-//         holdingConfiguration = new ConfigurationSpace();
-//
-//         holdingConfiguration.setTranslation(0.0, 0.4, 0.75);
-//         holdingConfiguration.setRotation(0.0, 0.3 * Math.PI, 0.0);
-//
-//         configurationSpaces.put(RobotSide.LEFT, holdingConfiguration);
+         configurationSpaces.put(RobotSide.LEFT, controlConfiguration);         
       }
       else
       {
          ConfigurationSpace holdingConfiguration = new ConfigurationSpace();
 
          holdingConfiguration.setTranslation(0.0, 0.4, 0.75);
-         holdingConfiguration.setRotation(0.0, 0.3 * Math.PI, 0.0);
+         holdingConfiguration.setRotation(0.5 * Math.PI, 0.0, -0.5 * Math.PI);
 
          configurationSpaces.put(RobotSide.LEFT, holdingConfiguration);
 
@@ -214,17 +205,36 @@ public class WayPointsTrajectory extends ConstrainedEndEffectorTrajectory
          controlConfiguration.setRotation(interpolatedOrientationYPR.getX(), interpolatedOrientationYPR.getY(), interpolatedOrientationYPR.getZ());
          
          configurationSpaces.put(RobotSide.RIGHT, controlConfiguration);
-         
-//         holdingConfiguration = new ConfigurationSpace();
-//         
-//         holdingConfiguration.setTranslation(0.0, -0.4, 0.75);
-//         holdingConfiguration.setRotation(0.0, 0.3 * Math.PI, 0.0);
-//
-//         configurationSpaces.put(RobotSide.RIGHT, holdingConfiguration);
       }      
       
       
       return configurationSpaces;
+   }
+   
+   public SideDependentList<ConfigurationBuildOrder> redefineConfigurationBuildOrders()
+   {
+      SideDependentList<ConfigurationBuildOrder> configurationBuildOrders = new SideDependentList<>();
+
+      if(robotSide == RobotSide.LEFT)
+      {
+         configurationBuildOrders.put(robotSide,
+                                      new ConfigurationBuildOrder(ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z,
+                                                                  ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL));
+         configurationBuildOrders.put(RobotSide.RIGHT,
+                                      new ConfigurationBuildOrder(ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z,
+                                                                  ConfigurationSpaceName.ROLL, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.YAW));
+      }
+      else
+      {
+         configurationBuildOrders.put(robotSide,
+                                      new ConfigurationBuildOrder(ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z,
+                                                                  ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL));
+         configurationBuildOrders.put(RobotSide.LEFT,
+                                      new ConfigurationBuildOrder(ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z,
+                                                                  ConfigurationSpaceName.ROLL, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.YAW));
+      }
+      
+      return configurationBuildOrders;
    }
    
    private double getSegmentDistance(Pose3D pose1, Pose3D pose2)

@@ -13,12 +13,11 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WayPointsPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.WayPointsTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.FramePose;
@@ -44,14 +43,14 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
    private final ConcurrentListeningQueue<SetBooleanParameterPacket> confirmQueue = new ConcurrentListeningQueue<SetBooleanParameterPacket>(5);
 
    private final HumanoidReferenceFrames referenceFrames;
-   
+
    public enum WayPointsByVRUIBehaviorState
    {
       WAITING_INPUT, PLANNING, WAITING_CONFIRM, MOTION, PLAN_FALIED, DONE
    }
 
    public WayPointsByVRUIBehaviorStateMachine(FullHumanoidRobotModelFactory robotModelFactory, CommunicationBridge communicationBridge, YoDouble yoTime,
-                                          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
+                                              FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super("WayPointsByVRUIBehaviorStateMachine", WayPointsByVRUIBehaviorState.class, yoTime, communicationBridge);
 
@@ -74,11 +73,16 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
 
       setupStateMachine();
    }
-   
+
+   public PlanConstrainedWholeBodyTrajectoryBehavior getPlanConstrainedWholeBodyTrajectoryBehavior()
+   {
+      return planConstrainedWholeBodyTrajectoryBehavior;
+   }
+
    private void setupStateMachine()
    {
       BehaviorAction<WayPointsByVRUIBehaviorState> waiting_input = new BehaviorAction<WayPointsByVRUIBehaviorState>(WayPointsByVRUIBehaviorState.WAITING_INPUT,
-                                                                                                            new SimpleDoNothingBehavior(communicationBridge))
+                                                                                                                    new SimpleDoNothingBehavior(communicationBridge))
       {
          @Override
          protected void setBehaviorInput()
@@ -94,7 +98,7 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
       };
 
       BehaviorAction<WayPointsByVRUIBehaviorState> planning = new BehaviorAction<WayPointsByVRUIBehaviorState>(WayPointsByVRUIBehaviorState.PLANNING,
-                                                                                                       planConstrainedWholeBodyTrajectoryBehavior)
+                                                                                                               planConstrainedWholeBodyTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -104,23 +108,25 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
             // TODO
             WayPointsPacket latestPacket = wayPointsPacketQueue.getLatestPacket();
 
+            PrintTools.info("numberOfWayPoints " + latestPacket.numberOfWayPoints);
 
             // TODO
-            ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(20.0);
+            ConstrainedEndEffectorTrajectory endeffectorTrajectory = new WayPointsTrajectory(latestPacket);
 
+            PrintTools.info("endeffectorTrajectory " + endeffectorTrajectory.getTaskRegion().getUpperLimit(0));
+            
             planConstrainedWholeBodyTrajectoryBehavior.setInputs(endeffectorTrajectory, fullRobotModel);
 
             planConstrainedWholeBodyTrajectoryBehavior.setNumberOfEndEffectorWayPoints(30);
             planConstrainedWholeBodyTrajectoryBehavior.setNumberOfExpanding(1000);
-            planConstrainedWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(320);
-            planConstrainedWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(160);
+            planConstrainedWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(80);
 
             PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
          }
       };
 
       BehaviorAction<WayPointsByVRUIBehaviorState> waiting = new BehaviorAction<WayPointsByVRUIBehaviorState>(WayPointsByVRUIBehaviorState.WAITING_CONFIRM,
-                                                                                                      new SimpleDoNothingBehavior(communicationBridge))
+                                                                                                              new SimpleDoNothingBehavior(communicationBridge))
       {
          @Override
          protected void setBehaviorInput()
@@ -132,9 +138,9 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
          public boolean isDone()
          {
             if (confirmQueue.isNewPacketAvailable())
-            {               
+            {
                boolean parameterValue = confirmQueue.getLatestPacket().getParameterValue();
-               System.out.println("user confirmed "+parameterValue);
+               System.out.println("user confirmed " + parameterValue);
                return parameterValue;
             }
             else
@@ -143,7 +149,7 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
       };
 
       BehaviorAction<WayPointsByVRUIBehaviorState> motion = new BehaviorAction<WayPointsByVRUIBehaviorState>(WayPointsByVRUIBehaviorState.MOTION,
-                                                                                                     wholebodyTrajectoryBehavior)
+                                                                                                             wholebodyTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -187,7 +193,7 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
       };
 
       BehaviorAction<WayPointsByVRUIBehaviorState> planFailedState = new BehaviorAction<WayPointsByVRUIBehaviorState>(WayPointsByVRUIBehaviorState.PLAN_FALIED,
-                                                                                                              new SimpleDoNothingBehavior(communicationBridge))
+                                                                                                                      new SimpleDoNothingBehavior(communicationBridge))
       {
          @Override
          protected void setBehaviorInput()
@@ -200,7 +206,7 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
       };
 
       BehaviorAction<WayPointsByVRUIBehaviorState> doneState = new BehaviorAction<WayPointsByVRUIBehaviorState>(WayPointsByVRUIBehaviorState.DONE,
-                                                                                                        new SimpleDoNothingBehavior(communicationBridge))
+                                                                                                                new SimpleDoNothingBehavior(communicationBridge))
       {
          @Override
          protected void setBehaviorInput()
@@ -231,17 +237,17 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
    {
       super.onBehaviorEntered();
    }
-   
+
    @Override
    public void coactiveDataRecieved(SimpleCoactiveBehaviorDataPacket data)
    {
-      System.out.println("BEHAVIOR RECIEVED " + data.key + " " + data.value);  
+      System.out.println("BEHAVIOR RECIEVED " + data.key + " " + data.value);
    }
 
    @Override
    public void onBehaviorExited()
    {
       TextToSpeechPacket p1 = new TextToSpeechPacket("exit cuttingWallBehaviorState");
-      sendPacket(p1);      
+      sendPacket(p1);
    }
 }
