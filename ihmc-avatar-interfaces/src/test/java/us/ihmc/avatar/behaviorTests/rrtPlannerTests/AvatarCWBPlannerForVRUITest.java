@@ -247,7 +247,7 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
       
       RobotSide robotSide = RobotSide.LEFT;
       
-      Pose3D[] poseOfWayPoints = new Pose3D[3];
+      Pose3D[] poseOfWayPoints = new Pose3D[4];
       Quaternion wayPointOrientation;
       
       wayPointOrientation = new Quaternion();
@@ -257,19 +257,21 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
       wayPointOrientation = new Quaternion();
       wayPointOrientation.appendPitchRotation(-Math.PI * 0.2);
       wayPointOrientation.appendYawRotation(-Math.PI * 0.3);
-      poseOfWayPoints[1] = new Pose3D(new Point3D(0.6,  0.1, 1.3), wayPointOrientation);
+      poseOfWayPoints[1] = new Pose3D(new Point3D(0.6,  0.1, 1.5), wayPointOrientation);
       
       wayPointOrientation = new Quaternion();
-      wayPointOrientation.appendRollRotation(Math.PI * 0.2);
-      poseOfWayPoints[2] = new Pose3D(new Point3D(0.6,  0.3, 1.0), wayPointOrientation);
+      wayPointOrientation.appendYawRotation(-Math.PI * 0.2);
+      poseOfWayPoints[2] = new Pose3D(new Point3D(0.5, -0.2, 1.0), wayPointOrientation);
       
-      //TODO
+      wayPointOrientation = new Quaternion();
+      wayPointOrientation.appendPitchRotation(Math.PI * 0.2);
+      poseOfWayPoints[3] = new Pose3D(new Point3D(0.6, 0.4, 1.0), wayPointOrientation);
+      
+      
       WayPointsPacket wallPosePacket = new WayPointsPacket();
       wallPosePacket.setRobotSide(robotSide);
       wallPosePacket.setWayPoints(poseOfWayPoints, 10.0);
       
-      
-
       System.out.println("WayPointsPacket Dispatch");
       drcBehaviorTestHelper.getBehaviorCommunicationBridge().sendPacketToBehavior(wallPosePacket);
       System.out.println("WayPointsPacket Dispatch done");
