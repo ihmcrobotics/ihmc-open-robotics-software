@@ -116,16 +116,7 @@ public class SimpleICPQPInputCalculator
    public void computeFootstepRegularizationTask(int footstepNumber, ICPQPInput icpQPInputToPack, DenseMatrix64F regularizationWeight, DenseMatrix64F objective)
    {
       int footstepIndex = 2 * footstepNumber;
-      MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, footstepIndex, footstepIndex, regularizationWeight, 0, 0, 2, 2, 1.0);
-
-      tmpObjective.zero();
-      tmpObjective.set(objective);
-      CommonOps.mult(regularizationWeight, tmpObjective, tmpObjective);
-
-      MatrixTools.addMatrixBlock(icpQPInputToPack.linearTerm, footstepIndex, 0, tmpObjective, 0, 0, 2, 1, 1.0);
-
-      CommonOps.multTransA(objective, tmpObjective, icpQPInputToPack.residualCost);
-      CommonOps.scale(0.5, icpQPInputToPack.residualCost);
+      computeQuadraticTask(footstepIndex, icpQPInputToPack, regularizationWeight, objective);
    }
 
    private void computeQuadraticTask(int startIndex, ICPQPInput icpQPInputToPack, DenseMatrix64F weight, DenseMatrix64F objective)
