@@ -96,8 +96,10 @@ public class FootContactStateInterpolator
             
             FramePoint2D initialPositionToPack = initialPositions.get(yoContactPoint);
             contactLine2D.orthogonalProjection(contactPointPosition, initialPositionToPack);
+            yoContactPoint.setInContact(true);
          }
       }
+      contactState.updateInContact();
    }
 
    public void update()
