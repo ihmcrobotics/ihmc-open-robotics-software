@@ -52,6 +52,8 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final DenseMatrix64F desiredCoPWeightMatrix = new DenseMatrix64F(2, 2);
    private final DenseMatrix64F copRateWeightMatrix = new DenseMatrix64F(2, 2);
 
+   private final DenseMatrix64F activeRhoMatrix;
+
    private final YoPlaneContactState yoPlaneContactState;
 
    private final YoBoolean hasReset;
@@ -102,6 +104,9 @@ public class PlaneContactStateToWrenchMatrixHelper
       rhoMaxMatrix = new DenseMatrix64F(rhoSize, 1);
       rhoWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
       rhoRateWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
+
+      activeRhoMatrix = new DenseMatrix64F(rhoSize, 1);
+      CommonOps.fill(activeRhoMatrix, 1.0);
 
       CommonOps.fill(rhoMaxMatrix, Double.POSITIVE_INFINITY);
 
@@ -221,10 +226,13 @@ public class PlaneContactStateToWrenchMatrixHelper
                   rhoRateWeightMatrix.set(rhoIndex, rhoIndex, 0.0);
                else
                   rhoRateWeightMatrix.set(rhoIndex, rhoIndex, rhoRateWeight);
+
+               activeRhoMatrix.set(rhoIndex, 1, 1.0);
             }
             else
             {
                clear(rhoIndex);
+               activeRhoMatrix.set(rhoIndex, 1, 0.0);
             }
 
             //// TODO: 6/5/17 scale this by the vertical magnitude
@@ -406,6 +414,11 @@ public class PlaneContactStateToWrenchMatrixHelper
    public DenseMatrix64F getRhoJacobian()
    {
       return rhoJacobianMatrix;
+   }
+
+   public DenseMatrix64F getActiveRhoMatrix()
+   {
+      return activeRhoMatrix;
    }
 
    public DenseMatrix64F getRhoMax()
