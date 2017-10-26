@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * This class ramps the Rho weights of contact points not in contact at initialization
- * It uses a quadratic to ramp the weights with a hardcoded initial velocity, and initial rho weight of 1.0;
+ * It uses a quadratic to ramp the weights
  */
 public class ContactStateRhoRamping
 {
@@ -30,11 +30,10 @@ public class ContactStateRhoRamping
    private final YoDouble duration;
    private final YoPolynomial polynomial;
    private final double dt;
-   private final double initialRhoVelocity = -0.2;
 
    /**
     * This class ramps the Rho weights of contact points not in contact at initialization
-    * It uses a quadratic to ramp the weights with a hardcoded initial velocity, and initial rho weight of 1.0;
+    * It uses a quadratic to ramp the weights
     * @param robotSide only used for naming
     * @param contactState the state that's adjusted
     * @param dt used to increment the time in duration on update
@@ -54,7 +53,7 @@ public class ContactStateRhoRamping
       this.rhoCurrent = new YoDouble(prefix + "rhoCurrent", registry);
       this.timeInTrajectory = new YoDouble(prefix + "timeInTrajectory", registry);
       this.duration = new YoDouble(prefix + "duration", registry);
-      this.polynomial = new YoPolynomial(prefix + "rhoWeightTraj", 3, registry);
+      this.polynomial = new YoPolynomial(prefix + "rhoWeightTraj", 5, registry);
 
       rhoInitial.set(1.0);
       rhoFinal.set(finalRhoWeight);
@@ -72,7 +71,7 @@ public class ContactStateRhoRamping
    {
       this.duration.set(duration);
       timeInTrajectory.set(0.0);
-      polynomial.setQuadratic(0.0, duration, rhoInitial.getDoubleValue(), initialRhoVelocity, rhoFinal.getDoubleValue());//0.00005);
+      polynomial.setQuarticUsingFinalAcceleration(0.0, duration, rhoInitial.getDoubleValue(), rhoFinal.getDoubleValue(), 0.0, 0.0);
 
       for (int i = 0; i < contactPoints.size(); i++)
       {
