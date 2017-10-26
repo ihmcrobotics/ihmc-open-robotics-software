@@ -227,12 +227,12 @@ public class PlaneContactStateToWrenchMatrixHelper
                else
                   rhoRateWeightMatrix.set(rhoIndex, rhoIndex, rhoRateWeight);
 
-               activeRhoMatrix.set(rhoIndex, 1, 1.0);
+               activeRhoMatrix.set(rhoIndex, 0, 1.0);
             }
             else
             {
                clear(rhoIndex);
-               activeRhoMatrix.set(rhoIndex, 1, 0.0);
+               activeRhoMatrix.set(rhoIndex, 0, 0.0);
             }
 
             //// TODO: 6/5/17 scale this by the vertical magnitude
