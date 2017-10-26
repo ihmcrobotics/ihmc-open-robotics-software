@@ -26,10 +26,10 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
  */
 public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPSolver
 {
-   //private static final double violationFractionToAdd = 0.8;
-   //private static final double violationFractionToRemove = 0.95;
-   private static final double violationFractionToAdd = 1.0;
-   private static final double violationFractionToRemove = 1.0;
+   private static final double violationFractionToAdd = 0.8;
+   private static final double violationFractionToRemove = 0.95;
+   //private static final double violationFractionToAdd = 1.0;
+   //private static final double violationFractionToRemove = 1.0;
    private double convergenceThreshold = 1e-10;
    private int maxNumberOfIterations = 10;
 
