@@ -35,7 +35,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class FootControlModule
 {
-   private static final boolean ENABLE_TOUCHDOWN_STATE = true;
+   public static final boolean ENABLE_TOUCHDOWN_STATE = false;
 
    private final YoVariableRegistry registry;
    private final ContactablePlaneBody contactableFoot;
@@ -63,6 +63,7 @@ public class FootControlModule
    private final SupportState supportState;
 
    private final YoDouble footLoadThresholdToHoldPosition;
+   private final YoDouble touchdownDuration;
 
    private final FootControlHelper footControlHelper;
 
@@ -93,6 +94,8 @@ public class FootControlModule
 
       footLoadThresholdToHoldPosition = new YoDouble("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
+      
+      touchdownDuration = new YoDouble(robotSide.getCamelCaseNameForStartOfExpression() + "TouchdownDuration", registry);
 
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
@@ -126,7 +129,7 @@ public class FootControlModule
       swingState = new SwingState(footControlHelper, yoTouchdownVelocity, yoTouchdownAcceleration, swingFootControlGains, registry);
       states.add(swingState);
       
-      touchdownState = new TouchDownState(footControlHelper, swingFootControlGains, yoTouchdownVelocity, yoTouchdownAcceleration, registry);
+      touchdownState = new TouchDownState(footControlHelper, swingFootControlGains, registry);
       states.add(touchdownState);
 
       moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
@@ -262,7 +265,7 @@ public class FootControlModule
       if(stateMachine.isCurrentState(ConstraintType.SWING) && swingState.isDone())
       {
          swingState.getDesireds(desiredPose, desiredLinearVelocity, desiredAngularVelocity);
-         touchdownState.initialize(0.1, desiredPose, desiredLinearVelocity, desiredAngularVelocity);
+         touchdownState.initialize(touchdownDuration.getDoubleValue(), desiredPose, desiredLinearVelocity, desiredAngularVelocity);
       }
 
       stateMachine.checkTransitionConditions();
@@ -355,8 +358,9 @@ public class FootControlModule
       }
    }
 
-   public void setFootstep(Footstep footstep, double swingTime)
+   public void setFootstep(Footstep footstep, double swingTime, double touchdownTime)
    {
+      touchdownDuration.set(touchdownTime);
       swingState.setFootstep(footstep, swingTime);
    }
 
