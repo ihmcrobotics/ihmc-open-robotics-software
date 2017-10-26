@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ConstraintToConvexRegion;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInput;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -26,6 +27,7 @@ public class SimpleICPOptimizationQPSolver
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
 
+   private static final boolean useWarmStart = true;
    private static final int maxNumberOfIterations = 10;
    private static final double convergenceThreshold = 1.0e-20;
 
@@ -103,7 +105,7 @@ public class SimpleICPOptimizationQPSolver
    private final DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
 
    /** Flag to use the quad prog QP solver vs. the active set QP solver. **/
-   private final JavaQuadProgSolver solver = new JavaQuadProgSolver();
+   private final SimpleEfficientActiveSetQPSolver solver = new SimpleEfficientActiveSetQPSolver();
 
    /** Full solution vector to the quadratic program. */
    private final DenseMatrix64F solution;
@@ -232,6 +234,7 @@ public class SimpleICPOptimizationQPSolver
 
       solver.setConvergenceThreshold(convergenceThreshold);
       solver.setMaxNumberOfIterations(maxNumberOfIterations);
+      solver.setUseWarmStart(useWarmStart);
    }
 
    public void setMaxNumberOfIterations(int maxNumberOfIterations)
