@@ -58,6 +58,12 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
          if (variableUpperBounds.numCols > 0)
             MatrixTools.removeRow(variableUpperBounds, variableIndex);
       }
+
+      int numVars = quadraticCostQMatrix.getNumRows();
+      if (linearEqualityConstraintsAMatrix.numRows == 0)
+         linearEqualityConstraintsAMatrix.reshape(0, numVars);
+      if (linearInequalityConstraintsCMatrixO.numRows == 0)
+         linearInequalityConstraintsCMatrixO.reshape(0, numVars);
    }
 
    private void copyActiveVariableSolutionToAllVariables(DenseMatrix64F solutionToPack, DenseMatrix64F activeVariableSolution)
