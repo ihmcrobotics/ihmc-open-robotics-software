@@ -38,6 +38,8 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 {
@@ -45,6 +47,11 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    private static final double planningHorizon = 1.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoDouble timeout = new  YoDouble("timeout", registry);
+
+   private final YoDouble timeSpentBeforeFootstepPlanner = new  YoDouble("timeSpentBeforeFootstepPlanner", registry);
+   private final YoDouble timeSpentInFootstepPlanner = new  YoDouble("timeSpentInFootstepPlanner", registry);
+   private final YoEnum<FootstepPlanningResult> yoResult = new YoEnum<>("planningResult", registry, FootstepPlanningResult.class);
 
    private final FootstepPlannerParameters parameters;
    private final WaypointDefinedBodyPathPlan bodyPath;
@@ -118,8 +125,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    @Override
    public void setTimeout(double timeout)
    {
-      // only considers footstep planner right now
-      footstepPlanner.setTimeout(timeout);
+      this.timeout.set(timeout);
    }
 
    @Override
@@ -132,6 +138,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    @Override
    public FootstepPlanningResult plan()
    {
+      long startTime = System.currentTimeMillis();
       waypoints.clear();
 
       if (planarRegionsList == null)
@@ -145,6 +152,16 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
          Point3D startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
          Point3D goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
          List<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+
+         if (path.size() < 2)
+         {
+            double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
+            timeSpentBeforeFootstepPlanner.set(seconds);
+            timeSpentInFootstepPlanner.set(0.0);
+            yoResult.set(FootstepPlanningResult.PLANNER_FAILED);
+//            PointCloudTools.savePlanarRegionsToFile(planarRegionsList, startPos, goalPos);
+            return yoResult.getEnumValue();
+         }
 
          for (Point3D waypoint3d : path)
          {
@@ -175,7 +192,16 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       goal.setGoalPoseBetweenFeet(footstepPlannerGoal);
       footstepPlanner.setGoal(goal);
 
-      return footstepPlanner.plan();
+      double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
+      timeSpentBeforeFootstepPlanner.set(seconds);
+      footstepPlanner.setTimeout(timeout.getDoubleValue() - seconds);
+
+      startTime = System.currentTimeMillis();
+      yoResult.set(footstepPlanner.plan());
+      seconds = (System.currentTimeMillis() - startTime) / 1000.0;
+      timeSpentInFootstepPlanner.set(seconds);
+
+      return yoResult.getEnumValue();
    }
 
    private void updateBodyPathVisualization()
