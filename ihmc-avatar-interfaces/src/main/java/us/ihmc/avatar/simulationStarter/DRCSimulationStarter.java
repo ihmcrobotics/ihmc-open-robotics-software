@@ -80,8 +80,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator;
    private boolean createSCSSimulatedSensors;
 
-   private boolean deactivateWalkingFallDetector = false;
-
    private boolean addFootstepMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = false;
    private boolean cheatWithGroundHeightAtForFootstep = false;
@@ -151,15 +149,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    public CommonAvatarEnvironmentInterface getEnvironment()
    {
       return environment;
-   }
-
-   /**
-    * Deativate the controller failure detector.
-    * If called the walking controller will running even if the robot falls.
-    */
-   public void deactivateWalkingFallDetector()
-   {
-      deactivateWalkingFallDetector = true;
    }
 
    /**
@@ -429,9 +418,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
          controllerFactory.addCustomStateTransition(controllerTransitionFactories.get(i));
 
       controllerFactory.setInitialState(HighLevelController.WALKING);
-
-      if (deactivateWalkingFallDetector)
-         controllerFactory.setFallbackControllerForFailure(null);
 
       controllerFactory.createQueuedControllerCommandGenerator(controllerCommands);
 

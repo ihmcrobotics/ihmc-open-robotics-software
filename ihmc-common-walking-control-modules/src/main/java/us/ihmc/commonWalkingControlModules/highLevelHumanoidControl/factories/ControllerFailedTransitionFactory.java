@@ -32,13 +32,14 @@ public class ControllerFailedTransitionFactory implements ControllerStateTransit
    /** {@inheritDoc} */
    @Override
    public StateTransition<HighLevelController> getOrCreateStateTransition(EnumMap<HighLevelController, ? extends FinishableState<HighLevelController>> controllerStateMap,
-                                                                          HighLevelControllerFactoryHelper controllerFactoryHelper, YoVariableRegistry parentRegistry)
+                                                                          HighLevelControllerFactoryHelper controllerFactoryHelper,
+                                                                          YoVariableRegistry parentRegistry)
    {
       if (stateTransition != null)
          return stateTransition;
 
-      StateTransitionCondition stateTransitionCondition = new ControllerFailedTransition(stateToAttachEnum, nextStateEnum, controllerFactoryHelper.getFallbackControllerForFailure(),
-                                                                                         controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(), parentRegistry);
+      StateTransitionCondition stateTransitionCondition = new ControllerFailedTransition(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
+                                                                                         parentRegistry);
       stateTransition = new StateTransition<>(nextStateEnum, stateTransitionCondition);
 
       return stateTransition;
