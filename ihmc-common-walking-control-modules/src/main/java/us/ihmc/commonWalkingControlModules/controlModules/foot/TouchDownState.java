@@ -94,8 +94,6 @@ public class TouchDownState extends AbstractFootControlState
       super(ConstraintType.TOUCHDOWN, footControlHelper);
 
       MomentumOptimizationSettings momentumOptimizationSettings = footControlHelper.getWalkingControllerParameters().getMomentumOptimizationSettings();
-      footContactRhoRamper = new ContactStateRhoRamping(robotSide, contactState, controllerToolbox.getControlDT(), momentumOptimizationSettings.getRhoWeight(),
-            parentRegistry);
 
       SideDependentList<FootSwitchInterface> footSwitches = controllerToolbox.getFootSwitches();
       footSwitch = footSwitches.get(robotSide);
@@ -104,6 +102,10 @@ public class TouchDownState extends AbstractFootControlState
       String namePrefix = footControlHelper.getRobotSide().getCamelCaseNameForStartOfExpression();
       registry = new YoVariableRegistry(namePrefix + name);
 
+      double controlDT = controllerToolbox.getControlDT();
+      double rhoWeight = momentumOptimizationSettings.getRhoWeight();
+      
+      footContactRhoRamper = new ContactStateRhoRamping(robotSide, contactState, rhoWeight, controlDT, registry);
       orientationTrajectory = new HermiteCurveBasedOrientationTrajectoryGenerator(namePrefix + "OrientationTrajectory", worldFrame, registry);
 
       initialOrientation = new YoFrameQuaternion(namePrefix + "initialOrientation", worldFrame, registry);

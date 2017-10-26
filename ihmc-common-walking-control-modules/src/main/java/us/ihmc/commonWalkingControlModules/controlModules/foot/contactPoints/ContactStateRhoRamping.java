@@ -53,7 +53,7 @@ public class ContactStateRhoRamping
       this.rhoCurrent = new YoDouble(prefix + "rhoCurrent", registry);
       this.timeInTrajectory = new YoDouble(prefix + "timeInTrajectory", registry);
       this.duration = new YoDouble(prefix + "duration", registry);
-      this.polynomial = new YoPolynomial(prefix + "rhoWeightTraj", 5, registry);
+      this.polynomial = new YoPolynomial(prefix + "rhoWeightTraj", 4, registry);
 
       rhoInitial.set(1.0);
       rhoFinal.set(finalRhoWeight);
@@ -71,7 +71,7 @@ public class ContactStateRhoRamping
    {
       this.duration.set(duration);
       timeInTrajectory.set(0.0);
-      polynomial.setQuarticUsingFinalAcceleration(0.0, duration, rhoInitial.getDoubleValue(), rhoFinal.getDoubleValue(), 0.0, 0.0);
+      polynomial.setCubicInitialPositionThreeFinalConditions(0.0, duration, rhoInitial.getDoubleValue(), rhoFinal.getDoubleValue(), 0.0, 0.0);
 
       for (int i = 0; i < contactPoints.size(); i++)
       {
