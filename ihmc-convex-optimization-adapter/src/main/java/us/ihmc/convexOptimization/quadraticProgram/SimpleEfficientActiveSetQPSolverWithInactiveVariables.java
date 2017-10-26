@@ -3,9 +3,9 @@ package us.ihmc.convexOptimization.quadraticProgram;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.tools.exceptions.NoConvergenceException;
 
-public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends SimpleEfficientActiveSetQPSolver implements ActiveSetSolverWithInactiveVariablesInterface
+public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends SimpleEfficientActiveSetQPSolver implements
+      ActiveSetQPSolverWithInactiveVariablesInterface
 {
    private final DenseMatrix64F originalQuadraticCostQMatrix = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F originalQuadraticCostQVector = new DenseMatrix64F(0, 0);
@@ -21,8 +21,6 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
    private final DenseMatrix64F activeVariableSolution = new DenseMatrix64F(0, 0);
 
    private final DenseMatrix64F computedObjectiveFunctionValue = new DenseMatrix64F(1, 1);
-
-   private int numberOfActiveVariables = 0;
 
    private void setMatricesFromOriginal()
    {
@@ -196,6 +194,15 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
    public void clear()
    {
       super.clear();
+
+      originalQuadraticCostQMatrix.reshape(0, 0);
+      originalQuadraticCostQVector.reshape(0, 0);
+
+      originalLinearEqualityConstraintsAMatrix.reshape(0, 0);
+      originalLinearInequalityConstraintsCMatrixO.reshape(0, 0);
+
+      originalVariableLowerBounds.reshape(0, 0);
+      originalVariableUpperBounds.reshape(0, 0);
 
       activeVariables.reshape(0, 0);
       activeVariableSolution.reshape(0, 0);
