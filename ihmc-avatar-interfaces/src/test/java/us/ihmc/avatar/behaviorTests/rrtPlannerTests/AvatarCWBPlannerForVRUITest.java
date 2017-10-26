@@ -13,11 +13,14 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.avatar.networkProcessor.rrtToolboxModule.ConstrainedWholeBodyPlanningToolboxController;
 import us.ihmc.avatar.networkProcessor.rrtToolboxModule.ConstrainedWholeBodyPlanningToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.SetBooleanParameterPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -26,12 +29,14 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WayPointsByVRUIBehaviorStateMachine;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WayPointsByVRUIBehaviorStateMachine.WayPointsByVRUIBehaviorState;
+import us.ihmc.humanoidRobotics.communication.packets.ConstrainedWholeBodyPlanningToolboxOutputConverter;
+import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.WayPointsPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.WayPointsTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -164,7 +169,7 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
       setupCWBPlanningToolboxModule();
    }
 
-   @Test
+   // @Test
    public void testForWayPointsTrajectory() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
@@ -206,7 +211,7 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
       System.out.println("End");
    }
    
-   // @Test
+   @Test
    public void testForBehavior() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -221,62 +226,100 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
       referenceFrames.updateFrames();
 
       /*
-       * reaching initial configuration
-       */
-      Quaternion initialOrientation = new Quaternion();
-      initialOrientation.appendPitchRotation(Math.PI * 0.3);
-      HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 1.0, new Point3D(0.0, 0.4, 0.75), initialOrientation,
-                                                                               referenceFrames.getMidFootZUpGroundFrame());
-      drcBehaviorTestHelper.send(lhandTrajectoryMessage);
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
-
-      initialOrientation = new Quaternion();
-      initialOrientation.appendPitchRotation(Math.PI * 0.3);
-      HandTrajectoryMessage rhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 1.0, new Point3D(-0.0, -0.4, 0.75), initialOrientation,
-                                                                               referenceFrames.getMidFootZUpGroundFrame());
-      drcBehaviorTestHelper.send(rhandTrajectoryMessage);
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-
-      sdfFullRobotModel.updateFrames();
-      /*
        * Behavior create.
        */
-      PlanConstrainedWholeBodyTrajectoryBehavior planningBehavior = new PlanConstrainedWholeBodyTrajectoryBehavior("PlanningBehavior", getRobotModel(),
-                                                                                                                   drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-                                                                                                                   sdfFullRobotModel,
-                                                                                                                   drcBehaviorTestHelper.getYoTime());
+      WayPointsByVRUIBehaviorStateMachine wayPointsByVRUIBehaviorStateMachine = new WayPointsByVRUIBehaviorStateMachine(getRobotModel(),
+                                                                                                            drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                                                            drcBehaviorTestHelper.getYoTime(),
+                                                                                                            sdfFullRobotModel, referenceFrames);
 
-      ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(20.0);
-      PrintTools.info("" + endeffectorTrajectory.getTrajectoryTime());
+      referenceFrames.updateFrames();
 
-      planningBehavior.setInputs(endeffectorTrajectory, sdfFullRobotModel);
-      PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
+      System.out.println("Behavior Dispatch");
+      drcBehaviorTestHelper.dispatchBehavior(wayPointsByVRUIBehaviorStateMachine);
+
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+    
+      
+      
+      
+      
+      
+      RobotSide robotSide = RobotSide.LEFT;
+      
+      Pose3D[] poseOfWayPoints = new Pose3D[3];
+      Quaternion wayPointOrientation;
+      
+      wayPointOrientation = new Quaternion();
+      wayPointOrientation.appendPitchRotation(Math.PI * 0.2);
+      poseOfWayPoints[0] = new Pose3D(new Point3D(0.6, 0.4, 1.0), wayPointOrientation);
+      
+      wayPointOrientation = new Quaternion();
+      wayPointOrientation.appendPitchRotation(-Math.PI * 0.2);
+      wayPointOrientation.appendYawRotation(-Math.PI * 0.3);
+      poseOfWayPoints[1] = new Pose3D(new Point3D(0.6,  0.1, 1.3), wayPointOrientation);
+      
+      wayPointOrientation = new Quaternion();
+      wayPointOrientation.appendRollRotation(Math.PI * 0.2);
+      poseOfWayPoints[2] = new Pose3D(new Point3D(0.6,  0.3, 1.0), wayPointOrientation);
+      
+      //TODO
+      WayPointsPacket wallPosePacket = new WayPointsPacket();
+      wallPosePacket.setRobotSide(robotSide);
+      wallPosePacket.setWayPoints(poseOfWayPoints, 10.0);
+      
+      
+
+      System.out.println("WayPointsPacket Dispatch");
+      drcBehaviorTestHelper.getBehaviorCommunicationBridge().sendPacketToBehavior(wallPosePacket);
+      System.out.println("WayPointsPacket Dispatch done");
 
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-      
-      System.out.println("Behavior Dispatch");
-      drcBehaviorTestHelper.dispatchBehavior(planningBehavior);
-
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(15.0);
-      System.out.println("Go Motion " + drcBehaviorTestHelper.getYoTime());
-
-      PrintTools.info("planningResult " + planningBehavior.getConstrainedWholeBodyPlanningToolboxOutputStatus().getPlanningResult());
-
-      ArrayList<Pose3D> handTrajectories = planningBehavior.getHandTrajectories(RobotSide.LEFT);
-      int numberOfPath = handTrajectories.size();
-      for (int i = 0; i < numberOfPath - 2; i++)
+      double yoTime = 0.0;
+      while (yoTime < 100)
       {
-         Pose3D pose = handTrajectories.get(i);
-         scs.addStaticLinkGraphics(getXYZAxis(pose, 0.05));
+         drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+         yoTime = drcBehaviorTestHelper.getYoTime().getDoubleValue();
+         if (wayPointsByVRUIBehaviorStateMachine.getStateMachine().getCurrentStateEnum() == WayPointsByVRUIBehaviorState.WAITING_CONFIRM)
+         {
+            PrintTools.info("Motion START!");
+
+            SetBooleanParameterPacket confirmPacket = new SetBooleanParameterPacket("", true);
+
+            System.out.println("confirmPacket Dispatch");
+            drcBehaviorTestHelper.getBehaviorCommunicationBridge().sendPacketToBehavior(confirmPacket);
+
+            int numberOfDiplayedWayPoints = 10;
+            ConstrainedWholeBodyPlanningToolboxOutputConverter converter = new ConstrainedWholeBodyPlanningToolboxOutputConverter(getRobotModel());
+            ConstrainedWholeBodyPlanningToolboxOutputStatus constrainedWholeBodyPlanningToolboxOutputStatus = wayPointsByVRUIBehaviorStateMachine.getPlanConstrainedWholeBodyTrajectoryBehavior()
+                                                                                                                                             .getConstrainedWholeBodyPlanningToolboxOutputStatus();
+
+            for (int i = 0; i < numberOfDiplayedWayPoints; i++)
+            {
+               int length = constrainedWholeBodyPlanningToolboxOutputStatus.getTrajectoryTimes().length;
+               double trajectoryTime = constrainedWholeBodyPlanningToolboxOutputStatus.getTrajectoryTimes()[length - 1];
+               double time = trajectoryTime * (double) (i) / (double) (numberOfDiplayedWayPoints);
+
+               KinematicsToolboxOutputStatus robotConfiguration = converter.getRobotConfiguration(constrainedWholeBodyPlanningToolboxOutputStatus, time);
+               KinematicsToolboxOutputConverter kinematicConverter = new KinematicsToolboxOutputConverter(getRobotModel());
+               kinematicConverter.updateFullRobotModel(robotConfiguration);
+
+               FullHumanoidRobotModel robotModel = kinematicConverter.getFullRobotModel();
+               Pose3D pose = new Pose3D(robotModel.getHand(RobotSide.LEFT).getBodyFixedFrame().getTransformToWorldFrame());
+               pose.appendTranslation(0.0, -ConstrainedWholeBodyPlanningToolboxController.handCoordinateOffsetX, 0.0);
+               scs.addStaticLinkGraphics(getXYZAxis(pose, 0.075));
+            }
+
+            break;
+         }
       }
 
-      System.out.println("Send " + drcBehaviorTestHelper.getYoTime());
-      drcBehaviorTestHelper.send(planningBehavior.getWholebodyTrajectoryMessage());
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(50.0);
 
-      System.out.println("Send " + drcBehaviorTestHelper.getYoTime());
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(planningBehavior.getWholebodyTrajectoryMessage().getHandTrajectoryMessage(RobotSide.LEFT)
-                                                                               .getTrajectoryTime());
+      System.out.println("End");
+      
+      
+      
 
-      System.out.println("End " + drcBehaviorTestHelper.getYoTime());
    }
 }
