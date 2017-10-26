@@ -20,6 +20,7 @@ public class SimpleICPQPInputCalculator
 
    private static final DenseMatrix64F identity = CommonOps.identity(2, 2);
    private final DenseMatrix64F tmpObjective = new DenseMatrix64F(2, 1);
+   private final DenseMatrix64F tmpScalar = new DenseMatrix64F(1, 1);
 
    private final DenseMatrix64F feedbackJacobian = new DenseMatrix64F(2, 6);
    private final DenseMatrix64F feedbackJtW = new DenseMatrix64F(6, 2);
@@ -65,14 +66,7 @@ public class SimpleICPQPInputCalculator
     */
    public void computeFeedbackRegularizationTask(ICPQPInput icpQPInputToPack, DenseMatrix64F regularizationWeight, DenseMatrix64F objective)
    {
-      MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, 0, 0, regularizationWeight, 0, 0, 2, 2, 1.0);
-
-      CommonOps.mult(regularizationWeight, objective, tmpObjective);
-
-      MatrixTools.addMatrixBlock(icpQPInputToPack.linearTerm, 0, 0, tmpObjective, 0, 0, 2, 1, 1.0);
-
-      CommonOps.multTransA(objective, tmpObjective, icpQPInputToPack.residualCost);
-      CommonOps.scale(0.5, icpQPInputToPack.residualCost);
+      computeQuadraticTask(0, icpQPInputToPack, regularizationWeight, objective);
    }
 
    /**
@@ -104,16 +98,7 @@ public class SimpleICPQPInputCalculator
    public void computeFootstepTask(int footstepNumber, ICPQPInput icpQPInputToPack, DenseMatrix64F footstepWeight, DenseMatrix64F objective)
    {
       int footstepIndex = 2 * footstepNumber;
-      MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, footstepIndex, footstepIndex, footstepWeight, 0, 0, 2, 2, 1.0);
-
-      tmpObjective.zero();
-      tmpObjective.set(objective);
-      CommonOps.mult(footstepWeight, tmpObjective, tmpObjective);
-
-      MatrixTools.addMatrixBlock(icpQPInputToPack.linearTerm, footstepIndex, 0, tmpObjective, 0, 0, 2, 1, 1.0);
-
-      CommonOps.multTransA(objective, tmpObjective, icpQPInputToPack.residualCost);
-      CommonOps.scale(0.5, icpQPInputToPack.residualCost);
+      computeQuadraticTask(footstepIndex, icpQPInputToPack, footstepWeight, objective);
    }
 
    /**
@@ -141,6 +126,18 @@ public class SimpleICPQPInputCalculator
 
       CommonOps.multTransA(objective, tmpObjective, icpQPInputToPack.residualCost);
       CommonOps.scale(0.5, icpQPInputToPack.residualCost);
+   }
+
+   private void computeQuadraticTask(int startIndex, ICPQPInput icpQPInputToPack, DenseMatrix64F weight, DenseMatrix64F objective)
+   {
+      MatrixTools.addMatrixBlock(icpQPInputToPack.quadraticTerm, startIndex, startIndex, weight, 0, 0, 2, 2, 1.0);
+
+      CommonOps.mult(weight, objective, tmpObjective);
+
+      MatrixTools.addMatrixBlock(icpQPInputToPack.linearTerm, startIndex, 0, tmpObjective, 0, 0, 2, 1, 1.0);
+
+      CommonOps.multTransA(0.5, objective, tmpObjective, tmpScalar);
+      CommonOps.addEquals(icpQPInputToPack.residualCost, tmpScalar);
    }
 
    public void computeDynamicsTask(ICPQPInput icpQPInput, DenseMatrix64F currentICPError, DenseMatrix64F referenceFootstepLocation,
