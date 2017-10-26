@@ -22,16 +22,21 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
 
    private final DenseMatrix64F computedObjectiveFunctionValue = new DenseMatrix64F(1, 1);
 
+   private void setMatricesFromOriginal()
+   {
+      quadraticCostQMatrix.set(originalQuadraticCostQMatrix);
+      quadraticCostQVector.set(originalQuadraticCostQVector);
+
+      linearEqualityConstraintsAMatrix.set(originalLinearEqualityConstraintsAMatrix);
+      linearInequalityConstraintsCMatrixO.set(originalLinearInequalityConstraintsCMatrixO);
+
+      variableLowerBounds.set(originalVariableLowerBounds);
+      variableUpperBounds.set(originalVariableUpperBounds);
+   }
+
    private void removeInactiveVariables()
    {
-      originalQuadraticCostQMatrix.set(quadraticCostQMatrix);
-      originalQuadraticCostQVector.set(quadraticCostQVector);
-
-      originalLinearEqualityConstraintsAMatrix.set(linearEqualityConstraintsAMatrix);
-      originalLinearInequalityConstraintsCMatrixO.set(linearInequalityConstraintsCMatrixO);
-
-      originalVariableLowerBounds.set(variableLowerBounds);
-      originalVariableUpperBounds.set(variableUpperBounds);
+      setMatricesFromOriginal();
 
       for (int variableIndex = activeVariables.getNumRows() - 1; variableIndex >= 0; variableIndex--)
       {
@@ -86,7 +91,7 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
    @Override
    public void setUpperBounds(DenseMatrix64F variableUpperBounds)
    {
-      if (variableUpperBounds.getNumRows() != quadraticCostQMatrix.getNumRows())
+      if (variableUpperBounds.getNumRows() != originalQuadraticCostQMatrix.getNumRows())
          throw new RuntimeException("variableUpperBounds.getNumRows() != quadraticCostQMatrix.getNumRows()");
 
       this.originalVariableUpperBounds.set(variableUpperBounds);
@@ -130,11 +135,11 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
          throw new RuntimeException("linearEqualityConstraintsBVector.getNumCols() != 1");
       if (linearEqualityConstraintsAMatrix.getNumRows() != linearEqualityConstraintsBVector.getNumRows())
          throw new RuntimeException("linearEqualityConstraintsAMatrix.getNumRows() != linearEqualityConstraintsBVector.getNumRows()");
-      if (linearEqualityConstraintsAMatrix.getNumCols() != quadraticCostQMatrix.getNumCols())
+      if (linearEqualityConstraintsAMatrix.getNumCols() != originalQuadraticCostQMatrix.getNumCols())
          throw new RuntimeException("linearEqualityConstraintsAMatrix.getNumCols() != quadraticCostQMatrix.getNumCols()");
 
       this.linearEqualityConstraintsBVector.set(linearEqualityConstraintsBVector);
-      this.linearEqualityConstraintsAMatrix.set(linearEqualityConstraintsAMatrix);
+      this.originalLinearEqualityConstraintsAMatrix.set(linearEqualityConstraintsAMatrix);
    }
 
    @Override
@@ -144,17 +149,17 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
          throw new RuntimeException("linearInequalityConstraintDVector.getNumCols() != 1");
       if (linearInequalityConstraintCMatrix.getNumRows() != linearInequalityConstraintDVector.getNumRows())
          throw new RuntimeException("linearInequalityConstraintCMatrix.getNumRows() != linearInequalityConstraintDVector.getNumRows()");
-      if (linearInequalityConstraintCMatrix.getNumCols() != quadraticCostQMatrix.getNumCols())
+      if (linearInequalityConstraintCMatrix.getNumCols() != originalQuadraticCostQMatrix.getNumCols())
          throw new RuntimeException("linearInequalityConstraintCMatrix.getNumCols() != quadraticCostQMatrix.getNumCols()");
 
       this.linearInequalityConstraintsDVectorO.set(linearInequalityConstraintDVector);
-      this.linearInequalityConstraintsCMatrixO.set(linearInequalityConstraintCMatrix);
+      this.originalLinearInequalityConstraintsCMatrixO.set(linearInequalityConstraintCMatrix);
    }
 
    @Override
    public void setActiveVariables(DenseMatrix64F activeVariables)
    {
-      if (activeVariables.getNumRows() != quadraticCostQMatrix.getNumRows())
+      if (activeVariables.getNumRows() != originalQuadraticCostQMatrix.getNumRows())
          throw new RuntimeException("activeVariables.getNumRows() != quadraticCostQMatrix.getNumRows()");
 
       this.activeVariables.set(activeVariables);
@@ -181,7 +186,7 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
    @Override
    public void setAllVariablesActive()
    {
-      activeVariables.reshape(quadraticCostQMatrix.getNumRows(), 1);
+      activeVariables.reshape(originalQuadraticCostQMatrix.getNumRows(), 1);
       CommonOps.fill(activeVariables, 1.0);
    }
 
@@ -194,6 +199,15 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
       activeVariableSolution.reshape(0, 0);
    }
 
+   @Override
+   public int solve(double[] solutionToPack, double[] lagrangeEqualityConstraintMultipliersToPack, double[] lagrangeInequalityConstraintMultipliersToPack,
+                    double[] lagrangeLowerBoundsConstraintMultipliersToPack, double[] lagrangeUpperBoundsConstraintMultipliersToPack)
+   {
+      setMatricesFromOriginal();
+
+      return super.solve(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
+                         lagrangeLowerBoundsConstraintMultipliersToPack, lagrangeUpperBoundsConstraintMultipliersToPack);
+   }
 
    @Override
    public int solve(DenseMatrix64F solutionToPack, DenseMatrix64F lagrangeEqualityConstraintMultipliersToPack,
