@@ -78,6 +78,11 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
       
       this.outputConverter = new ConstrainedWholeBodyPlanningToolboxOutputConverter(fullRobotModelFactory);
    }
+   
+   public void setInputs(FullHumanoidRobotModel fullRobotModel)
+   {
+      
+   }
 
    public void setInputs(ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory, FullHumanoidRobotModel fullRobotModel)
    {
