@@ -162,10 +162,10 @@ public class FeetManager
       }
    }
 
-   public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, double swingTime)
+   public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, double swingTime, double touchdownTime)
    {
       FootControlModule footControlModule = footControlModules.get(upcomingSwingSide);
-      footControlModule.setFootstep(footstep, swingTime);
+      footControlModule.setFootstep(footstep, swingTime, touchdownTime);
       setContactStateForSwing(upcomingSwingSide);
    }
 

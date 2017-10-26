@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
@@ -184,12 +185,24 @@ public class WalkingSingleSupportState extends SingleSupportState
    @Override
    public boolean isDone()
    {
-      if (super.isDone())
+      if(FootControlModule.ENABLE_TOUCHDOWN_STATE)
       {
-         if (feetManager.isInTouchdown(swingSide) && !feetManager.isTouchdownFinished(swingSide))
+         if(!feetManager.isInTouchdown(swingSide))
          {
             return false;
          }
+         if (super.isDone())
+         {
+            if (feetManager.isInTouchdown(swingSide) && !feetManager.isTouchdownFinished(swingSide))
+            {
+               return false;
+            }
+            return true;
+         }
+      }
+      
+      if (super.isDone())
+      {
          return true;
       }
 
@@ -265,7 +278,8 @@ public class WalkingSingleSupportState extends SingleSupportState
          balanceManager.requestICPPlannerToHoldCurrentCoMInNextDoubleSupport();
       }
 
-      feetManager.requestSwing(swingSide, nextFootstep, swingTime);
+      double touchdownTime = 0.2;
+      feetManager.requestSwing(swingSide, nextFootstep, swingTime - touchdownTime, touchdownTime);
 
       legConfigurationManager.startSwing(swingSide);
       legConfigurationManager.useHighWeight(swingSide.getOppositeSide());
