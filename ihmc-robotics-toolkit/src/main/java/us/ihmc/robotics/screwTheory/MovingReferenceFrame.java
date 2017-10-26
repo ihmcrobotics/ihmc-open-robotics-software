@@ -200,7 +200,7 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
       this(frameName, parentFrame, transformToParent, isZUpFrame, false);
    }
 
-   private MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isZUpFrame, boolean isFixedInParent)
+   protected MovingReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isZUpFrame, boolean isFixedInParent)
    {
       super(frameName, parentFrame, transformToParent, parentFrame.isAStationaryFrame() && isFixedInParent, isZUpFrame);
 

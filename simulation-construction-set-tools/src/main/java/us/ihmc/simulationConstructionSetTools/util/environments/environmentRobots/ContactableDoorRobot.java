@@ -3,6 +3,7 @@ package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobo
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -21,7 +22,6 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameBox3d;

@@ -40,4 +40,8 @@ public interface PlaneContactState
    public abstract void updateFromPlaneContactStateCommand(PlaneContactStateCommand planeContactStateCommand);
 
    public abstract void getPlaneContactStateCommand(PlaneContactStateCommand planeContactStateCommandToPack);
+
+   public abstract void notifyContactStateHasChanged();
+
+   public abstract boolean pollContactHasChangedNotification();
 }

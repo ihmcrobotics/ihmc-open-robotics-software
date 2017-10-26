@@ -1,8 +1,8 @@
 package us.ihmc.robotics.robotDescription;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.Axis;
 
 public class CapsuleDescriptionReadOnly implements ConvexShapeDescription
 {

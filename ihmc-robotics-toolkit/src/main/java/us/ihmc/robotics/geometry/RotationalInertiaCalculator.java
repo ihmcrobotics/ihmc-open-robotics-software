@@ -1,7 +1,7 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.robotics.Axis;
 
 public class RotationalInertiaCalculator
 {

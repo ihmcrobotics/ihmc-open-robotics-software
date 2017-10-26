@@ -395,4 +395,10 @@ public class StickRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
 
    }
+
+   @Override
+   public InputStream getWholeBodyControllerParametersFile()
+   {
+      return null;
+   }
 }

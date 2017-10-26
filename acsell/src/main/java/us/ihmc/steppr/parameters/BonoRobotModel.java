@@ -284,4 +284,10 @@ public class BonoRobotModel implements DRCRobotModel
    {
       return null;
    }
+
+   @Override
+   public InputStream getWholeBodyControllerParametersFile()
+   {
+      return null;
+   }
 }

@@ -8,11 +8,11 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
-import us.ihmc.robotics.Axis;
 
 public class JMEChangeMeshTester extends SimpleApplication
 {

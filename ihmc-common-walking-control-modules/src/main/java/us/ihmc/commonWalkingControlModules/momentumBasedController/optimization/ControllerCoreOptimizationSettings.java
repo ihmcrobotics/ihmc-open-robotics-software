@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlOptimizationControlModule;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
@@ -303,9 +304,25 @@ public interface ControllerCoreOptimizationSettings
     * @return a new instance of the QP solver to be used. By default it is the
     *         {@link SimpleEfficientActiveSetQPSolver}.
     */
-   default ActiveSetQPSolver getActiveSetQPSolver()
+   default SimpleActiveSetQPSolverInterface getActiveSetQPSolver()
    {
       return new SimpleEfficientActiveSetQPSolver();
+   }
+
+   /**
+    * Sets whether or not to use a warm start in the active set solver where the previous active set is retained between control ticks.
+    */
+   default boolean useWarmStartInSolver()
+   {
+      return false;
+   }
+
+   /**
+    * Sets the maximum number of iterations allowed in the solver before throwing a no convergence exception.
+    */
+   default int getMaxNumberOfSolverIterations()
+   {
+      return 10;
    }
 
    /**

@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning.bodyPath;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.mutable.MutableInt;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import com.google.common.util.concurrent.AtomicDouble;
 

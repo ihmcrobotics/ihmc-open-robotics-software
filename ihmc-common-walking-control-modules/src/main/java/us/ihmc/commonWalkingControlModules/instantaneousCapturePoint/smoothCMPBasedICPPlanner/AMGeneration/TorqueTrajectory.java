@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.AMGeneration;
 
-import us.ihmc.robotics.Axis;
+import us.ihmc.euclid.Axis;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;

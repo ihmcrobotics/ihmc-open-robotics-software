@@ -17,24 +17,30 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
 {
    private RigidBody rigidBody;
    private String rigidBodyName;
-   private long id = -1L;
    private double coefficientOfFriction = Double.NaN;
    private final int initialSize = 8;
    private final FrameTupleArrayList<FramePoint3D> contactPoints = FrameTupleArrayList.createFramePointArrayList(initialSize);
    private final FrameVector3D contactNormal = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
 
    private boolean useHighCoPDamping = false;
+   private boolean hasContactStateChanged;
 
    private boolean hasMaxContactPointNormalForce = false;
    private final RecyclingArrayList<MutableDouble> maxContactPointNormalForces = new RecyclingArrayList<>(initialSize, MutableDouble.class);
+   
+   /**
+    * Holds on to the rho weights, which are described in {@code ControllerCoreOptimizationSettings.getRhoWeight()}
+    * If a rho weight is to Double.NaN, the controller core will use the default rho weight set in the MomentumOptimizationSetting
+    */
+   private final RecyclingArrayList<MutableDouble> rhoWeights = new RecyclingArrayList<>(initialSize, MutableDouble.class);
 
    public PlaneContactStateCommand()
    {
    }
 
-   public void setId(long id)
+   public void setHasContactStateChanged(boolean hasContactStateChanged)
    {
-      this.id = id;
+      this.hasContactStateChanged = hasContactStateChanged;
    }
 
    public void setContactingRigidBody(RigidBody rigidBody)
@@ -52,18 +58,21 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    {
       contactPoints.clear();
       maxContactPointNormalForces.clear();
+      rhoWeights.clear();
    }
 
    public void addPointInContact(FramePoint3D newPointInContact)
    {
       contactPoints.add().setIncludingFrame(newPointInContact);
       maxContactPointNormalForces.add().setValue(Double.POSITIVE_INFINITY);
+      rhoWeights.add().setValue(Double.NaN);
    }
 
    public void addPointInContact(FramePoint2D newPointInContact)
    {
       contactPoints.add().setIncludingFrame(newPointInContact, 0.0);
       maxContactPointNormalForces.add().setValue(Double.POSITIVE_INFINITY);
+      rhoWeights.add().setValue(Double.NaN);
    }
 
    public void setPointsInContact(List<FramePoint3D> newPointsInContact)
@@ -72,7 +81,10 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
 
       maxContactPointNormalForces.clear();
       for (int i = 0; i < contactPoints.size(); i++)
+      {
          maxContactPointNormalForces.add().setValue(Double.POSITIVE_INFINITY);
+         rhoWeights.add().setValue(Double.NaN);
+      }
    }
 
    public void setPoint2dsInContact(ReferenceFrame contactFrame, List<Point2D> newPointsInContact)
@@ -82,6 +94,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       {
          contactPoints.add().setIncludingFrame(contactFrame, newPointsInContact.get(i), 0.0);
          maxContactPointNormalForces.add().setValue(Double.POSITIVE_INFINITY);
+         rhoWeights.add().setValue(Double.NaN);
       }
    }
 
@@ -99,11 +112,6 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    public void setUseHighCoPDamping(boolean useHighCoPDamping)
    {
       this.useHighCoPDamping = useHighCoPDamping;
-   }
-
-   public long getId()
-   {
-      return id;
    }
 
    public boolean isEmpty()
@@ -140,6 +148,20 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    {
       contactNormalToPack.setIncludingFrame(contactNormal);
    }
+   
+   /**
+    * Sets the rho weights, which are described in {@code ControllerCoreOptimizationSettings.getRhoWeight()}
+    * If a rho weight is to Double.NaN, the controller core will use the default rho weight set in the MomentumOptimizationSetting
+    */
+   public void setRhoWeight(int pointIndex, double rhoWeight)
+   {
+      rhoWeights.get(pointIndex).setValue(rhoWeight);
+   }
+
+   public double getRhoWeight(int pointIndex)
+   {
+      return rhoWeights.get(pointIndex).doubleValue();
+   }
 
    public boolean isUseHighCoPDamping()
    {
@@ -149,6 +171,11 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    public boolean hasMaxContactPointNormalForce()
    {
       return hasMaxContactPointNormalForce;
+   }
+
+   public boolean getHasContactStateChanged()
+   {
+      return hasContactStateChanged;
    }
 
    public double getMaxContactPointNormalForce(int pointIndex)
@@ -165,11 +192,17 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       contactPoints.copyFromListAndTrimSize(other.contactPoints);
       contactNormal.setIncludingFrame(other.contactNormal);
       useHighCoPDamping = other.useHighCoPDamping;
+      hasContactStateChanged = other.hasContactStateChanged;
 
       hasMaxContactPointNormalForce = other.hasMaxContactPointNormalForce;
+      
+      maxContactPointNormalForces.clear();
+      rhoWeights.clear();
+      
       for (int i = 0; i < other.contactPoints.size(); i++)
       {
          maxContactPointNormalForces.add().setValue(other.maxContactPointNormalForces.get(i));
+         rhoWeights.add().setValue(other.rhoWeights.get(i));
       }
    }
 

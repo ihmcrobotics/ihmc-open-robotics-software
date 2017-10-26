@@ -1,5 +1,6 @@
 package us.ihmc.atlas;
 
+import java.io.InputStream;
 import java.util.List;
 
 import com.jme3.math.Transform;
@@ -823,4 +824,10 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return null;
    }
 
+   @Override
+   public InputStream getWholeBodyControllerParametersFile()
+   {
+      return getClass().getResourceAsStream("/us/ihmc/atlas/parameters/controller.xml");
+   }
+   
 }

@@ -31,6 +31,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    private final FrameVector3D contactNormalFrameVector;
    private final int totalNumberOfContactPoints;
    private final List<YoContactPoint> contactPoints;
+   private final HashMap<YoContactPoint, YoDouble> rhoWeights = new HashMap<>();
    private final HashMap<YoContactPoint, YoDouble> maxContactPointNormalForces = new HashMap<>();
    private final FrameConvexPolygon2d contactPointsPolygon = new FrameConvexPolygon2d();
    private final YoFramePoint2d contactPointCentroid;
@@ -40,10 +41,17 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
          double coefficientOfFriction, YoVariableRegistry parentRegistry)
    {
+      this(namePrefix, rigidBody, planeFrame, contactFramePoints, coefficientOfFriction, Double.NaN, parentRegistry);
+   }
+   
+   public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
+         double coefficientOfFriction, double defaultRhoWeight, YoVariableRegistry parentRegistry)
+   {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.inContact = new YoBoolean(namePrefix + "InContact", registry);
       this.coefficientOfFriction = new YoDouble(namePrefix + "CoefficientOfFriction", registry);
       this.coefficientOfFriction.set(coefficientOfFriction);
+      
       this.rigidBody = rigidBody;
       this.planeFrame = planeFrame;
 
@@ -61,6 +69,10 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          YoDouble maxContactPointNormalForce = new YoDouble(namePrefix + "MaxContactPointNormalForce" + i, registry);
          maxContactPointNormalForce.set(Double.POSITIVE_INFINITY);
          maxContactPointNormalForces.put(contactPoint, maxContactPointNormalForce);
+         
+         YoDouble rhoWeight = new YoDouble(namePrefix + "RhoWeight" + i, registry);
+         rhoWeight.set(defaultRhoWeight);
+         rhoWeights.put(contactPoint, rhoWeight);
       }
       inContact.set(true);
 
@@ -77,12 +89,11 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    @Override
    public void getPlaneContactStateCommand(PlaneContactStateCommand planeContactStateCommandToPack)
    {
-      planeContactStateCommandToPack.setId(NameBasedHashCodeTools.combineHashCodes(getNumberOfContactPointsInContact(), rigidBody));
-
       planeContactStateCommandToPack.clearContactPoints();
       planeContactStateCommandToPack.setContactingRigidBody(rigidBody);
       planeContactStateCommandToPack.setCoefficientOfFriction(coefficientOfFriction.getDoubleValue());
       planeContactStateCommandToPack.setContactNormal(contactNormalFrameVector);
+      planeContactStateCommandToPack.setHasContactStateChanged(hasContactStateChanged.getBooleanValue());
 
       if (!inContact())
          return;
@@ -98,6 +109,10 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
             YoDouble maxForce = maxContactPointNormalForces.get(contactPoint);
             planeContactStateCommandToPack.setMaxContactPointNormalForce(contactedPointIndex, maxForce.getDoubleValue());
+            
+            YoDouble rhoWeight = rhoWeights.get(contactPoint);
+            planeContactStateCommandToPack.setRhoWeight(contactedPointIndex, rhoWeight.getDoubleValue());
+            
             contactedPointIndex++;
          }
       }
@@ -112,6 +127,8 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       coefficientOfFriction.set(planeContactStateCommand.getCoefficientOfFriction());
       planeContactStateCommand.getContactNormal(contactNormalFrameVector);
 
+      hasContactStateChanged.set(planeContactStateCommand.getHasContactStateChanged());
+
       if (planeContactStateCommand.isEmpty())
          clear();
       else
@@ -123,6 +140,12 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          YoContactPoint contactPoint = contactPoints.get(i);
          contactPoint.setPosition(tempContactPointPosition);
          contactPoint.setInContact(true);
+         
+         double maxContactPointNormalForce = planeContactStateCommand.getMaxContactPointNormalForce(i);
+         maxContactPointNormalForces.get(contactPoint).set(maxContactPointNormalForce);
+         
+         double rhoWeight = planeContactStateCommand.getRhoWeight(i);
+         rhoWeights.get(contactPoint).set(rhoWeight);
       }
 
       for (int i = planeContactStateCommand.getNumberOfContactPoints(); i < getTotalNumberOfContactPoints(); i++)
@@ -151,6 +174,11 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    public void setMaxContactPointNormalForce(YoContactPoint contactPoint, double maxNormalForce)
    {
       maxContactPointNormalForces.get(contactPoint).set(maxNormalForce);
+   }
+   
+   public void setRhoWeight(YoContactPoint contactPoint, double rhoWeight)
+   {
+      rhoWeights.get(contactPoint).set(rhoWeight);
    }
 
    @Override
@@ -361,15 +389,21 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       }
       else
       {
-         this.inContact.set(false);
-         for (int i = 0; i < totalNumberOfContactPoints; i++)
+         updateInContact();
+      }
+   }
+   
+   public void updateInContact()
+   {
+      for (int i = 0; i < totalNumberOfContactPoints; i++)
+      {
+         if (contactPoints.get(i).isInContact())
          {
-            if (contactPoints.get(i).isInContact())
-            {
-               this.inContact.set(true);
-            }
+            this.inContact.set(true);
+            return;
          }
       }
+      this.inContact.set(false);
    }
 
    public void computeSupportPolygon()
@@ -466,11 +500,13 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       inContact.set(true);
    }
 
+   @Override
    public void notifyContactStateHasChanged()
    {
       hasContactStateChanged.set(true);
    }
 
+   @Override
    public boolean pollContactHasChangedNotification()
    {
       boolean ret = hasContactStateChanged.getBooleanValue();

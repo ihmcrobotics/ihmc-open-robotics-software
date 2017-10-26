@@ -469,10 +469,13 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    public void initialize()
    {
+      controllerCoreCommand.requestReinitialization();
       controllerToolbox.initialize();
       managerFactory.initializeManagers();
 
       commandInputManager.flushAllCommands();
+      walkingMessageHandler.clearFootsteps();
+      walkingMessageHandler.clearFootTrajectory();
 
       privilegedConfigurationCommand.clear();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);

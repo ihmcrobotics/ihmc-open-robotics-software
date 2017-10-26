@@ -127,14 +127,14 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       trustFootSwitch.set(true);
 
       //TODO: Tune and triple check glitch filtering and timing of the virtual switches.
-      filteredHasFootHitGround = new GlitchFilteredYoBoolean(namePrefix + "FilteredFootHitGround", registry, hasFootHitGround, 1);
+      filteredHasFootHitGround = new GlitchFilteredYoBoolean(namePrefix + "FilteredFootHitGround", registry, hasFootHitGround, 2);
       filteredIsForceMagnitudePastThreshold = new GlitchFilteredYoBoolean(namePrefix + "FilteredForcePastThresh", registry, isForceMagnitudePastThreshold, 2);
       isForceMagnitudePastSecondThreshold = new YoBoolean(namePrefix + "ForcePastSecondThresh", registry);
       isCoPPastThreshold = new YoBoolean(namePrefix + "CoPPastThresh", registry);
 
       this.robotTotalWeight = robotTotalWeight;
       this.alphaFootLoadFiltering = new YoDouble(namePrefix + "AlphaFootLoadFiltering", registry);
-      alphaFootLoadFiltering.set(0.5);
+      alphaFootLoadFiltering.set(0.1);
       this.footLoadPercentage = new AlphaFilteredYoVariable(namePrefix + "FootLoadPercentage", registry, alphaFootLoadFiltering);
 
       double copVisualizerSize = 0.025;
