@@ -83,7 +83,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    @Override
    public HighLevelController getFallbackControllerState()
    {
-      return runningOnRealRobot ? HighLevelController.STAND_READY : HighLevelController.DO_NOTHING_BEHAVIOR;
+      return runningOnRealRobot ? HighLevelController.STAND_PREP_STATE : HighLevelController.DO_NOTHING_BEHAVIOR;
    }
 
    @Override

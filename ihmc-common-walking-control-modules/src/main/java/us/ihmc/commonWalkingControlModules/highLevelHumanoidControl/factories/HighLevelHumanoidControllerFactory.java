@@ -130,10 +130,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
    }
 
-   public void setFallbackControllerForFailure(HighLevelController fallbackController)
-   {
-      fallbackControllerForFailure.set(fallbackController);
-   }
 
    /**
     * Specifies whether the inverse dynamics module of the {@link WholeBodyControllerCore} should be
@@ -421,8 +417,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       humanoidHighLevelControllerManager = new HumanoidHighLevelControllerManager(commandInputManager, statusMessageOutputManager, initialControllerState,
                                                                                   highLevelControllerParameters, walkingControllerParameters,
                                                                                   icpPlannerParameters, requestedHighLevelControllerState,
-                                                                                  fallbackControllerForFailure, controllerFactoriesMap,
-                                                                                  stateTransitionFactories, managerFactory, controllerToolbox,
+                                                                                  controllerFactoriesMap, stateTransitionFactories, managerFactory, controllerToolbox,
                                                                                   centerOfPressureDataHolderForEstimator, forceSensorDataHolder,
                                                                                   lowLevelControllerOutput);
       humanoidHighLevelControllerManager.addYoVariableRegistry(registry);

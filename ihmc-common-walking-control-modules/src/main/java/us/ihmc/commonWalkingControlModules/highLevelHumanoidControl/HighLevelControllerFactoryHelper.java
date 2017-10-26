@@ -29,7 +29,6 @@ public class HighLevelControllerFactoryHelper
    private StatusMessageOutputManager statusMessageOutputManager;
    private LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput;
    private YoEnum<HighLevelController> requestedHighLevelControllerState;
-   private AtomicReference<HighLevelController> fallbackControllerForFailure;
    private ForceSensorDataHolderReadOnly forceSensorDataHolder;
 
    public void setLowLevelControllerOutput(LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
@@ -73,11 +72,6 @@ public class HighLevelControllerFactoryHelper
    public void setRequestedHighLevelControllerState(YoEnum<HighLevelController> requestedHighLevelControllerState)
    {
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
-   }
-
-   public void setFallbackControllerForFailure(AtomicReference<HighLevelController> fallbackControllerForFailure)
-   {
-      this.fallbackControllerForFailure = fallbackControllerForFailure;
    }
 
    public void setForceSensorDataHolder(ForceSensorDataHolderReadOnly forceSensorDataHolder)
@@ -133,11 +127,6 @@ public class HighLevelControllerFactoryHelper
    public YoEnum<HighLevelController> getRequestedHighLevelControllerState()
    {
       return requestedHighLevelControllerState;
-   }
-
-   public AtomicReference<HighLevelController> getFallbackControllerForFailure()
-   {
-      return fallbackControllerForFailure;
    }
 
    public ForceSensorDataHolderReadOnly getForceSensorDataHolder()

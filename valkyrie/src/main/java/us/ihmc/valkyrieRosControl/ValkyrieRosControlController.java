@@ -171,7 +171,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       controllerFactory.addRequestableTransition(STAND_PREP_STATE, calibrationState);
 
       controllerFactory.addRequestableTransition(STAND_READY, STAND_TRANSITION_STATE);
-      controllerFactory.addControllerFailureTransition(STAND_READY, fallbackControllerState);
+      if (fallbackControllerState != STAND_READY)
+         controllerFactory.addControllerFailureTransition(STAND_READY, fallbackControllerState);
       controllerFactory.addRequestableTransition(STAND_READY, calibrationState);
       controllerFactory.addRequestableTransition(STAND_READY, STAND_PREP_STATE);
 
