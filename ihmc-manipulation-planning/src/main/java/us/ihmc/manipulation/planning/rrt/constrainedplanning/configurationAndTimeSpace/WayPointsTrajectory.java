@@ -147,8 +147,9 @@ public class WayPointsTrajectory extends ConstrainedEndEffectorTrajectory
       double alpha = 0.0;
       
       for(int i=0;i<segmentTimes.length;i++)
-      {
+      {  
          leftTime = leftTime - segmentTimes[i];
+         
          if(leftTime <= 0)
          {
             indexOfSegment = i;
@@ -158,6 +159,14 @@ public class WayPointsTrajectory extends ConstrainedEndEffectorTrajectory
             
             break;
          }
+         
+         if(i==segmentTimes.length - 1 && leftTime < 1.0e-3)
+         {
+            indexOfSegment = i;
+            alpha = 1.0;
+            break;
+         }
+          
          if(i==segmentTimes.length - 1)
             PrintTools.warn("time calculating is wrong");
       }
@@ -177,8 +186,8 @@ public class WayPointsTrajectory extends ConstrainedEndEffectorTrajectory
       {
          ConfigurationSpace holdingConfiguration = new ConfigurationSpace();
          
-         holdingConfiguration.setTranslation(0.0, -0.4, 0.75);
-         holdingConfiguration.setRotation(0.5 * Math.PI, 0.0, -0.5 * Math.PI);
+         holdingConfiguration.setTranslation(-0.1, -0.4, 0.65);
+         holdingConfiguration.setRotation(0.5 * Math.PI, 0.0, -0.25 * Math.PI);
 
          configurationSpaces.put(RobotSide.RIGHT, holdingConfiguration);
          
@@ -194,8 +203,8 @@ public class WayPointsTrajectory extends ConstrainedEndEffectorTrajectory
       {
          ConfigurationSpace holdingConfiguration = new ConfigurationSpace();
 
-         holdingConfiguration.setTranslation(0.0, 0.4, 0.75);
-         holdingConfiguration.setRotation(0.5 * Math.PI, 0.0, -0.5 * Math.PI);
+         holdingConfiguration.setTranslation(-0.1, 0.4, 0.65);
+         holdingConfiguration.setRotation(-0.5 * Math.PI, 0.0, 0.25 * Math.PI);
 
          configurationSpaces.put(RobotSide.LEFT, holdingConfiguration);
 

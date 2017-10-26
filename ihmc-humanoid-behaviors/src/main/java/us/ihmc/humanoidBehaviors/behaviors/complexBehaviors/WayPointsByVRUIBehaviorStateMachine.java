@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.SetBooleanParameterPacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WayPointsByVRUIBehaviorStateMachine.WayPointsByVRUIBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
@@ -21,6 +22,7 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTim
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -112,8 +114,6 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
 
             // TODO
             ConstrainedEndEffectorTrajectory endeffectorTrajectory = new WayPointsTrajectory(latestPacket);
-
-            PrintTools.info("endeffectorTrajectory " + endeffectorTrajectory.getTaskRegion().getUpperLimit(0));
             
             planConstrainedWholeBodyTrajectoryBehavior.setInputs(endeffectorTrajectory, fullRobotModel);
 
@@ -158,10 +158,17 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
 
             WholeBodyTrajectoryMessage wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
 
-            // TODO
             wholebodyTrajectoryMessage = planConstrainedWholeBodyTrajectoryBehavior.getWholebodyTrajectoryMessage();
 
             wholebodyTrajectoryBehavior.setInput(wholebodyTrajectoryMessage);
+            
+            Point3D tempPoint = new Point3D();
+            wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT).getTrajectoryPoint(0).getPosition(tempPoint);
+            PrintTools.info(""+tempPoint);
+            
+            tempPoint = new Point3D();
+            wholebodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT).getTrajectoryPoint(10).getPosition(tempPoint);
+            PrintTools.info(""+tempPoint);
          }
       };
 

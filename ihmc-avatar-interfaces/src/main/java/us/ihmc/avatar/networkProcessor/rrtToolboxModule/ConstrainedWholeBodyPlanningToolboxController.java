@@ -487,9 +487,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
        */
       rootNode = new GenericTaskNode();
       tree = new CTTaskNodeTree(rootNode);
-      
-      PrintTools.info("Task Region check" + constrainedEndEffectorTrajectory.defineTaskRegion().getUpperLimit(0));
-      
+           
       tree.setTaskRegion(constrainedEndEffectorTrajectory.getTaskRegion());   //////////////////////////////////////////////////////////
 
       rootNode.convertDataToNormalizedData(constrainedEndEffectorTrajectory.getTaskRegion());

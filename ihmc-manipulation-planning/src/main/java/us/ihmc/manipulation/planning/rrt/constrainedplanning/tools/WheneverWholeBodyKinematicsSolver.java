@@ -184,6 +184,7 @@ public class WheneverWholeBodyKinematicsSolver
       momentumWeight.set(1.0);
       privilegedWeight.set(1.0); //0.02);
       privilegedConfigurationGain.set(50.0); //0.02);
+      privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -756,7 +757,8 @@ public class WheneverWholeBodyKinematicsSolver
 
    private void putHandTrajectoryMessages()
    {
-      for (RobotSide robotSide : RobotSide.values)
+//      for (RobotSide robotSide : RobotSide.values)
+      RobotSide robotSide = RobotSide.LEFT;
       {
          if (handFramePoses.get(robotSide).containsNaN())
          {
