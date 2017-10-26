@@ -2,6 +2,7 @@ package us.ihmc.convexOptimization.quadraticProgram;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends SimpleEfficientActiveSetQPSolver implements
@@ -11,8 +12,10 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
    private final DenseMatrix64F originalQuadraticCostQVector = new DenseMatrix64F(0, 0);
 
    private final DenseMatrix64F originalLinearEqualityConstraintsAMatrix = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F originalLinearEqualityConstraintsBVector = new DenseMatrix64F(0, 0);
 
    private final DenseMatrix64F originalLinearInequalityConstraintsCMatrixO = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F originalLinearInequalityConstraintsDVectorO = new DenseMatrix64F(0, 0);
 
    private final DenseMatrix64F originalVariableLowerBounds = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F originalVariableUpperBounds = new DenseMatrix64F(0, 0);
@@ -28,7 +31,10 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
       quadraticCostQVector.set(originalQuadraticCostQVector);
 
       linearEqualityConstraintsAMatrix.set(originalLinearEqualityConstraintsAMatrix);
+      linearEqualityConstraintsBVector.set(originalLinearEqualityConstraintsBVector);
+
       linearInequalityConstraintsCMatrixO.set(originalLinearInequalityConstraintsCMatrixO);
+      linearInequalityConstraintsDVectorO.set(originalLinearInequalityConstraintsDVectorO);
 
       variableLowerBounds.set(originalVariableLowerBounds);
       variableUpperBounds.set(originalVariableUpperBounds);
@@ -48,22 +54,45 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
 
          MatrixTools.removeRow(quadraticCostQVector, variableIndex);
 
-         if (linearEqualityConstraintsAMatrix.numRows > 0)
+         if (linearEqualityConstraintsAMatrix.getNumElements() > 0)
             MatrixTools.removeColumn(linearEqualityConstraintsAMatrix, variableIndex);
-         if (linearInequalityConstraintsCMatrixO.numRows > 0)
+         if (linearInequalityConstraintsCMatrixO.getNumElements() > 0)
             MatrixTools.removeColumn(linearInequalityConstraintsCMatrixO, variableIndex);
 
-         if (variableLowerBounds.numRows > 0)
+         if (variableLowerBounds.getNumElements() > 0)
             MatrixTools.removeRow(variableLowerBounds, variableIndex);
-         if (variableUpperBounds.numCols > 0)
+         if (variableUpperBounds.getNumElements() > 0)
             MatrixTools.removeRow(variableUpperBounds, variableIndex);
       }
 
       int numVars = quadraticCostQMatrix.getNumRows();
-      if (linearEqualityConstraintsAMatrix.numRows == 0)
+      if (linearEqualityConstraintsAMatrix.getNumElements() == 0)
          linearEqualityConstraintsAMatrix.reshape(0, numVars);
-      if (linearInequalityConstraintsCMatrixO.numRows == 0)
+      if (linearInequalityConstraintsCMatrixO.getNumElements() == 0)
          linearInequalityConstraintsCMatrixO.reshape(0, numVars);
+
+      removeZeroRowsFromConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
+      removeZeroRowsFromConstraints(linearInequalityConstraintsCMatrixO, linearInequalityConstraintsDVectorO);
+   }
+
+   private static void removeZeroRowsFromConstraints(DenseMatrix64F matrix, DenseMatrix64F vector)
+   {
+      for (int rowIndex = vector.numRows - 1; rowIndex >= 0; rowIndex--)
+      {
+         double sumOfRowElements = 0.0;
+
+         for (int columnIndex = 0; columnIndex < matrix.getNumCols(); columnIndex++)
+         {
+            sumOfRowElements += Math.abs(matrix.get(rowIndex, columnIndex));
+         }
+
+         boolean isZeroRow = MathTools.epsilonEquals(sumOfRowElements, 0.0, 1e-12);
+         if (isZeroRow)
+         {
+            MatrixTools.removeRow(matrix, rowIndex);
+            MatrixTools.removeRow(vector, rowIndex);
+         }
+      }
    }
 
    private void copyActiveVariableSolutionToAllVariables(DenseMatrix64F solutionToPack, DenseMatrix64F activeVariableSolution)
@@ -144,7 +173,7 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
       if (linearEqualityConstraintsAMatrix.getNumCols() != originalQuadraticCostQMatrix.getNumCols())
          throw new RuntimeException("linearEqualityConstraintsAMatrix.getNumCols() != quadraticCostQMatrix.getNumCols()");
 
-      this.linearEqualityConstraintsBVector.set(linearEqualityConstraintsBVector);
+      this.originalLinearEqualityConstraintsBVector.set(linearEqualityConstraintsBVector);
       this.originalLinearEqualityConstraintsAMatrix.set(linearEqualityConstraintsAMatrix);
    }
 
@@ -158,7 +187,7 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
       if (linearInequalityConstraintCMatrix.getNumCols() != originalQuadraticCostQMatrix.getNumCols())
          throw new RuntimeException("linearInequalityConstraintCMatrix.getNumCols() != quadraticCostQMatrix.getNumCols()");
 
-      this.linearInequalityConstraintsDVectorO.set(linearInequalityConstraintDVector);
+      this.originalLinearInequalityConstraintsDVectorO.set(linearInequalityConstraintDVector);
       this.originalLinearInequalityConstraintsCMatrixO.set(linearInequalityConstraintCMatrix);
    }
 
@@ -205,7 +234,10 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
       originalQuadraticCostQVector.reshape(0, 0);
 
       originalLinearEqualityConstraintsAMatrix.reshape(0, 0);
+      originalLinearEqualityConstraintsBVector.reshape(0, 0);
+
       originalLinearInequalityConstraintsCMatrixO.reshape(0, 0);
+      originalLinearInequalityConstraintsDVectorO.reshape(0, 0);
 
       originalVariableLowerBounds.reshape(0, 0);
       originalVariableUpperBounds.reshape(0, 0);
