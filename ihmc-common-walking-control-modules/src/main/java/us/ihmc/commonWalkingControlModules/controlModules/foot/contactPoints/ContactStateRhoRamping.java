@@ -98,7 +98,8 @@ public class ContactStateRhoRamping
       timeInTrajectory.add(dt);
       polynomial.compute(timeInTrajectory.getDoubleValue());
 
-      double rhoWeight = MathTools.clamp(polynomial.getPosition(), rhoInitial.getDoubleValue(), rhoFinal.getDoubleValue());
+      //rho initial is bigger than rho final
+      double rhoWeight = MathTools.clamp(polynomial.getPosition(), rhoFinal.getDoubleValue(), rhoInitial.getDoubleValue());
       rhoCurrent.set(rhoWeight);
 
       for (int i = 0; i < contactPoints.size(); i++)
