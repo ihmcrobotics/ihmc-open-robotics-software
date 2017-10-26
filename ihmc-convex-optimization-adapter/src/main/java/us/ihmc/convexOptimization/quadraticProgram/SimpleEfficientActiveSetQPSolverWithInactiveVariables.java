@@ -22,6 +22,8 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
 
    private final DenseMatrix64F computedObjectiveFunctionValue = new DenseMatrix64F(1, 1);
 
+   private int numberOfActiveVariables = 0;
+
    private void setMatricesFromOriginal()
    {
       quadraticCostQMatrix.set(originalQuadraticCostQMatrix);
@@ -197,6 +199,31 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
 
       activeVariables.reshape(0, 0);
       activeVariableSolution.reshape(0, 0);
+   }
+
+   @Override
+   public int solve(double[] solutionToPack)
+   {
+      int numberOfEqualityConstraints = originalLinearEqualityConstraintsAMatrix.getNumRows();
+      int numberOfInequalityConstraints = originalLinearInequalityConstraintsCMatrixO.getNumRows();
+
+      double[] lagrangeEqualityConstraintMultipliersToPack = new double[numberOfEqualityConstraints];
+      double[] lagrangeInequalityConstraintMultipliersToPack = new double[numberOfInequalityConstraints];
+
+      return solve(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack);
+   }
+
+   @Override
+   public int solve(double[] solutionToPack, double[] lagrangeEqualityConstraintMultipliersToPack, double[] lagrangeInequalityConstraintMultipliersToPack)
+   {
+      int numberOfLowerBoundConstraints = originalVariableLowerBounds.getNumRows();
+      int numberOfUpperBoundConstraints = originalVariableUpperBounds.getNumRows();
+
+      double[] lagrangeLowerBoundsConstraintMultipliersToPack = new double[numberOfLowerBoundConstraints];
+      double[] lagrangeUpperBoundsConstraintMultipliersToPack = new double[numberOfUpperBoundConstraints];
+
+      return solve(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
+                   lagrangeLowerBoundsConstraintMultipliersToPack, lagrangeUpperBoundsConstraintMultipliersToPack);
    }
 
    @Override
