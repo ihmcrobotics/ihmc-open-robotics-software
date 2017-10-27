@@ -534,4 +534,9 @@ public class FeetManager
    {
       return footControlModules.get(swingFoot).isTouchdownFinished();
    }
+
+   public boolean isTouchDownEnabled(RobotSide swingSide)
+   {
+      return footControlModules.get(swingSide).isTouchdownEnabled();
+   }
 }
