@@ -1,23 +1,24 @@
-package us.ihmc.quadrupedRobotics.util;
+package us.ihmc.tools.lists;
 
+import java.util.List;
 import java.util.Comparator;
 
-public class ArraySorter
+public class ListSorter
 {
    /**
     * Sort an array in place without allocating any memory.
     */
-   public static <T> void sort(T[] ts, Comparator<T> comparator)
+   public static <T> void sort(List<T> ts, Comparator<T> comparator)
    {
       boolean ordered = false;
 
       while (!ordered)
       {
          ordered = true;
-         for (int i = 0; i < ts.length - 1; i++)
+         for (int i = 0; i < ts.size() - 1; i++)
          {
-            T a = ts[i];
-            T b = ts[i + 1];
+            T a = ts.get(i);
+            T b = ts.get(i + 1);
 
             if(comparator.compare(a, b) > 0)
             {
@@ -28,23 +29,10 @@ public class ArraySorter
       }
    }
 
-   public static <T> void swap(T[] ts, int a, int b)
+   public static <T> void swap(List<T> ts, int a, int b)
    {
-      T tmp = ts[a];
-      ts[a] = ts[b];
-      ts[b] = tmp;
+      T tmp = ts.get(a);
+      ts.set(a, ts.get(b));
+      ts.set(b, tmp);
    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

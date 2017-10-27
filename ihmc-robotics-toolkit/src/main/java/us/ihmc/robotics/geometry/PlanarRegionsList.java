@@ -31,6 +31,7 @@ public class PlanarRegionsList
 
    /**
     * Adds a planar region to this list of planar regions.
+    * 
     * @param region to add.
     */
    public void addPlanarRegion(PlanarRegion region)
@@ -39,10 +40,13 @@ public class PlanarRegionsList
    }
 
    /**
-    * Find all the planar regions that intersect with the given convex polygon.
-    * The algorithm is equivalent to projecting all the regions onto the XY-plane and then finding the regions intersecting with the given convex polygon.
+    * Find all the planar regions that intersect with the given convex polygon. The algorithm is
+    * equivalent to projecting all the regions onto the XY-plane and then finding the regions
+    * intersecting with the given convex polygon.
+    * 
     * @param convexPolygon the query.
-    * @return the list of planar regions intersecting with the given polygon. Returns null when no region intersects.
+    * @return the list of planar regions intersecting with the given polygon. Returns null when no
+    *         region intersects.
     */
    public List<PlanarRegion> findPlanarRegionsIntersectingPolygon(ConvexPolygon2D convexPolygon)
    {
@@ -51,7 +55,8 @@ public class PlanarRegionsList
       for (int i = 0; i < regions.size(); i++)
       {
          PlanarRegion candidateRegion = regions.get(i);
-         if (candidateRegion.isVertical()) continue;
+         if (candidateRegion.isVertical())
+            continue;
 
          if (candidateRegion.isPolygonIntersecting(convexPolygon))
          {
@@ -64,9 +69,11 @@ public class PlanarRegionsList
       return containers;
    }
 
-    /**
-    * Find all the planar regions that intersect with the given 2d line segment.
-    * The algorithm is equivalent to projecting all the regions onto the XY-plane and then finding the regions intersecting with the given line segment.
+   /**
+    * Find all the planar regions that intersect with the given 2d line segment. The algorithm is
+    * equivalent to projecting all the regions onto the XY-plane and then finding the regions
+    * intersecting with the given line segment.
+    * 
     * @param lineSegmentInWorld the query.
     * @param intersectingRegionsToPack ArrayList were the intersecting regions will be packed into.
     */
@@ -75,9 +82,11 @@ public class PlanarRegionsList
       for (int i = 0; i < regions.size(); i++)
       {
          PlanarRegion candidateRegion = regions.get(i);
-         if (isLineSegmentObviouslyOutsideBoundingBox(candidateRegion, lineSegmentInWorld)) continue;
+         if (isLineSegmentObviouslyOutsideBoundingBox(candidateRegion, lineSegmentInWorld))
+            continue;
 
-         if (candidateRegion.isVertical()) continue;
+         if (candidateRegion.isVertical())
+            continue;
 
          if (candidateRegion.isLineSegmentIntersecting(lineSegmentInWorld))
          {
@@ -87,37 +96,45 @@ public class PlanarRegionsList
    }
 
    /**
-    * Returns true if lineSegment is Obviously Outside BoundingBox. If returns true, then definitely outside. If returns false, might still be outside.
-    * If intersects, will always return false.
+    * Returns true if lineSegment is Obviously Outside BoundingBox. If returns true, then definitely
+    * outside. If returns false, might still be outside. If intersects, will always return false.
+    * 
     * @param candidateRegion
     * @param lineSegmentInWorld
     * @return
     */
    private boolean isLineSegmentObviouslyOutsideBoundingBox(PlanarRegion candidateRegion, LineSegment2D lineSegmentInWorld)
    {
-	   BoundingBox3D boundingBox = candidateRegion.getBoundingBox3dInWorld();
+      BoundingBox3D boundingBox = candidateRegion.getBoundingBox3dInWorld();
 
-       double xMin = boundingBox.getMinX();
-       double yMin = boundingBox.getMinY();
-       double xMax = boundingBox.getMaxX();
-       double yMax = boundingBox.getMaxY();
+      double xMin = boundingBox.getMinX();
+      double yMin = boundingBox.getMinY();
+      double xMax = boundingBox.getMaxX();
+      double yMax = boundingBox.getMaxY();
 
-       Point2DReadOnly firstEndpoint = lineSegmentInWorld.getFirstEndpoint();
-       Point2DReadOnly secondEndpoint = lineSegmentInWorld.getSecondEndpoint();
+      Point2DReadOnly firstEndpoint = lineSegmentInWorld.getFirstEndpoint();
+      Point2DReadOnly secondEndpoint = lineSegmentInWorld.getSecondEndpoint();
 
-       if ((firstEndpoint.getX() < xMin) && (secondEndpoint.getX() < xMin)) return true;
-       if ((firstEndpoint.getX() > xMax) && (secondEndpoint.getX() > xMax)) return true;
-       if ((firstEndpoint.getY() < yMin) && (secondEndpoint.getY() < yMin)) return true;
-       if ((firstEndpoint.getY() > yMax) && (secondEndpoint.getY() > yMax)) return true;
+      if ((firstEndpoint.getX() < xMin) && (secondEndpoint.getX() < xMin))
+         return true;
+      if ((firstEndpoint.getX() > xMax) && (secondEndpoint.getX() > xMax))
+         return true;
+      if ((firstEndpoint.getY() < yMin) && (secondEndpoint.getY() < yMin))
+         return true;
+      if ((firstEndpoint.getY() > yMax) && (secondEndpoint.getY() > yMax))
+         return true;
 
-       return false;
+      return false;
    }
 
    /**
     * Find all the planar regions that contain the given point.
+    * 
     * @param point the query coordinates.
-    * @param maximumOrthogonalDistance tolerance expressed as maximum orthogonal distance from the region.
-    * @return the list of planar regions containing the query. Returns null when no region contains the query.
+    * @param maximumOrthogonalDistance tolerance expressed as maximum orthogonal distance from the
+    *           region.
+    * @return the list of planar regions containing the query. Returns null when no region contains
+    *         the query.
     */
    public List<PlanarRegion> findPlanarRegionsContainingPoint(Point3D point, double maximumOrthogonalDistance)
    {
@@ -138,10 +155,13 @@ public class PlanarRegionsList
    }
 
    /**
-    * Find all the planar regions that contain the given point.
-    * The algorithm is equivalent to projecting all the regions onto the XY-plane and then finding the regions containing the point.
+    * Find all the planar regions that contain the given point. The algorithm is equivalent to
+    * projecting all the regions onto the XY-plane and then finding the regions containing the
+    * point.
+    * 
     * @param point the query coordinates.
-    * @return the list of planar regions containing the query. Returns null when no region contains the query.
+    * @return the list of planar regions containing the query. Returns null when no region contains
+    *         the query.
     */
    public List<PlanarRegion> findPlanarRegionsContainingPointByProjectionOntoXYPlane(Point2D point)
    {
@@ -149,11 +169,14 @@ public class PlanarRegionsList
    }
 
    /**
-    * Find all the planar regions that contain the given point.
-    * The algorithm is equivalent to projecting all the regions onto the XY-plane and then finding the regions containing the point.
+    * Find all the planar regions that contain the given point. The algorithm is equivalent to
+    * projecting all the regions onto the XY-plane and then finding the regions containing the
+    * point.
+    * 
     * @param x the query x-coordinate.
     * @param y the query y-coordinate.
-    * @return the list of planar regions containing the query. Returns null when no region contains the query.
+    * @return the list of planar regions containing the query. Returns null when no region contains
+    *         the query.
     */
    public List<PlanarRegion> findPlanarRegionsContainingPointByProjectionOntoXYPlane(double x, double y)
    {
@@ -198,8 +221,8 @@ public class PlanarRegionsList
    }
 
    /**
-    * Retrieves the last planar region of this list.
-    * Special case: returns null when the list is empty.
+    * Retrieves the last planar region of this list. Special case: returns null when the list is
+    * empty.
     */
    public PlanarRegion getLastPlanarRegion()
    {
@@ -216,8 +239,8 @@ public class PlanarRegionsList
    }
 
    /**
-    * Retrieves the last planar region of this list and removes it from this list.
-    * Special case: returns null when the list is empty.
+    * Retrieves the last planar region of this list and removes it from this list. Special case:
+    * returns null when the list is empty.
     */
    public PlanarRegion pollLastPlanarRegion()
    {
@@ -228,7 +251,8 @@ public class PlanarRegionsList
    }
 
    /**
-    * @return a full depth copy of this list of planar regions. The copy can be entirely modified without interfering with this.
+    * @return a full depth copy of this list of planar regions. The copy can be entirely modified
+    *         without interfering with this.
     */
    public PlanarRegionsList copy()
    {
@@ -242,11 +266,12 @@ public class PlanarRegionsList
 
    /**
     * Transforms the planar regions list
+    * 
     * @param rigidBodyTransform transform from current frame to desired frame
     */
    public void transform(RigidBodyTransform rigidBodyTransform)
    {
-      for(int i = 0; i < regions.size(); i++)
+      for (int i = 0; i < regions.size(); i++)
       {
          regions.get(i).transform(rigidBodyTransform);
       }
