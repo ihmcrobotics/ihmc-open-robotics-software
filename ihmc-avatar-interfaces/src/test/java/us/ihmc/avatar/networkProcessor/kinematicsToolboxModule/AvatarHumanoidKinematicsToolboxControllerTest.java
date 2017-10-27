@@ -183,7 +183,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testHoldBodyPose() throws Exception
    {
       FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
@@ -207,7 +207,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
                  toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testRandomHandPositions() throws Exception
    {
       if (VERBOSE)
@@ -256,7 +256,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testRandomHandPoses() throws Exception
    {
       if (VERBOSE)
@@ -315,7 +315,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       assertTrue("Poor average solution quality: " + averageSolutionQuality, averageSolutionQuality < 5.0e-5);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testSingleSupport() throws Exception
    {
       if (VERBOSE)
