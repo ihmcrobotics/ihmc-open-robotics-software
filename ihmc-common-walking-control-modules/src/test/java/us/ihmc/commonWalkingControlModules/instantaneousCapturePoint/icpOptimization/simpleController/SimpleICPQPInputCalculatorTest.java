@@ -1019,21 +1019,294 @@ public class SimpleICPQPInputCalculatorTest
    @Test(timeout = 21000)
    public void testSubmitFeedbackAndFootstepTask()
    {
-      Assert.assertTrue(false);
+      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
+      SimpleICPQPInputCalculator inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+
+      indexHandler.registerFootstep();
+      indexHandler.setUseAngularMomentum(true);
+      indexHandler.computeProblemSize();
+
+      ICPQPInput feedbackTask = new ICPQPInput(2);
+
+      DenseMatrix64F feedbackWeight = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(feedbackWeight);
+      CommonOps.scale(3.6, feedbackWeight);
+
+      SimpleICPQPInputCalculator.computeFeedbackTask(feedbackTask, feedbackWeight);
+
+      ICPQPInput footstepTask = new ICPQPInput(2);
+      ICPQPInput footstepRegularizationTask = new ICPQPInput(2);
+
+      DenseMatrix64F footstepObjective1 = new DenseMatrix64F(2, 1);
+      DenseMatrix64F footstepPrevious1 = new DenseMatrix64F(2, 1);
+
+      footstepObjective1.set(0, 0, 0.5);
+      footstepObjective1.set(1, 0, 0.1);
+
+      footstepPrevious1.set(0, 0, 0.4);
+      footstepPrevious1.set(1, 0, 0.09);
+
+      DenseMatrix64F footstepWeight = new DenseMatrix64F(2, 2);
+      DenseMatrix64F footstepRegularizationWeight = new DenseMatrix64F(2, 2);
+
+      footstepWeight.set(0, 0, 5.0);
+      footstepWeight.set(1, 1, 5.0);
+      footstepRegularizationWeight.set(0, 0, 0.1);
+      footstepRegularizationWeight.set(1, 1, 0.1);
+
+      inputCalculator.computeFootstepTask(0, footstepTask, footstepWeight, footstepObjective1);
+      inputCalculator.computeFootstepRegularizationTask(0, footstepRegularizationTask, footstepRegularizationWeight, footstepPrevious1);
+
+      DenseMatrix64F quadratic = new DenseMatrix64F(6, 6);
+      DenseMatrix64F linear = new DenseMatrix64F(6, 1);
+      DenseMatrix64F scalar = new DenseMatrix64F(1, 1);
+
+      DenseMatrix64F quadraticExpected = new DenseMatrix64F(6, 6);
+      DenseMatrix64F linearExpected = new DenseMatrix64F(6, 1);
+      DenseMatrix64F scalarExpected = new DenseMatrix64F(1, 1);
+
+      inputCalculator.submitFootstepTask(footstepTask, quadratic, linear, scalar);
+      inputCalculator.submitFootstepTask(footstepRegularizationTask, quadratic, linear, scalar);
+      inputCalculator.submitFeedbackTask(feedbackTask, quadratic, linear, scalar);
+
+      MatrixTools.addMatrixBlock(quadraticExpected, 0, 0, feedbackTask.quadraticTerm, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(linearExpected, 0, 0, feedbackTask.linearTerm, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(scalarExpected, 0, 0, feedbackTask.residualCost, 0, 0, 1, 1, 1.0);
+
+      MatrixTools.addMatrixBlock(quadraticExpected, 4, 4, footstepTask.quadraticTerm, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(linearExpected, 4, 0, footstepTask.linearTerm, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(scalarExpected, 0, 0, footstepTask.residualCost, 0, 0, 1, 1, 1.0);
+
+      MatrixTools.addMatrixBlock(quadraticExpected, 4, 4, footstepRegularizationTask.quadraticTerm, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(linearExpected, 4, 0, footstepRegularizationTask.linearTerm, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(scalarExpected, 0, 0, footstepRegularizationTask.residualCost, 0, 0, 1, 1, 1.0);
+
+
+      Assert.assertTrue(MatrixFeatures.isEquals(quadraticExpected, quadratic, 1e-7));
+      Assert.assertTrue(MatrixFeatures.isEquals(linearExpected, linear, 1e-7));
+      Assert.assertTrue(MatrixFeatures.isEquals(scalarExpected, scalar, 1e-7));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 21000)
    public void testSubmitFeedbackAndFootstepAndDynamicsTask()
    {
-      Assert.assertTrue(false);
+      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
+      SimpleICPQPInputCalculator inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+
+      indexHandler.setUseAngularMomentum(true);
+      indexHandler.registerFootstep();
+      indexHandler.computeProblemSize();
+      inputCalculator.setConsiderAngularMomentumInAdjustment(true);
+      inputCalculator.setConsiderFeedbackInAdjustment(true);
+
+      ICPQPInput feedbackTask = new ICPQPInput(2);
+
+      DenseMatrix64F feedbackWeight = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(feedbackWeight);
+      CommonOps.scale(3.6, feedbackWeight);
+
+      SimpleICPQPInputCalculator.computeFeedbackTask(feedbackTask, feedbackWeight);
+
+
+      ICPQPInput dynamicsTask = new ICPQPInput(6);
+
+      double footstepRecursionMultiplier = Math.exp(-3.0 * 1.2);
+      double safetyFactor = 1.0;
+
+      DenseMatrix64F currentICPError = new DenseMatrix64F(2, 1);
+      currentICPError.set(0, 0, 0.03);
+      currentICPError.set(1, 0, 0.06);
+
+      DenseMatrix64F referenceFootstepLocation = new DenseMatrix64F(2, 1);
+      referenceFootstepLocation.set(0, 0, 0.5);
+      referenceFootstepLocation.set(1, 0, 0.1);
+
+      DenseMatrix64F dynamicsWeight = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(dynamicsWeight);
+      CommonOps.scale(2.7, dynamicsWeight);
+
+      DenseMatrix64F feedbackGains = new DenseMatrix64F(2, 2);
+      DenseMatrix64F invertedFeedbackGains = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(feedbackGains);
+      CommonOps.scale(1.5, feedbackGains);
+      DiagonalMatrixTools.invertDiagonalMatrix(feedbackGains, invertedFeedbackGains);
+
+      inputCalculator.computeDynamicsTask(dynamicsTask, currentICPError, referenceFootstepLocation, feedbackGains, dynamicsWeight, footstepRecursionMultiplier, safetyFactor);
+
+      ICPQPInput footstepTask = new ICPQPInput(2);
+      ICPQPInput footstepRegularizationTask = new ICPQPInput(2);
+
+      DenseMatrix64F footstepObjective1 = new DenseMatrix64F(2, 1);
+      DenseMatrix64F footstepPrevious1 = new DenseMatrix64F(2, 1);
+
+      footstepObjective1.set(0, 0, 0.5);
+      footstepObjective1.set(1, 0, 0.1);
+
+      footstepPrevious1.set(0, 0, 0.4);
+      footstepPrevious1.set(1, 0, 0.09);
+
+      DenseMatrix64F footstepWeight = new DenseMatrix64F(2, 2);
+      DenseMatrix64F footstepRegularizationWeight = new DenseMatrix64F(2, 2);
+
+      footstepWeight.set(0, 0, 5.0);
+      footstepWeight.set(1, 1, 5.0);
+      footstepRegularizationWeight.set(0, 0, 0.1);
+      footstepRegularizationWeight.set(1, 1, 0.1);
+
+      inputCalculator.computeFootstepTask(0, footstepTask, footstepWeight, footstepObjective1);
+      inputCalculator.computeFootstepRegularizationTask(0, footstepRegularizationTask, footstepRegularizationWeight, footstepPrevious1);
+      DenseMatrix64F quadratic = new DenseMatrix64F(6, 6);
+      DenseMatrix64F linear = new DenseMatrix64F(6, 1);
+      DenseMatrix64F scalar = new DenseMatrix64F(1, 1);
+
+      DenseMatrix64F quadraticExpected = new DenseMatrix64F(6, 6);
+      DenseMatrix64F linearExpected = new DenseMatrix64F(6, 1);
+      DenseMatrix64F scalarExpected = new DenseMatrix64F(1, 1);
+
+      inputCalculator.submitDynamicsTask(dynamicsTask, quadratic, linear, scalar);
+      inputCalculator.submitFeedbackTask(feedbackTask, quadratic, linear, scalar);
+      inputCalculator.submitFootstepTask(footstepTask, quadratic, linear, scalar);
+      inputCalculator.submitFootstepTask(footstepRegularizationTask, quadratic, linear, scalar);
+
+      MatrixTools.addMatrixBlock(quadraticExpected, 0, 0, dynamicsTask.quadraticTerm, 0, 0, 6, 6, 1.0);
+      MatrixTools.addMatrixBlock(linearExpected, 0, 0, dynamicsTask.linearTerm, 0, 0, 6, 1, 1.0);
+      MatrixTools.addMatrixBlock(scalarExpected, 0, 0, dynamicsTask.residualCost, 0, 0, 1, 1, 1.0);
+
+      MatrixTools.addMatrixBlock(quadraticExpected, 0, 0, feedbackTask.quadraticTerm, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(linearExpected, 0, 0, feedbackTask.linearTerm, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(scalarExpected, 0, 0, feedbackTask.residualCost, 0, 0, 1, 1, 1.0);
+
+      MatrixTools.addMatrixBlock(quadraticExpected, 4, 4, footstepTask.quadraticTerm, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(linearExpected, 4, 0, footstepTask.linearTerm, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(scalarExpected, 0, 0, footstepTask.residualCost, 0, 0, 1, 1, 1.0);
+
+      MatrixTools.addMatrixBlock(quadraticExpected, 4, 4, footstepRegularizationTask.quadraticTerm, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(linearExpected, 4, 0, footstepRegularizationTask.linearTerm, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(scalarExpected, 0, 0, footstepRegularizationTask.residualCost, 0, 0, 1, 1, 1.0);
+
+      Assert.assertTrue(MatrixFeatures.isEquals(quadraticExpected, quadratic, 1e-7));
+      Assert.assertTrue(MatrixFeatures.isEquals(linearExpected, linear, 1e-7));
+      Assert.assertTrue(MatrixFeatures.isEquals(scalarExpected, scalar, 1e-7));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 21000)
    public void testSubmitFeedbackAndFootstepAndDynamicsAndAngularMomentumTask()
    {
-      Assert.assertTrue(false);
+      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
+      SimpleICPQPInputCalculator inputCalculator = new SimpleICPQPInputCalculator(indexHandler);
+
+      indexHandler.setUseAngularMomentum(true);
+      indexHandler.registerFootstep();
+      indexHandler.computeProblemSize();
+      inputCalculator.setConsiderAngularMomentumInAdjustment(true);
+      inputCalculator.setConsiderFeedbackInAdjustment(true);
+
+      ICPQPInput feedbackTask = new ICPQPInput(2);
+
+      DenseMatrix64F feedbackWeight = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(feedbackWeight);
+      CommonOps.scale(3.6, feedbackWeight);
+
+      SimpleICPQPInputCalculator.computeFeedbackTask(feedbackTask, feedbackWeight);
+
+
+      ICPQPInput dynamicsTask = new ICPQPInput(6);
+
+      double footstepRecursionMultiplier = Math.exp(-3.0 * 1.2);
+      double safetyFactor = 1.0;
+
+      DenseMatrix64F currentICPError = new DenseMatrix64F(2, 1);
+      currentICPError.set(0, 0, 0.03);
+      currentICPError.set(1, 0, 0.06);
+
+      DenseMatrix64F referenceFootstepLocation = new DenseMatrix64F(2, 1);
+      referenceFootstepLocation.set(0, 0, 0.5);
+      referenceFootstepLocation.set(1, 0, 0.1);
+
+      DenseMatrix64F dynamicsWeight = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(dynamicsWeight);
+      CommonOps.scale(2.7, dynamicsWeight);
+
+      DenseMatrix64F feedbackGains = new DenseMatrix64F(2, 2);
+      DenseMatrix64F invertedFeedbackGains = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(feedbackGains);
+      CommonOps.scale(1.5, feedbackGains);
+      DiagonalMatrixTools.invertDiagonalMatrix(feedbackGains, invertedFeedbackGains);
+
+      inputCalculator.computeDynamicsTask(dynamicsTask, currentICPError, referenceFootstepLocation, feedbackGains, dynamicsWeight, footstepRecursionMultiplier, safetyFactor);
+
+      ICPQPInput footstepTask = new ICPQPInput(2);
+      ICPQPInput footstepRegularizationTask = new ICPQPInput(2);
+
+      DenseMatrix64F footstepObjective1 = new DenseMatrix64F(2, 1);
+      DenseMatrix64F footstepPrevious1 = new DenseMatrix64F(2, 1);
+
+      footstepObjective1.set(0, 0, 0.5);
+      footstepObjective1.set(1, 0, 0.1);
+
+      footstepPrevious1.set(0, 0, 0.4);
+      footstepPrevious1.set(1, 0, 0.09);
+
+      DenseMatrix64F footstepWeight = new DenseMatrix64F(2, 2);
+      DenseMatrix64F footstepRegularizationWeight = new DenseMatrix64F(2, 2);
+
+      footstepWeight.set(0, 0, 5.0);
+      footstepWeight.set(1, 1, 5.0);
+      footstepRegularizationWeight.set(0, 0, 0.1);
+      footstepRegularizationWeight.set(1, 1, 0.1);
+
+      inputCalculator.computeFootstepTask(0, footstepTask, footstepWeight, footstepObjective1);
+      inputCalculator.computeFootstepRegularizationTask(0, footstepRegularizationTask, footstepRegularizationWeight, footstepPrevious1);
+
+      ICPQPInput angularMomentumTask = new ICPQPInput(2);
+
+      DenseMatrix64F angularMomentumWeight = new DenseMatrix64F(2, 2);
+      CommonOps.setIdentity(angularMomentumWeight);
+      CommonOps.scale(2.0, angularMomentumWeight);
+
+      SimpleICPQPInputCalculator.computeAngularMomentumMinimizationTask(angularMomentumTask, angularMomentumWeight);
+
+
+
+      DenseMatrix64F quadratic = new DenseMatrix64F(6, 6);
+      DenseMatrix64F linear = new DenseMatrix64F(6, 1);
+      DenseMatrix64F scalar = new DenseMatrix64F(1, 1);
+
+      DenseMatrix64F quadraticExpected = new DenseMatrix64F(6, 6);
+      DenseMatrix64F linearExpected = new DenseMatrix64F(6, 1);
+      DenseMatrix64F scalarExpected = new DenseMatrix64F(1, 1);
+
+      inputCalculator.submitDynamicsTask(dynamicsTask, quadratic, linear, scalar);
+      inputCalculator.submitFeedbackTask(feedbackTask, quadratic, linear, scalar);
+      inputCalculator.submitFootstepTask(footstepTask, quadratic, linear, scalar);
+      inputCalculator.submitFootstepTask(footstepRegularizationTask, quadratic, linear, scalar);
+      inputCalculator.submitAngularMomentumMinimizationTask(angularMomentumTask, quadratic, linear, scalar);
+
+      MatrixTools.addMatrixBlock(quadraticExpected, 0, 0, dynamicsTask.quadraticTerm, 0, 0, 6, 6, 1.0);
+      MatrixTools.addMatrixBlock(linearExpected, 0, 0, dynamicsTask.linearTerm, 0, 0, 6, 1, 1.0);
+      MatrixTools.addMatrixBlock(scalarExpected, 0, 0, dynamicsTask.residualCost, 0, 0, 1, 1, 1.0);
+
+      MatrixTools.addMatrixBlock(quadraticExpected, 0, 0, feedbackTask.quadraticTerm, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(linearExpected, 0, 0, feedbackTask.linearTerm, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(scalarExpected, 0, 0, feedbackTask.residualCost, 0, 0, 1, 1, 1.0);
+
+      MatrixTools.addMatrixBlock(quadraticExpected, 4, 4, footstepTask.quadraticTerm, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(linearExpected, 4, 0, footstepTask.linearTerm, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(scalarExpected, 0, 0, footstepTask.residualCost, 0, 0, 1, 1, 1.0);
+
+      MatrixTools.addMatrixBlock(quadraticExpected, 4, 4, footstepRegularizationTask.quadraticTerm, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(linearExpected, 4, 0, footstepRegularizationTask.linearTerm, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(scalarExpected, 0, 0, footstepRegularizationTask.residualCost, 0, 0, 1, 1, 1.0);
+
+      MatrixTools.addMatrixBlock(quadraticExpected, 2, 2, angularMomentumTask.quadraticTerm, 0, 0, 2, 2, 1.0);
+      MatrixTools.addMatrixBlock(linearExpected, 2, 0, angularMomentumTask.linearTerm, 0, 0, 2, 1, 1.0);
+      MatrixTools.addMatrixBlock(scalarExpected, 0, 0, angularMomentumTask.residualCost, 0, 0, 1, 1, 1.0);
+
+      Assert.assertTrue(MatrixFeatures.isEquals(quadraticExpected, quadratic, 1e-7));
+      Assert.assertTrue(MatrixFeatures.isEquals(linearExpected, linear, 1e-7));
+      Assert.assertTrue(MatrixFeatures.isEquals(scalarExpected, scalar, 1e-7));
    }
 
 
