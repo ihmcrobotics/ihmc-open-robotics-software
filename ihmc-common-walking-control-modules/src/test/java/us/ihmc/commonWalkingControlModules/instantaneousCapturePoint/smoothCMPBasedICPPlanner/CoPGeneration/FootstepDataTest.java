@@ -38,7 +38,7 @@ public class FootstepDataTest
       assertTrue(testObject.getFootstep() == newFootstep);
    }
    
-   @Test 
+   @Test(timeout = 30000)
    public void testCopy()
    {
       Footstep footstep = new Footstep(RobotSide.RIGHT);

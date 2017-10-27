@@ -82,7 +82,7 @@ public class RigidBodyControlManagerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(expected = RuntimeException.class)
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testFailWithoutGains()
    {
       RigidBodyControlManager manager = createManager();
