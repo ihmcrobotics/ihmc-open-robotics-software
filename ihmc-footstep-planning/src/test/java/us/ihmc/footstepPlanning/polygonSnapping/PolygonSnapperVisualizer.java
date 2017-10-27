@@ -53,6 +53,7 @@ public class PolygonSnapperVisualizer
       scs.addYoGraphic(snappedPolygonViz);
 
       scs.addYoVariableRegistry(registry);
+      scs.setGroundVisible(false);
       scs.startOnAThread();
    }
 
