@@ -37,7 +37,7 @@ public class SmoothCapturePointAdjustmentToolbox
    private final DenseMatrix64F boundaryConditionMatrixInverse = new DenseMatrix64F(defaultSize, defaultSize);
    private final DenseMatrix64F boundaryConditionVector = new DenseMatrix64F(defaultSize, 1);
 
-   private final LinearSolver<DenseMatrix64F> pseudoInverseSolver = new DampedLeastSquaresSolver(defaultSize, 0.001);
+   private final LinearSolver<DenseMatrix64F> pseudoInverseSolver = new DampedLeastSquaresSolver(defaultSize, 0.0);
 
    private List<FrameTuple3D<?, ?>> icpQuantityInitialConditionList = new ArrayList<FrameTuple3D<?, ?>>();
 
