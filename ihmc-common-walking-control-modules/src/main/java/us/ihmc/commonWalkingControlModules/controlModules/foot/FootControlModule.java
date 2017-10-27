@@ -35,7 +35,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class FootControlModule
 {
-   public static final boolean ENABLE_TOUCHDOWN_STATE = false;
+   public static final boolean ENABLE_TOUCHDOWN_STATE = true;
 
    private final YoVariableRegistry registry;
    private final ContactablePlaneBody contactableFoot;
