@@ -88,6 +88,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    private final List<YoDouble> swingDurations;
    private final List<YoDouble> transferDurations;
+   private final List<YoDouble> touchdownDurations;
    private final List<YoDouble> swingSplitFractions;
    private final List<YoDouble> swingDurationShiftFractions;
    private final List<YoDouble> transferSplitFractions;
@@ -141,7 +142,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
     */
    public ReferenceCoPTrajectoryGenerator(String namePrefix, int numberOfPointsPerFoot, int maxNumberOfFootstepsToConsider,
                                           BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                          YoInteger numberFootstepsToConsider, List<YoDouble> swingDurations, List<YoDouble> transferDurations,
+                                          YoInteger numberFootstepsToConsider, List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> touchdownDurations,
                                           List<YoDouble> swingSplitFractions, List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions,
                                           YoVariableRegistry parentRegistry)
    {
@@ -162,6 +163,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
       this.swingDurations = swingDurations;
       this.transferDurations = transferDurations;
+      this.touchdownDurations = touchdownDurations;
       this.swingSplitFractions = swingSplitFractions;
       this.swingDurationShiftFractions = swingDurationShiftFractions;
       this.transferSplitFractions = transferSplitFractions;
@@ -877,8 +879,17 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private double getSwingSegmentTimes(int segmentIndex, int footstepIndex)
    {
       double swingTime = swingDurations.get(footstepIndex).getDoubleValue();
+      double touchdownDuration = touchdownDurations.get(footstepIndex).getDoubleValue();
       if (swingTime <= 0.0 || !Double.isFinite(swingTime))
+      {
          swingTime = defaultSwingTime;
+      }
+      
+      if (Double.isFinite(touchdownDuration) && touchdownDuration > 0.0)
+      {
+         swingTime += touchdownDuration;
+      }
+      
       switch (segmentIndex)
       {
       case 0:
