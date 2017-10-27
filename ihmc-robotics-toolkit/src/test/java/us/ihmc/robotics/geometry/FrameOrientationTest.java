@@ -68,7 +68,7 @@ public class FrameOrientationTest
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test
+	@Test(timeout = 30000)
 	public void testSetOrientationFromOneToTwo()
 	{
 	   Random random = new Random(1776L);
