@@ -18,7 +18,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class ArmTrajectoryCommandTest
 {
 
-   @Test(expected = IndexOutOfBoundsException.class)
+   @Test(timeout = 30000, expected = IndexOutOfBoundsException.class)
    public void testClear()
    {
       ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand();
