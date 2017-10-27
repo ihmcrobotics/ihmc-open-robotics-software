@@ -24,7 +24,7 @@ public class CoPPlanningToolsTest
       assertTrue(CoPPlanningTools.getCoPPointIndex(list, CoPPointName.MIDFEET_COP) == -1);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testArrayListLinearSearch()
    {
       ArrayList<CoPPointName> list = new ArrayList<>();
