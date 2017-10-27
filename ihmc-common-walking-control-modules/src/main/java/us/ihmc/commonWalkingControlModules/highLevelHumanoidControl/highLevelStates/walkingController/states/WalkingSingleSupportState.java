@@ -185,22 +185,19 @@ public class WalkingSingleSupportState extends SingleSupportState
    @Override
    public boolean isDone()
    {
-      if(FootControlModule.ENABLE_TOUCHDOWN_STATE)
+      if (FootControlModule.ENABLE_TOUCHDOWN_STATE)
       {
-         if(!feetManager.isInTouchdown(swingSide))
+         boolean touchdownHasCompleted = feetManager.isInTouchdown(swingSide) && feetManager.isTouchdownFinished(swingSide);
+         boolean icpErrorIsTooLarge = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
+         
+         if (super.isDone() && (icpErrorIsTooLarge || touchdownHasCompleted))
          {
-            return false;
-         }
-         if (super.isDone())
-         {
-            if (feetManager.isInTouchdown(swingSide) && !feetManager.isTouchdownFinished(swingSide))
-            {
-               return false;
-            }
             return true;
          }
+
+         return false;
       }
-      
+
       if (super.isDone())
       {
          return true;
