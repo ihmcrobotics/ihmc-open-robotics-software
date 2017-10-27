@@ -35,8 +35,6 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class FootControlModule
 {
-   public static final boolean ENABLE_TOUCHDOWN_STATE = true;
-
    private final YoVariableRegistry registry;
    private final ContactablePlaneBody contactableFoot;
 
@@ -166,10 +164,7 @@ public class FootControlModule
          }
       }
       
-      if(ENABLE_TOUCHDOWN_STATE)
-      {
-         swingState.addDoneWithStateTransition(ConstraintType.TOUCHDOWN);
-      }
+      swingState.addDoneWithStateTransition(ConstraintType.TOUCHDOWN);
 
       for (AbstractFootControlState state : states)
       {
@@ -283,6 +278,12 @@ public class FootControlModule
       stateMachine.setCurrentState(getCurrentConstraintType());
    }
    
+   public boolean isTouchdownEnabled()
+   {
+      double touchdownDuration = this.touchdownDuration.getDoubleValue();
+      return Double.isFinite(touchdownDuration) && touchdownDuration > 0.0;
+   }
+   
    public boolean isTouchdownFinished()
    {
       return touchdownState.isDone();
@@ -361,6 +362,7 @@ public class FootControlModule
    public void setFootstep(Footstep footstep, double swingTime, double touchdownTime)
    {
       touchdownDuration.set(touchdownTime);
+      swingState.enableFinishTransition(isTouchdownEnabled());
       swingState.setFootstep(footstep, swingTime);
    }
 
