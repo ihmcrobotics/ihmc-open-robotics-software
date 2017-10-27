@@ -12,23 +12,28 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
  */
 public class SimpleICPQPInputCalculator
 {
-   private static final boolean consider_angular_momentum_in_adjustment = true;
-   private static final boolean consider_feedback_in_adjustment = true;
+   private boolean considerAngularMomentumInAdjustment = true;
+   private boolean considerFeedbackInAdjustment = true;
 
    /** Input calculator that formulates the different objectives and handles adding them to the full program. */
    public SimpleICPQPIndexHandler indexHandler;
 
-   private static final DenseMatrix64F identity = CommonOps.identity(2, 2);
+   private final DenseMatrix64F identity = CommonOps.identity(2, 2);
    private final DenseMatrix64F tmpObjective = new DenseMatrix64F(2, 1);
    private final DenseMatrix64F tmpScalar = new DenseMatrix64F(1, 1);
 
    private final DenseMatrix64F feedbackJacobian = new DenseMatrix64F(2, 6);
    private final DenseMatrix64F feedbackJtW = new DenseMatrix64F(6, 2);
    private final DenseMatrix64F feedbackObjective = new DenseMatrix64F(2, 1);
+   private final DenseMatrix64F feedbackObjtW = new DenseMatrix64F(1, 2);
 
    private final DenseMatrix64F adjustmentJacobian = new DenseMatrix64F(2,6);
    private final DenseMatrix64F adjustmentJtW = new DenseMatrix64F(6,2);
    private final DenseMatrix64F adjustmentObjective = new DenseMatrix64F(2, 1);
+   private final DenseMatrix64F adjustmentObjtW = new DenseMatrix64F(1, 2);
+
+   private final DenseMatrix64F invertedFeedbackGain = new DenseMatrix64F(2, 2);
+
 
    /**
     * Creates the ICP Quadratic Problem Input Calculator. Refer to the class documentation: {@link SimpleICPQPInputCalculator}.
@@ -38,6 +43,24 @@ public class SimpleICPQPInputCalculator
    public SimpleICPQPInputCalculator(SimpleICPQPIndexHandler indexHandler)
    {
       this.indexHandler = indexHandler;
+   }
+
+   /**
+    * Sets whether or not the footstep adjustment should have knowledge of trying to use angular momentum for balance.
+    * By default, this is true.
+    */
+   public void setConsiderAngularMomentumInAdjustment(boolean considerAngularMomentumInAdjustment)
+   {
+      this.considerAngularMomentumInAdjustment = considerAngularMomentumInAdjustment;
+   }
+
+   /**
+    * Sets whether or not the footstep adjustment should have knowledge of trying to use cop feedback for balance.
+    * By default, this is true.
+    */
+   public void setConsiderFeedbackInAdjustment(boolean considerFeedbackInAdjustment)
+   {
+      this.considerFeedbackInAdjustment = considerFeedbackInAdjustment;
    }
 
    /**
@@ -134,7 +157,8 @@ public class SimpleICPQPInputCalculator
    public void computeDynamicsTask(ICPQPInput icpQPInput, DenseMatrix64F currentICPError, DenseMatrix64F referenceFootstepLocation,
          DenseMatrix64F feedbackGain, DenseMatrix64F weight, double footstepRecursionMultiplier, double footstepAdjustmentSafetyFactor)
    {
-      DiagonalMatrixTools.invertDiagonalMatrix(feedbackGain);
+      invertedFeedbackGain.zero();
+      DiagonalMatrixTools.invertDiagonalMatrix(feedbackGain, invertedFeedbackGain);
 
       int size = 2;
       if (indexHandler.useAngularMomentum())
@@ -150,23 +174,25 @@ public class SimpleICPQPInputCalculator
       feedbackJacobian.zero();
       feedbackJtW.zero();
       feedbackObjective.zero();
+      feedbackObjtW.zero();
 
       adjustmentJacobian.zero();
       adjustmentJtW.zero();
       adjustmentObjective.zero();
+      adjustmentObjtW.zero();
 
-      MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), feedbackGain, 0, 0, 2, 2, 1.0);
+      MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFeedbackCMPIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
       if (indexHandler.useAngularMomentum())
-         MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getAngularMomentumIndex(), feedbackGain, 0, 0, 2, 2, 1.0);
+         MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
       if (indexHandler.useStepAdjustment())
       {
          CommonOps.setIdentity(identity);
          CommonOps.scale(footstepRecursionMultiplier / footstepAdjustmentSafetyFactor, identity, identity);
 
-         if (consider_angular_momentum_in_adjustment)
-         {
+         if (considerFeedbackInAdjustment && (considerAngularMomentumInAdjustment || !indexHandler.useAngularMomentum()))
+         { // we only have one task, which is to use feedback and step adjustment
             MatrixTools.setMatrixBlock(feedbackJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
 
             MatrixTools.addMatrixBlock(feedbackObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
@@ -175,8 +201,8 @@ public class SimpleICPQPInputCalculator
          {
             MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFootstepStartIndex(), identity, 0, 0, 2, 2, 1.0);
 
-            if (consider_feedback_in_adjustment)
-               MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getFeedbackCMPIndex(), feedbackGain, 0, 0, 2, 2, 1.0);
+            if (considerAngularMomentumInAdjustment && indexHandler.useAngularMomentum())
+               MatrixTools.setMatrixBlock(adjustmentJacobian, 0, indexHandler.getAngularMomentumIndex(), invertedFeedbackGain, 0, 0, 2, 2, 1.0);
 
             MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, referenceFootstepLocation, 0, 0, 2, 1, footstepRecursionMultiplier);
             MatrixTools.addMatrixBlock(adjustmentObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
@@ -186,7 +212,7 @@ public class SimpleICPQPInputCalculator
       MatrixTools.addMatrixBlock(feedbackObjective, 0, 0, currentICPError, 0, 0, 2, 1, 1.0);
 
       CommonOps.multTransA(feedbackJacobian, weight, feedbackJtW);
-      CommonOps.multTransA(5.0, adjustmentJacobian, weight, adjustmentJtW);
+      CommonOps.multTransA(adjustmentJacobian, weight, adjustmentJtW);
 
       CommonOps.multAdd(feedbackJtW, feedbackJacobian, icpQPInput.quadraticTerm);
       CommonOps.multAdd(adjustmentJtW, adjustmentJacobian, icpQPInput.quadraticTerm);
@@ -194,7 +220,12 @@ public class SimpleICPQPInputCalculator
       CommonOps.multAdd(feedbackJtW, feedbackObjective, icpQPInput.linearTerm);
       CommonOps.multAdd(adjustmentJtW, adjustmentObjective, icpQPInput.linearTerm);
 
-      // todo residual cost
+
+      CommonOps.multTransA(feedbackObjective, weight, feedbackObjtW);
+      CommonOps.multTransA(adjustmentObjective, weight, adjustmentObjtW);
+
+      CommonOps.multAdd(0.5, feedbackObjtW, feedbackObjective, icpQPInput.residualCost);
+      CommonOps.multAdd(0.5, adjustmentObjtW, adjustmentObjective, icpQPInput.residualCost);
    }
 
    /**
