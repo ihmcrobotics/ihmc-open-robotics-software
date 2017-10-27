@@ -32,7 +32,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  * @author Alex Graber-Tilton
  *
  */
-public class WalkToGoalBehavior extends AbstractBehavior
+public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
 {
 
    private final YoBoolean DEBUG = new YoBoolean("DEBUG", registry);
@@ -69,7 +69,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
    private int expectedIndex = 0;
    private RobotSide lastSide = null;
 
-   public WalkToGoalBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, YoDouble yoTime)
+   public WalkToGoalWithPlanningBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, YoDouble yoTime)
    {
       super(outgoingCommunicationBridge);
       DEBUG.set(true);

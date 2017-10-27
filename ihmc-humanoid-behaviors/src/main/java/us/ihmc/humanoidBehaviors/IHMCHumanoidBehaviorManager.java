@@ -17,7 +17,7 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickUpBallBehaviorSt
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalWithPlanningBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.PartialFootholdBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestICPOptimizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestSmoothICPPlannerBehavior;
@@ -289,8 +289,8 @@ public class IHMCHumanoidBehaviorManager
             behaviorCommunicationBridge, wholeBodyControllerParameters, yoSupportPolygon, yoGraphicsListRegistry);
       dispatcher.addBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
 
-      WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(behaviorCommunicationBridge, fullRobotModel, yoTime);
-      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
+      WalkToGoalWithPlanningBehavior walkToGoalWithPlanningBehavior = new WalkToGoalWithPlanningBehavior(behaviorCommunicationBridge, fullRobotModel, yoTime);
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalWithPlanningBehavior);
 
    }
 
