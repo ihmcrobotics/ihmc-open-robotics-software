@@ -74,7 +74,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    private final YoDouble jointlimitScore = new YoDouble("jointlimitScore", registry);
 
-   private double bestScoreInitialGuess = 0;
+   private double bestScoreInitialGuess = 0.0;
 
    private final YoInteger cntKinematicSolver = new YoInteger("cntKinematicSolver", registry);
 
@@ -182,7 +182,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          break;
       case FIND_INITIAL_GUESS:
 
-         findInitialGuess();
+         // findInitialGuess();
+         findInitialGuess2();
 
          break;
       case EXPAND_TREE:
@@ -353,6 +354,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       {
          tree.connectNewNode(false);
 
+         // Option1 : Toway Expanding strategy.
          //         tree.updateNearestNodeTaskOnly();
          //                  
          //         tree.updateNewConfiguration();         
@@ -373,6 +375,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       }
 
       visualizedNode = tree.getNewNode().createNodeCopy();
+      // TODO
       visualizedNode.setValidity(tree.getNewNode().getValidity());
 
       double jointScore = kinematicsSolver.getArmJointLimitScore();
@@ -431,6 +434,59 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
          if (rootNode.getValidity() == false)
          {
+            terminateToolboxController();
+         }
+         else
+         {
+            state = CWBToolboxState.EXPAND_TREE;
+
+            rootNode.convertDataToNormalizedData(taskRegion);
+
+            PrintTools.info("" + bestScoreInitialGuess);
+            for (int i = 0; i < rootNode.getDimensionOfNodeData(); i++)
+               PrintTools.info("" + i + " " + rootNode.getNodeData(i));
+
+            tree = new CTTaskNodeTree(rootNode);
+            tree.setTaskRegion(taskRegion);
+         }
+      }
+   }
+   
+   private void findInitialGuess2()
+   {
+      CTTaskNode initialGuessNode = new GenericTaskNode();
+
+      CTTreeTools.setRandomNormalizedNodeData(initialGuessNode, true, 0.0);
+      initialGuessNode.setNormalizedNodeData(0, 0);
+      initialGuessNode.convertNormalizedDataToData(taskRegion);
+      
+      updateValidity(initialGuessNode);
+      
+      visualizedNode = initialGuessNode;
+      
+      double jointScore = kinematicsSolver.getArmJointLimitScore();
+      
+      jointlimitScore.set(jointScore);
+      
+      if (bestScoreInitialGuess < jointScore && visualizedNode.getValidity() == true)
+      {
+         bestScoreInitialGuess = jointScore;
+
+         rootNode = visualizedNode.createNodeCopy();
+         rootNode.setValidity(visualizedNode.getValidity());
+      }
+      
+      /*
+       * terminate finding initial guess.
+       */
+      numberOfInitialGuess -= 1;
+      if (numberOfInitialGuess < 1)
+      {
+         PrintTools.info("initial guess terminate");
+
+         if (rootNode.getValidity() == false)
+         {
+            PrintTools.info("Real???? ");
             terminateToolboxController();
          }
          else
@@ -546,7 +602,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private boolean updateValidity(CTTaskNode node)
    {
       long astartTime = System.currentTimeMillis();
-
+      
       if (node.getParentNode() != null)
       {
          kinematicsSolver.updateRobotConfigurationData(node.getParentNode().getConfiguration());
