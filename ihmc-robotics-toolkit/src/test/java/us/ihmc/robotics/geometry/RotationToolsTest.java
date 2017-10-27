@@ -412,7 +412,7 @@ public class RotationToolsTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testComputeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate() throws Exception
    {
       double dt = 1.0e-8;
@@ -449,7 +449,7 @@ public class RotationToolsTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testComputeAngularVelocityInWorldFrameFromYawPitchRollAnglesRate() throws Exception
    {
       for (int i = 0; i < 1000; i++)
@@ -476,7 +476,7 @@ public class RotationToolsTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void computeYawPitchRollAngleRatesFromAngularVelocityInBodyFrame() throws Exception
    {
       for (int i = 0; i < 1000; i++)
@@ -501,7 +501,7 @@ public class RotationToolsTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void computeYawPitchRollAngleRatesFromAngularVelocityInWorldFrame() throws Exception
    {
       for (int i = 0; i < 1000; i++)

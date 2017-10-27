@@ -19,7 +19,7 @@ public class ValkyriePointCloudDataReceiverTest extends HumanoidPointCloudDataRe
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 28.6)
-   @Test
+   @Test(timeout = 30000)
    public void testIsReceivingScansAnd95PercentOfPointsAreCorrect() throws SimulationExceededMaximumTimeException
    {
       super.testIsReceivingScansAnd95PercentOfPointsAreCorrect();

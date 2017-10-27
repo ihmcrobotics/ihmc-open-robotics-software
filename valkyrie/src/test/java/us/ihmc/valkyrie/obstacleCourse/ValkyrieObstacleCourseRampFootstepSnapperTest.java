@@ -29,7 +29,7 @@ public class ValkyrieObstacleCourseRampFootstepSnapperTest extends DRCObstacleCo
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 50.0)
-   @Test
+   @Test(timeout = 30000)
    public void testWalkingUpRampUsingSnapFootsteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpRampUsingSnapFootsteps();

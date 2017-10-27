@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 public class ExpandingPolytopeAlgorithmTest
 {
 
-   @Test
+   @Test(timeout = 30000)
    public void testWithAPointInsideACube()
    {
       double epsilonRelative = 1e-5;
@@ -68,7 +68,7 @@ public class ExpandingPolytopeAlgorithmTest
       EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.0, 0.0, 0.05), closestPointOnB, 1e-7);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testWithTwoCollidingCubes()
    {
       double epsilonRelative = 1e-5;
@@ -105,7 +105,7 @@ public class ExpandingPolytopeAlgorithmTest
       EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.7, 2.75, 4.0), closestPointOnB, 1e-7);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testExtensivelyWithTwoCubes()
    {
       Random random = new Random(1999L);
@@ -167,7 +167,7 @@ public class ExpandingPolytopeAlgorithmTest
       assertTrue("numberOfCollisions = " + numberOfCollisions, numberOfCollisions > 500);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testExtensivelyWithPolytopes()
    {
       Random random = new Random(1886L);
@@ -264,7 +264,7 @@ public class ExpandingPolytopeAlgorithmTest
       assertTrue("numberOfCollisions = " + numberOfCollisions, numberOfCollisions > 500);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testExtensivelyWithCylinders()
    {
       Random random = new Random(1886L);
@@ -365,7 +365,7 @@ public class ExpandingPolytopeAlgorithmTest
       assertTrue("numberOfCollisions = " + numberOfCollisions, numberOfCollisions > 500);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testTroublesomeCubes()
    {
       double epsilonRelative = 1e-5;
@@ -408,7 +408,7 @@ public class ExpandingPolytopeAlgorithmTest
       EuclidCoreTestTools.assertTuple3DEquals(new Point3D(-0.6654362950758336, 0.0120271553579471, 0.005), closestPointOnB, 1e-7);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testTroublesomeCylinder()
    {
       double epsilonRelative = 1e-5;
