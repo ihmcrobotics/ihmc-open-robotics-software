@@ -757,8 +757,7 @@ public class WheneverWholeBodyKinematicsSolver
 
    private void putHandTrajectoryMessages()
    {
-//      for (RobotSide robotSide : RobotSide.values)
-      RobotSide robotSide = RobotSide.LEFT;
+      for (RobotSide robotSide : RobotSide.values)      
       {
          if (handFramePoses.get(robotSide).containsNaN())
          {
