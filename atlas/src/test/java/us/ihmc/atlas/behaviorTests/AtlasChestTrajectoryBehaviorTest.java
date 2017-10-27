@@ -38,7 +38,7 @@ public class AtlasChestTrajectoryBehaviorTest extends DRCChestTrajectoryBehavior
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 32.5)
-   @Test
+   @Test(timeout = 420000)
    public void testSingleRandomChestOrientationMove() throws SimulationExceededMaximumTimeException
    {
       super.testSingleRandomChestOrientationMove();
