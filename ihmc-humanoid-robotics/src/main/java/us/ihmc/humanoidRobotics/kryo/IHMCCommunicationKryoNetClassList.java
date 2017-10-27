@@ -546,5 +546,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(ObjectDetectorResultPacket.class);
 
       registerPacketClass(RequestStereoPointCloudMessage.class);
+      registerPacketClass(StereoVisionPointCloudMessage.class);
    }
 }
