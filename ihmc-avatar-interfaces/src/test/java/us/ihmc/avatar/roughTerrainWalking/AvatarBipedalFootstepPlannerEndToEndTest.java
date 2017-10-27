@@ -131,7 +131,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testShortCinderBlockFieldWithAStar() throws IOException
    {
       double courseLength = CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS * CINDER_BLOCK_SIZE + CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
@@ -142,7 +142,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testShortCinderBlockFieldWithPlanarRegionBipedalPlanner() throws IOException
    {
       double courseLength = CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS * CINDER_BLOCK_SIZE + CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
@@ -153,7 +153,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSteppingStonesWithAStar() throws IOException
    {
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, -0.75, 0.007, 0.5 * Math.PI);
@@ -163,7 +163,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSteppingStonesWithPlanarRegionBipedalPlanner() throws IOException
    {
       DRCStartingLocation startingLocation = () -> new OffsetAndYawRobotInitialSetup(0.0, -0.75, 0.007, 0.5 * Math.PI);

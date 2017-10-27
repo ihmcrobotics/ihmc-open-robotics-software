@@ -27,7 +27,7 @@ public class AtlasPlaybackPoseSequenceTest extends PlaybackPoseSequenceDRCTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test
+   @Test(timeout = 30000)
    public void testReadAndWriteWithRandomSequence()
    {
       super.testReadAndWriteWithRandomSequence();

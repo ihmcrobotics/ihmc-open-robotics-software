@@ -33,7 +33,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test
+   @Test(timeout = 30000)
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
    {
       super.testCustomControlFrame();
@@ -41,7 +41,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test
+   @Test(timeout = 30000)
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
       super.testMessageWithTooManyTrajectoryPoints();
@@ -49,7 +49,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test
+   @Test(timeout = 30000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
       super.testMultipleTrajectoryPoints();
@@ -57,7 +57,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 40.0)
-   @Test
+   @Test(timeout = 30000)
    public void testQueuedMessages() throws Exception
    {
       super.testQueuedMessages();
@@ -65,7 +65,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
       super.testQueueStoppedWithOverrideMessage();
@@ -73,7 +73,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test
+   @Test(timeout = 30000)
    public void testQueueWithWrongPreviousId() throws Exception
    {
       super.testQueueWithWrongPreviousId();
@@ -81,7 +81,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSingleTrajectoryPoint() throws Exception
    {
       super.testSingleTrajectoryPoint();
@@ -89,7 +89,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test
+   @Test(timeout = 30000)
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();

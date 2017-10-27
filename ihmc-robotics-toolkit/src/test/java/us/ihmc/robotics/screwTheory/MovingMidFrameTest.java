@@ -11,7 +11,7 @@ import org.junit.Test;
 
 public class MovingMidFrameTest
 {
-   @Test
+   @Test(timeout = 30000)
    public void testAgainstFiniteDifferenceWithChainRobot()
    {
       Random random = new Random(3452345L);

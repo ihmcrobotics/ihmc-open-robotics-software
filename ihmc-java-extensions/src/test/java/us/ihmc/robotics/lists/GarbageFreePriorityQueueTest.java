@@ -16,7 +16,7 @@ import us.ihmc.commons.MutationTestFacilitator;
 public class GarbageFreePriorityQueueTest
 {
 
-   @Test
+   @Test(timeout = 30000)
    public void testQueueablepriorityQueue()
    {
       PriorityQueue<TestComparable> priorityQueue = new PriorityQueue<TestComparable>(10, TestComparable.class);
@@ -34,7 +34,7 @@ public class GarbageFreePriorityQueueTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testSameDelay()
    {
       PriorityQueue<TestComparable> priorityQueue = new PriorityQueue<TestComparable>(10, TestComparable.class);
@@ -56,7 +56,7 @@ public class GarbageFreePriorityQueueTest
       assertEquals(10, index);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testAddingInOrder()
    {
       PriorityQueue<TestComparable> priorityQueue = new PriorityQueue<TestComparable>(10, TestComparable.class);
@@ -77,7 +77,7 @@ public class GarbageFreePriorityQueueTest
       assertEquals(10, index);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testPop()
    {
       PriorityQueue<TestComparable> priorityQueue = new PriorityQueue<TestComparable>(10, TestComparable.class);
@@ -98,7 +98,7 @@ public class GarbageFreePriorityQueueTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testPopExtended()
    {
       int numberOfCommands = 100;
@@ -141,7 +141,7 @@ public class GarbageFreePriorityQueueTest
       }
    }
    
-   @Test
+   @Test(timeout = 30000)
    public void testPeek()
    { 
       PriorityQueue<TestComparable> priorityQueue = new PriorityQueue<TestComparable>(10, TestComparable.class);
@@ -152,7 +152,7 @@ public class GarbageFreePriorityQueueTest
       assertEquals(1, priorityQueue.getSize());
    }
    
-   @Test
+   @Test(timeout = 30000)
    public void testPopWhenEmpty()
    { 
       PriorityQueue<TestComparable> priorityQueue = new PriorityQueue<TestComparable>(10, TestComparable.class);
@@ -160,7 +160,7 @@ public class GarbageFreePriorityQueueTest
       assertEquals(0, priorityQueue.getSize());
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testClear()
    { 
       PriorityQueue<TestComparable> priorityQueue = new PriorityQueue<TestComparable>(10, TestComparable.class);
