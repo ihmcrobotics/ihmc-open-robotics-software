@@ -3,10 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Wrench;
