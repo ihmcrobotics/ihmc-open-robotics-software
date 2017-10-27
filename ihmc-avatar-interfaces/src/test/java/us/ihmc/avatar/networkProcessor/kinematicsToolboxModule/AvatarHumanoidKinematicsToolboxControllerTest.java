@@ -63,7 +63,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements MultiRobotTestInterface
 {
-   private static final boolean VERBOSE = true;
+   private static final boolean VERBOSE = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
@@ -389,7 +389,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       {
          PrintTools.info(this, "Solution quality: average = " + averageSolutionQuality + ", worst = " + worstSolutionQuality);
       }
-      assertTrue("Poor worst solution quality: " + worstSolutionQuality, worstSolutionQuality < 1.0e-3);
+      assertTrue("Poor worst solution quality: " + worstSolutionQuality, worstSolutionQuality < 2.0e-3);
       assertTrue("Poor average solution quality: " + averageSolutionQuality, averageSolutionQuality < 1.0e-4);
    }
 
