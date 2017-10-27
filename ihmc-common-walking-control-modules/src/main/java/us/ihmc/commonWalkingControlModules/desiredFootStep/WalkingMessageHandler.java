@@ -70,6 +70,7 @@ public class WalkingMessageHandler
    private final YoDouble defaultTransferTime = new YoDouble("defaultTransferTime", registry);
    private final YoDouble finalTransferTime = new YoDouble("finalTransferTime", registry);
    private final YoDouble defaultSwingTime = new YoDouble("defaultSwingTime", registry);
+   private final YoDouble defaultTouchdownTime = new YoDouble("defaultTouchdownTime", registry);
    private final YoDouble defaultInitialTransferTime = new YoDouble("defaultInitialTransferTime", registry);
 
    private final YoDouble defaultFinalTransferTime = new YoDouble("defaultFinalTransferTime", registry);
@@ -95,13 +96,13 @@ public class WalkingMessageHandler
    private final YoBoolean offsettingPlanWithFootstepError = new YoBoolean("offsettingPlanWithFootstepError", registry);
    private final FrameVector3D planOffsetInWorld = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
-   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime, double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, defaultFinalTransferTime, contactableFeet, statusOutputManager, null, yoGraphicsListRegistry, parentRegistry);
+      this(defaultTransferTime, defaultSwingTime, defaultTouchdownTime, defaultInitialTransferTime, defaultFinalTransferTime, contactableFeet, statusOutputManager, null, yoGraphicsListRegistry, parentRegistry);
    }
 
-   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime, double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          StatusMessageOutputManager statusOutputManager, YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
@@ -114,6 +115,7 @@ public class WalkingMessageHandler
 
       this.defaultTransferTime.set(defaultTransferTime);
       this.defaultSwingTime.set(defaultSwingTime);
+      this.defaultTouchdownTime.set(defaultTouchdownTime);
       this.defaultInitialTransferTime.set(defaultInitialTransferTime);
       this.defaultFinalTransferTime.set(defaultFinalTransferTime);
       this.finalTransferTime.set(defaultFinalTransferTime);
@@ -582,6 +584,11 @@ public class WalkingMessageHandler
    {
       return defaultSwingTime.getDoubleValue();
    }
+   
+   public double getDefaultTouchdownTime()
+   {
+      return defaultTouchdownTime.getDoubleValue();
+   }
 
    public double getNextSwingTime()
    {
@@ -709,8 +716,14 @@ public class WalkingMessageHandler
          else
             transferDuration = defaultTransferTime.getDoubleValue();
       }
+      
+      double touchdownDuration = footstep.getTouchdownDuration();
+      if(Double.isNaN(touchdownDuration) || touchdownDuration < 0.0)
+      {
+         touchdownDuration = defaultTouchdownTime.getDoubleValue();
+      }
 
-      timingToSet.setTimings(swingDuration, transferDuration);
+      timingToSet.setTimings(swingDuration, touchdownDuration, transferDuration);
 
       switch (executionTiming)
       {
