@@ -54,6 +54,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimpleOcclusionTests
 {
@@ -114,6 +115,7 @@ public class SimpleOcclusionTests
       List<YoGraphicPolygon> polygonVisualizations = null;
 
       YoBoolean plannerFailed = new YoBoolean("PlannerFailed", registry);
+      YoDouble solveTime = new YoDouble("SolveTime", registry);
 
       if (visualize)
       {
@@ -237,6 +239,7 @@ public class SimpleOcclusionTests
             long startTime = System.currentTimeMillis();
             FootstepPlanningResult result = planner.plan();
             double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
+            solveTime.set(seconds);
 
             if (seconds > maxSolveTime)
             {
@@ -256,7 +259,8 @@ public class SimpleOcclusionTests
          catch (Exception e)
          {
             // The catch needs to be removed once the visibility graph is improved.
-            PrintTools.info("Planner threw exception.");
+            PrintTools.info("Planner threw exception:");
+            e.printStackTrace();
          }
 
          if (plan == null)
