@@ -2,6 +2,9 @@ package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -23,7 +26,25 @@ public class FootstepNodeSnappingTools
                                                                      RigidBodyTransform snapTransform)
    {
       ArrayList<ConvexPolygon2D> intersections = new ArrayList<>();
-      footPolygon.applyTransformAndProjectToXYPlane(snapTransform);
+      ConvexPolygon2D footPolygonInPlaneFrame = new ConvexPolygon2D();
+
+      RigidBodyTransform inverseSnapTransform = new RigidBodyTransform(snapTransform);
+      inverseSnapTransform.invert();
+
+      RigidBodyTransform worldToRegion = new RigidBodyTransform();
+      planarRegion.getTransformToWorld(worldToRegion);
+      worldToRegion.invert();
+
+      for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly vertex = footPolygon.getVertex(i);
+         Vector4D transformPoint = new Vector4D(vertex.getX(), vertex.getY(), 0.0, 1.0);
+         snapTransform.transform(transformPoint);
+         worldToRegion.transform(transformPoint);
+         footPolygonInPlaneFrame.addVertex(transformPoint.getX(), transformPoint.getY());
+      }
+      footPolygonInPlaneFrame.update();
+
       planarRegion.getPolygonIntersectionsWhenProjectedVertically(footPolygon, intersections);
       return getConvexHull(intersections);
    }
