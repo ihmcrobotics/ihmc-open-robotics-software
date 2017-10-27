@@ -30,9 +30,9 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
-import us.ihmc.pathPlanning.tools.PointCloudTools;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
-import us.ihmc.pathPlanning.visibilityGraphs.PlanarRegionTools;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PointCloudTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -95,7 +95,7 @@ public class FootstepPlanningWithBodyPathTest
       TextureColorPalette colorPalette = new TextureColorAdaptivePalette();
       JavaFXMultiColorMeshBuilder javaFXMultiColorMeshBuilder = new JavaFXMultiColorMeshBuilder(colorPalette);
       NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(regions, javaFXMultiColorMeshBuilder);
-      ArrayList<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+      List<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
       for (Point3D waypoint3d : path)
       {
          waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));

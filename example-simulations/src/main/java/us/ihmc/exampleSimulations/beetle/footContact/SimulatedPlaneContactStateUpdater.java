@@ -8,9 +8,11 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameTuple2D;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -231,30 +233,6 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       }
 
       @Override
-      public void getPosition2d(FramePoint2D framePoint2dToPack)
-      {
-
-      }
-
-      @Override
-      public void getPosition2d(Point2D position2d)
-      {
-
-      }
-
-      @Override
-      public void setPosition(FramePoint3D position)
-      {
-
-      }
-
-      @Override
-      public void setPosition2d(FramePoint2D position2d)
-      {
-
-      }
-
-      @Override
       public ReferenceFrame getReferenceFrame()
       {
          return null;
@@ -264,6 +242,30 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       public PlaneContactState getParentContactState()
       {
          return null;
+      }
+
+      @Override
+      public void getPosition2d(FrameTuple2D<?, ?> framePoint2dToPack)
+      {
+         
+      }
+
+      @Override
+      public void getPosition2d(Tuple2DBasics position2d)
+      {
+         
+      }
+
+      @Override
+      public void setPosition(FrameTuple3D<?, ?> position)
+      {
+         
+      }
+
+      @Override
+      public void setPosition2d(FrameTuple2D<?, ?> position2d)
+      {
+         
       }
 
    }

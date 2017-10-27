@@ -54,9 +54,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       double trajectoryTime = 1.0;
       RigidBody pelvis = fullRobotModel.getPelvis();
 
-      FramePoint3D desiredRandomPelvisPosition = new FramePoint3D(pelvis.getBodyFixedFrame());
-      desiredRandomPelvisPosition.set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
-      desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ() - 0.1);
+      FramePoint3D desiredRandomPelvisPosition = getRandomPelvisPosition(random, pelvis);
       Point3D desiredPosition = new Point3D();
 
       desiredRandomPelvisPosition.get(desiredPosition);
@@ -92,6 +90,14 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
+   protected FramePoint3D getRandomPelvisPosition(Random random, RigidBody pelvis)
+   {
+      FramePoint3D desiredRandomPelvisPosition = new FramePoint3D(pelvis.getBodyFixedFrame());
+      desiredRandomPelvisPosition.set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
+      desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ() - 0.1);
+      return desiredRandomPelvisPosition;
+   }
+
    public void testSingleWaypointInUserMode() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -113,9 +119,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       double trajectoryTime = 1.0;
       RigidBody pelvis = fullRobotModel.getPelvis();
 
-      FramePoint3D desiredRandomPelvisPosition = new FramePoint3D(pelvis.getBodyFixedFrame());
-      desiredRandomPelvisPosition.set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
-      desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ() - 0.05);
+      FramePoint3D desiredRandomPelvisPosition = getRandomPelvisPosition(random, pelvis);
       Point3D desiredPosition = new Point3D();
 
       desiredRandomPelvisPosition.get(desiredPosition);

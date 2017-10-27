@@ -474,6 +474,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       managerFactory.initializeManagers();
 
       commandInputManager.flushAllCommands();
+      walkingMessageHandler.clearFootsteps();
+      walkingMessageHandler.clearFootTrajectory();
 
       privilegedConfigurationCommand.clear();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
