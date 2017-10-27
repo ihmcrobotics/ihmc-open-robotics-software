@@ -54,6 +54,11 @@ public class ICPQPInput
 
    public boolean equals(ICPQPInput other)
    {
-      return MatrixFeatures.isEquals(quadraticTerm, other.quadraticTerm) && MatrixFeatures.isEquals(linearTerm, other.linearTerm) && MatrixFeatures.isEquals(residualCost, other.residualCost);
+      return equals(other, 1e-7);
+   }
+
+   public boolean equals(ICPQPInput other, double tol)
+   {
+      return MatrixFeatures.isEquals(quadraticTerm, other.quadraticTerm, tol) && MatrixFeatures.isEquals(linearTerm, other.linearTerm, tol) && MatrixFeatures.isEquals(residualCost, other.residualCost, tol);
    }
 }
