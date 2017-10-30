@@ -131,48 +131,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    }
 
 
-   /**
-    * Specifies whether the inverse dynamics module of the {@link WholeBodyControllerCore} should be
-    * created or not.
-    * <p>
-    * This module is created by default as the {@link WalkingHighLevelHumanoidController} needs it.
-    * </p>
-    *
-    * @param setup whether to setup the inverse dynamics mode or not.
-    */
-   public void setupControllerCoreInverseDynamicsMode(boolean setup)
-   {
-      throw new RuntimeException("This has been moved to the Walking Controller State class.");
-   }
-
-   /**
-    * Specifies whether the inverse kinematics module of the {@link WholeBodyControllerCore} should
-    * be created or not.
-    * <p>
-    * This module is not created by default to prevent creating unused {@link YoVariable}s.
-    * </p>
-    *
-    * @param setup whether to setup the inverse kinematics mode or not.
-    */
-   public void setupControllerCoreInverseKinematicsMode(boolean setup)
-   {
-      throw new RuntimeException("This has been moved to the Walking Controller State class.");
-   }
-
-   /**
-    * Specifies whether the virtual model control module of the {@link WholeBodyControllerCore}
-    * should be created or not.
-    * <p>
-    * This module is not created by default to prevent creating unused {@link YoVariable}s.
-    * </p>
-    *
-    * @param setup whether to setup the virtual model control mode or not.
-    */
-   public void setupControllerCoreVirtualModelControlMode(boolean setup)
-   {
-      throw new RuntimeException("This has been moved to the Walking Controller State class.");
-   }
-
    private ComponentBasedFootstepDataMessageGenerator footstepGenerator;
 
    public void createComponentBasedFootstepDataMessageGenerator()
