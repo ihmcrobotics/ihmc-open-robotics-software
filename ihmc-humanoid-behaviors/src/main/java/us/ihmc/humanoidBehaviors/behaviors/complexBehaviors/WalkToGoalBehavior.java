@@ -34,8 +34,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
 
    private FootstepDataListMessage planToExecute;
 
-   public WalkToGoalBehavior(CommunicationBridge outgoingCommunicationBridge, WalkingControllerParameters walkingControllerParameters, YoDouble yoTime,
-         YoVariableRegistry parentRegistry)
+   public WalkToGoalBehavior(CommunicationBridge outgoingCommunicationBridge, WalkingControllerParameters walkingControllerParameters, YoDouble yoTime)
    {
       super(outgoingCommunicationBridge);
 
@@ -52,8 +51,6 @@ public class WalkToGoalBehavior extends AbstractBehavior
       attachNetworkListeningQueue(planningRequestQueue, FootstepPlanningToolboxOutputStatus.class);
 
       setupStateMachine();
-
-      parentRegistry.addChild(registry);
    }
 
    private void setupStateMachine()
