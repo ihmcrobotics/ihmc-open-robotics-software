@@ -110,7 +110,7 @@ public class JavaQuadProgSolverWithInactiveVariables extends JavaQuadProgSolver 
    {
       multQuad(x, originalQuadraticCostQMatrix, computedObjectiveFunctionValue);
       CommonOps.scale(0.5, computedObjectiveFunctionValue);
-      CommonOps.multAddTransA(quadraticCostQVector, x, computedObjectiveFunctionValue);
+      CommonOps.multAddTransA(originalQuadraticCostQVector, x, computedObjectiveFunctionValue);
       return computedObjectiveFunctionValue.get(0, 0) + quadraticCostScalar;
    }
 
@@ -304,7 +304,7 @@ public class JavaQuadProgSolverWithInactiveVariables extends JavaQuadProgSolver 
          if (isZeroColumn)
          {
             MatrixTools.removeColumn(matrix, rowIndex);
-            MatrixTools.removeColumn(vector, rowIndex);
+            MatrixTools.removeRow(vector, rowIndex);
          }
       }
    }

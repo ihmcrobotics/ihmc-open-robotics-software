@@ -11,6 +11,7 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 
 /**
  * Solves a Quadratic Program using an active set solver based on the
@@ -417,6 +418,8 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
       solver.invert(J);
       c2 = CommonOps.trace(J);
 
+      int numberOfIterations = 0;
+
       if (bulkHandleEqualityConstraints)
       {
          if (numberOfEqualityConstraints > 0)
@@ -455,7 +458,14 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
                activeSetIndices.set(equalityConstraintIndex, -equalityConstraintIndex - 1);
 
                if (!addConstraint())
-                  throw new RuntimeException("Constraints are linearly dependent.");
+               { // Constraints are linearly dependent
+                  CommonOps.fill(solutionToPack, Double.NaN);
+                  CommonOps.fill(lagrangeEqualityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
+                  CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
+                  CommonOps.fill(lagrangeLowerBoundMultipliersToPack, Double.POSITIVE_INFINITY);
+                  CommonOps.fill(lagrangeUpperBoundMultipliersToPack, Double.POSITIVE_INFINITY);
+                  return numberOfIterations - 1;
+               }
             }
          }
          else
@@ -508,7 +518,14 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
             activeSetIndices.set(equalityConstraintIndex, -equalityConstraintIndex - 1);
 
             if (!addConstraint())
-               throw new RuntimeException("Constraints are linearly dependent.");
+            { // Constraints are linearly dependent
+               CommonOps.fill(solutionToPack, Double.NaN);
+               CommonOps.fill(lagrangeEqualityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
+               CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
+               CommonOps.fill(lagrangeLowerBoundMultipliersToPack, Double.POSITIVE_INFINITY);
+               CommonOps.fill(lagrangeUpperBoundMultipliersToPack, Double.POSITIVE_INFINITY);
+               return numberOfIterations - 1;
+            }
          }
       }
 
@@ -518,7 +535,6 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
 
       constraintIndexForPartialStep = 0;
 
-      int numberOfIterations = 0;
       double fullStepLength;
       boolean isValid = true;
 
@@ -871,6 +887,12 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
 
       // update the number of constraints added
       numberOfActiveConstraints++;
+
+      if (numberOfActiveConstraints > problemSize)
+      {
+         // problem is over constrained
+         return false;
+      }
 
       // To update R we have to put the numberOfActiveConstraints components of the d vector into column numberOfActiveConstraints - 1 of R
       for (int i = 0; i < numberOfActiveConstraints; i++)
