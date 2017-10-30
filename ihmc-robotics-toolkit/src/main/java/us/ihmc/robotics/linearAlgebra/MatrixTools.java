@@ -999,6 +999,13 @@ public class MatrixTools
       vector.setS(matrix.get(3, 0) * x + matrix.get(3, 1) * y + matrix.get(3, 2) * z + matrix.get(3, 3) * s);
    }
 
+
+   /**
+    * Removes a row of the given matrix, indicated by {@code indexOfRowToRemove}.
+    *
+    * @param matrixToRemoveRowTo the matrix from which the row is to be removed. Modified.
+    * @param indexOfRowToRemove the column index to remove.
+    */
    public static void removeRow(DenseMatrix64F matrixToRemoveRowTo, int indexOfRowToRemove)
    {
       if (indexOfRowToRemove >= matrixToRemoveRowTo.getNumRows())
@@ -1020,6 +1027,12 @@ public class MatrixTools
       matrixToRemoveRowTo.reshape(matrixToRemoveRowTo.getNumRows() - 1, matrixToRemoveRowTo.getNumCols(), true);
    }
 
+   /**
+    * Removes a column of the given matrix, indicated by {@code indexOfColumnToRemove}.
+    *
+    * @param matrixToRemoveColumnTo the matrix from which the column is to be removed. Modified.
+    * @param indexOfColumnToRemove the column index to remove.
+    */
    public static void removeColumn(DenseMatrix64F matrixToRemoveColumnTo, int indexOfColumnToRemove)
    {
       if (indexOfColumnToRemove >= matrixToRemoveColumnTo.getNumCols())
