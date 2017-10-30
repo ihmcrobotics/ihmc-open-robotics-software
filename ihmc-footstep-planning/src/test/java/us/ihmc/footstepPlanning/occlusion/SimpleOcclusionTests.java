@@ -72,7 +72,7 @@ public class SimpleOcclusionTests
    @Rule
    public TestName name = new TestName();
 
-   @Test
+   @Test(timeout = 30000)
    public void testSimpleOcclusions()
    {
       FramePose startPose = new FramePose();
@@ -81,7 +81,7 @@ public class SimpleOcclusionTests
       runTest(startPose, goalPose, regions);
    }
 
-   @Test
+   @Test(timeout = 30000)
    @Ignore
    public void testMazeWithOcclusions()
    {

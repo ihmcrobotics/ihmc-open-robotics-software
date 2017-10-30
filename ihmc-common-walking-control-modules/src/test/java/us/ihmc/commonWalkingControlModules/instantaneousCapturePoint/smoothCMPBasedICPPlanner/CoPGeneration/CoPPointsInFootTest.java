@@ -66,7 +66,7 @@ public class CoPPointsInFootTest
       registry.clear();
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testAddCoPPointToList()
    {
       assertTrue(copPointsInFoot.isEmpty());
@@ -79,7 +79,7 @@ public class CoPPointsInFootTest
       assertTrue(copPointsInFoot.getCoPPointList().isEmpty());
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testAddandSetIncludingFrameWithFramePoint()
    {
       FramePoint3D testLocation = new FramePoint3D(footSpoof.getSoleFrame(), Math.random(), Math.random(), Math.random());
@@ -91,7 +91,7 @@ public class CoPPointsInFootTest
       assertTrue(MathTools.epsilonEquals(copPointsInFoot.get(0).getTime(), 0.2, epsilon));
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testAddAndSetIncludingFrameWithYoFramePoint()
    {
       YoFramePoint testLocation1 = new YoFramePoint("TestLocation1", footSpoof.getSoleFrame(), null);
@@ -108,7 +108,7 @@ public class CoPPointsInFootTest
       assertTrue(MathTools.epsilonEquals(copPointsInFoot.get(1).getTime(), 0.12, epsilon));
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testAddAndSetIncludingFrameWithCoPTrajectoryPoint()
    {
       CoPTrajectoryPoint testLocation1 = new CoPTrajectoryPoint("TestLocation1", "", null, framesToRegister);
@@ -130,7 +130,7 @@ public class CoPPointsInFootTest
       assertTrue(tempFramePointForTesting.epsilonEquals(testLocation2.getPosition().getFramePointCopy(), epsilon));
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testSetFeetLocations()
    {
       copPointsInFoot.setFeetLocation(new FramePoint3D(worldFrame, 0.2, 1.35, 2.1), new FramePoint3D(worldFrame, 1.3, 2.4, 6.6));
@@ -146,7 +146,7 @@ public class CoPPointsInFootTest
       assertTrue(framePointForTesting.getZ() == 6.6);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testChangeFrame()
    {
       copPointsInFoot.setFeetLocation(new FramePoint3D(worldFrame, 0.2, 0.1, 0.1), new FramePoint3D(worldFrame, 0.2, -0.1, 0.1));
@@ -171,7 +171,7 @@ public class CoPPointsInFootTest
       assertTrue(tempFramePoint.getZ() == 0.11 + zToAnkle);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testRegisterFrame()
    {
       double newFrameOriginX = 1;
@@ -207,7 +207,7 @@ public class CoPPointsInFootTest
       assertTrue(tempFramePoint.getZ() == 0.11 + newFrameOriginZ);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testVisualization()
    {
       YoGraphicsList dummyGraphicsList = new YoGraphicsList("DummyGraphics");

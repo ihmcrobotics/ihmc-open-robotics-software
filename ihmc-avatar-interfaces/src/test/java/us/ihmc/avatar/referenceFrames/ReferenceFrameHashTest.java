@@ -93,7 +93,7 @@ public abstract class ReferenceFrameHashTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test
+   @Test(timeout = 30000)
    public void testAllFramesGottenFromHumanoidReferenceFrameMethodsAreInTheHashList()
          throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
@@ -135,7 +135,7 @@ public abstract class ReferenceFrameHashTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test
+   @Test(timeout = 30000)
    public void testAllFramesGottenFromFullRobotModelMethodsAreInTheHashList()
          throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {

@@ -17,7 +17,7 @@ public class CoPTrajectoryTest
    private static int maxNumberOfSegments = 2;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double epsilon = Epsilons.ONE_BILLIONTH;
-   @Test
+   @Test(timeout = 30000)
    public void testLinear()
    {
       CoPTrajectory testTrajectory = new CoPTrajectory(CoPSplineType.LINEAR, maxNumberOfSegments, WalkingTrajectoryType.TRANSFER);
@@ -51,7 +51,7 @@ public class CoPTrajectoryTest
    }
 
    
-   @Test
+   @Test(timeout = 30000)
    public void testCubic()
    {
       CoPTrajectory testTrajectory = new CoPTrajectory(CoPSplineType.CUBIC, maxNumberOfSegments, WalkingTrajectoryType.SWING);

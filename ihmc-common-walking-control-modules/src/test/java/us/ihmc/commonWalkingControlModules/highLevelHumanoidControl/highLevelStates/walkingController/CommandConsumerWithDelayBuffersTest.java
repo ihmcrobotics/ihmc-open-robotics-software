@@ -26,7 +26,7 @@ import us.ihmc.robotics.lists.GenericTypeBuilder;
 public class CommandConsumerWithDelayBuffersTest
 {
 
-   @Test
+   @Test(timeout = 30000)
    public void testConstructor()
    {
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
@@ -43,7 +43,7 @@ public class CommandConsumerWithDelayBuffersTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public <C extends Command<C, ?>, M extends Packet<M>> void testIsNewCommandAvailableWithNoDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       Random random = new Random(100);
@@ -93,7 +93,7 @@ public class CommandConsumerWithDelayBuffersTest
       
    }
 
-   @Test
+   @Test(timeout = 30000)
    public <C extends Command<C, ?>, M extends Packet<M>> void testIsNewCommandAvailableWithDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       Random random = new Random(100);
@@ -162,7 +162,7 @@ public class CommandConsumerWithDelayBuffersTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public <C extends Command<C, ?>, M extends Packet<M>> void testSendMultipleCommandWithDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       Random random = new Random(10);
@@ -237,7 +237,7 @@ public class CommandConsumerWithDelayBuffersTest
       }
    }
    
-   @Test
+   @Test(timeout = 30000)
    public <C extends Command<C, ?>, M extends Packet<M>> void testQueueingManually()
    {
       Random random = new Random(100);
@@ -292,7 +292,7 @@ public class CommandConsumerWithDelayBuffersTest
       }
    }
    
-   @Test
+   @Test(timeout = 30000)
    public <C extends Command<C, ?>, M extends Packet<M>> void testClearAllQueues()
    {
       Random random = new Random(100);
@@ -337,7 +337,7 @@ public class CommandConsumerWithDelayBuffersTest
       assertEquals(0,commandConsumer.pollNewCommands(TestCommand.class).size());
    }
 
-   @Test
+   @Test(timeout = 30000)
    public <C extends Command<C, ?>, M extends Packet<M>> void testClearSingleQueue()
    {
       Random random = new Random(100);
@@ -400,7 +400,7 @@ public class CommandConsumerWithDelayBuffersTest
 
    }
 
-   @Test
+   @Test(timeout = 30000)
    public <C extends Command<C, ?>, M extends Packet<M>> void testFlushCommands()
    {
       Random random = new Random(100);
@@ -440,7 +440,7 @@ public class CommandConsumerWithDelayBuffersTest
       assertEquals(0,commandConsumer.pollNewCommands(TestCommand.class).size());
    }
    
-   @Test
+   @Test(timeout = 30000)
    public <C extends Command<C, ?>, M extends Packet<M>> void testAddingTooManyCommands()
    {
       Random random = new Random(100);

@@ -2786,7 +2786,7 @@ public class ConvexPolygon2dTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test//(timeout = 3000)
+   @Test(timeout = 30000)
    public void testIntersectionWithLineSegment1()
    {
       ConvexPolygon2D polygon = new ConvexPolygon2D();

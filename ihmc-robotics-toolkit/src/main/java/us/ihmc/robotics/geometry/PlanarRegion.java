@@ -13,9 +13,9 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -640,23 +640,11 @@ public class PlanarRegion
     * 
     * @param normalToPack used to store the normal of this planar region.
     */
-   public void getNormal(Vector3D normalToPack)
+   public void getNormal(Vector3DBasics normalToPack)
    {
       normalToPack.setX(fromLocalToWorldTransform.getM02());
       normalToPack.setY(fromLocalToWorldTransform.getM12());
       normalToPack.setZ(fromLocalToWorldTransform.getM22());
-   }
-
-   /**
-    * Retrieves the normal of this planar region and stores it in the given {@link Vector3D32}.
-    * 
-    * @param normalToPack used to store the normal of this planar region.
-    */
-   public void getNormal(Vector3D32 normalToPack)
-   {
-      normalToPack.setX((float) fromLocalToWorldTransform.getM02());
-      normalToPack.setY((float) fromLocalToWorldTransform.getM12());
-      normalToPack.setZ((float) fromLocalToWorldTransform.getM22());
    }
 
    /**
