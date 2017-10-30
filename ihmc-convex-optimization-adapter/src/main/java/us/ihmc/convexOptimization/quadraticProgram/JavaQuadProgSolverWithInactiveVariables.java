@@ -271,11 +271,13 @@ public class JavaQuadProgSolverWithInactiveVariables extends JavaQuadProgSolver 
          {
             MatrixTools.removeRow(variableLowerBounds, variableIndex);
             MatrixTools.removeRow(lowerBoundsCMatrix, variableIndex);
+            MatrixTools.removeColumn(lowerBoundsCMatrix, variableIndex);
          }
          if (variableUpperBounds.getNumElements() > 0)
          {
             MatrixTools.removeRow(variableUpperBounds, variableIndex);
             MatrixTools.removeRow(upperBoundsCMatrix, variableIndex);
+            MatrixTools.removeColumn(upperBoundsCMatrix, variableIndex);
          }
       }
 
