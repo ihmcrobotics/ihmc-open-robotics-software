@@ -339,7 +339,7 @@ public class SmoothCMPBasedICPPlannerTest
          scs.closeAndDispose();
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testForDiscontinuitiesWithoutAngularMomentum()
    {
       boolean isAMOn = false;
@@ -347,7 +347,7 @@ public class SmoothCMPBasedICPPlannerTest
       simulate(true, false, true);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testForDiscontinuitiesWithAngularMomentum()
    {
       boolean isAMOn = true;
@@ -355,7 +355,7 @@ public class SmoothCMPBasedICPPlannerTest
       simulate(true, false, true);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testForPlanningConsistencyWithoutAngularMomentum()
    {
       boolean isAMOn = false;
@@ -363,7 +363,7 @@ public class SmoothCMPBasedICPPlannerTest
       simulate(false, true, true);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testForPlanningConsistencyWithAngularMomentum()
    {
       boolean isAMOn = true;

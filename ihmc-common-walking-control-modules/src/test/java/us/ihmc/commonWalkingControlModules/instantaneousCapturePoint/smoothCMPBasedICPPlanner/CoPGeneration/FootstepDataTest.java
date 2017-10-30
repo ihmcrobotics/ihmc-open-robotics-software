@@ -12,7 +12,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepDataTest
 {
-   @Test
+   @Test(timeout = 30000)
    public void testConstructor()
    {
       FootstepData testObject = new FootstepData();
@@ -38,7 +38,7 @@ public class FootstepDataTest
       assertTrue(testObject.getFootstep() == newFootstep);
    }
    
-   @Test 
+   @Test(timeout = 30000)
    public void testCopy()
    {
       Footstep footstep = new Footstep(RobotSide.RIGHT);

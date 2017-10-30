@@ -29,7 +29,7 @@ public class AtlasEndToEndWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 10.9)
-   @Test
+   @Test(timeout = 30000)
    public void testIssue47BadChestTrajectoryMessage() throws Exception
    {
       super.testIssue47BadChestTrajectoryMessage();
@@ -37,7 +37,7 @@ public class AtlasEndToEndWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 10.8)
-   @Test
+   @Test(timeout = 30000)
    public void testIssue47BadPelvisTrajectoryMessage() throws Exception
    {
       super.testIssue47BadPelvisTrajectoryMessage();
@@ -45,7 +45,7 @@ public class AtlasEndToEndWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 19.1)
-   @Test
+   @Test(timeout = 30000)
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();
@@ -53,7 +53,7 @@ public class AtlasEndToEndWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 19.1)
-   @Test
+   @Test(timeout = 30000)
    public void testSingleWaypointUsingMessageOfMessages() throws Exception
    {
       super.testSingleWaypointUsingMessageOfMessages();
@@ -61,7 +61,7 @@ public class AtlasEndToEndWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 19.1)
-   @Test
+   @Test(timeout = 30000)
    public void testSingleWaypointUsingMessageOfMessagesWithDelays() throws Exception
    {
       super.testSingleWaypointUsingMessageOfMessagesWithDelays();

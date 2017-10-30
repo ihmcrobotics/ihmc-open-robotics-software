@@ -260,7 +260,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test (timeout = 30000)
+   @Test(timeout = 30000)
    public void testSimpleTranslationAtKnownLocation()
    {
       Random random = new Random(1987L);
@@ -289,7 +289,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test (timeout = 30000)
+   @Test(timeout = 30000)
    public void testNoDifferenceBetweenStateEstimatorAndLocalization()
    {
       FramePose upToDatePoseInPresent = new FramePose(worldFrame);
@@ -326,7 +326,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    //this tests fails, I don't think OutdatedPoseToUpToDateReferenceFrameUpdater can support more than a single rotation at a time
    @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test //(timeout = 30000)
+   @Test(timeout = 30000)
    public void testKnownDifferenceBetweenStateEstimatorAndLocalization()
    {
       FramePose stateEstimatorPresent = new FramePose(worldFrame);
@@ -414,7 +414,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    //this tests fails, I don't think OutdatedPoseToUpToDateReferenceFrameUpdater can support more than a single rotation at a time
    @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test //(timeout = 30000)
+   @Test(timeout = 30000)
    public void testKnownTranslationYawAndPitchDifferenceBetweenStateEstimatorAndLocalization()
    {
       FramePose stateEstimatorPresent = new FramePose(worldFrame);
@@ -457,7 +457,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test (timeout = 30000)
+   @Test(timeout = 30000)
    public void testSimpleRotationAtKnownLocation()
    {
       Random random = new Random(1987L);

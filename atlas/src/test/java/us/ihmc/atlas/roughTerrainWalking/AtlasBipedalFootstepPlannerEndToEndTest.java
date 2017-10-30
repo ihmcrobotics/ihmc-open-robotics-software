@@ -30,7 +30,7 @@ public class AtlasBipedalFootstepPlannerEndToEndTest extends AvatarBipedalFootst
 
    @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testShortCinderBlockFieldWithPlanarRegionBipedalPlanner() throws IOException
    {
       super.testShortCinderBlockFieldWithPlanarRegionBipedalPlanner();
@@ -38,7 +38,7 @@ public class AtlasBipedalFootstepPlannerEndToEndTest extends AvatarBipedalFootst
 
    @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testShortCinderBlockFieldWithAStar() throws IOException
    {
       super.testShortCinderBlockFieldWithAStar();
@@ -46,7 +46,7 @@ public class AtlasBipedalFootstepPlannerEndToEndTest extends AvatarBipedalFootst
 
    @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSteppingStonesWithAStar() throws IOException
    {
       super.testSteppingStonesWithAStar();
@@ -54,7 +54,7 @@ public class AtlasBipedalFootstepPlannerEndToEndTest extends AvatarBipedalFootst
 
    @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSteppingStonesWithPlanarRegionBipedalPlanner() throws IOException
    {
       super.testSteppingStonesWithPlanarRegionBipedalPlanner();

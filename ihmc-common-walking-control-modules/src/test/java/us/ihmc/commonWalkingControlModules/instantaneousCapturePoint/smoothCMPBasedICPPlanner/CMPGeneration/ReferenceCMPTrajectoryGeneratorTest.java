@@ -115,7 +115,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
 
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testDoubleSupportWithoutAngularMomentum()
    {
       cmpTrajectoryGenerator.setNumberOfRegisteredSteps(numberOfFootsteps);
@@ -124,7 +124,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
       checkSwingTrajectoriesForCopy();
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testSingleSupportWithoutAngularMomentum()
    {
       cmpTrajectoryGenerator.setNumberOfRegisteredSteps(numberOfFootsteps);
@@ -134,7 +134,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
 
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testDoubleSupportWithAngularMomentum()
    {
       cmpTrajectoryGenerator.setNumberOfRegisteredSteps(numberOfFootsteps);
@@ -144,7 +144,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
       checkSwingTrajectoriesForAddition();
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testSingleSupportWithAngularMomentum()
    {
       cmpTrajectoryGenerator.setNumberOfRegisteredSteps(numberOfFootsteps);

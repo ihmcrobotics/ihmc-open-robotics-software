@@ -11,7 +11,7 @@ import org.junit.Test;
 
 public class NumericalMovingReferenceFrameTest
 {
-   @Test
+   @Test(timeout = 30000)
    public void testWithChainRobot()
    {
       Random random = new Random(3452345L);

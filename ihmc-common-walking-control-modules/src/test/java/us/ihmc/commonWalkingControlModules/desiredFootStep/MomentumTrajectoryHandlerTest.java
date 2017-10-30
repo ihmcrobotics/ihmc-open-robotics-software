@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class MomentumTrajectoryHandlerTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSimpleExample()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
@@ -61,7 +61,7 @@ public class MomentumTrajectoryHandlerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testOutOfBounds()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
@@ -94,7 +94,7 @@ public class MomentumTrajectoryHandlerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testQueuing()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");

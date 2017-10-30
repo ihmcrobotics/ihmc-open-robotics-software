@@ -11,7 +11,7 @@ public class MovingReferenceFrameTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @Test
+   @Test(timeout = 30000)
    public void testAgainstTwistCalculatorWithPrismaticChainRobot() throws Exception
    {
       Random random = new Random(435423L);
@@ -44,7 +44,7 @@ public class MovingReferenceFrameTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testAgainstTwistCalculatorWithChainRobot() throws Exception
    {
       Random random = new Random(435423L);
@@ -77,7 +77,7 @@ public class MovingReferenceFrameTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testAgainstTwistCalculatorWithTreeRobot() throws Exception
    {
       Random random = new Random(435423L);

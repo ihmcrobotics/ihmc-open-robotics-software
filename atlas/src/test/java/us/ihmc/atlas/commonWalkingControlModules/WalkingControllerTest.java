@@ -147,7 +147,7 @@ public class WalkingControllerTest
 
    private static final double maxDriftRate = 0.2;
 
-   @Test
+   @Test(timeout = 30000)
    public void testForGarbage()
    {
       walkingController.doTransitionIntoAction();

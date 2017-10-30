@@ -28,7 +28,7 @@ public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRamp
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 95.7)
-   @Test
+   @Test(timeout = 520000)
    @Override
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -37,7 +37,7 @@ public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRamp
    
    // This has never worked. Would be nice if we can get it to work.")
    @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test
+   @Test(timeout=300000)
    @Override
    public void testDRCOverRandomBlocks() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -45,7 +45,7 @@ public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRamp
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 71.3)
-   @Test
+   @Test(timeout = 420000)
    @Override
    public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

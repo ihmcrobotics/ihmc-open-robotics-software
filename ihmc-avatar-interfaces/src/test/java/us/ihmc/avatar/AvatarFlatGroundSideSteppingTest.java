@@ -129,7 +129,7 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       return new FootstepDataListMessage();
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testSideStepping() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -168,7 +168,7 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       controllerSpy.assertCheckpointsReached();
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testSideSteppingWithForceDisturbances() throws SimulationExceededMaximumTimeException
    {
       setupTest();

@@ -16,7 +16,7 @@ import us.ihmc.robotics.referenceFrames.ZUpFrame;
 
 public class MovingZUpFrameTest
 {
-   @Test
+   @Test(timeout = 30000)
    public void testAgainstFiniteDifferenceWithChainRobot()
    {
       Random random = new Random(3452345L);
@@ -66,7 +66,7 @@ public class MovingZUpFrameTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testConsistencyWithZUpFrameWithChainRobot()
    {
       Random random = new Random(3452345L);
