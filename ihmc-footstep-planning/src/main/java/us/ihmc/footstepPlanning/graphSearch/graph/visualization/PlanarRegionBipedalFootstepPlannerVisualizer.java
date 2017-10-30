@@ -146,6 +146,17 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       graphicsListRegistry.registerYoGraphic("FootstepPlanner", leftRejectedFootstepViz);
       graphicsListRegistry.registerYoGraphic("FootstepPlanner", rightRejectedFootstepViz);
 
+      graphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(leftFootstepStartViz);
+      graphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(rightFootstepStartViz);
+      graphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(leftFootstepGoalViz);
+      graphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(rightFootstepGoalViz);
+      graphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(leftFootstepToExpandViz);
+      graphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(rightFootstepToExpandViz);
+      graphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(leftAcceptedFootstepViz);
+      graphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(rightAcceptedFootstepViz);
+      graphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(leftRejectedFootstepViz);
+      graphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(rightRejectedFootstepViz);
+
       solvedPlanFootstepsViz = new SideDependentList<ArrayList<YoGraphicPolygon>>(new ArrayList<YoGraphicPolygon>(), new ArrayList<YoGraphicPolygon>());
       solvedPlanFootstepsPolygons = new SideDependentList<ArrayList<YoFrameConvexPolygon2d>>(new ArrayList<YoFrameConvexPolygon2d>(), new ArrayList<YoFrameConvexPolygon2d>());
       
@@ -185,6 +196,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       int meshBufferSize = 2000;
       yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("planarRegionsList", vertexBufferSize, meshBufferSize, registry);
       graphicsListRegistry.registerYoGraphic("PlanarRegionsList", yoGraphicPlanarRegionsList);
+      graphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(yoGraphicPlanarRegionsList);
 
       parentRegistry.addChild(registry);
    }
