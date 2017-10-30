@@ -61,7 +61,7 @@ public class DRCFlatGroundWalkingTrack
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames,
                                                                                                     wristForceSensorNames, highLevelControllerParameters,
                                                                                                     walkingControllerParameters, capturePointPlannerParameters);
-      setupHighLevelStates(controllerFactory, feetForceSensorNames, highLevelControllerParameters.getFallbackControllerState());
+      setupHighLevelStates(controllerFactory, highLevelControllerParameters.getFallbackControllerState());
       controllerFactory.setInitialState(highLevelControllerParameters.getDefaultInitialControllerState());
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
 
@@ -94,8 +94,7 @@ public class DRCFlatGroundWalkingTrack
 
    }
 
-   public void setupHighLevelStates(HighLevelHumanoidControllerFactory controllerFactory, SideDependentList<String> feetForceSensorNames,
-                                    HighLevelController fallbackControllerState)
+   public void setupHighLevelStates(HighLevelHumanoidControllerFactory controllerFactory, HighLevelController fallbackControllerState)
    {
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
