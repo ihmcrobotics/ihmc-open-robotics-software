@@ -31,21 +31,17 @@ public class FootstepNodeSnappingTools
       RigidBodyTransform inverseSnapTransform = new RigidBodyTransform(snapTransform);
       inverseSnapTransform.invert();
 
-      RigidBodyTransform worldToRegion = new RigidBodyTransform();
-      planarRegion.getTransformToWorld(worldToRegion);
-      worldToRegion.invert();
-
       for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
       {
          Point2DReadOnly vertex = footPolygon.getVertex(i);
          Vector4D transformPoint = new Vector4D(vertex.getX(), vertex.getY(), 0.0, 1.0);
          snapTransform.transform(transformPoint);
-         worldToRegion.transform(transformPoint);
-         footPolygonInPlaneFrame.addVertex(transformPoint.getX(), transformPoint.getY());
+         transformPoint.setZ(0.0);
+         footPolygonInPlaneFrame.addVertex(transformPoint.getX() + 1e-10, transformPoint.getY() + 1e-10);
       }
       footPolygonInPlaneFrame.update();
 
-      planarRegion.getPolygonIntersectionsWhenProjectedVertically(footPolygon, intersections);
+      planarRegion.getPolygonIntersectionsWhenProjectedVertically(footPolygonInPlaneFrame, intersections);
       return getConvexHull(intersections);
    }
 
