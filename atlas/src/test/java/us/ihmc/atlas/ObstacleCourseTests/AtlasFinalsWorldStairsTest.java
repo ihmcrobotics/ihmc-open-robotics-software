@@ -71,7 +71,7 @@ public class AtlasFinalsWorldStairsTest
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 70.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 90000)
    public void testWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
