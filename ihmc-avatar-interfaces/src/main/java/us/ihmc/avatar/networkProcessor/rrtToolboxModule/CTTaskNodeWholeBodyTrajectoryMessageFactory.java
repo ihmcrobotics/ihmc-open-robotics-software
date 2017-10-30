@@ -31,7 +31,7 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
 
    private ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
 
-   private double firstTrajectoryPointTime = 6.0;
+   private double firstTrajectoryPointTime = 3.0;
    private double trajectoryTime;
 
    private WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
@@ -62,17 +62,28 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
 
          EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
 
+         SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
+         orientationCalculator.clear();
+         orientationCalculator.setFirstTrajectoryPointTime(firstTrajectoryPointTime);
+         
          for (int i = 0; i < numberOfTrajectoryPoints; i++)
          {
             CTTaskNode trajectoryNode = path.get(i);
 
             ConfigurationSpace configurationSpace = CTTreeTools.getConfigurationSpace(trajectoryNode, robotSide);
 
-            Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(trajectoryNode.getNodeData(0), robotSide, configurationSpace);
+            Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(trajectoryNode.getTime(), robotSide, configurationSpace);
             PrintTools.info(""+robotSide+" "+desiredPose);
 
             euclideanTrajectoryPointCalculator.appendTrajectoryPoint(new Point3D(desiredPose.getPosition()));
+            
+            double time = firstTrajectoryPointTime + trajectoryNode.getTime();
+
+            Quaternion desiredOrientation = new Quaternion(desiredPose.getOrientation());
+            orientationCalculator.appendTrajectoryPointOrientation(time, desiredOrientation);
          }
+         
+         orientationCalculator.compute();
 
          double[] trajectoryTimes = new double[numberOfTrajectoryPoints];
 
@@ -84,7 +95,7 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
          euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
 
          RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
-
+         
          for (int i = 0; i < numberOfTrajectoryPoints; i++)
          {
             CTTaskNode trajectoryNode = path.get(i);
@@ -102,13 +113,13 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
             else
                desiredOrientation.appendRollRotation(-Math.PI * 0.5);
 
-            Vector3D desiredAngularVelocity = new Vector3D();
+            //Vector3D desiredAngularVelocity = new Vector3D();
+            Vector3D desiredAngularVelocity = orientationCalculator.getTrajectoryPointsAngularVelocity().get(i);
 
             double time = trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
 
-            //            PrintTools.info(""+i+" "+time +" " + desiredLinearVelocity+" ");
-
-            // TODO: SO3TrajectoryPointCalculator will be used to get desiredAngularVelocity.
+            PrintTools.info(""+i+" "+time +" " + desiredLinearVelocity+" ");
+            
             handTrajectoryMessage.setTrajectoryPoint(i, time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, worldFrame);
          }
 
