@@ -18,7 +18,7 @@ public class AtlasSwingOverPlanarRegionsTest extends AvatarSwingOverPlanarRegion
 {
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 70000)
    public void testSwingOverPlanarRegions() throws SimulationExceededMaximumTimeException
    {
       super.testSwingOverPlanarRegions();
