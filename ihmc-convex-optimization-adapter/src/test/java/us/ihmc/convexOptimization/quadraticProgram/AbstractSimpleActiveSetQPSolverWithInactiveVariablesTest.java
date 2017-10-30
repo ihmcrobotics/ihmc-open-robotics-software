@@ -188,7 +188,7 @@ public abstract class AbstractSimpleActiveSetQPSolverWithInactiveVariablesTest e
       lagrangeEqualityMultipliers = new double[2];
       lagrangeInequalityMultipliers = new double[3];
       numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
-      assertEquals(expectedNumberOfIterations, numberOfIterations);
+      assertTrue(numberOfIterations < 1);
 
       assertEquals(2, solution.length);
       assertTrue(Double.isNaN(solution[0]));
