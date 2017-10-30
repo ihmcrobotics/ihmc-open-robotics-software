@@ -11,7 +11,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -23,6 +22,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
    }
 
    private final ConcurrentListeningQueue<FootstepPlanningRequestPacket> planningRequestQueue = new ConcurrentListeningQueue<>(20);
+   private final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> planningOutputStatusQueue = new ConcurrentListeningQueue<>(5);
 
    private final StateMachine<WalkToGoalBehaviorStates> stateMachine;
 
@@ -48,7 +48,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
       transitionBackToWaitingState = new YoBoolean("transitionBackToWaitingState", registry);
 
       attachNetworkListeningQueue(planningRequestQueue, FootstepPlanningRequestPacket.class);
-      attachNetworkListeningQueue(planningRequestQueue, FootstepPlanningToolboxOutputStatus.class);
+      attachNetworkListeningQueue(planningOutputStatusQueue, FootstepPlanningToolboxOutputStatus.class);
 
       setupStateMachine();
    }
@@ -131,6 +131,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
       {
          // Make sure there aren't any old plan requests hanging around
          planningRequestQueue.clear();
+         isDone.set(true);
       }
 
       @Override
@@ -141,8 +142,6 @@ public class WalkToGoalBehavior extends AbstractBehavior
 
    class PlanningState extends State<WalkToGoalBehaviorStates>
    {
-      private final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> planningOutputStatusQueue = new ConcurrentListeningQueue<>(5);
-
       public PlanningState()
       {
          super(WalkToGoalBehaviorStates.PLANNING);
