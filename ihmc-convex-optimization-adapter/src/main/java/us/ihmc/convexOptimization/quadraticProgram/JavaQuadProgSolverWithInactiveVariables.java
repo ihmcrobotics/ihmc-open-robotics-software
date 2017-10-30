@@ -180,8 +180,8 @@ public class JavaQuadProgSolverWithInactiveVariables extends JavaQuadProgSolver 
    @Override
    public int solve(double[] solutionToPack)
    {
-      int numberOfEqualityConstraints = originalLinearEqualityConstraintsAMatrix.getNumRows();
-      int numberOfInequalityConstraints = originalLinearInequalityConstraintsCMatrixO.getNumRows();
+      int numberOfEqualityConstraints = originalLinearEqualityConstraintsBVector.getNumRows();
+      int numberOfInequalityConstraints = originalLinearInequalityConstraintsDVectorO.getNumRows();
 
       double[] lagrangeEqualityConstraintMultipliersToPack = new double[numberOfEqualityConstraints];
       double[] lagrangeInequalityConstraintMultipliersToPack = new double[numberOfInequalityConstraints];
