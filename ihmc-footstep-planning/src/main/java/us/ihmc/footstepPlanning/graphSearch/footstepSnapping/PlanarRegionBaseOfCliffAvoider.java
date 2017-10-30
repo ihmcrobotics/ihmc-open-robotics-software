@@ -7,7 +7,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeUtils;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -117,7 +117,7 @@ public class PlanarRegionBaseOfCliffAvoider
                beforeAdjustmentPosition.setPosition(solePosition);
             }
 
-            BipedalFootstepPlannerNodeUtils.shiftInSoleFrame(shiftVectorInSoleFrame, soleTransform);
+            FootstepNodeTools.shiftInSoleFrame(shiftVectorInSoleFrame, soleTransform);
 
             if(visualize)
             {
