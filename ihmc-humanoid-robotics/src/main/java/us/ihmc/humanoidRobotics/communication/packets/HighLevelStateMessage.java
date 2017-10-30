@@ -5,7 +5,7 @@ import java.util.Random;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 
 @RosMessagePacket(documentation = "This message is used to switch the control scheme between force and position control.\n"
       + "WARNING: When in position control, the IHMC balance algorithms will be disabled and\n" + "it is up to the user to ensure stability.",
@@ -14,22 +14,22 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 public class HighLevelStateMessage extends Packet<HighLevelStateMessage>
 {
    @RosExportedField(documentation = "The enum value of the current high level state of the robot.")
-   public HighLevelController highLevelController;
+   public HighLevelControllerName highLevelControllerName;
 
    public HighLevelStateMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public HighLevelStateMessage(HighLevelController highLevelController)
+   public HighLevelStateMessage(HighLevelControllerName highLevelControllerName)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.highLevelController = highLevelController;
+      this.highLevelControllerName = highLevelControllerName;
    }
 
-   public HighLevelController getHighLevelController()
+   public HighLevelControllerName getHighLevelControllerName()
    {
-      return highLevelController;
+      return highLevelControllerName;
    }
 
    public boolean equals(Object obj)
@@ -39,24 +39,24 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage>
 
    public String toString()
    {
-      return "State= " + highLevelController.toString();
+      return "State= " + highLevelControllerName.toString();
    }
 
    @Override
    public boolean epsilonEquals(HighLevelStateMessage other, double epsilon)
    {
-      return this.getHighLevelController().equals(other.getHighLevelController());
+      return this.getHighLevelControllerName().equals(other.getHighLevelControllerName());
    }
 
    public HighLevelStateMessage(Random random)
    {
       double value = random.nextInt(3);
-      HighLevelController highLevelController = HighLevelController.WALKING;
+      HighLevelControllerName highLevelControllerName = HighLevelControllerName.WALKING;
       if (value == 1)
-         highLevelController = HighLevelController.DO_NOTHING_BEHAVIOR;
+         highLevelControllerName = HighLevelControllerName.DO_NOTHING_BEHAVIOR;
       else if (value == 2)
-         highLevelController = HighLevelController.DIAGNOSTICS;
+         highLevelControllerName = HighLevelControllerName.DIAGNOSTICS;
 
-      this.highLevelController = highLevelController;
+      this.highLevelControllerName = highLevelControllerName;
    }
 }

@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.FreezeControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 
 public class FreezeControllerStateFactory implements HighLevelControllerStateFactory
 {
@@ -20,8 +20,8 @@ public class FreezeControllerStateFactory implements HighLevelControllerStateFac
    }
 
    @Override
-   public HighLevelController getStateEnum()
+   public HighLevelControllerName getStateEnum()
    {
-      return HighLevelController.FREEZE_STATE;
+      return HighLevelControllerName.FREEZE_STATE;
    }
 }

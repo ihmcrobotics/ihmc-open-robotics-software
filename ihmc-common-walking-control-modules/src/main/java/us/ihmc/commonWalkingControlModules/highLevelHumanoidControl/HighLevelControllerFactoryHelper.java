@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
 import java.util.EnumMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
@@ -11,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
@@ -19,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class HighLevelControllerFactoryHelper
 {
-   private EnumMap<HighLevelController, HighLevelControllerStateFactory> controllerFactories;
+   private EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerFactories;
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private HighLevelControlManagerFactory managerFactory;
    private HighLevelControllerParameters highLevelControllerParameters;
@@ -28,7 +27,7 @@ public class HighLevelControllerFactoryHelper
    private CommandInputManager commandInputManager;
    private StatusMessageOutputManager statusMessageOutputManager;
    private LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput;
-   private YoEnum<HighLevelController> requestedHighLevelControllerState;
+   private YoEnum<HighLevelControllerName> requestedHighLevelControllerState;
    private ForceSensorDataHolderReadOnly forceSensorDataHolder;
 
    public void setLowLevelControllerOutput(LowLevelOneDoFJointDesiredDataHolderList lowLevelControllerOutput)
@@ -36,7 +35,7 @@ public class HighLevelControllerFactoryHelper
       this.lowLevelControllerOutput = lowLevelControllerOutput;
    }
 
-   public void setControllerFactories(EnumMap<HighLevelController, HighLevelControllerStateFactory> controllerFactories)
+   public void setControllerFactories(EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerFactories)
    {
       this.controllerFactories = controllerFactories;
    }
@@ -69,7 +68,7 @@ public class HighLevelControllerFactoryHelper
       this.statusMessageOutputManager = statusMessageOutputManager;
    }
 
-   public void setRequestedHighLevelControllerState(YoEnum<HighLevelController> requestedHighLevelControllerState)
+   public void setRequestedHighLevelControllerState(YoEnum<HighLevelControllerName> requestedHighLevelControllerState)
    {
       this.requestedHighLevelControllerState = requestedHighLevelControllerState;
    }
@@ -79,7 +78,7 @@ public class HighLevelControllerFactoryHelper
       this.forceSensorDataHolder = forceSensorDataHolder;
    }
 
-   public EnumMap<HighLevelController, HighLevelControllerStateFactory> getControllerFactories()
+   public EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> getControllerFactories()
    {
       return controllerFactories;
    }
@@ -124,7 +123,7 @@ public class HighLevelControllerFactoryHelper
       return lowLevelControllerOutput;
    }
 
-   public YoEnum<HighLevelController> getRequestedHighLevelControllerState()
+   public YoEnum<HighLevelControllerName> getRequestedHighLevelControllerState()
    {
       return requestedHighLevelControllerState;
    }

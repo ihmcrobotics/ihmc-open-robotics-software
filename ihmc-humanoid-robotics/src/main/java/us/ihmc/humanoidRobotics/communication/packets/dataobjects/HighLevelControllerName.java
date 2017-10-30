@@ -6,7 +6,7 @@ import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
  * @author twan
  *         Date: 5/6/13
  */
-public enum HighLevelController
+public enum HighLevelControllerName
 {
    @RosEnumValueDocumentation(documentation = "do nothing state. the robot will start in this state, and report this state when falling and ramping down the controller. This state is intended for feedback only. Requesting this state is not supported and can cause the robot to shut down.")
    DO_NOTHING_BEHAVIOR,
@@ -25,5 +25,5 @@ public enum HighLevelController
    @RosEnumValueDocumentation(documentation = "Automated calibration routine depending on the robot. For Valkyrie: estimation of the joint torque offsets.")
    CALIBRATION;
 
-   public static final HighLevelController[] values = values();
+   public static final HighLevelControllerName[] values = values();
 }

@@ -33,7 +33,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.producers.RawVideoDataServer;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -59,7 +59,7 @@ import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController.*;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
 public class DRCSimulationStarter implements SimulationStarterInterface
 {
@@ -107,7 +107,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private final Point3D scsCameraFix = new Point3D(-0.44, -0.17, 0.75);
 
    private final List<HighLevelControllerStateFactory> highLevelControllerFactories = new ArrayList<>();
-   private final List<ControllerStateTransitionFactory<HighLevelController>> controllerTransitionFactories = new ArrayList<>();
+   private final List<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories = new ArrayList<>();
    private DRCNetworkProcessor networkProcessor;
 
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
@@ -417,7 +417,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       for (int i = 0; i < controllerTransitionFactories.size(); i++)
          controllerFactory.addCustomStateTransition(controllerTransitionFactories.get(i));
 
-      controllerFactory.setInitialState(HighLevelController.WALKING);
+      controllerFactory.setInitialState(HighLevelControllerName.WALKING);
 
       controllerFactory.createQueuedControllerCommandGenerator(controllerCommands);
 

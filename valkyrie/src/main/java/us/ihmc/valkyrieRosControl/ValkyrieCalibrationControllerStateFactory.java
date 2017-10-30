@@ -3,7 +3,7 @@ package us.ihmc.valkyrieRosControl;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.valkyrie.ValkyrieCalibrationParameters;
 import us.ihmc.wholeBodyController.diagnostics.TorqueOffsetPrinter;
 
@@ -38,9 +38,9 @@ public class ValkyrieCalibrationControllerStateFactory implements HighLevelContr
    }
 
    @Override
-   public HighLevelController getStateEnum()
+   public HighLevelControllerName getStateEnum()
    {
-      return HighLevelController.CALIBRATION;
+      return HighLevelControllerName.CALIBRATION;
    }
 
    @Override

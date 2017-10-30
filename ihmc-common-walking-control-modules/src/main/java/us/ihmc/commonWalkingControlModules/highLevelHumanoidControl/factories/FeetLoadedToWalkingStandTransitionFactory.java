@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.FeetLoadedToWalkingStandTransition;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
@@ -14,18 +14,18 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.EnumMap;
 
-public class FeetLoadedToWalkingStandTransitionFactory implements ControllerStateTransitionFactory<HighLevelController>
+public class FeetLoadedToWalkingStandTransitionFactory implements ControllerStateTransitionFactory<HighLevelControllerName>
 {
-   private StateTransition<HighLevelController> stateTransition;
+   private StateTransition<HighLevelControllerName> stateTransition;
 
-   private final HighLevelController stateToAttachEnum;
-   private final HighLevelController nextStateEnum;
+   private final HighLevelControllerName stateToAttachEnum;
+   private final HighLevelControllerName nextStateEnum;
 
-   private final YoEnum<HighLevelController> requestedState;
+   private final YoEnum<HighLevelControllerName> requestedState;
    private final SideDependentList<String> feetForceSensors;
 
-   public FeetLoadedToWalkingStandTransitionFactory(HighLevelController stateToAttachEnum, HighLevelController nextStateEnum,
-                                                    YoEnum<HighLevelController> requestedState,
+   public FeetLoadedToWalkingStandTransitionFactory(HighLevelControllerName stateToAttachEnum, HighLevelControllerName nextStateEnum,
+                                                    YoEnum<HighLevelControllerName> requestedState,
                                                     SideDependentList<String> feetForceSensors)
    {
       this.stateToAttachEnum = stateToAttachEnum;
@@ -35,8 +35,8 @@ public class FeetLoadedToWalkingStandTransitionFactory implements ControllerStat
    }
 
    @Override
-   public StateTransition<HighLevelController> getOrCreateStateTransition(EnumMap<HighLevelController, ? extends FinishableState<HighLevelController>> controllerStateMap,
-                                                                          HighLevelControllerFactoryHelper controllerFactoryHelper, YoVariableRegistry parentRegistry)
+   public StateTransition<HighLevelControllerName> getOrCreateStateTransition(EnumMap<HighLevelControllerName, ? extends FinishableState<HighLevelControllerName>> controllerStateMap,
+                                                                              HighLevelControllerFactoryHelper controllerFactoryHelper, YoVariableRegistry parentRegistry)
    {
       if (stateTransition != null)
          return stateTransition;
@@ -56,7 +56,7 @@ public class FeetLoadedToWalkingStandTransitionFactory implements ControllerStat
    }
 
    @Override
-   public HighLevelController getStateToAttachEnum()
+   public HighLevelControllerName getStateToAttachEnum()
    {
       return stateToAttachEnum;
    }

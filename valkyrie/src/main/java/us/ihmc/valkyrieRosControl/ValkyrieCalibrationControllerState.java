@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -24,7 +24,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ValkyrieCalibrationControllerState extends HighLevelControllerState
 {
-   private static final HighLevelController controllerState = HighLevelController.CALIBRATION;
+   private static final HighLevelControllerName controllerState = HighLevelControllerName.CALIBRATION;
 
    private enum CalibrationStates
    {

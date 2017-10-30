@@ -17,7 +17,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -152,9 +152,9 @@ public class StepprDashboard extends JPanel implements PlaybackListener
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            requestedHighLevelState.set(HighLevelController.WALKING.ordinal());
+            requestedHighLevelState.set(HighLevelControllerName.WALKING.ordinal());
             ThreadTools.sleep(500);
-            requestedHighLevelState.set(HighLevelController.WALKING.ordinal());
+            requestedHighLevelState.set(HighLevelControllerName.WALKING.ordinal());
             ThreadTools.sleep(500);
             controlRatio.set(1.0);
          }

@@ -6,7 +6,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 
 @RosMessagePacket(documentation = "This message notifies the user of a change in the high level state. This message's primary\n"
                                   + "use is to signal a requested state change is completed.",
@@ -15,16 +15,16 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 public class HighLevelStateChangeStatusMessage extends StatusPacket<HighLevelStateChangeStatusMessage>
 {
    @RosExportedField(documentation = "initialState gives the controller's state prior to transition")
-   public HighLevelController initialState;
+   public HighLevelControllerName initialState;
    @RosExportedField(documentation = "endState gives the state the controller has transitioned into")
-   public HighLevelController endState;
+   public HighLevelControllerName endState;
    
    public HighLevelStateChangeStatusMessage()
    {
       this.destination = (byte)PacketDestination.ROS_API.ordinal();
    }
    
-   public HighLevelStateChangeStatusMessage(HighLevelController initialState, HighLevelController endState)
+   public HighLevelStateChangeStatusMessage(HighLevelControllerName initialState, HighLevelControllerName endState)
    {
       this.destination = (byte)PacketDestination.ROS_API.ordinal();
       setStateChange(initialState, endState);
@@ -32,11 +32,11 @@ public class HighLevelStateChangeStatusMessage extends StatusPacket<HighLevelSta
    
    public HighLevelStateChangeStatusMessage(Random random)
    {
-      this.initialState = HighLevelController.values[random.nextInt(HighLevelController.values.length)];
-      this.endState = HighLevelController.values[random.nextInt(HighLevelController.values.length)];
+      this.initialState = HighLevelControllerName.values[random.nextInt(HighLevelControllerName.values.length)];
+      this.endState = HighLevelControllerName.values[random.nextInt(HighLevelControllerName.values.length)];
    }
 
-   public void setStateChange(HighLevelController initialState, HighLevelController endState)
+   public void setStateChange(HighLevelControllerName initialState, HighLevelControllerName endState)
    {
       this.initialState = initialState;
       this.endState = endState;
@@ -50,12 +50,12 @@ public class HighLevelStateChangeStatusMessage extends StatusPacket<HighLevelSta
       endState = other.endState;
    }
 
-   public HighLevelController getInitialState()
+   public HighLevelControllerName getInitialState()
    {
       return initialState;
    }
    
-   public HighLevelController getEndState()
+   public HighLevelControllerName getEndState()
    {
       return endState;
    }
