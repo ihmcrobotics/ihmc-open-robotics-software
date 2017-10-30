@@ -28,6 +28,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderList;
 import us.ihmc.sensorProcessing.outputData.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class WalkingControllerState extends HighLevelControllerState
 {
@@ -94,6 +95,48 @@ public class WalkingControllerState extends HighLevelControllerState
       }
 
       registry.addChild(walkingController.getYoVariableRegistry());
+   }
+
+   /**
+    * Specifies whether the inverse dynamics module of the {@link WholeBodyControllerCore} should be
+    * created or not.
+    * <p>
+    * This module is created by default as the {@link WalkingHighLevelHumanoidController} needs it.
+    * </p>
+    *
+    * @param setup whether to setup the inverse dynamics mode or not.
+    */
+   public void setupControllerCoreInverseDynamicsMode(boolean setup)
+   {
+      setupInverseDynamicsSolver = setup;
+   }
+
+   /**
+    * Specifies whether the inverse kinematics module of the {@link WholeBodyControllerCore} should
+    * be created or not.
+    * <p>
+    * This module is not created by default to prevent creating unused {@link YoVariable}s.
+    * </p>
+    *
+    * @param setup whether to setup the inverse kinematics mode or not.
+    */
+   public void setupControllerCoreInverseKinematicsMode(boolean setup)
+   {
+      setupInverseKinematicsSolver = setup;
+   }
+
+   /**
+    * Specifies whether the virtual model control module of the {@link WholeBodyControllerCore}
+    * should be created or not.
+    * <p>
+    * This module is not created by default to prevent creating unused {@link YoVariable}s.
+    * </p>
+    *
+    * @param setup whether to setup the virtual model control mode or not.
+    */
+   public void setupControllerCoreVirtualModelControlMode(boolean setup)
+   {
+      setupVirtualModelControlSolver = setup;
    }
 
    public void initialize()
