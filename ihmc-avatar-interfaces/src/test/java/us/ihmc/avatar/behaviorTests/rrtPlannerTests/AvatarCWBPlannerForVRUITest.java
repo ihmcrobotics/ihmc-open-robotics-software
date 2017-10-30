@@ -25,21 +25,26 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WayPointsByVRUIBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WayPointsByVRUIBehaviorStateMachine.WayPointsByVRUIBehaviorState;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.ConstrainedWholeBodyPlanningToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WayPointsPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.WayPointsTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -61,7 +66,8 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
    private ConstrainedWholeBodyPlanningToolboxModule cwbPlanningToolboxModule;
 
    private KinematicsToolboxModule kinematicsToolboxModule;
-   private PacketCommunicator toolboxCommunicator;
+   private PacketCommunicator kinematicsToolboxCommunicator;
+   private PacketCommunicator cwbToolboxCommunicator;
 
    private void setupCWBPlanningToolboxModule() throws IOException
    {
@@ -69,9 +75,9 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, false);
       cwbPlanningToolboxModule = new ConstrainedWholeBodyPlanningToolboxModule(robotModel, fullRobotModel, null, visulaizerOn);
-      toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT,
+      kinematicsToolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT,
                                                                                    PacketDestination.KINEMATICS_TOOLBOX_MODULE);
-      toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE_PORT,
+      cwbToolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE_PORT,
                                                                                    PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
    }
 
@@ -125,6 +131,7 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
    public void destroySimulationAndRecycleMemory()
    {
       if (visualize)
+      //if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
@@ -148,10 +155,16 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
          kinematicsToolboxModule = null;
       }
 
-      if (toolboxCommunicator != null)
+      if (kinematicsToolboxCommunicator != null)
       {
-         toolboxCommunicator.closeConnection();
-         toolboxCommunicator = null;
+         kinematicsToolboxCommunicator.closeConnection();
+         kinematicsToolboxCommunicator = null;
+      }
+
+      if (cwbToolboxCommunicator != null)
+      {
+         cwbToolboxCommunicator.closeConnection();
+         cwbToolboxCommunicator = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -209,8 +222,36 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       System.out.println("End");
    }
-
+   
    @Test
+   public void testForReachability() throws SimulationExceededMaximumTimeException, IOException
+   {
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.getControllerFullRobotModel().updateFrames();
+      
+      drcBehaviorTestHelper.updateRobotModel();
+      WholeBodyInverseKinematicsBehavior wholebodyBehavior = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
+                                                                                                    drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                                                    drcBehaviorTestHelper.getSDFFullRobotModel());
+
+      FramePose handFramePose = new FramePose(ReferenceFrame.getWorldFrame());
+      handFramePose.setPosition(0.6, -0.4, 1.0);
+
+      wholebodyBehavior.setTrajectoryTime(3.0);
+      wholebodyBehavior.setDesiredHandPose(RobotSide.RIGHT, handFramePose);
+
+      drcBehaviorTestHelper.updateRobotModel();
+      drcBehaviorTestHelper.dispatchBehavior(wholebodyBehavior);
+
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(10.0);
+
+      System.out.println("End");
+
+   }
+
+   // @Test
    public void testForBehavior() throws SimulationExceededMaximumTimeException, IOException
    {
       ThreadTools.sleep(5000);
@@ -301,15 +342,16 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
                kinematicConverter.updateFullRobotModel(robotConfiguration);
 
                FullHumanoidRobotModel robotModel = kinematicConverter.getFullRobotModel();
-               Pose3D pose = new Pose3D(robotModel.getHand(RobotSide.LEFT).getBodyFixedFrame().getTransformToWorldFrame());
-               pose.appendTranslation(0.0, -ConstrainedWholeBodyPlanningToolboxController.handCoordinateOffsetX, 0.0);
-               scs.addStaticLinkGraphics(getXYZAxis(pose, 0.075));
-            }
+               Pose3D lHandPose = new Pose3D(robotModel.getHand(RobotSide.LEFT).getBodyFixedFrame().getTransformToWorldFrame());
+               lHandPose.appendTranslation(0.0, -ConstrainedWholeBodyPlanningToolboxController.handCoordinateOffsetX, 0.0);
+               scs.addStaticLinkGraphics(getXYZAxis(lHandPose, 0.075));
 
-            scs.addStaticLinkGraphics(getXYZAxis(PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory.getEndEffectorPose(0.0,
-                                                                                                                                                RobotSide.RIGHT,
-                                                                                                                                                new ConfigurationSpace()),
-                                                 0.2));
+               Pose3D rHandPose = new Pose3D(robotModel.getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame());
+               rHandPose.appendTranslation(0.0, ConstrainedWholeBodyPlanningToolboxController.handCoordinateOffsetX, 0.0);
+               scs.addStaticLinkGraphics(getXYZAxis(rHandPose, 0.15));
+
+               PrintTools.info("" + i + " " + rHandPose);
+            }
 
             break;
          }

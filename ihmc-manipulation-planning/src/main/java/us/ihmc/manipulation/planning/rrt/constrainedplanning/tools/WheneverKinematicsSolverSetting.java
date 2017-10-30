@@ -1,6 +1,9 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.tools;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
 public class WheneverKinematicsSolverSetting implements ControllerCoreOptimizationSettings
@@ -111,5 +114,11 @@ public class WheneverKinematicsSolverSetting implements ControllerCoreOptimizati
    public int getRhoSize()
    {
       return 0;
+   }
+
+   @Override
+   public SimpleActiveSetQPSolverInterface getActiveSetQPSolver()
+   {
+      return new JavaQuadProgSolver();
    }
 }
