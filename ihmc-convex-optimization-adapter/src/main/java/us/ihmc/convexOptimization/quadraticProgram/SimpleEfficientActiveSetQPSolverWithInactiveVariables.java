@@ -23,8 +23,6 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
    private final DenseMatrix64F activeVariables = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F activeVariableSolution = new DenseMatrix64F(0, 0);
 
-   private final DenseMatrix64F computedObjectiveFunctionValue = new DenseMatrix64F(1, 1);
-
    private void setMatricesFromOriginal()
    {
       quadraticCostQMatrix.set(originalQuadraticCostQMatrix);

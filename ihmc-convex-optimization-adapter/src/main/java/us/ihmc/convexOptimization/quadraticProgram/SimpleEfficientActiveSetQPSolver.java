@@ -90,7 +90,7 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
    private final TIntArrayList lowerBoundIndicesToAddToActiveSet = new TIntArrayList();
    private final TIntArrayList lowerBoundIndicesToRemoveFromActiveSet = new TIntArrayList();
 
-   private final DenseMatrix64F computedObjectiveFunctionValue = new DenseMatrix64F(1, 1);
+   protected final DenseMatrix64F computedObjectiveFunctionValue = new DenseMatrix64F(1, 1);
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
@@ -183,15 +183,6 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
       return computedObjectiveFunctionValue.get(0, 0) + quadraticCostScalar;
    }
 
-   private final DenseMatrix64F temporaryMatrix = new DenseMatrix64F(0, 0);
-
-   protected void multQuad(DenseMatrix64F xVector, DenseMatrix64F QMatrix, DenseMatrix64F xTransposeQx)
-   {
-
-      temporaryMatrix.reshape(xVector.numCols, QMatrix.numCols);
-      CommonOps.multTransA(xVector, QMatrix, temporaryMatrix);
-      CommonOps.mult(temporaryMatrix, xVector, xTransposeQx);
-   }
 
    @Override
    public void setLinearEqualityConstraints(DenseMatrix64F linearEqualityConstraintsAMatrix, DenseMatrix64F linearEqualityConstraintsBVector)
