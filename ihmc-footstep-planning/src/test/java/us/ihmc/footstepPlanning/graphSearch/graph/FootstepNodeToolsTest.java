@@ -21,7 +21,7 @@ public class FootstepNodeToolsTest
    private final double epsilon = 1e-8;
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test
+   @Test(timeout = 30000)
    public void testGetNodeTransform()
    {
       int numTests = 1000;
@@ -66,7 +66,7 @@ public class FootstepNodeToolsTest
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test
+   @Test(timeout = 30000)
    public void testGetSnappedNodeTransform()
    {
       int numTests = 10;
