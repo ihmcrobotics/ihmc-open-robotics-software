@@ -80,6 +80,11 @@ public class PolygonSnapperVisualizer
 
    public void setSnappedPolygon(RigidBodyTransform nonSnappedTransform, RigidBodyTransform snapTransform)
    {
+      setSnappedPolygon(nonSnappedTransform, snapTransform, null);
+   }
+
+   public void setSnappedPolygon(RigidBodyTransform nonSnappedTransform, RigidBodyTransform snapTransform, ConvexPolygon2D partialFootholdPolygon)
+   {
       Point3D nonSnappedPosition = new Point3D();
       Quaternion nonSnappedOrientation = new Quaternion();
       nonSnappedTransform.get(nonSnappedOrientation, nonSnappedPosition);
@@ -110,6 +115,15 @@ public class PolygonSnapperVisualizer
       snappedPolygonPose.setPosition(snappedPosition);
       snappedPolygonPose.setOrientation(snappedOrientation);
       snappedPolygonViz.update();
+
+      if(partialFootholdPolygon != null)
+      {
+         snappedPolygonViz.updateConvexPolygon2d(partialFootholdPolygon);
+      }
+      else
+      {
+         snappedPolygonViz.updateConvexPolygon2d(snappedPolygon.getConvexPolygon2d());
+      }
 
       scs.setTime(scs.getTime() + 1.0);
       scs.tickAndUpdate();
