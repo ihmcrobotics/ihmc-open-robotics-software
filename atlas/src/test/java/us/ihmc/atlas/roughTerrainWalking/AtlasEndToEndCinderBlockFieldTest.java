@@ -37,7 +37,7 @@ public class AtlasEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldT
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 167.7)
-   @Test(timeout = 30000)
+   @Test(timeout = 1200000)
    public void testWalkingOverCinderBlockField() throws Exception
    {
       super.testWalkingOverCinderBlockField();
