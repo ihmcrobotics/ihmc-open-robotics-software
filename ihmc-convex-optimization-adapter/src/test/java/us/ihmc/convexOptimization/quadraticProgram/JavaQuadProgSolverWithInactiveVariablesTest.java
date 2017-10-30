@@ -84,7 +84,7 @@ public class JavaQuadProgSolverWithInactiveVariablesTest extends AbstractSimpleA
    @Test(timeout = 300000000)
    public void testSimpleCasesWithBoundsConstraintsAndInactiveVariables()
    {
-      testSimpleCasesWithBoundsConstraintsAndInactiveVariables(0, 1, 3, false);
+      testSimpleCasesWithBoundsConstraintsAndInactiveVariables(0, 1, 2, 0, false);
    }
 
    @Override /** This IS a good solver **/

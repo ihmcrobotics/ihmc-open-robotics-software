@@ -188,7 +188,7 @@ public abstract class AbstractSimpleActiveSetQPSolverWithInactiveVariablesTest e
       lagrangeEqualityMultipliers = new double[2];
       lagrangeInequalityMultipliers = new double[3];
       numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
-      assertTrue(numberOfIterations < 1);
+      assertTrue(numberOfIterations <= 1);
 
       assertEquals(2, solution.length);
       assertTrue(Double.isNaN(solution[0]));
@@ -199,11 +199,11 @@ public abstract class AbstractSimpleActiveSetQPSolverWithInactiveVariablesTest e
    @Test(timeout = 300000000)
    public void testSimpleCasesWithBoundsConstraintsAndInactiveVariables()
    {
-      testSimpleCasesWithBoundsConstraintsAndInactiveVariables(1, 2, 3, false);
+      testSimpleCasesWithBoundsConstraintsAndInactiveVariables(1, 2, 3, 2, false);
    }
 
    public void testSimpleCasesWithBoundsConstraintsAndInactiveVariables(int expectedNumberOfIterations, int expectedNumberOfIterations2, int expectedNubmerOfIterations3,
-                                                    boolean ignoreLagrangeMultipliers)
+                                                    int expectedNumberOfIterations4, boolean ignoreLagrangeMultipliers)
    {
       ActiveSetQPSolverWithInactiveVariablesInterface solver = createSolverToTest();
 
@@ -459,7 +459,7 @@ public abstract class AbstractSimpleActiveSetQPSolverWithInactiveVariablesTest e
 
       numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
       numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      assertEquals(expectedNumberOfIterations2, numberOfIterations);
+      assertEquals(expectedNumberOfIterations4, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertTrue(Double.isNaN(solution[0]));
