@@ -24,7 +24,7 @@ public class FootstepNodeSnapperTest
    private int[] yawIndices = new int[]{-2, 4, 0};
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testFootstepCacheing()
    {
       TestSnapper testSnapper = new TestSnapper();
@@ -51,7 +51,7 @@ public class FootstepNodeSnapperTest
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testWithoutPlanarRegions()
    {
       TestSnapper testSnapper = new TestSnapper();
