@@ -41,7 +41,6 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
       if (snapTransform.containsNaN())
       {
-//         PrintTools.debug("Was not able to snap node:\n" + node);
          return false;
       }
 
@@ -50,7 +49,6 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
       double footArea = footPolygons.get(node.getRobotSide()).getArea();
       if (area < parameters.getMinimumFootholdPercent() * footArea)
       {
-//         PrintTools.debug("Node does not have enough foothold area. It only has " + Math.floor(100.0 * area / footArea) + "% foothold:\n" + node);
          return false;
       }
 
@@ -59,7 +57,6 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
       double heightChange = Math.abs(snapTransform.getTranslationZ() - previousSnapTransform.getTranslationZ());
       if (heightChange > parameters.getMaximumStepZ())
       {
-//         PrintTools.debug("Too much height difference (" + Math.round(100.0 * heightChange) + "cm) to previous node:\n" + node);
          return false;
       }
 
