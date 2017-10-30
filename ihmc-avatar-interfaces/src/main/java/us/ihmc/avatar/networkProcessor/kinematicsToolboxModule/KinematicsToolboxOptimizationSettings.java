@@ -1,8 +1,8 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
+import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolverWithInactiveVariables;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
 public class KinematicsToolboxOptimizationSettings implements ControllerCoreOptimizationSettings
@@ -112,8 +112,8 @@ public class KinematicsToolboxOptimizationSettings implements ControllerCoreOpti
    }
 
    @Override
-   public SimpleActiveSetQPSolverInterface getActiveSetQPSolver()
+   public ActiveSetQPSolverWithInactiveVariablesInterface getActiveSetQPSolver()
    {
-      return new JavaQuadProgSolver();
+      return new JavaQuadProgSolverWithInactiveVariables();
    }
 }
