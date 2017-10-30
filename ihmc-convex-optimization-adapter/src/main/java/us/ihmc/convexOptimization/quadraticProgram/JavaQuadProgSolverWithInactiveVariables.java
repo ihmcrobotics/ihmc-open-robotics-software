@@ -248,7 +248,6 @@ public class JavaQuadProgSolverWithInactiveVariables extends JavaQuadProgSolver 
       variableUpperBounds.set(originalVariableUpperBounds);
    }
 
-   // FIXME the constraint matrices are transposed here
    private void removeInactiveVariables()
    {
       setMatricesFromOriginal();

@@ -1569,10 +1569,10 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
    @Test(timeout = 30000)
    public void testMaxIterations()
    {
-      testMaxIterations(3);
+      testMaxIterations(3, true);
    }
 
-   public void testMaxIterations(int maxForSolution)
+   public void testMaxIterations(int maxForSolution, boolean checkLagrangeMultipliers)
    {
       SimpleActiveSetQPSolverInterface solver = createSolverToTest();
 
@@ -1617,16 +1617,19 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(6.0, solution[1], 1e-7);
       assertEquals(14.0, solution[2], 1e-7);
       /** These lagrange multipliers cause problems */
-      assertEquals(8.0, lagrangeEqualityMultipliers[0], 1e-7);
-      assertEquals(28.0, lagrangeInequalityMultipliers[0], 1e-7);
+      if (checkLagrangeMultipliers)
+      {
+         assertEquals(8.0, lagrangeEqualityMultipliers[0], 1e-7);
+         assertEquals(28.0, lagrangeInequalityMultipliers[0], 1e-7);
 
-      assertEquals(0.0, lagrangeLowerBoundMultipliers[0], 1e-7);
-      assertEquals(48.0, lagrangeLowerBoundMultipliers[1], 1e-7);
-      assertEquals(0.0, lagrangeLowerBoundMultipliers[2], 1e-7);
+         assertEquals(0.0, lagrangeLowerBoundMultipliers[0], 1e-7);
+         assertEquals(48.0, lagrangeLowerBoundMultipliers[1], 1e-7);
+         assertEquals(0.0, lagrangeLowerBoundMultipliers[2], 1e-7);
 
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[0], 1e-7);
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[1], 1e-7);
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[2], 1e-7);
+         assertEquals(0.0, lagrangeUpperBoundMultipliers[0], 1e-7);
+         assertEquals(0.0, lagrangeUpperBoundMultipliers[1], 1e-7);
+         assertEquals(0.0, lagrangeUpperBoundMultipliers[2], 1e-7);
+      }
 
       DenseMatrix64F solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);

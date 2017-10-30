@@ -306,7 +306,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
    @Test(timeout = 30000)
    public void testMaxIterations()
    {
-      testMaxIterations(6);
+      testMaxIterations(6, false);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
