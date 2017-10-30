@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -25,6 +26,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWh
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.GenericTaskNode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeFindInitialGuess;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeVisualizer;
@@ -235,7 +237,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
           */
          terminateToolboxController();
 
-         // TODO
+         // TODO         
          setOutputStatus(toolboxSolution, 4);
          setOutputStatus(toolboxSolution, tree.getPath());
 
@@ -258,8 +260,9 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          CTTaskNodeWholeBodyTrajectoryMessageFactory ctTaskNodeWholeBodyTrajectoryMessageFactory = new CTTaskNodeWholeBodyTrajectoryMessageFactory();
          ctTaskNodeWholeBodyTrajectoryMessageFactory.setCTTaskNodePath(tree.getPath(), constrainedEndEffectorTrajectory);
 
-         outputStatusToPack.setWholeBodyTrajectoryMessage(ctTaskNodeWholeBodyTrajectoryMessageFactory.getWholeBodyTrajectoryMessage());
-
+         WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = ctTaskNodeWholeBodyTrajectoryMessageFactory.getWholeBodyTrajectoryMessage();
+         outputStatusToPack.setWholeBodyTrajectoryMessage(wholeBodyTrajectoryMessage);
+         
          outputStatusToPack.setRobotConfigurations(ctTaskNodeWholeBodyTrajectoryMessageFactory.getConfigurations());
          outputStatusToPack.setTrajectoryTimes(ctTaskNodeWholeBodyTrajectoryMessageFactory.getTrajectoryTimes());
       }

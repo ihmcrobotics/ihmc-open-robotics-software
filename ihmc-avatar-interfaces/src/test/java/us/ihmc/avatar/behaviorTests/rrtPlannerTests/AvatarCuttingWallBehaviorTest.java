@@ -332,9 +332,13 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
                kinematicConverter.updateFullRobotModel(robotConfiguration);
 
                FullHumanoidRobotModel robotModel = kinematicConverter.getFullRobotModel();
-               Pose3D pose = new Pose3D(robotModel.getHand(RobotSide.LEFT).getBodyFixedFrame().getTransformToWorldFrame());
-               pose.appendTranslation(0.0, -ConstrainedWholeBodyPlanningToolboxController.handCoordinateOffsetX, 0.0);
-               scs.addStaticLinkGraphics(getXYZAxis(pose));
+               Pose3D lHandPose = new Pose3D(robotModel.getHand(RobotSide.LEFT).getBodyFixedFrame().getTransformToWorldFrame());
+               lHandPose.appendTranslation(0.0, -ConstrainedWholeBodyPlanningToolboxController.handCoordinateOffsetX, 0.0);
+               scs.addStaticLinkGraphics(getXYZAxis(lHandPose));
+               
+               Pose3D rHandPose = new Pose3D(robotModel.getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame());
+               rHandPose.appendTranslation(0.0, ConstrainedWholeBodyPlanningToolboxController.handCoordinateOffsetX, 0.0);
+               scs.addStaticLinkGraphics(getXYZAxis(rHandPose));
             }
 
             break;

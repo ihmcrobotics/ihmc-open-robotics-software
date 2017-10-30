@@ -140,7 +140,7 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
             if (confirmQueue.isNewPacketAvailable())
             {
                boolean parameterValue = confirmQueue.getLatestPacket().getParameterValue();
-               System.out.println("user confirmed " + parameterValue);
+               System.out.println("user confirmation packet is received. " + parameterValue);
                return parameterValue;
             }
             else
