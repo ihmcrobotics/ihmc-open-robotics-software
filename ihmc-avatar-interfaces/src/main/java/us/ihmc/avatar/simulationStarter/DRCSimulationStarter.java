@@ -405,7 +405,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames, wristForceSensorNames,
                                                                  highLevelControllerParameters, walkingControllerParameters, capturePointPlannerParameters);
-      setupHighLevelStates(controllerFactory, feetForceSensorNames);
+      setupHighLevelStates(controllerFactory);
 
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
       if (setupControllerNetworkSubscriber)
@@ -457,7 +457,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       return avatarSimulation;
    }
 
-   public void setupHighLevelStates(HighLevelHumanoidControllerFactory controllerFactory, SideDependentList<String> feetForceSensorNames)
+   public void setupHighLevelStates(HighLevelHumanoidControllerFactory controllerFactory)
    {
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
