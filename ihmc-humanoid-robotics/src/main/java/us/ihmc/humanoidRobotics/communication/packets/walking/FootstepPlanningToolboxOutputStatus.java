@@ -73,6 +73,7 @@ public class FootstepPlanningToolboxOutputStatus extends StatusPacket<FootstepPl
       footstepDataList.defaultSwingDuration = other.footstepDataList.defaultSwingDuration;
       footstepDataList.defaultTransferDuration = other.footstepDataList.defaultTransferDuration;
       footstepDataList.uniqueId = other.footstepDataList.uniqueId;
+      planarRegionsListMessage = other.planarRegionsListMessage;
    }
 
 }
