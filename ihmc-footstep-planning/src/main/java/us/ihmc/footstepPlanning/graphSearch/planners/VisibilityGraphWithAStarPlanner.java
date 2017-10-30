@@ -172,6 +172,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
          }
          catch (Exception e)
          {
+            e.printStackTrace();
             double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
             timeSpentBeforeFootstepPlanner.set(seconds);
             timeSpentInFootstepPlanner.set(0.0);
