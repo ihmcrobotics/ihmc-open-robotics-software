@@ -39,7 +39,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
  *     CE^T x = ce0
  *     CI^T x <= ci0
  */
-public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
+public class JavaQuadProgSolver implements SimpleActiveSetQPSolverInterface
 {
    private enum QuadProgStep {COMPUTE_CONSTRAINT_VIOLATIONS, FIND_MOST_VIOLATED_CONSTRAINT, COMPUTE_STEP_LENGTH}
 
@@ -79,8 +79,16 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
    private final CholeskyDecomposition<DenseMatrix64F> decomposer = DecompositionFactory.chol(defaultSize, false);
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(defaultSize);
 
+   private final DenseMatrix64F quadraticCostQMatrix = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F decomposedQuadraticCostQMatrix = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F quadraticCostQVector = new DenseMatrix64F(0, 0);
    private double quadraticCostScalar = 0.0;
+
+   private final DenseMatrix64F linearEqualityConstraintsAMatrix = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F linearEqualityConstraintsBVector = new DenseMatrix64F(0, 0);
+
+   private final DenseMatrix64F linearInequalityConstraintsCMatrix = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F linearInequalityConstraintsDVector = new DenseMatrix64F(0, 0);
 
    private final DenseMatrix64F totalLinearInequalityConstraintsCMatrix = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F totalLinearInequalityConstraintsDVector = new DenseMatrix64F(0, 0);
@@ -90,9 +98,6 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
 
    private final DenseMatrix64F upperBoundsCMatrix = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F upperBoundsDVector = new DenseMatrix64F(0, 0);
-
-   private final DenseMatrix64F activeVariables = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F activeVariableSolution = new DenseMatrix64F(0, 0);
 
    private int problemSize;
    private int numberOfInequalityConstraints;
@@ -143,14 +148,11 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
       decomposedQuadraticCostQMatrix.reshape(0, 0);
       quadraticCostQVector.reshape(0, 0);
 
-      activeVariables.reshape(0, 0);
-      activeVariableSolution.reshape(0, 0);
-
       linearEqualityConstraintsAMatrix.reshape(0, 0);
       linearEqualityConstraintsBVector.reshape(0, 0);
 
-      linearInequalityConstraintsCMatrixO.reshape(0, 0);
-      linearInequalityConstraintsDVectorO.reshape(0, 0);
+      linearInequalityConstraintsCMatrix.reshape(0, 0);
+      linearInequalityConstraintsDVector.reshape(0, 0);
 
       lowerBoundsCMatrix.reshape(0, 0);
       lowerBoundsDVector.reshape(0, 0);
@@ -252,12 +254,12 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
       if (linearInequalityConstraintCMatrix.getNumCols() != quadraticCostQMatrix.getNumCols())
          throw new RuntimeException("linearInequalityConstraintCMatrix.getNumCols() != quadraticCostQMatrix.getNumCols()");
 
-      this.linearInequalityConstraintsCMatrixO.reshape(problemSize, numberOfInequalityConstraints);
-      CommonOps.transpose(linearInequalityConstraintCMatrix, this.linearInequalityConstraintsCMatrixO);
-      CommonOps.scale(-1.0, this.linearInequalityConstraintsCMatrixO);
+      this.linearInequalityConstraintsCMatrix.reshape(problemSize, numberOfInequalityConstraints);
+      CommonOps.transpose(linearInequalityConstraintCMatrix, this.linearInequalityConstraintsCMatrix);
+      CommonOps.scale(-1.0, this.linearInequalityConstraintsCMatrix);
 
-      this.linearInequalityConstraintsDVectorO.reshape(numberOfInequalityConstraints, 1);
-      this.linearInequalityConstraintsDVectorO.set(linearInequalityConstraintDVector);
+      this.linearInequalityConstraintsDVector.reshape(numberOfInequalityConstraints, 1);
+      this.linearInequalityConstraintsDVector.set(linearInequalityConstraintDVector);
    }
 
    @Override
@@ -393,11 +395,6 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
       lagrangeUpperBoundMultipliersToPack.reshape(numberOfUpperBounds, 1);
       lagrangeUpperBoundMultipliersToPack.zero();
 
-      removeInactiveVariables();
-
-      activeVariableSolution.reshape(problemSize, 1);
-      activeVariableSolution.zero();
-
       reshape();
       zero();
 
@@ -450,7 +447,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
 
             tempMatrix.reshape(problemSize + numberOfEqualityConstraints, 1);
             CommonOps.mult(Q_augmented_inv, q_augmented, tempMatrix);
-            MatrixTools.setMatrixBlock(activeVariableSolution, 0, 0, tempMatrix, 0, 0, problemSize, 1, 1.0);
+            MatrixTools.setMatrixBlock(solutionToPack, 0, 0, tempMatrix, 0, 0, problemSize, 1, 1.0);
             MatrixTools.setMatrixBlock(lagrangeMultipliers, 0, 0, tempMatrix, problemSize, 0, numberOfEqualityConstraints, 1, 1.0);
 
             // Add equality constraints to the working set A
@@ -475,7 +472,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
             // x = -G^-1 * g0 = -J * J^T * g0
             tempMatrix.reshape(problemSize, 1);
             CommonOps.multTransA(J, quadraticCostQVector, tempMatrix);
-            CommonOps.mult(-1.0, J, tempMatrix, activeVariableSolution);
+            CommonOps.mult(-1.0, J, tempMatrix, solutionToPack);
 
             // Add equality constraints to the working set A
             numberOfActiveConstraints = 0;
@@ -490,7 +487,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
          // x = -G^-1 * g0 = -J * J^T * g0
          tempMatrix.reshape(problemSize, 1);
          CommonOps.multTransA(J, quadraticCostQVector, tempMatrix);
-         CommonOps.mult(-1.0, J, tempMatrix, activeVariableSolution);
+         CommonOps.mult(-1.0, J, tempMatrix, solutionToPack);
 
          // Add equality constraints to the working set A
          numberOfActiveConstraints = 0;
@@ -503,10 +500,10 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
             updateInfeasibilityMultiplier();
 
             // compute full step length: i.e., the minimum step in primal space s.t. the constraint becomes feasible
-            double stepLengthForEqualityConstraint = computeStepLengthForEqualityConstraint(activeVariableSolution, equalityConstraintIndex);
+            double stepLengthForEqualityConstraint = computeStepLengthForEqualityConstraint(solutionToPack, equalityConstraintIndex);
 
             // set x = x + minimumStepInPrimalSpace * stepDirectionInPrimalSpace
-            CommonOps.addEquals(activeVariableSolution, stepLengthForEqualityConstraint, stepDirectionInPrimalSpace);
+            CommonOps.addEquals(solutionToPack, stepLengthForEqualityConstraint, stepDirectionInPrimalSpace);
 
             // set u = u+
             lagrangeMultipliers.set(numberOfActiveConstraints, stepLengthForEqualityConstraint);
@@ -536,12 +533,11 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
          {
          case COMPUTE_CONSTRAINT_VIOLATIONS:
 
-            if (computeConstraintViolations(activeVariableSolution, c1, c2))
+            if (computeConstraintViolations(solutionToPack, c1, c2))
             { // numerically there are not infeasibilities anymore
                // the sum of all the constraint violations is negligible, so we are finished
                partitionLagrangeMultipliers(lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack, lagrangeLowerBoundMultipliersToPack,
                                             lagrangeUpperBoundMultipliersToPack);
-               copyActiveVariableSolutionToAllVariables(solutionToPack, activeVariableSolution);
                return numberOfIterations;
             }
 
@@ -574,7 +570,6 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
                { // we don't have any violations in the inactive set, so the current solution is valid, by assuming that the active set is satisfied
                   partitionLagrangeMultipliers(lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
                                                lagrangeLowerBoundMultipliersToPack, lagrangeUpperBoundMultipliersToPack);
-                  copyActiveVariableSolutionToAllVariables(solutionToPack, activeVariableSolution);
                   return numberOfIterations;
                }
             }
@@ -639,7 +634,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
 
             if (numberOfIterations > maxNumberOfIterations)
                break;
-            currentStep = takeStepInPrimalAndDualSpace(activeVariableSolution, stepLength, fullStepLength, mostViolatedConstraintIndex);
+            currentStep = takeStepInPrimalAndDualSpace(solutionToPack, stepLength, fullStepLength, mostViolatedConstraintIndex);
          }
       }
 
@@ -983,7 +978,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
 
    public void reshape()
    {
-      int numberOfInequalityConstraints = linearInequalityConstraintsDVectorO.getNumRows();
+      int numberOfInequalityConstraints = linearInequalityConstraintsDVector.getNumRows();
       int numberOfLowerBounds = lowerBoundsDVector.getNumRows();
       int numberOfUpperBounds = upperBoundsDVector.getNumRows();
       int numberOfConstraints = numberOfEqualityConstraints + numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds;
@@ -1015,8 +1010,8 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
       totalLinearInequalityConstraintsDVector.reshape(numberOfInequalityConstraints + numberOfLowerBounds + numberOfUpperBounds, 1);
 
       // add inequality constraints to total inequality constraint
-      MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsCMatrix, 0, 0, linearInequalityConstraintsCMatrixO, 0, 0, problemSize, numberOfInequalityConstraints, 1.0);
-      MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsDVector, 0, 0, linearInequalityConstraintsDVectorO, 0, 0, numberOfInequalityConstraints, 1, 1.0);
+      MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsCMatrix, 0, 0, linearInequalityConstraintsCMatrix, 0, 0, problemSize, numberOfInequalityConstraints, 1.0);
+      MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsDVector, 0, 0, linearInequalityConstraintsDVector, 0, 0, numberOfInequalityConstraints, 1, 1.0);
 
       // add lower bounds to total inequality constraint
       MatrixTools.setMatrixBlock(totalLinearInequalityConstraintsCMatrix, 0, numberOfInequalityConstraints, lowerBoundsCMatrix, 0, 0, problemSize, numberOfLowerBounds, 1.0);
@@ -1104,42 +1099,5 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
       temporaryMatrix.reshape(xVector.numCols, QMatrix.numCols);
       CommonOps.multTransA(xVector, QMatrix, temporaryMatrix);
       CommonOps.mult(temporaryMatrix, xVector, xTransposeQx);
-   }
-
-   private void removeInactiveVariables()
-   {
-      problemSize = 0;
-      for (int variableIndex = 0; variableIndex < activeVariables.getNumRows(); variableIndex++)
-      {
-         if (activeVariables.get(variableIndex) == 1.0)
-         {
-            problemSize++;
-            continue;
-         }
-
-         MatrixTools.removeRow(quadraticCostQMatrix, variableIndex);
-         MatrixTools.removeColumn(quadraticCostQMatrix, variableIndex);
-
-         MatrixTools.removeRow(quadraticCostQVector, variableIndex);
-
-         MatrixTools.removeColumn(linearEqualityConstraintsAMatrix, variableIndex);
-         MatrixTools.removeColumn(linearInequalityConstraintsCMatrixO, variableIndex);
-
-         MatrixTools.removeRow(lowerBoundsCMatrix, variableIndex);
-         MatrixTools.removeRow(lowerBoundsCMatrix, variableIndex);
-      }
-   }
-
-   private void copyActiveVariableSolutionToAllVariables(DenseMatrix64F solutionToPack, DenseMatrix64F activeVariableSolution)
-   {
-      int activeVariableIndex = 0;
-      for (int variableIndex = 0; variableIndex < solutionToPack.getNumRows(); variableIndex++)
-      {
-         if (activeVariables.get(variableIndex) != 1.0)
-            continue;
-
-         solutionToPack.set(variableIndex, 0, activeVariableSolution.get(activeVariableIndex, 0));
-         activeVariableIndex++;
-      }
    }
 }
