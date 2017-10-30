@@ -4,11 +4,14 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSimpleICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.AvatarICPOptimizationPushRecoveryTest;
+import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -48,6 +51,13 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
                   };
                }
             };
+
+         }
+
+         @Override
+         public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
+         {
+            return new AtlasContinuousCMPPlannerParameters(new AtlasPhysicalProperties());
          }
       };
 
@@ -56,7 +66,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testPushICPOptimizationBackwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimizationBackwardPushInSwing();
@@ -64,7 +74,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimizationDiagonalOutwardPushInSwing();
@@ -72,7 +82,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimizationDiagonalYawingOutwardPushInSwing();
@@ -80,7 +90,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testPushICPOptimizationForwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimizationForwardPushInSlowSwing();
@@ -88,7 +98,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testPushICPOptimizationForwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimizationForwardPushInSwing();
@@ -96,7 +106,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testPushICPOptimizationInwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimizationInwardPushInSwing();
@@ -104,7 +114,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testPushICPOptimizationLongBackwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimizationLongBackwardPushInSwing();
@@ -112,7 +122,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testPushICPOptimizationLongForwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimizationLongForwardPushInSwing();
@@ -120,7 +130,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testPushICPOptimizationLongInwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimizationLongInwardPushInSwing();
@@ -128,7 +138,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testPushICPOptimizationNoPush() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimizationNoPush();
@@ -136,7 +146,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testPushICPOptimizationOutwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimizationOutwardPushInSlowSwing();
@@ -144,7 +154,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testPushICPOptimizationOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimizationOutwardPushInSwing();
@@ -152,7 +162,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testPushICPOptimizationOutwardPushInTransfer() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimizationOutwardPushInTransfer();
@@ -160,7 +170,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testPushICPOptimizationOutwardPushOnEachStep() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimizationOutwardPushOnEachStep();
@@ -168,7 +178,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testPushICPOptimizationRandomPushInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimizationRandomPushInSwing();
@@ -179,7 +189,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
       AtlasSimpleICPOptimizationPushRecoveryTest test = new AtlasSimpleICPOptimizationPushRecoveryTest();
       try
       {
-         test.testPushICPOptimizationOutwardPushInSwing();
+         test.testPushICPOptimizationOutwardPushInSlowSwing();
       }
       catch (SimulationExceededMaximumTimeException e)
       {

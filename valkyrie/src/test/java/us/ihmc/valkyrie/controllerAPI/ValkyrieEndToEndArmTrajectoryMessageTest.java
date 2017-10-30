@@ -27,7 +27,7 @@ public class ValkyrieEndToEndArmTrajectoryMessageTest extends EndToEndArmTraject
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test
+   @Test(timeout = 30000)
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
       super.testMessageWithTooManyTrajectoryPoints();
@@ -35,7 +35,7 @@ public class ValkyrieEndToEndArmTrajectoryMessageTest extends EndToEndArmTraject
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 35.0)
-   @Test
+   @Test(timeout = 30000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
       super.testMultipleTrajectoryPoints();
@@ -43,7 +43,7 @@ public class ValkyrieEndToEndArmTrajectoryMessageTest extends EndToEndArmTraject
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 65.0)
-   @Test
+   @Test(timeout = 30000)
    public void testQueuedMessages() throws Exception
    {
       super.testQueuedMessages();
@@ -51,7 +51,7 @@ public class ValkyrieEndToEndArmTrajectoryMessageTest extends EndToEndArmTraject
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test
+   @Test(timeout = 30000)
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
       super.testQueueStoppedWithOverrideMessage();
@@ -59,7 +59,7 @@ public class ValkyrieEndToEndArmTrajectoryMessageTest extends EndToEndArmTraject
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 15.0)
-   @Test
+   @Test(timeout = 30000)
    public void testQueueWithWrongPreviousId() throws Exception
    {
       super.testQueueWithWrongPreviousId();
@@ -67,7 +67,7 @@ public class ValkyrieEndToEndArmTrajectoryMessageTest extends EndToEndArmTraject
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSingleTrajectoryPoint() throws Exception
    {
       super.testSingleTrajectoryPoint();
@@ -75,7 +75,7 @@ public class ValkyrieEndToEndArmTrajectoryMessageTest extends EndToEndArmTraject
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test
+   @Test(timeout = 30000)
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();

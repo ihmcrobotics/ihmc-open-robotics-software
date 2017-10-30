@@ -432,7 +432,7 @@ public class TwistTest extends SpatialMotionVectorTest
    /**
     * This test is used to prove that the reference frame in which the linear velocity of a body fixed point in computed in does not matter.
     */
-	@Test
+	@Test(timeout = 30000)
    public void testGetLinearVelocityOfPointFixedInBodyFrameComputedInDifferentFrames() throws Exception
    {
       Random random = new Random(4354L);
