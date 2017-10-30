@@ -60,13 +60,16 @@ public class WalkToGoalBehavior extends AbstractBehavior
    {
       WaitingForRequestState waitingForRequestState = new WaitingForRequestState();
       waitingForRequestState.addStateTransition(WalkToGoalBehaviorStates.PLANNING, planningRequestQueue::isNewPacketAvailable);
+      stateMachine.addState(waitingForRequestState);
 
       PlanningState planningState = new PlanningState();
       planningState.addStateTransition(WalkToGoalBehaviorStates.EXECUTING_PLAN, havePlanToExecute::getBooleanValue);
       planningState.addStateTransition(WalkToGoalBehaviorStates.WAITING_FOR_REQUEST, transitionBackToWaitingState::getBooleanValue);
+      stateMachine.addState(planningState);
 
       ExecutingPlanState executingPlanState = new ExecutingPlanState();
       executingPlanState.addStateTransition(WalkToGoalBehaviorStates.WAITING_FOR_REQUEST, footstepListBehavior::isDone);
+      stateMachine.addState(executingPlanState);
 
       stateMachine.setCurrentState(WalkToGoalBehaviorStates.WAITING_FOR_REQUEST);
    }
