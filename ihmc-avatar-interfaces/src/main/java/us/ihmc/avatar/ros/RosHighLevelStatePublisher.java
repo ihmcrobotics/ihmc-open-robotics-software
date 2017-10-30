@@ -1,6 +1,6 @@
 package us.ihmc.avatar.ros;
 
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 
 /**
@@ -14,10 +14,10 @@ public class RosHighLevelStatePublisher extends RosTopicPublisher<ihmc_msgs.High
       super(ihmc_msgs.HighLevelStateRosMessage._TYPE, latched);
    }
 
-   public void publish(HighLevelController highLevelController)
+   public void publish(HighLevelControllerName highLevelControllerName)
    {
 //      HighLevelStateRosMessage message = getMessage();
-//      message.setHighLevelController(GenericRosMessageConverter.convertEnumToByte(highLevelController));
+//      message.setHighLevelControllerName(GenericRosMessageConverter.convertEnumToByte(highLevelControllerName));
 //      publish(message);
    }
 }

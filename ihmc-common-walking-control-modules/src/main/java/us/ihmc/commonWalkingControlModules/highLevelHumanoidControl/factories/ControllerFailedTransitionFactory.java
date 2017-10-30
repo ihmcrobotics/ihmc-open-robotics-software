@@ -4,18 +4,18 @@ import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.ControllerFailedTransition;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class ControllerFailedTransitionFactory implements ControllerStateTransitionFactory<HighLevelController>
+public class ControllerFailedTransitionFactory implements ControllerStateTransitionFactory<HighLevelControllerName>
 {
-   private StateTransition<HighLevelController> stateTransition;
+   private StateTransition<HighLevelControllerName> stateTransition;
 
-   private final HighLevelController stateToAttachEnum;
-   private final HighLevelController nextStateEnum;
+   private final HighLevelControllerName stateToAttachEnum;
+   private final HighLevelControllerName nextStateEnum;
 
    /**
     * This transition will transition the robot from its current state into another state if the standard controller failure listener returns true.
@@ -23,7 +23,7 @@ public class ControllerFailedTransitionFactory implements ControllerStateTransit
     * @param stateToAttachEnum state to check if the controller has failed.
     * @param nextStateEnum state to transition to if the controller fails.
     */
-   public ControllerFailedTransitionFactory(HighLevelController stateToAttachEnum, HighLevelController nextStateEnum)
+   public ControllerFailedTransitionFactory(HighLevelControllerName stateToAttachEnum, HighLevelControllerName nextStateEnum)
    {
       this.stateToAttachEnum = stateToAttachEnum;
       this.nextStateEnum = nextStateEnum;
@@ -31,9 +31,9 @@ public class ControllerFailedTransitionFactory implements ControllerStateTransit
 
    /** {@inheritDoc} */
    @Override
-   public StateTransition<HighLevelController> getOrCreateStateTransition(EnumMap<HighLevelController, ? extends FinishableState<HighLevelController>> controllerStateMap,
-                                                                          HighLevelControllerFactoryHelper controllerFactoryHelper,
-                                                                          YoVariableRegistry parentRegistry)
+   public StateTransition<HighLevelControllerName> getOrCreateStateTransition(EnumMap<HighLevelControllerName, ? extends FinishableState<HighLevelControllerName>> controllerStateMap,
+                                                                              HighLevelControllerFactoryHelper controllerFactoryHelper,
+                                                                              YoVariableRegistry parentRegistry)
    {
       if (stateTransition != null)
          return stateTransition;
@@ -47,7 +47,7 @@ public class ControllerFailedTransitionFactory implements ControllerStateTransit
 
    /** {@inheritDoc} */
    @Override
-   public HighLevelController getStateToAttachEnum()
+   public HighLevelControllerName getStateToAttachEnum()
    {
       return stateToAttachEnum;
    }

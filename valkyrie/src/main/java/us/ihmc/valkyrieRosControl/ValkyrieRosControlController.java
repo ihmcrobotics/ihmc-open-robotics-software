@@ -1,9 +1,9 @@
 package us.ihmc.valkyrieRosControl;
 
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController.STAND_PREP_STATE;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController.STAND_READY;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController.STAND_TRANSITION_STATE;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController.WALKING;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_PREP_STATE;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_READY;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.STAND_TRANSITION_STATE;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -25,7 +25,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -161,9 +161,9 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       controllerFactory.addCustomControlState(calibrationStateFactory);
 
       // setup transitions
-      HighLevelController fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
+      HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
 
-      HighLevelController calibrationState = calibrationStateFactory.getStateEnum();
+      HighLevelControllerName calibrationState = calibrationStateFactory.getStateEnum();
       controllerFactory.addRequestableTransition(calibrationState, STAND_PREP_STATE);
       controllerFactory.addFinishedTransition(calibrationState, STAND_PREP_STATE);
 

@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
@@ -12,16 +12,16 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class FeetLoadedToWalkingStandTransition extends FeetLoadedTransition
 {
-   private final FinishableState<HighLevelController> currentState;
-   private final HighLevelController nextStateEnum;
-   private final YoEnum<HighLevelController> requestedState;
+   private final FinishableState<HighLevelControllerName> currentState;
+   private final HighLevelControllerName nextStateEnum;
+   private final YoEnum<HighLevelControllerName> requestedState;
 
    private final YoBoolean waitForRequest;
 
    private final YoDouble minimumTimeInState;
 
-   public FeetLoadedToWalkingStandTransition(FinishableState<HighLevelController> currentState, HighLevelController nextStateEnum,
-                                             YoEnum<HighLevelController> requestedState, ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetForceSensors,
+   public FeetLoadedToWalkingStandTransition(FinishableState<HighLevelControllerName> currentState, HighLevelControllerName nextStateEnum,
+                                             YoEnum<HighLevelControllerName> requestedState, ForceSensorDataHolderReadOnly forceSensorDataHolder, SideDependentList<String> feetForceSensors,
                                              double controlDT, double totalMass, double gravityZ, HighLevelControllerParameters highLevelControllerParameters, YoVariableRegistry parentRegistry)
    {
       super(forceSensorDataHolder, feetForceSensors, controlDT, totalMass, gravityZ, parentRegistry);

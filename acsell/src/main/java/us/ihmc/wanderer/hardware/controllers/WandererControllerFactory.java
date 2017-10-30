@@ -19,7 +19,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -43,7 +43,7 @@ import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotControll
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerStateFactory;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController.*;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
 
 public class WandererControllerFactory
 {
@@ -193,7 +193,7 @@ public class WandererControllerFactory
       controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);
       controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
 
-      HighLevelController fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
+      HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
       controllerFactory.addControllerFailureTransition(DO_NOTHING_BEHAVIOR, fallbackControllerState);
       controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);
       controllerFactory.setInitialState(highLevelControllerParameters.getDefaultInitialControllerState());

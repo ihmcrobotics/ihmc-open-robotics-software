@@ -13,7 +13,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
@@ -36,7 +36,7 @@ public class ValkyrieRosControlLowLevelController
 
    private final ValkyrieTorqueHysteresisCompensator torqueHysteresisCompensator;
 
-   private final AtomicReference<HighLevelController> currentHighLevelControllerState = new AtomicReference<HighLevelController>(null);
+   private final AtomicReference<HighLevelControllerName> currentHighLevelControllerState = new AtomicReference<HighLevelControllerName>(null);
 
    private JointTorqueOffsetEstimator jointTorqueOffsetEstimator;
 
@@ -80,7 +80,7 @@ public class ValkyrieRosControlLowLevelController
 
       yoTime.set(Conversions.nanosecondsToSeconds(timestamp) - wakeUpTime.getDoubleValue());
 
-      if (currentHighLevelControllerState.get() == HighLevelController.WALKING)
+      if (currentHighLevelControllerState.get() == HighLevelControllerName.WALKING)
       {
          torqueHysteresisCompensator.compute();
       }
@@ -131,7 +131,7 @@ public class ValkyrieRosControlLowLevelController
             {
                currentHighLevelControllerState.set(statusMessage.endState);
 
-               if (statusMessage.initialState == HighLevelController.CALIBRATION)
+               if (statusMessage.initialState == HighLevelControllerName.CALIBRATION)
                   writeTorqueOffsets();
             }
          }

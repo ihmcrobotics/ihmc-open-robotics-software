@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StandPrepControllerState extends HighLevelControllerState
 {
-   private static final HighLevelController controllerState = HighLevelController.STAND_PREP_STATE;
+   private static final HighLevelControllerName controllerState = HighLevelControllerName.STAND_PREP_STATE;
    private static final double MINIMUM_TIME_DONE_WITH_STAND_PREP = 0.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());

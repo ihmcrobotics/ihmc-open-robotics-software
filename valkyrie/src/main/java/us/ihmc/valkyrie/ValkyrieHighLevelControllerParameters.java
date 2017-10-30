@@ -5,7 +5,7 @@ import java.util.Set;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -45,7 +45,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    }
 
    @Override
-   public JointDesiredControlMode getJointDesiredControlMode(String jointName, HighLevelController state)
+   public JointDesiredControlMode getJointDesiredControlMode(String jointName, HighLevelControllerName state)
    {
       if (runningOnRealRobot)
       {
@@ -57,33 +57,33 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    }
 
    @Override
-   public double getDesiredJointStiffness(String jointName, HighLevelController state)
+   public double getDesiredJointStiffness(String jointName, HighLevelControllerName state)
    {
-      if (state != HighLevelController.WALKING)
+      if (state != HighLevelControllerName.WALKING)
          return standPrepParameters.getProportionalGain(jointName);
       else
          return 0.0;
    }
 
    @Override
-   public double getDesiredJointDamping(String jointName, HighLevelController state)
+   public double getDesiredJointDamping(String jointName, HighLevelControllerName state)
    {
-      if (state != HighLevelController.WALKING)
+      if (state != HighLevelControllerName.WALKING)
          return standPrepParameters.getDerivativeGain(jointName);
       else
          return 0.0;
    }
 
    @Override
-   public HighLevelController getDefaultInitialControllerState()
+   public HighLevelControllerName getDefaultInitialControllerState()
    {
-      return runningOnRealRobot ? HighLevelController.STAND_PREP_STATE : HighLevelController.WALKING;
+      return runningOnRealRobot ? HighLevelControllerName.STAND_PREP_STATE : HighLevelControllerName.WALKING;
    }
 
    @Override
-   public HighLevelController getFallbackControllerState()
+   public HighLevelControllerName getFallbackControllerState()
    {
-      return runningOnRealRobot ? HighLevelController.STAND_PREP_STATE : HighLevelController.DO_NOTHING_BEHAVIOR;
+      return runningOnRealRobot ? HighLevelControllerName.STAND_PREP_STATE : HighLevelControllerName.DO_NOTHING_BEHAVIOR;
    }
 
    @Override

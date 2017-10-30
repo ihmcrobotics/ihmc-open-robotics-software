@@ -2,7 +2,7 @@ package us.ihmc.escher.parameters;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 
 public class EscherHighLevelControllerParameters implements HighLevelControllerParameters
@@ -14,33 +14,33 @@ public class EscherHighLevelControllerParameters implements HighLevelControllerP
    }
 
    @Override
-   public JointDesiredControlMode getJointDesiredControlMode(String joint, HighLevelController state)
+   public JointDesiredControlMode getJointDesiredControlMode(String joint, HighLevelControllerName state)
    {
       return JointDesiredControlMode.EFFORT;
    }
 
    @Override
-   public double getDesiredJointStiffness(String joint, HighLevelController state)
+   public double getDesiredJointStiffness(String joint, HighLevelControllerName state)
    {
       return 100.0;
    }
 
    @Override
-   public double getDesiredJointDamping(String joint, HighLevelController state)
+   public double getDesiredJointDamping(String joint, HighLevelControllerName state)
    {
       return 0.5;
    }
 
    @Override
-   public HighLevelController getDefaultInitialControllerState()
+   public HighLevelControllerName getDefaultInitialControllerState()
    {
-      return HighLevelController.DO_NOTHING_BEHAVIOR;
+      return HighLevelControllerName.DO_NOTHING_BEHAVIOR;
    }
 
    @Override
-   public HighLevelController getFallbackControllerState()
+   public HighLevelControllerName getFallbackControllerState()
    {
-      return HighLevelController.DO_NOTHING_BEHAVIOR;
+      return HighLevelControllerName.DO_NOTHING_BEHAVIOR;
    }
 
    @Override

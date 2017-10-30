@@ -11,14 +11,12 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootstepDataMessageGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
@@ -32,7 +30,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -60,7 +58,6 @@ import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 public class HighLevelHumanoidControllerFactory implements CloseableAndDisposable
 {
@@ -68,16 +65,16 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
    private final ArrayList<HighLevelControllerStateFactory> controllerStateFactories = new ArrayList<>();
-   private final EnumMap<HighLevelController, HighLevelControllerStateFactory> controllerFactoriesMap = new EnumMap<>(HighLevelController.class);
+   private final EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerFactoriesMap = new EnumMap<>(HighLevelControllerName.class);
 
-   private final ArrayList<ControllerStateTransitionFactory<HighLevelController>> stateTransitionFactories = new ArrayList<>();
+   private final ArrayList<ControllerStateTransitionFactory<HighLevelControllerName>> stateTransitionFactories = new ArrayList<>();
 
    private HighLevelHumanoidControllerToolbox controllerToolbox = null;
 
-   private final YoEnum<HighLevelController> requestedHighLevelControllerState = new YoEnum<>("requestedHighLevelControllerState", registry,
-                                                                                              HighLevelController.class, true);
-   private final AtomicReference<HighLevelController> fallbackControllerForFailure = new AtomicReference<>();
-   private HighLevelController initialControllerState;
+   private final YoEnum<HighLevelControllerName> requestedHighLevelControllerState = new YoEnum<>("requestedHighLevelControllerState", registry,
+                                                                                                  HighLevelControllerName.class, true);
+   private final AtomicReference<HighLevelControllerName> fallbackControllerForFailure = new AtomicReference<>();
+   private HighLevelControllerName initialControllerState;
 
    private final ContactableBodiesFactory contactableBodiesFactory;
 
@@ -238,7 +235,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       DoNothingControllerStateFactory controllerStateFactory = new DoNothingControllerStateFactory();
 
       controllerStateFactories.add(controllerStateFactory);
-      controllerFactoriesMap.put(HighLevelController.DO_NOTHING_BEHAVIOR, controllerStateFactory);
+      controllerFactoriesMap.put(HighLevelControllerName.DO_NOTHING_BEHAVIOR, controllerStateFactory);
    }
 
    public void useDefaultStandPrepControlState()
@@ -246,7 +243,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       StandPrepControllerStateFactory controllerStateFactory = new StandPrepControllerStateFactory();
 
       controllerStateFactories.add(controllerStateFactory);
-      controllerFactoriesMap.put(HighLevelController.STAND_PREP_STATE, controllerStateFactory);
+      controllerFactoriesMap.put(HighLevelControllerName.STAND_PREP_STATE, controllerStateFactory);
    }
 
    public void useDefaultStandReadyControlState()
@@ -254,7 +251,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       StandReadyControllerStateFactory controllerStateFactory = new StandReadyControllerStateFactory();
 
       controllerStateFactories.add(controllerStateFactory);
-      controllerFactoriesMap.put(HighLevelController.STAND_READY, controllerStateFactory);
+      controllerFactoriesMap.put(HighLevelControllerName.STAND_READY, controllerStateFactory);
    }
 
    public void useDefaultStandTransitionControlState()
@@ -262,7 +259,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       StandTransitionControllerStateFactory controllerStateFactory = new StandTransitionControllerStateFactory();
 
       controllerStateFactories.add(controllerStateFactory);
-      controllerFactoriesMap.put(HighLevelController.STAND_TRANSITION_STATE, controllerStateFactory);
+      controllerFactoriesMap.put(HighLevelControllerName.STAND_TRANSITION_STATE, controllerStateFactory);
    }
 
    public void useDefaultWalkingControlState()
@@ -270,7 +267,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       WalkingControllerStateFactory controllerStateFactory = new WalkingControllerStateFactory();
 
       controllerStateFactories.add(controllerStateFactory);
-      controllerFactoriesMap.put(HighLevelController.WALKING, controllerStateFactory);
+      controllerFactoriesMap.put(HighLevelControllerName.WALKING, controllerStateFactory);
    }
 
    public void useDefaultFreezeControlState()
@@ -278,7 +275,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       FreezeControllerStateFactory controllerStateFactory = new FreezeControllerStateFactory();
 
       controllerStateFactories.add(controllerStateFactory);
-      controllerFactoriesMap.put(HighLevelController.FREEZE_STATE, controllerStateFactory);
+      controllerFactoriesMap.put(HighLevelControllerName.FREEZE_STATE, controllerStateFactory);
    }
 
    public void addCustomControlState(HighLevelControllerStateFactory customControllerStateFactory)
@@ -287,33 +284,33 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerFactoriesMap.put(customControllerStateFactory.getStateEnum(), customControllerStateFactory);
    }
 
-   public void addFinishedTransition(HighLevelController currentControlStateEnum, HighLevelController nextControlStateEnum)
+   public void addFinishedTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
       stateTransitionFactories.add(new FinishedControllerStateTransitionFactory<>(currentControlStateEnum, nextControlStateEnum));
    }
 
-   public void addRequestableTransition(HighLevelController currentControlStateEnum, HighLevelController nextControlStateEnum)
+   public void addRequestableTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
       stateTransitionFactories.add(new RequestedControllerStateTransitionFactory<>(requestedHighLevelControllerState, currentControlStateEnum,
                                                                                    nextControlStateEnum));
    }
 
-   public void addControllerFailureTransition(HighLevelController currentControlStateEnum, HighLevelController fallbackControlStateEnum)
+   public void addControllerFailureTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName fallbackControlStateEnum)
    {
       stateTransitionFactories.add(new ControllerFailedTransitionFactory(currentControlStateEnum, fallbackControlStateEnum));
    }
 
-   public void addCustomStateTransition(ControllerStateTransitionFactory<HighLevelController> stateTransitionFactory)
+   public void addCustomStateTransition(ControllerStateTransitionFactory<HighLevelControllerName> stateTransitionFactory)
    {
       stateTransitionFactories.add(stateTransitionFactory);
    }
 
-   public void setInitialState(HighLevelController initialStateEnum)
+   public void setInitialState(HighLevelControllerName initialStateEnum)
    {
       this.initialControllerState = initialStateEnum;
    }
 
-   public YoEnum<HighLevelController> getRequestedControlStateEnum()
+   public YoEnum<HighLevelControllerName> getRequestedControlStateEnum()
    {
       return requestedHighLevelControllerState;
    }
@@ -516,14 +513,14 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       return controllerToolbox;
    }
 
-   public HighLevelController getCurrentHighLevelControlState()
+   public HighLevelControllerName getCurrentHighLevelControlState()
    {
       return humanoidHighLevelControllerManager.getCurrentHighLevelControlState();
    }
 
    public void reinitializeWalking(boolean keepPosition)
    {
-      humanoidHighLevelControllerManager.requestHighLevelControllerState(HighLevelController.WALKING);
+      humanoidHighLevelControllerManager.requestHighLevelControllerState(HighLevelControllerName.WALKING);
       if (keepPosition)
          humanoidHighLevelControllerManager.reinitializeWalking();
    }

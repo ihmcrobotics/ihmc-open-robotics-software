@@ -16,7 +16,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -32,7 +32,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class WalkingControllerState extends HighLevelControllerState
 {
-   private final static HighLevelController controllerState = HighLevelController.WALKING;
+   private final static HighLevelControllerName controllerState = HighLevelControllerName.WALKING;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final WholeBodyControllerCore controllerCore;

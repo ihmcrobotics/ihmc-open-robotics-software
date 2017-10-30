@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandTransitionControllerState;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelController;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 
 import java.util.EnumMap;
 
@@ -16,9 +16,9 @@ public class StandTransitionControllerStateFactory implements HighLevelControlle
    {
       if (standTransitionControllerState == null)
       {
-         EnumMap<HighLevelController, HighLevelControllerStateFactory> controllerFactoriesMap = controllerFactoryHelper.getControllerFactories();
-         HighLevelControllerStateFactory standReadyControllerStateFactory = controllerFactoriesMap.get(HighLevelController.STAND_READY);
-         HighLevelControllerStateFactory walkingControllerStateFactory = controllerFactoriesMap.get(HighLevelController.WALKING);
+         EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerFactoriesMap = controllerFactoryHelper.getControllerFactories();
+         HighLevelControllerStateFactory standReadyControllerStateFactory = controllerFactoriesMap.get(HighLevelControllerName.STAND_READY);
+         HighLevelControllerStateFactory walkingControllerStateFactory = controllerFactoriesMap.get(HighLevelControllerName.WALKING);
 
          HighLevelControllerState standReadyControllerState = standReadyControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
          HighLevelControllerState walkingControllerState = walkingControllerStateFactory.getOrCreateControllerState(controllerFactoryHelper);
@@ -32,8 +32,8 @@ public class StandTransitionControllerStateFactory implements HighLevelControlle
    }
 
    @Override
-   public HighLevelController getStateEnum()
+   public HighLevelControllerName getStateEnum()
    {
-      return HighLevelController.STAND_TRANSITION_STATE;
+      return HighLevelControllerName.STAND_TRANSITION_STATE;
    }
 }
