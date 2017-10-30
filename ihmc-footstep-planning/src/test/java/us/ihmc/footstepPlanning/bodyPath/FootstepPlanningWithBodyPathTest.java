@@ -49,7 +49,7 @@ public class FootstepPlanningWithBodyPathTest
    @Rule
    public TestName name = new TestName();
 
-   @Test
+   @Test(timeout = 30000)
    public void testWaypointPathOnFlat()
    {
       YoVariableRegistry registry = new YoVariableRegistry(name.getMethodName());
@@ -80,7 +80,7 @@ public class FootstepPlanningWithBodyPathTest
          PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose, bodyPath);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testMaze()
    {
       WaypointDefinedBodyPathPlan bodyPath = new WaypointDefinedBodyPathPlan();

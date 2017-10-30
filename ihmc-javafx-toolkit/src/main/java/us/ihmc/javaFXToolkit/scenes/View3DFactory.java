@@ -219,6 +219,7 @@ public class View3DFactory
    public void addWorldCoordinateSystem(double arrowLength)
    {
       JavaFXCoordinateSystem worldCoordinateSystem = new JavaFXCoordinateSystem(arrowLength);
+      worldCoordinateSystem.setMouseTransparent(true);
       addNodeToView(worldCoordinateSystem);
    }
 

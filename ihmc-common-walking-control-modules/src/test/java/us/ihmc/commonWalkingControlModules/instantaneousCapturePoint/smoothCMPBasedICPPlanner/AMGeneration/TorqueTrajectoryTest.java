@@ -37,7 +37,7 @@ public class TorqueTrajectoryTest
       calculatedTrajectory = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testSetter()
    {
       assertTrue("Got incorrect number of segments, got: " + torqueTrajectory.getNumberOfSegments() + " should have been: "
@@ -55,7 +55,7 @@ public class TorqueTrajectoryTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testScaling()
    {
       double scalar = Math.random();

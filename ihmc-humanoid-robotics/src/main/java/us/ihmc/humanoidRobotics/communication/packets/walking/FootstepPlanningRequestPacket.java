@@ -11,6 +11,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningRequestPacket>
 {
+   public static final int NO_PLAN_ID = -1;
+
    public RobotSide initialStanceSide;
    public Point3D32 stanceFootPositionInWorld;
    public Quaternion32 stanceFootOrientationInWorld;
@@ -19,6 +21,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public boolean assumeFlatGround = true;
    public FootstepPlannerType requestedPlannerType;
    public double timeout;
+   public boolean requestDebugPacket = false;
+   public int planId = NO_PLAN_ID;
 
    public enum FootstepPlannerType
    {
@@ -77,6 +81,16 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public double getTimeout()
    {
       return timeout;
+   }
+
+   public void setRequestDebugPacket(boolean requestDebugPacket)
+   {
+      this.requestDebugPacket = requestDebugPacket;
+   }
+
+   public void setPlannerRequestId(int planId)
+   {
+      this.planId = planId;
    }
 
    @Override

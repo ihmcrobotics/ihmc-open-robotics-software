@@ -4,7 +4,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeUtils;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
@@ -73,9 +73,21 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
       if (snapTransform.containsNaN())
+      {
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand,
+                                                         BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
          return false;
+      }
 
-      RigidBodyTransform snappedSoleTransform = BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(nodeToExpand, snapTransform);
+      if (Math.abs(snapTransform.getM22()) < parameters.getMinimumSurfaceInclineRadians())
+      {
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand,
+                                                         BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
+         return false;
+      }
+
+      RigidBodyTransform snappedSoleTransform = new RigidBodyTransform();
+      FootstepNodeTools.getSnappedNodeTransform(nodeToExpand, snapTransform, snappedSoleTransform);
       baseOfCliffAvoider.shiftAwayFromCliffBottoms(parameters, planarRegionsList, snappedSoleTransform);
 
       boolean isEnoughArea = checkIfEnoughArea(nodeToExpand, footholdIntersection);
@@ -87,7 +99,9 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
 
       FootstepNodeSnapData previousNodeSnapData = snapAndWiggler.snapFootstepNode(previousNode);
       RigidBodyTransform previousSnapTransform = previousNodeSnapData.getSnapTransform();
-      RigidBodyTransform previousSnappedSoleTransform = BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(previousNode, previousSnapTransform);
+      RigidBodyTransform previousSnappedSoleTransform = new RigidBodyTransform();
+      FootstepNodeTools.getSnappedNodeTransform(previousNode, previousSnapTransform, previousSnappedSoleTransform);
+
       boolean goodFootstep = checkIfGoodFootstep(nodeToExpand, snappedSoleTransform, previousSnappedSoleTransform);
       if (!goodFootstep)
          return false;
