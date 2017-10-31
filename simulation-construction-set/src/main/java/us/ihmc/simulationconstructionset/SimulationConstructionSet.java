@@ -1169,9 +1169,11 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
    }
 
+   private boolean isCloseAndDispose = false;
    @Override
    public void closeAndDispose()
    {
+      isCloseAndDispose = true;
       if(myGUI != null)
       {
          EventDispatchThreadHelper.invokeAndWait(new Runnable()
@@ -1196,7 +1198,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       System.out.flush();
       stop();
-      stopSimulationThread();
 
       if (jFrame != null)
       {
@@ -2728,31 +2729,43 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       ticksToSimulate = 0;
       setScrollGraphsEnabled(true);
 
-      synchronized (simulationSynchronizer)
+      if(!isCloseAndDispose)
       {
-         if (myGUI != null)
+         synchronized (simulationSynchronizer)
          {
-            myGUI.notifySimulationStopped();
-            myGUI.updateGraphs();
-            myGUI.updateSimulationGraphics();
-            myGUI.updateGUI();
+            doStopGuiCleanup();
          }
+      }
+      else
+      {
+         doStopGuiCleanup();
+      }
 
-         if (playbackListeners != null)
-         {
-            for (int i = 0; i < playbackListeners.size(); i++)
-            {
-               PlaybackListener listener = playbackListeners.get(i);
-               listener.stop();
-            }
-         }
+   }
 
-         if(myDataBuffer != null)
+   private void doStopGuiCleanup()
+   {
+      if (myGUI != null)
+      {
+         myGUI.notifySimulationStopped();
+         myGUI.updateGraphs();
+         myGUI.updateSimulationGraphics();
+         myGUI.updateGUI();
+      }
+
+      if (playbackListeners != null)
+      {
+         for (int i = 0; i < playbackListeners.size(); i++)
          {
-            myDataBuffer.notifyRewindListeners();
+            PlaybackListener listener = playbackListeners.get(i);
+            listener.stop();
          }
       }
 
+      if(myDataBuffer != null)
+      {
+         myDataBuffer.notifyRewindListeners();
+      }
    }
 
    public boolean hasSimulationThreadStarted()
