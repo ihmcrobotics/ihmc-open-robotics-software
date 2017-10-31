@@ -847,26 +847,12 @@ public class SimpleICPOptimizationQPSolver
       MatrixTools.setMatrixBlock(previousFootstepLocation, 0, 0, footstepLocationSolution, 2 * stepIndex, 0, 2, 1, 1.0);
    }
 
-   public void setPreviousFootstepSolutionFromCurrent()
-   {
-      if (indexHandler.useStepAdjustment())
-      {
-         int stepIndex = 0;
-         MatrixTools.setMatrixBlock(previousFootstepLocation, 0, 0, footstepLocationSolution, 2 * stepIndex, 0, 2, 1, 1.0);
-      }
-   }
-
    /**
     * Sets the location of the previous CMP feedback for the feedback regularization task.
     *
     * @param feedbackDeltaSolution amount of CMP feedback.
     */
    private void setPreviousFeedbackDeltaSolution(DenseMatrix64F feedbackDeltaSolution)
-   {
-      previousFeedbackDeltaSolution.set(feedbackDeltaSolution);
-   }
-
-   public void setPreviousFeedbackDeltaSolutionFromCurrent()
    {
       previousFeedbackDeltaSolution.set(feedbackDeltaSolution);
    }
