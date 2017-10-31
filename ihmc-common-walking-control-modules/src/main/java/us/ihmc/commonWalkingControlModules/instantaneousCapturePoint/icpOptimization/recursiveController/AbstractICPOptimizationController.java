@@ -164,6 +164,8 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
    protected boolean useDifferentSplitRatioForBigAdjustment;
    protected double minimumTimeOnInitialCMPForBigAdjustment;
 
+   protected final ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();
+
    public AbstractICPOptimizationController(ICPPlannerParameters icpPlannerParameters, WalkingControllerParameters walkingControllerParameters,
                                             BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons,
                                             SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
@@ -645,10 +647,9 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
 
 
 
-
    private void submitFeedbackTaskConditionsToSolver()
    {
-      ICPOptimizationControllerHelper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
+      helper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
 
       double dynamicRelaxationWeight = this.dynamicRelaxationWeight.getDoubleValue();
       if (!localUseStepAdjustment)
@@ -674,7 +675,7 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
       for (int footstepIndex = 0; footstepIndex < numberOfFootstepsToConsider; footstepIndex++)
       {
          ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
-         ICPOptimizationControllerHelper.transformToWorldFrame(tempVector2d, forwardFootstepWeight, lateralFootstepWeight, soleFrame);
+         helper.transformToWorldFrame(tempVector2d, forwardFootstepWeight, lateralFootstepWeight, soleFrame);
          scaledFootstepWeights.set(tempVector2d);
 
          if (localScaleUpcomingStepWeights)
@@ -797,12 +798,12 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
    {
       ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
 
-      ICPOptimizationControllerHelper.transformToWorldFrame(tempVector2d, feedbackForwardWeight, feedbackLateralWeight, soleFrame);
+      helper.transformToWorldFrame(tempVector2d, feedbackForwardWeight, feedbackLateralWeight, soleFrame);
       scaledFeedbackWeight.set(tempVector2d);
 
       if (scaleFeedbackWeightWithGain.getBooleanValue())
       {
-         ICPOptimizationControllerHelper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
+         helper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
          scaledFeedbackWeight.scale(1.0 / tempVector2d.length());
       }
    }

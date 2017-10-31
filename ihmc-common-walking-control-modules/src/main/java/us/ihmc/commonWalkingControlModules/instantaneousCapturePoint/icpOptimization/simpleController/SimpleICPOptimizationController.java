@@ -153,6 +153,8 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    private final double controlDT;
    private final double dynamicRelaxationDoubleSupportWeightModifier;
 
+   private final ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();
+
    public SimpleICPOptimizationController(WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
                                           ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                           double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -564,7 +566,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
    private void submitFeedbackTaskConditionsToSolver()
    {
-      ICPOptimizationControllerHelper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
+      helper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
 
       double dynamicRelaxationWeight = this.dynamicRelaxationWeight.getDoubleValue();
       if (isInDoubleSupport.getBooleanValue())
@@ -592,7 +594,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       for (int footstepIndex = 0; footstepIndex < numberOfFootstepsToConsider; footstepIndex++)
       {
          ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
-         ICPOptimizationControllerHelper.transformToWorldFrame(tempVector2d, forwardFootstepWeight, lateralFootstepWeight, soleFrame);
+         helper.transformToWorldFrame(tempVector2d, forwardFootstepWeight, lateralFootstepWeight, soleFrame);
          scaledFootstepWeights.set(tempVector2d);
 
          if (localScaleUpcomingStepWeights)
@@ -720,13 +722,13 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    {
       ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
 
-      //ICPOptimizationControllerHelper.transformToWorldFrame(tempVector2d, feedbackForwardWeight, feedbackLateralWeight, soleFrame);
-      ICPOptimizationControllerHelper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackForwardWeight, feedbackLateralWeight);
+      //helper.transformToWorldFrame(tempVector2d, feedbackForwardWeight, feedbackLateralWeight, soleFrame);
+      helper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackForwardWeight, feedbackLateralWeight);
       scaledFeedbackWeight.set(tempVector2d);
 
       if (scaleFeedbackWeightWithGain.getBooleanValue())
       {
-         ICPOptimizationControllerHelper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
+         helper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackParallelGain, feedbackOrthogonalGain);
          scaledFeedbackWeight.scale(1.0 / tempVector2d.length());
       }
    }

@@ -60,7 +60,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Override
    // Invoked manually to test memory & thread leaks
    @ContinuousIntegrationTest(estimatedDuration = 50.0, categoriesOverride = IntegrationCategory.MANUAL)
-   @Test(timeout = 90000)
+   @Test(timeout = 120000)
    public void testForMemoryLeaks() throws Exception
    {
       super.testForMemoryLeaks();
@@ -100,7 +100,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 52.3)
-   @Test(timeout = 90000)
+   @Test(timeout = 100000)
    public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       super.testSimpleFlatGroundScriptWithOscillatingFeet();
@@ -108,7 +108,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 39.4)
-   @Test(timeout = 80000)
+   @Test(timeout = 120000)
    public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       super.testSimpleFlatGroundScriptWithRandomFootSlip();
@@ -116,7 +116,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 39.9)
-   @Test(timeout = 80000)
+   @Test(timeout = 120000)
    public void testSimpleScripts() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSimpleScripts();
