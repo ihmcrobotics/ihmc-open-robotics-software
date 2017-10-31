@@ -47,6 +47,11 @@ public class WayPointsPacket extends Packet<WayPointsPacket>
       }
    }
    
+   public Pose3D getPoseOfWayPoint(int index)
+   {
+      return new Pose3D(positionOfWayPoints[index], orientationOfWayPoints[index]);
+   }
+   
    @Override
    public boolean epsilonEquals(WayPointsPacket other, double epsilon)
    {
