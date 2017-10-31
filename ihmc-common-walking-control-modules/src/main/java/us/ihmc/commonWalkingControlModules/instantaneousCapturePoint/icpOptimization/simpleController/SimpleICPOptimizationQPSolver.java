@@ -26,8 +26,8 @@ public class SimpleICPOptimizationQPSolver
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-
-   private static final boolean useWarmStart = true;
+   // FIXME this cannot be true until we setup resetting the active set based on state changes
+   private static final boolean useWarmStart = false;
    private static final int maxNumberOfIterations = 10;
    private static final double convergenceThreshold = 1.0e-20;
 
