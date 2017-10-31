@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -42,6 +43,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
             WalkToGoalBehaviorStates.class, yoTime, registry);
 
       footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
+      registry.addChild(footstepListBehavior.getYoVariableRegistry());
 
       isDone = new YoBoolean("isDone", registry);
       havePlanToExecute = new YoBoolean("havePlanToExecute", registry);
@@ -132,6 +134,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
          // Make sure there aren't any old plan requests hanging around
          planningRequestQueue.clear();
          isDone.set(true);
+         transitionBackToWaitingState.set(false);
       }
 
       @Override
@@ -162,6 +165,10 @@ public class WalkToGoalBehavior extends AbstractBehavior
                planToExecute = latestPacket.footstepDataList;
                havePlanToExecute.set(true);
             }
+            else
+            {
+               transitionBackToWaitingState.set(true);
+            }
          }
       }
 
@@ -170,7 +177,13 @@ public class WalkToGoalBehavior extends AbstractBehavior
       {
          isDone.set(false);
 
+         ToolboxStateMessage wakeUp = new ToolboxStateMessage(ToolboxStateMessage.ToolboxState.WAKE_UP);
+         wakeUp.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
+
+         communicationBridge.sendPacket(wakeUp);
+
          FootstepPlanningRequestPacket footstepPlanningRequestPacket = planningRequestQueue.poll();
+         footstepPlanningRequestPacket.setTimeout(3.0);
          footstepPlanningRequestPacket.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
 
          communicationBridge.sendPacket(footstepPlanningRequestPacket);
@@ -199,6 +212,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
       @Override
       public void doTransitionIntoAction()
       {
+         footstepListBehavior.initialize();
          footstepListBehavior.onBehaviorEntered();
          footstepListBehavior.set(planToExecute);
       }
