@@ -179,6 +179,10 @@ public class SimpleICPOptimizationSolutionHandler
       if (solutionAdjustment.length() < deadband)
       {
          solutionLocation.set(referenceLocation);
+         solutionLocation.changeFrame(solutionLocationToPack.getReferenceFrame());
+         solutionLocationToPack.set(solutionLocation);
+
+         return false;
       }
       else
       {
@@ -215,6 +219,11 @@ public class SimpleICPOptimizationSolutionHandler
    public FrameVector2D getFootstepAdjustment()
    {
       return footstepAdjustment.getFrameTuple2d();
+   }
+
+   public FrameVector2D getClippedFootstepAdjustment()
+   {
+      return clippedFootstepAdjustment.getFrameTuple2d();
    }
 }
 
