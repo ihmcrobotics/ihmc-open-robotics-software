@@ -8,6 +8,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -19,6 +20,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
@@ -32,7 +35,12 @@ public class SimpleICPOptimizationSolutionHandlerTest
 
    private void setupTest(double deadbandSize)
    {
-      parameters = new TestICPOptimizationParameters(deadbandSize);
+      setupTest(deadbandSize, 0.02);
+   }
+
+   private void setupTest(double deadbandSize, double resolution)
+   {
+      parameters = new TestICPOptimizationParameters(deadbandSize, resolution);
       solutionHandler = new SimpleICPOptimizationSolutionHandler(parameters, false, "test", registry);
       solver = new SimpleICPOptimizationQPSolver(parameters, 4, false);
    }
@@ -77,7 +85,7 @@ public class SimpleICPOptimizationSolutionHandlerTest
    {
       double scale = 0.2;
       double deadbandSize = 0.05;
-      runTest(scale, deadbandSize);
+      runDeadbandTest(scale, deadbandSize);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -86,7 +94,7 @@ public class SimpleICPOptimizationSolutionHandlerTest
    {
       double scale = 0.9;
       double deadbandSize = 0.05;
-      runTest(scale, deadbandSize);
+      runDeadbandTest(scale, deadbandSize);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -95,7 +103,7 @@ public class SimpleICPOptimizationSolutionHandlerTest
    {
       double scale = 0.99;
       double deadbandSize = 0.05;
-      runTest(scale, deadbandSize);
+      runDeadbandTest(scale, deadbandSize);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -104,7 +112,7 @@ public class SimpleICPOptimizationSolutionHandlerTest
    {
       double scale = 1.0;
       double deadbandSize = 0.05;
-      runTest(scale, deadbandSize);
+      runDeadbandTest(scale, deadbandSize);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -113,7 +121,7 @@ public class SimpleICPOptimizationSolutionHandlerTest
    {
       double scale = 1.01;
       double deadbandSize = 0.05;
-      runTest(scale, deadbandSize);
+      runDeadbandTest(scale, deadbandSize);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -122,7 +130,7 @@ public class SimpleICPOptimizationSolutionHandlerTest
    {
       double scale = 1.05;
       double deadbandSize = 0.05;
-      runTest(scale, deadbandSize);
+      runDeadbandTest(scale, deadbandSize);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -131,10 +139,31 @@ public class SimpleICPOptimizationSolutionHandlerTest
    {
       double scale = 1.5;
       double deadbandSize = 0.05;
-      runTest(scale, deadbandSize);
+      runDeadbandTest(scale, deadbandSize);
    }
 
-   private void runTest(double scale, double deadbandSize)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
+   public void testWithinDeadbandResolution()
+   {
+      double scale = 0.2;
+      double deadbandSize = 0.05;
+      runDeadbandTest(scale, deadbandSize);
+      assertTrue(false);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
+   public void testOutsideDeadbandResolution()
+   {
+      double scale = 0.2;
+      double deadbandSize = 0.05;
+      runDeadbandTest(scale, deadbandSize);
+      assertTrue(false);
+   }
+
+
+   private void runDeadbandTest(double scale, double deadbandSize)
    {
       setupTest(deadbandSize);
 
@@ -177,10 +206,23 @@ public class SimpleICPOptimizationSolutionHandlerTest
       FramePoint2D expectedUnclippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
       expectedUnclippedSolution.add(scale * deadbandSize, 0.0);
       FramePoint2D expectedClippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
-      expectedClippedSolution.add(Math.max(scale - 1.0, 0.0) * deadbandSize, 0.0);
+
+      boolean wasAdjusted = scale > 1.0;
+
+      FrameVector2D adjustment = new FrameVector2D();
+      if (wasAdjusted)
+         adjustment.set((scale - 1.0) * deadbandSize, 0.0);
+      expectedClippedSolution.add(adjustment);
 
       assertTrue(foostepSolutions.get(0).epsilonEquals(expectedClippedSolution, 1e-3));
       assertTrue(unclippedFootstepSolutions.get(0).epsilonEquals(expectedUnclippedSolution, 1e-3));
+      assertEquals(wasAdjusted, solutionHandler.wasFootstepAdjusted());
+      assertTrue(TupleTools.epsilonEquals(adjustment, solutionHandler.getFootstepAdjustment(), 1e-3));
+
+      // test zeroing stuff out
+      solutionHandler.zeroAdjustment();
+      assertFalse(solutionHandler.wasFootstepAdjusted());
+      assertEquals(0.0, solutionHandler.getFootstepAdjustment().length(), 1e-3);
    }
 
    private void setupFeedbackTask(double weight, double stanceWidth)
@@ -211,10 +253,12 @@ public class SimpleICPOptimizationSolutionHandlerTest
    private class TestICPOptimizationParameters extends ICPOptimizationParameters
    {
       private final double deadbandSize;
+      private final double resolution;
 
-      public TestICPOptimizationParameters(double deadbandSize)
+      public TestICPOptimizationParameters(double deadbandSize, double resolution)
       {
          this.deadbandSize = deadbandSize;
+         this.resolution = resolution;
       }
 
       @Override public boolean useSimpleOptimization()
@@ -337,6 +381,11 @@ public class SimpleICPOptimizationSolutionHandlerTest
          return 0.0001;
       }
 
+      @Override
+      public double getFootstepSolutionResolution()
+      {
+         return resolution;
+      }
       @Override
       public double getMinimumTimeRemaining()
       {
