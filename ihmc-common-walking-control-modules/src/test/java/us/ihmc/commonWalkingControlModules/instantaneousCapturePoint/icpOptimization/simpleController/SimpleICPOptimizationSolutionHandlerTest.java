@@ -144,22 +144,173 @@ public class SimpleICPOptimizationSolutionHandlerTest
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
-   public void testWithinDeadbandResolution()
+   public void testWithinDeadbandResolution() throws NoConvergenceException
    {
-      double scale = 0.2;
+      double scale = 1.1;
       double deadbandSize = 0.05;
-      runDeadbandTest(scale, deadbandSize);
-      assertTrue(false);
+      double deadbandResolution = 0.02;
+
+      setupTest(deadbandSize, deadbandResolution);
+
+      double stepLength = 0.5;
+      double stanceWidth = 0.2;
+      int numberOfSteps = 3;
+      ArrayList<YoFramePoint2d> foostepSolutions = new ArrayList<>();
+      ArrayList<FramePoint2D> unclippedFootstepSolutions = new ArrayList<>();
+
+      for (int i = 0; i < numberOfSteps; i++)
+      {
+         foostepSolutions.add(new YoFramePoint2d("footstepSolution" + i, ReferenceFrame.getWorldFrame(), registry));
+         unclippedFootstepSolutions.add(new FramePoint2D(ReferenceFrame.getWorldFrame()));
+      }
+
+      ArrayList<Footstep> upcomingFootsteps = createFootsteps(stepLength, stanceWidth, numberOfSteps);
+      ArrayList<FramePoint2D> referenceFootstepPositions = createReferenceLocations(upcomingFootsteps);
+
+      double recursionMultiplier = Math.exp(-3.0 * 0.5);
+      setupFeedbackTask(10000.0, stanceWidth);
+      setupFootstepAdjustmentTask(5.0, recursionMultiplier, referenceFootstepPositions.get(0));
+
+      FrameVector2D currentICPError = new FrameVector2D(ReferenceFrame.getWorldFrame(), scale * deadbandSize, 0.0);
+      currentICPError.scale(recursionMultiplier);
+
+      FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
+      solver.compute(currentICPError, perfectCMP);
+
+      solutionHandler.extractFootstepSolutions(foostepSolutions, unclippedFootstepSolutions, upcomingFootsteps, 1, solver);
+      FrameVector2D copFeedback = new FrameVector2D();
+      solver.getCoPFeedbackDifference(copFeedback);
+
+      // first solution should be just outside the deadband
+      FramePoint2D expectedUnclippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
+      expectedUnclippedSolution.add(scale * deadbandSize, 0.0);
+      FramePoint2D expectedClippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
+
+
+      FrameVector2D clippedAdjustment = new FrameVector2D(ReferenceFrame.getWorldFrame(), (scale - 1.0) * deadbandSize, 0.0);
+      expectedClippedSolution.add(clippedAdjustment);
+
+      FrameVector2D adjustment = new FrameVector2D();
+      adjustment.set(scale * deadbandSize, 0.0);
+
+      assertTrue(foostepSolutions.get(0).epsilonEquals(expectedClippedSolution, 1e-3));
+      assertTrue(unclippedFootstepSolutions.get(0).epsilonEquals(expectedUnclippedSolution, 1e-3));
+      assertEquals(true, solutionHandler.wasFootstepAdjusted());
+      assertTrue(TupleTools.epsilonEquals(clippedAdjustment, solutionHandler.getClippedFootstepAdjustment(), 1e-3));
+      assertTrue(TupleTools.epsilonEquals(adjustment, solutionHandler.getFootstepAdjustment(), 1e-3));
+
+      // this should now produce a test within the next adjustment
+      currentICPError = new FrameVector2D(ReferenceFrame.getWorldFrame(), scale * deadbandSize + 0.5 * deadbandResolution, 0.0);
+      currentICPError.scale(recursionMultiplier);
+
+      solver.compute(currentICPError, perfectCMP);
+
+      solutionHandler.extractFootstepSolutions(foostepSolutions, unclippedFootstepSolutions, upcomingFootsteps, 1, solver);
+
+      // new solution should be clipped to the same value
+      expectedUnclippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
+      expectedUnclippedSolution.add(scale * deadbandSize + 0.5 * deadbandResolution, 0.0);
+
+      adjustment = new FrameVector2D();
+      adjustment.set(scale * deadbandSize + 0.5 * deadbandResolution, 0.0);
+
+      assertTrue(foostepSolutions.get(0).epsilonEquals(expectedClippedSolution, 1e-3));
+      assertTrue(unclippedFootstepSolutions.get(0).epsilonEquals(expectedUnclippedSolution, 1e-3));
+      assertEquals(false, solutionHandler.wasFootstepAdjusted());
+      assertTrue(TupleTools.epsilonEquals(clippedAdjustment, solutionHandler.getClippedFootstepAdjustment(), 1e-3));
+      assertTrue(TupleTools.epsilonEquals(adjustment, solutionHandler.getFootstepAdjustment(), 1e-3));
+
+      // test zeroing stuff out
+      solutionHandler.zeroAdjustment();
+      assertFalse(solutionHandler.wasFootstepAdjusted());
+      assertEquals(0.0, solutionHandler.getFootstepAdjustment().length(), 1e-3);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
-   public void testOutsideDeadbandResolution()
+   public void testOutsideDeadbandResolution() throws NoConvergenceException
    {
-      double scale = 0.2;
+      double scale = 1.1;
       double deadbandSize = 0.05;
-      runDeadbandTest(scale, deadbandSize);
-      assertTrue(false);
+      double deadbandResolution = 0.02;
+
+      setupTest(deadbandSize, deadbandResolution);
+
+      double stepLength = 0.5;
+      double stanceWidth = 0.2;
+      int numberOfSteps = 3;
+      ArrayList<YoFramePoint2d> foostepSolutions = new ArrayList<>();
+      ArrayList<FramePoint2D> unclippedFootstepSolutions = new ArrayList<>();
+
+      for (int i = 0; i < numberOfSteps; i++)
+      {
+         foostepSolutions.add(new YoFramePoint2d("footstepSolution" + i, ReferenceFrame.getWorldFrame(), registry));
+         unclippedFootstepSolutions.add(new FramePoint2D(ReferenceFrame.getWorldFrame()));
+      }
+
+      ArrayList<Footstep> upcomingFootsteps = createFootsteps(stepLength, stanceWidth, numberOfSteps);
+      ArrayList<FramePoint2D> referenceFootstepPositions = createReferenceLocations(upcomingFootsteps);
+
+      double recursionMultiplier = Math.exp(-3.0 * 0.5);
+      setupFeedbackTask(10000.0, stanceWidth);
+      setupFootstepAdjustmentTask(5.0, recursionMultiplier, referenceFootstepPositions.get(0));
+
+      FrameVector2D currentICPError = new FrameVector2D(ReferenceFrame.getWorldFrame(), scale * deadbandSize, 0.0);
+      currentICPError.scale(recursionMultiplier);
+
+      FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
+      solver.compute(currentICPError, perfectCMP);
+
+      solutionHandler.extractFootstepSolutions(foostepSolutions, unclippedFootstepSolutions, upcomingFootsteps, 1, solver);
+      FrameVector2D copFeedback = new FrameVector2D();
+      solver.getCoPFeedbackDifference(copFeedback);
+
+      // first solution should be just outside the deadband
+      FramePoint2D expectedUnclippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
+      expectedUnclippedSolution.add(scale * deadbandSize, 0.0);
+      FramePoint2D expectedClippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
+
+
+      FrameVector2D clippedAdjustment = new FrameVector2D(ReferenceFrame.getWorldFrame(), (scale - 1.0) * deadbandSize, 0.0);
+      expectedClippedSolution.add(clippedAdjustment);
+
+      FrameVector2D adjustment = new FrameVector2D();
+      adjustment.set(scale * deadbandSize, 0.0);
+
+      assertTrue(foostepSolutions.get(0).epsilonEquals(expectedClippedSolution, 1e-3));
+      assertTrue(unclippedFootstepSolutions.get(0).epsilonEquals(expectedUnclippedSolution, 1e-3));
+      assertEquals(true, solutionHandler.wasFootstepAdjusted());
+      assertTrue(TupleTools.epsilonEquals(clippedAdjustment, solutionHandler.getClippedFootstepAdjustment(), 1e-3));
+      assertTrue(TupleTools.epsilonEquals(adjustment, solutionHandler.getFootstepAdjustment(), 1e-3));
+
+      // this should now produce a test within the next adjustment
+      currentICPError = new FrameVector2D(ReferenceFrame.getWorldFrame(), scale * deadbandSize + 1.5 * deadbandResolution, 0.0);
+      currentICPError.scale(recursionMultiplier);
+
+      solver.compute(currentICPError, perfectCMP);
+
+      solutionHandler.extractFootstepSolutions(foostepSolutions, unclippedFootstepSolutions, upcomingFootsteps, 1, solver);
+
+      // new solution should be clipped to the same value
+      expectedUnclippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
+      adjustment = new FrameVector2D(ReferenceFrame.getWorldFrame(), scale * deadbandSize + 1.5 * deadbandResolution, 0.0);
+      expectedUnclippedSolution.add(adjustment);
+
+      expectedClippedSolution = new FramePoint2D(referenceFootstepPositions.get(0));
+      clippedAdjustment = new FrameVector2D(ReferenceFrame.getWorldFrame(), scale * deadbandSize + 1.5 * deadbandResolution - deadbandSize, 0.0);
+      expectedClippedSolution.add(clippedAdjustment);
+
+
+      assertTrue(foostepSolutions.get(0).epsilonEquals(expectedClippedSolution, 1e-3));
+      assertTrue(unclippedFootstepSolutions.get(0).epsilonEquals(expectedUnclippedSolution, 1e-3));
+      assertEquals(true, solutionHandler.wasFootstepAdjusted());
+      assertTrue(TupleTools.epsilonEquals(clippedAdjustment, solutionHandler.getClippedFootstepAdjustment(), 1e-3));
+      assertTrue(TupleTools.epsilonEquals(adjustment, solutionHandler.getFootstepAdjustment(), 1e-3));
+
+      // test zeroing stuff out
+      solutionHandler.zeroAdjustment();
+      assertFalse(solutionHandler.wasFootstepAdjusted());
+      assertEquals(0.0, solutionHandler.getFootstepAdjustment().length(), 1e-3);
    }
 
 
