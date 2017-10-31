@@ -876,8 +876,8 @@ public class PlanarRegion
                                                          intersectionPoint, intersectionDirection);
       Line3D fullIntersectionLine = new Line3D(intersectionPoint, intersectionDirection);
 
-      List<LineSegment3D> intersectionsWithThis = intersect(fullIntersectionLine);
-      List<LineSegment3D> intersectionsWithOther = other.intersect(fullIntersectionLine);
+      List<LineSegment3D> intersectionsWithThis = projectAndIntersect(fullIntersectionLine);
+      List<LineSegment3D> intersectionsWithOther = other.projectAndIntersect(fullIntersectionLine);
 
       for (LineSegment3D intersectionWithThis : intersectionsWithThis)
       {
@@ -931,10 +931,15 @@ public class PlanarRegion
    }
 
    /**
-    * Returns the intersection between this and the line. Since a planar region is not always
-    * convex the result is a list of line segments.
+    * Returns the intersection between this and the line when projected onto the region.
+    * <p>
+    * The provided line is projected onto the region in the direction of the z axis of the
+    * region frame (the plane normal). Then all intersections of this projected line and
+    * the plane are computed.
+    * <p>
+    * Since a planar region is not always convex the result is a list of line segments.
     */
-   public List<LineSegment3D> intersect(Line3D line)
+   public List<LineSegment3D> projectAndIntersect(Line3D line)
    {
       Line3D localLine = new Line3D(line);
       localLine.applyTransform(fromWorldToLocalTransform);
