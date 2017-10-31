@@ -11,6 +11,17 @@ public class SimpleICPQPIndexHandlerTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
+   public void testRegisterFootstep()
+   {
+      SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
+      indexHandler.registerFootstep();
+
+      Assert.assertTrue(indexHandler.useStepAdjustment());
+      Assert.assertEquals(1, indexHandler.getNumberOfFootstepsToConsider());
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
    public void testSizing()
    {
       SimpleICPQPIndexHandler indexHandler = new SimpleICPQPIndexHandler();
