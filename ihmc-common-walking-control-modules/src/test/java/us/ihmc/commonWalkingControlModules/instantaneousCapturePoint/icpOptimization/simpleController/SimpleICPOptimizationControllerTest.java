@@ -32,7 +32,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class SimpleAdjustmentICPOptimizationControllerTest
+public class SimpleICPOptimizationControllerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double epsilon = 1e-3;
@@ -87,9 +87,8 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
-      SimpleAdjustmentICPOptimizationController controller = new SimpleAdjustmentICPOptimizationController(optimizationParameters, walkingControllerParameters,
-                                                                                                           bipedSupportPolygons, null, contactableFeet,
-                                                                                                           controlDT, registry, null);
+      SimpleICPOptimizationController controller = new SimpleICPOptimizationController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons,
+                                                                                       null, contactableFeet, controlDT, registry, null);
 
 
       double omega = walkingControllerParameters.getOmega0();
@@ -160,9 +159,8 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
-      SimpleAdjustmentICPOptimizationController controller = new SimpleAdjustmentICPOptimizationController(optimizationParameters, walkingControllerParameters,
-                                                                                                           bipedSupportPolygons, null, contactableFeet, controlDT,
-                                                                                                           registry, null);
+      SimpleICPOptimizationController controller = new SimpleICPOptimizationController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons,
+                                                                                       null, contactableFeet, controlDT, registry, null);
 
 
       double omega = walkingControllerParameters.getOmega0();
@@ -233,10 +231,8 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
-      SimpleAdjustmentICPOptimizationController controller = new SimpleAdjustmentICPOptimizationController(optimizationParameters, walkingControllerParameters,
-                                                                                                           bipedSupportPolygons, null, contactableFeet, controlDT,
-                                                                                                           registry, null);
-
+      SimpleICPOptimizationController controller = new SimpleICPOptimizationController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons,
+                                                                                       null, contactableFeet, controlDT, registry, null);
 
       double omega = walkingControllerParameters.getOmega0();
 
@@ -323,10 +319,8 @@ public class SimpleAdjustmentICPOptimizationControllerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
-      SimpleAdjustmentICPOptimizationController controller = new SimpleAdjustmentICPOptimizationController(optimizationParameters, walkingControllerParameters,
-                                                                                                           bipedSupportPolygons, null, contactableFeet, controlDT,
-                                                                                                           registry, null);
-
+      SimpleICPOptimizationController controller = new SimpleICPOptimizationController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons,
+                                                                                       null, contactableFeet, controlDT, registry, null);
 
       double omega = walkingControllerParameters.getOmega0();
 

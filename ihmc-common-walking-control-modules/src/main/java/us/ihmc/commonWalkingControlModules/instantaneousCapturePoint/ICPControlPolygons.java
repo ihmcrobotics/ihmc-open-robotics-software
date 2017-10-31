@@ -24,7 +24,7 @@ public class ICPControlPolygons
    private static final Color rightFootColor = new Color(255, 160, 122);
    private static final SideDependentList<Color> feetColors = new SideDependentList<>(leftFootColor, rightFootColor);
 
-   private static boolean VISUALIZE = false;
+   private static boolean VISUALIZE = true;
    private static final int maxNumberOfContactPointsPerFoot = 6;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("ICPControlPolygons");
