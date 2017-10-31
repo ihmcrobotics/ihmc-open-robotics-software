@@ -10,21 +10,21 @@ import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 
 public class CoPPlanningToolsTest
 {
-   @Test
+   @Test(timeout = 30000)
    public void testArrayLinearSearch()
    {
       CoPPointName[] list = new CoPPointName[]{CoPPointName.MIDFEET_COP, CoPPointName.HEEL_COP, CoPPointName.BALL_COP, CoPPointName.TOE_COP, CoPPointName.TOE_COP};
       assertTrue(CoPPlanningTools.getCoPPointIndex(list, CoPPointName.BALL_COP) == 2);
    }
    
-   @Test
+   @Test(timeout = 30000)
    public void testArrayLinearSearchMissingPoint()
    {
       CoPPointName[] list = new CoPPointName[]{CoPPointName.HEEL_COP, CoPPointName.BALL_COP, CoPPointName.TOE_COP, CoPPointName.TOE_COP};
       assertTrue(CoPPlanningTools.getCoPPointIndex(list, CoPPointName.MIDFEET_COP) == -1);
    }
 
-   @Test 
+   @Test(timeout = 30000)
    public void testArrayListLinearSearch()
    {
       ArrayList<CoPPointName> list = new ArrayList<>();
@@ -36,7 +36,7 @@ public class CoPPlanningToolsTest
       assertTrue(CoPPlanningTools.getCoPPointIndex(list, CoPPointName.HEEL_COP) == 1);
    }
 
-   @Test 
+   @Test(timeout = 30000)
    public void testArrayListLinearSearchMissingPoint()
    {
       ArrayList<CoPPointName> list = new ArrayList<>();

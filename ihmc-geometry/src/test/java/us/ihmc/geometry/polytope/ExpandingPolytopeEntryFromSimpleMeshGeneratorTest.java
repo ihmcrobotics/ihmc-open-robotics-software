@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 public class ExpandingPolytopeEntryFromSimpleMeshGeneratorTest
 {
 
-   @Test
+   @Test(timeout = 30000)
    public void testExpandingPolytopeEntryFromSimpleMeshGeneratorWithTetrahedronCorrectlyOrdered()
    {
       SimpleTriangleMesh tetrahedron = new SimpleTriangleMesh();
@@ -51,7 +51,7 @@ public class ExpandingPolytopeEntryFromSimpleMeshGeneratorTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testExpandingPolytopeEntryFromSimpleMeshGeneratorWithTetrahedronIncorrectlyOrdered()
    {
       SimpleTriangleMesh tetrahedron = new SimpleTriangleMesh();
@@ -94,7 +94,7 @@ public class ExpandingPolytopeEntryFromSimpleMeshGeneratorTest
 
 
 
-   @Test
+   @Test(timeout = 30000)
    public void testExpandingPolytopeEntryFromSimpleMeshGeneratorWithIcoSpheres()
    {
       ExpandingPolytopeEntryFromSimpleMeshGenerator generator = new ExpandingPolytopeEntryFromSimpleMeshGenerator();

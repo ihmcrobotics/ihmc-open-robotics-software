@@ -33,7 +33,7 @@ public class AtlasWholeBodyInverseKinematicsBehaviorTest extends WholeBodyInvers
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSolvingForAHandPose() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSolvingForAHandPose();
@@ -41,7 +41,7 @@ public class AtlasWholeBodyInverseKinematicsBehaviorTest extends WholeBodyInvers
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSolvingForBothHandPoses() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSolvingForBothHandPoses();
@@ -49,7 +49,7 @@ public class AtlasWholeBodyInverseKinematicsBehaviorTest extends WholeBodyInvers
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSolvingForChestAngularControl() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSolvingForChestAngularControl();
@@ -57,7 +57,7 @@ public class AtlasWholeBodyInverseKinematicsBehaviorTest extends WholeBodyInvers
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSolvingForHandAngularLinearControl() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSolvingForHandAngularLinearControl();
@@ -65,7 +65,7 @@ public class AtlasWholeBodyInverseKinematicsBehaviorTest extends WholeBodyInvers
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSolvingForHandRollConstraint() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSolvingForHandRollConstraint();
@@ -73,7 +73,7 @@ public class AtlasWholeBodyInverseKinematicsBehaviorTest extends WholeBodyInvers
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSolvingForHandSelectionMatrix() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSolvingForHandSelectionMatrix();
@@ -81,7 +81,7 @@ public class AtlasWholeBodyInverseKinematicsBehaviorTest extends WholeBodyInvers
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSolvingForPelvisAngularControl() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSolvingForPelvisAngularControl();

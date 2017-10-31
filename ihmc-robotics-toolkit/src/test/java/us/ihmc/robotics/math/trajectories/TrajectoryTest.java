@@ -263,7 +263,7 @@ public class TrajectoryTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testGetDerivative()
    {
       Trajectory traj = new Trajectory(10);

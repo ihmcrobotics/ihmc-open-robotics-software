@@ -18,7 +18,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class ArmTrajectoryCommandTest
 {
 
-   @Test(expected = IndexOutOfBoundsException.class)
+   @Test(timeout = 30000, expected = IndexOutOfBoundsException.class)
    public void testClear()
    {
       ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand();
@@ -34,7 +34,7 @@ public class ArmTrajectoryCommandTest
       armTrajectoryCommand.getJointTrajectoryPoint(0, 0);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testIsCommandValid()
    {
       ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand(new Random());
@@ -43,13 +43,13 @@ public class ArmTrajectoryCommandTest
       assertFalse(armTrajectoryCommand.isCommandValid());
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testArmTrajectoryCommand()
    {
       new ArmTrajectoryCommand();
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testClearRobotSide()
    {
       ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand();
@@ -66,7 +66,7 @@ public class ArmTrajectoryCommandTest
       assertEquals(0, armTrajectoryCommand.getTrajectoryPointLists().size());
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testSetRobotSide()
    {
       ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand();
@@ -75,7 +75,7 @@ public class ArmTrajectoryCommandTest
       assertEquals(RobotSide.LEFT, armTrajectoryCommand.getRobotSide());
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testSetArmTrajectoryMessage()
    {
       Random random = new Random();
@@ -105,7 +105,7 @@ public class ArmTrajectoryCommandTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testSetArmTrajectoryCommand()
    {
       ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand(new Random());
@@ -146,7 +146,7 @@ public class ArmTrajectoryCommandTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testGetMessageClass()
    {
       ArmTrajectoryCommand otherArmTrajectoryCommand = new ArmTrajectoryCommand();

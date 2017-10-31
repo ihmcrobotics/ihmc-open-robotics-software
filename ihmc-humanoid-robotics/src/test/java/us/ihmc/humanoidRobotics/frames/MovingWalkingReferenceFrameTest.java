@@ -25,7 +25,7 @@ import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 public class MovingWalkingReferenceFrameTest
 {
 
-   @Test
+   @Test(timeout = 30000)
    public void testAgainstFiniteDifference()
    {
       Random random = new Random(23423L);
