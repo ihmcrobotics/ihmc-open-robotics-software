@@ -15,7 +15,10 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
 import us.ihmc.footstepPlanning.testTools.PlanningTest;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
@@ -51,6 +54,38 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, stairCase, assertPlannerReturnedResult);
       if (visualize())
          PlanningTestTools.visualizeAndSleep(stairCase, footstepPlan, goalPose);
+
+      if(assertPlannerReturnedResult)
+         assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
+   }
+
+   public void testWithWall(boolean assertPlannerReturnedResult)
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.addRectangle(5.0, 5.0);
+      generator.translate(-0.5, 0.5, 0.5);
+      generator.rotate(Math.PI / 2.0, Axis.Y);
+      generator.addRectangle(1.0, 1.5);
+      generator.identity();
+      generator.translate(0.5, -0.5, 0.5);
+      generator.rotate(Math.PI / 2.0, Axis.Y);
+      generator.addRectangle(1.0, 1.5);
+      PlanarRegionsList regions = generator.getPlanarRegionsList();
+
+      // define start and goal conditions
+      FramePose initialStanceFootPose = new FramePose(worldFrame);
+      RobotSide initialStanceSide = RobotSide.LEFT;
+      initialStanceFootPose.setY(initialStanceSide.negateIfRightSide(getParameters().getIdealFootstepWidth() / 2.0));
+      initialStanceFootPose.setX(-2.0);
+
+      FramePose goalPose = new FramePose(worldFrame);
+      goalPose.setPosition(2.0, 0.0, 0.0);
+
+      // run the test
+      FootstepPlanner planner = getPlanner();
+      FootstepPlan footstepPlan = PlanningTestTools.runPlanner(planner, initialStanceFootPose, initialStanceSide, goalPose, regions, assertPlannerReturnedResult);
+      if (visualize())
+         PlanningTestTools.visualizeAndSleep(regions, footstepPlan, goalPose);
 
       if(assertPlannerReturnedResult)
          assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
@@ -579,5 +614,10 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
 
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
       return planarRegionsList;
+   }
+
+   protected FootstepPlannerParameters getParameters()
+   {
+      return new DefaultFootstepPlanningParameters();
    }
 }

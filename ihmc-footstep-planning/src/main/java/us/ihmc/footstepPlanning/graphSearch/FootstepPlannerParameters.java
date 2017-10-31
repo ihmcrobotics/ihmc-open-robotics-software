@@ -297,10 +297,21 @@ public interface FootstepPlannerParameters
 
    /**
     * When using a cost based planning approach this value defines the cost that is added for each step
-    * taken. Setting this value to a high number will favour plans with less steps.
+    * taken. Setting this value to a high number will favor plans with less steps.
     */
    public default double getCostPerStep()
    {
       return 0.15;
+   }
+
+   /**
+    * Some node checkers will check if the body of the robot will move through a higher planar region
+    * (e.g. a wall) when going from one footstep to the next one. To avoid planar regions close to the
+    * ground triggering this this parameter defines a ground clearance under which obstacles are allowed.
+    * This should be set to be slightly above cinder block height (20.3cm) for Atlas.
+    */
+   public default double getBodyGroundClearance()
+   {
+      return 0.25;
    }
 }
