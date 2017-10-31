@@ -100,7 +100,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 52.3)
-   @Test(timeout = 100000)
+   @Test(timeout = 120000)
    public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       super.testSimpleFlatGroundScriptWithOscillatingFeet();
