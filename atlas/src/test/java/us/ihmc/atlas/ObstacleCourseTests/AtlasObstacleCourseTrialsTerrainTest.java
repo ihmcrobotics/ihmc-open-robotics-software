@@ -41,7 +41,7 @@ public class AtlasObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrial
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 57.4)
-   @Test(timeout = 30000)
+   @Test(timeout = 150000)
    public void testTrialsTerrainSlopeScript() throws SimulationExceededMaximumTimeException
    {
       super.testTrialsTerrainSlopeScript();
@@ -49,7 +49,7 @@ public class AtlasObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrial
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 61.5)
-   @Test(timeout = 30000)
+   @Test(timeout = 120000)
    public void testTrialsTerrainSlopeScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       super.testTrialsTerrainSlopeScriptRandomFootSlip();
@@ -57,7 +57,7 @@ public class AtlasObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrial
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 40.4)
-   @Test(timeout = 30000)
+   @Test(timeout = 120000)
    public void testTrialsTerrainZigzagHurdlesScript() throws SimulationExceededMaximumTimeException
    {
       super.testTrialsTerrainZigzagHurdlesScript();
@@ -65,7 +65,7 @@ public class AtlasObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrial
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.4)
-   @Test(timeout = 30000)
+   @Test(timeout = 80000)
    public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       super.testTrialsTerrainZigzagHurdlesScriptRandomFootSlip();
@@ -73,7 +73,7 @@ public class AtlasObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrial
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 49.8)
-   @Test(timeout = 30000)
+   @Test(timeout = 160000)
    public void testWalkingOntoAndOverSlopesSideways() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOntoAndOverSlopesSideways();
