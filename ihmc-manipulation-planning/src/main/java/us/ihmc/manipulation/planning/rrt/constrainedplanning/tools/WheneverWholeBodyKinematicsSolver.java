@@ -353,7 +353,7 @@ public class WheneverWholeBodyKinematicsSolver
 
       if (DEBUG)
          PrintTools.info("" + cntForUpdateInternal + " cur SQ " + solutionQuality.getDoubleValue() + " " + deltaSolutionQuality + " " + generalizedDelta);
-
+            
       if (!isSolutionGoodEnough && Math.abs(generalizedDelta) < 0.005)
       {
          isJointLimit = true;
@@ -365,7 +365,8 @@ public class WheneverWholeBodyKinematicsSolver
 
    public boolean getResult()
    {
-      if (isCollisionFree())
+      //if (isCollisionFree())
+      if(true)
          return isSolved;
       else
          return false;

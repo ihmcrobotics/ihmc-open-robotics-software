@@ -3,12 +3,15 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
@@ -53,9 +56,11 @@ public class SO3TrajectoryPointCalculator
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
          Vector3D orientation = new Vector3D();
-         YawPitchRollConversion.convertQuaternionToYawPitchRoll(trajectoryPointsOrientation.get(i), orientation);
+         // this conversion does not provide over 90 degree for pitch angle.
+         //YawPitchRollConversion.convertQuaternionToYawPitchRoll(trajectoryPointsOrientation.get(i), orientation);
+         convertQuaternionToYawPitchRoll(trajectoryPointsOrientation.get(i), orientation);
 
-         euclideanTrajectoryPointCalculator.appendTrajectoryPoint(new Point3D(orientation));
+         euclideanTrajectoryPointCalculator.appendTrajectoryPoint(new Point3D(orientation));         
       }
 
       double[] trajectoryTimes = new double[numberOfTrajectoryPoints];
@@ -77,9 +82,6 @@ public class SO3TrajectoryPointCalculator
          Vector3D angularVelocityYawPitchRoll = new Vector3D();
 
          double time = trajectoryPoints.get(i).get(orientationYawPitchRoll, angularVelocityYawPitchRoll);
-
-         //         PrintTools.info(""+i+" "+ orientationYawPitchRoll +" " + angularVelocityYawPitchRoll);
-
          trajectoryPointsAngularVelocity.add(angularVelocityYawPitchRoll);
       }
    }
@@ -144,5 +146,86 @@ public class SO3TrajectoryPointCalculator
       YawPitchRollConversion.convertQuaternionToYawPitchRoll(getOrientation(time), angularVelocity);
 
       return angularVelocity;
+   }
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   /**
+    * temporary
+    */
+   
+   private static final double EPS = 1.0e-12;
+   
+   public static final void convertQuaternionToYawPitchRoll(QuaternionReadOnly quaternion, Vector3DBasics eulerAnglesToPack)
+   {
+      if (quaternion.containsNaN())
+      {
+         eulerAnglesToPack.setToNaN();
+         return;
+      }
+
+      double qx = quaternion.getX();
+      double qy = quaternion.getY();
+      double qz = quaternion.getZ();
+      double qs = quaternion.getS();
+
+      double norm = quaternion.norm();
+      if (norm < EPS)
+      {
+         eulerAnglesToPack.setToZero();
+         return;
+      }
+
+      norm = 1.0 / norm;
+      qx *= norm;
+      qy *= norm;
+      qz *= norm;
+      qs *= norm;
+
+      double pitch = computePitchFromQuaternionImpl(qx, qy, qz, qs);
+      eulerAnglesToPack.setY(pitch);
+      if (Double.isNaN(pitch))
+      {
+         eulerAnglesToPack.setToNaN();
+      }
+      else
+      {
+         eulerAnglesToPack.setZ(computeYawFromQuaternionImpl(qx, qy, qz, qs));
+         eulerAnglesToPack.setX(computeRollFromQuaternionImpl(qx, qy, qz, qs));
+      }
+   }
+   
+   static double computeRollFromQuaternionImpl(double qx, double qy, double qz, double qs)
+   {
+      return Math.atan2(2.0 * (qy * qz + qx * qs), 1.0 - 2.0 * (qx * qx + qy * qy));
+   }
+   
+   static double computePitchFromQuaternionImpl(double qx, double qy, double qz, double qs)
+   {
+      double pitchArgument = 2.0 * (qs * qy - qx * qz);
+
+      double pitch = Math.asin(pitchArgument);
+      return pitch;
+   }
+   
+   static double computeYawFromQuaternionImpl(double qx, double qy, double qz, double qs)
+   {
+      return Math.atan2(2.0 * (qx * qy + qz * qs), 1.0 - 2.0 * (qy * qy + qz * qz));
    }
 }

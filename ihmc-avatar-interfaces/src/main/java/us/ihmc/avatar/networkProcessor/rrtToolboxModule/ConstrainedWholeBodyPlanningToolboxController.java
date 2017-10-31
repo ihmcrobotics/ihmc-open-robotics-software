@@ -13,7 +13,6 @@ import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -44,7 +43,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxController
 {
-   public static double handCoordinateOffsetX = -0.2;
+   public static double handCoordinateOffsetX = -0.2;//-0.2;
 
    /*
     * essential classes
@@ -143,7 +142,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
                                                         StatusMessageOutputManager statusOutputManager, YoVariableRegistry registry,
                                                         YoGraphicsListRegistry yoGraphicsRegistry, boolean startYoVariableServer)
    {
-      super(statusOutputManager, registry);
+      super(statusOutputManager, registry);      
       this.drcRobotModelFactory = drcRobotModel;
       this.visualizedFullRobotModel = fullRobotModel;
       this.isDone.set(false);
@@ -662,7 +661,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       long stopTime = System.currentTimeMillis();
       long elapsedTime = stopTime - astartTime;
 
-      // System.out.println("a " + elapsedTime / 1000.0 + " seconds " + cntKinematicSolver.getIntegerValue());
+      // System.out.println("elapsed time is " + elapsedTime / 1000.0 + " seconds " + cntKinematicSolver.getIntegerValue() +" "+ result);
 
       return result;
    }

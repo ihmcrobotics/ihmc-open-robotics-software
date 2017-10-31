@@ -118,7 +118,7 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
 
             double time = trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
 
-            PrintTools.info(""+i+" "+time +" " + desiredLinearVelocity+" ");
+            PrintTools.info(""+i+" "+time +" " + desiredLinearVelocity+" "+ desiredAngularVelocity);
             
             handTrajectoryMessage.setTrajectoryPoint(i, time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, worldFrame);
          }

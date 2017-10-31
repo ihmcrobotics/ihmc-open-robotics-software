@@ -198,7 +198,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
             planConstrainedWholeBodyTrajectoryBehavior.setNumberOfEndEffectorWayPoints(30);
             planConstrainedWholeBodyTrajectoryBehavior.setNumberOfExpanding(1000);
             planConstrainedWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(320);
-            planConstrainedWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(160);
+            planConstrainedWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(80);
 
             PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
          }
