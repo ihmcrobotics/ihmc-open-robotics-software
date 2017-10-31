@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.*;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.recursiveController.ICPAdjustmentOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.recursiveController.ICPTimingOptimizationController;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.SimpleAdjustmentICPOptimizationController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.SimpleICPOptimizationController;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -67,8 +67,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
       useSimpleAdjustment = icpOptimizationParameters.useSimpleOptimization();
       if (useSimpleAdjustment)
       {
-         icpOptimizationController = new SimpleAdjustmentICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, icpControlPolygons,
-                                                                                   contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+         icpOptimizationController = new SimpleICPOptimizationController(walkingControllerParameters, bipedSupportPolygons, icpControlPolygons,
+                                                                         contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       }
       else
       {
