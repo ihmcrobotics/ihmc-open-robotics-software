@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameTuple2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -12,12 +13,21 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class ICPOptimizationControllerHelper
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final Vector2dZUpFrame icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
+   private final Vector2dZUpFrame icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
 
-   private static final Matrix3D matrix = new Matrix3D();
-   private static final Matrix3D matrixTransformed = new Matrix3D();
+   private final Matrix3D matrix = new Matrix3D();
+   private final Matrix3D matrixTransformed = new Matrix3D();
 
-   public static void transformFromDynamicsFrame(FrameVector2D feedbackGainsToPack, FrameVector2D desiredICPVelocity, YoDouble parallelGain, YoDouble orthogonalGain)
+   private final RigidBodyTransform transformTranspose = new RigidBodyTransform();
+   private final RotationMatrix rotation = new RotationMatrix();
+   private final RotationMatrix rotationTranspose = new RotationMatrix();
+
+   public void transformFromDynamicsFrame(FrameVector2D feedbackGainsToPack, FrameVector2D desiredICPVelocity, YoDouble parallelGain, YoDouble orthogonalGain)
+   {
+      transformFromDynamicsFrame(feedbackGainsToPack, desiredICPVelocity, parallelGain.getDoubleValue(), orthogonalGain.getDoubleValue());
+   }
+
+   public void transformFromDynamicsFrame(FrameVector2D feedbackGainsToPack, FrameVector2D desiredICPVelocity, double parallelGain, double orthogonalGain)
    {
       double epsilonZeroICPVelocity = 1e-5;
 
@@ -26,58 +36,42 @@ public class ICPOptimizationControllerHelper
          icpVelocityDirectionFrame.setXAxis(desiredICPVelocity);
          RigidBodyTransform transform = icpVelocityDirectionFrame.getTransformToWorldFrame();
 
-         transform.getRotation(rotation);
-         rotationTranspose.set(rotation);
-         rotationTranspose.transpose();
-         transformTranspose.setRotation(rotationTranspose);
-
-         matrix.setToZero();
-         matrix.setElement(0, 0, 1.0 + parallelGain.getDoubleValue());
-         matrix.setElement(1, 1, 1.0 + orthogonalGain.getDoubleValue());
-
-         matrixTransformed.set(rotation);
-         matrixTransformed.multiply(matrix);
-         matrixTransformed.multiply(rotationTranspose);
-
-         feedbackGainsToPack.setToZero(worldFrame);
-         feedbackGainsToPack.setX(matrixTransformed.getElement(0, 0));
-         feedbackGainsToPack.setY(matrixTransformed.getElement(1, 1));
+         transformValues(feedbackGainsToPack, 1.0 + parallelGain, 1.0 + orthogonalGain, transform);
       }
       else
       {
          feedbackGainsToPack.setToZero(worldFrame);
-         feedbackGainsToPack.set(1.0 + orthogonalGain.getDoubleValue(), 1.0 + orthogonalGain.getDoubleValue());
+         feedbackGainsToPack.set(1.0 + orthogonalGain, 1.0 + orthogonalGain);
       }
    }
 
-   private static final RigidBodyTransform transformTranspose = new RigidBodyTransform();
-   private static final RotationMatrix rotation = new RotationMatrix();
-   private static final RotationMatrix rotationTranspose = new RotationMatrix();
 
-   public static void transformToWorldFrame(FrameVector2D weightsToPack, YoDouble xWeight, YoDouble yWeight, ReferenceFrame frame)
+   public void transformToWorldFrame(FrameVector2D weightsToPack, YoDouble xWeight, YoDouble yWeight, ReferenceFrame frame)
    {
-      RigidBodyTransform transformToWorldFrame = frame.getTransformToWorldFrame();
+      transformValues(weightsToPack, xWeight.getValue(), yWeight.getValue(), frame.getTransformToWorldFrame());
+   }
 
-      transformToWorldFrame.getRotation(rotation);
+   private void transformValues(FrameTuple2D valuesToPack, double xValue, double yValue, RigidBodyTransform transformToDesiredFrame)
+   {
+      transformToDesiredFrame.getRotation(rotation);
       rotationTranspose.set(rotation);
       rotation.transpose();
       transformTranspose.setRotation(rotationTranspose);
 
       matrix.setToZero();
-      matrix.setElement(0, 0, xWeight.getDoubleValue());
-      matrix.setElement(1, 1, yWeight.getDoubleValue());
+      matrix.setElement(0, 0, xValue);
+      matrix.setElement(1, 1, yValue);
 
       matrixTransformed.set(rotation);
       matrixTransformed.multiply(matrix);
       matrixTransformed.multiply(rotationTranspose);
 
-      weightsToPack.setToZero(worldFrame);
-      weightsToPack.setX(matrixTransformed.getElement(0, 0));
-      weightsToPack.setY(matrixTransformed.getElement(1, 1));
-
+      valuesToPack.setToZero(worldFrame);
+      valuesToPack.setX(matrixTransformed.getElement(0, 0));
+      valuesToPack.setY(matrixTransformed.getElement(1, 1));
    }
 
-   private static class Vector2dZUpFrame extends ReferenceFrame
+   private class Vector2dZUpFrame extends ReferenceFrame
    {
       private static final long serialVersionUID = -1810366869361449743L;
       private final FrameVector2D xAxis;
