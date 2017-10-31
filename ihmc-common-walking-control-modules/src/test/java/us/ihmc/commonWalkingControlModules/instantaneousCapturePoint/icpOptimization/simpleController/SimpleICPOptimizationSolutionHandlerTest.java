@@ -183,7 +183,7 @@ public class SimpleICPOptimizationSolutionHandlerTest
       ArrayList<FramePoint2D> referenceFootstepPositions = createReferenceLocations(upcomingFootsteps);
 
       double recursionMultiplier = Math.exp(-3.0 * 0.5);
-      setupFeedbackTask(1000.0, stanceWidth);
+      setupFeedbackTask(10000.0, stanceWidth);
       setupFootstepAdjustmentTask(5.0, recursionMultiplier, referenceFootstepPositions.get(0));
 
       FrameVector2D currentICPError = new FrameVector2D(ReferenceFrame.getWorldFrame(), scale * deadbandSize, 0.0);
@@ -209,14 +209,18 @@ public class SimpleICPOptimizationSolutionHandlerTest
 
       boolean wasAdjusted = scale > 1.0;
 
-      FrameVector2D adjustment = new FrameVector2D();
+      FrameVector2D clippedAdjustment = new FrameVector2D();
       if (wasAdjusted)
-         adjustment.set((scale - 1.0) * deadbandSize, 0.0);
-      expectedClippedSolution.add(adjustment);
+         clippedAdjustment.set((scale - 1.0) * deadbandSize, 0.0);
+      expectedClippedSolution.add(clippedAdjustment);
+
+      FrameVector2D adjustment = new FrameVector2D();
+      adjustment.set(scale * deadbandSize, 0.0);
 
       assertTrue(foostepSolutions.get(0).epsilonEquals(expectedClippedSolution, 1e-3));
       assertTrue(unclippedFootstepSolutions.get(0).epsilonEquals(expectedUnclippedSolution, 1e-3));
       assertEquals(wasAdjusted, solutionHandler.wasFootstepAdjusted());
+      assertTrue(TupleTools.epsilonEquals(clippedAdjustment, solutionHandler.getClippedFootstepAdjustment(), 1e-3));
       assertTrue(TupleTools.epsilonEquals(adjustment, solutionHandler.getFootstepAdjustment(), 1e-3));
 
       // test zeroing stuff out
@@ -238,7 +242,7 @@ public class SimpleICPOptimizationSolutionHandlerTest
       supportPolygon.update();
 
       double feedbackGain = 2.5;
-      double dynamicsWeight = 10000.0;
+      double dynamicsWeight = 100000.0;
 
       solver.setFeedbackConditions(feedbackGain, weight, dynamicsWeight);
       solver.addSupportPolygon(supportPolygon);
