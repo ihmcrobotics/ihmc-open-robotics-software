@@ -16,7 +16,7 @@ public class AtlasFootstepDataMessageSwingTrajectoryTest extends AvatarFootstepD
 {
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSwingTrajectoryInWorld() throws SimulationExceededMaximumTimeException
    {
       super.testSwingTrajectoryInWorld();

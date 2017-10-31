@@ -19,7 +19,7 @@ import us.ihmc.robotics.lists.PriorityQueue;
 public class GarbageFreePriorityQueueTest
 {
 
-   @Test
+   @Test(timeout = 30000)
    public void testQueueableCommandPriorityQueue()
    {
       PriorityQueue<Command<?,?>> commandPriorityQueue = new PriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
@@ -37,7 +37,7 @@ public class GarbageFreePriorityQueueTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testSameDelay()
    {
       PriorityQueue<Command<?,?>> commandPriorityQueue = new PriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
@@ -59,7 +59,7 @@ public class GarbageFreePriorityQueueTest
       assertEquals(10, index);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testAddingInOrder()
    {
       PriorityQueue<Command<?,?>> commandPriorityQueue = new PriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
@@ -80,7 +80,7 @@ public class GarbageFreePriorityQueueTest
       assertEquals(10, index);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testPop()
    {
       PriorityQueue<Command<?,?>> commandPriorityQueue = new PriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
@@ -101,7 +101,7 @@ public class GarbageFreePriorityQueueTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testPopExtended()
    {
       int numberOfCommands = 100;
@@ -146,7 +146,7 @@ public class GarbageFreePriorityQueueTest
       }
    }
    
-   @Test
+   @Test(timeout = 30000)
    public void testPeek()
    { 
       PriorityQueue<Command<?,?>> commandPriorityQueue = new PriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
@@ -157,7 +157,7 @@ public class GarbageFreePriorityQueueTest
       assertEquals(1, commandPriorityQueue.getSize());
    }
    
-   @Test
+   @Test(timeout = 30000)
    public void testPopWhenEmpty()
    { 
       PriorityQueue<Command<?,?>> commandPriorityQueue = new PriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());
@@ -165,7 +165,7 @@ public class GarbageFreePriorityQueueTest
       assertEquals(0, commandPriorityQueue.getSize());
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testClear()
    { 
       PriorityQueue<Command<?,?>> commandPriorityQueue = new PriorityQueue<Command<?,?>>(10, Command.class, new CommandExecutionTimeComparator());

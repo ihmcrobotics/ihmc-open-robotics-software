@@ -106,10 +106,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       double trajectoryTime = 1.0;
       RigidBody pelvis = fullRobotModel.getPelvis();
 
-      FramePose desiredRandomPelvisPose = new FramePose(pelvis.getBodyFixedFrame());
-      desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
-      desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.05, 0.05, 0.05));
-      desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.1);
+      FramePose desiredRandomPelvisPose = getRandomPelvisPose(random, pelvis);
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
 
@@ -183,10 +180,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       double trajectoryTime = 1.0;
       RigidBody pelvis = fullRobotModel.getPelvis();
 
-      FramePose desiredRandomPelvisPose = new FramePose(pelvis.getBodyFixedFrame());
-//      desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
-//      desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
-      desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.05);
+      FramePose desiredRandomPelvisPose = getRandomPelvisPose(random, pelvis);
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
 
@@ -1289,5 +1283,14 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   protected FramePose getRandomPelvisPose(Random random, RigidBody pelvis)
+   {
+      FramePose desiredRandomPelvisPose = new FramePose(pelvis.getBodyFixedFrame());
+      desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
+      desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.05, 0.05, 0.05));
+      desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.1);
+      return desiredRandomPelvisPose;
    }
 }

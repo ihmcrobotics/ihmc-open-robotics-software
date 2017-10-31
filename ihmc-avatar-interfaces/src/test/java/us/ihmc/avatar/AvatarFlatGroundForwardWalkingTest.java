@@ -129,7 +129,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       return new FootstepDataListMessage();
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testForwardWalk() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -172,7 +172,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       controllerSpy.assertCheckpointsReached();
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testForwardWalkWithForceDisturbances() throws SimulationExceededMaximumTimeException
    {
       setupTest();

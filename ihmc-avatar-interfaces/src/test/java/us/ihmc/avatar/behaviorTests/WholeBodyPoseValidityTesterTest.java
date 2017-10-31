@@ -264,7 +264,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("END");     
    }   
    
-   //@Test
+   //@Test(timeout = 30000)
    public void showUpRobotCollisionModel() throws SimulationExceededMaximumTimeException, IOException
    {  
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -293,7 +293,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("Out " );      
    }
    
-   //@Test
+   //@Test(timeout = 30000)
    public void validNodesStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
       if(isKinematicsToolboxVisualizerEnabled)
@@ -344,7 +344,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior Out " + testNodesBehavior.getNodesValdity());
    }
          
-   //@Test
+   //@Test(timeout = 30000)
    public void wholebodyTrajectoryBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -372,7 +372,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior Out " );      
    }
    
-   //@Test
+   //@Test(timeout = 30000)
    public void threeDimensionalNodeBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -398,7 +398,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior Out " );      
    }
    
-   //@Test
+   //@Test(timeout = 30000)
    public void controlPointOptimizationStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -430,7 +430,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior Out " );      
    }
    
-   @Test
+   @Test(timeout = 30000)
    public void cleaningMotionStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
       if(isKinematicsToolboxVisualizerEnabled)

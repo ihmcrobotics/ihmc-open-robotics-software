@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeUtils;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -55,7 +55,7 @@ public class FootstepNodeTest
       FootstepNode node = new FootstepNode(soleTranslation.getX(), soleTranslation.getY(), yaw, RobotSide.LEFT);
 
       Vector2D shiftVector = new Vector2D(1.0, 2.0);
-      RigidBodyTransform shiftedSoleTransform = BipedalFootstepPlannerNodeUtils.shiftInSoleFrame(shiftVector, soleTransform);
+      RigidBodyTransform shiftedSoleTransform = FootstepNodeTools.shiftInSoleFrame(shiftVector, soleTransform);
       EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.0, 2.0, 0.0), shiftedSoleTransform.getTranslationVector(), 1e-7);
       assertTrue(MathTools.epsilonEquals(node.getYaw(), yaw, 1e-7));
 
@@ -66,7 +66,7 @@ public class FootstepNodeTest
       node = new FootstepNode(soleTranslation.getX(), soleTranslation.getY(), yaw, RobotSide.LEFT);
 
       shiftVector = new Vector2D(1.0, 2.0);
-      shiftedSoleTransform = BipedalFootstepPlannerNodeUtils.shiftInSoleFrame(shiftVector, soleTransform);
+      shiftedSoleTransform = FootstepNodeTools.shiftInSoleFrame(shiftVector, soleTransform);
 
       EuclidCoreTestTools.assertTuple3DEquals(new Point3D(-2.0, 1.0, 0.0), shiftedSoleTransform.getTranslationVector(), 1e-7);
       assertTrue(MathTools.epsilonEquals(node.getYaw(), yaw, 1e-7));
