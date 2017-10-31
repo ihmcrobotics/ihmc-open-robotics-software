@@ -6,13 +6,16 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.jcodec.common.Assert;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SimpleICPOptimizationQPSolverTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -475,7 +478,7 @@ public class SimpleICPOptimizationQPSolverTest
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 21000)
-   public void testSteppingConstrainedWithAdjustment() throws Exception
+   public void testSteppingCoPConstrainedWithAdjustment() throws Exception
    {
       SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
@@ -527,6 +530,66 @@ public class SimpleICPOptimizationQPSolverTest
       Assert.assertTrue(footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
+   public void testCoPAndFootstepConstrainedWithAdjustment() throws Exception
+   {
+      SimpleICPOptimizationQPSolver solver = new SimpleICPOptimizationQPSolver(0.0, 0.0, 10, false);
+      solver.setMaxNumberOfIterations(10);
+
+      double feedbackWeight = 0.1;
+      double feedbackGain = 3.0;
+      double footstepWeight = 50.0;
+
+      solver.setFeedbackConditions(feedbackWeight, feedbackGain, 100000.0);
+
+      double sideLength = 0.1;
+      FrameConvexPolygon2d supportPolygon = createSupportPolygon(sideLength);
+      solver.addSupportPolygon(supportPolygon);
+
+      FrameConvexPolygon2d reachabilityPolygon = createReachabilityPolygon();
+      solver.addReachabilityPolygon(reachabilityPolygon);
+
+      double timeRemainingInState = 1.0;
+      double omega = 1.0;
+      double footstepMultiplier = Math.exp(-omega * timeRemainingInState);
+      FramePoint2D desiredFootstepLocation = new FramePoint2D(worldFrame, 0.3, 0.1);
+      solver.setFootstepAdjustmentConditions(footstepMultiplier, footstepWeight, desiredFootstepLocation);
+
+      FrameVector2D icpError = new FrameVector2D(worldFrame, 0.04, 0.06);
+      FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.04);
+
+      solver.compute(icpError, perfectCMP);
+
+      FrameVector2D cmpCoPDifference = new FrameVector2D();
+      FrameVector2D copFeedback = new FrameVector2D();
+      FramePoint2D footstepLocation = new FramePoint2D();
+
+      solver.getCMPDifferenceFromCoP(cmpCoPDifference);
+      solver.getCoPFeedbackDifference(copFeedback);
+      solver.getFootstepSolutionLocation(0, footstepLocation);
+
+      FrameVector2D cmpCoPDifferenceExpected = new FrameVector2D();
+      FrameVector2D copFeedbackExpected = new FrameVector2D();
+      FramePoint2D footstepLocationExpected = new FramePoint2D();
+
+      copFeedbackExpected.set(0.08, 0.06);
+
+      footstepLocationExpected.set(icpError);
+      footstepLocationExpected.scale(feedbackGain);
+      footstepLocationExpected.sub(copFeedbackExpected);
+      footstepLocationExpected.scale(1.0 / (feedbackGain * footstepMultiplier));
+
+      footstepLocationExpected.add(desiredFootstepLocation);
+
+      // project the footstep into the reachability polygon
+      reachabilityPolygon.orthogonalProjection(footstepLocationExpected);
+
+      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue(footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
+   }
+
    private FrameConvexPolygon2d createSupportPolygon(double sideLength)
    {
       FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
@@ -534,6 +597,24 @@ public class SimpleICPOptimizationQPSolverTest
       FramePoint2D frontLeft = new FramePoint2D(worldFrame, sideLength, sideLength);
       FramePoint2D frontRight = new FramePoint2D(worldFrame, sideLength, -sideLength);
       FramePoint2D backRight = new FramePoint2D(worldFrame, -sideLength, -sideLength);
+
+      supportPolygon.addVertex(backLeft);
+      supportPolygon.addVertex(frontLeft);
+      supportPolygon.addVertex(frontRight);
+      supportPolygon.addVertex(backRight);
+
+      supportPolygon.update();
+
+      return supportPolygon;
+   }
+
+   private FrameConvexPolygon2d createReachabilityPolygon()
+   {
+      FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
+      FramePoint2D backLeft = new FramePoint2D(worldFrame, 0.35, 0.08);
+      FramePoint2D frontLeft = new FramePoint2D(worldFrame, 0.35, 0.13);
+      FramePoint2D frontRight = new FramePoint2D(worldFrame, 0.05, 0.13);
+      FramePoint2D backRight = new FramePoint2D(worldFrame, 0.05, 0.08);
 
       supportPolygon.addVertex(backLeft);
       supportPolygon.addVertex(frontLeft);
