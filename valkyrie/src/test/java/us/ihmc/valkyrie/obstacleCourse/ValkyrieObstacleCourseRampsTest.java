@@ -31,7 +31,7 @@ public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 73.5)
-   @Test(timeout = 130000)
+   @Test(timeout = 150000)
    public void testWalkingDownRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingDownRampWithMediumSteps();
