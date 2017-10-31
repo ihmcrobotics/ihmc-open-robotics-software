@@ -164,15 +164,6 @@ public class FootstepPlanningToolboxController extends ToolboxController
    }
 
    @Override
-   protected <T extends StatusPacket<T>> void reportMessage(T statusMessage)
-   {
-      System.out.println("Sending status message " + statusMessage.getClass().getSimpleName() + " to behavior module");
-      super.reportMessage(statusMessage);
-      statusMessage.setDestination(PacketDestination.BEHAVIOR_MODULE);
-      packetCommunicator.send(statusMessage);
-   }
-
-   @Override
    protected void updateInternal()
    {
       robotDataReceiver.updateRobotModel();
