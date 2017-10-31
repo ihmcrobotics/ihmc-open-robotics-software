@@ -18,18 +18,22 @@ public abstract class FootstepNodeSnapper
 
    public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode)
    {
-      if (planarRegionsList == null)
+      if (snapDataHolder.containsKey(footstepNode))
       {
-         return FootstepNodeSnapData.identityData();
+         return snapDataHolder.get(footstepNode);
       }
-
-      if (!snapDataHolder.containsKey(footstepNode))
+      else if (planarRegionsList == null)
+      {
+         FootstepNodeSnapData identityData = FootstepNodeSnapData.identityData();
+         addSnapData(footstepNode, identityData);
+         return identityData;
+      }
+      else
       {
          FootstepNodeSnapData snapData = snapInternal(footstepNode);
          addSnapData(footstepNode, snapData);
+         return snapData;
       }
-
-      return snapDataHolder.get(footstepNode);
    }
 
    /**
