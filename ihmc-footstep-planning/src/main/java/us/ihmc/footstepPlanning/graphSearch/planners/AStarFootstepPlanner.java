@@ -17,7 +17,7 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeUtils;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
@@ -126,7 +126,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       RigidBodyTransform stepTransform = new RigidBodyTransform();
       footstepPose.get(stepTransform);
 
-      BipedalFootstepPlannerNodeUtils.getSoleTransform(node, snapTransform);
+      FootstepNodeTools.getNodeTransform(node, snapTransform);
       snapTransform.preMultiplyInvertThis(stepTransform);
 
       return snapTransform;

@@ -45,7 +45,7 @@ public class FrameOrientationTest
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test
+	@Test(timeout = 30000)
    public void testOrientationOrientation()
    {
       FrameOrientation original = new FrameOrientation(testFrame);
@@ -68,7 +68,7 @@ public class FrameOrientationTest
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test
+	@Test(timeout = 30000)
 	public void testSetOrientationFromOneToTwo()
 	{
 	   Random random = new Random(1776L);
@@ -254,7 +254,7 @@ public class FrameOrientationTest
 //   }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Test
+   @Test(timeout = 30000)
    public void testApplyTransform()
    {
       Random random = new Random(56165161L);
@@ -303,7 +303,7 @@ public class FrameOrientationTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.4)
-   @Test
+   @Test(timeout = 30000)
    public void testChangeFrame()
    {
       Random random = new Random(56165161L);
@@ -352,7 +352,7 @@ public class FrameOrientationTest
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test
+	@Test(timeout = 30000)
    public void testChangeFrameCopy()
    {
       FrameOrientation origOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());

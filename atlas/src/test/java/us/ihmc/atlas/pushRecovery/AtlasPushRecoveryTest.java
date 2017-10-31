@@ -23,7 +23,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 13.8)
-   @Test
+   @Test(timeout = 30000)
    public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
    {
       super.testControllerFailureKicksIn();
@@ -31,7 +31,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 27.2)
-   @Test
+   @Test(timeout = 30000)
    public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       super.testLongBackwardPushWhileStanding();
@@ -39,7 +39,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 18.6)
-   @Test
+   @Test(timeout = 30000)
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       super.testLongBackwardPushWhileStandingAfterControllerFailureKickedIn();
@@ -47,7 +47,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 18.7)
-   @Test
+   @Test(timeout = 30000)
    public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       super.testLongForwardPushWhileStanding();
@@ -55,7 +55,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       super.testLongForwardPushWhileStandingAfterControllerFailureKickedIn();
@@ -63,7 +63,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testPushICPOptimiWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimiWhileInSwing();
@@ -71,7 +71,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 23.7)
-   @Test
+   @Test(timeout = 30000)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushWhileInSwing();
@@ -79,7 +79,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 21.1)
-   @Test
+   @Test(timeout = 30000)
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
       super.testPushWhileInTransfer();
@@ -87,7 +87,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 21.5)
-   @Test
+   @Test(timeout = 30000)
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       super.testPushWhileStanding();
@@ -95,7 +95,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 21.4)
-   @Test
+   @Test(timeout = 30000)
    public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       super.testPushWhileStandingRecoveringAfterControllerFailureKickedIn();
@@ -103,7 +103,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 22.3)
-   @Test
+   @Test(timeout = 30000)
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testRecoveringWithSwingSpeedUpWhileInSwing();
@@ -111,7 +111,7 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 16.9)
-   @Test
+   @Test(timeout = 30000)
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
       super.testRecoveryWhileInFlamingoStance();

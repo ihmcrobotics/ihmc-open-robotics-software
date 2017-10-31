@@ -18,7 +18,7 @@ public class YoTrajectoryTest
       registry.clear();
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testGetDerivative()
    {
       YoTrajectory traj = new YoTrajectory("Trajectory", 10, registry);

@@ -45,7 +45,7 @@ public class ValkyriePushRecoveryMultiStepTest extends DRCPushRecoveryMultiStepT
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 53.2)
-   @Test
+   @Test(timeout = 30000)
    public void testMultiStepBackwardAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       super.testMultiStepBackwardAndContinueWalking();
@@ -53,7 +53,7 @@ public class ValkyriePushRecoveryMultiStepTest extends DRCPushRecoveryMultiStepT
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 67.1)
-   @Test
+   @Test(timeout = 30000)
    @Ignore("Needs to be improved")
    public void testMultiStepForwardAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {

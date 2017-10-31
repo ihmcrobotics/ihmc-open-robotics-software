@@ -384,6 +384,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Planar regions
       registerPacketClass(PlanarRegionsListMessage.class);
+      registerPacketField(PlanarRegionsListMessage.class);
       registerPacketClass(PlanarRegionMessage.class);
       registerPacketClass(RequestPlanarRegionsListMessage.class);
       registerPacketClass(RequestPlanarRegionsListMessage.RequestType.class);

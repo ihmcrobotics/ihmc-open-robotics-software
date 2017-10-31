@@ -37,7 +37,7 @@ public class AtlasFootstepListBehaviorTest extends DRCFootstepListBehaviorTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 31.9)
-   @Test
+   @Test(timeout = 30000)
    public void testSideStepping() throws SimulationExceededMaximumTimeException
    {
       super.testSideStepping();
@@ -45,7 +45,7 @@ public class AtlasFootstepListBehaviorTest extends DRCFootstepListBehaviorTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 26.1)
-   @Test
+   @Test(timeout = 30000)
    public void testStepLongerThanMaxStepLength() throws SimulationExceededMaximumTimeException
    {
       super.testStepLongerThanMaxStepLength();
@@ -53,7 +53,7 @@ public class AtlasFootstepListBehaviorTest extends DRCFootstepListBehaviorTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 50.1)
-   @Test
+   @Test(timeout = 30000)
    public void testStop() throws SimulationExceededMaximumTimeException
    {
       super.testStop();
@@ -61,7 +61,7 @@ public class AtlasFootstepListBehaviorTest extends DRCFootstepListBehaviorTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 31.2)
-   @Test
+   @Test(timeout = 30000)
    public void testTwoStepsForwards() throws SimulationExceededMaximumTimeException
    {
       super.testTwoStepsForwards();

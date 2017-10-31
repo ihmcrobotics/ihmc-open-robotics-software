@@ -75,14 +75,14 @@ public class RigidBodyControlManagerTest
    private double q2_home = random.nextDouble();
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testConstuctor()
    {
       createManager();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(expected = RuntimeException.class)
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testFailWithoutGains()
    {
       RigidBodyControlManager manager = createManager();
@@ -91,7 +91,7 @@ public class RigidBodyControlManagerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testInitialize()
    {
       // create manager
@@ -127,7 +127,7 @@ public class RigidBodyControlManagerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testTaskspaceMessage()
    {
       RigidBodyControlManager manager = createManager();
@@ -263,7 +263,7 @@ public class RigidBodyControlManagerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testTaskspaceWeightAndSelectionMatrixFromMessage()
    {
       RigidBodyControlManager manager = createManager();
@@ -383,7 +383,7 @@ public class RigidBodyControlManagerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testTaskspaceMessageWithCustomControlFrame()
    {
       RigidBodyControlManager manager = createManager();

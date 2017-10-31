@@ -31,6 +31,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoDouble maximumZPenetrationOnValleyRegions = new YoDouble("maximumZPenetrationOnValleyRegions", registry);
    private final YoDouble yawWeight = new YoDouble("yawWeight", registry);
    private final YoDouble costPerStep = new YoDouble("costPerStep", registry);
+   private final YoDouble bodyGroundClearance = new YoDouble("bodyGroundClearance", registry);
 
    public YoFootstepPlannerParameters(YoVariableRegistry parentRegistry, FootstepPlannerParameters defaults)
    {
@@ -63,6 +64,7 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       maximumZPenetrationOnValleyRegions.set(defaults.getMaximumZPenetrationOnValleyRegions());
       yawWeight.set(defaults.getYawWeight());
       costPerStep.set(defaults.getCostPerStep());
+      bodyGroundClearance.set(defaults.getBodyGroundClearance());
    }
 
    @Override
@@ -201,6 +203,12 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    public double getCostPerStep()
    {
       return costPerStep.getDoubleValue();
+   }
+
+   @Override
+   public double getBodyGroundClearance()
+   {
+      return bodyGroundClearance.getDoubleValue();
    }
 
 }

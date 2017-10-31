@@ -13,7 +13,7 @@ import java.util.ArrayList;
 public class CollisionGroundContactModelTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.13)
-   @Test
+   @Test(timeout = 30000)
    public void testDoGroundContact()
    {
       YoVariableRegistry registry = new YoVariableRegistry("CollisionGroundContactModelTest");

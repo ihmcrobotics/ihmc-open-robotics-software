@@ -191,7 +191,7 @@ public class ConvexPolygonToolsTest
       ConvexPolygon2dTestHelpers.verifyPointsAreNotInside(polygon2, pointsThatShouldNotBeInOriginals, 0.0);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testCombineDisjointPolygons2() throws Exception
    {
       Random random = new Random(234234L);

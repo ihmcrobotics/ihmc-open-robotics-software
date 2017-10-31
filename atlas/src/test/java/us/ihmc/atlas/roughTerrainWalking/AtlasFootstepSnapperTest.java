@@ -34,7 +34,7 @@ public class AtlasFootstepSnapperTest extends FootstepSnapperSimulationTest
 {
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.8)
-   @Test
+   @Test(timeout = 30000)
    public void testAdjustingFootstepSnapperOnOddTerrain() throws InsufficientDataException
    {
       super.testAdjustingFootstepSnapperOnOddTerrain();
@@ -42,7 +42,7 @@ public class AtlasFootstepSnapperTest extends FootstepSnapperSimulationTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test
+   @Test(timeout = 30000)
    public void testConvexHullFootstepSnapperOnOddTerrain() throws InsufficientDataException
    {
       super.testConvexHullFootstepSnapperOnOddTerrain();
@@ -50,7 +50,7 @@ public class AtlasFootstepSnapperTest extends FootstepSnapperSimulationTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test
+   @Test(timeout = 30000)
    public void testConvexHullFootstepSnapperOnSteps() throws InsufficientDataException
    {
       super.testConvexHullFootstepSnapperOnSteps();
@@ -58,7 +58,7 @@ public class AtlasFootstepSnapperTest extends FootstepSnapperSimulationTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testFootstepAndPointsFromDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {
       super.testFootstepAndPointsFromDataFile();
@@ -66,7 +66,7 @@ public class AtlasFootstepSnapperTest extends FootstepSnapperSimulationTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test
+   @Test(timeout = 30000)
    public void testSimpleFootstepSnapperOnBumpyGround() throws InsufficientDataException
    {
       super.testSimpleFootstepSnapperOnBumpyGround();
@@ -74,7 +74,7 @@ public class AtlasFootstepSnapperTest extends FootstepSnapperSimulationTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
-   @Test
+   @Test(timeout = 30000)
    public void testSimpleFootstepSnapperOnListOfPoints() throws InsufficientDataException, IOException
    {
       super.testSimpleFootstepSnapperOnListOfPoints();
@@ -82,7 +82,7 @@ public class AtlasFootstepSnapperTest extends FootstepSnapperSimulationTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test
+   @Test(timeout = 30000)
    public void testSimpleFootstepSnapperOnSteps() throws InsufficientDataException
    {
       super.testSimpleFootstepSnapperOnSteps();
@@ -90,7 +90,7 @@ public class AtlasFootstepSnapperTest extends FootstepSnapperSimulationTest
 
 	@Override
    @ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Test
+   @Test(timeout = 30000)
    public void testPointsFromAtlasDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {
       boolean assertPositionConditions = true;

@@ -63,7 +63,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFeedbackRegularizationWeight()
    {
-      return runningOnRealRobot ? 0.0001 : 0.00005;
+      return runningOnRealRobot ? 0.0001 : 0.00001;
    }
 
    /** {@inheritDoc} */

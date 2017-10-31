@@ -227,7 +227,7 @@ public class FootstepAngularMomentumPredictorTest
       clear();
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testAngularMomentumInitialTransfer()
    {
       setupInputs();
@@ -310,7 +310,7 @@ public class FootstepAngularMomentumPredictorTest
       return comListCounter + 1;
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testAngularMomentumNormalTransfer()
    {
       setupInputs();
@@ -453,7 +453,7 @@ public class FootstepAngularMomentumPredictorTest
       return comListCounter;
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testAngularMomentumSwing()
    {
       setupInputs();
