@@ -12,6 +12,7 @@ import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -88,8 +89,10 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
          return false;
       }
 
-      Point3D nodePosition = new Point3D(node.getX(), node.getY(), snapTransform.getTranslationZ());
-      Point3D previousNodePosition = new Point3D(previousNode.getX(), previousNode.getY(), previousSnapTransform.getTranslationZ());
+      Point3D nodePosition = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(node, parameters.getIdealFootstepWidth()));
+      nodePosition.setZ(snapTransform.getTranslationZ());
+      Point3D previousNodePosition = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(previousNode, parameters.getIdealFootstepWidth()));
+      previousNodePosition.setZ(previousSnapTransform.getTranslationZ());
       if (planarRegions != null && isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegions, parameters.getBodyGroundClearance()))
       {
          if (DEBUG)
