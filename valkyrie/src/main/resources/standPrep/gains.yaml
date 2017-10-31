@@ -75,16 +75,16 @@ leftElbowPitch:
     kd: 10.0
     ki: 0.0    
 leftForearmYaw:
-    kp: 0.0
+    kp: 50.0
     kd: 0.0
     ki: 0.0    
 leftWristRoll:
-    kp: 0.0
-    kd: 0.0
+    kp: 20.0
+    kd: 1.0
     ki: 0.0    
 leftWristPitch:
-    kp: 0.0
-    kd: 0.0
+    kp: 20.0
+    kd: 1.0
     ki: 0.0       
 lowerNeckPitch:
     kp: 0.0
@@ -115,16 +115,16 @@ rightElbowPitch:
     kd: 4.0
     ki: 0.0      
 rightForearmYaw:
-    kp: 0.0
+    kp: 50.0
     kd: 0.0
     ki: 0.0    
 rightWristRoll:
-    kp: 0.0
-    kd: 0.0
+    kp: 20.0
+    kd: 1.0
     ki: 0.0    
 rightWristPitch:
-    kp: 0.0
-    kd: 0.0
+    kp: 20.0
+    kd: 1.0
     ki: 0.0
 leftIndexFingerPitch1:
     kp: 0.0
