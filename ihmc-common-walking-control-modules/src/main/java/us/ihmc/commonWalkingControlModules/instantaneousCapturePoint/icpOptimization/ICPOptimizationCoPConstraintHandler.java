@@ -9,7 +9,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ICPOptimizationCoPConstraintHandler
 {
-   private static final boolean useControlPolygons = true;
+   private static final boolean useControlPolygons = false;
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPControlPolygons icpControlPolygons;

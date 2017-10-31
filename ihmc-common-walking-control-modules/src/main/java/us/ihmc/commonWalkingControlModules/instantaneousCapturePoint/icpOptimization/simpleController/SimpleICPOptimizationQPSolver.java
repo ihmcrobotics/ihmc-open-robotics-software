@@ -1009,4 +1009,14 @@ public class SimpleICPOptimizationQPSolver
    {
       return numberOfIterations;
    }
+
+   public ConstraintToConvexRegion getCoPLocationConstraint()
+   {
+      return copLocationConstraint;
+   }
+
+   public ConstraintToConvexRegion getCMPLocationConstraint()
+   {
+      return cmpLocationConstraint;
+   }
 }
