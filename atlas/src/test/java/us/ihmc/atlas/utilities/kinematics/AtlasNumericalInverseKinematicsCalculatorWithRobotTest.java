@@ -50,7 +50,7 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 13.2)
-   @Test
+   @Test(timeout = 30000)
    public void testRandomFeasibleRobotPoses()
    {
       super.testRandomFeasibleRobotPoses();
@@ -58,7 +58,7 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSimpleCase()
    {
       super.testSimpleCase();

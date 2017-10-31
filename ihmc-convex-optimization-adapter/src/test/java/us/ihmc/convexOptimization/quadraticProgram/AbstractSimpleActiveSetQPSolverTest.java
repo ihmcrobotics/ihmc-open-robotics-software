@@ -317,10 +317,10 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
    @Test(timeout = 30000)
    public void testSimpleCasesWithBoundsConstraints()
    {
-      testSimpleCasesWithBoundsConstraints(1, 3, 3, false);
+      testSimpleCasesWithBoundsConstraints(1, 3, 3, 3, false);
    }
 
-   public void testSimpleCasesWithBoundsConstraints(int expectedNumberOfIterations, int expectedNumberOfIterations2, int expectedNubmerOfIterations3,
+   public void testSimpleCasesWithBoundsConstraints(int expectedNumberOfIterations, int expectedNumberOfIterations2, int expectedNumberOfIterations3, int expectedNubmerOfIterations3,
                                                     boolean ignoreLagrangeMultipliers)
    {
       SimpleActiveSetQPSolverInterface solver = createSolverToTest();
@@ -547,7 +547,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
 
       numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
       numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
-      assertEquals(expectedNumberOfIterations2, numberOfIterations);
+      assertEquals(expectedNumberOfIterations3, numberOfIterations);
 
       assertEquals(3, solution.length);
       assertTrue(Double.isNaN(solution[0]));
@@ -1569,10 +1569,10 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
    @Test(timeout = 30000)
    public void testMaxIterations()
    {
-      testMaxIterations(3);
+      testMaxIterations(3, false);
    }
 
-   public void testMaxIterations(int maxForSolution)
+   public void testMaxIterations(int maxForSolution, boolean ignoreLagrangeMultipliers)
    {
       SimpleActiveSetQPSolverInterface solver = createSolverToTest();
 
@@ -1617,16 +1617,19 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       assertEquals(6.0, solution[1], 1e-7);
       assertEquals(14.0, solution[2], 1e-7);
       /** These lagrange multipliers cause problems */
-      assertEquals(8.0, lagrangeEqualityMultipliers[0], 1e-7);
-      assertEquals(28.0, lagrangeInequalityMultipliers[0], 1e-7);
+      if (!ignoreLagrangeMultipliers)
+      {
+         assertEquals(8.0, lagrangeEqualityMultipliers[0], 1e-7);
+         assertEquals(28.0, lagrangeInequalityMultipliers[0], 1e-7);
 
-      assertEquals(0.0, lagrangeLowerBoundMultipliers[0], 1e-7);
-      assertEquals(48.0, lagrangeLowerBoundMultipliers[1], 1e-7);
-      assertEquals(0.0, lagrangeLowerBoundMultipliers[2], 1e-7);
+         assertEquals(0.0, lagrangeLowerBoundMultipliers[0], 1e-7);
+         assertEquals(48.0, lagrangeLowerBoundMultipliers[1], 1e-7);
+         assertEquals(0.0, lagrangeLowerBoundMultipliers[2], 1e-7);
 
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[0], 1e-7);
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[1], 1e-7);
-      assertEquals(0.0, lagrangeUpperBoundMultipliers[2], 1e-7);
+         assertEquals(0.0, lagrangeUpperBoundMultipliers[0], 1e-7);
+         assertEquals(0.0, lagrangeUpperBoundMultipliers[1], 1e-7);
+         assertEquals(0.0, lagrangeUpperBoundMultipliers[2], 1e-7);
+      }
 
       DenseMatrix64F solutionMatrix = new DenseMatrix64F(costQuadraticMatrix.length, 1);
       solutionMatrix.setData(solution);

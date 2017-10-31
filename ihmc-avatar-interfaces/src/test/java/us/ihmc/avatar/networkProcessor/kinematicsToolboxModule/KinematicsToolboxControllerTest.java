@@ -158,7 +158,7 @@ public class KinematicsToolboxControllerTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testHoldBodyPose() throws Exception
    {
       Pair<FloatingInverseDynamicsJoint, OneDoFJoint[]> initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
@@ -179,7 +179,7 @@ public class KinematicsToolboxControllerTest
                  toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testRandomHandPositions() throws Exception
    {
       if (VERBOSE)
@@ -215,7 +215,7 @@ public class KinematicsToolboxControllerTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testRandomHandPoses() throws Exception
    {
       if (VERBOSE)

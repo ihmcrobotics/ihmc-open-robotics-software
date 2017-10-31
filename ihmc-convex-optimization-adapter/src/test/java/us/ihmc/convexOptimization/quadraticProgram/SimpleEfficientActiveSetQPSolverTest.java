@@ -3,13 +3,16 @@ package us.ihmc.convexOptimization.quadraticProgram;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SimpleEfficientActiveSetQPSolverTest extends AbstractSimpleActiveSetQPSolverTest
 {
    @Override

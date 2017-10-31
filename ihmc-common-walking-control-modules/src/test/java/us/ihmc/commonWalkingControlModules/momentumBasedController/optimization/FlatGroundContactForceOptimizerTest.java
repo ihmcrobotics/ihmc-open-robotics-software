@@ -25,7 +25,7 @@ public class FlatGroundContactForceOptimizerTest
 
    private static final boolean showSCS = false;
 
-   @Test
+   @Test(timeout = 30000)
    public void simpleTest()
    {
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
