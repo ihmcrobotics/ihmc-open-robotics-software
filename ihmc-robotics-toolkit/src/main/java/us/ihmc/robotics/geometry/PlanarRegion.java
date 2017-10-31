@@ -936,16 +936,11 @@ public class PlanarRegion
     */
    public List<LineSegment3D> intersect(Line3D line)
    {
-      List<LineSegment3D> ret = new ArrayList<>();
-      if (!boundingBox3dInWorld.doesIntersectWithLine3D(line))
-      {
-         return ret;
-      }
-
       Line3D localLine = new Line3D(line);
       localLine.applyTransform(fromWorldToLocalTransform);
       Line2D lineInPlane = new Line2D(localLine.getPointX(), localLine.getPointY(), localLine.getDirectionX(), localLine.getDirectionY());
 
+      List<LineSegment3D> ret = new ArrayList<>();
       for (ConvexPolygon2D polygon : convexPolygons)
       {
          Point2D[] intersectionPoints = polygon.intersectionWith(lineInPlane);

@@ -7,7 +7,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -43,7 +42,82 @@ public class SnapBasedNodeCheckerTest
    public TestName name = new TestName();
 
    @Test(timeout = 30000)
-   public void testSwingingThroughObstacle()
+   public void testSwingingThroughObstacle0()
+   {
+      FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(-0.5, 0.5, 0.5);
+      generator.rotate(Math.PI / 2.0, Axis.Y);
+      generator.addRectangle(1.0, 2.0);
+      PlanarRegionsList planarRegions = generator.getPlanarRegionsList();
+
+      FootstepNodeSnapper snapper = new TestSnapper();
+      SnapBasedNodeChecker checker = new SnapBasedNodeChecker(parameters, footPolygons, snapper);
+      checker.setPlanarRegions(planarRegions);
+
+      FootstepNode node0 = new FootstepNode(-0.65, -0.1, 0.0, RobotSide.LEFT);
+      FootstepNode node1 = new FootstepNode(-0.2, 0.15, 0.0, RobotSide.RIGHT);
+      snapper.addSnapData(node0, new FootstepNodeSnapData(new RigidBodyTransform()));
+      snapper.addSnapData(node1, new FootstepNodeSnapData(new RigidBodyTransform()));
+
+      if (visualize)
+      {
+         Graphics3DObject graphics = new Graphics3DObject();
+         graphics.addCoordinateSystem(0.3);
+         graphics.addPlanarRegionsList(planarRegions);
+
+         Point3D nodeA = new Point3D(node0.getX(), node0.getY(), 0.0);
+         Point3D nodeB = new Point3D(node1.getX(), node1.getY(), 0.0);
+         PlanarRegion bodyRegion = SnapBasedNodeChecker.createBodyRegionFromNodes(nodeA, nodeB, parameters.getBodyGroundClearance(), 2.0);
+         graphics.addPlanarRegionsList(new PlanarRegionsList(bodyRegion), YoAppearance.White());
+
+         for (PlanarRegion region : planarRegions.getPlanarRegionsAsList())
+         {
+            List<LineSegment3D> intersections = region.intersect(bodyRegion);
+
+            for (LineSegment3D intersection : intersections)
+            {
+               graphics.identity();
+               graphics.translate(intersection.getFirstEndpoint());
+               Vector3D zAxis = new Vector3D(0.0, 0.0, 1.0);
+               Vector3D direction = intersection.getDirection(true);
+               double dotProduct = zAxis.dot(direction);
+               Vector3D rotationAxis = new Vector3D();
+               rotationAxis.cross(zAxis, direction);
+               if (rotationAxis.length() < 1.0e-5)
+               {
+                  rotationAxis.setX(1.0);
+               }
+               double rotationAngle = Math.acos(dotProduct);
+               graphics.rotate(rotationAngle, rotationAxis);
+               graphics.addCylinder(intersection.length(), 0.02, YoAppearance.Red());
+            }
+         }
+
+         graphics.identity();
+         graphics.translate(node0.getX(), node0.getY(), 0.0);
+         graphics.addSphere(0.05, YoAppearance.Green());
+
+         graphics.identity();
+         graphics.translate(node1.getX(), node1.getY(), 0.0);
+         graphics.addSphere(0.05, YoAppearance.Red());
+
+         SimulationConstructionSet scs = new SimulationConstructionSet();
+         scs.setGroundVisible(false);
+         scs.addStaticLinkGraphics(graphics);
+
+         scs.startOnAThread();
+         ThreadTools.sleepForever();
+      }
+      else
+      {
+         Assert.assertFalse(checker.isNodeValid(node0, node1));
+      }
+   }
+
+   @Test(timeout = 30000)
+   public void testSwingingThroughObstacle1()
    {
       FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
       double bodyGroundClearance = parameters.getBodyGroundClearance();
@@ -93,7 +167,6 @@ public class SnapBasedNodeCheckerTest
                   rotationAxis.setX(1.0);
                }
                double rotationAngle = Math.acos(dotProduct);
-               PrintTools.info("angle: " + rotationAngle);
                graphics.rotate(rotationAngle, rotationAxis);
                graphics.addCylinder(intersection.length(), 0.02, YoAppearance.Red());
             }
