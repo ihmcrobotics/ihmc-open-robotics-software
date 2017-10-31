@@ -22,6 +22,7 @@ public class SimpleICPQPIndexHandlerTest
       indexHandler.computeProblemSize();
 
       Assert.assertEquals(0, indexHandler.getFeedbackCMPIndex());
+      Assert.assertEquals(2, indexHandler.getAngularMomentumIndex());
       Assert.assertEquals(2, indexHandler.getFootstepIndex(0));
       Assert.assertEquals(2, indexHandler.getFootstepStartIndex());
       Assert.assertEquals(0, indexHandler.getNumberOfFootstepVariables());
@@ -33,6 +34,7 @@ public class SimpleICPQPIndexHandlerTest
       indexHandler.resetFootsteps();
 
       Assert.assertEquals(0, indexHandler.getFeedbackCMPIndex());
+      Assert.assertEquals(2, indexHandler.getAngularMomentumIndex());
       Assert.assertEquals(2, indexHandler.getFootstepIndex(0));
       Assert.assertEquals(2, indexHandler.getFootstepStartIndex());
       Assert.assertEquals(0, indexHandler.getNumberOfFootstepVariables());
@@ -44,6 +46,7 @@ public class SimpleICPQPIndexHandlerTest
       indexHandler.registerFootstep();
 
       Assert.assertEquals(0, indexHandler.getFeedbackCMPIndex());
+      Assert.assertEquals(2, indexHandler.getAngularMomentumIndex());
       Assert.assertEquals(2, indexHandler.getFootstepIndex(0));
       Assert.assertEquals(2, indexHandler.getFootstepStartIndex());
       Assert.assertEquals(0, indexHandler.getNumberOfFootstepVariables());
@@ -55,6 +58,7 @@ public class SimpleICPQPIndexHandlerTest
       indexHandler.computeProblemSize();
 
       Assert.assertEquals(0, indexHandler.getFeedbackCMPIndex());
+      Assert.assertEquals(2, indexHandler.getAngularMomentumIndex());
       Assert.assertEquals(2, indexHandler.getFootstepIndex(0));
       Assert.assertEquals(2, indexHandler.getFootstepStartIndex());
       Assert.assertEquals(2, indexHandler.getNumberOfFootstepVariables());
@@ -66,6 +70,7 @@ public class SimpleICPQPIndexHandlerTest
       indexHandler.resetFootsteps();
 
       Assert.assertEquals(0, indexHandler.getFeedbackCMPIndex());
+      Assert.assertEquals(2, indexHandler.getAngularMomentumIndex());
       Assert.assertEquals(2, indexHandler.getFootstepIndex(0));
       Assert.assertEquals(2, indexHandler.getFootstepStartIndex());
       Assert.assertEquals(2, indexHandler.getNumberOfFootstepVariables());
@@ -77,6 +82,7 @@ public class SimpleICPQPIndexHandlerTest
       indexHandler.setUseAngularMomentum(true);
 
       Assert.assertEquals(0, indexHandler.getFeedbackCMPIndex());
+      Assert.assertEquals(2, indexHandler.getAngularMomentumIndex());
       Assert.assertEquals(2, indexHandler.getFootstepIndex(0));
       Assert.assertEquals(2, indexHandler.getFootstepStartIndex());
       Assert.assertEquals(2, indexHandler.getNumberOfFootstepVariables());
@@ -88,6 +94,7 @@ public class SimpleICPQPIndexHandlerTest
       indexHandler.computeProblemSize();
 
       Assert.assertEquals(0, indexHandler.getFeedbackCMPIndex());
+      Assert.assertEquals(2, indexHandler.getAngularMomentumIndex());
       Assert.assertEquals(4, indexHandler.getFootstepIndex(0));
       Assert.assertEquals(4, indexHandler.getFootstepStartIndex());
       Assert.assertEquals(0, indexHandler.getNumberOfFootstepVariables());
@@ -101,6 +108,7 @@ public class SimpleICPQPIndexHandlerTest
       indexHandler.computeProblemSize();
 
       Assert.assertEquals(0, indexHandler.getFeedbackCMPIndex());
+      Assert.assertEquals(2, indexHandler.getAngularMomentumIndex());
       Assert.assertEquals(4, indexHandler.getFootstepIndex(0));
       Assert.assertEquals(4, indexHandler.getFootstepStartIndex());
       Assert.assertEquals(2, indexHandler.getNumberOfFootstepVariables());
@@ -116,6 +124,7 @@ public class SimpleICPQPIndexHandlerTest
       indexHandler.computeProblemSize();
 
       Assert.assertEquals(0, indexHandler.getFeedbackCMPIndex());
+      Assert.assertEquals(2, indexHandler.getAngularMomentumIndex());
       Assert.assertEquals(2, indexHandler.getFootstepIndex(0));
       Assert.assertEquals(2, indexHandler.getFootstepStartIndex());
       Assert.assertEquals(4, indexHandler.getNumberOfFootstepVariables());
@@ -131,6 +140,7 @@ public class SimpleICPQPIndexHandlerTest
       indexHandler.computeProblemSize();
 
       Assert.assertEquals(0, indexHandler.getFeedbackCMPIndex());
+      Assert.assertEquals(2, indexHandler.getAngularMomentumIndex());
       Assert.assertEquals(4, indexHandler.getFootstepIndex(0));
       Assert.assertEquals(4, indexHandler.getFootstepStartIndex());
       Assert.assertEquals(4, indexHandler.getNumberOfFootstepVariables());
