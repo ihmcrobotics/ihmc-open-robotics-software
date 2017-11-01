@@ -83,6 +83,7 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
    
    private void setupWayPointsPacket()
    {
+      // for left hand
       Pose3D[] poseOfWayPoints = new Pose3D[4];
       Quaternion wayPointOrientation;
 
@@ -105,6 +106,35 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
       
       wallPosePacket = new WayPointsPacket();
       wallPosePacket.setRobotSide(RobotSide.LEFT);
+      wallPosePacket.setWayPoints(poseOfWayPoints, 10.0);
+      
+      // for right hand
+      poseOfWayPoints = new Pose3D[5];      
+
+      wayPointOrientation = new Quaternion();
+      wayPointOrientation.appendPitchRotation(Math.PI * 0.2);
+      poseOfWayPoints[0] = new Pose3D(new Point3D(0.6, -0.4, 1.0), wayPointOrientation);
+
+      wayPointOrientation = new Quaternion();
+      wayPointOrientation.appendPitchRotation(-Math.PI * 0.2);
+      wayPointOrientation.appendYawRotation(Math.PI * 0.1);
+      poseOfWayPoints[1] = new Pose3D(new Point3D(0.6, -0.1, 1.5), wayPointOrientation);
+
+      wayPointOrientation = new Quaternion();
+      wayPointOrientation.appendYawRotation(Math.PI * 0.2);
+      poseOfWayPoints[2] = new Pose3D(new Point3D(0.5, 0.2, 1.0), wayPointOrientation);
+
+      wayPointOrientation = new Quaternion();
+      wayPointOrientation.appendPitchRotation(Math.PI * 0.1);
+      wayPointOrientation.appendYawRotation(Math.PI * 0.2);
+      poseOfWayPoints[3] = new Pose3D(new Point3D(0.6, -0.4, 0.8), wayPointOrientation);
+      
+      wayPointOrientation = new Quaternion();
+      wayPointOrientation.appendYawRotation(-Math.PI * 0.1);
+      poseOfWayPoints[4] = new Pose3D(new Point3D(0.6, -0.5, 1.0), wayPointOrientation);
+      
+      wallPosePacket = new WayPointsPacket();
+      wallPosePacket.setRobotSide(RobotSide.RIGHT);
       wallPosePacket.setWayPoints(poseOfWayPoints, 10.0);
    }
    
