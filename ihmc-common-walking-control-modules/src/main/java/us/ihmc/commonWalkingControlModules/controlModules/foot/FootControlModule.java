@@ -61,7 +61,6 @@ public class FootControlModule
    private final SupportState supportState;
 
    private final YoDouble footLoadThresholdToHoldPosition;
-   private final YoDouble touchdownDuration;
 
    private final FootControlHelper footControlHelper;
 
@@ -93,8 +92,6 @@ public class FootControlModule
       footLoadThresholdToHoldPosition = new YoDouble("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
       
-      touchdownDuration = new YoDouble(robotSide.getCamelCaseNameForStartOfExpression() + "TouchdownDuration", registry);
-
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
       // set up states and state machine
@@ -202,7 +199,12 @@ public class FootControlModule
    
    public void requestTouchdown()
    {
-      setContactState(ConstraintType.TOUCHDOWN);
+    if(stateMachine.isCurrentState(ConstraintType.SWING))
+    {
+       setContactState(ConstraintType.TOUCHDOWN);
+       swingState.getDesireds(desiredPose, desiredLinearVelocity, desiredAngularVelocity);
+       touchdownState.initialize(desiredPose, desiredLinearVelocity, desiredAngularVelocity);
+    }
    }
 
    public void requestStopTrajectoryIfPossible()
@@ -260,12 +262,6 @@ public class FootControlModule
          requestExploration();
       }
       
-      if(stateMachine.isCurrentState(ConstraintType.SWING) && swingState.isDone())
-      {
-         swingState.getDesireds(desiredPose, desiredLinearVelocity, desiredAngularVelocity);
-         touchdownState.initialize(touchdownDuration.getDoubleValue(), desiredPose, desiredLinearVelocity, desiredAngularVelocity);
-      }
-
       stateMachine.checkTransitionConditions();
 
       if (!isInFlatSupportState() && footControlHelper.getPartialFootholdControlModule() != null)
@@ -281,17 +277,6 @@ public class FootControlModule
       stateMachine.setCurrentState(getCurrentConstraintType());
    }
    
-   public boolean isTouchdownEnabled()
-   {
-      double touchdownDuration = this.touchdownDuration.getDoubleValue();
-      return Double.isFinite(touchdownDuration) && touchdownDuration > 0.0;
-   }
-   
-   public boolean isTouchdownFinished()
-   {
-      return touchdownState.isDone();
-   }
-
    public boolean isInFlatSupportState()
    {
       ConstraintType currentConstraintType = getCurrentConstraintType();
@@ -364,9 +349,8 @@ public class FootControlModule
 
    public void setFootstep(Footstep footstep, double swingTime, double touchdownTime)
    {
-      touchdownDuration.set(touchdownTime);
-      swingState.enableFinishTransition(isTouchdownEnabled());
       swingState.setFootstep(footstep, swingTime);
+      touchdownState.setTouchdownDuration(touchdownTime);
    }
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
@@ -413,6 +397,11 @@ public class FootControlModule
             ret.addCommand(state.getFeedbackControlCommand());
       }
       return ret;
+   }
+   
+   public boolean isInTouchdown()
+   {
+      return getCurrentConstraintType().equals(ConstraintType.TOUCHDOWN);
    }
 
    public void initializeFootExploration()
