@@ -169,7 +169,7 @@ public class TouchDownState extends AbstractFootControlState
    {
       initialFootPose.changeFrame(worldFrame);
       desiredOrientation.changeFrame(worldFrame);
-      desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), 0.0, 0.0);
+      desiredOrientation.setYawPitchRoll(initialFootPose.getYaw(), 0.0, 0.0);
       initialize(desiredTouchdownDuration, initialFootPose, initialFootLinearVelocity, initialFootAngularVelocity, desiredOrientation);
    }
 
