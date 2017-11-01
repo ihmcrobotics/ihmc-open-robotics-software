@@ -48,6 +48,12 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
                      {
                         return true;
                      }
+
+                     @Override
+                     public boolean useStepAdjustment()
+                     {
+                        return true;
+                     }
                   };
                }
             };
