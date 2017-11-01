@@ -30,7 +30,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
                                               WalkingFailureDetectionControlModule failureDetectionControlModule, double minimumTransferTime,
                                               YoVariableRegistry parentRegistry)
    {
-      super(transferToSide, WalkingStateEnum.getWalkingTransferState(transferToSide), walkingMessageHandler, controllerToolbox, managerFactory,
+      super(transferToSide, WalkingStateEnum.getWalkingTransferState(transferToSide), walkingControllerParameters, walkingMessageHandler, controllerToolbox, managerFactory,
             failureDetectionControlModule, parentRegistry);
 
       this.minimumTransferTime.set(minimumTransferTime);
