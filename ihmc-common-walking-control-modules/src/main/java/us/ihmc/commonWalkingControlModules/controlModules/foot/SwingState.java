@@ -121,8 +121,6 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoDouble maxInitialLinearVelocityMagnitude;
    private final YoDouble maxInitialAngularVelocityMagnitude;
 
-   private final YoBoolean enableFinishCriteria;
-   
    private final DoubleParameter finalSwingHeightOffset;
    private final double controlDT;
 
@@ -195,7 +193,6 @@ public class SwingState extends AbstractUnconstrainedState
       maximumHeightForHeelTouchdown.set(swingTrajectoryParameters.getMaximumHeightForHeelTouchdown());
       heelTouchdownLengthRatio.set(swingTrajectoryParameters.getHeelTouchdownLengthRatio());
 
-      enableFinishCriteria = new YoBoolean("enableFinishCriteria", registry);
       doToeTouchdownIfPossible = new YoBoolean(namePrefix + "DoToeTouchdownIfPossible", registry);
       toeTouchdownAngle = new YoDouble(namePrefix + "ToeTouchdownAngle", registry);
       stepDownHeightForToeTouchdown = new YoDouble(namePrefix + "StepDownHeightForToeTouchdown", registry);
@@ -751,25 +748,9 @@ public class SwingState extends AbstractUnconstrainedState
       yoDesiredSoleAngularVelocity.setToNaN();
    }
    
-   /**
-    * TODO: disable the transition to the touchdown state from the foot control module
-    * If the finish transition is disabled the isDone condition will always return false
-    * If the isDone condition always returns false the touchdownState won't ever trigger and 
-    * the WalkingSingleSupportState will trigger the transition to transfer when the swing foot becomes loaded.
-    * @param enableFinishCriteria whether to force isDone to always return false
-    */
-   public void enableFinishTransition(boolean enableFinishCriteria)
-   {
-      this.enableFinishCriteria.set(enableFinishCriteria);
-   }
-
    @Override
    public boolean isDone() 
    {
-      if(enableFinishCriteria.getBooleanValue())
-      {
-         return (getTimeInCurrentState() > 0.1 && controllerToolbox.getFootSwitches().get(robotSide).hasFootHitGround());
-      }
       return false;
    }
 }
