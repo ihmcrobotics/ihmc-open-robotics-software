@@ -92,6 +92,9 @@ public class WalkToGoalBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
+      walkToGoalPacketQueue.clear();
+      planningOutputStatusQueue.clear();
+      havePlanToExecute.set(false);
    }
 
    @Override
@@ -103,7 +106,6 @@ public class WalkToGoalBehavior extends AbstractBehavior
    @Override
    public void onBehaviorPaused()
    {
-
    }
 
    @Override
@@ -238,14 +240,13 @@ public class WalkToGoalBehavior extends AbstractBehavior
       public void doTransitionIntoAction()
       {
          footstepListBehavior.initialize();
-         footstepListBehavior.onBehaviorEntered();
          footstepListBehavior.set(planToExecute);
       }
 
       @Override
       public void doTransitionOutOfAction()
       {
-         footstepListBehavior.onBehaviorExited();
+         footstepListBehavior.doPostBehaviorCleanup();
          isDone.set(true);
       }
    }
