@@ -12,7 +12,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.PrintTools;
@@ -27,7 +26,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalWithPlanningBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket.WalkToGoalAction;
@@ -41,7 +40,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
@@ -52,7 +50,7 @@ import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterface
+public abstract class DRCWalkToGoalWithPlanningBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
@@ -166,36 +164,36 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       Vector2D walkDirection = new Vector2D(1, 0);
       double trajectoryTime = walkDistance / ASSUMED_WALKING_SPEED_mPerSec;
 
-      WalkToGoalBehavior walkToGoalBehavior = testWalkToGoalBehavior(walkDistance, walkDirection, trajectoryTime);
+      WalkToGoalWithPlanningBehavior walkToGoalWithPlanningBehavior = testWalkToGoalBehavior(walkDistance, walkDirection, trajectoryTime);
 
-      assertTrue(walkToGoalBehavior.isDone());
+      assertTrue(walkToGoalWithPlanningBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private WalkToGoalBehavior testWalkToGoalBehavior(double walkDistance, Vector2D walkDirection, double trajectoryTime)
+   private WalkToGoalWithPlanningBehavior testWalkToGoalBehavior(double walkDistance, Vector2D walkDirection, double trajectoryTime)
          throws SimulationExceededMaximumTimeException
    {
       FramePose2d initialMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
       FramePose2d desiredMidFeetPose = offsetMidFeetPose2d(initialMidFeetPose, walkDistance, walkDirection);
 
-      final WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(communicationBridge, fullRobotModel, yoTime);
-      walkToGoalBehavior.initialize();
+      final WalkToGoalWithPlanningBehavior walkToGoalWithPlanningBehavior = new WalkToGoalWithPlanningBehavior(communicationBridge, fullRobotModel, yoTime);
+      walkToGoalWithPlanningBehavior.initialize();
 
       WalkToGoalBehaviorPacket requestedGoal = new WalkToGoalBehaviorPacket(desiredMidFeetPose.getX(), desiredMidFeetPose.getY(), desiredMidFeetPose.getYaw(),
             RobotSide.RIGHT);
-      walkToGoalBehavior.getCommunicationBridge().consumeObjectFromNetwork(requestedGoal);
+      walkToGoalWithPlanningBehavior.getCommunicationBridge().consumeObjectFromNetwork(requestedGoal);
 
       WalkToGoalBehaviorPacket walkToGoalFindPathPacket = new WalkToGoalBehaviorPacket(WalkToGoalAction.FIND_PATH);
-      walkToGoalBehavior.getCommunicationBridge().consumeObjectFromNetwork(walkToGoalFindPathPacket);
+      walkToGoalWithPlanningBehavior.getCommunicationBridge().consumeObjectFromNetwork(walkToGoalFindPathPacket);
 
       WalkToGoalBehaviorPacket walkToGoalExecutePacket = new WalkToGoalBehaviorPacket(WalkToGoalAction.EXECUTE);
-      walkToGoalBehavior.getCommunicationBridge().consumeObjectFromNetwork(walkToGoalExecutePacket);
-      walkToGoalBehavior.doControl();
-      assertTrue( walkToGoalBehavior.hasInputBeenSet() );
+      walkToGoalWithPlanningBehavior.getCommunicationBridge().consumeObjectFromNetwork(walkToGoalExecutePacket);
+      walkToGoalWithPlanningBehavior.doControl();
+      assertTrue( walkToGoalWithPlanningBehavior.hasInputBeenSet() );
 
-      boolean success = executeBehavior(walkToGoalBehavior, trajectoryTime);
+      boolean success = executeBehavior(walkToGoalWithPlanningBehavior, trajectoryTime);
       assertTrue(success);
 
       FramePose2d finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
@@ -204,7 +202,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       PrintTools.debug(this, " initial Midfeet Pose :\n" + initialMidFeetPose + "\n");
       assertPosesAreWithinThresholds(desiredMidFeetPose, finalMidFeetPose);
 
-      return walkToGoalBehavior;
+      return walkToGoalWithPlanningBehavior;
    }
 
    private FramePose2d offsetMidFeetPose2d(FramePose2d initialPose, double walkDistance, Vector2D walkDirection)
