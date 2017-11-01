@@ -45,7 +45,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 {
    public static double handCoordinateOffsetX = -0.05;//-0.2;
    
-   private static double handOffset_NoHand_Version = -0.05;
+   private static double handOffset_NoHand_Version = -0.03;
    private static double handOffset_DualRobotiQ_Version = -0.2;
 
    /*
@@ -368,7 +368,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       {
          tree.connectNewNode(false);
 
-         // Option1 : Toway Expanding strategy.
+         // Option 1 : Two way Expanding strategy.
          //         tree.updateNearestNodeTaskOnly();
          //                  
          //         tree.updateNewConfiguration();         
