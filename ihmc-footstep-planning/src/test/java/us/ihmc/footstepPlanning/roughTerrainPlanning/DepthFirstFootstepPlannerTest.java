@@ -14,7 +14,6 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlanarRegionBipedalFootstepPlannerVisualizer;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
@@ -128,29 +127,6 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       planner.setTimeout(10.0);
       planner.setExitAfterInitialSolution(false);
       super.testCompareStepBeforeGap(!visualize);
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 10000.0)
-   @Test(timeout = 300000)
-   public void testPartialGaps()
-   {
-      parameters.set(new DefaultFootstepPlanningParameters()
-      {
-         @Override
-         public double getMinimumFootholdPercent()
-         {
-            return 0.4;
-         }
-
-         @Override
-         public boolean getRejectIfCannotFullyWiggleInside()
-         {
-            return false;
-         }
-      });
-
-      super.testPartialGaps(!visualize);
    }
 
    @Override

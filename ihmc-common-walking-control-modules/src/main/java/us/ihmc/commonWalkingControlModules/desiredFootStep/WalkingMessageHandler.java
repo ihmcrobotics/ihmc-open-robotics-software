@@ -486,7 +486,9 @@ public class WalkingMessageHandler
             desiredFootPositionInWorld, desiredFootOrientationInWorld,
             actualFootPositionInWorld, actualFootOrientationInWorld, robotSide));
       executingFootstep.set(true);
-      timeElapsedWhenFootstepExecuted.set(yoTime.getDoubleValue() - footstepDataListReceivedTime.getDoubleValue());
+
+      if (yoTime != null)
+         timeElapsedWhenFootstepExecuted.set(yoTime.getDoubleValue() - footstepDataListReceivedTime.getDoubleValue());
    }
 
    public void reportFootstepCompleted(RobotSide robotSide, FramePose actualFootPoseInWorld)

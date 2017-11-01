@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.avatar.behaviorTests.DRCWalkToGoalBehaviorTest;
+import us.ihmc.avatar.behaviorTests.DRCWalkToGoalWithPlanningBehaviorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -14,11 +14,11 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
-public class AtlasWalkToGoalBehaviorTest extends DRCWalkToGoalBehaviorTest
+public class AtlasWalkToGoalWithPlanningBehaviorTest extends DRCWalkToGoalWithPlanningBehaviorTest
 {
    private final AtlasRobotModel robotModel;
    
-   public AtlasWalkToGoalBehaviorTest()
+   public AtlasWalkToGoalWithPlanningBehaviorTest()
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false);
    }
