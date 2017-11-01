@@ -226,6 +226,11 @@ public class FeetManager
          footControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
       }
    }
+   
+   public void initializeContactStatesForTouchdown(RobotSide robotSide)
+   {
+      footControlModules.get(robotSide).requestTouchdown();
+   }
 
    public void initializeContactStatesForDoubleSupport(RobotSide transferToSide)
    {

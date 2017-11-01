@@ -164,8 +164,6 @@ public class FootControlModule
          }
       }
       
-      swingState.addDoneWithStateTransition(ConstraintType.TOUCHDOWN);
-
       for (AbstractFootControlState state : states)
       {
          stateMachine.addState(state);
@@ -200,6 +198,11 @@ public class FootControlModule
    {
       if (stateMachine.getCurrentState() == moveViaWaypointsState)
          moveViaWaypointsState.requestTouchdownForDisturbanceRecovery();
+   }
+   
+   public void requestTouchdown()
+   {
+      setContactState(ConstraintType.TOUCHDOWN);
    }
 
    public void requestStopTrajectoryIfPossible()
