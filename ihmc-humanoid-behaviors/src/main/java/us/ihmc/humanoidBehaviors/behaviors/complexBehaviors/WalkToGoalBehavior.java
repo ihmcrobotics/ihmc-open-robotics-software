@@ -106,12 +106,15 @@ public class WalkToGoalBehavior extends AbstractBehavior
    @Override
    public void onBehaviorPaused()
    {
+      if(stateMachine.getCurrentStateEnum().equals(WalkToGoalBehaviorStates.EXECUTING_PLAN))
+         footstepListBehavior.pause();
    }
 
    @Override
    public void onBehaviorResumed()
    {
-
+      if(stateMachine.getCurrentStateEnum().equals(WalkToGoalBehaviorStates.EXECUTING_PLAN))
+         footstepListBehavior.resume();
    }
 
    @Override
@@ -203,7 +206,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
 
          WalkToGoalBehaviorPacket walkToGoalBehaviorPacket = walkToGoalPacketQueue.poll();
          referenceFrames.updateFrames();
-         FramePose initialPose = new FramePose(referenceFrames.getFootFrame(walkToGoalBehaviorPacket.goalSide));
+         FramePose initialPose = new FramePose(referenceFrames.getSoleFrame(walkToGoalBehaviorPacket.goalSide));
          tempFinalPose.setToZero();
          tempFinalPose.setX(walkToGoalBehaviorPacket.xGoal);
          tempFinalPose.setY(walkToGoalBehaviorPacket.yGoal);
