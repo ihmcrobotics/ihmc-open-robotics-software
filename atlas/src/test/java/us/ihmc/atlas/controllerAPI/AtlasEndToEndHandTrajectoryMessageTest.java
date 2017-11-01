@@ -33,7 +33,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 40000)
+   @Test(timeout = 45000)
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
    {
       super.testCustomControlFrame();
