@@ -25,8 +25,8 @@ public class CTTreeTools
 
    public static void setRandomNormalizedNodeData(CTTaskNode node, Random randomManager, int index, boolean isUniform, double treeReachingTime)
    {
-      double exceedIntentionalTimeRatio = 3.0;
-      // double exceedIntentionalTimeRatio = 3.0 * treeReachingTime;
+      //double exceedIntentionalTimeRatio = 3.0;
+       double exceedIntentionalTimeRatio = 3.0 * treeReachingTime;
       // double exceedIntentionalTimeRatio = 3.0 * treeReachingTime;
       
       double exceedIntentionalRatio = 0.5;
