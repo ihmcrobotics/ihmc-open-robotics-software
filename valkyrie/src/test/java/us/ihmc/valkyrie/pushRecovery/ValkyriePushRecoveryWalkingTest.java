@@ -76,7 +76,7 @@ public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 29.3)
+   @ContinuousIntegrationTest(estimatedDuration = 29.3, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 55000)
    public void testPushTowardsTheBack() throws SimulationExceededMaximumTimeException
    {
