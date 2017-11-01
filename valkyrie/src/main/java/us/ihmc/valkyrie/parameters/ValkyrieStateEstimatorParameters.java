@@ -6,7 +6,7 @@ import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorT
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_POSITION;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_TAU;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_VELOCITY;
-import static us.ihmc.valkyrie.fingers.ValkyrieSimulatedFingerJoint.*;
+import static us.ihmc.valkyrie.fingers.ValkyrieFingerJoint.*;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -27,7 +27,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.valkyrie.fingers.ValkyrieSimulatedFingerJoint;
+import us.ihmc.valkyrie.fingers.ValkyrieFingerJoint;
 
 public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 {
@@ -173,7 +173,8 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       sensorProcessing.addSensorAlphaFilter(angularVelocityAlphaFilter, false, IMU_ANGULAR_VELOCITY);
       sensorProcessing.addSensorAlphaFilter(linearAccelerationAlphaFilter, false, IMU_LINEAR_ACCELERATION);
 
-      configureFingerProcessing(sensorProcessing);
+      if (runningOnRealRobot)
+         configureFingerProcessing(sensorProcessing);
    }
 
    private void configureFingerProcessing(SensorProcessing sensorProcessing)
@@ -181,18 +182,18 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
 
       {
-         SideDependentList<EnumMap<ValkyrieSimulatedFingerJoint, YoDouble>> sideDependentScales = SideDependentList.createListOfEnumMaps(ValkyrieSimulatedFingerJoint.class);
-         SideDependentList<EnumMap<ValkyrieSimulatedFingerJoint, YoDouble>> sideDependentBiases = SideDependentList.createListOfEnumMaps(ValkyrieSimulatedFingerJoint.class);
+         SideDependentList<EnumMap<ValkyrieFingerJoint, YoDouble>> sideDependentScales = SideDependentList.createListOfEnumMaps(ValkyrieFingerJoint.class);
+         SideDependentList<EnumMap<ValkyrieFingerJoint, YoDouble>> sideDependentBiases = SideDependentList.createListOfEnumMaps(ValkyrieFingerJoint.class);
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            EnumMap<ValkyrieSimulatedFingerJoint, YoDouble> scales = sideDependentScales.get(robotSide);
-            EnumMap<ValkyrieSimulatedFingerJoint, YoDouble> biases = sideDependentBiases.get(robotSide);
+            EnumMap<ValkyrieFingerJoint, YoDouble> scales = sideDependentScales.get(robotSide);
+            EnumMap<ValkyrieFingerJoint, YoDouble> biases = sideDependentBiases.get(robotSide);
 
-            for (ValkyrieSimulatedFingerJoint fingerJoint : ValkyrieSimulatedFingerJoint.values)
+            for (ValkyrieFingerJoint fingerJoint : ValkyrieFingerJoint.values)
             {
-               YoDouble scale = new YoDouble("scale" + fingerJoint.getPascalCaseName(robotSide), registry);
-               YoDouble bias = new YoDouble("bias" + fingerJoint.getPascalCaseName(robotSide), registry);
+               YoDouble scale = new YoDouble("scale" + fingerJoint.getPascalCaseJointName(robotSide), registry);
+               YoDouble bias = new YoDouble("bias" + fingerJoint.getPascalCaseJointName(robotSide), registry);
                scales.put(fingerJoint, scale);
                biases.put(fingerJoint, bias);
             }
@@ -236,55 +237,55 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
          for (RobotSide robotSide : RobotSide.values)
          {
             { // Doing the thumb separately
-               ValkyrieSimulatedFingerJoint[] thumbBaseJoints = {ThumbRoll, ThumbPitch1, ThumbPitch2};
-               for (ValkyrieSimulatedFingerJoint joint : thumbBaseJoints)
+               ValkyrieFingerJoint[] thumbBaseJoints = {ThumbRoll, ThumbPitch1, ThumbPitch2};
+               for (ValkyrieFingerJoint joint : thumbBaseJoints)
                {
                   YoDouble scale = sideDependentScales.get(robotSide).get(joint);
                   YoDouble bias = sideDependentBiases.get(robotSide).get(joint);
-                  String jointName = joint.getCamelCaseName(robotSide);
+                  String jointName = joint.getCamelCaseJointName(robotSide);
                   sensorProcessing.addJointPositionAffineTransformOnlyForSpecifiedJoints(scale, bias, false, jointName);
                }
                {
-                  ValkyrieSimulatedFingerJoint slaveJoint = ThumbPitch3;
+                  ValkyrieFingerJoint slaveJoint = ThumbPitch3;
                   YoDouble scale = sideDependentScales.get(robotSide).get(slaveJoint);
                   YoDouble bias = sideDependentBiases.get(robotSide).get(slaveJoint);
-                  String masterJointName = ThumbPitch2.getCamelCaseName(robotSide);
-                  String slaveJointName = slaveJoint.getCamelCaseName(robotSide);
+                  String masterJointName = ThumbPitch2.getCamelCaseJointName(robotSide);
+                  String slaveJointName = slaveJoint.getCamelCaseJointName(robotSide);
                   sensorProcessing.computeJointPositionUsingCoupling(masterJointName, slaveJointName, scale, bias, false);
                }
             }
             
-            ValkyrieSimulatedFingerJoint[] masterJoints = {IndexFingerPitch1, MiddleFingerPitch1, PinkyPitch1};
-            ValkyrieSimulatedFingerJoint[] slaveJoints2 = {IndexFingerPitch2, MiddleFingerPitch2, PinkyPitch2};
-            ValkyrieSimulatedFingerJoint[] slaveJoints3 = {IndexFingerPitch3, MiddleFingerPitch3, PinkyPitch3};
+            ValkyrieFingerJoint[] masterJoints = {IndexFingerPitch1, MiddleFingerPitch1, PinkyPitch1};
+            ValkyrieFingerJoint[] slaveJoints2 = {IndexFingerPitch2, MiddleFingerPitch2, PinkyPitch2};
+            ValkyrieFingerJoint[] slaveJoints3 = {IndexFingerPitch3, MiddleFingerPitch3, PinkyPitch3};
 
-            for (ValkyrieSimulatedFingerJoint joint : masterJoints)
+            for (ValkyrieFingerJoint joint : masterJoints)
             {
                YoDouble scale = sideDependentScales.get(robotSide).get(joint);
                YoDouble bias = sideDependentBiases.get(robotSide).get(joint);
-               String jointName = joint.getCamelCaseName(robotSide);
+               String jointName = joint.getCamelCaseJointName(robotSide);
                sensorProcessing.addJointPositionAffineTransformOnlyForSpecifiedJoints(scale, bias, false, jointName);
             }
 
             for (int i = 0; i < 3; i++)
             {
-               ValkyrieSimulatedFingerJoint masterJoint = masterJoints[i];
+               ValkyrieFingerJoint masterJoint = masterJoints[i];
 
                {
-                  ValkyrieSimulatedFingerJoint slaveJoint = slaveJoints2[i];
+                  ValkyrieFingerJoint slaveJoint = slaveJoints2[i];
                   YoDouble scale = sideDependentScales.get(robotSide).get(slaveJoint);
                   YoDouble bias = sideDependentBiases.get(robotSide).get(slaveJoint);
-                  String masterJointName = masterJoint.getCamelCaseName(robotSide);
-                  String slaveJointName = slaveJoint.getCamelCaseName(robotSide);
+                  String masterJointName = masterJoint.getCamelCaseJointName(robotSide);
+                  String slaveJointName = slaveJoint.getCamelCaseJointName(robotSide);
                   sensorProcessing.computeJointPositionUsingCoupling(masterJointName, slaveJointName, scale, bias, false);
                }
 
                {
-                  ValkyrieSimulatedFingerJoint slaveJoint = slaveJoints3[i];
+                  ValkyrieFingerJoint slaveJoint = slaveJoints3[i];
                   YoDouble scale = sideDependentScales.get(robotSide).get(slaveJoint);
                   YoDouble bias = sideDependentBiases.get(robotSide).get(slaveJoint);
-                  String masterJointName = masterJoint.getCamelCaseName(robotSide);
-                  String slaveJointName = slaveJoint.getCamelCaseName(robotSide);
+                  String masterJointName = masterJoint.getCamelCaseJointName(robotSide);
+                  String slaveJointName = slaveJoint.getCamelCaseJointName(robotSide);
                   sensorProcessing.computeJointPositionUsingCoupling(masterJointName, slaveJointName, scale, bias, false);
                }
             }

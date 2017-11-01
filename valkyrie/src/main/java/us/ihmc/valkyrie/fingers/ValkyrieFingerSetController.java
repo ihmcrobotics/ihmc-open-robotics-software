@@ -50,8 +50,8 @@ public class ValkyrieFingerSetController implements RobotController
    private final LinkedHashMap<ValkyrieRealRobotFingerJoint, YoDouble> desiredAngles = new LinkedHashMap<>();
 
    private final EnumMap<ValkyrieRealRobotFingerJoint, YoDouble> realRobotControlVariables = new EnumMap<>(ValkyrieRealRobotFingerJoint.class);
-   private final EnumMap<ValkyrieSimulatedFingerJoint, RevoluteJoint> revoluteJointMap = new EnumMap<>(ValkyrieSimulatedFingerJoint.class);
-   private final EnumMap<ValkyrieSimulatedFingerJoint, JointDesiredOutput> desiredOutputMap = new EnumMap<>(ValkyrieSimulatedFingerJoint.class);
+   private final EnumMap<ValkyrieFingerJoint, RevoluteJoint> revoluteJointMap = new EnumMap<>(ValkyrieFingerJoint.class);
+   private final EnumMap<ValkyrieFingerJoint, JointDesiredOutput> desiredOutputMap = new EnumMap<>(ValkyrieFingerJoint.class);
 
    private final YoEnum<HandConfiguration> handConfiguration;
    private final YoEnum<HandConfiguration> handDesiredConfiguration;
@@ -111,7 +111,7 @@ public class ValkyrieFingerSetController implements RobotController
          desiredAngles.put(jointEnum, desiredAngle);
       }
 
-      for (ValkyrieSimulatedFingerJoint simulatedFingerJoint : ValkyrieSimulatedFingerJoint.values)
+      for (ValkyrieFingerJoint simulatedFingerJoint : ValkyrieFingerJoint.values)
       {
          revoluteJointMap.put(simulatedFingerJoint, simulatedFingerJoint.getRelatedRevoluteJoint(robotSide, fullRobotModel));
          desiredOutputMap.put(simulatedFingerJoint, lowLevelDesiredJointData.getJointDesiredOutput(revoluteJointMap.get(simulatedFingerJoint)));
@@ -284,27 +284,27 @@ public class ValkyrieFingerSetController implements RobotController
          switch (controllableJoint)
          {
          case ThumbRoll:
-            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.ThumbRoll).setDesiredPosition(desiredValue);
+            desiredOutputMap.get(ValkyrieFingerJoint.ThumbRoll).setDesiredPosition(desiredValue);
             break;
          case Thumb:
-            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.ThumbPitch1).setDesiredPosition(desiredValue / 3.0);
-            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.ThumbPitch2).setDesiredPosition(desiredValue / 3.0);
-            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.ThumbPitch3).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieFingerJoint.ThumbPitch1).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieFingerJoint.ThumbPitch2).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieFingerJoint.ThumbPitch3).setDesiredPosition(desiredValue / 3.0);
             break;
          case Index:
-            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.IndexFingerPitch1).setDesiredPosition(desiredValue / 3.0);
-            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.IndexFingerPitch2).setDesiredPosition(desiredValue / 3.0);
-            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.IndexFingerPitch3).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieFingerJoint.IndexFingerPitch1).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieFingerJoint.IndexFingerPitch2).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieFingerJoint.IndexFingerPitch3).setDesiredPosition(desiredValue / 3.0);
             break;
          case Middle:
-            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.MiddleFingerPitch1).setDesiredPosition(desiredValue / 3.0);
-            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.MiddleFingerPitch2).setDesiredPosition(desiredValue / 3.0);
-            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.MiddleFingerPitch3).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieFingerJoint.MiddleFingerPitch1).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieFingerJoint.MiddleFingerPitch2).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieFingerJoint.MiddleFingerPitch3).setDesiredPosition(desiredValue / 3.0);
             break;
          case Pinky:
-            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.PinkyPitch1).setDesiredPosition(desiredValue / 3.0);
-            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.PinkyPitch2).setDesiredPosition(desiredValue / 3.0);
-            desiredOutputMap.get(ValkyrieSimulatedFingerJoint.PinkyPitch3).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieFingerJoint.PinkyPitch1).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieFingerJoint.PinkyPitch2).setDesiredPosition(desiredValue / 3.0);
+            desiredOutputMap.get(ValkyrieFingerJoint.PinkyPitch3).setDesiredPosition(desiredValue / 3.0);
             break;
          }
       }

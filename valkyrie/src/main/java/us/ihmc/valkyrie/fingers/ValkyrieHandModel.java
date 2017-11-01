@@ -7,11 +7,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ValkyrieHandModel implements HandModel
 {
-   private static HandJointName[] handJointNames = new HandJointName[ValkyrieSimulatedFingerJoint.values.length];
+   private static HandJointName[] handJointNames = new HandJointName[ValkyrieFingerJoint.values.length];
 
    static
    {
-      for (int i = 0; i < ValkyrieSimulatedFingerJoint.values.length; i++)
+      for (int i = 0; i < ValkyrieFingerJoint.values.length; i++)
       {
          final int finalIndex = i;
          handJointNames[i] = new HandJointName()
@@ -25,7 +25,7 @@ public class ValkyrieHandModel implements HandModel
             @Override
             public String getJointName(RobotSide robotSide)
             {
-               return ValkyrieSimulatedFingerJoint.values[finalIndex].getJointName(robotSide);
+               return ValkyrieFingerJoint.values[finalIndex].getJointName(robotSide);
             }
 
             @Override

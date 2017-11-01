@@ -43,9 +43,9 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
    private final YoBoolean sendFingerJointGains = new YoBoolean("sendFingerJointGains", registry);
    private final YoDouble fingerTrajectoryTime = new YoDouble("FingerTrajectoryTime", registry);
 
-   private final SideDependentList<LinkedHashMap<ValkyrieSimulatedFingerJoint, YoDouble>> kpMap = new SideDependentList<>();
-   private final SideDependentList<LinkedHashMap<ValkyrieSimulatedFingerJoint, YoDouble>> kdMap = new SideDependentList<>();
-   private final SideDependentList<LinkedHashMap<ValkyrieSimulatedFingerJoint, JointDesiredOutput>> outputs = new SideDependentList<>();
+   private final SideDependentList<LinkedHashMap<ValkyrieFingerJoint, YoDouble>> kpMap = new SideDependentList<>();
+   private final SideDependentList<LinkedHashMap<ValkyrieFingerJoint, YoDouble>> kdMap = new SideDependentList<>();
+   private final SideDependentList<LinkedHashMap<ValkyrieFingerJoint, JointDesiredOutput>> outputs = new SideDependentList<>();
 
    private final long controlDTInNS;
    private final long estimatorDTInNS;
@@ -81,10 +81,10 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
       {
          if (!isRunningOnRealRobot)
          {
-            kpMap.put(robotSide, new LinkedHashMap<ValkyrieSimulatedFingerJoint, YoDouble>());
-            kdMap.put(robotSide, new LinkedHashMap<ValkyrieSimulatedFingerJoint, YoDouble>());
+            kpMap.put(robotSide, new LinkedHashMap<ValkyrieFingerJoint, YoDouble>());
+            kdMap.put(robotSide, new LinkedHashMap<ValkyrieFingerJoint, YoDouble>());
 
-            for (ValkyrieSimulatedFingerJoint simulatedFingerJoint : ValkyrieSimulatedFingerJoint.values)
+            for (ValkyrieFingerJoint simulatedFingerJoint : ValkyrieFingerJoint.values)
             {
                YoDouble kp = new YoDouble("kp" + robotSide.getCamelCaseNameForMiddleOfExpression() + simulatedFingerJoint.name(), registry);
                YoDouble kd = new YoDouble("kd" + robotSide.getCamelCaseNameForMiddleOfExpression() + simulatedFingerJoint.name(), registry);
@@ -142,7 +142,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
       {
          if (!isRunningOnRealRobot)
          {
-            for (ValkyrieSimulatedFingerJoint simulatedFingerJoint : ValkyrieSimulatedFingerJoint.values)
+            for (ValkyrieFingerJoint simulatedFingerJoint : ValkyrieFingerJoint.values)
             {
                PinJoint relatedPinJoint = simulatedFingerJoint.getRelatedPinJoint(robotSide, simulatedRobot);
                RevoluteJoint relatedRevoluteJoint = (RevoluteJoint) simulatedFingerJoint.getRelatedRevoluteJoint(robotSide, fullRobotModel);
@@ -176,11 +176,11 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         final double[] simulatedJointValues = new double[ValkyrieSimulatedFingerJoint.values.length];
+         final double[] simulatedJointValues = new double[ValkyrieFingerJoint.values.length];
 
-         for (int i = 0; i < ValkyrieSimulatedFingerJoint.values.length; i++)
+         for (int i = 0; i < ValkyrieFingerJoint.values.length; i++)
          {
-            simulatedJointValues[i] = ValkyrieSimulatedFingerJoint.values[i].getRelatedRevoluteJoint(robotSide, fullRobotModel).getQ();
+            simulatedJointValues[i] = ValkyrieFingerJoint.values[i].getRelatedRevoluteJoint(robotSide, fullRobotModel).getQ();
          }
 
          jointAngleCommunicators.get(robotSide).updateHandAngles(new HandSensorData()
@@ -253,7 +253,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
       {
          if (!isRunningOnRealRobot)
          {
-            for (ValkyrieSimulatedFingerJoint simulatedFingerJoint : ValkyrieSimulatedFingerJoint.values)
+            for (ValkyrieFingerJoint simulatedFingerJoint : ValkyrieFingerJoint.values)
             {
                outputs.get(robotSide).get(simulatedFingerJoint).setStiffness(kpMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
                outputs.get(robotSide).get(simulatedFingerJoint).setDamping(kdMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
