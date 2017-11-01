@@ -131,7 +131,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(-0.5, 1.0, 0.0);
-      double magnitude = 800;
+      double magnitude = 750;
       double duration = 0.05;
       double percentInSwing = 0.2;
       RobotSide side = RobotSide.LEFT;
