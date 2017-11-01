@@ -44,7 +44,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxController
 {
    public static double handCoordinateOffsetX = -0.05;//-0.2;
-   
+
    private static double handOffset_NoHand_Version = -0.03;
    private static double handOffset_DualRobotiQ_Version = -0.2;
 
@@ -121,6 +121,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    private int numberOfMotionPath = 1;
 
+   private int numberOfTimesToShortcut = 5;
+
    private static int terminateToolboxCondition = 1000;
 
    // public CTTaskNodeWholeBodyTrajectoryMessageFactory ctTaskNodeWholeBodyTrajectoryMessageFactory;
@@ -145,17 +147,16 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
                                                         StatusMessageOutputManager statusOutputManager, YoVariableRegistry registry,
                                                         YoGraphicsListRegistry yoGraphicsRegistry, boolean startYoVariableServer)
    {
-      super(statusOutputManager, registry);      
+      super(statusOutputManager, registry);
       this.drcRobotModelFactory = drcRobotModel;
-      
-      if(this.drcRobotModelFactory.getHandModel() == null)
+
+      if (this.drcRobotModelFactory.getHandModel() == null)
       {
          handCoordinateOffsetX = handOffset_NoHand_Version;
       }
       else
          handCoordinateOffsetX = handOffset_DualRobotiQ_Version;
-      
-      
+
       this.visualizedFullRobotModel = fullRobotModel;
       this.isDone.set(false);
 
@@ -273,7 +274,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
          WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = ctTaskNodeWholeBodyTrajectoryMessageFactory.getWholeBodyTrajectoryMessage();
          outputStatusToPack.setWholeBodyTrajectoryMessage(wholeBodyTrajectoryMessage);
-         
+
          outputStatusToPack.setRobotConfigurations(ctTaskNodeWholeBodyTrajectoryMessageFactory.getConfigurations());
          outputStatusToPack.setTrajectoryTimes(ctTaskNodeWholeBodyTrajectoryMessageFactory.getTrajectoryTimes());
       }
@@ -291,21 +292,21 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       tree.getPath().clear();
 
       ArrayList<CTTaskNode> revertedPath = new ArrayList<CTTaskNode>();
-      CTTaskNode currentNode = tree.getNewNode();
+      CTTaskNode currentNode = new CTTaskNode(tree.getNewNode());
       revertedPath.add(currentNode);
 
       while (true)
       {
          currentNode = currentNode.getParentNode();
          if (currentNode != null)
-            revertedPath.add(currentNode);
+            revertedPath.add(new CTTaskNode(currentNode));
          else
             break;
       }
 
       int revertedPathSize = revertedPath.size();
 
-      tree.addNodeOnPath(revertedPath.get(revertedPathSize - 1));
+      tree.addNodeOnPath(new CTTaskNode(revertedPath.get(revertedPathSize - 1)));
       int currentIndex = 0;
       for (int j = 0; j < revertedPathSize - 2; j++)
       {
@@ -315,62 +316,41 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
          if (generalizedTimeGap > tree.dismissibleTimeGap)
          {
-            tree.addNodeOnPath(revertedPath.get(i - 1));
+            tree.addNodeOnPath(new CTTaskNode(revertedPath.get(i - 1)));
             currentIndex++;
          }
       }
-      tree.addNodeOnPath(revertedPath.get(0));
+      tree.addNodeOnPath(new CTTaskNode(revertedPath.get(0)));
 
-      
-
-      ArrayList<CTTaskNode> originalPath = new ArrayList<CTTaskNode>();
-      for(int i=0;i<tree.getPath().size();i++)
+      // set every parent nodes.
+      for (int i = 0; i < tree.getPath().size() - 1; i++)
       {
-         originalPath.add(new CTTaskNode(tree.getPath().get(i)));
-         PrintTools.info(""+i+" "+originalPath.get(i).getTime());
+         tree.getPath().get(i + 1).setParentNode(tree.getPath().get(i));
       }
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
+
+      treeVisualizer.update(tree.getPath());
+
+      long time1 = System.currentTimeMillis();
+
+      for (int i = 0; i < numberOfTimesToShortcut; i++)
+         updateShortcutPath(tree.getPath());
+
+      long time2 = System.currentTimeMillis();
+      PrintTools.info("shortcut time is = " + (time2 - time1) / 1000.0);
       PrintTools.info("the size of the path is " + tree.getPath().size() + " before dismissing " + revertedPathSize);
 
       numberOfMotionPath = tree.getPath().size();
-      
+
       //if(startYoVariableServer)
       if (true)
-         treeVisualizer.update(tree.getPath());
+      {
+         treeVisualizer.showUpPath(tree.getPath());
+      }
+
       /*
        * terminate state
        */
       state = CWBToolboxState.GENERATE_MOTION;
-
-      for (int i = 0; i < numberOfMotionPath; i++)
-         PrintTools.info("" + i + " " + tree.getPath().get(i).getNodeData(0));
-
-      for (int i = 0; i < revertedPathSize; i++)
-         PrintTools.info("" + i + " " + revertedPath.get(i).getNodeData(0));
    }
 
    /**
@@ -498,7 +478,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          }
       }
    }
-   
+
    private void findInitialGuess2()
    {
       CTTaskNode initialGuessNode = new GenericTaskNode();
@@ -506,15 +486,15 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       CTTreeTools.setRandomNormalizedNodeData(initialGuessNode, true, 0.0);
       initialGuessNode.setNormalizedNodeData(0, 0);
       initialGuessNode.convertNormalizedDataToData(taskRegion);
-      
+
       updateValidity(initialGuessNode);
-      
+
       visualizedNode = initialGuessNode;
-      
+
       double jointScore = kinematicsSolver.getArmJointLimitScore();
-      
+
       jointlimitScore.set(jointScore);
-      
+
       if (bestScoreInitialGuess < jointScore && visualizedNode.getValidity() == true)
       {
          bestScoreInitialGuess = jointScore;
@@ -522,7 +502,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          rootNode = new CTTaskNode(visualizedNode);
          rootNode.setValidity(visualizedNode.getValidity());
       }
-      
+
       /*
        * terminate finding initial guess.
        */
@@ -590,8 +570,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
        */
       rootNode = new GenericTaskNode();
       tree = new CTTaskNodeTree(rootNode);
-           
-      tree.setTaskRegion(constrainedEndEffectorTrajectory.getTaskRegion());   //////////////////////////////////////////////////////////
+
+      tree.setTaskRegion(constrainedEndEffectorTrajectory.getTaskRegion()); //////////////////////////////////////////////////////////
 
       rootNode.convertDataToNormalizedData(constrainedEndEffectorTrajectory.getTaskRegion());
 
@@ -649,7 +629,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    private boolean updateValidity(CTTaskNode node)
    {
       long astartTime = System.currentTimeMillis();
-      
+
       if (node.getParentNode() != null)
       {
          kinematicsSolver.updateRobotConfigurationData(node.getParentNode().getConfiguration());
@@ -765,5 +745,54 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    {
       endeffectorPose.get(robotSide).setPosition(desiredPose.getPosition());
       endeffectorPose.get(robotSide).setOrientation(desiredPose.getOrientation());
+   }
+
+   /**
+    * oneTime shortcut : try to make a shortcut from index to index+2
+    */
+   private void updateShortcutPath(ArrayList<CTTaskNode> path, int index)
+   {
+      // check out when index is over the size.
+      if (index > path.size() - 3)
+      {
+         return;
+      }
+
+      CTTaskNode nodeFrom = new CTTaskNode(path.get(index));
+      CTTaskNode nodeGoal = new CTTaskNode(path.get(index + 2));
+
+      CTTaskNode nodeShortcut = path.get(index + 1);
+      CTTaskNode nodeDummy = new CTTaskNode(nodeShortcut);
+
+      for (int i = 0; i < nodeShortcut.getDimensionOfNodeData(); i++)
+      {
+         double dataFrom = nodeFrom.getNodeData(i);
+         double dataGoal = nodeGoal.getNodeData(i);
+
+         double dataShortcut = (dataGoal + dataFrom) / 2;
+         nodeDummy.setNodeData(i, dataShortcut);
+      }
+
+      if (nodeDummy.getParentNode() == null)
+      {
+         PrintTools.info("no parent!");
+      }
+      updateValidity(nodeDummy);
+      if (nodeDummy.getValidity())
+      {
+         for (int i = 0; i < nodeShortcut.getDimensionOfNodeData(); i++)
+         {
+            nodeShortcut.setNodeData(i, nodeDummy.getNodeData(i));
+         }
+      }
+   }
+
+   private void updateShortcutPath(ArrayList<CTTaskNode> path)
+   {
+      for (int i = 0; i < path.size(); i++)
+      {
+         updateShortcutPath(path, i);
+         path.get(i).convertDataToNormalizedData(taskRegion);
+      }
    }
 }

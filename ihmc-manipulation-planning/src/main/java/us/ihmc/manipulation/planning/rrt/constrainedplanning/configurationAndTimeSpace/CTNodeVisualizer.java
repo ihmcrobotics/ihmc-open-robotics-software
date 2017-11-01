@@ -50,7 +50,7 @@ public class CTNodeVisualizer
 
    public void updateVisualizer(CTTaskNode newNode)
    {
-      String prefix = "" + configurationIndex + "" + updateCnt;
+      String prefix = "wholenodes_" + configurationIndex + "" + updateCnt;
       if (newNode.getValidity())
       {
          if (newNode.getParentNode() != null)
@@ -65,7 +65,7 @@ public class CTNodeVisualizer
          }
 
          CircleArtifact nodeArtifact = new CircleArtifact(prefix + "_valid", newNode.getNormalizedNodeData(0),
-                                                          newNode.getNormalizedNodeData(configurationIndex), 0.01, true);
+                                                          newNode.getNormalizedNodeData(configurationIndex), 0.0075, true);
          nodeArtifact.setColor(Color.blue);
 
          plotter.addArtifact(nodeArtifact);
@@ -74,7 +74,7 @@ public class CTNodeVisualizer
       else
       {
          CircleArtifact nodeArtifact = new CircleArtifact(prefix + "_invalid", newNode.getNormalizedNodeData(0),
-                                                          newNode.getNormalizedNodeData(configurationIndex), 0.01, true);
+                                                          newNode.getNormalizedNodeData(configurationIndex), 0.0075, true);
          nodeArtifact.setColor(Color.red);
          plotter.addArtifact(nodeArtifact);
       }
@@ -82,10 +82,21 @@ public class CTNodeVisualizer
       updateCnt++;
    }
 
-   private void updateVisualizer(CTTaskNode newNode, boolean isPath)
+   private void updateVisualizer(CTTaskNode newNode, boolean isShortcut)
    {
-      String prefix = "" + configurationIndex + "" + updateCnt;
-
+      String prefix;
+      Color pathColor;
+      if(isShortcut)
+      {
+         prefix = "shortcut_" + configurationIndex + "" + updateCnt;
+         pathColor = Color.green;
+      }         
+      else
+      {
+         prefix = "path_" + configurationIndex + "" + updateCnt;
+         pathColor = Color.black;
+      }
+               
       if (newNode.getParentNode() != null)
       {
          CTTaskNode parentNode = newNode.getParentNode();
@@ -93,13 +104,13 @@ public class CTNodeVisualizer
                                                       new Point2D(parentNode.getNormalizedNodeData(0), parentNode.getNormalizedNodeData(configurationIndex)),
                                                       new Point2D(newNode.getNormalizedNodeData(0), newNode.getNormalizedNodeData(configurationIndex)));
 
-         lineArtifact.setColor(Color.green);
+         lineArtifact.setColor(pathColor);
          plotter.addArtifact(lineArtifact);
       }
 
       CircleArtifact nodeArtifact = new CircleArtifact(prefix + "_valid", newNode.getNormalizedNodeData(0), newNode.getNormalizedNodeData(configurationIndex),
-                                                       0.015, true);
-      nodeArtifact.setColor(Color.green);
+                                                       0.012, true);
+      nodeArtifact.setColor(pathColor);
 
       plotter.addArtifact(nodeArtifact);
 
@@ -107,10 +118,10 @@ public class CTNodeVisualizer
       updateCnt++;
    }
 
-   public void updateVisualizer(ArrayList<CTTaskNode> path)
+   public void updateVisualizer(ArrayList<CTTaskNode> path, boolean isShortcut)
    {
       int size = path.size();
       for(int i=0;i<size;i++)
-         updateVisualizer(path.get(i), true);
+         updateVisualizer(path.get(i), isShortcut);
    }
 }
