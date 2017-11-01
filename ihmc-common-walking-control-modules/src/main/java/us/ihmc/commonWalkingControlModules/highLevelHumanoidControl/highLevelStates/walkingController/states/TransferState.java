@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -45,9 +46,9 @@ public abstract class TransferState extends WalkingState
 
    private final Footstep nextFootstep = new Footstep();
 
-   public TransferState(RobotSide transferToSide, WalkingStateEnum transferStateEnum, WalkingMessageHandler walkingMessageHandler,
-                        HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
-                        WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
+   public TransferState(RobotSide transferToSide, WalkingStateEnum transferStateEnum, WalkingControllerParameters walkingControllerParameters,
+         WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
+         WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
       super(transferStateEnum, parentRegistry);
       this.transferToSide = transferToSide;
@@ -61,7 +62,7 @@ public abstract class TransferState extends WalkingState
       feetManager = managerFactory.getOrCreateFeetManager();
       touchdownDuration = new YoDouble("touchdownDuration", registry);
       icpErrorThresholdToAbortTouchdown = new YoDouble("icpErrorThresholdToAbortTouchdown", registry);
-      icpErrorThresholdToAbortTouchdown.set(0.1);
+      icpErrorThresholdToAbortTouchdown.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       isTouchdownEnabled = new YoBoolean("isTouchdownEnabled", registry);
    }
 
