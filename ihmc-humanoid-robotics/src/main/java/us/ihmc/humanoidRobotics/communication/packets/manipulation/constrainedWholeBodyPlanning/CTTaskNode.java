@@ -19,7 +19,14 @@ public class CTTaskNode
 
    public CTTaskNode(CTTaskNode node)
    {
-      this(node.getDimensionOfNodeData());
+      this.nodeData = new NodeData(node.nodeData);
+      this.normalizedNodeData = new NodeData(node.normalizedNodeData);
+      this.configuration = node.configuration;
+
+      this.childNodes = node.childNodes;
+      this.parentNode = node.parentNode;
+
+      this.validity = node.validity;
    }
 
    public CTTaskNode(double[] rootData)
@@ -200,24 +207,6 @@ public class CTTaskNode
       }
       createdNewNode.setParentNode(this);
       return createdNewNode;
-   }
-
-   /**
-    * this method is only used to create optimal path in CTTaskNodeTree.
-    */
-   public final CTTaskNode createNodeCopy()
-   {
-      CTTaskNode nodeCopy = new CTTaskNode(this);
-
-      nodeCopy.nodeData = new NodeData(this.nodeData);
-      nodeCopy.normalizedNodeData = new NodeData(this.normalizedNodeData);
-      nodeCopy.configuration = this.configuration;
-
-      nodeCopy.parentNode = this.parentNode;
-
-      nodeCopy.validity = this.validity;
-
-      return nodeCopy;
    }
 
    public final void setConfigurationJoints(KinematicsToolboxOutputStatus outputStatus)

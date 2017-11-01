@@ -45,7 +45,7 @@ public class CTTaskNodeTree
 
    public CTTaskNodeTree(CTTaskNode rootNode)
    {
-      this.rootNode = rootNode.createNodeCopy();
+      this.rootNode = new CTTaskNode(rootNode);
       this.wholeNodes.add(this.rootNode);
 
       this.dimensionOfTask = rootNode.getDimensionOfNodeData() - 1;

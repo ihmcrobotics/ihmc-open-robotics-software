@@ -321,10 +321,43 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       }
       tree.addNodeOnPath(revertedPath.get(0));
 
+      
+
+      ArrayList<CTTaskNode> originalPath = new ArrayList<CTTaskNode>();
+      for(int i=0;i<tree.getPath().size();i++)
+      {
+         originalPath.add(new CTTaskNode(tree.getPath().get(i)));
+         PrintTools.info(""+i+" "+originalPath.get(i).getTime());
+      }
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
       PrintTools.info("the size of the path is " + tree.getPath().size() + " before dismissing " + revertedPathSize);
 
       numberOfMotionPath = tree.getPath().size();
-
+      
       //if(startYoVariableServer)
       if (true)
          treeVisualizer.update(tree.getPath());
@@ -388,7 +421,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          //         }
       }
 
-      visualizedNode = tree.getNewNode().createNodeCopy();
+      visualizedNode = new CTTaskNode(tree.getNewNode());
       // TODO
       visualizedNode.setValidity(tree.getNewNode().getValidity());
 
@@ -435,7 +468,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       {
          bestScoreInitialGuess = scoreInitialGuess;
 
-         rootNode = visualizedNode.createNodeCopy();
+         rootNode = new CTTaskNode(visualizedNode);
       }
 
       /*
@@ -486,7 +519,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       {
          bestScoreInitialGuess = jointScore;
 
-         rootNode = visualizedNode.createNodeCopy();
+         rootNode = new CTTaskNode(visualizedNode);
          rootNode.setValidity(visualizedNode.getValidity());
       }
       
