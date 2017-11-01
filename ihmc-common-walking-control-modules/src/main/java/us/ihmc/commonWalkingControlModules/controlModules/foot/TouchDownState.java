@@ -164,13 +164,13 @@ public class TouchDownState extends AbstractFootControlState
     * @param initialFootLinearVelocity the current desired foot linear velocity
     * @param initialFootAngularVelocity the current desired foot angular velocity
     */
-   public void initialize(double desiredTouchdownDuration, FramePose initialFootPose, FrameVector3D initialFootLinearVelocity,
+   public void initialize(FramePose initialFootPose, FrameVector3D initialFootLinearVelocity,
          FrameVector3D initialFootAngularVelocity)
    {
       initialFootPose.changeFrame(worldFrame);
       desiredOrientation.changeFrame(worldFrame);
       desiredOrientation.setYawPitchRoll(initialFootPose.getYaw(), 0.0, 0.0);
-      initialize(desiredTouchdownDuration, initialFootPose, initialFootLinearVelocity, initialFootAngularVelocity, desiredOrientation);
+      initialize(initialFootPose, initialFootLinearVelocity, initialFootAngularVelocity, desiredOrientation);
    }
 
    /**
@@ -181,11 +181,9 @@ public class TouchDownState extends AbstractFootControlState
     * @param initialFootAngularVelocity the current desired foot angular velocity
     * @param finalFootOrientation the final orientation trajectory desired, this should be the ground orientation. 
     */
-   public void initialize(double desiredTouchdownDuration, FramePose initialFootPose, FrameVector3D initialFootLinearVelocity,
+   public void initialize(FramePose initialFootPose, FrameVector3D initialFootLinearVelocity,
          FrameVector3D initialFootAngularVelocity, FrameOrientation finalFootOrientation)
    {
-      this.desiredTouchdownDuration.set(desiredTouchdownDuration);
-
       //We're only using the orientation here. If you want to switch to holding X and Y, be careful, as the swing tracks position in a weird frame, 
       //and once in contact, the desired position would need to be consistent with current desireds, but transformed to somewhere on the contact line
       initialFootPose.changeFrame(worldFrame);
@@ -325,5 +323,10 @@ public class TouchDownState extends AbstractFootControlState
             return 1;
          return 0;
       }
+   }
+
+   public void setTouchdownDuration(double touchdownDuration)
+   {
+      desiredTouchdownDuration.set(touchdownDuration);
    }
 }

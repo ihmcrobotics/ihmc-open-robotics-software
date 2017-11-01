@@ -532,16 +532,6 @@ public class FeetManager
 
    public boolean isInTouchdown(RobotSide swingFoot)
    {
-      return footControlModules.get(swingFoot).getCurrentConstraintType().equals(ConstraintType.TOUCHDOWN);
-   }
-
-   public boolean isTouchdownFinished(RobotSide swingFoot)
-   {
-      return footControlModules.get(swingFoot).isTouchdownFinished();
-   }
-
-   public boolean isTouchDownEnabled(RobotSide swingSide)
-   {
-      return footControlModules.get(swingSide).isTouchdownEnabled();
+      return footControlModules.get(swingFoot).isInTouchdown();
    }
 }
