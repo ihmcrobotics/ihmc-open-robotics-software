@@ -8,13 +8,30 @@ import us.ihmc.simulationconstructionset.PinJoint;
 
 public enum ValkyrieSimulatedFingerJoint
 {
-   ThumbRoll, ThumbPitch1, ThumbPitch2, ThumbPitch3,
-   IndexFingerPitch1, IndexFingerPitch2, IndexFingerPitch3,
-   MiddleFingerPitch1, MiddleFingerPitch2, MiddleFingerPitch3,
-   PinkyPitch1, PinkyPitch2, PinkyPitch3;
+   ThumbRoll("ThumbRoll"), ThumbPitch1("ThumbPitch1"), ThumbPitch2("ThumbPitch2"), ThumbPitch3("ThumbPitch3"),
+   IndexFingerPitch1("IndexFingerPitch1"), IndexFingerPitch2("IndexFingerPitch2"), IndexFingerPitch3("IndexFingerPitch3"),
+   MiddleFingerPitch1("MiddleFingerPitch1"), MiddleFingerPitch2("MiddleFingerPitch2"), MiddleFingerPitch3("MiddleFingerPitch3"),
+   PinkyPitch1("PinkyPitch1"), PinkyPitch2("PinkyPitch2"), PinkyPitch3("PinkyPitch3");
 
    public static final ValkyrieSimulatedFingerJoint[] values = ValkyrieSimulatedFingerJoint.values();
 
+   private String name;
+
+   ValkyrieSimulatedFingerJoint(String name)
+   {
+      this.name = name;
+   }
+
+   public String getCamelCaseName(RobotSide side)
+   {
+      return side.getCamelCaseName() + name;
+   }
+
+   public String getPascalCaseName(RobotSide side)
+   {
+      return side.getPascalCaseName() + name;
+   }
+   
    public RevoluteJoint getRelatedRevoluteJoint(RobotSide robotSide, FullRobotModel fullRobotModel)
    {
       return (RevoluteJoint) fullRobotModel.getOneDoFJointByName(getJointName(robotSide));
