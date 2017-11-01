@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -14,6 +15,8 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class TransferState extends WalkingState
 {
@@ -35,6 +38,10 @@ public abstract class TransferState extends WalkingState
    private final FramePoint2D filteredDesiredCoP = new FramePoint2D();
    private final FramePoint2D desiredCoP = new FramePoint2D();
    private final FramePoint3D nextExitCMP = new FramePoint3D();
+   
+   private final YoBoolean isTouchdownEnabled;
+   private final YoDouble touchdownDuration;
+   private final YoDouble icpErrorThresholdToAbortTouchdown;
 
    private final Footstep nextFootstep = new Footstep();
 
@@ -52,6 +59,10 @@ public abstract class TransferState extends WalkingState
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
+      touchdownDuration = new YoDouble("touchdownDuration", registry);
+      icpErrorThresholdToAbortTouchdown = new YoDouble("icpErrorThresholdToAbortTouchdown", registry);
+      icpErrorThresholdToAbortTouchdown.set(0.1);
+      isTouchdownEnabled = new YoBoolean("isTouchdownEnabled", registry);
    }
 
    public RobotSide getTransferToSide()
@@ -62,8 +73,19 @@ public abstract class TransferState extends WalkingState
    @Override
    public void doAction()
    {
-      feetManager.updateContactStatesInDoubleSupport(transferToSide);
-
+      boolean touchdownTimeElapsed = getTimeInCurrentState() > touchdownDuration.getDoubleValue();
+      boolean icpErrorTooGreat = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToAbortTouchdown.getDoubleValue();
+      if(touchdownTimeElapsed || icpErrorTooGreat || !isTouchdownEnabled.getBooleanValue())
+      {
+         if(isTouchdownEnabled.getBooleanValue())
+         {
+            feetManager.initializeContactStatesForDoubleSupport(transferToSide);
+            updateICPPlan();
+            isTouchdownEnabled.set(false);
+         }
+         feetManager.updateContactStatesInDoubleSupport(transferToSide);
+      }
+      
       switchToToeOffIfPossible();
 
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
@@ -73,6 +95,11 @@ public abstract class TransferState extends WalkingState
    @Override
    public boolean isDone()
    {
+      if(isTouchdownEnabled.getBooleanValue())
+      {
+         return false;
+      }
+      
       if (!balanceManager.isICPPlanDone())
          return false;
       balanceManager.getCapturePoint(capturePoint2d);
@@ -114,9 +141,24 @@ public abstract class TransferState extends WalkingState
    @Override
    public void doTransitionIntoAction()
    {
+      touchdownDuration.set(walkingMessageHandler.getNextTouchdownDuration());
+      boolean supportFootWasSwinging = feetManager.getCurrentConstraintType(transferToSide) == ConstraintType.SWING;
+      if(supportFootWasSwinging && touchdownDuration.getDoubleValue() > controllerToolbox.getControlDT())
+      {
+         feetManager.initializeContactStatesForTouchdown(transferToSide);
+         isTouchdownEnabled.set(true);
+      }
+      else
+      {
+         feetManager.initializeContactStatesForDoubleSupport(transferToSide);
+         isTouchdownEnabled.set(false);
+         updateICPPlan();
+      }
+   }
+   
+   protected void updateICPPlan()
+   {
       balanceManager.clearICPPlan();
-
-      feetManager.initializeContactStatesForDoubleSupport(transferToSide);
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
       if (walkingMessageHandler.hasUpcomingFootsteps())
@@ -146,5 +188,10 @@ public abstract class TransferState extends WalkingState
    public void doTransitionOutOfAction()
    {
       feetManager.reset();
+   }
+
+   public boolean isTouchdownEnabled()
+   {
+      return isTouchdownEnabled.getBooleanValue();
    }
 }

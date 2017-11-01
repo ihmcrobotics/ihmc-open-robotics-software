@@ -585,16 +585,23 @@ public class WalkingMessageHandler
       return defaultSwingTime.getDoubleValue();
    }
    
-   public double getDefaultTouchdownTime()
-   {
-      return defaultTouchdownTime.getDoubleValue();
-   }
-
    public double getNextSwingTime()
    {
       if (upcomingFootstepTimings.isEmpty())
          return getDefaultSwingTime();
       return upcomingFootstepTimings.get(0).getSwingTime();
+   }
+   
+   public double getDefaultTouchdownTime()
+   {
+      return defaultTouchdownTime.getDoubleValue();
+   }
+   
+   public double getNextTouchdownDuration()
+   {
+      if (upcomingFootstepTimings.isEmpty())
+         return getDefaultTouchdownTime();
+      return upcomingFootstepTimings.get(0).getTouchdownDuration();
    }
 
    public double getInitialTransferTime()

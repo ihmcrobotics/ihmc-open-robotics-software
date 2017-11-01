@@ -41,10 +41,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   protected void updateICPPlan()
    {
-      super.doTransitionIntoAction();
-
+      super.updateICPPlan();
       boolean initialTransfer = isInitialTransfer();
 
       if (initialTransfer)
