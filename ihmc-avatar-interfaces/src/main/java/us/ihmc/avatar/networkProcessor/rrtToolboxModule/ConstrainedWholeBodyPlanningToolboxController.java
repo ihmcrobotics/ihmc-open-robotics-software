@@ -43,7 +43,10 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxController
 {
-   public static double handCoordinateOffsetX = -0.2;//-0.2;
+   public static double handCoordinateOffsetX = -0.05;//-0.2;
+   
+   private static double handOffset_NoHand_Version = -0.05;
+   private static double handOffset_DualRobotiQ_Version = -0.2;
 
    /*
     * essential classes
@@ -144,6 +147,15 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    {
       super(statusOutputManager, registry);      
       this.drcRobotModelFactory = drcRobotModel;
+      
+      if(this.drcRobotModelFactory.getHandModel() == null)
+      {
+         handCoordinateOffsetX = handOffset_NoHand_Version;
+      }
+      else
+         handCoordinateOffsetX = handOffset_DualRobotiQ_Version;
+      
+      
       this.visualizedFullRobotModel = fullRobotModel;
       this.isDone.set(false);
 

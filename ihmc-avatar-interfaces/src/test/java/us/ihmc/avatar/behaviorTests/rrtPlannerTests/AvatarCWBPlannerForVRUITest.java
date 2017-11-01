@@ -157,7 +157,7 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      //if (visualize)
+      //if (true)
       if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
