@@ -284,7 +284,6 @@ public class FootstepPlanningToolboxController extends ToolboxController
          @Override
          public void receivedPacket(FootstepPlanningRequestPacket packet)
          {
-            System.out.println("Planning toolbox received planning request");
             if (packet == null)
                return;
             latestRequestReference.set(packet);
