@@ -36,6 +36,7 @@ import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.tools.lists.ListSorter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
  * Attempts to soften the touchdown portion of swing. This state is only triggered if a touchdown duration is supplied with the footstep
@@ -43,6 +44,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class TouchDownState extends AbstractFootControlState
 {
+   
+   private enum LineContactActivationMethod { SENSED_COP, FOOT_ORIENTATION };
+   
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry;
    private final SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
@@ -56,6 +60,7 @@ public class TouchDownState extends AbstractFootControlState
 
    private final FrameLineSegment contactLine = new FrameLineSegment();
 
+   private final YoEnum<LineContactActivationMethod> lineContactActivationMethod;
    private final YoFrameQuaternion initialOrientation;
    private final YoFrameVector initialAngularVelocity;
    private final YoFrameQuaternion finalOrientation;
@@ -78,7 +83,8 @@ public class TouchDownState extends AbstractFootControlState
    private final MovingReferenceFrame footBodyFixedFrame;
    private final FramePose controlFramePose = new FramePose();
 
-   private final YoContactPointDistanceComparator comparator = new YoContactPointDistanceComparator();
+   private final YoContactPointDistanceComparator copDistanceComparator = new YoContactPointDistanceComparator();
+   private final YoContactLowestPointDistanceComparator zHeightDistanceComparator = new YoContactLowestPointDistanceComparator();
    private final FramePoint3D endPointA = new FramePoint3D();
    private final FramePoint3D endPointB = new FramePoint3D();
 
@@ -104,6 +110,9 @@ public class TouchDownState extends AbstractFootControlState
 
       double controlDT = controllerToolbox.getControlDT();
       double rhoWeight = momentumOptimizationSettings.getRhoWeight();
+      
+      lineContactActivationMethod = new YoEnum<>("lineContactActivationMethod", registry, LineContactActivationMethod.class);
+      lineContactActivationMethod.set(LineContactActivationMethod.FOOT_ORIENTATION);
       
       footContactRhoRamper = new ContactStateRhoRamping(robotSide, contactState, rhoWeight, controlDT, registry);
       orientationTrajectory = new HermiteCurveBasedOrientationTrajectoryGenerator(namePrefix + "OrientationTrajectory", worldFrame, registry);
@@ -155,6 +164,11 @@ public class TouchDownState extends AbstractFootControlState
       orientationTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
    }
+   
+   public void setTouchdownDuration(double touchdownDuration)
+   {
+      desiredTouchdownDuration.set(touchdownDuration);
+   }
 
    /**
     * This assumes flat ground! sets the final desired foot pose to assume flat ground and uses the foot's current desired yaw.
@@ -199,7 +213,7 @@ public class TouchDownState extends AbstractFootControlState
    public void doTransitionIntoAction()
    {
       super.doTransitionIntoAction();
-
+      
       enableLineContactAndSetTheGroundContactFrame(contactPointPosition, groundContactFrame);
       footContactRhoRamper.initialize(desiredTouchdownDuration.getDoubleValue());
 
@@ -229,27 +243,42 @@ public class TouchDownState extends AbstractFootControlState
     */
    private void enableLineContactAndSetTheGroundContactFrame(FramePoint3D contactPointPositionToPack, TranslationReferenceFrame groundContactFrameToUpdate)
    {
-      //TODO: create option to use expected contact points from footstep or look into orientation of foot assuming flat ground
-      updateContactStateForLineContactBasedOnSensedCoP(contactState, contactPoints, contactLine);
+      //choose a way to sort the contacts
+      Comparator<YoContactPoint> contactPointComparator = zHeightDistanceComparator;
+      if(lineContactActivationMethod.getEnumValue() == LineContactActivationMethod.SENSED_COP)
+      {
+         contactPointComparator = getComparatorBasedOnCoPPosition();
+      }
+      
+      updateUsingLineContact(contactState, contactPoints, contactLine, contactPointComparator);
       MovingReferenceFrame footFixedFrame = contactableFoot.getRigidBody().getBodyFixedFrame();
       contactLine.changeFrame(footFixedFrame);
       contactPointPositionToPack.setToNaN(footFixedFrame);
       contactLine.getMidpoint(contactPointPositionToPack);
       groundContactFrameToUpdate.updateTranslation(contactPointPositionToPack);
    }
-
+   
    /**
-    * Extracts a line contact based on the distance from the sensed CoP and activates the contacts
+    * updates and returns the {@link copDistanceComparator} with sensed Center of Pressure.
+    * @return
+    */
+   private Comparator<YoContactPoint> getComparatorBasedOnCoPPosition()
+   {
+      footSwitch.computeAndPackCoP(sensedCoP);
+      sensedCoP.changeFrame(soleFrame);
+      copDistanceComparator.setCoP(sensedCoP);
+      return copDistanceComparator;
+   }
+   
+   /**
+    * extracts a line contact by sorting the contact points based on the {@link contactPointComparator} and uses the first 2 in the list
     * @param contactState used to update the in contact state after enabled the contact points
     * @param contactPoints used to find the closest contact points from the sensed CoP
     * @param contactLineToPack the line contact found 
     */
-   private void updateContactStateForLineContactBasedOnSensedCoP(YoPlaneContactState contactState, List<YoContactPoint> contactPoints, FrameLineSegment contactLineToPack)
+   private void updateUsingLineContact(YoPlaneContactState contactState, List<YoContactPoint> contactPoints, FrameLineSegment contactLineToPack, Comparator<YoContactPoint> contactPointComparator)
    {
-      footSwitch.computeAndPackCoP(sensedCoP);
-      sensedCoP.changeFrame(soleFrame);
-      comparator.setCoP(sensedCoP);
-      ListSorter.sort(contactPoints, comparator);
+      ListSorter.sort(contactPoints, contactPointComparator);
 
       YoContactPoint yoContactPointA = contactPoints.get(0);
       yoContactPointA.setInContact(true);
@@ -289,7 +318,6 @@ public class TouchDownState extends AbstractFootControlState
    @Override
    public boolean isDone()
    {
-      //TODO: set done if icp error is large
       return getTimeInCurrentState() > desiredTouchdownDuration.getDoubleValue();
    }
 
@@ -325,8 +353,27 @@ public class TouchDownState extends AbstractFootControlState
       }
    }
 
-   public void setTouchdownDuration(double touchdownDuration)
+   /**
+    * Compares YoContactPoints Z heights, This assumes the foot is hitting flat ground. 
+    */
+   private class YoContactLowestPointDistanceComparator implements Comparator<YoContactPoint>
    {
-      desiredTouchdownDuration.set(touchdownDuration);
+      private final FramePoint3D cp1 = new FramePoint3D();
+      private final FramePoint3D cp2 = new FramePoint3D();
+      
+      public int compare(YoContactPoint o1, YoContactPoint o2)
+      {
+         o1.getPosition(cp1);
+         o2.getPosition(cp2);
+         
+         cp1.changeFrame(worldFrame);
+         cp2.changeFrame(worldFrame);
+         
+         if (cp1.getZ() < cp2.getZ())
+            return -1;
+         if (cp1.getZ() > cp2.getZ())
+            return 1;
+         return 0;
+      }
    }
 }
