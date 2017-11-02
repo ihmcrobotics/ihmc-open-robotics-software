@@ -8,7 +8,7 @@ import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.PinJoint;
 
-public enum ValkyrieFingerJoint implements HandJointName
+public enum ValkyrieHandJointName implements HandJointName
 {
    ThumbRoll,
    ThumbPitch1,
@@ -24,9 +24,9 @@ public enum ValkyrieFingerJoint implements HandJointName
    PinkyPitch2,
    PinkyPitch3;
 
-   public static final ValkyrieFingerJoint[] values = ValkyrieFingerJoint.values();
-   public static final ValkyrieFingerJoint[] controllableJoints = {ThumbRoll, ThumbPitch1, ThumbPitch2, IndexFingerPitch1, MiddleFingerPitch1, PinkyPitch1};
-   public static final ValkyrieFingerJoint[] passiveJoints = {ThumbPitch3, IndexFingerPitch2, IndexFingerPitch3, MiddleFingerPitch2, MiddleFingerPitch3,
+   public static final ValkyrieHandJointName[] values = ValkyrieHandJointName.values();
+   public static final ValkyrieHandJointName[] controllableJoints = {ThumbRoll, ThumbPitch1, ThumbPitch2, IndexFingerPitch1, MiddleFingerPitch1, PinkyPitch1};
+   public static final ValkyrieHandJointName[] passiveJoints = {ThumbPitch3, IndexFingerPitch2, IndexFingerPitch3, MiddleFingerPitch2, MiddleFingerPitch3,
          PinkyPitch2, PinkyPitch3};
 
    @Override
@@ -80,7 +80,7 @@ public enum ValkyrieFingerJoint implements HandJointName
    public static int getNumberOfFingerJoints(FingerName fingerName)
    {
       int numberOfFingerJoints = 0;
-      for (ValkyrieFingerJoint joint : values)
+      for (ValkyrieHandJointName joint : values)
       {
          if (joint.getFingerName() == fingerName)
             numberOfFingerJoints++;
@@ -95,7 +95,7 @@ public enum ValkyrieFingerJoint implements HandJointName
    }
 
    @Override
-   public ValkyrieFingerJoint[] getValues()
+   public ValkyrieHandJointName[] getValues()
    {
       return values;
    }

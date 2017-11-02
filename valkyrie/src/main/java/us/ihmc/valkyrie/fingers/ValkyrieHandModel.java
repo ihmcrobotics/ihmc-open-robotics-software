@@ -5,8 +5,8 @@ import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 public class ValkyrieHandModel implements HandModel
 {
    @Override
-   public ValkyrieFingerJoint[] getHandJointNames()
+   public ValkyrieHandJointName[] getHandJointNames()
    {
-      return ValkyrieFingerJoint.values;
+      return ValkyrieHandJointName.values;
    }
 }

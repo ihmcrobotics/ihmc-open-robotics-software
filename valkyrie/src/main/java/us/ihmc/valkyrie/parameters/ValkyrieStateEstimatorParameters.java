@@ -6,7 +6,7 @@ import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorT
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_POSITION;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_TAU;
 import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_VELOCITY;
-import static us.ihmc.valkyrie.fingers.ValkyrieFingerJoint.*;
+import static us.ihmc.valkyrie.fingers.ValkyrieHandJointName.*;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -27,7 +27,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.valkyrie.fingers.ValkyrieFingerJoint;
+import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
 
 public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 {
@@ -182,15 +182,15 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
 
       {
-         SideDependentList<EnumMap<ValkyrieFingerJoint, YoDouble>> sideDependentScales = SideDependentList.createListOfEnumMaps(ValkyrieFingerJoint.class);
-         SideDependentList<EnumMap<ValkyrieFingerJoint, YoDouble>> sideDependentBiases = SideDependentList.createListOfEnumMaps(ValkyrieFingerJoint.class);
+         SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> sideDependentScales = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
+         SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> sideDependentBiases = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            EnumMap<ValkyrieFingerJoint, YoDouble> scales = sideDependentScales.get(robotSide);
-            EnumMap<ValkyrieFingerJoint, YoDouble> biases = sideDependentBiases.get(robotSide);
+            EnumMap<ValkyrieHandJointName, YoDouble> scales = sideDependentScales.get(robotSide);
+            EnumMap<ValkyrieHandJointName, YoDouble> biases = sideDependentBiases.get(robotSide);
 
-            for (ValkyrieFingerJoint fingerJoint : ValkyrieFingerJoint.values)
+            for (ValkyrieHandJointName fingerJoint : ValkyrieHandJointName.values)
             {
                YoDouble scale = new YoDouble("scale" + fingerJoint.getPascalCaseJointName(robotSide), registry);
                YoDouble bias = new YoDouble("bias" + fingerJoint.getPascalCaseJointName(robotSide), registry);
@@ -237,8 +237,8 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
          for (RobotSide robotSide : RobotSide.values)
          {
             { // Doing the thumb separately
-               ValkyrieFingerJoint[] thumbBaseJoints = {ThumbRoll, ThumbPitch1, ThumbPitch2};
-               for (ValkyrieFingerJoint joint : thumbBaseJoints)
+               ValkyrieHandJointName[] thumbBaseJoints = {ThumbRoll, ThumbPitch1, ThumbPitch2};
+               for (ValkyrieHandJointName joint : thumbBaseJoints)
                {
                   YoDouble scale = sideDependentScales.get(robotSide).get(joint);
                   YoDouble bias = sideDependentBiases.get(robotSide).get(joint);
@@ -246,7 +246,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
                   sensorProcessing.addJointPositionAffineTransformOnlyForSpecifiedJoints(scale, bias, false, jointName);
                }
                {
-                  ValkyrieFingerJoint slaveJoint = ThumbPitch3;
+                  ValkyrieHandJointName slaveJoint = ThumbPitch3;
                   YoDouble scale = sideDependentScales.get(robotSide).get(slaveJoint);
                   YoDouble bias = sideDependentBiases.get(robotSide).get(slaveJoint);
                   String masterJointName = ThumbPitch2.getCamelCaseJointName(robotSide);
@@ -255,11 +255,11 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
                }
             }
             
-            ValkyrieFingerJoint[] masterJoints = {IndexFingerPitch1, MiddleFingerPitch1, PinkyPitch1};
-            ValkyrieFingerJoint[] slaveJoints2 = {IndexFingerPitch2, MiddleFingerPitch2, PinkyPitch2};
-            ValkyrieFingerJoint[] slaveJoints3 = {IndexFingerPitch3, MiddleFingerPitch3, PinkyPitch3};
+            ValkyrieHandJointName[] masterJoints = {IndexFingerPitch1, MiddleFingerPitch1, PinkyPitch1};
+            ValkyrieHandJointName[] slaveJoints2 = {IndexFingerPitch2, MiddleFingerPitch2, PinkyPitch2};
+            ValkyrieHandJointName[] slaveJoints3 = {IndexFingerPitch3, MiddleFingerPitch3, PinkyPitch3};
 
-            for (ValkyrieFingerJoint joint : masterJoints)
+            for (ValkyrieHandJointName joint : masterJoints)
             {
                YoDouble scale = sideDependentScales.get(robotSide).get(joint);
                YoDouble bias = sideDependentBiases.get(robotSide).get(joint);
@@ -269,10 +269,10 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 
             for (int i = 0; i < 3; i++)
             {
-               ValkyrieFingerJoint masterJoint = masterJoints[i];
+               ValkyrieHandJointName masterJoint = masterJoints[i];
 
                {
-                  ValkyrieFingerJoint slaveJoint = slaveJoints2[i];
+                  ValkyrieHandJointName slaveJoint = slaveJoints2[i];
                   YoDouble scale = sideDependentScales.get(robotSide).get(slaveJoint);
                   YoDouble bias = sideDependentBiases.get(robotSide).get(slaveJoint);
                   String masterJointName = masterJoint.getCamelCaseJointName(robotSide);
@@ -281,7 +281,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
                }
 
                {
-                  ValkyrieFingerJoint slaveJoint = slaveJoints3[i];
+                  ValkyrieHandJointName slaveJoint = slaveJoints3[i];
                   YoDouble scale = sideDependentScales.get(robotSide).get(slaveJoint);
                   YoDouble bias = sideDependentBiases.get(robotSide).get(slaveJoint);
                   String masterJointName = masterJoint.getCamelCaseJointName(robotSide);

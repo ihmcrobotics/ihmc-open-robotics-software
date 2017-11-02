@@ -6,7 +6,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAngl
 import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
-import us.ihmc.valkyrie.fingers.ValkyrieFingerJoint;
+import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
 
 public class ValkyrieFingerStateCommunicator
@@ -28,9 +28,9 @@ public class ValkyrieFingerStateCommunicator
       @Override
       public HandJointAnglePacket newInstance()
       {
-         double[] indexJoints = new double[ValkyrieFingerJoint.getNumberOfFingerJoints(FingerName.INDEX)];
-         double[] middleJoints = new double[ValkyrieFingerJoint.getNumberOfFingerJoints(FingerName.MIDDLE)];
-         double[] thumbJoints = new double[ValkyrieFingerJoint.getNumberOfFingerJoints(FingerName.THUMB)];
+         double[] indexJoints = new double[ValkyrieHandJointName.getNumberOfFingerJoints(FingerName.INDEX)];
+         double[] middleJoints = new double[ValkyrieHandJointName.getNumberOfFingerJoints(FingerName.MIDDLE)];
+         double[] thumbJoints = new double[ValkyrieHandJointName.getNumberOfFingerJoints(FingerName.THUMB)];
          return new HandJointAnglePacket(null, false, false, indexJoints, middleJoints, thumbJoints);
       }
    }
