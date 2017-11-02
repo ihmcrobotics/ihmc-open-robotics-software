@@ -24,6 +24,9 @@ public enum ValkyrieFingerJoint
    PinkyPitch3;
 
    public static final ValkyrieFingerJoint[] values = ValkyrieFingerJoint.values();
+   public static final ValkyrieFingerJoint[] controllableJoints = {ThumbRoll, ThumbPitch1, ThumbPitch2, IndexFingerPitch1, MiddleFingerPitch1, PinkyPitch1};
+   public static final ValkyrieFingerJoint[] passiveJoints = {ThumbPitch3, IndexFingerPitch2, IndexFingerPitch3, MiddleFingerPitch2, MiddleFingerPitch3,
+         PinkyPitch2, PinkyPitch3};
 
    public String getJointName(RobotSide robotSide)
    {
