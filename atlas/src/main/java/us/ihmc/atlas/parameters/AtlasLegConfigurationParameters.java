@@ -43,6 +43,13 @@ public class AtlasLegConfigurationParameters extends LegConfigurationParameters
 
    @Override
    /** {@inheritDoc} */
+   public double getLegPrivilegedLowWeight()
+   {
+      return runningOnRealRobot ? 5.0 : 10.0;
+   }
+
+   @Override
+   /** {@inheritDoc} */
    public double getLegPrivilegedHighWeight()
    {
       return runningOnRealRobot ? 50.0 : 150.0;
