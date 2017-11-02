@@ -64,8 +64,8 @@ public class SmoothCMPBasedICPPlannerTest
    private final static double spatialEpsilonForPlanningConsistency = 0.010; // m 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final boolean visualize = false;
-   private static final boolean keepSCSUp = false;
+   private static final boolean visualize = true;
+   private static final boolean keepSCSUp = true;
    private static final boolean testAssertions = !keepSCSUp && true;
 
    // Simulation parameters
@@ -364,7 +364,7 @@ public class SmoothCMPBasedICPPlannerTest
       simulate(false, true, true);
    }
 
-   @Test(timeout = 30000)
+   @Test//(timeout = 30000)
    public void testForPlanningConsistencyWithAngularMomentum()
    {
       boolean isAMOn = true;
