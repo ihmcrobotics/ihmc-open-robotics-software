@@ -107,6 +107,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       motionLimitLine.setToNaN();
       adjustmentLineSegment.setToNaN();
       solver.resetReachabilityConstraint();
+      solver.resetPlanarRegionConstraint();
    }
 
    public void initializeReachabilityConstraintForSingleSupport(RobotSide supportSide, ICPQPOptimizationSolver solver)
@@ -133,6 +134,7 @@ public class ICPOptimizationReachabilityConstraintHandler
       FrameConvexPolygon2d polygon2d = contractedReachabilityPolygon.getFrameConvexPolygon2d();
       polygon2d.update();
       solver.addReachabilityPolygon(polygon2d);
+      solver.resetPlanarRegionConstraint();
    }
 
    private final FramePoint2D adjustedLocation = new FramePoint2D();
