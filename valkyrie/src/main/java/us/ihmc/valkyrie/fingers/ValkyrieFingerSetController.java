@@ -45,11 +45,11 @@ public class ValkyrieFingerSetController implements RobotController
    private final YoDouble startTrajectoryTime, currentTrajectoryTime, endTrajectoryTime, trajectoryTime;
    private final YoBoolean hasTrajectoryTimeChanged, isStopped;
 
-   private final LinkedHashMap<ValkyrieRealRobotFingerJoint, YoDouble> initialDesiredAngles = new LinkedHashMap<>();
-   private final LinkedHashMap<ValkyrieRealRobotFingerJoint, YoDouble> finalDesiredAngles = new LinkedHashMap<>();
-   private final LinkedHashMap<ValkyrieRealRobotFingerJoint, YoDouble> desiredAngles = new LinkedHashMap<>();
+   private final LinkedHashMap<ValkyrieFingerJoint, YoDouble> initialDesiredAngles = new LinkedHashMap<>();
+   private final LinkedHashMap<ValkyrieFingerJoint, YoDouble> finalDesiredAngles = new LinkedHashMap<>();
+   private final LinkedHashMap<ValkyrieFingerJoint, YoDouble> desiredAngles = new LinkedHashMap<>();
 
-   private final EnumMap<ValkyrieRealRobotFingerJoint, YoDouble> realRobotControlVariables = new EnumMap<>(ValkyrieRealRobotFingerJoint.class);
+   private final EnumMap<ValkyrieFingerJoint, YoDouble> realRobotControlVariables = new EnumMap<>(ValkyrieFingerJoint.class);
    private final EnumMap<ValkyrieFingerJoint, RevoluteJoint> revoluteJointMap = new EnumMap<>(ValkyrieFingerJoint.class);
    private final EnumMap<ValkyrieFingerJoint, JointDesiredOutput> desiredOutputMap = new EnumMap<>(ValkyrieFingerJoint.class);
 
@@ -98,7 +98,7 @@ public class ValkyrieFingerSetController implements RobotController
 
    private void mapJointsAndVariables(FullRobotModel fullRobotModel, LowLevelOneDoFJointDesiredDataHolderList lowLevelDesiredJointData)
    {
-      for (ValkyrieRealRobotFingerJoint jointEnum : ValkyrieRealRobotFingerJoint.values)
+      for (ValkyrieFingerJoint jointEnum : ValkyrieFingerJoint.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          YoDouble initialDesiredAngle = new YoDouble("q_d_initial_" + sidePrefix + jointEnum, registry);
@@ -120,9 +120,9 @@ public class ValkyrieFingerSetController implements RobotController
 
       if (runningOnRealRobot)
       {
-         for (ValkyrieRealRobotFingerJoint realRobotFingerJointEnum : ValkyrieRealRobotFingerJoint.values)
+         for (ValkyrieFingerJoint realRobotFingerJointEnum : ValkyrieFingerJoint.values)
          {
-            realRobotControlVariables.put(realRobotFingerJointEnum, realRobotFingerJointEnum.getRelatedControlVariable(robotSide, controllerRegistry));
+//            realRobotControlVariables.put(realRobotFingerJointEnum, realRobotFingerJointEnum.getRelatedControlVariable(robotSide, controllerRegistry));
          }
       }
    }
@@ -243,15 +243,15 @@ public class ValkyrieFingerSetController implements RobotController
    {
       isStopped.set(false);
 
-      for (ValkyrieRealRobotFingerJoint controllableJoint : ValkyrieRealRobotFingerJoint.values)
+      for (ValkyrieFingerJoint controllableJoint : ValkyrieFingerJoint.values)
       {
          finalDesiredAngles.get(controllableJoint).set(0.0);
       }
    }
 
-   private void computeAllFinalDesiredAngles(double percent, EnumMap<ValkyrieRealRobotFingerJoint, Double> desiredDefinition)
+   private void computeAllFinalDesiredAngles(double percent, EnumMap<ValkyrieFingerJoint, Double> desiredDefinition)
    {
-      for (ValkyrieRealRobotFingerJoint controllableJoint : ValkyrieRealRobotFingerJoint.values)
+      for (ValkyrieFingerJoint controllableJoint : ValkyrieFingerJoint.values)
       {
          double qDesired = percent * desiredDefinition.get(controllableJoint);
          finalDesiredAngles.get(controllableJoint).set(qDesired);
@@ -267,13 +267,13 @@ public class ValkyrieFingerSetController implements RobotController
    {
       if (runningOnRealRobot)
       {
-         for (ValkyrieRealRobotFingerJoint controllableJoint : ValkyrieRealRobotFingerJoint.values)
+         for (ValkyrieFingerJoint controllableJoint : ValkyrieFingerJoint.values)
          {
             realRobotControlVariables.get(controllableJoint).set(desiredAngles.get(controllableJoint).getDoubleValue());
          }
       }
 
-      for (ValkyrieRealRobotFingerJoint controllableJoint : ValkyrieRealRobotFingerJoint.values)
+      for (ValkyrieFingerJoint controllableJoint : ValkyrieFingerJoint.values)
       {
          double desiredValue = desiredAngles.get(controllableJoint).getDoubleValue();
 
@@ -286,22 +286,22 @@ public class ValkyrieFingerSetController implements RobotController
          case ThumbRoll:
             desiredOutputMap.get(ValkyrieFingerJoint.ThumbRoll).setDesiredPosition(desiredValue);
             break;
-         case Thumb:
+         case ThumbPitch1:
             desiredOutputMap.get(ValkyrieFingerJoint.ThumbPitch1).setDesiredPosition(desiredValue / 3.0);
             desiredOutputMap.get(ValkyrieFingerJoint.ThumbPitch2).setDesiredPosition(desiredValue / 3.0);
             desiredOutputMap.get(ValkyrieFingerJoint.ThumbPitch3).setDesiredPosition(desiredValue / 3.0);
             break;
-         case Index:
+         case IndexFingerPitch1:
             desiredOutputMap.get(ValkyrieFingerJoint.IndexFingerPitch1).setDesiredPosition(desiredValue / 3.0);
             desiredOutputMap.get(ValkyrieFingerJoint.IndexFingerPitch2).setDesiredPosition(desiredValue / 3.0);
             desiredOutputMap.get(ValkyrieFingerJoint.IndexFingerPitch3).setDesiredPosition(desiredValue / 3.0);
             break;
-         case Middle:
+         case MiddleFingerPitch1:
             desiredOutputMap.get(ValkyrieFingerJoint.MiddleFingerPitch1).setDesiredPosition(desiredValue / 3.0);
             desiredOutputMap.get(ValkyrieFingerJoint.MiddleFingerPitch2).setDesiredPosition(desiredValue / 3.0);
             desiredOutputMap.get(ValkyrieFingerJoint.MiddleFingerPitch3).setDesiredPosition(desiredValue / 3.0);
             break;
-         case Pinky:
+         case PinkyPitch1:
             desiredOutputMap.get(ValkyrieFingerJoint.PinkyPitch1).setDesiredPosition(desiredValue / 3.0);
             desiredOutputMap.get(ValkyrieFingerJoint.PinkyPitch2).setDesiredPosition(desiredValue / 3.0);
             desiredOutputMap.get(ValkyrieFingerJoint.PinkyPitch3).setDesiredPosition(desiredValue / 3.0);
@@ -312,7 +312,7 @@ public class ValkyrieFingerSetController implements RobotController
 
    private void initializeTrajectory()
    {
-      for (ValkyrieRealRobotFingerJoint controllableJoint : ValkyrieRealRobotFingerJoint.values)
+      for (ValkyrieFingerJoint controllableJoint : ValkyrieFingerJoint.values)
       {
          initialDesiredAngles.get(controllableJoint).set(desiredAngles.get(controllableJoint).getDoubleValue());
       }
@@ -338,7 +338,7 @@ public class ValkyrieFingerSetController implements RobotController
       yoPolynomial.compute(currentTrajectoryTime.getDoubleValue());
       double alpha = MathTools.clamp(yoPolynomial.getPosition(), 0.0, 1.0);
 
-      for (ValkyrieRealRobotFingerJoint controllableJoint : ValkyrieRealRobotFingerJoint.values)
+      for (ValkyrieFingerJoint controllableJoint : ValkyrieFingerJoint.values)
       {
          double q_d_initial = initialDesiredAngles.get(controllableJoint).getDoubleValue();
          double q_d_final = finalDesiredAngles.get(controllableJoint).getDoubleValue();

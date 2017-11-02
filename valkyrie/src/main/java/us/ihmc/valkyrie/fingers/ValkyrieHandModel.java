@@ -13,7 +13,8 @@ public class ValkyrieHandModel implements HandModel
    {
       for (int i = 0; i < ValkyrieFingerJoint.values.length; i++)
       {
-         final int finalIndex = i;
+         ValkyrieFingerJoint jointName = ValkyrieFingerJoint.values[i];
+         
          handJointNames[i] = new HandJointName()
          {
             @Override
@@ -25,19 +26,19 @@ public class ValkyrieHandModel implements HandModel
             @Override
             public String getJointName(RobotSide robotSide)
             {
-               return ValkyrieFingerJoint.values[finalIndex].getJointName(robotSide);
+               return jointName.getJointName(robotSide);
             }
 
             @Override
             public int getHandJointAngleIndex()
             {
-               return finalIndex;
+               return jointName.ordinal();
             }
 
             @Override
             public FingerName getFinger(RobotSide robotSide)
             {
-               return FingerName.INDEX;
+               return jointName.getFingerName();
             }
          };
       }

@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.fingers;
 
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -39,6 +40,32 @@ public enum ValkyrieFingerJoint
       return side.getPascalCaseName() + name();
    }
 
+   public FingerName getFingerName()
+   {
+      switch (this)
+      {
+      case ThumbRoll:
+      case ThumbPitch1:
+      case ThumbPitch2:
+      case ThumbPitch3:
+         return FingerName.THUMB;
+      case IndexFingerPitch1:
+      case IndexFingerPitch2:
+      case IndexFingerPitch3:
+         return FingerName.INDEX;
+      case MiddleFingerPitch1:
+      case MiddleFingerPitch2:
+      case MiddleFingerPitch3:
+         return FingerName.MIDDLE;
+      case PinkyPitch1:
+      case PinkyPitch2:
+      case PinkyPitch3:
+         return FingerName.PINKY;
+      default:
+         throw new RuntimeException("Unexpected " + getClass().getSimpleName() + " value: " + this);
+      }
+   }
+
    public RevoluteJoint getRelatedRevoluteJoint(RobotSide robotSide, FullRobotModel fullRobotModel)
    {
       return (RevoluteJoint) fullRobotModel.getOneDoFJointByName(getJointName(robotSide));
@@ -47,32 +74,5 @@ public enum ValkyrieFingerJoint
    public PinJoint getRelatedPinJoint(RobotSide robotSide, FloatingRootJointRobot sdfRobot)
    {
       return (PinJoint) sdfRobot.getOneDegreeOfFreedomJoint(getJointName(robotSide));
-   }
-
-   public ValkyrieRealRobotFingerJoint getRelatedRealFingerJoint()
-   {
-      switch (this)
-      {
-      case ThumbRoll:
-         return ValkyrieRealRobotFingerJoint.ThumbRoll;
-      case ThumbPitch1:
-      case ThumbPitch2:
-      case ThumbPitch3:
-         return ValkyrieRealRobotFingerJoint.Thumb;
-      case IndexFingerPitch1:
-      case IndexFingerPitch2:
-      case IndexFingerPitch3:
-         return ValkyrieRealRobotFingerJoint.Index;
-      case MiddleFingerPitch1:
-      case MiddleFingerPitch2:
-      case MiddleFingerPitch3:
-         return ValkyrieRealRobotFingerJoint.Middle;
-      case PinkyPitch1:
-      case PinkyPitch2:
-      case PinkyPitch3:
-         return ValkyrieRealRobotFingerJoint.Pinky;
-      default:
-         return null;
-      }
    }
 }

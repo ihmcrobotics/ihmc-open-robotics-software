@@ -151,13 +151,13 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
                output.setStiffness(kpMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
                output.setDamping(kdMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
 
-               double fullyExtensonPositionLimit = ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(robotSide, simulatedFingerJoint.getRelatedRealFingerJoint());
-               double fullyFlexedPositionLimit = ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(robotSide, simulatedFingerJoint.getRelatedRealFingerJoint());
-
-               if (fullyExtensonPositionLimit <= fullyFlexedPositionLimit)
-                  relatedPinJoint.setLimitStops(fullyExtensonPositionLimit - 0.1, fullyFlexedPositionLimit + 0.1, 10.0, 2.5);
-               else
-                  relatedPinJoint.setLimitStops(fullyFlexedPositionLimit - 0.1, fullyExtensonPositionLimit + 0.1, 10.0, 2.5);
+//               double fullyExtensonPositionLimit = ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(robotSide, simulatedFingerJoint.getRelatedRealFingerJoint());
+//               double fullyFlexedPositionLimit = ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(robotSide, simulatedFingerJoint.getRelatedRealFingerJoint());
+//
+//               if (fullyExtensonPositionLimit <= fullyFlexedPositionLimit)
+//                  relatedPinJoint.setLimitStops(fullyExtensonPositionLimit - 0.1, fullyFlexedPositionLimit + 0.1, 10.0, 2.5);
+//               else
+//                  relatedPinJoint.setLimitStops(fullyFlexedPositionLimit - 0.1, fullyExtensonPositionLimit + 0.1, 10.0, 2.5);
             }
          }
       }
