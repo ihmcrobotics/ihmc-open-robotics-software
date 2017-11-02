@@ -14,15 +14,13 @@ public interface HandJointName
    public FingerName getFinger(RobotSide robotSide);
 
    /**
-    * Retrieves the position index of this joint on the finger.
-    * <p>
-    * For instance, if the finger to which this joint belongs has 3 knuckles, the returned index
-    * should be contained in [0,3[.
-    * </p>
+    * Provides a side-dependent index for this joint that contained in [0, N[, where N is the number
+    * of hand joints.
     * 
-    * @return index of the joint on the finger.
+    * @param robotSide refers to which hand this joint belongs.
+    * @return the index associated with this joint.
     */
-   public int getHandJointAngleIndex();
+   public int getIndex(RobotSide robotSide);
 
    /**
     * Get the {@code HandJointName} for all the finger joints for one hand.
