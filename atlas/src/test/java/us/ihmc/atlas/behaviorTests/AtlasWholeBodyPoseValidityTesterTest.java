@@ -30,7 +30,7 @@ public class AtlasWholeBodyPoseValidityTesterTest extends WholeBodyPoseValidityT
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 90000)
    public void testACleaningMotion() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testACleaningMotion();

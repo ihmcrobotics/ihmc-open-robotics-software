@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -59,6 +60,7 @@ import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
@@ -74,7 +76,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private boolean isKinematicsToolboxVisualizerEnabled = false;
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private KinematicsToolboxModule kinematicsToolboxModule;
@@ -141,7 +143,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (visualize)
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
@@ -167,6 +169,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Before
@@ -223,9 +226,8 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
          motionTime = solarPanelPlanner.getMotionTime();
          drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);         
       }      
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
-      
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      Assert.assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime + 1.0));
 
       if(solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion) == true)
       {
@@ -233,7 +235,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
          motionTime = solarPanelPlanner.getMotionTime();
          drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
       }      
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
+      Assert.assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime));
       
       scs.addStaticLinkGraphics(getPrintCleaningPath(RRTNode1DTimeDomain.cleaningPath));
 
@@ -430,7 +432,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       PrintTools.info("behavior Out " );      
    }
    
-   @Test(timeout = 30000)
+   @Test(timeout = 200000)
    public void cleaningMotionStateMachineBehaviorTest() throws SimulationExceededMaximumTimeException, IOException
    {
       if(isKinematicsToolboxVisualizerEnabled)
@@ -451,7 +453,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       drcBehaviorTestHelper.dispatchBehavior(cleaningStateMachineBehavior);
       
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(150);
+      Assert.assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(150.0));
       
       PrintTools.info("behavior Out " );      
    }
