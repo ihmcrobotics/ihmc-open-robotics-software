@@ -28,7 +28,7 @@ public class YoEffortJointHandleHolder
 
       this.handle = handle;
       this.joint = joint;
-      this.desiredJointData = desiredJointData;
+      this.desiredJointData = desiredJointData != null ? desiredJointData : new JointDesiredOutput();
 
       this.tauMeasured = new YoDouble(name + "TauMeasured", registry);
       this.q = new YoDouble(name + "_q", registry);

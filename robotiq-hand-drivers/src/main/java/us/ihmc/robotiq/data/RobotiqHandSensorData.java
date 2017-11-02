@@ -1,17 +1,17 @@
 package us.ihmc.robotiq.data;
 
+import static us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal.*;
+
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandSensorData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.communication.RobotiqReadResponse;
 import us.ihmc.robotiq.communication.registers.FaultStatusRegister.gFLT;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gACT;
+import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 
 public class RobotiqHandSensorData implements HandSensorData
 {
-   private final double[][] jointAngles = new double[3][];
-   private final double[] indexFingerJointAngles = new double[4];
-   private final double[] middleFingerJointAngles = new double[4];
-   private final double[] thumbJointAngles = new double[3];
+   private final double[] jointAngles = new double[RobotiqHandJointNameMinimal.values.length];
    private final RobotiqReadResponse response = new RobotiqReadResponse();
 
    private boolean connected;
@@ -33,24 +33,21 @@ public class RobotiqHandSensorData implements HandSensorData
    }
    
    @Override
-   public double[][] getFingerJointAngles(RobotSide robotSide)
+   public double[] getFingerJointAngles(RobotSide robotSide)
    {
-      thumbJointAngles[0] = (response.getFingerAPosition().getRegisterValue() & 0xFF) * (25.0/72) * Math.PI / 0xFF; //62.5 degrees
-      thumbJointAngles[1] = (response.getFingerAPosition().getRegisterValue() & 0xFF) * (0.5) * Math.PI / 0xFF; //90 degrees
-      thumbJointAngles[2] = 0.0;
-      jointAngles[2] = thumbJointAngles;
+      jointAngles[FINGER_MIDDLE_JOINT_1.getIndex(robotSide)] = (response.getFingerAPosition().getRegisterValue() & 0xFF) * (25.0/72) * Math.PI / 0xFF; //62.5 degrees
+      jointAngles[FINGER_MIDDLE_JOINT_2.getIndex(robotSide)] = (response.getFingerAPosition().getRegisterValue() & 0xFF) * (0.5) * Math.PI / 0xFF; //90 degrees
+      jointAngles[FINGER_MIDDLE_JOINT_3.getIndex(robotSide)] = 0.0;
       
-      middleFingerJointAngles[0] = -((double)(response.getScissorPosition().getRegisterValue() & 0xFF) * (8.0/45) / 0xFF - (4.0/45)) * Math.PI; //32 degrees
-      middleFingerJointAngles[1] = (double)(response.getFingerBPosition().getRegisterValue() & 0xFF) * (25.0/72) * Math.PI / 0xFF; //62.5 degrees
-      middleFingerJointAngles[2] = (double)(response.getFingerBPosition().getRegisterValue() & 0xFF) * (0.5) * Math.PI / 0xFF; //90 degrees
-      middleFingerJointAngles[3] = 0.0;
-      jointAngles[robotSide.equals(RobotSide.LEFT) ? 1 : 0] = middleFingerJointAngles;
+      jointAngles[PALM_FINGER_1_JOINT.getIndex(robotSide)] = -((double)(response.getScissorPosition().getRegisterValue() & 0xFF) * (8.0/45) / 0xFF - (4.0/45)) * Math.PI; //32 degrees
+      jointAngles[FINGER_1_JOINT_1.getIndex(robotSide)]    =   (double)(response.getFingerBPosition().getRegisterValue() & 0xFF) * (25.0/72) * Math.PI / 0xFF; //62.5 degrees
+      jointAngles[FINGER_1_JOINT_2.getIndex(robotSide)]    =   (double)(response.getFingerBPosition().getRegisterValue() & 0xFF) * (0.5) * Math.PI / 0xFF; //90 degrees
+      jointAngles[FINGER_1_JOINT_3.getIndex(robotSide)]    = 0.0;
       
-      indexFingerJointAngles[0] = ((double)(response.getScissorPosition().getRegisterValue() & 0xFF) * (8.0/45) / 0xFF - (4.0/45)) * Math.PI; //32 degrees
-      indexFingerJointAngles[1] = (double)(response.getFingerCPosition().getRegisterValue() & 0xFF) * (25.0/72) * Math.PI / 0xFF; //62.5 degrees
-      indexFingerJointAngles[2] = (double)(response.getFingerCPosition().getRegisterValue() & 0xFF) * (0.5) * Math.PI / 0xFF; //90 degrees
-      indexFingerJointAngles[3] = 0.0;
-      jointAngles[robotSide.equals(RobotSide.LEFT) ? 0 : 1] = indexFingerJointAngles;
+      jointAngles[PALM_FINGER_2_JOINT.getIndex(robotSide)] = ((double)(response.getScissorPosition().getRegisterValue() & 0xFF) * (8.0/45) / 0xFF - (4.0/45)) * Math.PI; //32 degrees
+      jointAngles[FINGER_2_JOINT_1.getIndex(robotSide)]    =  (double)(response.getFingerCPosition().getRegisterValue() & 0xFF) * (25.0/72) * Math.PI / 0xFF; //62.5 degrees
+      jointAngles[FINGER_2_JOINT_2.getIndex(robotSide)]    =  (double)(response.getFingerCPosition().getRegisterValue() & 0xFF) * (0.5) * Math.PI / 0xFF; //90 degrees
+      jointAngles[FINGER_2_JOINT_3.getIndex(robotSide)]    = 0.0;
       
       return jointAngles;
    }

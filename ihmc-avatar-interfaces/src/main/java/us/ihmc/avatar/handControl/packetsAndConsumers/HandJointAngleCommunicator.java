@@ -22,7 +22,7 @@ public class HandJointAngleCommunicator implements CloseableAndDisposable
    private final HumanoidGlobalDataProducer dataProducer;
 
    private final ConcurrentCopier<HandJointAnglePacket> packetCopier;
-   private double[][] fingers = new double[3][];
+   private double[] fingers;
    private final AtomicBoolean connected = new AtomicBoolean();
    private final AtomicBoolean calibrated = new AtomicBoolean();
    private final RobotSide side;
@@ -95,12 +95,17 @@ public class HandJointAngleCommunicator implements CloseableAndDisposable
 
    public void write()
    {
+      if (fingers == null)
+      {
+         return;
+      }
+
       HandJointAnglePacket packet = packetCopier.getCopyForWriting();
       if (packet == null)
       {
          return;
       }
-      packet.setAll(side, connected.get(), calibrated.get(), fingers[0], fingers[1], fingers[2]);
+      packet.setAll(side, connected.get(), calibrated.get(), fingers);
       packetCopier.commit();
    }
 

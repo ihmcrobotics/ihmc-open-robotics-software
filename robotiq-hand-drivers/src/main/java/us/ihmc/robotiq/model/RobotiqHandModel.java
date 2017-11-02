@@ -15,25 +15,35 @@ public class RobotiqHandModel implements HandModel
 
      public static final RobotiqHandJointNameMinimal[] values = RobotiqHandJointNameMinimal.values();
 
-      public int getHandJointAngleIndex()
+      @Override
+      public int getIndex(RobotSide robotSide)
       {
          switch (this)
          {
             case PALM_FINGER_1_JOINT:
-            case PALM_FINGER_2_JOINT:
-            case FINGER_MIDDLE_JOINT_1: //fixed
-               return 0;
+               return robotSide == RobotSide.LEFT ? 4 : 0;
             case FINGER_1_JOINT_1:
-            case FINGER_2_JOINT_1:
-            case FINGER_MIDDLE_JOINT_2:
-               return 1;
+               return robotSide == RobotSide.LEFT ? 5 : 1;
             case FINGER_1_JOINT_2:
-            case FINGER_2_JOINT_2:
-            case FINGER_MIDDLE_JOINT_3:
-               return 2;
+               return robotSide == RobotSide.LEFT ? 6 : 2;
             case FINGER_1_JOINT_3:
+               return robotSide == RobotSide.LEFT ? 7 : 3;
+               
+            case PALM_FINGER_2_JOINT:
+               return robotSide == RobotSide.LEFT ? 0 : 4;
+            case FINGER_2_JOINT_1:
+               return robotSide == RobotSide.LEFT ? 1 : 5;
+            case FINGER_2_JOINT_2:
+               return robotSide == RobotSide.LEFT ? 2 : 6;
             case FINGER_2_JOINT_3:
-               return 3;
+               return robotSide == RobotSide.LEFT ? 3 : 7;
+               
+            case FINGER_MIDDLE_JOINT_1:
+               return 8;
+            case FINGER_MIDDLE_JOINT_2:
+               return 9;
+            case FINGER_MIDDLE_JOINT_3:
+               return 10;
             default:
                return -1;
          }

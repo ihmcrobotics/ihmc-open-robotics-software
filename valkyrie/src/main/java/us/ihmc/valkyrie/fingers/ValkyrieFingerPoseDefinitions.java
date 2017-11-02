@@ -7,8 +7,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ValkyrieFingerPoseDefinitions
 {
-   private static final SideDependentList<EnumMap<ValkyrieRealRobotFingerJoint, Double>> openDesiredDefinitions = SideDependentList.createListOfEnumMaps(ValkyrieRealRobotFingerJoint.class);
-   private static final SideDependentList<EnumMap<ValkyrieRealRobotFingerJoint, Double>> closedDesiredDefinitions = SideDependentList.createListOfEnumMaps(ValkyrieRealRobotFingerJoint.class);
+   private static final SideDependentList<EnumMap<ValkyrieHandJointName, Double>> openDesiredDefinitions = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
+   private static final SideDependentList<EnumMap<ValkyrieHandJointName, Double>> closedDesiredDefinitions = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
    
    static
    {
@@ -20,13 +20,13 @@ public class ValkyrieFingerPoseDefinitions
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         EnumMap<ValkyrieRealRobotFingerJoint, Double> openDesiredDefinition = openDesiredDefinitions.get(robotSide);
+         EnumMap<ValkyrieHandJointName, Double> openDesiredDefinition = openDesiredDefinitions.get(robotSide);
          
-         openDesiredDefinition.put(ValkyrieRealRobotFingerJoint.ThumbRoll, 0.0);
-         openDesiredDefinition.put(ValkyrieRealRobotFingerJoint.Thumb, 0.0);
-         openDesiredDefinition.put(ValkyrieRealRobotFingerJoint.Index, 0.0);
-         openDesiredDefinition.put(ValkyrieRealRobotFingerJoint.Middle, 0.0);
-         openDesiredDefinition.put(ValkyrieRealRobotFingerJoint.Pinky, 0.0);
+         openDesiredDefinition.put(ValkyrieHandJointName.ThumbRoll, 0.0);
+         openDesiredDefinition.put(ValkyrieHandJointName.ThumbPitch1, 0.0);
+         openDesiredDefinition.put(ValkyrieHandJointName.IndexFingerPitch1, 0.0);
+         openDesiredDefinition.put(ValkyrieHandJointName.MiddleFingerPitch1, 0.0);
+         openDesiredDefinition.put(ValkyrieHandJointName.PinkyPitch1, 0.0);
       }
    }
    
@@ -34,23 +34,23 @@ public class ValkyrieFingerPoseDefinitions
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         EnumMap<ValkyrieRealRobotFingerJoint, Double> closedDesiredDefinition = closedDesiredDefinitions.get(robotSide);
+         EnumMap<ValkyrieHandJointName, Double> closedDesiredDefinition = closedDesiredDefinitions.get(robotSide);
          
-         closedDesiredDefinition.put(ValkyrieRealRobotFingerJoint.ThumbRoll, 0.0);
-//         closedDesiredDefinition.put(ValkyrieRealRobotFingerJoint.ThumbRoll, ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(robotSide, ValkyrieRealRobotFingerJoint.ThumbRoll));
-         closedDesiredDefinition.put(ValkyrieRealRobotFingerJoint.Thumb, ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(robotSide, ValkyrieRealRobotFingerJoint.Thumb) / 2.0);
-         closedDesiredDefinition.put(ValkyrieRealRobotFingerJoint.Index, ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(robotSide, ValkyrieRealRobotFingerJoint.Index));
-         closedDesiredDefinition.put(ValkyrieRealRobotFingerJoint.Middle, ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(robotSide, ValkyrieRealRobotFingerJoint.Middle));
-         closedDesiredDefinition.put(ValkyrieRealRobotFingerJoint.Pinky, ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(robotSide, ValkyrieRealRobotFingerJoint.Pinky));
+         closedDesiredDefinition.put(ValkyrieHandJointName.ThumbRoll, 0.0);
+//         closedDesiredDefinition.put(ValkyrieFingerJoint.ThumbRoll, ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(robotSide, ValkyrieFingerJoint.ThumbRoll));
+//         closedDesiredDefinition.put(ValkyrieRealRobotFingerJoint.Thumb, ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(robotSide, ValkyrieFingerJoint.Thumb) / 2.0);
+//         closedDesiredDefinition.put(ValkyrieRealRobotFingerJoint.Index, ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(robotSide, ValkyrieFingerJoint.Index));
+//         closedDesiredDefinition.put(ValkyrieRealRobotFingerJoint.Middle, ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(robotSide, ValkyrieRealRobotFingerJoint.Middle));
+//         closedDesiredDefinition.put(ValkyrieRealRobotFingerJoint.Pinky, ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(robotSide, ValkyrieRealRobotFingerJoint.Pinky));
       }
    }
    
-   public static EnumMap<ValkyrieRealRobotFingerJoint, Double> getOpenDesiredDefinition(RobotSide robotSide)
+   public static EnumMap<ValkyrieHandJointName, Double> getOpenDesiredDefinition(RobotSide robotSide)
    {
       return openDesiredDefinitions.get(robotSide);
    }
    
-   public static EnumMap<ValkyrieRealRobotFingerJoint, Double> getClosedDesiredDefinition(RobotSide robotSide)
+   public static EnumMap<ValkyrieHandJointName, Double> getClosedDesiredDefinition(RobotSide robotSide)
    {
       return closedDesiredDefinitions.get(robotSide);
    }
