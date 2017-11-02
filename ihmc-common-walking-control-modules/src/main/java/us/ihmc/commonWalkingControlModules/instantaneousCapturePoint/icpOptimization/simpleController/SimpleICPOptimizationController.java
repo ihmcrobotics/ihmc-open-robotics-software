@@ -353,7 +353,6 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
          upcomingFootsteps.get(footstepIndex).getPosition2d(tempPoint2d);
          upcomingFootstepLocations.get(footstepIndex).set(tempPoint2d);
       }
-
    }
 
    @Override
@@ -610,9 +609,11 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
          predictedEndOfStateICP.scale(Math.exp(omega0 * timeRemainingInState.getDoubleValue()));
          predictedEndOfStateICP.add(perfectCMP);
 
-         upcomingFootsteps.get(footstepIndex).getPosition2d(tempPoint2d);
+         Footstep upcomingFootstep = upcomingFootsteps.get(footstepIndex);
+         upcomingFootstep.getPosition2d(tempPoint2d);
          solver.setFootstepAdjustmentConditions(recursionMultiplier, scaledFootstepWeights.getX(), scaledFootstepWeights.getY(), footstepAdjustmentSafetyFactor,
                                                 tempPoint2d);
+         solver.setPlanarRegionConstraint(upcomingFootstep.getPlanarRegion());
       }
 
       if (useFootstepRegularization)
