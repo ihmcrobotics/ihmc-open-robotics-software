@@ -91,7 +91,28 @@ public enum ValkyrieHandJointName implements HandJointName
    @Override
    public int getHandJointAngleIndex()
    {
-      return ordinal();
+      switch (this)
+      {
+      case ThumbPitch1:
+      case IndexFingerPitch1:
+      case MiddleFingerPitch1:
+      case PinkyPitch1:
+         return 0;
+      case ThumbPitch2:
+      case IndexFingerPitch2:
+      case MiddleFingerPitch2:
+      case PinkyPitch2:
+         return 1;
+      case ThumbPitch3:
+      case IndexFingerPitch3:
+      case MiddleFingerPitch3:
+      case PinkyPitch3:
+         return 2;
+      case ThumbRoll:
+         return 3;
+      default:
+         throw new RuntimeException("Unexpected " + getClass().getSimpleName() + " value: " + this);
+      }
    }
 
    @Override
