@@ -44,6 +44,7 @@ public class FootstepTiming
    {
       this.swingTime = swingTime;
       this.transferTime = transferTime;
+      this.touchdownDuration = 0.0;
    }
    
    /**
