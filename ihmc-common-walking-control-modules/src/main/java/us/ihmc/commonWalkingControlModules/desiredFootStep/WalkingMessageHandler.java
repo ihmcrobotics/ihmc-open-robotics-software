@@ -357,13 +357,13 @@ public class WalkingMessageHandler
     * @param newSwingDuration is the new swing duration for the adjusted timing
     * @param newTransferDuration is the new transfer duration for the adjusted timing.
     */
-   public void adjustTimings(int stepIndex, double newSwingDuration, double newTransferDuration)
+   public void adjustTimings(int stepIndex, double newSwingDuration, double newTouchdownDuration, double newTransferDuration)
    {
       if (upcomingFootstepTimings.size() <= stepIndex)
       {
          throw new RuntimeException("Can not adjust timing of upciming step " + stepIndex + ", only have " + upcomingFootstepTimings.size() + " upcoming steps.");
       }
-      upcomingFootstepTimings.get(stepIndex).setTimings(newSwingDuration, newTransferDuration);
+      upcomingFootstepTimings.get(stepIndex).setTimings(newSwingDuration, newTouchdownDuration, newTransferDuration);
    }
 
    public FootTrajectoryCommand pollFootTrajectoryForFlamingoStance(RobotSide swingSide)
@@ -769,7 +769,8 @@ public class WalkingMessageHandler
 
       double lastSwingStart = firstTiming.getSwingStartTime();
       double lastSwingTime = firstTiming.getSwingTime();
-      firstTiming.setTimings(lastSwingTime, lastSwingStart);
+      double touchdownDuration = firstTiming.getTouchdownDuration();
+      firstTiming.setTimings(lastSwingTime, touchdownDuration, lastSwingStart);
 
       for (int footstepIdx = 1; footstepIdx < upcomingFootstepTimings.size(); footstepIdx++)
       {
@@ -777,7 +778,8 @@ public class WalkingMessageHandler
          double swingStart = timing.getSwingStartTime();
          double swingTime = timing.getSwingTime();
          double transferTime = swingStart - (lastSwingStart + lastSwingTime);
-         timing.setTimings(swingTime, transferTime);
+         touchdownDuration = timing.getTouchdownDuration();
+         timing.setTimings(swingTime, touchdownDuration, transferTime);
 
          lastSwingStart = swingStart;
          lastSwingTime = swingTime;
