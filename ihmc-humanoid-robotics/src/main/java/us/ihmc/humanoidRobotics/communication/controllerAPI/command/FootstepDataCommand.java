@@ -231,6 +231,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       return predictedContactPoints;
    }
 
+   public PlanarRegion getPlanarRegion()
+   {
+      return planarRegion;
+   }
+
    public double getSwingDuration()
    {
       return swingDuration;

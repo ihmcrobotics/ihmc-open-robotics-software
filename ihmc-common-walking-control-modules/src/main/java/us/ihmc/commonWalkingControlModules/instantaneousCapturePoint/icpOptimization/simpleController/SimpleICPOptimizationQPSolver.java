@@ -768,7 +768,7 @@ public class SimpleICPOptimizationQPSolver
     */
    private void addReachabilityConstraint()
    {
-      reachabilityConstraint.setDeltaInside(copSafeDistanceToEdge);
+      reachabilityConstraint.setDeltaInside(0.0);
       reachabilityConstraint.formulateConstraint();
 
       int constraintSize = reachabilityConstraint.getInequalityConstraintSize();
@@ -787,8 +787,8 @@ public class SimpleICPOptimizationQPSolver
     */
    private void addPlanarRegionConstraint()
    {
-      // todo formualte the distance inside
-      planarRegionConstraint.setDeltaInside(copSafeDistanceToEdge);
+      // todo formulate the distance inside
+      planarRegionConstraint.setDeltaInside(0.10);
       planarRegionConstraint.formulateConstraint();
 
       int constraintSize = planarRegionConstraint.getInequalityConstraintSize();
