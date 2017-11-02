@@ -29,7 +29,7 @@ public class AtlasEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraj
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 55.2)
-   @Test(timeout = 60000)
+   @Test(timeout = 70000)
    public void testHeightModeSwitchWhileWalking() throws Exception
    {
       super.testHeightModeSwitchWhileWalking();
@@ -61,7 +61,7 @@ public class AtlasEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraj
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 21.1)
-   @Test(timeout = 30000)
+   @Test(timeout = 40000)
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();
