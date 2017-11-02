@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.fingers;
 
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -7,7 +8,7 @@ import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.PinJoint;
 
-public enum ValkyrieFingerJoint
+public enum ValkyrieFingerJoint implements HandJointName
 {
    ThumbRoll,
    ThumbPitch1,
@@ -28,6 +29,7 @@ public enum ValkyrieFingerJoint
    public static final ValkyrieFingerJoint[] passiveJoints = {ThumbPitch3, IndexFingerPitch2, IndexFingerPitch3, MiddleFingerPitch2, MiddleFingerPitch3,
          PinkyPitch2, PinkyPitch3};
 
+   @Override
    public String getJointName(RobotSide robotSide)
    {
       return getCamelCaseJointName(robotSide);
@@ -41,6 +43,12 @@ public enum ValkyrieFingerJoint
    public String getPascalCaseJointName(RobotSide side)
    {
       return side.getPascalCaseName() + name();
+   }
+
+   @Override
+   public FingerName getFinger(RobotSide robotSide)
+   {
+      return getFingerName();
    }
 
    public FingerName getFingerName()
@@ -67,6 +75,18 @@ public enum ValkyrieFingerJoint
       default:
          throw new RuntimeException("Unexpected " + getClass().getSimpleName() + " value: " + this);
       }
+   }
+
+   @Override
+   public int getHandJointAngleIndex()
+   {
+      return ordinal();
+   }
+
+   @Override
+   public ValkyrieFingerJoint[] getValues()
+   {
+      return values;
    }
 
    public RevoluteJoint getRelatedRevoluteJoint(RobotSide robotSide, FullRobotModel fullRobotModel)
