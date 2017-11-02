@@ -77,6 +77,17 @@ public enum ValkyrieFingerJoint implements HandJointName
       }
    }
 
+   public static int getNumberOfFingerJoints(FingerName fingerName)
+   {
+      int numberOfFingerJoints = 0;
+      for (ValkyrieFingerJoint joint : values)
+      {
+         if (joint.getFingerName() == fingerName)
+            numberOfFingerJoints++;
+      }
+      return numberOfFingerJoints;
+   }
+
    @Override
    public int getHandJointAngleIndex()
    {
