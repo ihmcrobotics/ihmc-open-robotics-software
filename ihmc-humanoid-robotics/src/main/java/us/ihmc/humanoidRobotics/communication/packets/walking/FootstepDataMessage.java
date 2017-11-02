@@ -73,7 +73,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public double transferDuration = -1.0;
    @RosExportedField(documentation = "The touchdown duration is the time spent trying to do a soft touchdown."
          + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration. If the default is set to zero, the touchdown state will be disabled")
-   public double touchdownDuration = 0.0;
+   public double touchdownDuration = -1.0;
 
    /** the time to delay this command on the controller side before being executed **/
    public double executionDelayTime;
