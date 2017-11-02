@@ -43,9 +43,9 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
    private final YoBoolean sendFingerJointGains = new YoBoolean("sendFingerJointGains", registry);
    private final YoDouble fingerTrajectoryTime = new YoDouble("FingerTrajectoryTime", registry);
 
-   private final SideDependentList<LinkedHashMap<ValkyrieSimulatedFingerJoint, YoDouble>> kpMap = new SideDependentList<>();
-   private final SideDependentList<LinkedHashMap<ValkyrieSimulatedFingerJoint, YoDouble>> kdMap = new SideDependentList<>();
-   private final SideDependentList<LinkedHashMap<ValkyrieSimulatedFingerJoint, JointDesiredOutput>> outputs = new SideDependentList<>();
+   private final SideDependentList<LinkedHashMap<ValkyrieHandJointName, YoDouble>> kpMap = new SideDependentList<>();
+   private final SideDependentList<LinkedHashMap<ValkyrieHandJointName, YoDouble>> kdMap = new SideDependentList<>();
+   private final SideDependentList<LinkedHashMap<ValkyrieHandJointName, JointDesiredOutput>> outputs = new SideDependentList<>();
 
    private final long controlDTInNS;
    private final long estimatorDTInNS;
@@ -81,10 +81,10 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
       {
          if (!isRunningOnRealRobot)
          {
-            kpMap.put(robotSide, new LinkedHashMap<ValkyrieSimulatedFingerJoint, YoDouble>());
-            kdMap.put(robotSide, new LinkedHashMap<ValkyrieSimulatedFingerJoint, YoDouble>());
+            kpMap.put(robotSide, new LinkedHashMap<ValkyrieHandJointName, YoDouble>());
+            kdMap.put(robotSide, new LinkedHashMap<ValkyrieHandJointName, YoDouble>());
 
-            for (ValkyrieSimulatedFingerJoint simulatedFingerJoint : ValkyrieSimulatedFingerJoint.values)
+            for (ValkyrieHandJointName simulatedFingerJoint : ValkyrieHandJointName.values)
             {
                YoDouble kp = new YoDouble("kp" + robotSide.getCamelCaseNameForMiddleOfExpression() + simulatedFingerJoint.name(), registry);
                YoDouble kd = new YoDouble("kd" + robotSide.getCamelCaseNameForMiddleOfExpression() + simulatedFingerJoint.name(), registry);
@@ -142,7 +142,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
       {
          if (!isRunningOnRealRobot)
          {
-            for (ValkyrieSimulatedFingerJoint simulatedFingerJoint : ValkyrieSimulatedFingerJoint.values)
+            for (ValkyrieHandJointName simulatedFingerJoint : ValkyrieHandJointName.values)
             {
                PinJoint relatedPinJoint = simulatedFingerJoint.getRelatedPinJoint(robotSide, simulatedRobot);
                RevoluteJoint relatedRevoluteJoint = (RevoluteJoint) simulatedFingerJoint.getRelatedRevoluteJoint(robotSide, fullRobotModel);
@@ -151,13 +151,13 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
                output.setStiffness(kpMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
                output.setDamping(kdMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
 
-               double fullyExtensonPositionLimit = ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(robotSide, simulatedFingerJoint.getRelatedRealFingerJoint());
-               double fullyFlexedPositionLimit = ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(robotSide, simulatedFingerJoint.getRelatedRealFingerJoint());
-
-               if (fullyExtensonPositionLimit <= fullyFlexedPositionLimit)
-                  relatedPinJoint.setLimitStops(fullyExtensonPositionLimit - 0.1, fullyFlexedPositionLimit + 0.1, 10.0, 2.5);
-               else
-                  relatedPinJoint.setLimitStops(fullyFlexedPositionLimit - 0.1, fullyExtensonPositionLimit + 0.1, 10.0, 2.5);
+//               double fullyExtensonPositionLimit = ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(robotSide, simulatedFingerJoint.getRelatedRealFingerJoint());
+//               double fullyFlexedPositionLimit = ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(robotSide, simulatedFingerJoint.getRelatedRealFingerJoint());
+//
+//               if (fullyExtensonPositionLimit <= fullyFlexedPositionLimit)
+//                  relatedPinJoint.setLimitStops(fullyExtensonPositionLimit - 0.1, fullyFlexedPositionLimit + 0.1, 10.0, 2.5);
+//               else
+//                  relatedPinJoint.setLimitStops(fullyFlexedPositionLimit - 0.1, fullyExtensonPositionLimit + 0.1, 10.0, 2.5);
             }
          }
       }
@@ -176,11 +176,11 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         final double[] simulatedJointValues = new double[ValkyrieSimulatedFingerJoint.values.length];
+         final double[] simulatedJointValues = new double[ValkyrieHandJointName.values.length];
 
-         for (int i = 0; i < ValkyrieSimulatedFingerJoint.values.length; i++)
+         for (int i = 0; i < ValkyrieHandJointName.values.length; i++)
          {
-            simulatedJointValues[i] = ValkyrieSimulatedFingerJoint.values[i].getRelatedRevoluteJoint(robotSide, fullRobotModel).getQ();
+            simulatedJointValues[i] = ValkyrieHandJointName.values[i].getRelatedRevoluteJoint(robotSide, fullRobotModel).getQ();
          }
 
          jointAngleCommunicators.get(robotSide).updateHandAngles(new HandSensorData()
@@ -253,7 +253,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
       {
          if (!isRunningOnRealRobot)
          {
-            for (ValkyrieSimulatedFingerJoint simulatedFingerJoint : ValkyrieSimulatedFingerJoint.values)
+            for (ValkyrieHandJointName simulatedFingerJoint : ValkyrieHandJointName.values)
             {
                outputs.get(robotSide).get(simulatedFingerJoint).setStiffness(kpMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
                outputs.get(robotSide).get(simulatedFingerJoint).setDamping(kdMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
