@@ -25,6 +25,7 @@ import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -261,6 +262,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       if (this.location == null)
          this.location = new Point3D();
       this.location.set(location);
+   }
+
+   public void setPlanarRegion(PlanarRegion planarRegion)
+   {
+      this.planarRegion = planarRegion;
    }
 
    public void setOrientation(QuaternionReadOnly orientation)
