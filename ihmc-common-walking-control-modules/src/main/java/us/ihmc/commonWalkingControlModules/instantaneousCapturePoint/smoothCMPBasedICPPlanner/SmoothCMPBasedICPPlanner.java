@@ -250,7 +250,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       finalTransferDuration.set(defaultFinalTransferDuration.getDoubleValue());
       finalTransferDurationAlpha.set(defaultTransferDurationAlpha.getDoubleValue());
    }
-
+   
    @Override
    /** {@inheritDoc} */
    public void initializeForStanding(double initialTime)
@@ -264,12 +264,9 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       isDoubleSupport.set(true);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
-      updateTransferPlan();
-   }
 
-   public void setICPInitialConditionsFromCurrentState()
-   {
-      referenceICPGenerator.setICPInitialConditionsForAdjustment(timeInCurrentState.getDoubleValue());
+      referenceICPGenerator.setInitialConditionsForAdjustment();
+      updateTransferPlan();
    }
 
    @Override
@@ -284,7 +281,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
-
+      referenceICPGenerator.setInitialConditionsForAdjustment();
       updateTransferPlan();
    }
 
@@ -310,7 +307,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
-
+      referenceICPGenerator.setInitialConditionsForAdjustment();
       updateSingleSupportPlan();
    }
 
