@@ -38,13 +38,12 @@ public class FootstepTiming
    }
 
    /**
-    * Sets the {@link #swingTime} and {@link #transferTime} of the footstep. Sets the {@link #touchdownDuration} to 0.0
+    * Sets the {@link #swingTime} and {@link #transferTime} of the footstep.
     */
    public void setTimings(double swingTime, double transferTime)
    {
       this.swingTime = swingTime;
       this.transferTime = transferTime;
-      this.touchdownDuration = 0.0;
    }
    
    /**
