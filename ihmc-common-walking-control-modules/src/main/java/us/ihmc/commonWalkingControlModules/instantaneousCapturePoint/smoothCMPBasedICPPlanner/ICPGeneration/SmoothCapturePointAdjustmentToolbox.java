@@ -39,52 +39,11 @@ public class SmoothCapturePointAdjustmentToolbox
 
    private final LinearSolver<DenseMatrix64F> pseudoInverseSolver = new DampedLeastSquaresSolver(defaultSize, 0.0);
 
-   private List<FrameTuple3D<?, ?>> icpQuantityInitialConditionList = new ArrayList<FrameTuple3D<?, ?>>();
-
    private final SmoothCapturePointToolbox icpToolbox;
 
    public SmoothCapturePointAdjustmentToolbox(SmoothCapturePointToolbox smoothCapturePointToolbox)
    {
       this.icpToolbox = smoothCapturePointToolbox;
-
-      icpQuantityInitialConditionList.add(new FramePoint3D());
-      while (icpQuantityInitialConditionList.size() < defaultSize)
-      {
-         icpQuantityInitialConditionList.add(new FrameVector3D());
-      }
-   }
-
-   public void setICPInitialConditions(double localTime, List<FramePoint3D> exitCornerPointsFromCoPs, List<FrameTrajectory3D> copPolynomials3D,
-                                       int currentSwingSegment, double omega0)
-   {
-      if (currentSwingSegment < 0)
-      {
-         FrameTrajectory3D copPolynomial3D = copPolynomials3D.get(0);
-         for (int i = 0; i < copPolynomials3D.get(0).getNumberOfCoefficients() / 2; i++)
-         {
-            FrameTuple3D<?, ?> icpQuantityInitialCondition = icpQuantityInitialConditionList.get(i);
-
-            copPolynomial3D.getDerivative(i, localTime, icpQuantityInitialCondition);
-         }
-      }
-      else
-      {
-         FrameTrajectory3D copPolynomial3D = copPolynomials3D.get(currentSwingSegment);
-         for (int i = 0; i < copPolynomials3D.get(0).getNumberOfCoefficients() / 2; i++)
-         {
-            FrameTuple3D<?, ?> icpQuantityInitialCondition = icpQuantityInitialConditionList.get(i);
-
-            icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, localTime, i, copPolynomial3D,
-                                                                            exitCornerPointsFromCoPs.get(currentSwingSegment), icpQuantityInitialCondition);
-         }
-      }
-   }
-
-   public void adjustDesiredTrajectoriesForInitialSmoothing(List<FramePoint3D> entryCornerPointsToPack, List<FramePoint3D> exitCornerPointsToPack,
-                                                            List<FrameTrajectory3D> copPolynomials3D, double omega0)
-   {
-      adjustDesiredTrajectoriesForInitialSmoothing3D(omega0, copPolynomials3D, icpQuantityInitialConditionList, entryCornerPointsToPack,
-                                                     exitCornerPointsToPack);
    }
 
    public void adjustDesiredTrajectoriesForInitialSmoothing3D(double omega0, List<FrameTrajectory3D> copPolynomials3D,

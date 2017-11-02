@@ -215,7 +215,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
          swingDurationShiftFractions.get(i).setToNaN();
       }
    }
-   
+
    public void clearPlanWithoutClearingPlannedFootsteps()
    {
       referenceCoPGenerator.clearPlan();
@@ -265,6 +265,11 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
       updateTransferPlan();
+   }
+
+   public void setICPInitialConditionsFromCurrentState()
+   {
+      referenceICPGenerator.setICPInitialConditionsForAdjustment(timeInCurrentState.getDoubleValue());
    }
 
    @Override
