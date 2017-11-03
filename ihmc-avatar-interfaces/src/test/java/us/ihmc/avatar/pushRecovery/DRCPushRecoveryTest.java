@@ -36,7 +36,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class DRCPushRecoveryTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    static
    {
       simulationTestingParameters.setRunMultiThreaded(false);

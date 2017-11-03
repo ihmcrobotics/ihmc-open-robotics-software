@@ -78,7 +78,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
       YoEnum<RobotSide> supportLegFrameSide = new YoEnum<RobotSide>("supportLegFrameSide", registry, RobotSide.class);
 
-      SimulationTestingParameters testingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      SimulationTestingParameters testingParameters = SimulationTestingParameters.createFromSystemProperties();
       testingParameters.setDataBufferSize(2048);
 
       Robot robot = new Robot("Dummy");

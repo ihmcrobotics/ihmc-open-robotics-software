@@ -33,7 +33,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final CommonAvatarEnvironmentInterface environment = new FlatGroundEnvironment();
    private static final DRCStartingLocation location = DRCObstacleCourseStartingLocation.DEFAULT;
 

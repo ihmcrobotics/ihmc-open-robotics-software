@@ -29,7 +29,7 @@ public class SimulationConstructionSetParameters
       this.createGUI = createGUI;
    }
    
-   public static SimulationConstructionSetParameters createFromEnvironmentVariables()
+   public static SimulationConstructionSetParameters createFromSystemProperties()
    {
       SimulationConstructionSetParameters parametersToReturn = new SimulationConstructionSetParameters();
 
