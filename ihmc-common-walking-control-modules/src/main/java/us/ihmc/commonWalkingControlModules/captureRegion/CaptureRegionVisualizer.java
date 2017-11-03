@@ -23,13 +23,19 @@ public class CaptureRegionVisualizer
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
 
    public CaptureRegionVisualizer(OneStepCaptureRegionCalculator captureRegionCalculator, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                  YoVariableRegistry parentRegistry)
+   {
+      this(captureRegionCalculator, "", yoGraphicsListRegistry, parentRegistry);
+   }
+
+   public CaptureRegionVisualizer(OneStepCaptureRegionCalculator captureRegionCalculator, String suffix, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
       this.captureRegionCalculator = captureRegionCalculator;
 
-      yoCaptureRegionPolygon = new YoFrameConvexPolygon2d(caption, "", worldFrame, 30, registry);
+      yoCaptureRegionPolygon = new YoFrameConvexPolygon2d(caption, suffix, worldFrame, 30, registry);
 
-      YoArtifactPolygon polygonArtifact = new YoArtifactPolygon(caption, yoCaptureRegionPolygon, color, false);
+      YoArtifactPolygon polygonArtifact = new YoArtifactPolygon(caption + suffix, yoCaptureRegionPolygon, color, false);
       yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), polygonArtifact);
 
       parentRegistry.addChild(registry);

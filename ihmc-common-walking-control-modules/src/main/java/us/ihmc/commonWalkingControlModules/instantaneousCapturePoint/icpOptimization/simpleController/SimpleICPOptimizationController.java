@@ -22,6 +22,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -153,7 +154,8 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    private final ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();
 
    public SimpleICPOptimizationController(WalkingControllerParameters walkingControllerParameters, BipedSupportPolygons bipedSupportPolygons,
-                                          ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                          ICPControlPolygons icpControlPolygons,
+                                          SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                           double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters, walkingControllerParameters.getICPOptimizationParameters(), bipedSupportPolygons, icpControlPolygons, contactableFeet,
@@ -229,7 +231,8 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
                                                                                        registry, yoGraphicsListRegistry);
-      planarRegionConstraintProvider = new PlanarRegionConstraintProvider(contactableFeet, yoNamePrefix, VISUALIZE, registry, yoGraphicsListRegistry);
+      planarRegionConstraintProvider = new PlanarRegionConstraintProvider(walkingControllerParameters, bipedSupportPolygons, contactableFeet, yoNamePrefix, VISUALIZE,
+                                                                          registry, yoGraphicsListRegistry);
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
@@ -421,7 +424,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       Footstep upcomingFootstep = upcomingFootsteps.get(0);
       planarRegionConstraintProvider.setActivePlanarRegion(upcomingFootstep.getPlanarRegion());
       planarRegionConstraintProvider.computeDistanceFromEdgeForNoOverhang(upcomingFootstep);
-      planarRegionConstraintProvider.updatePlanarRegionConstraintForSingleSupport(solver);
+      planarRegionConstraintProvider.updatePlanarRegionConstraintForSingleSupport(supportSide, timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
    }
 
    private void initializeOnContactChange(double initialTime)
@@ -563,6 +566,8 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       else
       {
          copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue(), solver);
+         planarRegionConstraintProvider.updatePlanarRegionConstraintForSingleSupport(supportSide.getEnumValue(), timeRemainingInState.getDoubleValue(),
+                                                                                     currentICP, omega0, solver);
       }
 
       solver.resetFootstepConditions();
