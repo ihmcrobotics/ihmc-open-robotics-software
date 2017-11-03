@@ -163,6 +163,12 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygonsInSoleFrame, snapper);
       ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
 
+      if(showPlannerVisualizer)
+      {
+         visualizer.setFootstepSnapper(snapper);
+         nodeChecker.addPlannerListener(visualizer);
+      }
+
       planner = new DepthFirstFootstepPlanner(parameters, snapper, nodeChecker, stepCostCalculator, registry);
       planner.setFeetPolygons(footPolygonsInSoleFrame);
       planner.setMaximumNumberOfNodesToExpand(100);
