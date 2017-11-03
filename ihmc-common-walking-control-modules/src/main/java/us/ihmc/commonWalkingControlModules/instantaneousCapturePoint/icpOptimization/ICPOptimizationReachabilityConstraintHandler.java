@@ -145,14 +145,14 @@ public class ICPOptimizationReachabilityConstraintHandler
 
    private final FrameConvexPolygonWithLineIntersector2d lineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
 
-   public void updateReachabilityBasedOnAdjustment(ArrayList<YoFramePoint2d> upcomingFootstepLocations, ArrayList<FramePoint2D> footstepSolutions,
+   public void updateReachabilityBasedOnAdjustment(YoFramePoint2d upcomingFootstepLocation, FramePoint2D footstepSolution,
                                                    boolean wasAdjusted)
    {
       if (!wasAdjusted)
          return;
 
-      upcomingFootstepLocations.get(0).getFrameTuple2d(referenceLocation);
-      adjustedLocation.setIncludingFrame(footstepSolutions.get(0));
+      upcomingFootstepLocation.getFrameTuple2d(referenceLocation);
+      adjustedLocation.setIncludingFrame(footstepSolution);
       referenceLocation.changeFrame(worldFrame);
       adjustedLocation.changeFrame(worldFrame);
 
@@ -173,13 +173,13 @@ public class ICPOptimizationReachabilityConstraintHandler
       contractedReachabilityPolygon.setConvexPolygon2d(polygon2d.getConvexPolygon2d());
    }
 
-   public void updateReachabilityBasedOnAdjustment(List<Footstep> upcomingFootsteps, ArrayList<FramePoint2D> footstepSolutions, boolean wasAdjusted)
+   public void updateReachabilityBasedOnAdjustment(Footstep upcomingFootstep, FramePoint2D footstepSolution, boolean wasAdjusted)
    {
       if (!wasAdjusted)
          return;
 
-      upcomingFootsteps.get(0).getPosition2d(referenceLocation);
-      adjustedLocation.setIncludingFrame(footstepSolutions.get(0));
+      upcomingFootstep.getPosition2d(referenceLocation);
+      adjustedLocation.setIncludingFrame(footstepSolution);
       referenceLocation.changeFrame(worldFrame);
       adjustedLocation.changeFrame(worldFrame);
 

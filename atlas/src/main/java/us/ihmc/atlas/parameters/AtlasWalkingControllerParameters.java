@@ -97,7 +97,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       legConfigurationParameters = new AtlasLegConfigurationParameters(runningOnRealRobot);
       toeOffParameters = new AtlasToeOffParameters(jointMap);
       swingTrajectoryParameters = new AtlasSwingTrajectoryParameters(target, jointMap.getModelScale());
-      steppingParameters = new AtlasSteppingParameters(jointMap);
+      steppingParameters = new AtlasSteppingParameters(jointMap, runningOnRealRobot);
       leapOfFaithParameters = new AtlasLeapOfFaithParameters(runningOnRealRobot);
 
       if (USE_SIMPLE_ICP_OPTIMIZATION)
