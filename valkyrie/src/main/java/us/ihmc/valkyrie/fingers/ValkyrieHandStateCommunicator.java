@@ -1,10 +1,9 @@
 package us.ihmc.valkyrie.fingers;
 
-import java.io.IOException;
 import java.util.EnumMap;
 import java.util.concurrent.TimeUnit;
 
-import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
@@ -23,13 +22,13 @@ public class ValkyrieHandStateCommunicator implements RobotController
    private final SideDependentList<HandJointAnglePacket> packetsForPublish = new SideDependentList<>();
 
    private final SideDependentList<EnumMap<ValkyrieHandJointName, OneDoFJoint>> handJoints = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
-   private final GlobalDataProducer dataProducer;
+   private final PacketCommunicator packetCommunicator;
 
    private boolean isRunning = false;
 
-   public ValkyrieHandStateCommunicator(FullHumanoidRobotModel fullRobotModel, ValkyrieHandModel handModel, GlobalDataProducer dataProducer, PeriodicRealtimeThreadScheduler scheduler)
+   public ValkyrieHandStateCommunicator(FullHumanoidRobotModel fullRobotModel, ValkyrieHandModel handModel, PacketCommunicator packetCommunicator, PeriodicRealtimeThreadScheduler scheduler)
    {
-      this.dataProducer = dataProducer;
+      this.packetCommunicator = packetCommunicator;
       this.scheduler = scheduler;
 
       for (RobotSide robotside : RobotSide.values)
@@ -44,7 +43,6 @@ public class ValkyrieHandStateCommunicator implements RobotController
             handJoints.get(robotside).put(jointEnum, joint);
          }
       }
-      dataProducer.registerPacketToSkipQueue(HandJointAnglePacket.class);
    }
 
    public void start()
@@ -109,14 +107,7 @@ public class ValkyrieHandStateCommunicator implements RobotController
 
             if (hasPacketToPublish)
             {
-               try
-               {
-                  dataProducer.skipQueueAndSend(packetsForPublish.get(robotSide));
-               }
-               catch (IOException e)
-               {
-                  e.printStackTrace();
-               }
+               packetCommunicator.send(packetsForPublish.get(robotSide));
             }
          }
       }

@@ -289,7 +289,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
 
       PeriodicRealtimeThreadScheduler handStateCommunicatorScheduler = new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.HAND_COMMUNICATOR_PRIORITY);
-      ValkyrieHandStateCommunicator handStateCommunicator = new ValkyrieHandStateCommunicator(threadDataSynchronizer.getEstimatorFullRobotModel(), robotModel.getHandModel(), dataProducer, handStateCommunicatorScheduler);
+      ValkyrieHandStateCommunicator handStateCommunicator = new ValkyrieHandStateCommunicator(threadDataSynchronizer.getEstimatorFullRobotModel(), robotModel.getHandModel(), controllerPacketCommunicator, handStateCommunicatorScheduler);
       handStateCommunicator.start();
       estimatorThread.addRobotController(handStateCommunicator);
 
