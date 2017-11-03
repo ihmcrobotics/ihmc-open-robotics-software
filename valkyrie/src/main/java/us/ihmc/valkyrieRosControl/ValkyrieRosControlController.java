@@ -40,6 +40,7 @@ import us.ihmc.tools.SettableTimestampProvider;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.fingers.ValkyrieHandStateCommunicator;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
@@ -286,6 +287,12 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       DRCEstimatorThread estimatorThread = new DRCEstimatorThread(sensorInformation, contactPointParameters, robotModel, stateEstimatorParameters, sensorReaderFactory,
             threadDataSynchronizer, estimatorScheduler, dataProducer, valkyrieLowLevelOutputWriter, yoVariableServer, gravity);
       estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+
+      PeriodicRealtimeThreadScheduler handStateCommunicatorScheduler = new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.HAND_COMMUNICATOR_PRIORITY);
+      ValkyrieHandStateCommunicator handStateCommunicator = new ValkyrieHandStateCommunicator(threadDataSynchronizer.getEstimatorFullRobotModel(), robotModel.getHandModel(), dataProducer, handStateCommunicatorScheduler);
+      handStateCommunicator.start();
+      estimatorThread.addRobotController(handStateCommunicator);
+
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, sensorInformation, controllerFactory, threadDataSynchronizer, drcOutputWriter,
             dataProducer, yoVariableServer, gravity, estimatorDT);
 
