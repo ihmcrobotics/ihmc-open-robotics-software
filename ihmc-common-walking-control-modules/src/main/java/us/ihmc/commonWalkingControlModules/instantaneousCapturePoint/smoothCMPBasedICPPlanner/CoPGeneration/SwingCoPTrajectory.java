@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPB
 
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.WalkingTrajectoryType;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SwingCoPTrajectory extends CoPTrajectory
 {

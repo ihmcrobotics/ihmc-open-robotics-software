@@ -1,9 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
@@ -41,6 +37,10 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 
 //TODO 1) add isDoneWalking functionality
 
@@ -150,10 +150,10 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
     * Creates CoP planner object. Should be followed by call to {@code initializeParamters()} to pass planning parameters 
     * @param namePrefix
     */
-   public ReferenceCoPTrajectoryGenerator(String namePrefix, int numberOfPointsPerFoot, int maxNumberOfFootstepsToConsider,
-                                          BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                          YoInteger numberFootstepsToConsider, List<YoDouble> swingDurations, List<YoDouble> transferDurations,
-                                          List<YoDouble> swingSplitFractions, List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions,
+   public ReferenceCoPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, BipedSupportPolygons bipedSupportPolygons,
+                                          SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoInteger numberFootstepsToConsider,
+                                          List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions,
+                                          List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions,
                                           YoVariableRegistry parentRegistry)
    {
       this.numberFootstepsToConsider = numberFootstepsToConsider;
@@ -878,7 +878,6 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    {
       CoPPointsInFoot copLocationWaypoint = copLocationWaypoints.get(copLocationsIndex);
       FootstepData upcomingFootstepData = upcomingFootstepsData.get(footstepIndex);
-      PrintTools.debug("Came here");
       int i = 0;
       for (i = 0; i < swingCoPPointList.length - 1; i++)
       {
@@ -1409,23 +1408,5 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          return 0.0;
       else
          return activeTrajectory.getNodeTimes()[activeTrajectory.getNumberOfSegments()];
-   }
-
-   private class TransferCoPTrajectoryBuilder extends GenericTypeBuilder<TransferCoPTrajectory>
-   {
-      @Override
-      public TransferCoPTrajectory newInstance()
-      {
-         return new TransferCoPTrajectory(orderOfSplineInterpolation.getEnumValue(), numberOfTransferSegments);
-      }
-   }
-
-   private class SwingCoPTrajectoryBuilder extends GenericTypeBuilder<SwingCoPTrajectory>
-   {
-      @Override
-      public SwingCoPTrajectory newInstance()
-      {
-         return new SwingCoPTrajectory(orderOfSplineInterpolation.getEnumValue(), numberOfSwingSegments);
-      }
    }
 }

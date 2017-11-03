@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.ICPGeneration;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
@@ -18,6 +15,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Tim Seyde
@@ -77,8 +77,8 @@ public class ReferenceICPTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox(icpToolbox);
 
-   public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isStanding,
-                                          YoBoolean isInitialTransfer, YoBoolean isDoubleSupport, boolean debug, YoVariableRegistry registry)
+   public ReferenceICPTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider,
+                                          YoBoolean isInitialTransfer, boolean debug, YoVariableRegistry registry)
    {
       this.omega0 = omega0;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
