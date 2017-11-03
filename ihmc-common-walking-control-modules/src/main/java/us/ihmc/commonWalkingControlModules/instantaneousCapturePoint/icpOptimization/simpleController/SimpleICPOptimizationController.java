@@ -85,9 +85,9 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    private final YoFramePoint2d feedbackCMPDelta = new YoFramePoint2d(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
 
    private final ArrayList<Footstep> upcomingFootsteps = new ArrayList<>();
-   private final ArrayList<YoFramePoint2d> upcomingFootstepLocations = new ArrayList<>();
-   private final ArrayList<YoFramePoint2d> footstepSolutions = new ArrayList<>();
-   private final ArrayList<FramePoint2D> unclippedFootstepSolutions = new ArrayList<>();
+   private final YoFramePoint2d upcomingFootstepLocation;
+   private final YoFramePoint2d footstepSolution;
+   private final FramePoint2D unclippedFootstepSolution = new FramePoint2D();
 
    private final YoDouble forwardFootstepWeight = new YoDouble(yoNamePrefix + "ForwardFootstepWeight", registry);
    private final YoDouble lateralFootstepWeight = new YoDouble(yoNamePrefix + "LateralFootstepWeight", registry);
@@ -211,12 +211,11 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
       minimumTimeRemaining.set(icpOptimizationParameters.getMinimumTimeRemaining());
 
+      upcomingFootstepLocation = new YoFramePoint2d(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
+      footstepSolution = new YoFramePoint2d(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
+
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
       {
-         upcomingFootstepLocations.add(new YoFramePoint2d(yoNamePrefix + "UpcomingFootstepLocation" + i, worldFrame, registry));
-         footstepSolutions.add(new YoFramePoint2d(yoNamePrefix + "FootstepSolutionLocation" + i, worldFrame, registry));
-         unclippedFootstepSolutions.add(new FramePoint2D(worldFrame));
-
          YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration" + i, registry);
          swingDuration.setToNaN();
          swingDurations.add(swingDuration);
@@ -253,7 +252,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
       YoGraphicPosition predictedEndOfStateICP = new YoGraphicPosition(yoNamePrefix + "PredictedEndOfStateICP", this.predictedEndOfStateICP, 0.005, YoAppearance.MidnightBlue(),
                                                                        YoGraphicPosition.GraphicType.BALL);
-      YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix + "ClippedFootstepSolution", this.footstepSolutions.get(0), 0.005,
+      YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix + "ClippedFootstepSolution", this.footstepSolution, 0.005,
                                                                         YoAppearance.ForestGreen(), YoGraphicPosition.GraphicType.SOLID_BALL);
       solutionHandler.setupVisualizers(artifactList);
 
@@ -283,11 +282,10 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    public void clearPlan()
    {
       upcomingFootsteps.clear();
+      upcomingFootstepLocation.setToZero();
 
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
       {
-         upcomingFootstepLocations.get(i).setToZero();
-
          swingDurations.get(i).setToNaN();
          transferDurations.get(i).setToNaN();
       }
@@ -340,14 +338,17 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
          {
             int footstepIndex = upcomingFootsteps.size();
             upcomingFootsteps.add(footstep);
-            footstep.getPosition2d(tempPoint2d);
-            upcomingFootstepLocations.get(footstepIndex).set(tempPoint2d);
-
-            footstepSolutions.get(footstepIndex).set(tempPoint2d);
-            unclippedFootstepSolutions.get(footstepIndex).set(tempPoint2d);
 
             swingDurations.get(footstepIndex).set(timing.getSwingTime());
             transferDurations.get(footstepIndex).set(timing.getTransferTime());
+
+            if (footstepIndex == 0)
+            {
+               footstep.getPosition2d(tempPoint2d);
+               upcomingFootstepLocation.set(tempPoint2d);
+               footstepSolution.set(tempPoint2d);
+               unclippedFootstepSolution.set(tempPoint2d);
+            }
          }
          else
          {
@@ -358,11 +359,8 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
    private void updateYoFootsteps()
    {
-      for (int footstepIndex = 0; footstepIndex < upcomingFootsteps.size(); footstepIndex++)
-      {
-         upcomingFootsteps.get(footstepIndex).getPosition2d(tempPoint2d);
-         upcomingFootstepLocations.get(footstepIndex).set(tempPoint2d);
-      }
+      upcomingFootsteps.get(0).getPosition2d(tempPoint2d);
+      upcomingFootstepLocation.set(tempPoint2d);
    }
 
    @Override
@@ -381,11 +379,8 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
 
-      for (int i = 0; i < footstepSolutions.size(); i++)
-      {
-         footstepSolutions.get(i).setToNaN();
-         unclippedFootstepSolutions.get(i).setToNaN();
-      }
+      footstepSolution.setToNaN();
+      unclippedFootstepSolution.setToNaN();
 
       speedUpTime.set(0.0);
    }
@@ -401,11 +396,8 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
       initializeOnContactChange(initialTime);
 
-      for (int i = 0; i < footstepSolutions.size(); i++)
-      {
-         footstepSolutions.get(i).setToNaN();
-         unclippedFootstepSolutions.get(i).setToNaN();
-      }
+      footstepSolution.setToNaN();
+      unclippedFootstepSolution.setToNaN();
 
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
@@ -487,7 +479,10 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    @Override
    public void getFootstepSolution(int footstepIndex, FramePoint2D footstepSolutionToPack)
    {
-      footstepSolutions.get(footstepIndex).getFrameTuple2d(footstepSolutionToPack);
+      if (footstepIndex > 0)
+         throw new RuntimeException("This controller is not set up to handle more than one footstep.");
+
+      footstepSolution.getFrameTuple2d(footstepSolutionToPack);
    }
 
    @Override
@@ -695,7 +690,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
          numberOfIterations.set(solver.getNumberOfIterations());
 
          if (localUseStepAdjustment && numberOfFootstepsToConsider > 0)
-            solutionHandler.extractFootstepSolutions(footstepSolutions, unclippedFootstepSolutions, upcomingFootsteps, numberOfFootstepsToConsider, solver);
+            solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootsteps.get(0), numberOfFootstepsToConsider, solver);
 
          if (isInDoubleSupport.getBooleanValue())
             solutionHandler.zeroAdjustment();
@@ -725,7 +720,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
    private void updateReachabilityRegionFromAdjustment()
    {
-      reachabilityConstraintHandler.updateReachabilityBasedOnAdjustment(upcomingFootsteps, unclippedFootstepSolutions, wasFootstepAdjusted());
+      reachabilityConstraintHandler.updateReachabilityBasedOnAdjustment(upcomingFootsteps.get(0), unclippedFootstepSolution, wasFootstepAdjusted());
    }
 
    private void computeTimeInCurrentState(double currentTime)

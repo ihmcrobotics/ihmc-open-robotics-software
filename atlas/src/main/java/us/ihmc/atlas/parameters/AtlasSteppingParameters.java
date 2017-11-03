@@ -6,10 +6,12 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 public class AtlasSteppingParameters implements SteppingParameters
 {
    private final AtlasJointMap jointMap;
+   private final boolean runningOnRealRobot;
 
-   public AtlasSteppingParameters(AtlasJointMap jointMap)
+   public AtlasSteppingParameters(AtlasJointMap jointMap, boolean runningOnRealRobot)
    {
       this.jointMap = jointMap;
+      this.runningOnRealRobot = runningOnRealRobot;
    }
 
    @Override
@@ -45,7 +47,8 @@ public class AtlasSteppingParameters implements SteppingParameters
    @Override
    public double getMaxStepLength()
    {
-      return 0.6 * jointMap.getModelScale();    // 0.5; //0.35;
+      double length = runningOnRealRobot ? 0.6 : 1.0;
+      return length * jointMap.getModelScale();    // 0.5; //0.35;
    }
 
    @Override

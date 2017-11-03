@@ -777,7 +777,7 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
 
    private void updateReachabilityRegionFromAdjustment()
    {
-      reachabilityConstraintHandler.updateReachabilityBasedOnAdjustment(upcomingFootstepLocations, unclippedFootstepSolutions, wasFootstepAdjusted());
+      reachabilityConstraintHandler.updateReachabilityBasedOnAdjustment(upcomingFootstepLocations.get(0), unclippedFootstepSolutions.get(0), wasFootstepAdjusted());
    }
 
 
