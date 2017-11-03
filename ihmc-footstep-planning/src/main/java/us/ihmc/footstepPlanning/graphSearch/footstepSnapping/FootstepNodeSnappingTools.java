@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -86,5 +87,24 @@ public class FootstepNodeSnappingTools
       regionToSole.multiply(regionToWorld);
 
       footPolygonInRegionFrame.applyTransformAndProjectToXYPlane(regionToSole);
+   }
+
+   /**
+    * Computes the snap transform which snaps the given node to the given pose
+    *
+    * @param node
+    * @param footstepPose
+    * @return
+    */
+   public static RigidBodyTransform computeSnapTransform(FootstepNode node, Pose3D footstepPose)
+   {
+      RigidBodyTransform snapTransform = new RigidBodyTransform();
+      RigidBodyTransform stepTransform = new RigidBodyTransform();
+      footstepPose.get(stepTransform);
+
+      FootstepNodeTools.getNodeTransform(node, snapTransform);
+      snapTransform.preMultiplyInvertThis(stepTransform);
+
+      return snapTransform;
    }
 }
