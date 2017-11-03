@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointAdjustmentToolbox;
@@ -16,7 +17,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
-import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SmoothCapturePointAdjustmentToolboxTest
@@ -33,7 +33,16 @@ public class SmoothCapturePointAdjustmentToolboxTest
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
    private final SmoothCapturePointAdjustmentToolbox icpAdjustmentToolbox = new SmoothCapturePointAdjustmentToolbox(icpToolbox);
    private final List<FrameTuple3D<?, ?>> icpQuantityInitialConditionList = new ArrayList<>();
-
+   
+   @Before
+   public void setupTest()
+   {
+      icpQuantityInitialConditionList.clear();
+      icpQuantityInitialConditionList.add(new FramePoint3D());
+      while(icpQuantityInitialConditionList.size() < SmoothCapturePointAdjustmentToolbox.defaultSize)
+         icpQuantityInitialConditionList.add(new FrameVector3D());
+   }
+   
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAdjustICPDuringInitialTransfer3DLinear()

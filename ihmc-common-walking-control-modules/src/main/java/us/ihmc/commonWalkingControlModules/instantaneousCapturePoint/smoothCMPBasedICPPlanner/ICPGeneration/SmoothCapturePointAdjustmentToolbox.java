@@ -14,7 +14,7 @@ import java.util.List;
 
 public class SmoothCapturePointAdjustmentToolbox
 {
-   private static final int defaultSize = 100;
+   public static final int defaultSize = 100;
 
    private double generalizedGammaPrimeSegment1;
    private final DenseMatrix64F generalizedAlphaPrimeRowSegment1 = new DenseMatrix64F(1, defaultSize);
