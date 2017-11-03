@@ -48,7 +48,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 {
    private static final int maxNumberOfCoPWaypoints = 20;
    private static final boolean debug = false;
-   
+
    public enum UseSplitFractionFor
    {
       POSITION, TIME
@@ -153,8 +153,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    public ReferenceCoPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, BipedSupportPolygons bipedSupportPolygons,
                                           SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoInteger numberFootstepsToConsider,
                                           List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions,
-                                          List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions,
-                                          YoVariableRegistry parentRegistry)
+                                          List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions, YoVariableRegistry parentRegistry)
    {
       this.numberFootstepsToConsider = numberFootstepsToConsider;
       this.fullPrefix = namePrefix + "CoPTrajectoryGenerator";
@@ -343,34 +342,33 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    @Override
    public void createVisualizerForConstantCoPs(YoGraphicsList yoGraphicsList, ArtifactList artifactList)
    {
-      for (int footIndex = 0; footIndex < copLocationWaypoints.size(); footIndex++)
+      if (debug)
       {
-         CoPPointsInFoot copPointsInFoot = copLocationWaypoints.get(footIndex);
-         copPointsInFoot.setupVisualizers(yoGraphicsList, artifactList, COP_POINT_SIZE);
-      }
-
-      if(debug)
-      {
-         for (int waypointIndex = 0; waypointIndex < maxNumberOfCoPWaypoints; waypointIndex++)
+         for (int footIndex = 0; footIndex < copLocationWaypoints.size(); footIndex++)
          {
-            YoFramePoint yoCoPWaypoint = new YoFramePoint("CoPWaypointAfterAdjustment" + waypointIndex, worldFrame, registry);
-            YoGraphicPosition copWaypointViz = new YoGraphicPosition("AdjustedCoPWaypointViz" + waypointIndex, yoCoPWaypoint, COP_POINT_SIZE, YoAppearance.Yellow(),
-                                                                     YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
-            yoCoPWaypoint.setToNaN();
-            yoGraphicsList.add(copWaypointViz);
-            artifactList.add(copWaypointViz.createArtifact());
-            copWaypointsViz.add(yoCoPWaypoint);
+            CoPPointsInFoot copPointsInFoot = copLocationWaypoints.get(footIndex);
+            copPointsInFoot.setupVisualizers(yoGraphicsList, artifactList, COP_POINT_SIZE);
          }
+      }
+      for (int waypointIndex = 0; waypointIndex < maxNumberOfCoPWaypoints; waypointIndex++)
+      {
+         YoFramePoint yoCoPWaypoint = new YoFramePoint("CoPWaypointAfterAdjustment" + waypointIndex, worldFrame, registry);
+         YoGraphicPosition copWaypointViz = new YoGraphicPosition("AdjustedCoPWaypointViz" + waypointIndex, yoCoPWaypoint, COP_POINT_SIZE,
+                                                                  YoAppearance.Green(), YoGraphicPosition.GraphicType.BALL);
+         yoCoPWaypoint.setToNaN();
+         yoGraphicsList.add(copWaypointViz);
+         artifactList.add(copWaypointViz.createArtifact());
+         copWaypointsViz.add(yoCoPWaypoint);
       }
    }
 
    @Override
    public void updateListeners()
    {
-      for (int i = 0; i < copLocationWaypoints.size(); i++)
-         copLocationWaypoints.get(i).notifyVariableChangedListeners();
-      if(debug)
-         updateAdjustedCoPViz();
+      if (debug)
+         for (int i = 0; i < copLocationWaypoints.size(); i++)
+            copLocationWaypoints.get(i).notifyVariableChangedListeners();
+      updateAdjustedCoPViz();
    }
 
    private void updateAdjustedCoPViz()
@@ -379,32 +377,32 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       int swingTrajectoryIndex = 0;
       int waypointIndex = 0;
       int additionalTransferIndex = 0;
-      for (int i = 0; i < copLocationWaypoints.size() && !copLocationWaypoints.get(i).getCoPPointList().isEmpty(); i++)
+      for (int i = 0; waypointIndex < copWaypointsViz.size() && i < copLocationWaypoints.size() && !copLocationWaypoints.get(i).getCoPPointList().isEmpty(); i++)
       {
          CoPPointsInFoot copPointsInFoot = copLocationWaypoints.get(i);
          List<CoPPointName> copPointNames = copPointsInFoot.getCoPPointList();
          int transferEndIndex = CoPPlanningTools.getCoPPointIndex(copPointNames, entryCoPName);
-         if(transferEndIndex == -1)
+         if (transferEndIndex == -1)
          {
             transferEndIndex = copPointNames.size();
-            if(copPointNames.get(transferEndIndex - 1) == CoPPointName.FINAL_COP)
+            if (copPointNames.get(transferEndIndex - 1) == CoPPointName.FINAL_COP)
                transferEndIndex--;
          }
          CoPTrajectory transferTrajectory = transferCoPTrajectories.get(transferTrajectoryIndex);
          int j = 0;
-         for(j = 0; j+additionalTransferIndex < transferTrajectory.getNumberOfSegments(); j++)
+         for (j = 0; j + additionalTransferIndex < transferTrajectory.getNumberOfSegments(); j++)
          {
             transferTrajectory.getSegment(j + additionalTransferIndex).getFramePositionInitial(tempFramePoint1);
             copWaypointsViz.get(waypointIndex).set(tempFramePoint1);
             copWaypointsViz.get(waypointIndex++).notifyVariableChangedListeners();
          }
          additionalTransferIndex = j;
-         if(transferEndIndex == copPointNames.size())
+         if (transferEndIndex == copPointNames.size())
             continue;
          transferTrajectoryIndex++;
-         
+
          CoPTrajectory swingTrajectory = swingCoPTrajectories.get(swingTrajectoryIndex);
-         for(j = 0; j < swingTrajectory.getNumberOfSegments(); j++)
+         for (j = 0; j < swingTrajectory.getNumberOfSegments(); j++)
          {
             swingTrajectory.getSegment(j).getFramePositionInitial(tempFramePoint1);
             copWaypointsViz.get(waypointIndex).set(tempFramePoint1);
