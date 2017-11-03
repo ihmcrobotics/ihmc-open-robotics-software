@@ -237,8 +237,8 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
                {
                   Map<String, Double> jointCoeffs = coeffs.get(jointEnum.getJointName(robotSide));
 
-                  scales.get(jointEnum).set(jointCoeffs.get("scale"));
-                  biases.get(jointEnum).set(jointCoeffs.get("bias"));
+                  scales.get(jointEnum).set(jointCoeffs.getOrDefault("scale", 0.0));
+                  biases.get(jointEnum).set(jointCoeffs.getOrDefault("bias", 0.0));
                }
             }
             areCoeffsLoaded = true;
