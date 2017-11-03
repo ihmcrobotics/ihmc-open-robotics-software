@@ -100,12 +100,13 @@ public class ConstraintToConvexRegion
     * @param planarRegion planar region to constrain to.
     * @return success
     */
-   public boolean addPlanarRegion(PlanarRegion planarRegion)
+   public boolean addPlanarRegion(PlanarRegion planarRegion, double deltaInside)
    {
       if (planarRegion == null)
          return false;
 
       convexPolygon.set(planarRegion.getConvexHull());
+      this.deltaInside = deltaInside;
       return true;
    }
 

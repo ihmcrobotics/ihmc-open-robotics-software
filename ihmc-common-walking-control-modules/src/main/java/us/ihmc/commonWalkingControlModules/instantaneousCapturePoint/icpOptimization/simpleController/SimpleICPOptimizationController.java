@@ -229,7 +229,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
                                                                                        registry, yoGraphicsListRegistry);
-      planarRegionConstraintProvider = new PlanarRegionConstraintProvider(yoNamePrefix, VISUALIZE, registry, yoGraphicsListRegistry);
+      planarRegionConstraintProvider = new PlanarRegionConstraintProvider(contactableFeet, yoNamePrefix, VISUALIZE, registry, yoGraphicsListRegistry);
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
@@ -417,7 +417,10 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
       copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide, solver);
       reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide, solver);
-      planarRegionConstraintProvider.setActivePlanarRegion(upcomingFootsteps.get(0).getPlanarRegion());
+
+      Footstep upcomingFootstep = upcomingFootsteps.get(0);
+      planarRegionConstraintProvider.setActivePlanarRegion(upcomingFootstep.getPlanarRegion());
+      planarRegionConstraintProvider.computeDistanceFromEdgeForNoOverhang(upcomingFootstep);
       planarRegionConstraintProvider.updatePlanarRegionConstraintForSingleSupport(solver);
    }
 

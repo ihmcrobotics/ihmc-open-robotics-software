@@ -164,6 +164,7 @@ public class SimpleICPOptimizationQPSolver
    private double cmpSafeDistanceFromEdge = Double.POSITIVE_INFINITY;
 
    private boolean hasPlanarRegionConstraint = false;
+   private double planarRegionDistanceFromEdge = 0.0;
 
    /**
     * Creates the ICP Optimization Solver. Refer to the class documentation: {@link SimpleICPOptimizationQPSolver}.
@@ -300,9 +301,9 @@ public class SimpleICPOptimizationQPSolver
       reachabilityConstraint.addPolygon(polygon);
    }
 
-   public void setPlanarRegionConstraint(PlanarRegion planarRegion)
+   public void setPlanarRegionConstraint(PlanarRegion planarRegion, double planarRegionDistanceFromEdge)
    {
-      hasPlanarRegionConstraint = planarRegionConstraint.addPlanarRegion(planarRegion);
+      hasPlanarRegionConstraint = planarRegionConstraint.addPlanarRegion(planarRegion, planarRegionDistanceFromEdge);
    }
 
    /**
