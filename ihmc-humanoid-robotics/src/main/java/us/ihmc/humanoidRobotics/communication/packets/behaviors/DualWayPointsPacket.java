@@ -1,5 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -81,6 +82,8 @@ public class DualWayPointsPacket extends Packet<DualWayPointsPacket>
             this.orientationOfWayPointsRight[i] = new Quaternion(poseOfWayPoints[i].getOrientation());
          }
       }
+      
+      PrintTools.info("check " + numberOfWayPointsLeft +" "+numberOfWayPointsRight);
    }
 
    public Pose3D getPoseOfWayPoint(RobotSide robotSide, int index)

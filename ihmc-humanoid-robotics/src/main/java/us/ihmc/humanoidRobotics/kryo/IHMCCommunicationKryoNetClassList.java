@@ -74,6 +74,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.ButtonData;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.DebrisData;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.DoorLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.DrillPacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.DualWayPointsPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorButtonPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorDebrisPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
@@ -490,6 +491,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(WallPosePacket.class);
       
       registerPacketClass(WayPointsPacket.class);
+      registerPacketClass(DualWayPointsPacket.class);
       
 
       registerPacketClass(DoorLocationPacket.class);

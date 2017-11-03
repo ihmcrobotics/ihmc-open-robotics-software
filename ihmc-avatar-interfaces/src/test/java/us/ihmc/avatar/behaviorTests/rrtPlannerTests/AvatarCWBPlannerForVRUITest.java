@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -35,11 +34,13 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WayPointsByVRUIBehav
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.ConstrainedWholeBodyPlanningToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.DualWayPointsPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WayPointsPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DualWayPointsTrajectory;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.WayPointsTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
@@ -79,7 +80,7 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
                                                                                    PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
    }
 
-   private WayPointsPacket wallPosePacket;
+   private WayPointsPacket wayPointsPacket;
    
    private void setupWayPointsPacket()
    {
@@ -104,9 +105,9 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
       wayPointOrientation.appendPitchRotation(Math.PI * 0.2);
       poseOfWayPoints[3] = new Pose3D(new Point3D(0.6, 0.4, 0.8), wayPointOrientation);
       
-      wallPosePacket = new WayPointsPacket();
-      wallPosePacket.setRobotSide(RobotSide.LEFT);
-      wallPosePacket.setWayPoints(poseOfWayPoints, 10.0);
+      wayPointsPacket = new WayPointsPacket();
+      wayPointsPacket.setRobotSide(RobotSide.LEFT);
+      wayPointsPacket.setWayPoints(poseOfWayPoints, 10.0);
       
       // for right hand
       poseOfWayPoints = new Pose3D[5];      
@@ -133,9 +134,50 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
       wayPointOrientation.appendYawRotation(-Math.PI * 0.1);
       poseOfWayPoints[4] = new Pose3D(new Point3D(0.6, -0.5, 1.0), wayPointOrientation);
       
-      wallPosePacket = new WayPointsPacket();
-      wallPosePacket.setRobotSide(RobotSide.RIGHT);
-      wallPosePacket.setWayPoints(poseOfWayPoints, 10.0);
+      wayPointsPacket = new WayPointsPacket();
+      wayPointsPacket.setRobotSide(RobotSide.RIGHT);
+      wayPointsPacket.setWayPoints(poseOfWayPoints, 10.0);
+   }
+   
+   private DualWayPointsPacket dualWayPointsPacket;
+   
+   private void setupDualWayPointsPacket()
+   {
+      dualWayPointsPacket = new DualWayPointsPacket();
+      dualWayPointsPacket.setTrajectoryTime(10.0);
+      
+      // for left hand
+      Pose3D[] poseOfWayPoints = new Pose3D[2];
+      Quaternion wayPointOrientation;
+
+      wayPointOrientation = new Quaternion();
+      wayPointOrientation.appendPitchRotation(Math.PI * 0.1);
+      poseOfWayPoints[0] = new Pose3D(new Point3D(0.6, 0.4, 1.0), wayPointOrientation);
+
+      wayPointOrientation = new Quaternion();
+      wayPointOrientation.appendPitchRotation(-Math.PI * 0.2);
+      wayPointOrientation.appendYawRotation(-Math.PI * 0.3);
+      poseOfWayPoints[1] = new Pose3D(new Point3D(0.6, 0.2, 1.5), wayPointOrientation);
+      
+      dualWayPointsPacket.setWayPoints(RobotSide.LEFT, poseOfWayPoints);
+      
+      // for right hand
+      poseOfWayPoints = new Pose3D[3];      
+
+      wayPointOrientation = new Quaternion();
+      wayPointOrientation.appendPitchRotation(Math.PI * 0.1);
+      poseOfWayPoints[0] = new Pose3D(new Point3D(0.6, -0.4, 1.0), wayPointOrientation);
+
+      wayPointOrientation = new Quaternion();
+      wayPointOrientation.appendPitchRotation(-Math.PI * 0.2);
+      wayPointOrientation.appendYawRotation(Math.PI * 0.1);
+      poseOfWayPoints[1] = new Pose3D(new Point3D(0.6, -0.2, 1.5), wayPointOrientation);
+
+      wayPointOrientation = new Quaternion();
+      wayPointOrientation.appendYawRotation(Math.PI * 0.2);
+      poseOfWayPoints[2] = new Pose3D(new Point3D(0.5, -0.2, 1.2), wayPointOrientation);
+      
+      dualWayPointsPacket.setWayPoints(RobotSide.RIGHT, poseOfWayPoints);
    }
    
    public ArrayList<Graphics3DObject> getXYZAxis(Pose3D pose, double length)
@@ -187,8 +229,8 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      //if (true)
-      if (simulationTestingParameters.getKeepSCSUp())
+      if (true)
+      //if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
@@ -243,13 +285,14 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
    public void testForWayPointsTrajectory() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+      
+      setupWayPointsPacket();      
+      
+      WayPointsTrajectory endeffectorTrajectory = new WayPointsTrajectory(wayPointsPacket);
 
-      setupWayPointsPacket();
-      WayPointsTrajectory endeffectorTrajectory = new WayPointsTrajectory(wallPosePacket);
-
-      scs.addStaticLinkGraphics(getXYZAxis(wallPosePacket.getPoseOfWayPoint(0), 0.05));
-      scs.addStaticLinkGraphics(getXYZAxis(wallPosePacket.getPoseOfWayPoint(1), 0.05));
-      scs.addStaticLinkGraphics(getXYZAxis(wallPosePacket.getPoseOfWayPoint(2), 0.05));
+      scs.addStaticLinkGraphics(getXYZAxis(wayPointsPacket.getPoseOfWayPoint(0), 0.05));
+      scs.addStaticLinkGraphics(getXYZAxis(wayPointsPacket.getPoseOfWayPoint(1), 0.05));
+      scs.addStaticLinkGraphics(getXYZAxis(wayPointsPacket.getPoseOfWayPoint(2), 0.05));
 
       scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(1.0, RobotSide.LEFT, new ConfigurationSpace()), 0.1));
       scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(4.0, RobotSide.LEFT, new ConfigurationSpace()), 0.1));
@@ -258,7 +301,10 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
       scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(9.0, RobotSide.LEFT, new ConfigurationSpace()), 0.1));
 
       scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(0.0, RobotSide.RIGHT, new ConfigurationSpace()), 0.2));
-
+      
+      // setupDualWayPointsPacket();      
+      // DualWayPointsTrajectory endeffectorTrajectory = new DualWayPointsTrajectory(dualWayPointsPacket);      
+      
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       System.out.println("End");
    }
@@ -300,7 +346,7 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
 
       setupWayPointsPacket();
       
-      ConstrainedEndEffectorTrajectory endeffectorTrajectory = new WayPointsTrajectory(wallPosePacket);
+      ConstrainedEndEffectorTrajectory endeffectorTrajectory = new WayPointsTrajectory(wayPointsPacket);
       
       drcBehaviorTestHelper.getControllerFullRobotModel().updateFrames();
       
@@ -358,12 +404,14 @@ public abstract class AvatarCWBPlannerForVRUITest implements MultiRobotTestInter
       drcBehaviorTestHelper.dispatchBehavior(wayPointsByVRUIBehaviorStateMachine);
 
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-
-      setupWayPointsPacket();
-
+      
       System.out.println("WayPointsPacket Dispatch");
-      setupWayPointsPacket();
-      drcBehaviorTestHelper.getBehaviorCommunicationBridge().sendPacketToBehavior(wallPosePacket);
+      
+      setupWayPointsPacket();      
+      setupDualWayPointsPacket();      
+      
+      // drcBehaviorTestHelper.getBehaviorCommunicationBridge().sendPacketToBehavior(wayPointsPacket);
+      drcBehaviorTestHelper.getBehaviorCommunicationBridge().sendPacketToBehavior(dualWayPointsPacket);
       System.out.println("WayPointsPacket Dispatch done");
 
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
