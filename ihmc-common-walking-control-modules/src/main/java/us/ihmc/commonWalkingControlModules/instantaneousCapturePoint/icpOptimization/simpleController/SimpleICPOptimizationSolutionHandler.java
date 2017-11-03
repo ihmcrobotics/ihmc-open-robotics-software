@@ -1,9 +1,8 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController;
 
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.SimpleICPOptimizationController.*;
-
 import java.util.ArrayList;
 
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -24,6 +23,9 @@ public class SimpleICPOptimizationSolutionHandler
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private final boolean useICPControlPlane;
+   private final ICPControlPlane icpControlPlane;
+
    private final YoDouble footstepDeadband;
    private final YoDouble footstepSolutionResolution;
 
@@ -39,9 +41,11 @@ public class SimpleICPOptimizationSolutionHandler
    private final YoDouble angularMomentumMinimizationCostToGo;
 
    private final YoFramePoint2d adjustedICPReferenceLocation;
+   private final YoFramePoint2d unprojectedFootstepSolution;
 
    private final boolean debug;
 
+   private final FramePoint2D locationSolutionOnPlane = new FramePoint2D();
    private final FramePoint2D locationSolution = new FramePoint2D();
    private final FramePoint2D previousLocationSolution = new FramePoint2D();
    private final FramePoint2D clippedLocationSolution = new FramePoint2D();
@@ -55,10 +59,13 @@ public class SimpleICPOptimizationSolutionHandler
 
    private final String yoNamePrefix;
 
-   public SimpleICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, boolean debug, String yoNamePrefix, YoVariableRegistry registry)
+   public SimpleICPOptimizationSolutionHandler(ICPControlPlane icpControlPlane, ICPOptimizationParameters icpOptimizationParameters, boolean useICPControlPlane,
+                                               boolean debug, String yoNamePrefix, YoVariableRegistry registry)
    {
+      this.useICPControlPlane = useICPControlPlane && icpControlPlane != null;
       this.yoNamePrefix = yoNamePrefix;
       this.debug = debug;
+      this.icpControlPlane = icpControlPlane;
 
       if (debug)
       {
@@ -87,6 +94,7 @@ public class SimpleICPOptimizationSolutionHandler
       clippedFootstepAdjustment = new YoFrameVector2d(yoNamePrefix + "ClippedFootstepAdjustment", worldFrame, registry);
 
       adjustedICPReferenceLocation = new YoFramePoint2d(yoNamePrefix + "AdjustedICPReferenceLocation", worldFrame, registry);
+      unprojectedFootstepSolution = new YoFramePoint2d(yoNamePrefix + "UnprojectedFootstepSolution", worldFrame, registry);
 
       footstepDeadband.set(icpOptimizationParameters.getAdjustmentDeadband());
       footstepSolutionResolution.set(icpOptimizationParameters.getFootstepSolutionResolution());
@@ -112,31 +120,40 @@ public class SimpleICPOptimizationSolutionHandler
       }
    }
 
-   private final FramePoint2D referenceFootstepLocation = new FramePoint2D();
+   private final FramePoint3D referenceFootstepLocation = new FramePoint3D();
+   private final FramePoint2D referenceFootstepLocation2D = new FramePoint2D();
+
    public void extractFootstepSolutions(ArrayList<YoFramePoint2d> footstepSolutionsToPack, ArrayList<FramePoint2D> unclippedFootstepSolutionsToPack,
          ArrayList<Footstep> upcomingFootsteps, int numberOfFootstepsToConsider, SimpleICPOptimizationQPSolver solver)
    {
       boolean firstStepAdjusted = false;
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
       {
-         solver.getFootstepSolutionLocation(i, locationSolution);
+         upcomingFootsteps.get(i).getPosition(referenceFootstepLocation);
+         referenceFootstepLocation2D.set(referenceFootstepLocation);
+
+         solver.getFootstepSolutionLocation(i, locationSolutionOnPlane);
+         unprojectedFootstepSolution.set(locationSolutionOnPlane);
+
+         if (useICPControlPlane)
+            icpControlPlane.projectPointFromPlaneOntoSurface(locationSolutionOnPlane, locationSolution, referenceFootstepLocation.getZ());
+         else
+            locationSolution.set(locationSolutionOnPlane);
 
          ReferenceFrame deadbandFrame = upcomingFootsteps.get(i).getSoleReferenceFrame();
 
-         //referenceFootstepLocations.get(i).getFrameTuple2d(referenceFootstepLocation);
-         upcomingFootsteps.get(i).getPosition2d(referenceFootstepLocation);
          footstepSolutionsToPack.get(i).getFrameTuple2d(previousLocationSolution);
          clippedLocationSolution.set(locationSolution);
-         boolean footstepWasAdjusted = applyLocationDeadband(clippedLocationSolution, previousLocationSolution, referenceFootstepLocation,
+         boolean footstepWasAdjusted = applyLocationDeadband(clippedLocationSolution, previousLocationSolution, referenceFootstepLocation2D,
                deadbandFrame, footstepDeadband.getDoubleValue(), footstepSolutionResolution.getDoubleValue());
 
          if (i == 0)
          {
             firstStepAdjusted = footstepWasAdjusted;
             footstepAdjustment.set(locationSolution);
-            footstepAdjustment.sub(referenceFootstepLocation);
+            footstepAdjustment.sub(referenceFootstepLocation2D);
             clippedFootstepAdjustment.set(clippedLocationSolution);
-            clippedFootstepAdjustment.sub(referenceFootstepLocation);
+            clippedFootstepAdjustment.sub(referenceFootstepLocation2D);
          }
 
          footstepSolutionsToPack.get(i).set(clippedLocationSolution);

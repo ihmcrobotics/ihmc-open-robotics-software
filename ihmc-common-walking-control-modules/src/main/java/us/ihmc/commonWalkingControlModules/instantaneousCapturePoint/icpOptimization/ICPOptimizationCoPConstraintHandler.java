@@ -9,15 +9,21 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ICPOptimizationCoPConstraintHandler
 {
-   private static final boolean useControlPolygons = false;
+   private final boolean useICPControlPolygons;
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPControlPolygons icpControlPolygons;
 
    public ICPOptimizationCoPConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons)
    {
+      this(bipedSupportPolygons, icpControlPolygons, false);
+   }
+
+   public ICPOptimizationCoPConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons, boolean useICPControlPolygons)
+   {
       this.bipedSupportPolygons = bipedSupportPolygons;
       this.icpControlPolygons = icpControlPolygons;
+      this.useICPControlPolygons = useICPControlPolygons && icpControlPolygons != null;
    }
 
    public void updateCoPConstraintForDoubleSupport(ICPQPOptimizationSolver solver)
@@ -27,7 +33,7 @@ public class ICPOptimizationCoPConstraintHandler
       for (RobotSide robotSide : RobotSide.values)
       {
          FrameConvexPolygon2d supportPolygon;
-         if (useControlPolygons && icpControlPolygons != null)
+         if (useICPControlPolygons)
             supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(robotSide);
          else
             supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(robotSide);
@@ -42,7 +48,7 @@ public class ICPOptimizationCoPConstraintHandler
       for (RobotSide robotSide : RobotSide.values)
       {
          FrameConvexPolygon2d supportPolygon;
-         if (useControlPolygons && icpControlPolygons != null)
+         if (useICPControlPolygons)
             supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(robotSide);
          else
             supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(robotSide);
@@ -55,7 +61,7 @@ public class ICPOptimizationCoPConstraintHandler
       solver.resetCoPLocationConstraint();
 
       FrameConvexPolygon2d supportPolygon;
-      if (useControlPolygons && icpControlPolygons != null)
+      if (useICPControlPolygons)
          supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(supportSide);
       else
          supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(supportSide);
@@ -67,7 +73,7 @@ public class ICPOptimizationCoPConstraintHandler
       solver.resetCoPLocationConstraint();
 
       FrameConvexPolygon2d supportPolygon;
-      if (useControlPolygons && icpControlPolygons != null)
+      if (useICPControlPolygons)
          supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(supportSide);
       else
          supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(supportSide);

@@ -31,6 +31,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class ICPOptimizationReachabilityConstraintHandler
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final SideDependentList<YoFrameConvexPolygon2d> reachabilityPolygons = new SideDependentList<>();
 
    private final YoFrameConvexPolygon2d contractedReachabilityPolygon;
