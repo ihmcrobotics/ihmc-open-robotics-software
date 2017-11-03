@@ -492,14 +492,12 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       planarRegionUpdateIndex.set(0);
       yoGraphicPlanarRegionsList.submitPlanarRegionsListToRender(planarRegionsList);
 
-      //      while (!yoGraphicPlanarRegionsList.isQueueEmpty())
-//      {
-//         yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
-//         planarRegionUpdateIndex.increment();
-//         tickAndUpdate();
-//      }
-//
-//      tickAndUpdate();
+      while (!yoGraphicPlanarRegionsList.isQueueEmpty())
+      {
+         tickAndUpdate();
+      }
+
+      tickAndUpdate();
    }
 
    private void tickAndUpdate()
@@ -514,7 +512,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       if(!yoGraphicPlanarRegionsList.isQueueEmpty())
       {
          yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
-         planarRegionUpdateIndex.set(0);
+         planarRegionUpdateIndex.increment();
       }
    }
 
