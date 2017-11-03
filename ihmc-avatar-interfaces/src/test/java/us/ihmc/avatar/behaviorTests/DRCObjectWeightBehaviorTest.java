@@ -22,7 +22,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final double epsilon = 10e-8;
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
 

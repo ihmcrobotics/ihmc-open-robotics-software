@@ -32,7 +32,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class AvatarICPOptimizationPushRecoveryTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 

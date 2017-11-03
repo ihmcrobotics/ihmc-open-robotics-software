@@ -57,7 +57,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 {
-   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private BlockingSimulationRunner blockingSimulationRunner;
 
    @Before

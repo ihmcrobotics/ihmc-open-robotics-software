@@ -12,7 +12,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class RobotAllJointsDataCheckerTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
 
    @After

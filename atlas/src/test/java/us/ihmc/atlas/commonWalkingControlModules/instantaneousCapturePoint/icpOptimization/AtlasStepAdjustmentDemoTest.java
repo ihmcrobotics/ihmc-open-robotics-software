@@ -21,7 +21,7 @@ import us.ihmc.tools.thread.ThreadTools;
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
 public class AtlasStepAdjustmentDemoTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final double simulationTime = 15.0;
    private AtlasStepAdjustmentDemo demo;
 

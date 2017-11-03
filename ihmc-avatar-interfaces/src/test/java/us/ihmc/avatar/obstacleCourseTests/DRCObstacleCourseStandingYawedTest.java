@@ -21,7 +21,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
    public abstract class DRCObstacleCourseStandingYawedTest implements MultiRobotTestInterface
    {
-      private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
       private DRCSimulationTestHelper drcSimulationTestHelper;
 

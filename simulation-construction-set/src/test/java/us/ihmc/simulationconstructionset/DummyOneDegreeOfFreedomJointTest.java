@@ -33,7 +33,7 @@ public class DummyOneDegreeOfFreedomJointTest
 
       if (keepSCSUp)
       {
-         SimulationConstructionSetParameters parameters = SimulationTestingParameters.createFromEnvironmentVariables();
+         SimulationConstructionSetParameters parameters = SimulationTestingParameters.createFromSystemProperties();
          SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
          scs.startOnAThread();
          ThreadTools.sleepForever();
