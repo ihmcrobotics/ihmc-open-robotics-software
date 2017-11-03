@@ -1,14 +1,10 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CMPGeneration;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.WalkingTrajectoryType;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.AMGeneration.AngularMomentumTrajectory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.AMGeneration.TorqueTrajectory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectory;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.WalkingTrajectoryType;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -18,12 +14,14 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ReferenceCMPTrajectoryGenerator
 {
    private static final int maxNumberOfCoefficients = 10;
    private static final int maxNumberOfSegments = 5;
    
-   private final String fullPrefix;
    private final List<CMPTrajectory> transferCMPTrajectories = new ArrayList<>();
    private final List<CMPTrajectory> swingCMPTrajectories = new ArrayList<>();
    private final YoDouble verticalGroundReaction;
@@ -39,7 +37,7 @@ public class ReferenceCMPTrajectoryGenerator
 
    public ReferenceCMPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, YoInteger numberOfFootstepsToConsider, YoVariableRegistry registry)
    {
-      this.fullPrefix = namePrefix + "CMPTrajectoryGenerator";
+      String fullPrefix = namePrefix + "CMPTrajectoryGenerator";
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
 
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)

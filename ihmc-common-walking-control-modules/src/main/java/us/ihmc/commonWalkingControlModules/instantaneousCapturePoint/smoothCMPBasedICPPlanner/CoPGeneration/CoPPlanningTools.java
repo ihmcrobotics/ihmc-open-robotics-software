@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
+
+import java.util.List;
 
 public class CoPPlanningTools
 {

@@ -86,6 +86,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    }
 
    @After
