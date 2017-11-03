@@ -53,7 +53,7 @@ public class CoPPointsInFoot
       {
          YoFramePoint copLocation = copLocationsInWorldFrameReadOnly.get(i);
          YoGraphicPosition yoGraphicPosition = new YoGraphicPosition(copLocation.getNamePrefix(), copLocation, pointSize, YoAppearance.Green(),
-                                                                     YoGraphicPosition.GraphicType.BALL);
+                                                                     YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
          graphicsList.add(yoGraphicPosition);
          artifactList.add(yoGraphicPosition.createArtifact());
       }
