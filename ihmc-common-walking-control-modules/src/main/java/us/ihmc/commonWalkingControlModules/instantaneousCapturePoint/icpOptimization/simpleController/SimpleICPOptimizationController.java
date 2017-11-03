@@ -243,9 +243,13 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
       YoGraphicPosition predictedEndOfStateICP = new YoGraphicPosition(yoNamePrefix + "PredictedEndOfStateICP", this.predictedEndOfStateICP, 0.005, YoAppearance.MidnightBlue(),
                                                                        YoGraphicPosition.GraphicType.BALL);
+      YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix + "ClippedFootstepSolution", this.footstepSolutions.get(0), 0.005, YoAppearance.ForestGreen(),
+                                                                        YoGraphicPosition.GraphicType.SOLID_BALL);
       solutionHandler.setupVisualizers(artifactList);
 
       artifactList.add(predictedEndOfStateICP.createArtifact());
+      artifactList.add(clippedFootstepSolution.createArtifact());
+
       artifactList.setVisible(VISUALIZE);
 
       yoGraphicsListRegistry.registerArtifactList(artifactList);
@@ -304,7 +308,6 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    @Override
    public void setSwingSplitFraction(int stepNumber, double splitFraction)
    {
-
    }
 
    @Override
@@ -316,7 +319,6 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    @Override
    public void setFinalTransferSplitFraction(double finalTransferSplitFraction)
    {
-
    }
 
    @Override
@@ -369,6 +371,13 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
 
+      for (int i = 0; i < footstepSolutions.size(); i++)
+      {
+         footstepSolutions.get(i).setToNaN();
+         unclippedFootstepSolutions.get(i).setToNaN();
+      }
+
+
       speedUpTime.set(0.0);
    }
 
@@ -382,6 +391,12 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
 
       initializeOnContactChange(initialTime);
+
+      for (int i = 0; i < footstepSolutions.size(); i++)
+      {
+         footstepSolutions.get(i).setToNaN();
+         unclippedFootstepSolutions.get(i).setToNaN();
+      }
 
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
