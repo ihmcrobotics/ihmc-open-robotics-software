@@ -43,7 +43,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 {
    private static final boolean VISUALIZE = false;
-   private static final boolean debug = false;
+   private static final boolean debug = true;
 
    private static final double ZERO_TIME = 0.0;
 
@@ -371,6 +371,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceICPGenerator.getICPPhaseEntryCornerPoints(icpPhaseEntryCornerPoints);
       referenceICPGenerator.getICPPhaseExitCornerPoints(icpPhaseExitCornerPoints);
       referenceICPGenerator.compute(ZERO_TIME);
+      updateListeners();
       // TODO implement requested hold position
       // TODO implement is done walking
    }
@@ -419,6 +420,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
 
       referenceICPGenerator.getICPPhaseEntryCornerPoints(icpPhaseEntryCornerPoints);
       referenceICPGenerator.getICPPhaseExitCornerPoints(icpPhaseExitCornerPoints);
+      updateListeners();
    }
 
    private void printCoPTrajectories()
