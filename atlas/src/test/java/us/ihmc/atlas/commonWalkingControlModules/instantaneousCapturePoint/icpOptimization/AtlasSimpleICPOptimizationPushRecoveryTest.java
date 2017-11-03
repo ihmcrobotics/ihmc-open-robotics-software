@@ -60,11 +60,13 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
          }
 
+         /*
          @Override
          public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
          {
             return new AtlasContinuousCMPPlannerParameters(new AtlasPhysicalProperties());
          }
+         */
       };
 
       return atlasRobotModel;
