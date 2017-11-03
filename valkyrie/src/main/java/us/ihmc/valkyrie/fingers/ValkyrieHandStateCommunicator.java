@@ -1,7 +1,6 @@
 package us.ihmc.valkyrie.fingers;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.concurrent.TimeUnit;
 
@@ -9,27 +8,29 @@ import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
-import us.ihmc.valkyrieRosControl.ValkyriePriorityParameters;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class ValkyrieHandStateCommunicator
+public class ValkyrieHandStateCommunicator implements RobotController
 {
-   private final PeriodicRealtimeThreadScheduler scheduler = new PeriodicRealtimeThreadScheduler(ValkyriePriorityParameters.HAND_COMMUNICATOR_PRIORITY);
+   private final PeriodicRealtimeThreadScheduler scheduler;
    private final SideDependentList<ConcurrentRingBuffer<HandJointAnglePacket>> packetBuffers = new SideDependentList<>();
    private final SideDependentList<HandJointAnglePacket> packetsForPublish = new SideDependentList<>();
 
    private final SideDependentList<EnumMap<ValkyrieHandJointName, OneDoFJoint>> handJoints = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
-   private GlobalDataProducer dataProducer;
+   private final GlobalDataProducer dataProducer;
 
-   public ValkyrieHandStateCommunicator(FloatingInverseDynamicsJoint rootJoint, ValkyrieHandModel handModel)
+   private boolean isRunning = false;
+
+   public ValkyrieHandStateCommunicator(FullHumanoidRobotModel fullRobotModel, ValkyrieHandModel handModel, GlobalDataProducer dataProducer, PeriodicRealtimeThreadScheduler scheduler)
    {
-      InverseDynamicsJoint[] allJoints = ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor());
+      this.dataProducer = dataProducer;
+      this.scheduler = scheduler;
 
       for (RobotSide robotside : RobotSide.values)
       {
@@ -39,26 +40,36 @@ public class ValkyrieHandStateCommunicator
 
          for (ValkyrieHandJointName jointEnum : ValkyrieHandJointName.values)
          {
-            InverseDynamicsJoint[] foundJoints = ScrewTools.findJointsWithNames(allJoints, jointEnum.getJointName(robotside));
-            if (foundJoints.length != 1)
-               throw new RuntimeException("Expected to find one joint with the name: " + jointEnum.getJointName(robotside) + ", got: "
-                     + Arrays.toString(foundJoints));
-            handJoints.get(robotside).put(jointEnum, (OneDoFJoint) foundJoints[0]);
+            OneDoFJoint joint = fullRobotModel.getOneDoFJointByName(jointEnum.getJointName(robotside));
+            handJoints.get(robotside).put(jointEnum, joint);
          }
       }
+      dataProducer.registerPacketToSkipQueue(HandJointAnglePacket.class);
    }
 
    public void start()
    {
+      if (isRunning)
+         return;
+
       scheduler.schedule(this::publish, 10, TimeUnit.MILLISECONDS);
+      isRunning = true;
    }
 
    public void stop()
    {
       scheduler.shutdown();
+      isRunning = false;
    }
 
-   public void update()
+   @Override
+   public void initialize()
+   {
+      start();
+   }
+
+   @Override
+   public void doControl()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -66,6 +77,8 @@ public class ValkyrieHandStateCommunicator
          HandJointAnglePacket packet = buffer.next();
          if (packet != null)
          {
+            packet.robotSide = robotSide;
+
             for (ValkyrieHandJointName jointEnum : ValkyrieHandJointName.values)
             {
                double q = handJoints.get(robotSide).get(jointEnum).getQ();
@@ -107,6 +120,24 @@ public class ValkyrieHandStateCommunicator
             }
          }
       }
+   }
+
+   @Override
+   public String getDescription()
+   {
+      return null;
+   }
+
+   @Override
+   public String getName()
+   {
+      return null;
+   }
+
+   @Override
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return null;
    }
 
    private class HandJointAnglePacketBuilder implements Builder<HandJointAnglePacket>
