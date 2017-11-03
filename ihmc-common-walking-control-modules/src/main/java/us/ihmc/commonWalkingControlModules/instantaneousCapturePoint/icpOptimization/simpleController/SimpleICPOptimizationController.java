@@ -5,11 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationCoPConstraintHandler;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationControllerHelper;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationReachabilityConstraintHandler;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.*;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -125,6 +121,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
    private final ICPOptimizationCoPConstraintHandler copConstraintHandler;
    private final ICPOptimizationReachabilityConstraintHandler reachabilityConstraintHandler;
+   private final PlanarRegionConstraintProvider planarRegionConstraintProvider;
    private final SimpleICPOptimizationSolutionHandler solutionHandler;
 
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
@@ -232,6 +229,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
                                                                                        registry, yoGraphicsListRegistry);
+      planarRegionConstraintProvider = new PlanarRegionConstraintProvider(yoNamePrefix, VISUALIZE, registry, yoGraphicsListRegistry);
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
@@ -367,6 +365,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
+      planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
 
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
 
@@ -386,6 +385,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
       copConstraintHandler.updateCoPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport(solver);
+      planarRegionConstraintProvider.updatePlanarRegionConstraintForDoubleSupport(solver);
    }
 
    @Override
@@ -402,6 +402,8 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
       copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide, solver);
       reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide, solver);
+      planarRegionConstraintProvider.setActivePlanarRegion(upcomingFootsteps.get(0).getPlanarRegion());
+      planarRegionConstraintProvider.updatePlanarRegionConstraintForSingleSupport(solver);
    }
 
    private void initializeOnContactChange(double initialTime)
@@ -613,7 +615,6 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
          upcomingFootstep.getPosition2d(tempPoint2d);
          solver.setFootstepAdjustmentConditions(recursionMultiplier, scaledFootstepWeights.getX(), scaledFootstepWeights.getY(), footstepAdjustmentSafetyFactor,
                                                 tempPoint2d);
-         solver.setPlanarRegionConstraint(upcomingFootstep.getPlanarRegion());
       }
 
       if (useFootstepRegularization)

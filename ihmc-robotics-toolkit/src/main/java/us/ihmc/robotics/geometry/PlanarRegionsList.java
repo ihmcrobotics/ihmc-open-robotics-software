@@ -39,6 +39,11 @@ public class PlanarRegionsList
       regions.add(region);
    }
 
+   public void clear()
+   {
+      regions.clear();
+   }
+
    /**
     * Clears the planar regions list.
     */
