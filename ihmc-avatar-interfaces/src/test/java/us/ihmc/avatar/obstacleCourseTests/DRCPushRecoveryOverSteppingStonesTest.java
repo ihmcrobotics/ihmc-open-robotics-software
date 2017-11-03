@@ -53,6 +53,7 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
    @Before
    public void showMemoryUsageBeforeTest()
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
