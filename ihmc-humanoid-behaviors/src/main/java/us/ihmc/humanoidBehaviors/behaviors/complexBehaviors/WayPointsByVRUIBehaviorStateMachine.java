@@ -13,12 +13,13 @@ import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.DualWayPointsPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WayPointsPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.WayPointsTrajectory;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DualWayPointsTrajectory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.FramePose;
@@ -41,6 +42,7 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
    private FramePose centerFramePose;
 
    private final ConcurrentListeningQueue<WayPointsPacket> wayPointsPacketQueue = new ConcurrentListeningQueue<WayPointsPacket>(5);
+   private final ConcurrentListeningQueue<DualWayPointsPacket> dualWayPointsPacketQueue = new ConcurrentListeningQueue<DualWayPointsPacket>(5);
 
    private final ConcurrentListeningQueue<SetBooleanParameterPacket> confirmQueue = new ConcurrentListeningQueue<SetBooleanParameterPacket>(5);
 
@@ -70,6 +72,7 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
       this.yoTime = yoTime;
 
       attachNetworkListeningQueue(wayPointsPacketQueue, WayPointsPacket.class);
+      attachNetworkListeningQueue(dualWayPointsPacketQueue, DualWayPointsPacket.class);
 
       attachNetworkListeningQueue(confirmQueue, SetBooleanParameterPacket.class);
 
@@ -95,7 +98,8 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
          @Override
          public boolean isDone()
          {
-            return wayPointsPacketQueue.isNewPacketAvailable();
+            //return wayPointsPacketQueue.isNewPacketAvailable();
+            return dualWayPointsPacketQueue.isNewPacketAvailable();
          }
       };
 
@@ -107,13 +111,12 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
          {
             PrintTools.info("setBehaviorInput PLANNING " + yoTime.getDoubleValue());
 
-            // TODO
-            WayPointsPacket latestPacket = wayPointsPacketQueue.getLatestPacket();
-
-            PrintTools.info("numberOfWayPoints " + latestPacket.numberOfWayPoints);
+            //WayPointsPacket latestPacket = wayPointsPacketQueue.getLatestPacket();
+            DualWayPointsPacket latestPacket = dualWayPointsPacketQueue.getLatestPacket();
 
             // TODO
-            ConstrainedEndEffectorTrajectory endeffectorTrajectory = new WayPointsTrajectory(latestPacket);
+            //ConstrainedEndEffectorTrajectory endeffectorTrajectory = new WayPointsTrajectory(latestPacket);
+            ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DualWayPointsTrajectory(latestPacket);
             
             planConstrainedWholeBodyTrajectoryBehavior.setInputs(endeffectorTrajectory, fullRobotModel);
 
