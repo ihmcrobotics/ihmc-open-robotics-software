@@ -166,4 +166,9 @@ public class ICPControlPolygons
    {
       return footControlPolygonsInWorldFrame.get(robotSide);
    }
+
+   public ICPControlPlane getIcpControlPlane()
+   {
+      return icpControlPlane;
+   }
 }
