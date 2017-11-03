@@ -1,5 +1,9 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionVisualizer;
+import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.SimpleICPOptimizationQPSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -11,7 +15,9 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -25,13 +31,20 @@ public class PlanarRegionConstraintProvider
    private final YoFrameConvexPolygon2d activePlanarRegion;
 
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
+   private final BipedSupportPolygons bipedSupportPolygons;
 
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private final YoDouble distanceToPlanarRegionEdgeForNoOverhang;
 
-   public PlanarRegionConstraintProvider(SideDependentList<? extends ContactablePlaneBody> contactableFeet, String yoNamePrefix, boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   private final OneStepCaptureRegionCalculator captureRegionCalculator;
+
+   public PlanarRegionConstraintProvider(WalkingControllerParameters parameters, BipedSupportPolygons bipedSupportPolygons,
+                                         SideDependentList<? extends ContactablePlaneBody> contactableFeet, String yoNamePrefix, boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.contactableFeet = contactableFeet;
+      this.bipedSupportPolygons = bipedSupportPolygons;
+
+      captureRegionCalculator = new OneStepCaptureRegionCalculator(bipedSupportPolygons, parameters, yoNamePrefix, registry, yoGraphicsListRegistry);
 
       activePlanarRegion = new YoFrameConvexPolygon2d(yoNamePrefix + "ActivePlanarRegionConstraint", "", worldFrame, 12, registry);
       distanceToPlanarRegionEdgeForNoOverhang = new YoDouble(yoNamePrefix + "DistanceToPlanarRegionEdgeForNoOverhang", registry);
@@ -86,11 +99,15 @@ public class PlanarRegionConstraintProvider
 
    public void updatePlanarRegionConstraintForDoubleSupport(SimpleICPOptimizationQPSolver solver)
    {
+      captureRegionCalculator.hideCaptureRegion();
       solver.resetPlanarRegionConstraint();
    }
 
-   public void updatePlanarRegionConstraintForSingleSupport(SimpleICPOptimizationQPSolver solver)
+   public void updatePlanarRegionConstraintForSingleSupport(RobotSide supportSide, double swingTimeRemaining, FramePoint2D currentICP, double omega0, SimpleICPOptimizationQPSolver solver)
    {
+      captureRegionCalculator.calculateCaptureRegion(supportSide.getOppositeSide(), swingTimeRemaining, currentICP, omega0,
+                                                     bipedSupportPolygons.getFootPolygonInWorldFrame(supportSide));
+
       solver.resetPlanarRegionConstraint();
       if (!planarRegionsList.isEmpty())
       {
