@@ -29,6 +29,7 @@ import us.ihmc.communication.packets.HumanoidKinematicsToolboxConfigurationMessa
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.geometry.polytope.DCELPolytope.Frame.FrameConvexPolytope;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -412,8 +413,9 @@ public class KinematicsToolboxController extends ToolboxController
       FeedbackControlCommandList allFeedbackControlCommands = new FeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
 
       /*
-       * Submitting and requesting the controller core to run the feedback controllers, formulate
-       * and solve the optimization problem for this control tick.
+       * Submitting and requesting the controller core to run the feedback
+       * controllers, formulate and solve the optimization problem for this
+       * control tick.
        */
       controllerCore.reset();
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
@@ -459,9 +461,9 @@ public class KinematicsToolboxController extends ToolboxController
          KinematicsToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxConfigurationCommand.class);
 
          /*
-          * If there is a new privileged configuration, the desired robot state is updated alongside
-          * with the privileged configuration and the initial center of mass position and foot
-          * poses.
+          * If there is a new privileged configuration, the desired robot state
+          * is updated alongside with the privileged configuration and the
+          * initial center of mass position and foot poses.
           */
          KinematicsToolboxHelper.setRobotStateFromPrivilegedConfigurationData(command, rootJoint, jointNameBasedHashCodeMap);
          if (command.hasPrivilegedJointAngles() || command.hasPrivilegedRootJointPosition() || command.hasPrivilegedRootJointOrientation())
@@ -489,9 +491,10 @@ public class KinematicsToolboxController extends ToolboxController
 
       FeedbackControlCommandList inputs = new FeedbackControlCommandList();
       /*
-       * By using the map, we ensure that there is only one command per end-effector (including the
-       * center of mass). The map is also useful for remembering commands received during the
-       * previous control ticks of the same run.
+       * By using the map, we ensure that there is only one command per
+       * end-effector (including the center of mass). The map is also useful for
+       * remembering commands received during the previous control ticks of the
+       * same run.
        */
       userFeedbackCommands.values().forEach(inputs::addCommand);
       return inputs;

@@ -1,8 +1,10 @@
 package us.ihmc.geometry.polytope;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -38,8 +40,8 @@ public class ConvexPolytopeFromExpandingPolytopeEntryGeneratorTest
       ConvexPolytopeFromExpandingPolytopeEntryGenerator generatorTwo = new ConvexPolytopeFromExpandingPolytopeEntryGenerator();
       ConvexPolytope convexPolytope = generatorTwo.generateConvexPolytope(expandingPolytope);
 
-      ArrayList<PolytopeVertex[]> edges = convexPolytope.getEdges();
-      ArrayList<PolytopeVertex> vertices = convexPolytope.getVertices();
+      List<PolytopeVertex[]> edges = convexPolytope.getEdges();
+      List<PolytopeVertex> vertices = convexPolytope.getVertices();
 
       assertEquals(numberOfVertices, vertices.size());
       assertEquals(30, edges.size());

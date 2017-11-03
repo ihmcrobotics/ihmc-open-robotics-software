@@ -6,7 +6,9 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -19,6 +21,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 public class GilbertJohnsonKeerthiCollisionDetectorTest
 {
    private static boolean VERBOSE = false;
+   private static final double EPSILON = Epsilons.ONE_MILLIONTH;
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -357,6 +360,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
             }
 
             // Make sure the projection projects to itself:
+
             checkPointProjectsToItself(detector, polytopeOne, closestPointOnPolytopeOne, 1e-4);
             checkPointProjectsToItself(detector, polytopeTwo, closestPointOnPolytopeTwo, 1e-4);
 
@@ -370,7 +374,6 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
             else
             {
                numberNotColliding++;
-
                Point3D pointHalfwayBetweenPolytopes = new Point3D(closestPointOnPolytopeOne);
                pointHalfwayBetweenPolytopes.add(closestPointOnPolytopeTwo);
                pointHalfwayBetweenPolytopes.scale(0.5);
@@ -404,7 +407,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
          System.out.println("number not colliding = " + numberNotColliding);
       }
 
-      // Make sure some are both colliding and not colliding
+      // Make sure some are both colliding and not collidingEPSILON
       assertTrue("numberColliding = " + numberColliding, numberColliding > 1000);
       assertTrue("numberNotColliding = " + numberNotColliding, numberNotColliding > 1000);
    }
@@ -520,7 +523,6 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       {
          assertFalse(shouldStillBeOutside);
       }
-
       EuclidCoreTestTools.assertTuple3DEquals(pointItShouldProjectTo, projectionPoint, epsilon);
 
       return projectionPoint;
@@ -539,7 +541,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       {
          printTroublesomeOne(polytope, closestPointOnPolytope);
       }
-      assertTrue(" distanceBetweenTheTwoProjections = " + distanceBetweenTheTwoProjections, distanceBetweenTheTwoProjections < epsilon);
+      assertTrue(" distanceBetweenTheTwoProjections = " + distanceBetweenTheTwoProjections + " Polytope: " + polytope.toString() + " PointOnPolytope: " + closestPointCheckPolytope.toString(), distanceBetweenTheTwoProjections < epsilon);
    }
 
    private void printTroublesomeOne(SupportingVertexHolder polytope, Point3D pointToProject)

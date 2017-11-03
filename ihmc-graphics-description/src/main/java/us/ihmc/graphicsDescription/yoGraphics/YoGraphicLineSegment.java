@@ -3,6 +3,7 @@ package us.ihmc.graphicsDescription.yoGraphics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -109,7 +110,7 @@ public class YoGraphicLineSegment extends YoGraphicVector
       return new double[] { scaleFactor };
    }
 
-   public void setStartAndEnd(Point3D startPoint, Point3D endPoint)
+   public void setStartAndEnd(Point3DReadOnly startPoint, Point3DReadOnly endPoint)
    {
       this.startX.set(startPoint.getX());
       this.startY.set(startPoint.getY());
