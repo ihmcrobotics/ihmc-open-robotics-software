@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController;
 
-import java.util.ArrayList;
-
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -41,7 +39,7 @@ public class SimpleICPOptimizationSolutionHandler
    private final YoDouble angularMomentumMinimizationCostToGo;
 
    private final YoFramePoint2d adjustedICPReferenceLocation;
-   private final YoFramePoint2d unprojectedFootstepSolution;
+   private final YoFramePoint2d controlPlaneFootstepSolution;
 
    private final boolean debug;
 
@@ -99,7 +97,7 @@ public class SimpleICPOptimizationSolutionHandler
       clippedFootstepAdjustment = new YoFrameVector2d(yoNamePrefix + "ClippedFootstepAdjustment", worldFrame, registry);
 
       adjustedICPReferenceLocation = new YoFramePoint2d(yoNamePrefix + "AdjustedICPReferenceLocation", worldFrame, registry);
-      unprojectedFootstepSolution = new YoFramePoint2d(yoNamePrefix + "UnprojectedFootstepSolution", worldFrame, registry);
+      controlPlaneFootstepSolution = new YoFramePoint2d(yoNamePrefix + "ControlPlaneFootstepSolution", worldFrame, registry);
 
       footstepDeadband.set(icpOptimizationParameters.getAdjustmentDeadband());
       footstepSolutionResolution.set(icpOptimizationParameters.getFootstepSolutionResolution());
@@ -138,7 +136,7 @@ public class SimpleICPOptimizationSolutionHandler
          referenceFootstepLocation2D.set(referenceFootstepLocation);
 
          solver.getFootstepSolutionLocation(i, locationSolutionOnPlane);
-         unprojectedFootstepSolution.set(locationSolutionOnPlane);
+         controlPlaneFootstepSolution.set(locationSolutionOnPlane);
 
          if (useICPControlPlane)
             icpControlPlane.projectPointFromPlaneOntoSurface(locationSolutionOnPlane, locationSolution, referenceFootstepLocation.getZ());

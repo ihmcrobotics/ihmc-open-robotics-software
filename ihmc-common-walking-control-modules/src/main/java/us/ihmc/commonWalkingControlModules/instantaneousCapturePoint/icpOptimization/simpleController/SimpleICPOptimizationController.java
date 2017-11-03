@@ -86,6 +86,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
    private final ArrayList<Footstep> upcomingFootsteps = new ArrayList<>();
    private final YoFramePoint2d upcomingFootstepLocation;
+   private final YoFramePoint2d controlPlaneFootstepLocation;
    private final YoFramePoint2d footstepSolution;
    private final FramePoint2D unclippedFootstepSolution = new FramePoint2D();
 
@@ -212,6 +213,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       minimumTimeRemaining.set(icpOptimizationParameters.getMinimumTimeRemaining());
 
       upcomingFootstepLocation = new YoFramePoint2d(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
+      controlPlaneFootstepLocation = new YoFramePoint2d(yoNamePrefix + "ControlPlaneFootstepLocation", worldFrame, registry);
       footstepSolution = new YoFramePoint2d(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
 
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
@@ -359,8 +361,11 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
    private void updateYoFootsteps()
    {
-      upcomingFootsteps.get(0).getPosition2d(tempPoint2d);
-      upcomingFootstepLocation.set(tempPoint2d);
+      if (upcomingFootsteps.size() > 0)
+      {
+         upcomingFootsteps.get(0).getPosition2d(tempPoint2d);
+         upcomingFootstepLocation.set(tempPoint2d);
+      }
    }
 
    @Override
@@ -647,8 +652,9 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
             icpControlPlane.projectPointOntoControlPlane(tempPoint3d, projectedTempPoint3d);
          else
             projectedTempPoint3d.set(tempPoint3d);
-         tempPoint2d.set(tempPoint3d);
+         tempPoint2d.set(projectedTempPoint3d);
 
+         controlPlaneFootstepLocation.set(tempPoint2d);
          solver.setFootstepAdjustmentConditions(recursionMultiplier, scaledFootstepWeights.getX(), scaledFootstepWeights.getY(), footstepAdjustmentSafetyFactor,
                                                 tempPoint2d);
       }

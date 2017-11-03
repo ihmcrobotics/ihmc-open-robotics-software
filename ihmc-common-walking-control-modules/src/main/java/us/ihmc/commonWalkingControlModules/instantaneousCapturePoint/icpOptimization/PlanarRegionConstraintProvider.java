@@ -111,7 +111,7 @@ public class PlanarRegionConstraintProvider
       solver.resetPlanarRegionConstraint();
       if (!planarRegionsList.isEmpty())
       {
-         solver.setPlanarRegionConstraint(planarRegionsList.getLastPlanarRegion(), distanceToPlanarRegionEdgeForNoOverhang.getDoubleValue());
+         //solver.setPlanarRegionConstraint(planarRegionsList.getLastPlanarRegion(), distanceToPlanarRegionEdgeForNoOverhang.getDoubleValue());
          activePlanarRegion.setConvexPolygon2d(planarRegionsList.getLastPlanarRegion().getConvexHull());
       }
    }
