@@ -71,7 +71,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
    public void testRunsTheSameWayTwiceJustStanding() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
@@ -152,7 +152,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
    public void testWalkingOverSmallPlatformQuickly() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
@@ -195,7 +195,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
    public void testSidestepOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM_TURNED;
@@ -230,7 +230,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
    public void testSidestepOverSmallWall() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_WALL;
@@ -265,7 +265,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
    public void testWalkingOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM;
@@ -310,7 +310,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
    public void testWalkingOntoMediumPlatformToesTouching() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.MEDIUM_PLATFORM;
@@ -347,7 +347,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
    public void testWalkingOffOfMediumPlatform() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM;
@@ -384,7 +384,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
 	public void testWalkingOffOfMediumPlatformSlowSteps() throws SimulationExceededMaximumTimeException
 	{
-	   simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+	   simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 	   BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
 	   DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM;

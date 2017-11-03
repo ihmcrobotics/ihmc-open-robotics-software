@@ -43,7 +43,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FootstepPlanningWithBodyPathTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getKeepSCSUp();
 
    @Rule

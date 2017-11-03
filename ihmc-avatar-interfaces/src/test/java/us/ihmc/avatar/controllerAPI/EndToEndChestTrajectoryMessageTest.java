@@ -51,7 +51,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final double EPSILON_FOR_DESIREDS = 5.0e-4;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;

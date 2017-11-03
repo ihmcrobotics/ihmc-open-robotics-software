@@ -32,7 +32,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTestInterface
 {
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private static final boolean LOCAL_MODE = false;

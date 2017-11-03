@@ -43,7 +43,7 @@ import us.ihmc.tools.thread.ThreadTools;
 @ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class FiducialDetectorFromCameraImagesTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    @ContinuousIntegrationTest(estimatedDuration = 5.0)
    @Test(timeout = 300000)

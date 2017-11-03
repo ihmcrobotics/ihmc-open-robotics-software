@@ -80,7 +80,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final double EPSILON_FOR_DESIREDS = 1.2e-4;
    private static final double EPSILON_FOR_HEIGHT = 1.0e-2;
 
