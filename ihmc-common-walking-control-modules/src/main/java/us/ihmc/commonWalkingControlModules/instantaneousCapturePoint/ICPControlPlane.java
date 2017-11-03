@@ -34,20 +34,40 @@ public class ICPControlPlane
 
    public void projectPointOntoControlPlane(FramePoint3D pointToProject, FramePoint3D projectionToPack)
    {
+      ReferenceFrame referenceFrame = pointToProject.getReferenceFrame();
       pointToProject.changeFrame(centerOfMassFrame);
+
       projectPointOntoControlPlane(pointToProject, projectionToPack, controlPlaneHeight.getDoubleValue());
+
+      pointToProject.changeFrame(referenceFrame);
+      projectionToPack.changeFrame(referenceFrame);
    }
 
    public void projectPointFromPlaneOntoSurface(FramePoint3D pointToProject, FramePoint3D projectionToPack, double surfaceHeight)
    {
+      ReferenceFrame referenceFrame = pointToProject.getReferenceFrame();
+      pointToProject.setZ(surfaceHeight);
       pointToProject.changeFrame(centerOfMassFrame);
-      projectPointFromControlPlaneOntoSurface(pointToProject, projectionToPack, controlPlaneHeight.getDoubleValue(), surfaceHeight);
+
+      double surfaceHeightInCoMFrame = pointToProject.getZ();
+      projectPointFromControlPlaneOntoSurface(pointToProject, projectionToPack, controlPlaneHeight.getDoubleValue(), surfaceHeightInCoMFrame);
+
+      pointToProject.changeFrame(referenceFrame);
+      projectionToPack.changeFrame(referenceFrame);
    }
+
+   private final FramePoint3D tempPoint = new FramePoint3D();
 
    public void projectPointFromPlaneOntoSurface(FramePoint2D pointToProject, FramePoint2D projectionToPack, double surfaceHeight)
    {
-      pointToProject.changeFrame(centerOfMassFrame);
-      projectPointFromControlPlaneOntoSurface(pointToProject, projectionToPack, controlPlaneHeight.getDoubleValue(), surfaceHeight);
+      ReferenceFrame referenceFrame = pointToProject.getReferenceFrame();
+      tempPoint.setIncludingFrame(pointToProject, surfaceHeight);
+      tempPoint.changeFrame(centerOfMassFrame);
+
+      double surfaceHeightInCoMFrame = tempPoint.getZ();
+      projectPointFromControlPlaneOntoSurface(pointToProject, projectionToPack, controlPlaneHeight.getDoubleValue(), surfaceHeightInCoMFrame);
+
+      projectionToPack.changeFrame(referenceFrame);
    }
 
    private static void projectPointOntoControlPlane(FramePoint3D pointToProject, FramePoint3D projectionToPack, double planeHeight)
@@ -57,6 +77,11 @@ public class ICPControlPlane
    }
 
    private static void projectPointFromControlPlaneOntoSurface(FramePoint3D pointToProject, FramePoint3D projectionToPack, double planeHeight, double surfaceHeight)
+   {
+      projectPoint(pointToProject, projectionToPack, surfaceHeight, planeHeight);
+   }
+
+   private static void projectPointFromControlPlaneOntoSurface(FramePoint3D pointToProject, FramePoint2D projectionToPack, double planeHeight, double surfaceHeight)
    {
       projectPoint(pointToProject, projectionToPack, surfaceHeight, planeHeight);
    }
@@ -74,6 +99,12 @@ public class ICPControlPlane
    }
 
    private static void projectPoint(FramePoint2D pointToProject, FramePoint2D projectionToPack, double projectedHeight, double unprojectedHeight)
+   {
+      projectionToPack.setIncludingFrame(pointToProject);
+      projectionToPack.scale(projectedHeight / unprojectedHeight);
+   }
+
+   private static void projectPoint(FramePoint3D pointToProject, FramePoint2D projectionToPack, double projectedHeight, double unprojectedHeight)
    {
       projectionToPack.setIncludingFrame(pointToProject);
       projectionToPack.scale(projectedHeight / unprojectedHeight);
