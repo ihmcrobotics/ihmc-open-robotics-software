@@ -26,7 +26,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class AvatarPushAndWalkBehaviorTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private PushRobotController pushRobotController;
 

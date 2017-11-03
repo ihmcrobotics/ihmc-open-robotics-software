@@ -35,7 +35,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterface
 {
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private BlockingSimulationRunner blockingSimulationRunner;
    private DRCSimulationTestHelper drcSimulationTestHelper;
 

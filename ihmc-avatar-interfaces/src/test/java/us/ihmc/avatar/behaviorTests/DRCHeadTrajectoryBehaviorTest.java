@@ -33,7 +33,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    @Before
    public void showMemoryUsageBeforeTest()

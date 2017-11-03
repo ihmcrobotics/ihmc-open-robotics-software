@@ -49,7 +49,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiRobotTestInterface
 {
-   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private final boolean VISUALIZE = simulationTestingParameters.getKeepSCSUp();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;

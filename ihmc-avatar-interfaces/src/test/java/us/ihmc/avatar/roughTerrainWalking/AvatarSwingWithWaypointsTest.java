@@ -36,7 +36,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInterface
 {
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    public void testRegularSwingWithWaypoints() throws SimulationExceededMaximumTimeException

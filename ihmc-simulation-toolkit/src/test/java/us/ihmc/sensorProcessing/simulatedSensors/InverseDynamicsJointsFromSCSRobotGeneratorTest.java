@@ -49,7 +49,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private BlockingSimulationRunner blockingSimulationRunner;
    private AssertionError assertionError;
 

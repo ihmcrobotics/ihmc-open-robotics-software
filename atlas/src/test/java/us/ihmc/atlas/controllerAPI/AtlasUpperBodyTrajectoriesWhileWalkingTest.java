@@ -55,7 +55,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class AtlasUpperBodyTrajectoriesWhileWalkingTest
 {
-   protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    static
    {
       //TODO: remove this once state estimator parameters are tuned

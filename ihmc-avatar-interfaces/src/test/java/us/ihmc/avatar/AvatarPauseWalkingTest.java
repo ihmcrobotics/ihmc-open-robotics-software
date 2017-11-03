@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 {
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private DRCRobotModel robotModel;
    private YoBoolean walkPaused;

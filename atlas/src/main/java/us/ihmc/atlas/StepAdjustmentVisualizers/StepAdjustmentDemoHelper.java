@@ -37,7 +37,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class StepAdjustmentDemoHelper
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    // Increase to 10 when you want the sims to run a little faster and don't need the data.
    private final int recordFrequencySpeedup = 1;

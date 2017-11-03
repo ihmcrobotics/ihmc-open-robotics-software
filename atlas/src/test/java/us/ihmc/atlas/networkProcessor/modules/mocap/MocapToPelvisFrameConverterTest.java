@@ -28,7 +28,7 @@ import us.ihmc.tools.thread.ThreadTools;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class MocapToPelvisFrameConverterTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private final Random random = new Random(456654321123L);
 
    @Before

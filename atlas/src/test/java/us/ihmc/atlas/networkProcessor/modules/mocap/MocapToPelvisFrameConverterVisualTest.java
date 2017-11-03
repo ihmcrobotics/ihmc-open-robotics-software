@@ -32,7 +32,7 @@ import us.ihmc.tools.thread.ThreadTools;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
 public class MocapToPelvisFrameConverterVisualTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final String modelDirectory = "models/GFE/atlas_description/meshes_unplugged/";
    private final Random random = new Random(456654321123L);
 

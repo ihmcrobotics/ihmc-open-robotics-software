@@ -44,7 +44,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final Vector3D zeroVector = new Vector3D();
 

@@ -46,7 +46,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class DRCInverseDynamicsCalculatorTestHelper
 {
-   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private final YoVariableRegistry registry = new YoVariableRegistry("InverseDynamicsCalculatorTestHelper");
 
