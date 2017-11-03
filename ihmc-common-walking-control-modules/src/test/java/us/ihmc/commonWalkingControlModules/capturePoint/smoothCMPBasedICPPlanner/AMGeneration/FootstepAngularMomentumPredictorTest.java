@@ -177,13 +177,12 @@ public class FootstepAngularMomentumPredictorTest
       midFeetFrame = new MidFootZUpGroundFrame(testName + "MidFeetFrame", soleFrames.get(RobotSide.RIGHT), soleFrames.get(RobotSide.LEFT));
       BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(ankleFrames, midFeetFrame, soleFrames, testRegistry, null);
       bipedSupportPolygons.updateUsingContactStates(contactStates);
-      copTrajectoryGenerator = new ReferenceCoPTrajectoryGenerator(testName + "CoPGenerator", testParameters.getNumberOfCoPWayPointsPerFoot(),
+      copTrajectoryGenerator = new ReferenceCoPTrajectoryGenerator(testName + "CoPGenerator",
                                                                    testParameters.getNumberOfFootstepsToConsider(), bipedSupportPolygons, contactableFeet,
                                                                    numberOfFootstepsToConsider, swingDurations, transferDurations, swingSplitFractions,
                                                                    swingShiftFractions, transferSplitFractions, testRegistry);
-      icpTrajectoryGenerator = new ReferenceICPTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isStanding, isInitialTransfer, isDoubleSupport,
-                                                                   false, testRegistry);
-      comTrajectoryGenerator = new ReferenceCoMTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isStanding, isInitialTransfer, isDoubleSupport,
+      icpTrajectoryGenerator = new ReferenceICPTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, false, testRegistry);
+      comTrajectoryGenerator = new ReferenceCoMTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, isDoubleSupport,
                                                                    testRegistry);
       angularMomentumGenerator = new FootstepAngularMomentumPredictor(testName, omega, true, testRegistry);
       copTrajectoryGenerator.initializeParameters(testParameters);
@@ -244,7 +243,6 @@ public class FootstepAngularMomentumPredictorTest
 
       comTrajectoryGenerator.setNumberOfRegisteredSteps(copTrajectoryGenerator.getNumberOfFootstepsRegistered());
       comTrajectoryGenerator.initializeForTransfer(0.0, copTrajectoryGenerator.getTransferCoPTrajectories(), copTrajectoryGenerator.getSwingCoPTrajectories(),
-                                                   icpTrajectoryGenerator.getICPPositionFromCoPDesiredInitialList(),
                                                    icpTrajectoryGenerator.getICPPositonFromCoPDesiredFinalList());
 
       List<FramePoint3D> comInitialPositionList = comTrajectoryGenerator.getCoMPositionDesiredInitialList();
@@ -327,7 +325,6 @@ public class FootstepAngularMomentumPredictorTest
 
       comTrajectoryGenerator.setNumberOfRegisteredSteps(copTrajectoryGenerator.getNumberOfFootstepsRegistered());
       comTrajectoryGenerator.initializeForTransfer(0.0, copTrajectoryGenerator.getTransferCoPTrajectories(), copTrajectoryGenerator.getSwingCoPTrajectories(),
-                                                   icpTrajectoryGenerator.getICPPositionFromCoPDesiredInitialList(),
                                                    icpTrajectoryGenerator.getICPPositonFromCoPDesiredFinalList());
       List<FramePoint3D> comInitialPositionList = comTrajectoryGenerator.getCoMPositionDesiredInitialList();
       List<FramePoint3D> comFinalPositionList = comTrajectoryGenerator.getCoMPositionDesiredFinalList();
@@ -469,7 +466,6 @@ public class FootstepAngularMomentumPredictorTest
 
       comTrajectoryGenerator.setNumberOfRegisteredSteps(copTrajectoryGenerator.getNumberOfFootstepsRegistered());
       comTrajectoryGenerator.initializeForSwing(0.0, copTrajectoryGenerator.getTransferCoPTrajectories(), copTrajectoryGenerator.getSwingCoPTrajectories(),
-                                                icpTrajectoryGenerator.getICPPositionFromCoPDesiredInitialList(),
                                                 icpTrajectoryGenerator.getICPPositonFromCoPDesiredFinalList());
 
       List<FramePoint3D> comInitialPositionList = comTrajectoryGenerator.getCoMPositionDesiredInitialList();
