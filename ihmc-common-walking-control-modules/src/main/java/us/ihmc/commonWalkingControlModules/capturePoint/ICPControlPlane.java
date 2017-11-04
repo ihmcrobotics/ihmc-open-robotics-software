@@ -58,16 +58,19 @@ public class ICPControlPlane
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
-   public void projectPointFromPlaneOntoSurface(FramePoint2D pointToProject, FramePoint2D projectionToPack, double surfaceHeight)
+   public void projectPointFromPlaneOntoSurface(FramePoint2D pointToProject, FramePoint2D projectionToPack, double surfaceHeightInWorld)
    {
       ReferenceFrame referenceFrame = pointToProject.getReferenceFrame();
-      tempPoint.setIncludingFrame(pointToProject, surfaceHeight);
+      pointToProject.changeFrame(ReferenceFrame.getWorldFrame());
+
+      tempPoint.setIncludingFrame(pointToProject, surfaceHeightInWorld);
       tempPoint.changeFrame(centerOfMassFrame);
 
       double surfaceHeightInCoMFrame = tempPoint.getZ();
-      projectPointFromControlPlaneOntoSurface(pointToProject, projectionToPack, controlPlaneHeight.getDoubleValue(), surfaceHeightInCoMFrame);
+      projectPointFromControlPlaneOntoSurface(tempPoint, projectionToPack, controlPlaneHeight.getDoubleValue(), surfaceHeightInCoMFrame);
 
       projectionToPack.changeFrame(referenceFrame);
+      pointToProject.changeFrame(referenceFrame);
    }
 
    private static void projectPointOntoControlPlane(FramePoint3D pointToProject, FramePoint3D projectionToPack, double planeHeight)
