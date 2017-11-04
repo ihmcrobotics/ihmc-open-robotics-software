@@ -19,6 +19,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -85,10 +86,10 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    private final YoFramePoint2d feedbackCMPDelta = new YoFramePoint2d(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
 
    private final ArrayList<Footstep> upcomingFootsteps = new ArrayList<>();
-   private final YoFramePoint2d upcomingFootstepLocation;
-   private final YoFramePoint2d controlPlaneFootstepLocation;
+   private final YoFramePoint upcomingFootstepLocation;
+   private final YoFramePoint2d footstepLocationSubmitted;
    private final YoFramePoint2d footstepSolution;
-   private final FramePoint2D unclippedFootstepSolution = new FramePoint2D();
+   private final YoFramePoint2d unclippedFootstepSolution;
 
    private final YoDouble forwardFootstepWeight = new YoDouble(yoNamePrefix + "ForwardFootstepWeight", registry);
    private final YoDouble lateralFootstepWeight = new YoDouble(yoNamePrefix + "LateralFootstepWeight", registry);
@@ -212,9 +213,10 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
       minimumTimeRemaining.set(icpOptimizationParameters.getMinimumTimeRemaining());
 
-      upcomingFootstepLocation = new YoFramePoint2d(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
-      controlPlaneFootstepLocation = new YoFramePoint2d(yoNamePrefix + "ControlPlaneFootstepLocation", worldFrame, registry);
+      upcomingFootstepLocation = new YoFramePoint(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
+      footstepLocationSubmitted = new YoFramePoint2d(yoNamePrefix + "FootstepLocationSubmitted", worldFrame, registry);
       footstepSolution = new YoFramePoint2d(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
+      unclippedFootstepSolution = new YoFramePoint2d(yoNamePrefix + "UnclippedFootstepSolutionLocation", worldFrame, registry);
 
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
       {
@@ -346,8 +348,9 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
             if (footstepIndex == 0)
             {
+               footstep.getPosition(tempPoint3d);
                footstep.getPosition2d(tempPoint2d);
-               upcomingFootstepLocation.set(tempPoint2d);
+               upcomingFootstepLocation.set(tempPoint3d);
                footstepSolution.set(tempPoint2d);
                unclippedFootstepSolution.set(tempPoint2d);
             }
@@ -520,7 +523,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       this.icpError.set(currentICP);
       this.icpError.sub(desiredICP);
 
-      updateYoFootsteps();
+      //updateYoFootsteps();
 
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
@@ -646,15 +649,18 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
          predictedEndOfStateICP.scale(Math.exp(omega0 * timeRemainingInState.getDoubleValue()));
          predictedEndOfStateICP.add(perfectCMP);
 
+         /*
          Footstep upcomingFootstep = upcomingFootsteps.get(footstepIndex);
          upcomingFootstep.getPosition(tempPoint3d);
+         */
+         upcomingFootstepLocation.getFrameTuple(tempPoint3d);
          if (useICPControlPlane)
             icpControlPlane.projectPointOntoControlPlane(tempPoint3d, projectedTempPoint3d);
          else
             projectedTempPoint3d.set(tempPoint3d);
          tempPoint2d.set(projectedTempPoint3d);
 
-         controlPlaneFootstepLocation.set(tempPoint2d);
+         footstepLocationSubmitted.set(tempPoint2d);
          solver.setFootstepAdjustmentConditions(recursionMultiplier, scaledFootstepWeights.getX(), scaledFootstepWeights.getY(), footstepAdjustmentSafetyFactor,
                                                 tempPoint2d);
       }

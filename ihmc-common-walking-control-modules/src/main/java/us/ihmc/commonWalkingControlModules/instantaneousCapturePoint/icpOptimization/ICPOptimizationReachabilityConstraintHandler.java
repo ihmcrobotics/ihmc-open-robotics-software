@@ -173,13 +173,13 @@ public class ICPOptimizationReachabilityConstraintHandler
       contractedReachabilityPolygon.setConvexPolygon2d(polygon2d.getConvexPolygon2d());
    }
 
-   public void updateReachabilityBasedOnAdjustment(Footstep upcomingFootstep, FramePoint2D footstepSolution, boolean wasAdjusted)
+   public void updateReachabilityBasedOnAdjustment(Footstep upcomingFootstep, YoFramePoint2d footstepSolution, boolean wasAdjusted)
    {
       if (!wasAdjusted)
          return;
 
       upcomingFootstep.getPosition2d(referenceLocation);
-      adjustedLocation.setIncludingFrame(footstepSolution);
+      footstepSolution.getFrameTuple2dIncludingFrame(adjustedLocation);
       referenceLocation.changeFrame(worldFrame);
       adjustedLocation.changeFrame(worldFrame);
 
