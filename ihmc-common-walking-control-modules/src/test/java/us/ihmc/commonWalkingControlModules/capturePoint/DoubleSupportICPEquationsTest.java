@@ -7,10 +7,13 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 
 /**
  * Created by agrabertilton on 3/4/15.
  */
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class DoubleSupportICPEquationsTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
