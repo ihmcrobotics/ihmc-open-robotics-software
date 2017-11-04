@@ -152,7 +152,7 @@ public class SimpleICPOptimizationSolutionHandlerTest
       double stanceWidth = 0.2;
       int numberOfSteps = 3;
       YoFramePoint2d foostepSolution = new YoFramePoint2d("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
-      FramePoint2D unclippedFootstepSolution = new FramePoint2D();
+      YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
 
       Footstep upcomingFootstep = createFootsteps(stepLength, stanceWidth, numberOfSteps);
       FramePoint2D referenceFootstepPosition = createReferenceLocations(upcomingFootstep);
@@ -230,7 +230,7 @@ public class SimpleICPOptimizationSolutionHandlerTest
       double stanceWidth = 0.2;
       int numberOfSteps = 3;
       YoFramePoint2d foostepSolution = new YoFramePoint2d("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
-      FramePoint2D unclippedFootstepSolution = new FramePoint2D();
+      YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
       Footstep upcomingFootstep = createFootsteps(stepLength, stanceWidth, numberOfSteps);
       FramePoint2D referenceFootstepPosition = createReferenceLocations(upcomingFootstep);
 
@@ -305,7 +305,7 @@ public class SimpleICPOptimizationSolutionHandlerTest
       double stanceWidth = 0.2;
       int numberOfSteps = 3;
       YoFramePoint2d foostepSolution = new YoFramePoint2d("footstepSolution", ReferenceFrame.getWorldFrame(), registry);
-      FramePoint2D unclippedFootstepSolution = new FramePoint2D();
+      YoFramePoint2d unclippedFootstepSolution = new YoFramePoint2d("unclippedFootstepSolution", ReferenceFrame.getWorldFrame(), registry);
       Footstep upcomingFootstep = createFootsteps(stepLength, stanceWidth, numberOfSteps);
       FramePoint2D referenceFootstepPosition = createReferenceLocations(upcomingFootstep);
 
