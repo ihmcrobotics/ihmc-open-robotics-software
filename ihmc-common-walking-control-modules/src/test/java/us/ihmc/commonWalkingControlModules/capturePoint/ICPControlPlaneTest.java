@@ -523,6 +523,23 @@ public class ICPControlPlaneTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testProjectPointOntoPlanarRegion()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoDouble omega = new YoDouble("omega", registry);
+      double gravity = 9.81;
+
+      ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(0.1, 0.1, 1.0);
+      double planeHeightInCoMFrame = -1.0; //
+
+      ICPControlPlane icpControlPlane = new ICPControlPlane(omega, centerOfMassFrame, gravity, registry);
+      omega.set(Math.sqrt(-gravity / planeHeightInCoMFrame));
+
+
+   }
+
    private static ReferenceFrame createCenterOfMassFrame(double x, double y, double z)
    {
       TranslationReferenceFrame centerOfMassFrame = new TranslationReferenceFrame("centerOfMass", worldFrame);
