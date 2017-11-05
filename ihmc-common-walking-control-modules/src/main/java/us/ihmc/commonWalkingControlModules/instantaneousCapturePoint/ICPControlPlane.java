@@ -32,6 +32,11 @@ public class ICPControlPlane
       });
    }
 
+   public double getControlPlaneHeight()
+   {
+      return controlPlaneHeight.getDoubleValue();
+   }
+
    public void projectPointOntoControlPlane(FramePoint3D pointToProject, FramePoint3D projectionToPack)
    {
       ReferenceFrame referenceFrame = pointToProject.getReferenceFrame();
