@@ -43,13 +43,15 @@ public class PlanarRegionConstraintProvider
    private final ICPControlPlane icpControlPlane;
 
    private final ConvexPolygon2D projectedConvexHull = new ConvexPolygon2D();
+   private final YoDouble footstepDeadband;
 
    public PlanarRegionConstraintProvider(ICPControlPlane icpControlPlane, WalkingControllerParameters parameters, BipedSupportPolygons bipedSupportPolygons,
-                                         SideDependentList<? extends ContactablePlaneBody> contactableFeet, String yoNamePrefix, boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                         SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoDouble footstepDeadband, String yoNamePrefix, boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.icpControlPlane = icpControlPlane;
       this.contactableFeet = contactableFeet;
       this.bipedSupportPolygons = bipedSupportPolygons;
+      this.footstepDeadband = footstepDeadband;
 
       captureRegionCalculator = new OneStepCaptureRegionCalculator(bipedSupportPolygons, parameters, yoNamePrefix, registry, yoGraphicsListRegistry);
 
@@ -123,11 +125,24 @@ public class PlanarRegionConstraintProvider
                                                      bipedSupportPolygons.getFootPolygonInWorldFrame(supportSide));
 
       solver.resetPlanarRegionConstraint();
+
       if (!planarRegionsList.isEmpty())
       {
-         //solver.setPlanarRegionConstraint(planarRegionsList.getLastPlanarRegion(), distanceToPlanarRegionEdgeForNoOverhang.getDoubleValue());
+         PlanarRegion planarRegion = planarRegionsList.getLastPlanarRegion();
+
+         activePlanarRegion.setConvexPolygon2d(planarRegion.getConvexHull());
+         icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion, projectedConvexHull);
+
+         activePlanarRegionInControlPlane.setConvexPolygon2d(projectedConvexHull);
+
+         solver.setPlanarRegionConstraint(projectedConvexHull, distanceToPlanarRegionEdgeForNoOverhang.getDoubleValue() - footstepDeadband.getDoubleValue());
          activePlanarRegion.setConvexPolygon2d(planarRegionsList.getLastPlanarRegion().getConvexHull());
       }
+   }
+
+   public PlanarRegion getActivePlanarRegion()
+   {
+      return planarRegionsList.getLastPlanarRegion();
    }
 
    public void reset()
