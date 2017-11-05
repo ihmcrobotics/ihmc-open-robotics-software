@@ -110,6 +110,16 @@ public class ConstraintToConvexRegion
       return true;
    }
 
+   public boolean addPlanarRegion(ConvexPolygon2D convexPolygon, double deltaInside)
+   {
+      if (convexPolygon == null)
+         return false;
+
+      this.convexPolygon.set(convexPolygon);
+      this.deltaInside = deltaInside;
+      return true;
+   }
+
    /**
     * Sets the polygon for the convex constraint to use. Should be called after
     * all the vertices have been added using {@link #addVertex(FramePoint3D)} or

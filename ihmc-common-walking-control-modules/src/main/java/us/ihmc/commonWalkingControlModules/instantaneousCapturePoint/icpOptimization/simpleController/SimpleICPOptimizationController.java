@@ -241,8 +241,8 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       copConstraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons, useICPControlPlane);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
                                                                                        registry, yoGraphicsListRegistry);
-      planarRegionConstraintProvider = new PlanarRegionConstraintProvider(icpControlPlane, walkingControllerParameters, bipedSupportPolygons, contactableFeet, yoNamePrefix,
-                                                                          VISUALIZE, registry, yoGraphicsListRegistry);
+      planarRegionConstraintProvider = new PlanarRegionConstraintProvider(icpControlPlane, walkingControllerParameters, bipedSupportPolygons, contactableFeet,
+                                                                          solutionHandler.getFootstepDeadband(), yoNamePrefix, VISUALIZE, registry, yoGraphicsListRegistry);
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);
@@ -257,7 +257,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       YoGraphicPosition predictedEndOfStateICP = new YoGraphicPosition(yoNamePrefix + "PredictedEndOfStateICP", this.predictedEndOfStateICP, 0.005, YoAppearance.MidnightBlue(),
                                                                        YoGraphicPosition.GraphicType.BALL);
       YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix + "ClippedFootstepSolution", this.footstepSolution, 0.005,
-                                                                        YoAppearance.ForestGreen(), YoGraphicPosition.GraphicType.SOLID_BALL);
+                                                                        YoAppearance.ForestGreen(), YoGraphicPosition.GraphicType.BALL);
       solutionHandler.setupVisualizers(artifactList);
 
       artifactList.add(predictedEndOfStateICP.createArtifact());
