@@ -107,7 +107,7 @@ public class ICPControlPolygons
                if (!contactPoint.isInContact())
                   continue;
 
-               icpControlPlane.projectPointOntoControlPlane(contactPoint.getPosition(), tempFramePoint);
+               icpControlPlane.projectPointOntoControlPlane(worldFrame, contactPoint.getPosition(), tempFramePoint);
                footPolygonInWorldFrame.addVertexByProjectionOntoXYPlane(tempFramePoint);
                footPolygonInMidFeetZUp.addVertexByProjectionOntoXYPlane(tempFramePoint);
             }

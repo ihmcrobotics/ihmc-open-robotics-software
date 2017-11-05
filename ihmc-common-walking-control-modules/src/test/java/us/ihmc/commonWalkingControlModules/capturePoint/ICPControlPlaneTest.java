@@ -6,6 +6,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -17,6 +18,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPControlPlaneTest
@@ -25,7 +27,7 @@ public class ICPControlPlaneTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testProjectOfPointForwardAndLeftOntoPlane()
+   public void testProjectPointForwardAndLeftOntoPlane()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
       YoDouble omega = new YoDouble("omega", registry);
@@ -48,7 +50,7 @@ public class ICPControlPlaneTest
       FramePoint3D projectedPoint = new FramePoint3D(worldFrame);
       FramePoint3D expectedProjectedPoint = new FramePoint3D(centerOfMassFrame);
 
-      icpControlPlane.projectPointOntoControlPlane(pointToProject, projectedPoint);
+      icpControlPlane.projectPointOntoControlPlane(worldFrame, pointToProject, projectedPoint);
 
       expectedProjectedPoint.setX(0.15 / 1.1);
       expectedProjectedPoint.setY(0.15 / 1.1);
@@ -64,7 +66,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointOntoControlPlane(pointToProject, projectedPoint);
+      icpControlPlane.projectPointOntoControlPlane(worldFrame, pointToProject, projectedPoint);
 
       expectedProjectedPoint.setX(0.15 / 0.9);
       expectedProjectedPoint.setY(0.15 / 0.9);
@@ -80,7 +82,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointOntoControlPlane(pointToProject, projectedPoint);
+      icpControlPlane.projectPointOntoControlPlane(worldFrame, pointToProject, projectedPoint);
 
       expectedProjectedPoint.setX(0.15);
       expectedProjectedPoint.setY(0.15);
@@ -96,7 +98,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointOntoControlPlane(pointToProject, projectedPoint);
+      icpControlPlane.projectPointOntoControlPlane(worldFrame, pointToProject, projectedPoint);
 
       expectedProjectedPoint.setX(0.15 / 0.95);
       expectedProjectedPoint.setY(0.15 / 0.95);
@@ -105,7 +107,6 @@ public class ICPControlPlaneTest
 
       EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
-
       // test point slightly below the plane
       pointToProject = new FramePoint3D(centerOfMassFrame, 0.15, 0.15, -1.05);
       pointToProject.changeFrame(worldFrame);
@@ -113,7 +114,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointOntoControlPlane(pointToProject, projectedPoint);
+      icpControlPlane.projectPointOntoControlPlane(worldFrame, pointToProject, projectedPoint);
 
       expectedProjectedPoint.setX(0.15 / 1.05);
       expectedProjectedPoint.setY(0.15 / 1.05);
@@ -129,7 +130,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointOntoControlPlane(pointToProject, projectedPoint);
+      icpControlPlane.projectPointOntoControlPlane(worldFrame, pointToProject, projectedPoint);
 
       expectedProjectedPoint.setX(0.15 / 0.99);
       expectedProjectedPoint.setY(0.15 / 0.99);
@@ -145,7 +146,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointOntoControlPlane(pointToProject, projectedPoint);
+      icpControlPlane.projectPointOntoControlPlane(worldFrame, pointToProject, projectedPoint);
 
       expectedProjectedPoint.setX(1.0 / 1.01 * 0.15);
       expectedProjectedPoint.setY(1.0 / 1.01 * 0.15);
@@ -161,7 +162,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointOntoControlPlane(pointToProject, projectedPoint);
+      icpControlPlane.projectPointOntoControlPlane(worldFrame, pointToProject, projectedPoint);
 
       expectedProjectedPoint.setX(0.075);
       expectedProjectedPoint.setY(0.075);
@@ -177,7 +178,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointOntoControlPlane(pointToProject, projectedPoint);
+      icpControlPlane.projectPointOntoControlPlane(worldFrame, pointToProject, projectedPoint);
 
       expectedProjectedPoint.setX(20 * 0.15);
       expectedProjectedPoint.setY(20 * 0.15);
@@ -193,7 +194,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointOntoControlPlane(pointToProject, projectedPoint);
+      icpControlPlane.projectPointOntoControlPlane(worldFrame, pointToProject, projectedPoint);
 
       expectedProjectedPoint.setX(-0.15 / 0.05);
       expectedProjectedPoint.setY(-0.15 / 0.05);
@@ -209,7 +210,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointOntoControlPlane(pointToProject, projectedPoint);
+      icpControlPlane.projectPointOntoControlPlane(worldFrame, pointToProject, projectedPoint);
 
       expectedProjectedPoint.setX(-0.3);
       expectedProjectedPoint.setY(-0.3);
@@ -218,17 +219,17 @@ public class ICPControlPlaneTest
 
       EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
 
-      // test handling point level with the CoM
+      // test handling point at CoM
       pointToProject = new FramePoint3D(centerOfMassFrame, 0.15, 0.15, 0.0);
       pointToProject.changeFrame(worldFrame);
 
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointOntoControlPlane(pointToProject, projectedPoint);
+      icpControlPlane.projectPointOntoControlPlane(worldFrame, pointToProject, projectedPoint);
 
       expectedProjectedPoint.setX(Double.POSITIVE_INFINITY);
-      expectedProjectedPoint.setY(Double.POSITIVE_INFINITY);
+      expectedProjectedPoint.setY(Double.NEGATIVE_INFINITY);
       expectedProjectedPoint.setZ(-1.0);
       expectedProjectedPoint.changeFrame(worldFrame);
 
@@ -269,7 +270,7 @@ public class ICPControlPlaneTest
          FramePoint3D projectedPoint = new FramePoint3D(worldFrame);
          FramePoint3D expectedProjectedPoint = new FramePoint3D(centerOfMassFrame);
 
-         icpControlPlane.projectPointOntoControlPlane(pointToProject, projectedPoint);
+         icpControlPlane.projectPointOntoControlPlane(worldFrame, pointToProject, projectedPoint);
 
          expectedProjectedPoint.setX(xPointPosition * planeHeightInCoMFrame / zPointPosition);
          expectedProjectedPoint.setY(yPointPosition * planeHeightInCoMFrame / zPointPosition);
@@ -278,6 +279,202 @@ public class ICPControlPlaneTest
 
          EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
       }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testProjectPointForwardAndLeftFromPlaneOntoSurface()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoDouble omega = new YoDouble("omega", registry);
+      double gravity = 9.81;
+
+      ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(0.1, 0.1, 1.0);
+      double planeHeightInCoMFrame = -1.0; //
+
+      ICPControlPlane icpControlPlane = new ICPControlPlane(omega, centerOfMassFrame, gravity, registry);
+      omega.set(Math.sqrt(-gravity / planeHeightInCoMFrame));
+
+
+      // test plane height
+      assertEquals(planeHeightInCoMFrame, icpControlPlane.getControlPlaneHeight(), 1e-10);
+
+      // test point a little below the plane
+      FramePoint2D pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
+      pointToProject.changeFrame(worldFrame);
+
+      FramePoint3D projectedPoint = new FramePoint3D(worldFrame);
+      FramePoint3D expectedProjectedPoint = new FramePoint3D(centerOfMassFrame);
+
+      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, -0.1);
+
+      expectedProjectedPoint.setX(1.1 * 0.15);
+      expectedProjectedPoint.setY(1.1 * 0.15);
+      expectedProjectedPoint.changeFrame(worldFrame);
+      expectedProjectedPoint.setZ(-0.1);
+
+      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+
+      // test point a little above the plane
+      pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
+      pointToProject.changeFrame(worldFrame);
+
+      projectedPoint.setToZero(worldFrame);
+      expectedProjectedPoint.setToZero(centerOfMassFrame);
+
+      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 0.1);
+
+      expectedProjectedPoint.setX(0.9 * 0.15);
+      expectedProjectedPoint.setY(0.9 * 0.15);
+      expectedProjectedPoint.changeFrame(worldFrame);
+      expectedProjectedPoint.setZ(0.1);
+
+      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+
+      // test point on the plane
+      pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
+      pointToProject.changeFrame(worldFrame);
+
+      projectedPoint.setToZero(worldFrame);
+      expectedProjectedPoint.setToZero(centerOfMassFrame);
+
+      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 0.0);
+
+      expectedProjectedPoint.setX(0.15);
+      expectedProjectedPoint.setY(0.15);
+      expectedProjectedPoint.setZ(-1.0);
+      expectedProjectedPoint.changeFrame(worldFrame);
+
+      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+
+      // test point slightly above the plane
+      pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
+      pointToProject.changeFrame(worldFrame);
+
+      projectedPoint.setToZero(worldFrame);
+      expectedProjectedPoint.setToZero(centerOfMassFrame);
+
+      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 0.05);
+
+      expectedProjectedPoint.setX(0.95 * 0.15);
+      expectedProjectedPoint.setY(0.95 * 0.15);
+      expectedProjectedPoint.changeFrame(worldFrame);
+      expectedProjectedPoint.setZ(0.05);
+
+      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+
+
+      // test point slightly below the plane
+      pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
+      pointToProject.changeFrame(worldFrame);
+
+      projectedPoint.setToZero(worldFrame);
+      expectedProjectedPoint.setToZero(centerOfMassFrame);
+
+      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, -0.05);
+
+      expectedProjectedPoint.setX(1.05 * 0.15);
+      expectedProjectedPoint.setY(1.05 * 0.15);
+      expectedProjectedPoint.changeFrame(worldFrame);
+      expectedProjectedPoint.setZ(-0.05);
+
+      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+
+      // test point barely above the plane
+      pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
+      pointToProject.changeFrame(worldFrame);
+
+      projectedPoint.setToZero(worldFrame);
+      expectedProjectedPoint.setToZero(centerOfMassFrame);
+
+      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 0.01);
+
+      expectedProjectedPoint.setX(0.99 * 0.15);
+      expectedProjectedPoint.setY(0.99 * 0.15);
+      expectedProjectedPoint.changeFrame(worldFrame);
+      expectedProjectedPoint.setZ(0.01);
+
+      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+
+      // test point barely below the plane
+      pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
+      pointToProject.changeFrame(worldFrame);
+
+      projectedPoint.setToZero(worldFrame);
+      expectedProjectedPoint.setToZero(centerOfMassFrame);
+
+      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, -0.01);
+
+      expectedProjectedPoint.setX(1.01 * 0.15);
+      expectedProjectedPoint.setY(1.01 * 0.15);
+      expectedProjectedPoint.changeFrame(worldFrame);
+      expectedProjectedPoint.setZ(-0.01);
+
+      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+
+      // test point far below the plane
+      pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
+      pointToProject.changeFrame(worldFrame);
+
+      projectedPoint.setToZero(worldFrame);
+      expectedProjectedPoint.setToZero(centerOfMassFrame);
+
+      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, -1.0);
+
+      expectedProjectedPoint.setX(0.3);
+      expectedProjectedPoint.setY(0.3);
+      expectedProjectedPoint.changeFrame(worldFrame);
+      expectedProjectedPoint.setZ(-1.0);
+
+      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+
+      // test point far above the plane
+      pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
+      pointToProject.changeFrame(worldFrame);
+
+      projectedPoint.setToZero(worldFrame);
+      expectedProjectedPoint.setToZero(centerOfMassFrame);
+
+      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 0.95);
+
+      expectedProjectedPoint.setX(0.05 * 0.15);
+      expectedProjectedPoint.setY(0.05 * 0.15);
+      expectedProjectedPoint.changeFrame(worldFrame);
+      expectedProjectedPoint.setZ(0.95);
+
+      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+
+      // test handling point slightly above the CoM
+      pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
+      pointToProject.changeFrame(worldFrame);
+
+      projectedPoint.setToZero(worldFrame);
+      expectedProjectedPoint.setToZero(centerOfMassFrame);
+
+      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 1.05);
+
+      expectedProjectedPoint.setX(-0.05 * 0.15);
+      expectedProjectedPoint.setY(-0.05 * 0.15);
+      expectedProjectedPoint.changeFrame(worldFrame);
+      expectedProjectedPoint.setZ(1.05);
+
+      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+
+      // test handling point well above the CoM
+      pointToProject = new FramePoint2D(centerOfMassFrame, 0.15, 0.15);
+      pointToProject.changeFrame(worldFrame);
+
+      projectedPoint.setToZero(worldFrame);
+      expectedProjectedPoint.setToZero(centerOfMassFrame);
+
+      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 1.5);
+
+      expectedProjectedPoint.setX(-0.075);
+      expectedProjectedPoint.setY(-0.075);
+      expectedProjectedPoint.changeFrame(worldFrame);
+      expectedProjectedPoint.setZ(1.5);
+
+      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
    }
 
    private static ReferenceFrame createCenterOfMassFrame(double x, double y, double z)
