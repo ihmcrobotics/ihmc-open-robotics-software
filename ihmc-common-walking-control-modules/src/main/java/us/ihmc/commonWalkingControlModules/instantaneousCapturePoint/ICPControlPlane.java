@@ -26,6 +26,14 @@ public class ICPControlPlane
    private final YoDouble controlPlaneHeight;
    private final ReferenceFrame centerOfMassFrame;
 
+   private final FramePoint3D tempFramePoint = new FramePoint3D();
+   private final FramePoint3D tempProjectedFramePoint = new FramePoint3D();
+   private final FramePoint2D tempFramePoint2D = new FramePoint2D();
+
+   private final FramePoint3D centerOfMassPosition = new FramePoint3D();
+   private final FrameVector3D rayDirection = new FrameVector3D();
+   private final FramePoint3D intersectionToThrowAway = new FramePoint3D();
+
    public ICPControlPlane(YoDouble omega0, ReferenceFrame centerOfMassFrame, double gravityZ, YoVariableRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
@@ -47,10 +55,6 @@ public class ICPControlPlane
    {
       return controlPlaneHeight.getDoubleValue();
    }
-
-   private final FramePoint3D tempFramePoint = new FramePoint3D();
-   private final FramePoint3D tempProjectedFramePoint = new FramePoint3D();
-   private final FramePoint2D tempFramePoint2D = new FramePoint2D();
 
    public void projectPointOntoControlPlane(ReferenceFrame desiredReferenceFrame, FramePoint3D pointToProject, FramePoint3D projectionToPack)
    {
@@ -78,10 +82,6 @@ public class ICPControlPlane
    }
 
 
-   private final FramePoint3D centerOfMassPosition = new FramePoint3D();
-   private final FrameVector3D rayDirection = new FrameVector3D();
-   private final FramePoint3D intersectionToThrowAway = new FramePoint3D();
-
    public void projectPointFromPlaneOntoPlanarRegion(ReferenceFrame desiredReferenceFrame, FramePoint2D pointToProject, FramePoint3D projectionToPack, PlanarRegion planarRegion)
    {
       tempFramePoint2D.setIncludingFrame(pointToProject);
@@ -107,6 +107,7 @@ public class ICPControlPlane
    public void projectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2D convexPolygonInControlPlaneToPack)
    {
       ConvexPolygon2D convexHull = planarRegion.getConvexHull();
+      convexPolygonInControlPlaneToPack.clear();
 
       for (int vertexIndex = 0; vertexIndex < convexHull.getNumberOfVertices(); vertexIndex++)
       {
@@ -123,6 +124,7 @@ public class ICPControlPlane
 
          convexPolygonInControlPlaneToPack.addVertex(tempProjectedFramePoint.getX(), tempProjectedFramePoint.getY());
       }
+      convexPolygonInControlPlaneToPack.update();
    }
 
    private static void projectPointOntoControlPlane(FramePoint3D pointToProject, FramePoint3D projectionToPack, double planeHeight)
