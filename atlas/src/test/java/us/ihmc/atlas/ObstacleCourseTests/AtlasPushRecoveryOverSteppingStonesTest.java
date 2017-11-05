@@ -20,7 +20,6 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-// this test is flaky because toe off is not triggered properly - the toe off condition needs to be fixed
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasPushRecoveryOverSteppingStonesTest extends DRCPushRecoveryOverSteppingStonesTest
 {

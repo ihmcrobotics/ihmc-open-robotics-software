@@ -4,7 +4,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionVisualizer;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.SimpleICPOptimizationQPSolver;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -29,6 +31,7 @@ public class PlanarRegionConstraintProvider
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoFrameConvexPolygon2d activePlanarRegion;
+   private final YoFrameConvexPolygon2d activePlanarRegionInControlPlane;
 
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private final BipedSupportPolygons bipedSupportPolygons;
@@ -37,25 +40,33 @@ public class PlanarRegionConstraintProvider
    private final YoDouble distanceToPlanarRegionEdgeForNoOverhang;
 
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
+   private final ICPControlPlane icpControlPlane;
 
-   public PlanarRegionConstraintProvider(WalkingControllerParameters parameters, BipedSupportPolygons bipedSupportPolygons,
+   private final ConvexPolygon2D projectedConvexHull = new ConvexPolygon2D();
+
+   public PlanarRegionConstraintProvider(ICPControlPlane icpControlPlane, WalkingControllerParameters parameters, BipedSupportPolygons bipedSupportPolygons,
                                          SideDependentList<? extends ContactablePlaneBody> contactableFeet, String yoNamePrefix, boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this.icpControlPlane = icpControlPlane;
       this.contactableFeet = contactableFeet;
       this.bipedSupportPolygons = bipedSupportPolygons;
 
       captureRegionCalculator = new OneStepCaptureRegionCalculator(bipedSupportPolygons, parameters, yoNamePrefix, registry, yoGraphicsListRegistry);
 
       activePlanarRegion = new YoFrameConvexPolygon2d(yoNamePrefix + "ActivePlanarRegionConstraint", "", worldFrame, 12, registry);
+      activePlanarRegionInControlPlane = new YoFrameConvexPolygon2d(yoNamePrefix + "ActivePlanarRegionConstraintInControlPlane", "", worldFrame, 12, registry);
       distanceToPlanarRegionEdgeForNoOverhang = new YoDouble(yoNamePrefix + "DistanceToPlanarRegionEdgeForNoOverhang", registry);
 
       if (yoGraphicsListRegistry != null)
       {
-         YoArtifactPolygon reachabilityGraphic = new YoArtifactPolygon("ActivePlanarRegionViz", activePlanarRegion, Color.RED, false);
+         YoArtifactPolygon activePlanarRegionViz = new YoArtifactPolygon("ActivePlanarRegionViz", activePlanarRegion, Color.RED, false, true);
+         YoArtifactPolygon activePlanarRegionInControlPlaneViz = new YoArtifactPolygon("ActivePlanarRegionInControlPlaneViz", activePlanarRegionInControlPlane, Color.RED, false);
 
-         reachabilityGraphic.setVisible(visualize);
+         activePlanarRegionViz.setVisible(visualize);
+         activePlanarRegionInControlPlaneViz.setVisible(visualize);
 
-         yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), reachabilityGraphic);
+         yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), activePlanarRegionViz);
+         yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), activePlanarRegionInControlPlaneViz);
       }
    }
 
@@ -66,7 +77,10 @@ public class PlanarRegionConstraintProvider
       if (planarRegion != null)
       {
          planarRegionsList.addPlanarRegion(planarRegion);
+
          activePlanarRegion.setConvexPolygon2d(planarRegion.getConvexHull());
+         icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion, projectedConvexHull);
+         activePlanarRegionInControlPlane.setConvexPolygon2d(projectedConvexHull);
       }
       else
       {
