@@ -277,7 +277,7 @@ public class ICPControlPlaneTest
          expectedProjectedPoint.setZ(planeHeightInCoMFrame);
          expectedProjectedPoint.changeFrame(worldFrame);
 
-         EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+         EuclidCoreTestTools.assertTuple3DEquals("iteration " + iter, expectedProjectedPoint, projectedPoint, 1e-10);
       }
    }
 
@@ -475,6 +475,52 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.setZ(1.5);
 
       EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testRandomProjectOntoSurface()
+   {
+      Random random = new Random(12345);
+
+      for (int iter = 0; iter < 1000; iter++)
+      {
+         YoVariableRegistry registry = new YoVariableRegistry("robert");
+         YoDouble omega = new YoDouble("omega", registry);
+         double gravity = 9.81;
+
+         double xCoMPosition = RandomNumbers.nextDouble(random, 10.0);
+         double yCoMPosition = RandomNumbers.nextDouble(random, 10.0);
+         double zCoMPosition = RandomNumbers.nextDouble(random, 10.0);
+         ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(xCoMPosition, yCoMPosition, zCoMPosition);
+         double planeHeightInCoMFrame = RandomNumbers.nextDouble(random, -5.0, 0.001);
+
+         ICPControlPlane icpControlPlane = new ICPControlPlane(omega, centerOfMassFrame, gravity, registry);
+         omega.set(Math.sqrt(-gravity / planeHeightInCoMFrame));
+
+         // test plane height
+         assertEquals("iteration " + iter, planeHeightInCoMFrame, icpControlPlane.getControlPlaneHeight(), 1e-10);
+
+         // test point a little below the plane
+         double xPointPosition = RandomNumbers.nextDouble(random, 20.0);
+         double yPointPosition = RandomNumbers.nextDouble(random, 20.0);
+
+         double zSurfacePosition = RandomNumbers.nextDouble(random, 20.0);
+         FramePoint2D pointToProject = new FramePoint2D(centerOfMassFrame, xPointPosition, yPointPosition);
+         pointToProject.changeFrame(worldFrame);
+
+         FramePoint3D projectedPoint = new FramePoint3D(worldFrame);
+         FramePoint3D expectedProjectedPoint = new FramePoint3D(centerOfMassFrame);
+
+         icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, zSurfacePosition);
+
+         expectedProjectedPoint.setX(xPointPosition * (zSurfacePosition - zCoMPosition) / planeHeightInCoMFrame);
+         expectedProjectedPoint.setY(yPointPosition * (zSurfacePosition - zCoMPosition) / planeHeightInCoMFrame);
+         expectedProjectedPoint.changeFrame(worldFrame);
+         expectedProjectedPoint.setZ(zSurfacePosition);
+
+         EuclidCoreTestTools.assertTuple3DEquals("iteration " + iter, expectedProjectedPoint, projectedPoint, 1e-10);
+      }
    }
 
    private static ReferenceFrame createCenterOfMassFrame(double x, double y, double z)
