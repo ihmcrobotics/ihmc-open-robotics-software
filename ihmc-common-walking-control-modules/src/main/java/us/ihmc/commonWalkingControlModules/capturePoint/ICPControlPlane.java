@@ -37,45 +37,34 @@ public class ICPControlPlane
       return controlPlaneHeight.getDoubleValue();
    }
 
-   public void projectPointOntoControlPlane(FramePoint3D pointToProject, FramePoint3D projectionToPack)
-   {
-      ReferenceFrame referenceFrame = pointToProject.getReferenceFrame();
-      pointToProject.changeFrame(centerOfMassFrame);
-
-      projectPointOntoControlPlane(pointToProject, projectionToPack, controlPlaneHeight.getDoubleValue());
-
-      pointToProject.changeFrame(referenceFrame);
-      projectionToPack.changeFrame(referenceFrame);
-   }
-
-   public void projectPointFromPlaneOntoSurface(FramePoint3D pointToProject, FramePoint3D projectionToPack, double surfaceHeight)
-   {
-      ReferenceFrame referenceFrame = pointToProject.getReferenceFrame();
-      pointToProject.setZ(surfaceHeight);
-      pointToProject.changeFrame(centerOfMassFrame);
-
-      double surfaceHeightInCoMFrame = pointToProject.getZ();
-      projectPointFromControlPlaneOntoSurface(pointToProject, projectionToPack, controlPlaneHeight.getDoubleValue(), surfaceHeightInCoMFrame);
-
-      pointToProject.changeFrame(referenceFrame);
-      projectionToPack.changeFrame(referenceFrame);
-   }
-
    private final FramePoint3D tempPoint = new FramePoint3D();
+   private final FramePoint2D tempPoint2D = new FramePoint2D();
 
-   public void projectPointFromPlaneOntoSurface(FramePoint2D pointToProject, FramePoint2D projectionToPack, double surfaceHeightInWorld)
+   public void projectPointOntoControlPlane(ReferenceFrame desiredReferenceFrame, FramePoint3D pointToProject, FramePoint3D projectionToPack)
    {
-      ReferenceFrame referenceFrame = pointToProject.getReferenceFrame();
-      pointToProject.changeFrame(ReferenceFrame.getWorldFrame());
+      tempPoint.setIncludingFrame(pointToProject);
+      tempPoint.changeFrame(centerOfMassFrame);
 
-      tempPoint.setIncludingFrame(pointToProject, surfaceHeightInWorld);
+      projectPointOntoControlPlane(tempPoint, projectionToPack, controlPlaneHeight.getDoubleValue());
+
+      pointToProject.changeFrame(desiredReferenceFrame);
+      projectionToPack.changeFrame(desiredReferenceFrame);
+   }
+
+
+   public void projectPointFromPlaneOntoSurface(ReferenceFrame desiredReferenceFrame, FramePoint2D pointToProject, FramePoint3D projectionToPack, double surfaceHeightInWorld)
+   {
+      tempPoint2D.set(pointToProject);
+      tempPoint2D.changeFrame(ReferenceFrame.getWorldFrame());
+
+      tempPoint.setIncludingFrame(tempPoint2D, surfaceHeightInWorld);
       tempPoint.changeFrame(centerOfMassFrame);
 
       double surfaceHeightInCoMFrame = tempPoint.getZ();
       projectPointFromControlPlaneOntoSurface(tempPoint, projectionToPack, controlPlaneHeight.getDoubleValue(), surfaceHeightInCoMFrame);
 
-      projectionToPack.changeFrame(referenceFrame);
-      pointToProject.changeFrame(referenceFrame);
+      projectionToPack.changeFrame(desiredReferenceFrame);
+      pointToProject.changeFrame(desiredReferenceFrame);
    }
 
    private static void projectPointOntoControlPlane(FramePoint3D pointToProject, FramePoint3D projectionToPack, double planeHeight)
@@ -89,32 +78,10 @@ public class ICPControlPlane
       projectPoint(pointToProject, projectionToPack, surfaceHeight, planeHeight);
    }
 
-   private static void projectPointFromControlPlaneOntoSurface(FramePoint3D pointToProject, FramePoint2D projectionToPack, double planeHeight, double surfaceHeight)
-   {
-      projectPoint(pointToProject, projectionToPack, surfaceHeight, planeHeight);
-   }
-
-   private static void projectPointFromControlPlaneOntoSurface(FramePoint2D pointToProject, FramePoint2D projectionToPack, double planeHeight, double surfaceHeight)
-   {
-      projectPoint(pointToProject, projectionToPack, surfaceHeight, planeHeight);
-   }
-
    private static void projectPoint(FramePoint3D pointToProject, FramePoint3D projectionToPack, double projectedHeight, double unprojectedHeight)
    {
       projectionToPack.setIncludingFrame(pointToProject);
       projectionToPack.scale(projectedHeight / unprojectedHeight);
       projectionToPack.setZ(projectedHeight);
-   }
-
-   private static void projectPoint(FramePoint2D pointToProject, FramePoint2D projectionToPack, double projectedHeight, double unprojectedHeight)
-   {
-      projectionToPack.setIncludingFrame(pointToProject);
-      projectionToPack.scale(projectedHeight / unprojectedHeight);
-   }
-
-   private static void projectPoint(FramePoint3D pointToProject, FramePoint2D projectionToPack, double projectedHeight, double unprojectedHeight)
-   {
-      projectionToPack.setIncludingFrame(pointToProject);
-      projectionToPack.scale(projectedHeight / unprojectedHeight);
    }
 }
