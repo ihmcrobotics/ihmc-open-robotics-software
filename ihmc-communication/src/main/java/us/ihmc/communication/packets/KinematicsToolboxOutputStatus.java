@@ -89,6 +89,22 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
       solutionQuality = other.solutionQuality;
    }
 
+   public void getDesiredJointState(FloatingInverseDynamicsJoint rootJointToUpdate, OneDoFJoint[] jointsToUpdate)
+   {
+      if (jointsToUpdate.length != desiredJointAngles.length)
+         throw new RuntimeException("Array size does not match");
+      int jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(jointsToUpdate);
+
+      if (jointNameHash != this.jointNameHash)
+         throw new RuntimeException("The robots are different.");
+
+      for (int i = 0; i < desiredJointAngles.length; i++)
+         jointsToUpdate[i].setQ(desiredJointAngles[i]);
+
+      rootJointToUpdate.setPosition(desiredRootTranslation);
+      rootJointToUpdate.setRotation(desiredRootOrientation);
+   }
+
    public void setDesiredJointState(FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] newJointData, boolean useQDesired)
    {
       if (newJointData.length != desiredJointAngles.length)
