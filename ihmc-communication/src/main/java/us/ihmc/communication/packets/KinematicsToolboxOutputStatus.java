@@ -2,6 +2,7 @@ package us.ihmc.communication.packets;
 
 import java.util.Random;
 
+import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
@@ -159,6 +160,36 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
    public double getSolutionQuality()
    {
       return solutionQuality;
+   }
+
+   public static KinematicsToolboxOutputStatus interpolateOutputStatus(KinematicsToolboxOutputStatus outputStatusOne,
+                                                                       KinematicsToolboxOutputStatus outputStatusTwo, double alpha)
+   {
+      if (outputStatusOne.jointNameHash != outputStatusTwo.jointNameHash)
+         throw new RuntimeException("Output status are not compatible.");
+
+      KinematicsToolboxOutputStatus interplateOutputStatus = new KinematicsToolboxOutputStatus();
+
+      interplateOutputStatus.desiredJointAngles = new float[outputStatusOne.desiredJointAngles.length];
+      float[] jointAngles1 = outputStatusOne.getJointAngles();
+      float[] jointAngles2 = outputStatusTwo.getJointAngles();
+
+      for (int i = 0; i < interplateOutputStatus.desiredJointAngles.length; i++)
+      {
+         interplateOutputStatus.desiredJointAngles[i] = (float) TupleTools.interpolate(jointAngles1[i], jointAngles2[i], alpha);
+      }
+
+      Vector3D32 rootTranslation1 = outputStatusOne.getPelvisTranslation();
+      Vector3D32 rootTranslation2 = outputStatusTwo.getPelvisTranslation();
+      Quaternion32 rootOrientation1 = outputStatusOne.getPelvisOrientation();
+      Quaternion32 rootOrientation2 = outputStatusTwo.getPelvisOrientation();
+
+      interplateOutputStatus.desiredRootTranslation.interpolate(rootTranslation1, rootTranslation2, alpha);
+      interplateOutputStatus.desiredRootOrientation.interpolate(rootOrientation1, rootOrientation2, alpha);
+
+      interplateOutputStatus.jointNameHash = outputStatusOne.jointNameHash;
+
+      return interplateOutputStatus;
    }
 
    @Override
