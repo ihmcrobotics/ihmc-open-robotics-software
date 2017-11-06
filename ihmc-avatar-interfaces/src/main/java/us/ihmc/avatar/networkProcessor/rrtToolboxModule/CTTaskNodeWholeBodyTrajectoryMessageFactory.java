@@ -64,7 +64,6 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
 
          SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
          orientationCalculator.clear();
-         orientationCalculator.setFirstTrajectoryPointTime(firstTrajectoryPointTime);
          
          for (int i = 0; i < numberOfTrajectoryPoints; i++)
          {
@@ -105,8 +104,8 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
             else
                desiredOrientation.appendRollRotation(-Math.PI * 0.5);
 
-            //Vector3D desiredAngularVelocity = new Vector3D();
-            Vector3D desiredAngularVelocity = orientationCalculator.getTrajectoryPointsAngularVelocity().get(i);
+            Vector3D desiredAngularVelocity = new Vector3D();
+            orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
 
             double time = trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
 
@@ -134,7 +133,6 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
 
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
       orientationCalculator.clear();
-      orientationCalculator.setFirstTrajectoryPointTime(firstTrajectoryPointTime);
 
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
@@ -165,7 +163,8 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
          desiredOrientation.appendPitchRotation(trajectoryNode.getNodeData(3));
          desiredOrientation.appendRollRotation(trajectoryNode.getNodeData(4));
 
-         Vector3D desiredAngularVelocity = orientationCalculator.getTrajectoryPointsAngularVelocity().get(i);
+         Vector3D desiredAngularVelocity = new Vector3D();
+         orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
 
          PrintTools.info("" + i + " " + time);
 
