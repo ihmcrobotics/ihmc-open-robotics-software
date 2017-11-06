@@ -28,24 +28,24 @@ public class AtlasEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraj
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 18.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 55.2)
+   @Test(timeout = 70000)
    public void testHeightModeSwitchWhileWalking() throws Exception
    {
       super.testHeightModeSwitchWhileWalking();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 18.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 50.7)
+   @Test(timeout = 50000)
    public void testHeightUsingMultipleWaypoints() throws Exception
    {
       super.testHeightUsingMultipleWaypoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 18.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 58.4)
+   @Test(timeout = 80000)
    public void testHeightUsingMultipleWaypointsWhileWalking() throws Exception
    {
       super.testHeightUsingMultipleWaypointsWhileWalking();
@@ -53,30 +53,30 @@ public class AtlasEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraj
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 18.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 60000)
    public void testMultipleWaypoints() throws Exception
    {
       super.testMultipleWaypoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 21.1)
+   @Test(timeout = 40000)
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 58.7)
+   @Test(timeout = 60000)
    public void testSingleWaypointAndWalk() throws Exception
    {
       super.testSingleWaypointAndWalk();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 23.1)
    @Test(timeout = 30000)
    public void testStopAllTrajectory() throws Exception
    {

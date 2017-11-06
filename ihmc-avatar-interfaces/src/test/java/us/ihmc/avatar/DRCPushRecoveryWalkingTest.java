@@ -32,7 +32,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    static
    {
       simulationTestingParameters.setRunMultiThreaded(false);
@@ -77,7 +77,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double magnitude = 750.0;
+      double magnitude = 650.0;
       double duration = 0.04;
       double percentInSwing = 0.2;
       RobotSide side = RobotSide.LEFT;
@@ -131,7 +131,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(-0.5, 1.0, 0.0);
-      double magnitude = 800;
+      double magnitude = 700;
       double duration = 0.05;
       double percentInSwing = 0.2;
       RobotSide side = RobotSide.LEFT;

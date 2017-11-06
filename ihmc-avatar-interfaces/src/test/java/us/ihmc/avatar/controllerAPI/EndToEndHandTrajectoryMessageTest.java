@@ -78,7 +78,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTestInterface
 {
-   protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    static
    {
       simulationTestingParameters.setUsePefectSensors(true);

@@ -37,7 +37,7 @@ public class VirtualModelControllerTest
 {
    private final Random bigRandom = new Random(1000L);
    private final Random random = new Random();
-   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private boolean hasSCSSimulation = false;
 

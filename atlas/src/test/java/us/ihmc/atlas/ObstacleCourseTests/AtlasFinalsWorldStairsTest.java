@@ -71,10 +71,10 @@ public class AtlasFinalsWorldStairsTest
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 70.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 90000)
    public void testWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
@@ -122,8 +122,7 @@ public class AtlasFinalsWorldStairsTest
    @Test(timeout = 30000)
    public void testFastWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-      simulationTestingParameters.setKeepSCSUp(true);
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;

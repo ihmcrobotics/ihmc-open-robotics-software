@@ -28,7 +28,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
 {
    private static boolean DEBUG = false;
 
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 

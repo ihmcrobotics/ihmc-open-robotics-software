@@ -23,7 +23,7 @@ public class ContactableDoorRobotTest
    
    private Robot[] robots;
    
-   private final SimulationConstructionSetParameters parameters = SimulationConstructionSetParameters.createFromEnvironmentVariables();
+   private final SimulationConstructionSetParameters parameters = SimulationConstructionSetParameters.createFromSystemProperties();
    private final SimulationTestingParameters testingParams = new SimulationTestingParameters();
    
    RigidBodyTransform doorToWorldTransform = new RigidBodyTransform();

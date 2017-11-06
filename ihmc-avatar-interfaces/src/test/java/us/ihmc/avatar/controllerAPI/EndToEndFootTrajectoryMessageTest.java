@@ -60,7 +60,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final double EPSILON_FOR_DESIREDS = 1.0e-10;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -206,7 +206,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
    //Picks up a foot and puts it down. Done using both sides
    @ContinuousIntegrationTest(estimatedDuration = 41.5)
-   @Test(timeout = 30000)
+   @Test(timeout = 70000)
    public void testPickUpAndPutDown() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

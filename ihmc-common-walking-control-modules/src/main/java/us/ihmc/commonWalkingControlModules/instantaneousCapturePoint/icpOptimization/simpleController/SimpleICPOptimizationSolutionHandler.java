@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController;
 
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.AbstractSimpleICPOptimizationController.*;
+import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.SimpleICPOptimizationController.*;
 
 import java.util.ArrayList;
 
@@ -53,8 +53,11 @@ public class SimpleICPOptimizationSolutionHandler
 
    private final FrameVector3D tempVector = new FrameVector3D();
 
+   private final String yoNamePrefix;
+
    public SimpleICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, boolean debug, String yoNamePrefix, YoVariableRegistry registry)
    {
+      this.yoNamePrefix = yoNamePrefix;
       this.debug = debug;
 
       if (debug)
@@ -179,6 +182,10 @@ public class SimpleICPOptimizationSolutionHandler
       if (solutionAdjustment.length() < deadband)
       {
          solutionLocation.set(referenceLocation);
+         solutionLocation.changeFrame(solutionLocationToPack.getReferenceFrame());
+         solutionLocationToPack.set(solutionLocation);
+
+         return false;
       }
       else
       {
@@ -215,6 +222,11 @@ public class SimpleICPOptimizationSolutionHandler
    public FrameVector2D getFootstepAdjustment()
    {
       return footstepAdjustment.getFrameTuple2d();
+   }
+
+   public FrameVector2D getClippedFootstepAdjustment()
+   {
+      return clippedFootstepAdjustment.getFrameTuple2d();
    }
 }
 

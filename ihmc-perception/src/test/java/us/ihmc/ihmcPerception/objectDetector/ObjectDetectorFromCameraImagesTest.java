@@ -39,7 +39,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class ObjectDetectorFromCameraImagesTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    @ContinuousIntegrationTest(estimatedDuration = 5.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 300000)

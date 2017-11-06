@@ -34,7 +34,7 @@ public class FeatherstoneAlgorithmTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    @Test(timeout = 30000)
    public void testSinglePendulumAgainstLagrangianCalculation()

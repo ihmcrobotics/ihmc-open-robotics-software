@@ -44,7 +44,7 @@ import us.ihmc.tools.MemoryTools;
 
 public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
 //   private static final boolean showGUI = false;
    //TODO get that from the StateEstimatorParameters

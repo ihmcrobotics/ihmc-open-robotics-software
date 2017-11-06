@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 
 // moved to in development
 // this test is flaky because toe off is not triggered properly - the toe off condition needs to be fixed
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT, IntegrationCategory.VIDEO})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasObstacleCourseSteppingStonesTest extends DRCObstacleCourseSteppingStonesTest
 {
    @Override
@@ -32,7 +32,7 @@ public class AtlasObstacleCourseSteppingStonesTest extends DRCObstacleCourseStep
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 48.9)
-   @Test(timeout = 30000)
+   @Test(timeout = 80000)
    public void testWalkingOverEasySteppingStones() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOverEasySteppingStones();

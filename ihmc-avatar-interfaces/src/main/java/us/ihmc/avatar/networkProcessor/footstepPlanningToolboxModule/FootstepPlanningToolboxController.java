@@ -1,34 +1,19 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
+import us.ihmc.communication.packets.*;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.footstepPlanning.FootstepPlannerGoal;
-import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlanarRegionBipedalFootstepPlannerVisualizer;
@@ -44,10 +29,7 @@ import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.PlanarRegionBipedalFootstepPlannerVisualizerFactory;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.*;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -64,6 +46,13 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FootstepPlanningToolboxController extends ToolboxController
 {
@@ -83,6 +72,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final YoBoolean requestedPlanarRegions = new YoBoolean("RequestedPlanarRegions", registry);
    private final YoDouble toolboxTime = new YoDouble("ToolboxTime", registry);
    private final YoDouble timeReceivedPlanarRegion = new YoDouble("timeReceivedPlanarRegion", registry);
+   private final YoInteger planId = new YoInteger("planId", registry);
 
    private final HumanoidReferenceFrames humanoidReferenceFrames;
    private final RobotContactPointParameters contactPointParameters;
@@ -134,6 +124,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       usePlanarRegions.set(true);
       isDone.set(true);
+      planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
    }
 
    private AStarFootstepPlanner createAStarPlanner(SideDependentList<ConvexPolygon2D> footPolygons, DRCRobotModel robotModel)
@@ -247,6 +238,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       if (request == null)
          return false;
 
+      planId.set(request.planId);
       FootstepPlanningRequestPacket.FootstepPlannerType requestedPlannerType = request.requestedPlannerType;
 
       if (requestedPlannerType != null)
@@ -358,6 +350,8 @@ public class FootstepPlanningToolboxController extends ToolboxController
          }
       }
 
+      planarRegionsList.ifPresent(result::setPlanarRegionsList);
+      result.setPlanId(planId.getIntegerValue());
       result.planningResult = status;
       return result;
    }

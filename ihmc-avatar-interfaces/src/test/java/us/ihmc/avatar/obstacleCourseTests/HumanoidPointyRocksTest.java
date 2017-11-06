@@ -77,7 +77,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private SideDependentList<YoFrameConvexPolygon2d> supportPolygons = null;
    private SideDependentList<ArrayList<Point2D>> footContactsInAnkleFrame = null;
 
-   private static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private PushRobotController pushController;
@@ -86,6 +86,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    }
 
    @After
