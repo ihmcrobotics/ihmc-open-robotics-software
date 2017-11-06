@@ -33,7 +33,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private DarpaRoboticsChallengeTrialsWalkingEnvironment environment;

@@ -58,7 +58,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestInterface
 {
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("PointyRocksTest");

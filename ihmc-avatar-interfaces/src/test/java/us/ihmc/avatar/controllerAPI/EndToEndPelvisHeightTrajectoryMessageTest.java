@@ -26,7 +26,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private static final boolean DEBUG = false;
 

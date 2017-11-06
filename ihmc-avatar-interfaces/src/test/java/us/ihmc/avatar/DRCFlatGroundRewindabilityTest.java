@@ -36,7 +36,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
    @Before
    public void setUp() throws Exception
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       simulationTestingParameters.setRunMultiThreaded(false);
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }

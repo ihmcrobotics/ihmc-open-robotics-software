@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -16,6 +13,9 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CoPPointsInFoot
 {
@@ -53,7 +53,7 @@ public class CoPPointsInFoot
       {
          YoFramePoint copLocation = copLocationsInWorldFrameReadOnly.get(i);
          YoGraphicPosition yoGraphicPosition = new YoGraphicPosition(copLocation.getNamePrefix(), copLocation, pointSize, YoAppearance.Green(),
-                                                                     YoGraphicPosition.GraphicType.BALL);
+                                                                     YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
          graphicsList.add(yoGraphicPosition);
          artifactList.add(yoGraphicPosition.createArtifact());
       }

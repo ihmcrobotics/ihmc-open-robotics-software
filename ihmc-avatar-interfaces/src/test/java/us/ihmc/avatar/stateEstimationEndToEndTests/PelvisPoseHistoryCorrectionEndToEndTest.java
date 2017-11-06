@@ -68,7 +68,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    //TODO get that from the StateEstimatorParameters
    private static final boolean USE_ROTATION_CORRECTION = false;

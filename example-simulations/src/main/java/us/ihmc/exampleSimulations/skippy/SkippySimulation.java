@@ -12,7 +12,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class SkippySimulation
 {
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    public static final double DT = 0.0001;
    public static final double controlDT = 0.0001;
    public static final double TIME = 20.0;

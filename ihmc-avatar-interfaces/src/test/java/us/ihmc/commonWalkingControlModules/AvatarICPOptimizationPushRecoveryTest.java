@@ -32,7 +32,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class AvatarICPOptimizationPushRecoveryTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -106,7 +106,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double percentWeight = 0.3;
+      double percentWeight = 0.25;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);

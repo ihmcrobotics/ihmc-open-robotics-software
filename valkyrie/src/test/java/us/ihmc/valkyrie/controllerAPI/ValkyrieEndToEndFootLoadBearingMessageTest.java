@@ -27,7 +27,7 @@ public class ValkyrieEndToEndFootLoadBearingMessageTest extends EndToEndEndFootB
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 41.3)
-   @Test(timeout = 30000)
+   @Test(timeout = 80000)
    public void testSwitchFootToLoadBearing() throws Exception
    {
       super.testSwitchFootToLoadBearing();

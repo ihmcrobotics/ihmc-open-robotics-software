@@ -58,7 +58,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimpleOcclusionTests
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getKeepSCSUp();
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 

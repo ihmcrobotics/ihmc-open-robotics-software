@@ -38,7 +38,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInterface
 {
-   protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
