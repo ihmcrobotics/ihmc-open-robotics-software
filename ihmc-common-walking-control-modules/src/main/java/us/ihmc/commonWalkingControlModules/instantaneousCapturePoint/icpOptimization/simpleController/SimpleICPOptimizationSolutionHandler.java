@@ -11,6 +11,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -129,8 +130,8 @@ public class SimpleICPOptimizationSolutionHandler
    private final FramePoint3D referenceFootstepLocation = new FramePoint3D();
    private final FramePoint2D referenceFootstepLocation2D = new FramePoint2D();
 
-   public void extractFootstepSolution(YoFramePoint2d footstepSolutionToPack, YoFramePoint2d unclippedFootstepSolutionToPack,
-         Footstep upcomingFootstep, int numberOfFootstepsToConsider, SimpleICPOptimizationQPSolver solver)
+   public void extractFootstepSolution(YoFramePoint2d footstepSolutionToPack, YoFramePoint2d unclippedFootstepSolutionToPack, Footstep upcomingFootstep,
+                                       int numberOfFootstepsToConsider, SimpleICPOptimizationQPSolver solver)
    {
       boolean firstStepAdjusted = false;
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
@@ -143,6 +144,51 @@ public class SimpleICPOptimizationSolutionHandler
 
          if (useICPControlPlane)
             icpControlPlane.projectPointFromPlaneOntoSurface(locationSolutionOnPlane, locationSolution, referenceFootstepLocation.getZ());
+         else
+            locationSolution.set(locationSolutionOnPlane);
+
+         ReferenceFrame deadbandFrame = upcomingFootstep.getSoleReferenceFrame();
+         footstepSolutionToPack.getFrameTuple2d(previousLocationSolution);
+         clippedLocationSolution.set(locationSolution);
+         boolean footstepWasAdjusted = applyLocationDeadband(clippedLocationSolution, previousLocationSolution, referenceFootstepLocation2D,
+                                                             deadbandFrame, footstepDeadband.getDoubleValue(), footstepSolutionResolution.getDoubleValue());
+
+         if (i == 0)
+         {
+            firstStepAdjusted = footstepWasAdjusted;
+            footstepAdjustment.setByProjectionOntoXYPlane(locationSolution);
+            footstepAdjustment.sub(referenceFootstepLocation2D);
+            clippedFootstepAdjustment.set(clippedLocationSolution);
+            clippedFootstepAdjustment.sub(referenceFootstepLocation2D);
+         }
+
+         footstepSolutionToPack.set(clippedLocationSolution);
+         unclippedFootstepSolutionToPack.setByProjectionOntoXYPlane(locationSolution);
+      }
+
+      this.footstepWasAdjusted.set(firstStepAdjusted);
+   }
+
+   public void extractFootstepSolution(YoFramePoint2d footstepSolutionToPack, YoFramePoint2d unclippedFootstepSolutionToPack, Footstep upcomingFootstep,
+                                       int numberOfFootstepsToConsider, PlanarRegion activePlanarRegion, SimpleICPOptimizationQPSolver solver)
+   {
+      if (activePlanarRegion == null)
+      {
+         extractFootstepSolution(footstepSolutionToPack, unclippedFootstepSolutionToPack, upcomingFootstep, numberOfFootstepsToConsider, solver);
+         return;
+      }
+
+      boolean firstStepAdjusted = false;
+      for (int i = 0; i < numberOfFootstepsToConsider; i++)
+      {
+         upcomingFootstep.getPosition(referenceFootstepLocation);
+         referenceFootstepLocation2D.set(referenceFootstepLocation);
+
+         solver.getFootstepSolutionLocation(i, locationSolutionOnPlane);
+         footstepSolutionInControlPlane.set(locationSolutionOnPlane);
+
+         if (useICPControlPlane)
+            icpControlPlane.projectPointFromPlaneOntoPlanarRegion(worldFrame, locationSolutionOnPlane, locationSolution, activePlanarRegion);
          else
             locationSolution.set(locationSolutionOnPlane);
 
