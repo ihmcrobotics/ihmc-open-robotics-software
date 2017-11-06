@@ -17,7 +17,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
 {
    protected final YoVariableRegistry registry;
-   FramePoint3D localPosition = new FramePoint3D(); // dummy variable to hand out data with    
    private YoFramePoint yoFramePointInWorld;
 
    public CoPTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame[] referenceFrames)

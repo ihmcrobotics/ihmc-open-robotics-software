@@ -56,7 +56,7 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
 {
    private static final boolean DEBUG = false;
 
-   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    {
 //      simulationTestingParameters.setKeepSCSUp(true);
    }

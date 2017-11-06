@@ -8,16 +8,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
@@ -39,7 +36,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class HumanoidPointyRocksEnvironmentContactsTest implements MultiRobotTestInterface
 {
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private YoBoolean doFootExplorationInTransferToStanding;

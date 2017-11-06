@@ -37,7 +37,7 @@ public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 69.5)
-   @Test(timeout = 70000)
+   @Test(timeout = 80000)
    public void testPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException
    {
       super.testPushLeftInitialTransferState();
@@ -53,7 +53,7 @@ public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 44.5)
-   @Test(timeout = 50000)
+   @Test(timeout = 60000)
    public void testPushRightLateSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightLateSwing();
@@ -69,7 +69,7 @@ public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 38.2)
-   @Test(timeout = 40000)
+   @Test(timeout = 60000)
    public void testPushRightTransferState() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightTransferState();

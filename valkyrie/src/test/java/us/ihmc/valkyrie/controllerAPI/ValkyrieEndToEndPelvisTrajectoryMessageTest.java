@@ -27,7 +27,7 @@ public class ValkyrieEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisT
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 54.8)
-   @Test(timeout = 60000)
+   @Test(timeout = 80000)
    public void testHeightModeSwitchWhileWalking() throws Exception
    {
       super.testHeightModeSwitchWhileWalking();
@@ -35,7 +35,7 @@ public class ValkyrieEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisT
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 59.9)
-   @Test(timeout = 60000)
+   @Test(timeout = 80000)
    public void testHeightUsingMultipleWaypoints() throws Exception
    {
       super.testHeightUsingMultipleWaypoints();

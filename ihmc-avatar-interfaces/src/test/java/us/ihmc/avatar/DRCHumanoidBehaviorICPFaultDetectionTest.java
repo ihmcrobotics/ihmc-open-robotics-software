@@ -34,7 +34,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private BlockingSimulationRunner blockingSimulationRunner;
 
    @Before

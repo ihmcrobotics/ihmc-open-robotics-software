@@ -48,8 +48,8 @@ public class AtlasObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTrial
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 61.5)
-   @Test(timeout = 120000)
+   @ContinuousIntegrationTest(estimatedDuration = 120.0)
+   @Test(timeout = 150000)
    public void testTrialsTerrainSlopeScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       super.testTrialsTerrainSlopeScriptRandomFootSlip();

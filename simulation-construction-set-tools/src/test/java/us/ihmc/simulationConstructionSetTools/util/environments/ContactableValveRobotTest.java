@@ -58,7 +58,7 @@ public class ContactableValveRobotTest
 
       createContactPoints(robots[0]);
 
-      SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       SimulationConstructionSet scs = new SimulationConstructionSet(robots, simulationTestingParameters);
 
       scs.addYoVariableRegistry(valveTestRegistry);

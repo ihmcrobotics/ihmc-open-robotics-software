@@ -68,7 +68,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 42.8)
-   @Test(timeout = 70000)
+   @Test(timeout = 100000)
    public void testLongStepsMaxHeightPauseAndResume() throws SimulationExceededMaximumTimeException
    {
       super.testLongStepsMaxHeightPauseAndResume();
