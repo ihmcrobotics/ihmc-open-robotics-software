@@ -75,22 +75,14 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
             Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(trajectoryNode.getTime(), robotSide, configurationSpace);
             PrintTools.info(""+robotSide+" "+desiredPose);
 
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(new Point3D(desiredPose.getPosition()));
-            
             double time = firstTrajectoryPointTime + trajectoryNode.getTime();
-
+            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(time, new Point3D(desiredPose.getPosition()));
+            
             Quaternion desiredOrientation = new Quaternion(desiredPose.getOrientation());
             orientationCalculator.appendTrajectoryPointOrientation(time, desiredOrientation);
          }
          
          orientationCalculator.compute();
-
-         double[] trajectoryTimes = new double[numberOfTrajectoryPoints];
-
-         for (int i = 0; i < numberOfTrajectoryPoints; i++)
-            trajectoryTimes[i] = path.get(i).getTime();
-
-         euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTimes);
 
          euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
 
@@ -203,15 +195,10 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
 
          Point3D pelvisPosition = new Point3D(0, 0, trajectoryNode.getNodeData(1));
 
-         euclideanTrajectoryPointCalculator.appendTrajectoryPoint(pelvisPosition);
+         double time = firstTrajectoryPointTime + trajectoryNode.getTime();
+         euclideanTrajectoryPointCalculator.appendTrajectoryPoint(time, pelvisPosition);
       }
 
-      double[] trajectoryTimes = new double[numberOfTrajectoryPoints];
-
-      for (int i = 0; i < numberOfTrajectoryPoints; i++)
-         trajectoryTimes[i] = path.get(i).getTime();
-
-      euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTimes);
       euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
 
       RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
