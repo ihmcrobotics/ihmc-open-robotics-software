@@ -1,11 +1,8 @@
 package us.ihmc.communication.packets;
 
-import java.util.List;
 import java.util.Random;
 
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.MathTools;
@@ -109,25 +106,6 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
          rootJoint.getTranslation(desiredRootTranslation);
          rootJoint.getRotation(desiredRootOrientation);
       }
-   }
-
-   public void setDesiredJointState(List<OneDoFJoint> newJointData)
-   {
-      if (newJointData.size() != desiredJointAngles.length)
-         throw new RuntimeException("Array size does not match");
-
-      for (int i = 0; i < desiredJointAngles.length; i++)
-         desiredJointAngles[i] = (float) newJointData.get(i).getqDesired();
-   }
-
-   public void setRootTranslation(Vector3D rootTranslation)
-   {
-      this.desiredRootTranslation.set(rootTranslation);
-   }
-
-   public void setRootOrientation(Quaternion rootOrientation)
-   {
-      this.desiredRootOrientation.set(rootOrientation);
    }
 
    public void setSolutionQuality(double solutionQuality)
