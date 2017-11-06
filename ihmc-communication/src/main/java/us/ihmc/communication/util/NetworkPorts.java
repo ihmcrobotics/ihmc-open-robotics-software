@@ -48,10 +48,10 @@ public class NetworkPorts
    public static final NetworkPorts LIDAR_SCAN_LOGGER_PORT = new NetworkPorts(6023);
    public static final NetworkPorts VALVE_DETECTOR_SERVER_PORT = new NetworkPorts(6024);
    public static final NetworkPorts VALVE_DETECTOR_FEEDBACK_PORT = new NetworkPorts(6025);
-   public static final NetworkPorts MOCAP_MODULE_VIZ = new NetworkPorts(6026);   
+   public static final NetworkPorts MOCAP_MODULE_VIZ = new NetworkPorts(6026);
    public static final NetworkPorts VISIBILITY_GRAPHS = new NetworkPorts(6027);
    public static final NetworkPorts CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE_PORT = new NetworkPorts(6028);
-   
+
    // Mission control ports
    public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(2046);
    public static final NetworkPorts MISSION_CONTROL_CPU0_TEST_PORT = new NetworkPorts(2147);
