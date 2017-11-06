@@ -6,11 +6,15 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -538,6 +542,126 @@ public class ICPControlPlaneTest
       omega.set(Math.sqrt(-gravity / planeHeightInCoMFrame));
 
 
+      assertTrue(false);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testProjectPlanarRegionMostBasic()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoDouble omega = new YoDouble("omega", registry);
+      double gravity = 9.81;
+
+      ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(0.0, 0.0, 1.0);
+      double planeHeightInCoMFrame = -1.0; //
+
+      ICPControlPlane icpControlPlane = new ICPControlPlane(omega, centerOfMassFrame, gravity, registry);
+      omega.set(Math.sqrt(-gravity / planeHeightInCoMFrame));
+
+      TranslationReferenceFrame referenceFrame = new TranslationReferenceFrame("test", worldFrame);
+      referenceFrame.updateTranslation(new Vector3D(0.0, 0.0, 0.1));
+
+      ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D();
+      Point2D point1 = new Point2D(0.2, 0.2);
+      Point2D point2 = new Point2D(0.2, -0.2);
+      Point2D point3 = new Point2D(-0.2, -0.2);
+      Point2D point4 = new Point2D(-0.2, 0.2);
+      convexPolygon2D.addVertex(point1);
+      convexPolygon2D.addVertex(point2);
+      convexPolygon2D.addVertex(point3);
+      convexPolygon2D.addVertex(point4);
+      convexPolygon2D.update();
+
+      PlanarRegion planarRegion = new PlanarRegion(referenceFrame.getTransformToWorldFrame(), convexPolygon2D);
+
+      ConvexPolygon2D projectedConvexPolygon = new ConvexPolygon2D();
+      icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion, projectedConvexPolygon);
+
+      Point2DReadOnly projectedPoint1 = convexPolygon2D.getVertex(0);
+      Point2DReadOnly projectedPoint2 = convexPolygon2D.getVertex(1);
+      Point2DReadOnly projectedPoint3 = convexPolygon2D.getVertex(2);
+      Point2DReadOnly projectedPoint4 = convexPolygon2D.getVertex(3);
+
+      Point2D predictedProjectPoint1 = new Point2D(projectedPoint1);
+      Point2D predictedProjectPoint2 = new Point2D(projectedPoint2);
+      Point2D predictedProjectPoint3 = new Point2D(projectedPoint3);
+      Point2D predictedProjectPoint4 = new Point2D(projectedPoint4);
+
+      predictedProjectPoint1.scale(1.0 / 0.9);
+      predictedProjectPoint2.scale(1.0 / 0.9);
+      predictedProjectPoint3.scale(1.0 / 0.9);
+      predictedProjectPoint4.scale(1.0 / 0.9);
+
+
+      EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint1, projectedConvexPolygon.getVertex(0), 1e-10);
+      EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint2, projectedConvexPolygon.getVertex(1), 1e-10);
+      EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint3, projectedConvexPolygon.getVertex(2), 1e-10);
+      EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint4, projectedConvexPolygon.getVertex(3), 1e-10);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testProjectPlanarRegion()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoDouble omega = new YoDouble("omega", registry);
+      double gravity = 9.81;
+
+      ReferenceFrame centerOfMassFrame = createCenterOfMassFrame(0.1, 0.1, 1.0);
+      double planeHeightInCoMFrame = -1.0; //
+
+      ICPControlPlane icpControlPlane = new ICPControlPlane(omega, centerOfMassFrame, gravity, registry);
+      omega.set(Math.sqrt(-gravity / planeHeightInCoMFrame));
+
+      TranslationReferenceFrame referenceFrame = new TranslationReferenceFrame("test", worldFrame);
+      referenceFrame.updateTranslation(new Vector3D(0.0, 0.0, 0.1));
+
+      ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D();
+      Point2D point1 = new Point2D(0.2, 0.2);
+      Point2D point2 = new Point2D(0.2, -0.2);
+      Point2D point3 = new Point2D(-0.2, -0.2);
+      Point2D point4 = new Point2D(-0.2, 0.2);
+      convexPolygon2D.addVertex(point1);
+      convexPolygon2D.addVertex(point2);
+      convexPolygon2D.addVertex(point3);
+      convexPolygon2D.addVertex(point4);
+      convexPolygon2D.update();
+
+      PlanarRegion planarRegion = new PlanarRegion(referenceFrame.getTransformToWorldFrame(), convexPolygon2D);
+
+      ConvexPolygon2D projectedConvexPolygon = new ConvexPolygon2D();
+      icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion, projectedConvexPolygon);
+
+      Point2DReadOnly projectedPoint1 = convexPolygon2D.getVertex(0);
+      Point2DReadOnly projectedPoint2 = convexPolygon2D.getVertex(1);
+      Point2DReadOnly projectedPoint3 = convexPolygon2D.getVertex(2);
+      Point2DReadOnly projectedPoint4 = convexPolygon2D.getVertex(3);
+
+      Point2D predictedProjectPoint1 = new Point2D(projectedPoint1);
+      Point2D predictedProjectPoint2 = new Point2D(projectedPoint2);
+      Point2D predictedProjectPoint3 = new Point2D(projectedPoint3);
+      Point2D predictedProjectPoint4 = new Point2D(projectedPoint4);
+
+      predictedProjectPoint1.sub(0.1, 0.1);
+      predictedProjectPoint2.sub(0.1, 0.1);
+      predictedProjectPoint3.sub(0.1, 0.1);
+      predictedProjectPoint4.sub(0.1, 0.1);
+
+      predictedProjectPoint1.scale(1.0 / 0.9);
+      predictedProjectPoint2.scale(1.0 / 0.9);
+      predictedProjectPoint3.scale(1.0 / 0.9);
+      predictedProjectPoint4.scale(1.0 / 0.9);
+
+      predictedProjectPoint1.add(0.1, 0.1);
+      predictedProjectPoint2.add(0.1, 0.1);
+      predictedProjectPoint3.add(0.1, 0.1);
+      predictedProjectPoint4.add(0.1, 0.1);
+
+      EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint1, projectedConvexPolygon.getVertex(0), 1e-10);
+      EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint2, projectedConvexPolygon.getVertex(1), 1e-10);
+      EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint3, projectedConvexPolygon.getVertex(2), 1e-10);
+      EuclidCoreTestTools.assertTuple2DEquals(predictedProjectPoint4, projectedConvexPolygon.getVertex(3), 1e-10);
    }
 
    private static ReferenceFrame createCenterOfMassFrame(double x, double y, double z)
