@@ -11,6 +11,7 @@ import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.tools.ArrayTools;
 
 public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolboxOutputStatus>
 {
@@ -208,15 +209,8 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
       if (!MathTools.epsilonEquals(solutionQuality, other.solutionQuality, epsilon))
          return false;
 
-      for (int i = 0; i < desiredJointAngles.length; i++)
-      {
-         if (Math.abs(desiredJointAngles[i] - other.desiredJointAngles[i]) > epsilon)
-         {
-            System.out.println(i);
-            System.out.println("Diff: " + Math.abs(desiredJointAngles[i] - other.desiredJointAngles[i]) + ", this: " + desiredJointAngles[i] + ", other: " + other.desiredJointAngles[i]);
-            return false;
-         }
-      }
+      if (!ArrayTools.deltaEquals(desiredJointAngles, other.desiredJointAngles, (float) epsilon))
+         return false;
 
       return true;
    }
