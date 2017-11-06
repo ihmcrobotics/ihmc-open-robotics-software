@@ -38,7 +38,6 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @After
