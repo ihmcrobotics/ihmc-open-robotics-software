@@ -119,6 +119,7 @@ public class PlanarRegionConstraintProvider
       solver.resetPlanarRegionConstraint();
    }
 
+   // FIXME this is wrong
    public void updatePlanarRegionConstraintForSingleSupport(RobotSide supportSide, double swingTimeRemaining, FramePoint2D currentICP, double omega0, SimpleICPOptimizationQPSolver solver)
    {
       captureRegionCalculator.calculateCaptureRegion(supportSide.getOppositeSide(), swingTimeRemaining, currentICP, omega0,

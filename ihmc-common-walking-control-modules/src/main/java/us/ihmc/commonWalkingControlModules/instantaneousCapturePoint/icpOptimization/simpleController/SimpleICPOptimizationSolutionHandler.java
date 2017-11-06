@@ -169,6 +169,7 @@ public class SimpleICPOptimizationSolutionHandler
       this.footstepWasAdjusted.set(firstStepAdjusted);
    }
 
+   // fixme this is wrong
    public void extractFootstepSolution(YoFramePoint2d footstepSolutionToPack, YoFramePoint2d unclippedFootstepSolutionToPack, Footstep upcomingFootstep,
                                        int numberOfFootstepsToConsider, PlanarRegion activePlanarRegion, SimpleICPOptimizationQPSolver solver)
    {
