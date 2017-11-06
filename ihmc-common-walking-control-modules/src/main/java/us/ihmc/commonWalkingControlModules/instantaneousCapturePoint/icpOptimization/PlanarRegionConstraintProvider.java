@@ -130,14 +130,14 @@ public class PlanarRegionConstraintProvider
       if (!planarRegionsList.isEmpty())
       {
          PlanarRegion planarRegion = planarRegionsList.getLastPlanarRegion();
+         ConvexPolygon2D convexHull = planarRegion.getConvexHull();
 
-         activePlanarRegion.setConvexPolygon2d(planarRegion.getConvexHull());
          icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion, projectedConvexHull);
 
+         activePlanarRegion.setConvexPolygon2d(convexHull);
          activePlanarRegionInControlPlane.setConvexPolygon2d(projectedConvexHull);
 
          solver.setPlanarRegionConstraint(projectedConvexHull, distanceToPlanarRegionEdgeForNoOverhang.getDoubleValue() - footstepDeadband.getDoubleValue());
-         activePlanarRegion.setConvexPolygon2d(planarRegionsList.getLastPlanarRegion().getConvexHull());
       }
    }
 
