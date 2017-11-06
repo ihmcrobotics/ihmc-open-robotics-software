@@ -60,11 +60,13 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
 
          }
 
+         /*
          @Override
          public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
          {
             return new AtlasContinuousCMPPlannerParameters(new AtlasPhysicalProperties());
          }
+         */
       };
 
       return atlasRobotModel;
@@ -75,7 +77,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
    @Test(timeout = 60000)
    public void testPushICPOptimizationBackwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationBackwardPushInSwing();
+      super.testPushICPOptimizationOutwardPushInSwing();
    }
 
    @Override

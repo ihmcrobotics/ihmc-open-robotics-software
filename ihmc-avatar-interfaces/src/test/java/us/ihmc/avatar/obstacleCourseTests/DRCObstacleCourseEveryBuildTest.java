@@ -8,7 +8,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
@@ -37,7 +36,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
    @Before
    public void showMemoryUsageBeforeTest()
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 

@@ -87,23 +87,23 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 21.5)
-   @Test(timeout = 30000)
+   @Test(timeout = 60000)
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       super.testPushWhileStanding();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 21.4)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 42.4)
+   @Test(timeout = 60000)
    public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       super.testPushWhileStandingRecoveringAfterControllerFailureKickedIn();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 22.3)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 42.3)
+   @Test(timeout = 60000)
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testRecoveringWithSwingSpeedUpWhileInSwing();

@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules;
 
 import org.junit.After;
 import org.junit.Before;
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -26,7 +25,7 @@ import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarDynamicReachabilityCalculatorTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 

@@ -35,7 +35,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTestInterface
 {
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private OffsetAndYawRobotInitialSetup location = new OffsetAndYawRobotInitialSetup(new Vector3D(0.0, 0.0, 0.0), 0.0);
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private DRCRobotModel robotModel;

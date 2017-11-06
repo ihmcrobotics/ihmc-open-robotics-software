@@ -68,7 +68,7 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
 
    public void testWalkingWithHighSteps() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();

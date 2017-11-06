@@ -33,7 +33,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack;
 
