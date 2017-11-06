@@ -3,7 +3,6 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
@@ -60,17 +59,10 @@ public class SO3TrajectoryPointCalculator
          //YawPitchRollConversion.convertQuaternionToYawPitchRoll(trajectoryPointsOrientation.get(i), orientation);
          convertQuaternionToYawPitchRoll(trajectoryPointsOrientation.get(i), orientation);
 
-         euclideanTrajectoryPointCalculator.appendTrajectoryPoint(new Point3D(orientation));         
+         double time = firstTrajectoryPointTime + trajectoryPointsTime.get(i);
+         euclideanTrajectoryPointCalculator.appendTrajectoryPoint(time, new Point3D(orientation));         
       }
 
-      double[] trajectoryTimes = new double[numberOfTrajectoryPoints];
-
-      for (int i = 0; i < numberOfTrajectoryPoints; i++)
-      {
-         trajectoryTimes[i] = trajectoryPointsTime.get(i);
-      }
-
-      euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTimes);
       euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
 
       RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
@@ -78,10 +70,8 @@ public class SO3TrajectoryPointCalculator
       trajectoryPointsAngularVelocity.clear();
       for (int i = 0; i < numberOfTrajectoryPoints; i++)
       {
-         Point3D orientationYawPitchRoll = new Point3D();
          Vector3D angularVelocityYawPitchRoll = new Vector3D();
-
-         double time = trajectoryPoints.get(i).get(orientationYawPitchRoll, angularVelocityYawPitchRoll);
+         trajectoryPoints.get(i).getLinearVelocity(angularVelocityYawPitchRoll);
          trajectoryPointsAngularVelocity.add(angularVelocityYawPitchRoll);
       }
    }
