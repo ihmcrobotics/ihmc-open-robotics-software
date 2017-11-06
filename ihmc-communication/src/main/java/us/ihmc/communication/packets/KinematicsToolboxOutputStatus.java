@@ -43,10 +43,22 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
       // empty constructor for serialization
    }
 
+   public KinematicsToolboxOutputStatus(KinematicsToolboxOutputStatus other)
+   {
+      set(other);
+   }
+
    public KinematicsToolboxOutputStatus(OneDoFJoint[] joints)
    {
       desiredJointAngles = new float[joints.length];
       jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(joints);
+   }
+
+   public KinematicsToolboxOutputStatus(FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] newJointData, boolean useQDesired)
+   {
+      desiredJointAngles = new float[newJointData.length];
+      jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(newJointData);
+      setDesiredJointState(rootJoint, newJointData, useQDesired);
    }
 
    @Override
