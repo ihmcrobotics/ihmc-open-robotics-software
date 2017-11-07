@@ -16,13 +16,11 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -30,6 +28,9 @@ import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PlaneContactStateToWrenchMatrixHelper
 {
@@ -80,6 +81,10 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
 
+   private final FramePoint2D contactPoint2d = new FramePoint2D();
+   private final FrameVector2D contactPointToCentroid = new FrameVector2D();
+   private final FrameVector2D xAxis = new FrameVector2D();
+
    public PlaneContactStateToWrenchMatrixHelper(ContactablePlaneBody contactablePlaneBody, ReferenceFrame centerOfMassFrame, int maxNumberOfContactPoints,
          int numberOfBasisVectorsPerContactPoint, YoVariableRegistry parentRegistry)
    {
@@ -123,7 +128,7 @@ public class PlaneContactStateToWrenchMatrixHelper
          YoDouble rhoWeight = new YoDouble(namePrefix + "RhoWeight" + i, registry);
          YoDouble maxContactForce = new YoDouble(namePrefix + "MaxContactForce" + i, registry);
          maxContactForce.set(Double.POSITIVE_INFINITY);
-         
+
          rhoWeights.put(yoPlaneContactState.getContactPoints().get(i), rhoWeight);
          maxContactForces.put(yoPlaneContactState.getContactPoints().get(i), maxContactForce);
       }
@@ -160,7 +165,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       for (int i = 0; i < command.getNumberOfContactPoints(); i++)
       {
-         rhoWeights.get(yoPlaneContactState.getContactPoints().get(i)).set(command.getRhoWeight(i));         
+         rhoWeights.get(yoPlaneContactState.getContactPoints().get(i)).set(command.getRhoWeight(i));
          if (command.hasMaxContactPointNormalForce())
          {
             maxContactForces.get(yoPlaneContactState.getContactPoints().get(i)).set(command.getMaxContactPointNormalForce(i));
@@ -188,10 +193,19 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       int rhoIndex = 0;
 
+      FramePoint2D centroidOfSupport = yoPlaneContactState.getCentroid();
+      xAxis.setIncludingFrame(planeFrame, 1.0, 0.0);
+      contactPointToCentroid.setToZero(planeFrame);
+
       for (int contactPointIndex = 0; contactPointIndex < yoPlaneContactState.getTotalNumberOfContactPoints(); contactPointIndex++)
       {
          YoContactPoint contactPoint = contactPoints.get(contactPointIndex);
          boolean inContact = contactPoint.isInContact();
+
+         // rotate each friction cone approximation to point one vector towards the center of the foot
+         contactPoint.getPosition2d(contactPoint2d);
+         contactPointToCentroid.sub(centroidOfSupport, contactPoint2d);
+         double angleOffset = xAxis.angle(contactPointToCentroid);
 
          for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
          {
@@ -201,7 +215,7 @@ public class PlaneContactStateToWrenchMatrixHelper
             if (inContact)
             {
                contactPoint.getPosition(basisVectorOrigin);
-               computeBasisVector(basisVectorIndex, normalContactVectorRotationMatrix, basisVector);
+               computeBasisVector(basisVectorIndex, angleOffset, normalContactVectorRotationMatrix, basisVector);
 
                DenseMatrix64F singleRhoJacobian = computeSingleRhoJacobian(basisVectorOrigin, basisVector);
                CommonOps.insert(singleRhoJacobian, rhoJacobianMatrix, 0, rhoIndex);
@@ -214,8 +228,8 @@ public class PlaneContactStateToWrenchMatrixHelper
                {
                   rhoWeight = defaultRhoWeight;
                }
-               
-               rhoWeightMatrix.set(rhoIndex, rhoIndex, rhoWeight * (double) maxNumberOfContactPoints / (double) numberOfContactPointsInContact);
+
+               rhoWeightMatrix.set(rhoIndex, rhoIndex, rhoWeight * maxNumberOfContactPoints / numberOfContactPointsInContact);
 
                if (resetRequested.getBooleanValue())
                   rhoRateWeightMatrix.set(rhoIndex, rhoIndex, 0.0);
@@ -335,9 +349,9 @@ public class PlaneContactStateToWrenchMatrixHelper
       normalContactVectorRotationMatrixToPack.set(normalContactVectorRotation);
    }
 
-   private void computeBasisVector(int basisVectorIndex, RotationMatrix normalContactVectorRotationMatrix, FrameVector3D basisVectorToPack)
+   private void computeBasisVector(int basisVectorIndex, double rotationOffset, RotationMatrix normalContactVectorRotationMatrix, FrameVector3D basisVectorToPack)
    {
-      double angle = basisVectorIndex * basisVectorAngleIncrement;
+      double angle = rotationOffset + basisVectorIndex * basisVectorAngleIncrement;
       double mu = yoPlaneContactState.getCoefficientOfFriction();
 
       // Compute the linear part considering a normal contact vector pointing z-up

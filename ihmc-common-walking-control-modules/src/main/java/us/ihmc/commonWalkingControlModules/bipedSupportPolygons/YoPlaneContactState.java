@@ -10,15 +10,14 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoPlaneContactState implements PlaneContactState, ModifiableContactState
 {
@@ -43,7 +42,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    {
       this(namePrefix, rigidBody, planeFrame, contactFramePoints, coefficientOfFriction, Double.NaN, parentRegistry);
    }
-   
+
    public YoPlaneContactState(String namePrefix, RigidBody rigidBody, ReferenceFrame planeFrame, List<FramePoint2D> contactFramePoints,
          double coefficientOfFriction, double defaultRhoWeight, YoVariableRegistry parentRegistry)
    {
@@ -51,7 +50,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       this.inContact = new YoBoolean(namePrefix + "InContact", registry);
       this.coefficientOfFriction = new YoDouble(namePrefix + "CoefficientOfFriction", registry);
       this.coefficientOfFriction.set(coefficientOfFriction);
-      
+
       this.rigidBody = rigidBody;
       this.planeFrame = planeFrame;
 
@@ -69,7 +68,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          YoDouble maxContactPointNormalForce = new YoDouble(namePrefix + "MaxContactPointNormalForce" + i, registry);
          maxContactPointNormalForce.set(Double.POSITIVE_INFINITY);
          maxContactPointNormalForces.put(contactPoint, maxContactPointNormalForce);
-         
+
          YoDouble rhoWeight = new YoDouble(namePrefix + "RhoWeight" + i, registry);
          rhoWeight.set(defaultRhoWeight);
          rhoWeights.put(contactPoint, rhoWeight);
@@ -109,10 +108,10 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
 
             YoDouble maxForce = maxContactPointNormalForces.get(contactPoint);
             planeContactStateCommandToPack.setMaxContactPointNormalForce(contactedPointIndex, maxForce.getDoubleValue());
-            
+
             YoDouble rhoWeight = rhoWeights.get(contactPoint);
             planeContactStateCommandToPack.setRhoWeight(contactedPointIndex, rhoWeight.getDoubleValue());
-            
+
             contactedPointIndex++;
          }
       }
@@ -140,10 +139,10 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          YoContactPoint contactPoint = contactPoints.get(i);
          contactPoint.setPosition(tempContactPointPosition);
          contactPoint.setInContact(true);
-         
+
          double maxContactPointNormalForce = planeContactStateCommand.getMaxContactPointNormalForce(i);
          maxContactPointNormalForces.get(contactPoint).set(maxContactPointNormalForce);
-         
+
          double rhoWeight = planeContactStateCommand.getRhoWeight(i);
          rhoWeights.get(contactPoint).set(rhoWeight);
       }
@@ -175,7 +174,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    {
       maxContactPointNormalForces.get(contactPoint).set(maxNormalForce);
    }
-   
+
    public void setRhoWeight(YoContactPoint contactPoint, double rhoWeight)
    {
       rhoWeights.get(contactPoint).set(rhoWeight);
@@ -392,7 +391,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
          updateInContact();
       }
    }
-   
+
    public void updateInContact()
    {
       for (int i = 0; i < totalNumberOfContactPoints; i++)
@@ -420,6 +419,11 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
    public double getFootholdArea()
    {
       return contactPointsPolygon.getArea();
+   }
+
+   public FramePoint2D getCentroid()
+   {
+      return contactPointsPolygon.getCentroid();
    }
 
    @Override
@@ -520,7 +524,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       return rigidBody;
    }
 
-   
+
 
    @Override
    public String toString()
