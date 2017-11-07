@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
@@ -143,12 +144,15 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    private final CTTreeFindInitialGuess ctTreeFindInitialGuess;
 
+   private final CommandInputManager commandInputManager;
+
    public ConstrainedWholeBodyPlanningToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModel,
-                                                        StatusMessageOutputManager statusOutputManager, YoVariableRegistry registry,
-                                                        YoGraphicsListRegistry yoGraphicsRegistry, boolean startYoVariableServer)
+                                                        CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
+                                                        YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsRegistry, boolean startYoVariableServer)
    {
       super(statusOutputManager, registry);
       this.drcRobotModelFactory = drcRobotModel;
+      this.commandInputManager = commandInputManager;
 
       if (this.drcRobotModelFactory.getHandModel() == null)
       {
@@ -432,8 +436,9 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    /**
     * state == FIND_INITIAL_GUESS
-    * @throws ExecutionException 
-    * @throws InterruptedException 
+    * 
+    * @throws ExecutionException
+    * @throws InterruptedException
     */
    private void findInitialGuess() throws InterruptedException, ExecutionException
    {
@@ -624,7 +629,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    }
 
    /**
-    * update validity of input node. 
+    * update validity of input node.
     */
    private boolean updateValidity(CTTaskNode node)
    {
@@ -644,8 +649,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       kinematicsSolver.holdCurrentTrajectoryMessages();
 
       /*
-       * set whole body tasks. pose from 'constrainedEndEffectorTrajectory' is
-       * considered as being in MidZUpframe. for kinematicsSolver, append offset
+       * set whole body tasks. pose from 'constrainedEndEffectorTrajectory' is considered as being
+       * in MidZUpframe. for kinematicsSolver, append offset
        */
       SideDependentList<ConfigurationSpace> configurationSpaces = new SideDependentList<>();
 
