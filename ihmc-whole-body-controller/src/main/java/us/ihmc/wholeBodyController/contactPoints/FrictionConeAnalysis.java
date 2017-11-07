@@ -34,7 +34,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 public class FrictionConeAnalysis
 {
    private static final double friction = 0.8;
-   private static final int vectors = 3;
+   private static final int vectors = 4;
 
    private static final boolean showPlotter = true;
    private static final int pointsOnCircle = 50;
@@ -266,17 +266,10 @@ public class FrictionConeAnalysis
    {
       List<Point2D> contactPoints = new ArrayList<>();
 
-//      contactPoints.add(new Point2D(0.2, 0.1));
-//      contactPoints.add(new Point2D(0.2, -0.1));
-//      contactPoints.add(new Point2D(-0.2, -0.1));
-//      contactPoints.add(new Point2D(-0.2, 0.1));
-
       contactPoints.add(new Point2D(0.2, 0.1));
       contactPoints.add(new Point2D(0.2, -0.1));
-      contactPoints.add(new Point2D(0.075, -0.2));
-      contactPoints.add(new Point2D(-0.2, -0.05));
-      contactPoints.add(new Point2D(-0.2, 0.05));
-      contactPoints.add(new Point2D(0.075, 0.2));
+      contactPoints.add(new Point2D(-0.2, -0.1));
+      contactPoints.add(new Point2D(-0.2, 0.1));
 
       moveCentroidToOrigin(contactPoints);
       return contactPoints;
