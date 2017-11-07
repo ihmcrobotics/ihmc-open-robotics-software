@@ -88,9 +88,11 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
 
    private final FramePoint2D contactPoint2d = new FramePoint2D();
+   private final FrictionConeRotationCalculator coneRotationCalculator;
 
    public PlaneContactStateToWrenchMatrixHelper(ContactablePlaneBody contactablePlaneBody, ReferenceFrame centerOfMassFrame, int maxNumberOfContactPoints,
-         int numberOfBasisVectorsPerContactPoint, YoVariableRegistry parentRegistry)
+                                                int numberOfBasisVectorsPerContactPoint, FrictionConeRotationCalculator coneRotationCalculator,
+                                                YoVariableRegistry parentRegistry)
    {
       List<FramePoint2D> contactPoints2d = contactablePlaneBody.getContactPoints2d();
 
@@ -100,6 +102,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       this.centerOfMassFrame = centerOfMassFrame;
       this.maxNumberOfContactPoints = maxNumberOfContactPoints;
       this.numberOfBasisVectorsPerContactPoint = numberOfBasisVectorsPerContactPoint;
+      this.coneRotationCalculator = coneRotationCalculator;
 
       rhoSize = maxNumberOfContactPoints * numberOfBasisVectorsPerContactPoint;
       basisVectorAngleIncrement = 2.0 * Math.PI / numberOfBasisVectorsPerContactPoint;
@@ -203,9 +206,7 @@ public class PlaneContactStateToWrenchMatrixHelper
          boolean inContact = contactPoint.isInContact();
 
          // rotate each friction cone approximation to point one vector towards the center of the foot
-         double angleOfEdge = yoPlaneContactState.getAngleOfEdgeAfterPoint(contactPointIndex);
-         double interiorAngle = yoPlaneContactState.getInteriorAngle(contactPointIndex);
-         double angleOffset = angleOfEdge - 0.5 * interiorAngle;
+         double angleOffset = coneRotationCalculator.computeConeRotation(yoPlaneContactState, contactPointIndex);
 
          // in case the contact point is close to another point rotate it
          if (inContact)

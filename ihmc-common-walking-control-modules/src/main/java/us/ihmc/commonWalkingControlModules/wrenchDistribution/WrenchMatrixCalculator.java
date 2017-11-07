@@ -17,13 +17,13 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WrenchMatrixCalculator
 {
@@ -51,7 +51,7 @@ public class WrenchMatrixCalculator
 
    private final DenseMatrix64F desiredCoPMatrix;
    private final DenseMatrix64F previousCoPMatrix;
-   
+
    private final DenseMatrix64F rhoMaxMatrix;
    private final DenseMatrix64F rhoWeightMatrix;
    private final DenseMatrix64F rhoRateWeightMatrix;
@@ -76,27 +76,27 @@ public class WrenchMatrixCalculator
    {
       this.centerOfMassFrame = centerOfMassFrame;
       List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
-      
-      
+
+
       nContactableBodies = toolbox.getNumberOfContactableBodies();
-      maxNumberOfContactPoints = toolbox.getNumberOfContactPointsPerContactableBody();        
-      numberOfBasisVectorsPerContactPoint = toolbox.getNumberOfBasisVectorsPerContactPoint(); 
-      rhoSize = toolbox.getRhoSize();                                                  
-      copTaskSize = 2 * nContactableBodies; 
-      
+      maxNumberOfContactPoints = toolbox.getNumberOfContactPointsPerContactableBody();
+      numberOfBasisVectorsPerContactPoint = toolbox.getNumberOfBasisVectorsPerContactPoint();
+      rhoSize = toolbox.getRhoSize();
+      copTaskSize = 2 * nContactableBodies;
+
       rhoJacobianMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, rhoSize);
-      copJacobianMatrix = new DenseMatrix64F(copTaskSize, rhoSize);            
-      rhoPreviousMatrix = new DenseMatrix64F(rhoSize, 1);                      
-                                                                               
-      desiredCoPMatrix = new DenseMatrix64F(copTaskSize, 1);                   
+      copJacobianMatrix = new DenseMatrix64F(copTaskSize, rhoSize);
+      rhoPreviousMatrix = new DenseMatrix64F(rhoSize, 1);
+
+      desiredCoPMatrix = new DenseMatrix64F(copTaskSize, 1);
       previousCoPMatrix = new DenseMatrix64F(copTaskSize, 1);
 
       rhoMaxMatrix = new DenseMatrix64F(rhoSize, 1);
       rhoWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
-      rhoRateWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);              
-      desiredCoPWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);   
-      copRateWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);      
-      
+      rhoRateWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
+      desiredCoPWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);
+      copRateWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);
+
 
       if (contactablePlaneBodies.size() > nContactableBodies)
          throw new RuntimeException("Unexpected number of contactable plane bodies: " + contactablePlaneBodies.size());
@@ -108,8 +108,9 @@ public class WrenchMatrixCalculator
 
          rigidBodies.add(rigidBody);
 
+         FrictionConeRotationCalculator frictionConeRotation = toolbox.getOptimizationSettings().getFrictionConeRotation();
          PlaneContactStateToWrenchMatrixHelper helper = new PlaneContactStateToWrenchMatrixHelper(contactablePlaneBody, centerOfMassFrame,
-               maxNumberOfContactPoints, numberOfBasisVectorsPerContactPoint, registry);
+               maxNumberOfContactPoints, numberOfBasisVectorsPerContactPoint, frictionConeRotation, registry);
          planeContactStateToWrenchMatrixHelpers.put(rigidBody, helper);
 
          basisVectorsOrigin.addAll(helper.getBasisVectorsOrigin());
