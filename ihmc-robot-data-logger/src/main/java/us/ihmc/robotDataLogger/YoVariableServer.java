@@ -23,11 +23,10 @@ import us.ihmc.robotDataLogger.rtps.RegistryPublisher;
 import us.ihmc.robotDataLogger.rtps.TimestampPublisher;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, VariableChangedListener

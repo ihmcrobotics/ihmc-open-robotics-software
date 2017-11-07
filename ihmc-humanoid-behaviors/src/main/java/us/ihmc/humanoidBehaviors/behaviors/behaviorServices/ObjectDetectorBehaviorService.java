@@ -23,7 +23,7 @@ import us.ihmc.ihmcPerception.objectDetector.ObjectDetectorFromCameraImages;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
 {

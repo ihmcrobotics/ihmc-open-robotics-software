@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class BlockingSimulationRunner
 {
