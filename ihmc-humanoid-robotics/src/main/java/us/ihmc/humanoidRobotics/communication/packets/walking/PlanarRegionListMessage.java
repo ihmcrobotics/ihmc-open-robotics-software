@@ -1,5 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
@@ -7,18 +8,27 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class PlanarRegionListMessage extends Packet<PlanarRegionListMessage> implements Iterable<PlanarRegionListMessage>, VisualizablePacket
+public class PlanarRegionListMessage extends Packet<PlanarRegionListMessage> implements Iterable<PlanarRegionMessage>, VisualizablePacket
 {
-   public ArrayList<PlanarRegionMessage> planarRegionList = new ArrayList<>();
+   public ArrayList<PlanarRegionMessage> planarRegionList = new ArrayList<PlanarRegionMessage>();
+
+   public ExecutionMode executionMode = ExecutionMode.OVERRIDE;
 
    public PlanarRegionListMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      setExecutionMode(ExecutionMode.OVERRIDE);
    }
 
    public PlanarRegionListMessage(ArrayList<PlanarRegionMessage> planarRegionList)
    {
+      this(planarRegionList, ExecutionMode.OVERRIDE);
+   }
+
+   public PlanarRegionListMessage(ArrayList<PlanarRegionMessage> planarRegionList, ExecutionMode executionMode)
+   {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      setExecutionMode(executionMode);
       if (planarRegionList != null)
       {
          this.planarRegionList = planarRegionList;
@@ -28,6 +38,11 @@ public class PlanarRegionListMessage extends Packet<PlanarRegionListMessage> imp
    public ArrayList<PlanarRegionMessage> getDataList()
    {
       return planarRegionList;
+   }
+
+   public void setExecutionMode(ExecutionMode executionMode)
+   {
+      this.executionMode = executionMode;
    }
 
    public void add(PlanarRegionMessage planarRegionMessage)
@@ -60,6 +75,9 @@ public class PlanarRegionListMessage extends Packet<PlanarRegionListMessage> imp
             return false;
          }
       }
+
+      if (this.executionMode != otherList.executionMode)
+         return false;
 
       return true;
    }

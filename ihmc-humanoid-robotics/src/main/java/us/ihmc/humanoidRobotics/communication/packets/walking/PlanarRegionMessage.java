@@ -16,7 +16,6 @@ import java.util.List;
 public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
 {
    public static final int NO_REGION_ID = -1;
-   public static final double DEFAULT_BOUNDING_BOX_EPSILON = 1e-15;
 
    private int regionId = NO_REGION_ID;
    private RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
@@ -122,6 +121,31 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
    public void setRegionId(int regionId)
    {
       this.regionId = regionId;
+   }
+
+   public RigidBodyTransform getTransformToWorld()
+   {
+      return fromLocalToWorldTransform;
+   }
+
+   public RigidBodyTransform getTransformFromWorld()
+   {
+      return fromWorldToLocalTransform;
+   }
+
+   public Point2D[] getConcaveHullVertices()
+   {
+      return concaveHullsVertices;
+   }
+
+   public List<ConvexPolygon2D> getConvexPolygons()
+   {
+      return convexPolygons;
+   }
+
+   public int getRegionId()
+   {
+      return regionId;
    }
 
    @Override
