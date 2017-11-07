@@ -75,7 +75,9 @@ public abstract class AbstractModularRobotController implements RobotController
       }
       
       this.robotControllers.add(robotController);
-      registry.addChild(robotController.getYoVariableRegistry());
+      YoVariableRegistry controllerRegistry = robotController.getYoVariableRegistry();
+      if (controllerRegistry != null)
+         registry.addChild(controllerRegistry);
    }
 
    public void setOutputProcessor(OutputProcessor outputProcessor)

@@ -18,6 +18,9 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBa
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectory;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -26,6 +29,7 @@ import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ReferenceCMPTrajectoryGeneratorTest
 {
    private final int numberOfFootsteps = 3;
@@ -115,6 +119,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
 
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testDoubleSupportWithoutAngularMomentum()
    {
@@ -124,6 +129,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
       checkSwingTrajectoriesForCopy();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testSingleSupportWithoutAngularMomentum()
    {
@@ -134,6 +140,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
 
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testDoubleSupportWithAngularMomentum()
    {
@@ -144,6 +151,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
       checkSwingTrajectoriesForAddition();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testSingleSupportWithAngularMomentum()
    {
