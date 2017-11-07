@@ -118,6 +118,6 @@ public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTraj
    @Override
    public boolean isCommandValid()
    {
-      return false;
+      return getNumberOfWaypoints() > 0;
    }
 }
