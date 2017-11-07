@@ -34,6 +34,13 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PlaneContactStateToWrenchMatrixHelper
 {
+   /**
+    * This is used when determining whether two contact points are at the same location. If that is the case
+    * one of them will rotate it's friction cone approximation to get better coverage of the cone through the
+    * basis vectors.
+    */
+   private static final double distanceThresholdBetweenTwoContactPoint = 0.01;
+
    private final int maxNumberOfContactPoints;
    private final int numberOfBasisVectorsPerContactPoint;
    private final double basisVectorAngleIncrement;
@@ -206,6 +213,26 @@ public class PlaneContactStateToWrenchMatrixHelper
          contactPoint.getPosition2d(contactPoint2d);
          contactPointToCentroid.sub(centroidOfSupport, contactPoint2d);
          double angleOffset = xAxis.angle(contactPointToCentroid);
+
+         // in case the contact point is close to another point rotate it
+         if (inContact)
+         {
+            int matches = 0;
+            for (int j = contactPointIndex + 1; j < contactPoints.size(); j++)
+            {
+               YoContactPoint candidateForMatch = contactPoints.get(j);
+               candidateForMatch.getPosition2d(contactPoint2d);
+               if (candidateForMatch.isInContact() && contactPoint.epsilonEquals(contactPoint2d, distanceThresholdBetweenTwoContactPoint))
+               {
+                  matches++;
+               }
+            }
+            // TODO: If there are more then two contacts in the same spot we should probably disable them.
+            if (matches > 0)
+            {
+               angleOffset += basisVectorAngleIncrement / 2.0;
+            }
+         }
 
          for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
          {
