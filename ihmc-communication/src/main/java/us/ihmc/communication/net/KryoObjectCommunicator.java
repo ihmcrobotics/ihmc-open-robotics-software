@@ -18,7 +18,7 @@ import com.esotericsoftware.kryonet.EndPoint;
 import com.esotericsoftware.kryonet.FrameworkMessage.KeepAlive;
 import com.esotericsoftware.kryonet.Listener;
 
-import us.ihmc.tools.FormattingTools;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class KryoObjectCommunicator implements NetworkedObjectCommunicator
