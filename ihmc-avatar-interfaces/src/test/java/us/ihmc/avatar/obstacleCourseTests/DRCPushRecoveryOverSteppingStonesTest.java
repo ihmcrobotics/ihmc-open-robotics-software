@@ -21,6 +21,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
@@ -235,7 +236,10 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
       }
       convexPolygon2D.update();
 
-      PlanarRegion planarRegion = new PlanarRegion(ReferenceFrame.getWorldFrame().getTransformToWorldFrame(), convexPolygon2D);
+      TranslationReferenceFrame planarRegionFrame = new TranslationReferenceFrame("planarRegionFrame", ReferenceFrame.getWorldFrame());
+      planarRegionFrame.updateTranslation(new Vector3D(0.0, 0.0, 0.3));
+
+      PlanarRegion planarRegion = new PlanarRegion(planarRegionFrame.getTransformToWorldFrame(), convexPolygon2D);
       return planarRegion;
    }
 
