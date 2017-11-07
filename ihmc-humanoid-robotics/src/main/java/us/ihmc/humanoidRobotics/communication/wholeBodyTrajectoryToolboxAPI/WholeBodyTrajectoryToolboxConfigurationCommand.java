@@ -55,6 +55,6 @@ public class WholeBodyTrajectoryToolboxConfigurationCommand
    @Override
    public boolean isCommandValid()
    {
-      return false;
+      return true;
    }
 }

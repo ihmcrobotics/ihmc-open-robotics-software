@@ -2,10 +2,11 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedW
 
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 
-public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<WholeBodyTrajectoryToolboxConfigurationMessage>
+public class WholeBodyTrajectoryToolboxConfigurationMessage extends TrackablePacket<WholeBodyTrajectoryToolboxConfigurationMessage>
 {
    public int numberOfInitialGuesses = -1;
    public int maximumExpansionSize = -1;
