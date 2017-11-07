@@ -19,7 +19,7 @@ import us.ihmc.codecs.generated.FilterModeEnum;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class VideoPlayer
 {

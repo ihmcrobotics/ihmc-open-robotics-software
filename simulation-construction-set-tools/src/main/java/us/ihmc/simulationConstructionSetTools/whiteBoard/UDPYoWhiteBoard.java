@@ -7,7 +7,7 @@ import java.io.IOException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.tools.io.DatagramInputStream;
 import us.ihmc.tools.io.DatagramOutputStream;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class UDPYoWhiteBoard extends DataStreamYoWhiteBoard
 {
