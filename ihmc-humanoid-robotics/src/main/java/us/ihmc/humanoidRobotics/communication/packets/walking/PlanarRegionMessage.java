@@ -38,7 +38,7 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
 
    public PlanarRegionMessage(RigidBodyTransform transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons)
    {
-      this(transformToWorld, new Point2D[], planarRegionConvexPolygons);
+      this(transformToWorld, new Point2D[0], planarRegionConvexPolygons);
    }
 
    public PlanarRegionMessage(RigidBodyTransform transformToWorld, Point2D[] concaveHullVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
@@ -62,6 +62,7 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
    {
       this.fromWorldToLocalTransform.set(planarRegionMessage.fromWorldToLocalTransform);
       this.fromLocalToWorldTransform.set(planarRegionMessage.fromLocalToWorldTransform);
+      this.regionId = planarRegionMessage.regionId;
 
       this.concaveHullsVertices = new Point2D[planarRegionMessage.concaveHullsVertices.length];
       for (int i = 0; i < planarRegionMessage.concaveHullsVertices.length; i++)
@@ -80,6 +81,7 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
    {
       planarRegion.getTransformToWorld(fromLocalToWorldTransform);
       this.fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
+      this.regionId = planarRegion.getRegionId();
 
       this.concaveHullsVertices = new Point2D[planarRegion.getConcaveHullSize()];
       for (int i = 0; i < planarRegion.getConcaveHullSize(); i++)
@@ -115,6 +117,11 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
    public void setConcaveHullsVertices(Point2D[] concaveHullsVertices)
    {
       this.concaveHullsVertices = concaveHullsVertices;
+   }
+
+   public void setRegionId(int regionId)
+   {
+      this.regionId = regionId;
    }
 
    @Override
@@ -156,7 +163,9 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
          }
       }
 
-      return transformToWorldEquals && transformToLocalEquals && convexPolygonsEqual && concaveHullEqual;
+      boolean idEqual = regionId == planarRegionMessage.regionId;
+
+      return transformToWorldEquals && transformToLocalEquals && convexPolygonsEqual && concaveHullEqual && idEqual;
    }
 
    /** {@inheritDoc} */

@@ -1095,4 +1095,9 @@ public abstract class PacketValidityChecker
    {
       return "TODO";
    }
+
+   public static String validatePlanarRegionListMessage(PlanarRegionListMessage planarRegionListMessage)
+   {
+      return "TODO";
+   }
 }
