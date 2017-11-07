@@ -16,7 +16,6 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -89,8 +88,6 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
 
    private final FramePoint2D contactPoint2d = new FramePoint2D();
-   private final FrameVector2D contactPointToCentroid = new FrameVector2D();
-   private final FrameVector2D xAxis = new FrameVector2D();
 
    public PlaneContactStateToWrenchMatrixHelper(ContactablePlaneBody contactablePlaneBody, ReferenceFrame centerOfMassFrame, int maxNumberOfContactPoints,
          int numberOfBasisVectorsPerContactPoint, YoVariableRegistry parentRegistry)
@@ -200,19 +197,15 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       int rhoIndex = 0;
 
-      FramePoint2D centroidOfSupport = yoPlaneContactState.getCentroid();
-      xAxis.setIncludingFrame(planeFrame, 1.0, 0.0);
-      contactPointToCentroid.setToZero(planeFrame);
-
       for (int contactPointIndex = 0; contactPointIndex < yoPlaneContactState.getTotalNumberOfContactPoints(); contactPointIndex++)
       {
          YoContactPoint contactPoint = contactPoints.get(contactPointIndex);
          boolean inContact = contactPoint.isInContact();
 
          // rotate each friction cone approximation to point one vector towards the center of the foot
-         contactPoint.getPosition2d(contactPoint2d);
-         contactPointToCentroid.sub(centroidOfSupport, contactPoint2d);
-         double angleOffset = xAxis.angle(contactPointToCentroid);
+         double angleOfEdge = yoPlaneContactState.getAngleOfEdgeAfterPoint(contactPointIndex);
+         double interiorAngle = yoPlaneContactState.getInteriorAngle(contactPointIndex);
+         double angleOffset = angleOfEdge - 0.5 * interiorAngle;
 
          // in case the contact point is close to another point rotate it
          if (inContact)
@@ -273,6 +266,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
             rhoIndex++;
          }
+
       }
 
       isFootholdAreaLargeEnough.set(yoPlaneContactState.getFootholdArea() > 1.0e-3);
