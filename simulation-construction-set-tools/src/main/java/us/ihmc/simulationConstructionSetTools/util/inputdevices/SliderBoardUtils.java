@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.inputdevices;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 
 public class SliderBoardUtils

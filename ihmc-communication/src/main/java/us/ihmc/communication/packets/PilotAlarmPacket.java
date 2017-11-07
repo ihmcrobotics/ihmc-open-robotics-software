@@ -1,6 +1,6 @@
 package us.ihmc.communication.packets;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class PilotAlarmPacket extends Packet<PilotAlarmPacket>
 {

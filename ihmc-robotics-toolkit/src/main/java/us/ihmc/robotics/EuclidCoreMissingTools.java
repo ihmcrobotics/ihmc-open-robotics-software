@@ -1,5 +1,6 @@
 package us.ihmc.robotics;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 
 public class EuclidCoreMissingTools

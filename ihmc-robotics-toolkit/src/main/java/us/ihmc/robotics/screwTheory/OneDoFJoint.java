@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
 {

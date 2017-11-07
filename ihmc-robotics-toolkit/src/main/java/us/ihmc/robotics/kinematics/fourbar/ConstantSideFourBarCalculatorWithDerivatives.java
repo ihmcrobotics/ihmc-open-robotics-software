@@ -3,10 +3,9 @@ package us.ihmc.robotics.kinematics.fourbar;
 import static java.lang.Math.*;
 import static java.lang.Math.min;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
-import static us.ihmc.robotics.MathTools.*;
+import static us.ihmc.commons.MathTools.*;
 
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class ConstantSideFourBarCalculatorWithDerivatives implements FourbarCalculatorWithDerivatives
 {
