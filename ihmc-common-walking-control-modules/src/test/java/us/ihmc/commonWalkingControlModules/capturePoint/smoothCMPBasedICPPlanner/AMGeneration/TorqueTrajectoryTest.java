@@ -8,6 +8,9 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.AMGeneration.AngularMomentumTrajectory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.AMGeneration.TorqueTrajectory;
 import us.ihmc.commons.Epsilons;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
@@ -15,6 +18,7 @@ import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.Trajectory;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class TorqueTrajectoryTest
 {
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -39,6 +43,7 @@ public class TorqueTrajectoryTest
       calculatedTrajectory = new FrameTrajectory3D(numberOfCoefficients, worldFrame);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testSetter()
    {
@@ -57,6 +62,7 @@ public class TorqueTrajectoryTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testScaling()
    {

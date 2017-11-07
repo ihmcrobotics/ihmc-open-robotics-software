@@ -9,15 +9,21 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBa
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectory;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.MathTools;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class CoPTrajectoryTest
 {
    private static int maxNumberOfSegments = 2;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double epsilon = Epsilons.ONE_BILLIONTH;
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testLinear()
    {
@@ -51,7 +57,8 @@ public class CoPTrajectoryTest
       assertTrue(MathTools.epsilonEquals(testTrajectory.getSegment(1).getTrajectoryZ().getCoefficient(1), 21.3, epsilon));
    }
 
-   
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCubic()
    {
