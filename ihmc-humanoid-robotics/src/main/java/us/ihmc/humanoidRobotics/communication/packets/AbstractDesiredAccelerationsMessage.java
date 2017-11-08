@@ -5,11 +5,11 @@ import java.text.NumberFormat;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.communication.packets.TrackablePacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.tools.ArrayTools;
 
-public abstract class AbstractDesiredAccelerationsMessage<T extends AbstractDesiredAccelerationsMessage<T>> extends TrackablePacket<T>
+public abstract class AbstractDesiredAccelerationsMessage<T extends AbstractDesiredAccelerationsMessage<T>> extends Packet<T>
 {
    @RosExportedField(documentation = "Specifies the desired joint accelerations.")
    public double[] desiredJointAccelerations;
