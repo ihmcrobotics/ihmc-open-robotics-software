@@ -12,7 +12,7 @@ import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
@@ -268,7 +268,7 @@ public class GenericROSTranslationTools
             ihmcMessageClass = (Class<? extends Packet>) aClass;
             break;
          }
-         else if(StatusPacket.class.isAssignableFrom(aClass) && aClass.getSimpleName().equals(ihmcMessageClassName.replace("Message", "")))
+         else if(SettablePacket.class.isAssignableFrom(aClass) && aClass.getSimpleName().equals(ihmcMessageClassName.replace("Message", "")))
          {
             ihmcMessageClass = (Class<? extends Packet>) aClass;
             break;
@@ -313,7 +313,7 @@ public class GenericROSTranslationTools
          outputTopics = new HashSet<>();
          for (Class<?> aClass : getIHMCCoreRosMessagePacketAnnotatedClasses())
          {
-            if(StatusPacket.class.isAssignableFrom(aClass) && !aClass.getAnnotation(RosMessagePacket.class).topic().equals(RosMessagePacket.NO_CORRESPONDING_TOPIC_STRING))
+            if(SettablePacket.class.isAssignableFrom(aClass) && !aClass.getAnnotation(RosMessagePacket.class).topic().equals(RosMessagePacket.NO_CORRESPONDING_TOPIC_STRING))
             {
                outputTopics.add(aClass);
             }
@@ -330,7 +330,7 @@ public class GenericROSTranslationTools
          inputTopics = new HashSet<>();
          for (Class<?> aClass : getIHMCCoreRosMessagePacketAnnotatedClasses())
          {
-            if(!StatusPacket.class.isAssignableFrom(aClass) && !aClass.getAnnotation(RosMessagePacket.class).topic().equals(RosMessagePacket.NO_CORRESPONDING_TOPIC_STRING))
+            if(!SettablePacket.class.isAssignableFrom(aClass) && !aClass.getAnnotation(RosMessagePacket.class).topic().equals(RosMessagePacket.NO_CORRESPONDING_TOPIC_STRING))
             {
                inputTopics.add(aClass);
             }
@@ -348,7 +348,7 @@ public class GenericROSTranslationTools
       for (Class<?> annotatedClass : allAnnotatedRosMessageClasses)
       {
          RosMessagePacket annotation = annotatedClass.getAnnotation(RosMessagePacket.class);
-         if(StatusPacket.class.isAssignableFrom(annotatedClass) && annotation.rosPackage().equals(additionalPackage) && !annotation.topic().equals(RosMessagePacket.NO_CORRESPONDING_TOPIC_STRING))
+         if(SettablePacket.class.isAssignableFrom(annotatedClass) && annotation.rosPackage().equals(additionalPackage) && !annotation.topic().equals(RosMessagePacket.NO_CORRESPONDING_TOPIC_STRING))
          {
             outputTopicsForPackage.add(annotatedClass);
          }
@@ -364,7 +364,7 @@ public class GenericROSTranslationTools
       for (Class<?> annotatedClass : allAnnotatedRosMessageClasses)
       {
          RosMessagePacket annotation = annotatedClass.getAnnotation(RosMessagePacket.class);
-         if(!StatusPacket.class.isAssignableFrom(annotatedClass) && annotation.rosPackage().equals(additionalPackage) &&!annotation.topic().equals(RosMessagePacket.NO_CORRESPONDING_TOPIC_STRING))
+         if(!SettablePacket.class.isAssignableFrom(annotatedClass) && annotation.rosPackage().equals(additionalPackage) &&!annotation.topic().equals(RosMessagePacket.NO_CORRESPONDING_TOPIC_STRING))
          {
             inputTopicsForPackage.add(annotatedClass);
          }
