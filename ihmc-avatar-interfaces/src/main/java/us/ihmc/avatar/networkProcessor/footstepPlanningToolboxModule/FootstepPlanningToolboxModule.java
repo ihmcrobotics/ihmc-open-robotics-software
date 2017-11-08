@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -10,6 +11,8 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.RequestPacket;
+import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
@@ -57,4 +60,9 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
       return status;
    }
 
+   @Override
+   public List<Class<? extends RequestPacket<?>>> createListOfSupportedRequests()
+   {
+      return Collections.singletonList(RequestPlanarRegionsListMessage.class);
+   }
 }

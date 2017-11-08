@@ -8,10 +8,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.StatusPacket;
-import us.ihmc.communication.packets.TrackablePacket;
+import us.ihmc.communication.packets.*;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
@@ -76,6 +73,19 @@ public class KinematicsToolboxModule extends ToolboxModule
    {
       List<Class<? extends StatusPacket<?>>> status = new ArrayList<>();
       status.add(KinematicsToolboxOutputStatus.class);
+      return status;
+   }
+
+   @Override
+   public List<Class<? extends RequestPacket<?>>> createListOfSupportedRequests()
+   {
+      return supportedRequests();
+   }
+
+   static List<Class<? extends RequestPacket<?>>> supportedRequests()
+   {
+      List<Class<? extends RequestPacket<?>>> status = new ArrayList<>();
+      status.add(RequestPlanarRegionsListMessage.class);
       return status;
    }
 
