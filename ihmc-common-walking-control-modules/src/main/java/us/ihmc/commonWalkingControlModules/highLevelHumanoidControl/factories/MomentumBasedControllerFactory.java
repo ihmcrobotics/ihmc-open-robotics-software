@@ -29,6 +29,7 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFoo
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.RequestMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -74,6 +75,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusOutputManager;
+   private final RequestMessageOutputManager requestOutputManager;
    private boolean createComponentBasedFootstepDataMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = true;
    private HeightMap heightMapForFootstepZ = null;
@@ -133,6 +135,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
       commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
+      requestOutputManager = new RequestMessageOutputManager(ControllerAPIDefinition.getControllerSupportedRequestableMessages());
 
       managerFactory = new HighLevelControlManagerFactory(statusOutputManager, registry);
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);

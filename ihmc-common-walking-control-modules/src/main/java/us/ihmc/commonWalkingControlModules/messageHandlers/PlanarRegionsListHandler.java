@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
+import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -17,9 +20,12 @@ public class PlanarRegionsListHandler
    private final YoInteger currentNumberOfPlanarRegions = new YoInteger("currentNumberOfPlanarRegions", registry);
    private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(maxNumberOfPlanarRegions, PlanarRegion.class);
 
+   private final RequestPlanarRegionsListMessage planarRegionsRequestMessage = new RequestPlanarRegionsListMessage(RequestType.SINGLE_UPDATE);
+
    public PlanarRegionsListHandler(YoVariableRegistry parentRegistry)
    {
       planarRegions.clear();
+      planarRegionsRequestMessage.setDestination(PacketDestination.CONTROLLER);
 
       parentRegistry.addChild(registry);
    }
@@ -33,6 +39,12 @@ public class PlanarRegionsListHandler
       }
 
       hasNewPlanarRegionsList.set(true);
+   }
+
+   public void requestPlanarRegions()
+   {
+      //packetCommunicator.send(planarRegionsRequestMessage);
+
    }
 
    public boolean pollHasNewPlanarRegionsList(PlanarRegionsList planarRegionsListToPack)
