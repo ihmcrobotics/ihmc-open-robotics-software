@@ -16,6 +16,4 @@ public abstract class TrackablePacket<T extends TrackablePacket<T>> extends Pack
    {
       return source;
    }
-
-   public abstract void set(T other);
 }

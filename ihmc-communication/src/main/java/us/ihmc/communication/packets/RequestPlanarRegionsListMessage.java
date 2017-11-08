@@ -1,6 +1,6 @@
 package us.ihmc.communication.packets;
 
-public class RequestPlanarRegionsListMessage extends TrackablePacket<RequestPlanarRegionsListMessage>
+public class RequestPlanarRegionsListMessage extends RequestPacket<RequestPlanarRegionsListMessage>
 {
    public enum RequestType {SINGLE_UPDATE, CONTINUOUS_UPDATE, STOP_UPDATE, CLEAR};
 
@@ -21,19 +21,24 @@ public class RequestPlanarRegionsListMessage extends TrackablePacket<RequestPlan
       setDestination(destination);
    }
 
-   public RequestType getRequesType()
+   public RequestType getRequestType()
    {
       return requestType;
    }
 
-   public void setRequesType(RequestType requesType)
+   public void setRequestType(RequestType requestType)
    {
-      this.requestType = requesType;
+      this.requestType = requestType;
    }
 
    @Override
    public boolean epsilonEquals(RequestPlanarRegionsListMessage other, double epsilon)
    {
       return requestType == other.requestType;
+   }
+
+   public void set(RequestPlanarRegionsListMessage other)
+   {
+      this.requestType = other.requestType;
    }
 }
