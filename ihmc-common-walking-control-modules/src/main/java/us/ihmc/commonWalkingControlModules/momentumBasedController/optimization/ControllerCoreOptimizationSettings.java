@@ -3,9 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlOptimizationControlModule;
-import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.*;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
 public interface ControllerCoreOptimizationSettings
@@ -304,9 +302,9 @@ public interface ControllerCoreOptimizationSettings
     * @return a new instance of the QP solver to be used. By default it is the
     *         {@link SimpleEfficientActiveSetQPSolver}.
     */
-   default SimpleActiveSetQPSolverInterface getActiveSetQPSolver()
+   default ActiveSetQPSolverWithInactiveVariablesInterface getActiveSetQPSolver()
    {
-      return new SimpleEfficientActiveSetQPSolver();
+      return new SimpleEfficientActiveSetQPSolverWithInactiveVariables();
    }
 
    /**
