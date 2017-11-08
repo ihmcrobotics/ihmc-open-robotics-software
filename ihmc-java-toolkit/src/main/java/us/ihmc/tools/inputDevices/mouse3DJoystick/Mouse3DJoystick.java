@@ -15,7 +15,7 @@ import us.ihmc.graphicsDescription.input.mouse.Mouse3DListener;
 import us.ihmc.graphicsDescription.input.mouse.Mouse3DListenerHolder;
 import us.ihmc.tools.inputDevices.JInputTools;
 import us.ihmc.tools.inputDevices.JInputTools.ControllerType;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class Mouse3DJoystick implements Mouse3DInterface
 {

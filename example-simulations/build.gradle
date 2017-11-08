@@ -29,10 +29,9 @@ mainDependencies {
    compile group: 'org.ejml', name: 'core', version: '0.30'
    compile "org.apache.commons:commons-lang3:3.4"
    compile "us.ihmc.thirdparty.jinput:jinput:160414"
-   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.12.1"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-quadruped-robotics", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-avatar-interfaces", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
@@ -51,8 +50,7 @@ mainDependencies {
 
 testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
-   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.12.1"
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.16.8"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: groupDependencyVersion
 }

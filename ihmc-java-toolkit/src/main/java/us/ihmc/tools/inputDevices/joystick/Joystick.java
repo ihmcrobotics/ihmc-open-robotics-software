@@ -15,7 +15,7 @@ import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 /**
  * <p>WARNING: On Windows, the process running this thread needs to have a Window in focus for the OS 

@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class TrajectoryTest
 {

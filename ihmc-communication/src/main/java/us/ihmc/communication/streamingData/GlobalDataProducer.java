@@ -14,7 +14,7 @@ import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLoca
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.streamingData.AtomicLastPacketHolder.LastPacket;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class GlobalDataProducer
 {

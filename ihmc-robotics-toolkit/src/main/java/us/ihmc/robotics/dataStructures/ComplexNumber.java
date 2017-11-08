@@ -1,6 +1,6 @@
 package us.ihmc.robotics.dataStructures;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 import java.util.List;
 

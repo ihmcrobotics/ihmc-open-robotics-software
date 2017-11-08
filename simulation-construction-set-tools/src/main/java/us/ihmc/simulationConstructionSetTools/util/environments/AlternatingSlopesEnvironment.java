@@ -1,7 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.environments;
 
 import us.ihmc.euclid.Axis;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.PlanarRegionEnvironmentInterface;
 
 public class AlternatingSlopesEnvironment extends PlanarRegionEnvironmentInterface

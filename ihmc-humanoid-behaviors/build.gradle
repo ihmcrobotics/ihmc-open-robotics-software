@@ -37,7 +37,7 @@ mainDependencies {
    compile "org.boofcv:io:0.24.1"
    compile "org.boofcv:recognition:0.24.1"
    compile "us.ihmc:IHMCNativeLibraryLoader:1.0"
-   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.12.1"
    compile group: "us.ihmc", name: "ihmc-manipulation-planning", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robot-models", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
@@ -48,7 +48,6 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-perception", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
@@ -58,7 +57,6 @@ mainDependencies {
 testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.16.8"
-   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
-   compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.12.1"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
 }

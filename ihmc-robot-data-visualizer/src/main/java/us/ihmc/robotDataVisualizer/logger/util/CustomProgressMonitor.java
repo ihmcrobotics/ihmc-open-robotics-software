@@ -21,7 +21,7 @@ import javax.swing.JTextArea;
 import org.apache.commons.io.output.TeeOutputStream;
 
 import us.ihmc.tools.gui.TextAreaOutputStream;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 
 public class CustomProgressMonitor extends JDialog implements ProgressMonitorInterface

@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.ihmcPerception.fiducialDetector.FiducialDetectorFromCameraImages;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
 {

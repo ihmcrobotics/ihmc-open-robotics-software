@@ -11,7 +11,7 @@ import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Serialization;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class KryoObjectClient extends KryoObjectCommunicator
 {

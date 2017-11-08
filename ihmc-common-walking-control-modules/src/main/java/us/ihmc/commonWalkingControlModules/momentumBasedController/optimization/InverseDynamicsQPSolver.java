@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
+import us.ihmc.convexOptimization.quadraticProgram.*;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -26,7 +26,7 @@ public class InverseDynamicsQPSolver
    private final YoFrameVector wrenchEquilibriumTorqueError;
 
    private final YoBoolean firstCall = new YoBoolean("firstCall", registry);
-   private final SimpleActiveSetQPSolverInterface qpSolver;
+   private final ActiveSetQPSolverWithInactiveVariablesInterface qpSolver;
 
    private final DenseMatrix64F solverInput_H;
    private final DenseMatrix64F solverInput_f;
@@ -45,10 +45,13 @@ public class InverseDynamicsQPSolver
    private final DenseMatrix64F solverInput_lb_previous;
    private final DenseMatrix64F solverInput_ub_previous;
 
+   private final DenseMatrix64F solverInput_activeIndices;
+
    private final DenseMatrix64F solverOutput;
    private final DenseMatrix64F solverOutput_jointAccelerations;
    private final DenseMatrix64F solverOutput_rhos;
 
+   private final YoInteger numberOfActiveVariables = new YoInteger("numberOfActiveVariables", registry);
    private final YoInteger numberOfIterations = new YoInteger("numberOfIterations", registry);
    private final YoInteger numberOfEqualityConstraints = new YoInteger("numberOfEqualityConstraints", registry);
    private final YoInteger numberOfInequalityConstraints = new YoInteger("numberOfInequalityConstraints", registry);
@@ -75,7 +78,7 @@ public class InverseDynamicsQPSolver
    private boolean useWarmStart = false;
    private int maxNumberOfIterations = 100;
 
-   public InverseDynamicsQPSolver(SimpleActiveSetQPSolverInterface qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase, YoVariableRegistry parentRegistry)
+   public InverseDynamicsQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase, YoVariableRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.numberOfDoFs = numberOfDoFs;
@@ -104,6 +107,9 @@ public class InverseDynamicsQPSolver
 
       CommonOps.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
       CommonOps.fill(solverInput_ub, Double.POSITIVE_INFINITY);
+
+      solverInput_activeIndices = new DenseMatrix64F(problemSize, 1);
+      CommonOps.fill(solverInput_activeIndices, 1.0);
 
       solverOutput = new DenseMatrix64F(problemSize, 1);
       solverOutput_jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
@@ -414,8 +420,11 @@ public class InverseDynamicsQPSolver
       if (useWarmStart && pollResetActiveSet())
          qpSolver.resetActiveConstraints();
 
+      numberOfActiveVariables.set((int) CommonOps.elementSum(solverInput_activeIndices));
+
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
       qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
+      qpSolver.setActiveVariables(solverInput_activeIndices);
       qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
 
@@ -519,5 +528,10 @@ public class InverseDynamicsQPSolver
    public void setMaxRho(DenseMatrix64F rhoMax)
    {
       CommonOps.insert(rhoMax, solverInput_ub, numberOfDoFs, 0);
+   }
+
+   public void setActiveRhos(DenseMatrix64F activeRhoMatrix)
+   {
+      CommonOps.insert(activeRhoMatrix, solverInput_activeIndices, numberOfDoFs, 0);
    }
 }
