@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.desiredFootStep;
+package us.ihmc.commonWalkingControlModules.messageHandlers;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
