@@ -47,14 +47,11 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
    private PushRobotController pushRobotController;
 
-   private double swingTime, transferTime, initialTransferTime;
+   private double swingTime, transferTime;
    private double totalMass;
 
    private SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
-
    private SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
-
-   private Exception caughtException;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -89,16 +86,17 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
    protected abstract double getSizeScale();
 
+   protected double getForcePointOffsetZInChestFrame()
+   {
+      return 0.3;
+   }
+
    public void testPushICPOptimizationNoPush() throws SimulationExceededMaximumTimeException
    {
       //setupTest(getScript());
       setupAndRunTest(createForwardWalkingFootstepMessage());
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
    public void testPushICPOptimizationOutwardPushInSwing() throws SimulationExceededMaximumTimeException
@@ -116,11 +114,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
    public void testPushICPOptimizationOutwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
@@ -139,10 +133,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
    public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws SimulationExceededMaximumTimeException
@@ -161,10 +152,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
    public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws SimulationExceededMaximumTimeException
@@ -216,10 +204,8 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       pushRobotController.applyForceDelayed(secondPushCondition, delay, secondForceDirection, magnitude, duration);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-      boolean noExceptions = caughtException == null;
 
       assertTrue(success);
-      assertTrue(noExceptions);
    }
 
    public void testPushICPOptimizationRandomPushInSwing() throws SimulationExceededMaximumTimeException
@@ -241,11 +227,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
    public void testPushICPOptimizationLongForwardPushInSwing() throws SimulationExceededMaximumTimeException
@@ -263,11 +245,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.7 * swingTime;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
    public void testPushICPOptimizationLongBackwardPushInSwing() throws SimulationExceededMaximumTimeException
@@ -286,10 +264,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       double duration = 0.8 * swingTime;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
    public void testPushICPOptimizationLongInwardPushInSwing() throws SimulationExceededMaximumTimeException
@@ -307,11 +282,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.8 * swingTime;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
    public void testPushICPOptimizationOutwardPushInTransfer() throws SimulationExceededMaximumTimeException
@@ -335,11 +306,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
    public void testPushICPOptimizationInwardPushInSwing() throws SimulationExceededMaximumTimeException
@@ -357,11 +324,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
    public void testPushICPOptimizationForwardPushInSwing() throws SimulationExceededMaximumTimeException
@@ -379,11 +342,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
    public void testPushICPOptimizationForwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
@@ -401,11 +360,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
    public void testPushICPOptimizationBackwardPushInSwing() throws SimulationExceededMaximumTimeException
@@ -423,11 +378,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
    public void testPushICPOptimizationOutwardPushOnEachStep() throws SimulationExceededMaximumTimeException
@@ -476,10 +427,8 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       pushRobotController.applyForceDelayed(secondPushCondition, delay, secondForceDirection, magnitude, duration);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-      boolean noExceptions = caughtException == null;
 
       assertTrue(success);
-      assertTrue(noExceptions);
    }
 
 
@@ -513,15 +462,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       }
 
       setupCamera(scs);
-      swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
-      transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
-      initialTransferTime = getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime();
       ThreadTools.sleep(1000);
-   }
-
-   protected double getForcePointOffsetZInChestFrame()
-   {
-      return 0.3;
    }
 
    private void setupCamera(SimulationConstructionSet scs)
@@ -556,8 +497,9 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       FootstepDataMessage message5 = createFootstepDataMessage(RobotSide.RIGHT, step5Location);
       FootstepDataMessage message6 = createFootstepDataMessage(RobotSide.LEFT, step6Location);
 
-      double swingTime = 0.7;
-      double transferTime = 0.25;
+      swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
+      transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+
       FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
       message.add(message1);
       message.add(message2);
@@ -594,8 +536,8 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       FootstepDataMessage message5 = createFootstepDataMessage(RobotSide.RIGHT, step5Location);
       FootstepDataMessage message6 = createFootstepDataMessage(RobotSide.LEFT, step6Location);
 
-      double swingTime = 1.2;
-      double transferTime = 0.8;
+      swingTime = 1.2;
+      transferTime = 0.8;
       FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
       message.add(message1);
       message.add(message2);
@@ -638,8 +580,9 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       FootstepDataMessage message5 = createFootstepDataMessage(RobotSide.RIGHT, step5Location, orientation);
       FootstepDataMessage message6 = createFootstepDataMessage(RobotSide.LEFT, step6Location, orientation);
 
-      double swingTime = 1.2;
-      double transferTime = 0.8;
+      swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
+      transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+
       FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
       message.add(message1);
       message.add(message2);
