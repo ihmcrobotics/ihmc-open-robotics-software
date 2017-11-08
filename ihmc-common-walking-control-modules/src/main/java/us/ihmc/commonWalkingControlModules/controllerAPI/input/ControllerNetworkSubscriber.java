@@ -236,7 +236,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
             }
          }
       };
-      controllerRequestOutputManager.attachGlobalRequestableMessageListener(globalRequestedMessageListener);
+      controllerRequestOutputManager.attachGlobalRequestMessageListener(globalRequestedMessageListener);
    }
 
    @Override

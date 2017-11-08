@@ -11,50 +11,50 @@ import java.util.Map;
 
 public class RequestMessageOutputManager
 {
-   /** Local copies of the requestable messages reported by the controller. */
-   private final Map<Class<? extends RequestPacket<?>>, RequestPacket<?>> requestableClassToObjectMap = new HashMap<>();
+   /** Local copies of the request messages reported by the controller. */
+   private final Map<Class<? extends RequestPacket<?>>, RequestPacket<?>> requestClassToObjectMap = new HashMap<>();
 
-   /** Exhaustive list of all the supported requestable messages that this API can process. */
+   /** Exhaustive list of all the supported request messages that this API can process. */
    private final List<Class<? extends RequestPacket<?>>> listOfSupportedMessages = new ArrayList<>();
    /** List of all the attached global listeners. */
-   private final List<GlobalRequestedMessageListener> globalRequestedMessageListeners = new ArrayList<>();
+   private final List<GlobalRequestedMessageListener> globalRequestMessageListeners = new ArrayList<>();
 
-   public RequestMessageOutputManager(List<Class<? extends RequestPacket<?>>> requestableMessagesToRegister)
+   public RequestMessageOutputManager(List<Class<? extends RequestPacket<?>>> requestMessagesToRegister)
    {
-      registerRequestableMessages(requestableMessagesToRegister);
+      registerRequestMessages(requestMessagesToRegister);
    }
 
    /**
     * This method has to remain private.
-    * It is used to register in the API a list of requestable messages.
-    * @param requestableMessageClasses
+    * It is used to register in the API a list of request messages.
+    * @param requestMessageClasses
     */
    @SuppressWarnings("unchecked")
-   private <S extends RequestPacket<S>> void registerRequestableMessages(List<Class<? extends RequestPacket<?>>> requestableMessageClasses)
+   private <S extends RequestPacket<S>> void registerRequestMessages(List<Class<? extends RequestPacket<?>>> requestMessageClasses)
    {
-      for (int i = 0; i < requestableMessageClasses.size(); i++)
-         registerStatusMessage((Class<S>) requestableMessageClasses.get(i));
+      for (int i = 0; i < requestMessageClasses.size(); i++)
+         registerStatusMessage((Class<S>) requestMessageClasses.get(i));
    }
 
    /**
     * Attach a new global listener to this API.
-    * @param globalRequestableMessageListener the new global listener to attach.
+    * @param globalRequestMessageListener the new global listener to attach.
     */
-   public void attachGlobalRequestableMessageListener(GlobalRequestedMessageListener globalRequestableMessageListener)
+   public void attachGlobalRequestMessageListener(GlobalRequestedMessageListener globalRequestMessageListener)
    {
-      globalRequestedMessageListeners.add(globalRequestableMessageListener);
+      globalRequestMessageListeners.add(globalRequestMessageListener);
    }
 
    /**
     * This method has to remain private.
-    * It is used to register in the API a requestable message.
-    * @param requestableMessageClass
+    * It is used to register in the API a request message.
+    * @param requestMessageClass
     */
-   private <S extends RequestPacket<S>> void registerStatusMessage(Class<S> requestableMessageClass)
+   private <S extends RequestPacket<S>> void registerStatusMessage(Class<S> requestMessageClass)
    {
-      Builder<S> builer = CommandInputManager.createBuilderWithEmptyConstructor(requestableMessageClass);
-      requestableClassToObjectMap.put(requestableMessageClass, builer.newInstance());
-      listOfSupportedMessages.add(requestableMessageClass);
+      Builder<S> builer = CommandInputManager.createBuilderWithEmptyConstructor(requestMessageClass);
+      requestClassToObjectMap.put(requestMessageClass, builer.newInstance());
+      listOfSupportedMessages.add(requestMessageClass);
    }
 
    /**
@@ -62,26 +62,26 @@ public class RequestMessageOutputManager
     * @param requestedMessage the requested message to report.
     */
    @SuppressWarnings("unchecked")
-   public <S extends RequestPacket<S>> void reportStatusMessage(S requestedMessage)
+   public <S extends RequestPacket<S>> void reportRequestMessage(S requestedMessage)
    {
-      S requestedMessageClone = (S) requestableClassToObjectMap.get(requestedMessage.getClass());
+      S requestedMessageClone = (S) requestClassToObjectMap.get(requestedMessage.getClass());
 
       if (requestedMessageClone == null)
       {
-         PrintTools.error(this, "The status message " + requestedMessage.getClass().getSimpleName() + " has not been registered or is not supported.");
+         PrintTools.error(this, "The request message " + requestedMessage.getClass().getSimpleName() + " has not been registered or is not supported.");
          return;
       }
 
-      for (int i = 0; i < globalRequestedMessageListeners.size(); i++)
+      for (int i = 0; i < globalRequestMessageListeners.size(); i++)
       {
-         GlobalRequestedMessageListener globalStatusMessageListener = globalRequestedMessageListeners.get(i);
+         GlobalRequestedMessageListener globalStatusMessageListener = globalRequestMessageListeners.get(i);
          requestedMessageClone.set(requestedMessage);
          globalStatusMessageListener.receivedNewMessageStatus(requestedMessageClone);
       }
    }
 
    /**
-    * @return The list of all the requestable messages supported by this API.
+    * @return The list of all the request messages supported by this API.
     */
    public List<Class<? extends RequestPacket<?>>> getListOfSupportedMessages()
    {
@@ -92,11 +92,11 @@ public class RequestMessageOutputManager
     * Listener for a given type of requested message.
     * The implementation of this interface will only receive requested message of the given type.
     *
-    * @param <S> The status message type to be listening for.
+    * @param <S> The request message type to be listening for.
     */
-   public static interface StatusMessageListener<S extends RequestPacket<S>>
+   public static interface RequestMessageListener<S extends RequestPacket<S>>
    {
-      public abstract void receivedNewMessageStatus(S statusMessage);
+      public abstract void receivedNewMessageRequeste(S requestMessage);
    }
 
    /**
@@ -105,6 +105,6 @@ public class RequestMessageOutputManager
     */
    public static interface GlobalRequestedMessageListener
    {
-      public abstract void receivedNewMessageStatus(RequestPacket<?> statusMessage);
+      public abstract void receivedNewMessageStatus(RequestPacket<?> requestMessage);
    }
 }
