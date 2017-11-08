@@ -43,8 +43,8 @@ public class ParameterTools
       for (ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>> parameterTripple : parameterList)
       {
          String name = parameterTripple.getLeft();
-         YoJointAccelerationIntegrationParameters yoParameters = new YoJointAccelerationIntegrationParameters(name, registry);
-         yoParameters.set(parameterTripple.getMiddle());
+         JointAccelerationIntegrationParametersReadOnly defaultParameters = parameterTripple.getMiddle();
+         YoJointAccelerationIntegrationParameters yoParameters = new YoJointAccelerationIntegrationParameters(name, registry, defaultParameters);
 
          for (String jointName : parameterTripple.getRight())
          {
