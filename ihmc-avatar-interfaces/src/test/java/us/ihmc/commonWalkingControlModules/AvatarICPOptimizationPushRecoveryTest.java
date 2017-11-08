@@ -102,7 +102,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
    public void testPushICPOptimizationOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
       StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
