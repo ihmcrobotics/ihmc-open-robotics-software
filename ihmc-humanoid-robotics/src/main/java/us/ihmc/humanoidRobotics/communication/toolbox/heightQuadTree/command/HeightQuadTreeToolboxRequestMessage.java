@@ -1,9 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.TrackablePacket;
 
-public class HeightQuadTreeToolboxRequestMessage extends TrackablePacket<HeightQuadTreeToolboxRequestMessage>
+public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeToolboxRequestMessage>
 {
    public boolean requestClearQuadTree;
    public boolean requestQuadTreeUpdate;
