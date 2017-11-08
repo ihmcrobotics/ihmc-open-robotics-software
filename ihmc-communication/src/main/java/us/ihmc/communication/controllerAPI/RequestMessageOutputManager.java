@@ -1,7 +1,7 @@
 package us.ihmc.communication.controllerAPI;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.TrackablePacket;
+import us.ihmc.communication.packets.RequestPacket;
 import us.ihmc.concurrent.Builder;
 
 import java.util.ArrayList;
@@ -12,14 +12,14 @@ import java.util.Map;
 public class RequestMessageOutputManager
 {
    /** Local copies of the requestable messages reported by the controller. */
-   private final Map<Class<? extends TrackablePacket<?>>, TrackablePacket<?>> requestableClassToObjectMap = new HashMap<>();
+   private final Map<Class<? extends RequestPacket<?>>, RequestPacket<?>> requestableClassToObjectMap = new HashMap<>();
 
    /** Exhaustive list of all the supported requestable messages that this API can process. */
-   private final List<Class<? extends TrackablePacket<?>>> listOfSupportedMessages = new ArrayList<>();
+   private final List<Class<? extends RequestPacket<?>>> listOfSupportedMessages = new ArrayList<>();
    /** List of all the attached global listeners. */
    private final List<GlobalRequestedMessageListener> globalRequestedMessageListeners = new ArrayList<>();
 
-   public RequestMessageOutputManager(List<Class<? extends TrackablePacket<?>>> requestableMessagesToRegister)
+   public RequestMessageOutputManager(List<Class<? extends RequestPacket<?>>> requestableMessagesToRegister)
    {
       registerRequestableMessages(requestableMessagesToRegister);
    }
@@ -30,7 +30,7 @@ public class RequestMessageOutputManager
     * @param requestableMessageClasses
     */
    @SuppressWarnings("unchecked")
-   private <S extends TrackablePacket<S>> void registerRequestableMessages(List<Class<? extends TrackablePacket<?>>> requestableMessageClasses)
+   private <S extends RequestPacket<S>> void registerRequestableMessages(List<Class<? extends RequestPacket<?>>> requestableMessageClasses)
    {
       for (int i = 0; i < requestableMessageClasses.size(); i++)
          registerStatusMessage((Class<S>) requestableMessageClasses.get(i));
@@ -50,7 +50,7 @@ public class RequestMessageOutputManager
     * It is used to register in the API a requestable message.
     * @param requestableMessageClass
     */
-   private <S extends TrackablePacket<S>> void registerStatusMessage(Class<S> requestableMessageClass)
+   private <S extends RequestPacket<S>> void registerStatusMessage(Class<S> requestableMessageClass)
    {
       Builder<S> builer = CommandInputManager.createBuilderWithEmptyConstructor(requestableMessageClass);
       requestableClassToObjectMap.put(requestableMessageClass, builer.newInstance());
@@ -62,7 +62,7 @@ public class RequestMessageOutputManager
     * @param requestedMessage the requested message to report.
     */
    @SuppressWarnings("unchecked")
-   public <S extends TrackablePacket<S>> void reportStatusMessage(S requestedMessage)
+   public <S extends RequestPacket<S>> void reportStatusMessage(S requestedMessage)
    {
       S requestedMessageClone = (S) requestableClassToObjectMap.get(requestedMessage.getClass());
 
@@ -83,7 +83,7 @@ public class RequestMessageOutputManager
    /**
     * @return The list of all the requestable messages supported by this API.
     */
-   public List<Class<? extends TrackablePacket<?>>> getListOfSupportedMessages()
+   public List<Class<? extends RequestPacket<?>>> getListOfSupportedMessages()
    {
       return listOfSupportedMessages;
    }
@@ -94,7 +94,7 @@ public class RequestMessageOutputManager
     *
     * @param <S> The status message type to be listening for.
     */
-   public static interface StatusMessageListener<S extends TrackablePacket<S>>
+   public static interface StatusMessageListener<S extends RequestPacket<S>>
    {
       public abstract void receivedNewMessageStatus(S statusMessage);
    }
@@ -105,6 +105,6 @@ public class RequestMessageOutputManager
     */
    public static interface GlobalRequestedMessageListener
    {
-      public abstract void receivedNewMessageStatus(TrackablePacket<?> statusMessage);
+      public abstract void receivedNewMessageStatus(RequestPacket<?> statusMessage);
    }
 }

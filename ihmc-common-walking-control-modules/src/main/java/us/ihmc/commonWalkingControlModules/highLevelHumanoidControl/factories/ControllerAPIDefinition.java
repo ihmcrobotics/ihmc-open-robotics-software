@@ -5,10 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.StatusPacket;
-import us.ihmc.communication.packets.TextToSpeechPacket;
-import us.ihmc.communication.packets.TrackablePacket;
+import us.ihmc.communication.packets.*;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
@@ -22,7 +19,7 @@ public abstract class ControllerAPIDefinition
 {
    private static final List<Class<? extends Command<?, ?>>> supportedCommands;
    private static final List<Class<? extends StatusPacket<?>>> supportedStatusMessages;
-   private static final List<Class<? extends TrackablePacket<?>>> supportedRequestableMessages;
+   private static final List<Class<? extends RequestPacket<?>>> supportedRequestableMessages;
 
    static
    {
@@ -75,7 +72,7 @@ public abstract class ControllerAPIDefinition
 
       supportedStatusMessages = Collections.unmodifiableList(statusMessages);
 
-      List<Class<? extends TrackablePacket<?>>> requestableMessages = new ArrayList<>();
+      List<Class<? extends RequestPacket<?>>> requestableMessages = new ArrayList<>();
       requestableMessages.add(RequestPlanarRegionsListMessage.class);
 
       supportedRequestableMessages = Collections.unmodifiableList(requestableMessages);
@@ -91,7 +88,7 @@ public abstract class ControllerAPIDefinition
       return supportedStatusMessages;
    }
 
-   public static List<Class<? extends TrackablePacket<?>>> getControllerSupportedRequestableMessages()
+   public static List<Class<? extends RequestPacket<?>>> getControllerSupportedRequestableMessages()
    {
       return supportedRequestableMessages;
    }
