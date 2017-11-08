@@ -59,11 +59,6 @@ public class WalkingMessageHandler
 
    private final SideDependentList<RecyclingArrayDeque<FootTrajectoryCommand>> upcomingFootTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
 
-   private static final int maxNumberOfPlanarRegions = 100;
-   private final YoBoolean hasNewPlanarRegionsList = new YoBoolean("hasNewPlanarRegionsList", registry);
-   private final YoInteger currentNumberOfPlanarRegions = new YoInteger("currentNumberOfPlanarRegions", registry);
-   private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(maxNumberOfPlanarRegions, PlanarRegion.class);
-
    private final StatusMessageOutputManager statusOutputManager;
 
    private final YoInteger currentFootstepIndex = new YoInteger("currentFootstepIndex", registry);
@@ -93,6 +88,7 @@ public class WalkingMessageHandler
 
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final CenterOfMassTrajectoryHandler comTrajectoryHandler;
+   private final PlanarRegionsListHandler planarRegionsListHandler;
 
    private final YoBoolean offsettingPlanWithFootstepError = new YoBoolean("offsettingPlanWithFootstepError", registry);
    private final FrameVector3D planOffsetInWorld = new FrameVector3D(ReferenceFrame.getWorldFrame());
@@ -110,8 +106,6 @@ public class WalkingMessageHandler
 
       upcomingFootsteps.clear();
       upcomingFootstepTimings.clear();
-
-      planarRegions.clear();
 
       this.yoTime = yoTime;
       footstepDataListReceivedTime.setToNaN();
@@ -140,6 +134,7 @@ public class WalkingMessageHandler
 
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime);
+      planarRegionsListHandler = new PlanarRegionsListHandler(registry);
 
       parentRegistry.addChild(registry);
    }
@@ -227,13 +222,12 @@ public class WalkingMessageHandler
 
    public void handlePlanarRegionsListCommand(PlanarRegionsListCommand planarRegionsListCommand)
    {
-      for (int i = 0; i < planarRegionsListCommand.getNumberOfPlanarRegions(); i++)
-      {
-         planarRegionsListCommand.getPlanarRegionCommand(i).getPlanarRegion(planarRegions.add());
-         currentNumberOfPlanarRegions.increment();
-      }
+      planarRegionsListHandler.handlePlanarRegionsListCommand(planarRegionsListCommand);
+   }
 
-      hasNewPlanarRegionsList.set(true);
+   public PlanarRegionsListHandler getPlanarRegionsListHandler()
+   {
+      return planarRegionsListHandler;
    }
 
    public void handleAdjustFootstepCommand(AdjustFootstepCommand command)
