@@ -7,10 +7,10 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWh
 public class WholeBodyTrajectoryToolboxConfigurationCommand
       implements Command<WholeBodyTrajectoryToolboxConfigurationCommand, WholeBodyTrajectoryToolboxConfigurationMessage>
 {
-   public int numberOfInitialGuesses = -1;
-   public int maximumExpansionSize = -1;
-   public boolean hasInitialConfiguration = false;
-   public final KinematicsToolboxOutputStatus initialConfiguration = new KinematicsToolboxOutputStatus();
+   private int numberOfInitialGuesses = -1;
+   private int maximumExpansionSize = -1;
+   private boolean hasInitialConfiguration = false;
+   private final KinematicsToolboxOutputStatus initialConfiguration = new KinematicsToolboxOutputStatus();
 
    public WholeBodyTrajectoryToolboxConfigurationCommand()
    {
@@ -44,6 +44,26 @@ public class WholeBodyTrajectoryToolboxConfigurationCommand
       hasInitialConfiguration = message.getInitialConfiguration() != null;
       if (hasInitialConfiguration)
          initialConfiguration.set(message.getInitialConfiguration());
+   }
+
+   public int getNumberOfInitialGuesses()
+   {
+      return numberOfInitialGuesses;
+   }
+
+   public int getMaximumExpansionSize()
+   {
+      return maximumExpansionSize;
+   }
+
+   public boolean hasInitialConfiguration()
+   {
+      return hasInitialConfiguration;
+   }
+
+   public KinematicsToolboxOutputStatus getInitialConfiguration()
+   {
+      return initialConfiguration;
    }
 
    @Override
