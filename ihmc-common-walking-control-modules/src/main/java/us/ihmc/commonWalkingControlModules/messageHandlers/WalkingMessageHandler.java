@@ -61,6 +61,7 @@ public class WalkingMessageHandler
    private final SideDependentList<RecyclingArrayDeque<FootTrajectoryCommand>> upcomingFootTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
 
    private final StatusMessageOutputManager statusOutputManager;
+   private final RequestMessageOutputManager requestOutputManager;
 
    private final YoInteger currentFootstepIndex = new YoInteger("currentFootstepIndex", registry);
    private final YoInteger currentNumberOfFootsteps = new YoInteger("currentNumberOfFootsteps", registry);
@@ -107,6 +108,7 @@ public class WalkingMessageHandler
                                 RequestMessageOutputManager requestOutputManager, YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
+      this.requestOutputManager = requestOutputManager;
 
       upcomingFootsteps.clear();
       upcomingFootstepTimings.clear();
@@ -548,6 +550,11 @@ public class WalkingMessageHandler
       fallingDirection.changeFrame(worldFrame);
       failureStatusMessage.setFallingDirection(fallingDirection);
       statusOutputManager.reportStatusMessage(failureStatusMessage);
+   }
+
+   public void requestPlanarRegions()
+   {
+      planarRegionsListHandler.requestPlanarRegions();
    }
 
    public void registerCompletedDesiredFootstep(Footstep completedFesiredFootstep)
