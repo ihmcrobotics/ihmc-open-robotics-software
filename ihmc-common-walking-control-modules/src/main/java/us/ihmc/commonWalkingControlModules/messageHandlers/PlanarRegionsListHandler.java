@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
+import us.ihmc.communication.controllerAPI.RequestMessageOutputManager;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
@@ -20,10 +21,15 @@ public class PlanarRegionsListHandler
    private final YoInteger currentNumberOfPlanarRegions = new YoInteger("currentNumberOfPlanarRegions", registry);
    private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(maxNumberOfPlanarRegions, PlanarRegion.class);
 
+   private final YoBoolean waitingOnNewPlanarRegions = new YoBoolean("waitingOnNewPlanarRegions", registry);
+
+   private final RequestMessageOutputManager requestOutputManager;
    private final RequestPlanarRegionsListMessage planarRegionsRequestMessage = new RequestPlanarRegionsListMessage(RequestType.SINGLE_UPDATE);
 
-   public PlanarRegionsListHandler(YoVariableRegistry parentRegistry)
+   public PlanarRegionsListHandler(RequestMessageOutputManager requestOutputManager, YoVariableRegistry parentRegistry)
    {
+      this.requestOutputManager = requestOutputManager;
+
       planarRegions.clear();
       planarRegionsRequestMessage.setDestination(PacketDestination.CONTROLLER);
 
@@ -39,12 +45,13 @@ public class PlanarRegionsListHandler
       }
 
       hasNewPlanarRegionsList.set(true);
+      waitingOnNewPlanarRegions.set(false);
    }
 
    public void requestPlanarRegions()
    {
-      //packetCommunicator.send(planarRegionsRequestMessage);
-
+      requestOutputManager.reportRequestMessage(planarRegionsRequestMessage);
+      waitingOnNewPlanarRegions.set(true);
    }
 
    public boolean pollHasNewPlanarRegionsList(PlanarRegionsList planarRegionsListToPack)
