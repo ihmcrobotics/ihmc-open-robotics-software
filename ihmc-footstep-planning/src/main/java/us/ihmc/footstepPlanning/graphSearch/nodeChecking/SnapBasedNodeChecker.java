@@ -90,9 +90,9 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
       }
 
       Point3D nodePosition = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(node, parameters.getIdealFootstepWidth()));
-      nodePosition.setZ(snapTransform.getTranslationZ());
+      snapTransform.transform(nodePosition);
       Point3D previousNodePosition = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(previousNode, parameters.getIdealFootstepWidth()));
-      previousNodePosition.setZ(previousSnapTransform.getTranslationZ());
+      previousSnapTransform.transform(previousNodePosition);
       if (planarRegions != null && isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegions, parameters.getBodyGroundClearance()))
       {
          if (DEBUG)
