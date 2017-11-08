@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.recursiveController.multipliers.interpolation;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class EfficientCubicDerivativeMatrix extends DenseMatrix64F
 {

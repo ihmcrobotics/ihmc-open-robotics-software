@@ -9,7 +9,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyFeedbackController;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.PDGainsInterface;
 import us.ihmc.robotics.controllers.SimplePDGainsHolder;
 import us.ihmc.robotics.lists.RecyclingArrayList;

@@ -49,7 +49,7 @@ mainDependencies {
    compile group: 'us.ihmc.ihmcPerception', name: 'valvenet', version: '0.0.4'
    compile group: 'us.ihmc.ihmcPerception', name: 'cuda', version: '7.5'
    compile "org.ddogleg:ddogleg:0.7"
-   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.12.1"
    compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: groupDependencyVersion
@@ -59,7 +59,6 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robot-models", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
 }
@@ -67,9 +66,8 @@ mainDependencies {
 testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.16.8"
-   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.12.1"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set-test", version: groupDependencyVersion

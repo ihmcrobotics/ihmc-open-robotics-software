@@ -32,13 +32,12 @@ mainDependencies {
    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
    compile group: 'net.sourceforge.jmatio', name: 'jmatio', version: '1.0'
    compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.1.2'
-   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.12.1"
    compile group: "us.ihmc", name: "ihmc-model-file-loader", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-communication", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion

@@ -25,7 +25,7 @@ import us.ihmc.steppr.hardware.command.StepprCommand;
 import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.steppr.hardware.state.StepprState;
 import us.ihmc.steppr.parameters.BonoRobotModel;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;

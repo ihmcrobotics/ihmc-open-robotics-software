@@ -51,6 +51,7 @@ public class WrenchMatrixCalculator
 
    private final DenseMatrix64F desiredCoPMatrix;
    private final DenseMatrix64F previousCoPMatrix;
+   private final DenseMatrix64F activeRhoMatrix;
 
    private final DenseMatrix64F rhoMaxMatrix;
    private final DenseMatrix64F rhoWeightMatrix;
@@ -76,27 +77,28 @@ public class WrenchMatrixCalculator
    {
       this.centerOfMassFrame = centerOfMassFrame;
       List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
-
-
+      
+      
       nContactableBodies = toolbox.getNumberOfContactableBodies();
-      maxNumberOfContactPoints = toolbox.getNumberOfContactPointsPerContactableBody();
-      numberOfBasisVectorsPerContactPoint = toolbox.getNumberOfBasisVectorsPerContactPoint();
-      rhoSize = toolbox.getRhoSize();
-      copTaskSize = 2 * nContactableBodies;
-
+      maxNumberOfContactPoints = toolbox.getNumberOfContactPointsPerContactableBody();        
+      numberOfBasisVectorsPerContactPoint = toolbox.getNumberOfBasisVectorsPerContactPoint(); 
+      rhoSize = toolbox.getRhoSize();                                                  
+      copTaskSize = 2 * nContactableBodies; 
+      
       rhoJacobianMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, rhoSize);
-      copJacobianMatrix = new DenseMatrix64F(copTaskSize, rhoSize);
-      rhoPreviousMatrix = new DenseMatrix64F(rhoSize, 1);
-
-      desiredCoPMatrix = new DenseMatrix64F(copTaskSize, 1);
+      copJacobianMatrix = new DenseMatrix64F(copTaskSize, rhoSize);            
+      rhoPreviousMatrix = new DenseMatrix64F(rhoSize, 1);                      
+                                                                               
+      desiredCoPMatrix = new DenseMatrix64F(copTaskSize, 1);                   
       previousCoPMatrix = new DenseMatrix64F(copTaskSize, 1);
+      activeRhoMatrix = new DenseMatrix64F(rhoSize, 1);
 
       rhoMaxMatrix = new DenseMatrix64F(rhoSize, 1);
       rhoWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
-      rhoRateWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
-      desiredCoPWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);
-      copRateWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);
-
+      rhoRateWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);              
+      desiredCoPWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);   
+      copRateWeightMatrix = new DenseMatrix64F(copTaskSize, copTaskSize);      
+      
 
       if (contactablePlaneBodies.size() > nContactableBodies)
          throw new RuntimeException("Unexpected number of contactable plane bodies: " + contactablePlaneBodies.size());
@@ -195,6 +197,8 @@ public class WrenchMatrixCalculator
          CommonOps.insert(helper.getDesiredCoPMatrix(), desiredCoPMatrix, copStartIndex, 0);
          CommonOps.insert(helper.getPreviousCoPMatrix(), previousCoPMatrix, copStartIndex, 0);
 
+         CommonOps.insert(helper.getActiveRhoMatrix(), activeRhoMatrix, rhoStartIndex, 0);
+
          CommonOps.insert(helper.getRhoJacobian(), rhoJacobianMatrix, 0, rhoStartIndex);
          CommonOps.insert(helper.getCopJacobianMatrix(), copJacobianMatrix, copStartIndex, rhoStartIndex);
 
@@ -266,6 +270,11 @@ public class WrenchMatrixCalculator
    public DenseMatrix64F getPreviousCoPMatrix()
    {
       return previousCoPMatrix;
+   }
+
+   public DenseMatrix64F getActiveRhoMatrix()
+   {
+      return activeRhoMatrix;
    }
 
    public DenseMatrix64F getRhoMaxMatrix()

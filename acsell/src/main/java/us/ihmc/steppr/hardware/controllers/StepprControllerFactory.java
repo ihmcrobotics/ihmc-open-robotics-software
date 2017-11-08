@@ -33,7 +33,7 @@ import us.ihmc.steppr.hardware.output.StepprOutputWriter;
 import us.ihmc.steppr.hardware.sensorReader.StepprSensorReaderFactory;
 import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.tools.io.logging.LogTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.wholeBodyController.DRCControllerThread;

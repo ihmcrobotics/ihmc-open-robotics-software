@@ -54,11 +54,10 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.1.1'
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
    compile group: 'us.ihmc', name: 'euclid', version: '0.6.1'
-   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.12.1"
    compile group: "us.ihmc", name: "ihmc-jmonkey-engine-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robot-description", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-parameter-optimization", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: groupDependencyVersion
@@ -71,9 +70,8 @@ testDependencies {
    compile group: 'junit', name: 'junit', version: '4.11'
    compile group: 'org.ejml', name: 'dense64', version: '0.30'
    compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.16.8"
-   compile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.11.2'
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.12.1"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-java-extensions-test", version: groupDependencyVersion
 }
 
 distributions {

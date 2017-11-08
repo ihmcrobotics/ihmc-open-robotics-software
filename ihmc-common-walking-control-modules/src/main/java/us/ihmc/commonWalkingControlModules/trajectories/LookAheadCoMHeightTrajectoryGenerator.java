@@ -24,7 +24,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
