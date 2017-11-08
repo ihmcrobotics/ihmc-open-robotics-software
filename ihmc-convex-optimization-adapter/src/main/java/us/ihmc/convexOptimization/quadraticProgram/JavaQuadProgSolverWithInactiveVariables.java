@@ -2,7 +2,8 @@ package us.ihmc.convexOptimization.quadraticProgram;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.MathTools;
+
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class JavaQuadProgSolverWithInactiveVariables extends JavaQuadProgSolver implements  ActiveSetQPSolverWithInactiveVariablesInterface
