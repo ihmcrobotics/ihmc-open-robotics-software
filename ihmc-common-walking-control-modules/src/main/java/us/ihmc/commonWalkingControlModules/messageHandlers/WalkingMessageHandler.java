@@ -1,8 +1,10 @@
-package us.ihmc.commonWalkingControlModules.desiredFootStep;
+package us.ihmc.commonWalkingControlModules.messageHandlers;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -17,13 +19,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PlanOffsetStatus;
@@ -33,6 +29,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -61,6 +58,11 @@ public class WalkingMessageHandler
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
 
    private final SideDependentList<RecyclingArrayDeque<FootTrajectoryCommand>> upcomingFootTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
+
+   private static final int maxNumberOfPlanarRegions = 100;
+   private final YoBoolean hasNewPlanarRegionsList = new YoBoolean("hasNewPlanarRegionsList", registry);
+   private final YoInteger currentNumberOfPlanarRegions = new YoInteger("currentNumberOfPlanarRegions", registry);
+   private final RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(maxNumberOfPlanarRegions, PlanarRegion.class);
 
    private final StatusMessageOutputManager statusOutputManager;
 
@@ -108,6 +110,8 @@ public class WalkingMessageHandler
 
       upcomingFootsteps.clear();
       upcomingFootstepTimings.clear();
+
+      planarRegions.clear();
 
       this.yoTime = yoTime;
       footstepDataListReceivedTime.setToNaN();
@@ -219,6 +223,17 @@ public class WalkingMessageHandler
       updateTransferTimes(upcomingFootstepTimings);
 
       updateVisualization();
+   }
+
+   public void handlePlanarRegionsListCommand(PlanarRegionsListCommand planarRegionsListCommand)
+   {
+      for (int i = 0; i < planarRegionsListCommand.getNumberOfPlanarRegions(); i++)
+      {
+         planarRegionsListCommand.getPlanarRegionCommand(i).getPlanarRegion(planarRegions.add());
+         currentNumberOfPlanarRegions.increment();
+      }
+
+      hasNewPlanarRegionsList.set(true);
    }
 
    public void handleAdjustFootstepCommand(AdjustFootstepCommand command)

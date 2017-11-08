@@ -111,6 +111,25 @@ public class PlanarRegion
       updateConvexHull();
    }
 
+   public void set(RigidBodyTransform transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons)
+   {
+      this.set(transformToWorld, planarRegionConvexPolygons, NO_REGION_ID);
+   }
+
+   public void set(RigidBodyTransform transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons, int newRegionId)
+   {
+      fromLocalToWorldTransform.set(transformToWorld);
+      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
+
+      convexPolygons.clear();
+      convexPolygons.addAll(planarRegionConvexPolygons);
+
+      updateBoundingBox();
+      updateConvexHull();
+
+      regionId = newRegionId;
+   }
+
    /**
     * Check if the given lineSegment intersects this region projected onto the XY-plane.
     *

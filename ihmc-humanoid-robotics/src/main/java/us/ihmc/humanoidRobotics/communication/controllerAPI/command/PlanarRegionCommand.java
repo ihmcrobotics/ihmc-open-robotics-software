@@ -9,6 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
 import java.util.List;
@@ -123,5 +124,10 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
    public int getRegionId()
    {
       return regionId;
+   }
+
+   public void getPlanarRegion(PlanarRegion planarRegionToPack)
+   {
+      planarRegionToPack.set(fromLocalToWorldTransform, convexPolygons, regionId);
    }
 }
