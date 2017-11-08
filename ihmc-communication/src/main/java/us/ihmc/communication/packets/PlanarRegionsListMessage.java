@@ -4,7 +4,7 @@ import java.util.List;
 
 public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage>
 {
-   public List<PlanarRegionMessage> planarRegions;
+   private List<PlanarRegionMessage> planarRegions;
 
    public PlanarRegionsListMessage()
    {
