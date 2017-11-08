@@ -31,7 +31,7 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.io.logging.LogTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.wanderer.hardware.output.WandererOutputWriter;

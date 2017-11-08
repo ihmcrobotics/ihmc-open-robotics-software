@@ -5,14 +5,14 @@ import static java.lang.Math.acos;
 import static java.lang.Math.atan2;
 import static java.lang.Math.pow;
 import static java.lang.Math.sqrt;
-import static us.ihmc.robotics.MathTools.checkIntervalContains;
-import static us.ihmc.robotics.MathTools.cube;
-import static us.ihmc.robotics.MathTools.square;
+import static us.ihmc.commons.MathTools.checkIntervalContains;
+import static us.ihmc.commons.MathTools.cube;
+import static us.ihmc.commons.MathTools.square;
 
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class FourbarCalculatorTools
 {

@@ -3,9 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
-import us.ihmc.robotics.math.trajectories.YoTrajectory;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoTrajectoryTest

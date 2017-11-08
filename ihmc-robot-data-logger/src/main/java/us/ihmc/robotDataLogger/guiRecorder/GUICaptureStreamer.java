@@ -28,7 +28,7 @@ import us.ihmc.pubsub.participant.Participant;
 import us.ihmc.pubsub.publisher.Publisher;
 import us.ihmc.pubsub.types.ByteBufferPubSubType;
 import us.ihmc.robotDataLogger.rtps.LogParticipantSettings;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class GUICaptureStreamer
 {

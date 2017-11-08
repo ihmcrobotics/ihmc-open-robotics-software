@@ -2,7 +2,7 @@ package us.ihmc.graphicsDescription.color;
 
 import java.util.Arrays;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>

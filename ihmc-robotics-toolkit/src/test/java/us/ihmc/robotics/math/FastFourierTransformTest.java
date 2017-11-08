@@ -7,7 +7,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 import us.ihmc.commons.Epsilons;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class FastFourierTransformTest
 {

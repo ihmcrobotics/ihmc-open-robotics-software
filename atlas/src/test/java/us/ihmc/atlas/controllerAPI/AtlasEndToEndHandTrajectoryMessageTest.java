@@ -25,7 +25,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajectoryMessageTest
 {
@@ -33,7 +33,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 45000)
+   @Test(timeout = 60000)
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
    {
       super.testCustomControlFrame();
@@ -81,7 +81,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 40000)
+   @Test(timeout = 60000)
    public void testSingleTrajectoryPoint() throws Exception
    {
       super.testSingleTrajectoryPoint();

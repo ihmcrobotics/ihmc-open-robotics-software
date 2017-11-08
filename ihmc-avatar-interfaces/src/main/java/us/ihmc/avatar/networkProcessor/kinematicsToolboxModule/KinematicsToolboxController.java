@@ -428,7 +428,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       if (tickCount++ == numberOfTicksToSendSolution)
       { // Packing and sending the solution every N control ticks, with N = numberOfTicksToSendSolution.
-         inverseKinematicsSolution.setDesiredJointState(rootJoint, oneDoFJoints);
+         inverseKinematicsSolution.setDesiredJointState(rootJoint, oneDoFJoints, false);
          inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
          reportMessage(inverseKinematicsSolution);
          tickCount = 0;

@@ -6,7 +6,7 @@ import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class AbstractLoadBearingMessage <T extends AbstractLoadBearingMessage<T>> extends TrackablePacket<T>
 {

@@ -22,7 +22,7 @@ import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.tools.FormattingTools;
+import us.ihmc.commons.FormattingTools;
 
 public class AtlasUIPacketRecorder
 {
