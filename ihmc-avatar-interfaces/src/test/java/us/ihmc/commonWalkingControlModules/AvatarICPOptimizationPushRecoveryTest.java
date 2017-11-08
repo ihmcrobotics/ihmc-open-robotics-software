@@ -471,7 +471,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
-   private FootstepDataListMessage createForwardWalkingFootstepMessage()
+   protected FootstepDataListMessage createForwardWalkingFootstepMessage()
    {
       double scale = getSizeScale();
 
@@ -510,7 +510,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       return message;
    }
 
-   private FootstepDataListMessage createSlowForwardWalkingFootstepMessage()
+   protected FootstepDataListMessage createSlowForwardWalkingFootstepMessage()
    {
       double scale = getSizeScale();
 
@@ -548,7 +548,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       return message;
    }
 
-   private FootstepDataListMessage createYawingForwardWalkingFootstepMessage()
+   protected FootstepDataListMessage createYawingForwardWalkingFootstepMessage()
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.appendYawRotation(0.5);
