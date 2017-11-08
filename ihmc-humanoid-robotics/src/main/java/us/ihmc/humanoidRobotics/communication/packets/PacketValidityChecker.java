@@ -1090,14 +1090,4 @@ public abstract class PacketValidityChecker
       }
       return null;
    }
-
-   public static String validatePlanarRegionMessage(PlanarRegionMessage planarRegionMessage)
-   {
-      return "TODO";
-   }
-
-   public static String validatePlanarRegionListMessage(PlanarRegionListMessage planarRegionListMessage)
-   {
-      return "TODO";
-   }
 }

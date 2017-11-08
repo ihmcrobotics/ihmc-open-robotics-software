@@ -1,10 +1,14 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packets.PlanarRegionMessage;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PlanarRegionMessage;
+import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
 import java.util.List;
@@ -14,11 +18,15 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
    public static final int NO_REGION_ID = -1;
 
    private int regionId = NO_REGION_ID;
-   private RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
-   private RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
+   private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
+   private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
 
-   private RecyclingArrayList<Point2D> concaveHullsVertices = new RecyclingArrayList<Point2D>(20, Point2D.class);
-   private RecyclingArrayList<ConvexPolygon2D> convexPolygons = new RecyclingArrayList<ConvexPolygon2D>(10, ConvexPolygon2D.class);
+   private final RecyclingArrayList<Point2D> concaveHullsVertices = new RecyclingArrayList<Point2D>(20, Point2D.class);
+   private final RecyclingArrayList<ConvexPolygon2D> convexPolygons = new RecyclingArrayList<ConvexPolygon2D>(10, ConvexPolygon2D.class);
+
+   private final Vector3D regionOrigin = new Vector3D();
+   private final Vector3D regionNormal = new Vector3D();
+   private final AxisAngle regionOrientation = new AxisAngle();
 
    public PlanarRegionCommand()
    {
@@ -37,18 +45,26 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
    @Override
    public void set(PlanarRegionMessage message)
    {
-      fromLocalToWorldTransform.set(message.getTransformToWorld());
-      fromWorldToLocalTransform.set(message.getTransformFromWorld());
+      regionOrigin.set(message.getRegionOrigin());
+      regionNormal.set(message.getRegionNormal());
+      EuclidGeometryTools.axisAngleFromZUpToVector3D(regionNormal, regionOrientation);
 
-      Point2D[] originalConcaveHullVertices = message.getConcaveHullVertices();
+      fromLocalToWorldTransform.set(regionOrientation, regionOrigin);
+      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
+
+      Point2D32[] originalConcaveHullVertices = message.getConcaveHullVertices();
       concaveHullsVertices.clear();
       for (int i = 0; i < originalConcaveHullVertices.length; i++)
          concaveHullsVertices.add().set(originalConcaveHullVertices[i]);
 
-      List<ConvexPolygon2D> convexPolygons = message.getConvexPolygons();
-      this.convexPolygons.clear();
-      for (int i = 0; i < convexPolygons.size(); i++)
-         this.convexPolygons.add().set(convexPolygons.get(i));
+      List<Point2D32[]> convexPolygonsVertices = message.getConvexPolygonsVertices();
+      convexPolygons.clear();
+      for (int i = 0; i < convexPolygonsVertices.size(); i++)
+      {
+         Point2D32[] convexPolygonVertices = convexPolygonsVertices.get(i);
+         convexPolygons.add().addVertices(convexPolygonVertices, convexPolygonVertices.length);
+         convexPolygons.getLast().update();
+      }
 
       regionId = message.getRegionId();
    }
