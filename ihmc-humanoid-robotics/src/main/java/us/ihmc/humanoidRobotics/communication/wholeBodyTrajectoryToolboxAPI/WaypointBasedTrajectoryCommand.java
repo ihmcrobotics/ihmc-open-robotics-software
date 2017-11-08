@@ -84,9 +84,19 @@ public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTraj
       }
    }
 
+   public RigidBody getEndEffector()
+   {
+      return endEffector;
+   }
+
    public double getWaypointTime(int i)
    {
       return waypointTimes.get(i);
+   }
+   
+   public double getLastWaypointTime()
+   {
+      return waypointTimes.get(getNumberOfWaypoints() - 1);
    }
 
    public Pose3D getWaypoint(int i)
