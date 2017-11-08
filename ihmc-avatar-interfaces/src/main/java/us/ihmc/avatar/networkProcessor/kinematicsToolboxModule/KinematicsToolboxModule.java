@@ -11,7 +11,6 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
-import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
@@ -42,8 +41,7 @@ public class KinematicsToolboxModule extends ToolboxModule
     * these commands that can be sent over the network.
     * <p>
     * Do not forget that this toolbox will ignore any message with a destination different from
-    * {@value KinematicsToolboxModule#PACKET_DESTINATION}. This toolbox will also ignore any message
-    * that does not extend {@link TrackablePacket}.
+    * {@value KinematicsToolboxModule#PACKET_DESTINATION}.
     * </p>
     */
    @Override
