@@ -8,12 +8,15 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.RequestMessageOutputManager;
+import us.ihmc.communication.controllerAPI.RequestMessageOutputManager.GlobalRequestedMessageListener;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.GlobalStatusMessageListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.RequestPacket;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
@@ -37,6 +40,8 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    private final CommandInputManager controllerCommandInputManager;
    /** The output API that provides the status messages to send to the packet communicator. */
    private final StatusMessageOutputManager controllerStatusOutputManager;
+   /** The output API that provides the request messages to send to the packet communicator. */
+   private final RequestMessageOutputManager controllerRequestOutputManager;
    /** Communicator from which commands are received and status messages can send to. */
    private final PacketCommunicator packetCommunicator;
    /** Used to schedule status message sending. */
@@ -45,23 +50,31 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    private final AtomicReference<MessageFilter> messageFilter = new AtomicReference<>(null);
 
    /** All the possible status message that can be sent to the communicator. */
+   private final List<Class<? extends RequestPacket<?>>> listOfSupportedRequestMessages;
+
+   /** All the possible status message that can be sent to the communicator. */
    private final List<Class<? extends StatusPacket<?>>> listOfSupportedStatusMessages;
 
    /** All the possible messages that can be sent to the communicator. */
    private final List<Class<? extends Packet<?>>> listOfSupportedControlMessages;
-   
+
    /** Local buffers for each message to ensure proper copying from the controller thread to the communication thread. */
    private final Map<Class<? extends StatusPacket<?>>, ConcurrentRingBuffer<? extends StatusPacket<?>>> statusMessageClassToBufferMap = new HashMap<>();
 
+   /** Local buffers for each message to ensure proper copying from the controller thread to the communication thread. */
+   private final Map<Class<? extends RequestPacket<?>>, ConcurrentRingBuffer<? extends RequestPacket<?>>> requestMessageClassToBufferMap = new HashMap<>();
+
    public ControllerNetworkSubscriber(CommandInputManager controllerCommandInputManager, StatusMessageOutputManager controllerStatusOutputManager,
-         PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
+         RequestMessageOutputManager controllerRequestOutputManager, PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
    {
       this.controllerCommandInputManager = controllerCommandInputManager;
       this.controllerStatusOutputManager = controllerStatusOutputManager;
+      this.controllerRequestOutputManager = controllerRequestOutputManager;
       this.scheduler = scheduler;
       this.packetCommunicator = packetCommunicator;
       listOfSupportedStatusMessages = controllerStatusOutputManager.getListOfSupportedMessages();
       listOfSupportedControlMessages = controllerCommandInputManager.getListOfSupportedMessages();
+      listOfSupportedRequestMessages = controllerRequestOutputManager.getListOfSupportedMessages();
 
       if (packetCommunicator == null)
       {
@@ -74,7 +87,10 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
       createAllSubscribersForSupportedMessages();
       createGlobalStatusMessageListener();
+      createGlobalRequestMessageListener();
+
       createAllStatusMessageBuffers();
+      createAllRequestMessageBuffers();
 
       if (scheduler != null)
          scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
@@ -101,6 +117,19 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
          statusMessageClassToBufferMap.put(statusMessageClass, newBuffer);
       }
    }
+
+   @SuppressWarnings("unchecked")
+   private <T extends RequestPacket<T>> void createAllRequestMessageBuffers()
+   {
+      for (int i = 0; i < listOfSupportedRequestMessages.size(); i++)
+      {
+         Class<T> requestMessageClass = (Class<T>) listOfSupportedRequestMessages.get(i);
+         Builder<T> builder = CommandInputManager.createBuilderWithEmptyConstructor(requestMessageClass);
+         ConcurrentRingBuffer<T> newBuffer = new ConcurrentRingBuffer<>(builder, buffersCapacity);
+         requestMessageClassToBufferMap.put(requestMessageClass, newBuffer);
+      }
+   }
+
 
    private <T extends Packet<T>> void createAllSubscribersForSupportedMessages()
    {
@@ -185,6 +214,31 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       controllerStatusOutputManager.attachGlobalStatusMessageListener(globalStatusMessageListener);
    }
 
+   private void createGlobalRequestMessageListener()
+   {
+      GlobalRequestedMessageListener globalRequestedMessageListener = new GlobalRequestedMessageListener()
+      {
+         @Override
+         public void receivedNewMessageStatus(RequestPacket<?> requestMessage)
+         {
+            copyData(requestMessage);
+         }
+
+         @SuppressWarnings("unchecked")
+         private <T extends RequestPacket<T>> void copyData(RequestPacket<?> requestMessage)
+         {
+            ConcurrentRingBuffer<T> buffer = (ConcurrentRingBuffer<T>) requestMessageClassToBufferMap.get(requestMessage.getClass());
+            T next = buffer.next();
+            if (next != null)
+            {
+               next.set((T) requestMessage);
+               buffer.commit();
+            }
+         }
+      };
+      controllerRequestOutputManager.attachGlobalRequestableMessageListener(globalRequestedMessageListener);
+   }
+
    @Override
    public void run()
    {
@@ -200,6 +254,21 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
             }
             buffer.flush();
          }
+      }
+
+      for (int i = 0; i < listOfSupportedRequestMessages.size(); i++)
+      {
+         ConcurrentRingBuffer<? extends RequestPacket<?>> buffer = requestMessageClassToBufferMap.get(listOfSupportedRequestMessages.get(i));
+         if (buffer.poll())
+         {
+            RequestPacket<?> requestMessage;
+            while ((requestMessage = buffer.read()) != null)
+            {
+               packetCommunicator.send(requestMessage);
+            }
+            buffer.flush();
+         }
+
       }
    }
 

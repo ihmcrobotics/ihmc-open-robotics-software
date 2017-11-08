@@ -17,15 +17,12 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.CommandInputManager.HasReceivedInputListener;
+import us.ihmc.communication.controllerAPI.RequestMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.StatusPacket;
-import us.ihmc.communication.packets.ToolboxStateMessage;
-import us.ihmc.communication.packets.TrackablePacket;
+import us.ihmc.communication.packets.*;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -58,6 +55,7 @@ public abstract class ToolboxModule
    protected final PacketCommunicator packetCommunicator;
    protected final CommandInputManager commandInputManager;
    protected final StatusMessageOutputManager statusOutputManager;
+   protected final RequestMessageOutputManager requestOutputManager;
    protected final ControllerNetworkSubscriber controllerNetworkSubscriber;
    private final int thisDesitination;
 
@@ -93,7 +91,8 @@ public abstract class ToolboxModule
       packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(toolboxPort, new IHMCCommunicationKryoNetClassList());
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
-      controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, null, packetCommunicator);
+      requestOutputManager = new RequestMessageOutputManager(createListOfSupportedRequests());
+      controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, requestOutputManager, null, packetCommunicator);
 
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
@@ -385,7 +384,12 @@ public abstract class ToolboxModule
     * @return used to create the {@link StatusMessageOutputManager} and to defines the output API.
     */
    abstract public List<Class<? extends StatusPacket<?>>> createListOfSupportedStatus();
-   
+
+   /**
+    * @return used to create the {@link RequestMessageOutputManager} and to defines the output API.
+    */
+   abstract public List<Class<? extends RequestPacket<?>>> createListOfSupportedRequests();
+
    /**
     * @return the collection of commands that cannot wake up this module.
     */
