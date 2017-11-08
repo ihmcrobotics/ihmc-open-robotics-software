@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.messageHandlers;
 
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -32,5 +33,20 @@ public class PlanarRegionsListHandler
       }
 
       hasNewPlanarRegionsList.set(true);
+   }
+
+   public boolean pollHasNewPlanarRegionsList(PlanarRegionsList planarRegionsListToPack)
+   {
+      if (!hasNewPlanarRegionsList.getBooleanValue())
+         return false;
+
+      planarRegionsListToPack.clear();
+      for (int i = 0; i <planarRegions.size(); i++)
+         planarRegionsListToPack.addPlanarRegion(planarRegions.get(i));
+
+      hasNewPlanarRegionsList.set(false);
+      planarRegions.clear();
+
+      return true;
    }
 }
