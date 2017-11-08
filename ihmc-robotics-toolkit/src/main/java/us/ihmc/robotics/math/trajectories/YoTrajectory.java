@@ -3,7 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.Epsilons;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;

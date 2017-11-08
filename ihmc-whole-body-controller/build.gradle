@@ -24,7 +24,7 @@ testSuites {
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
-   compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.11.2'
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.12.1"
    compile group: 'commons-net', name: 'commons-net', version: '3.3'
    compile group: 'org.yaml', name: 'snakeyaml', version: '1.17' //1.11
    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.8'
@@ -41,7 +41,6 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set-tools", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion
-   compile group: "us.ihmc", name: "ihmc-java-extensions", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-robot-models", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion

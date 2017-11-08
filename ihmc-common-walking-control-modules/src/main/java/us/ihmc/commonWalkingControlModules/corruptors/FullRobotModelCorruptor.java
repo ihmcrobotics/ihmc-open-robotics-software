@@ -17,7 +17,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.tools.FormattingTools;
+import us.ihmc.commons.FormattingTools;
 
 public class FullRobotModelCorruptor
 {

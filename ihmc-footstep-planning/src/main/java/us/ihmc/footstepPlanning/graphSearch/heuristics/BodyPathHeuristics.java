@@ -6,7 +6,7 @@ import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 

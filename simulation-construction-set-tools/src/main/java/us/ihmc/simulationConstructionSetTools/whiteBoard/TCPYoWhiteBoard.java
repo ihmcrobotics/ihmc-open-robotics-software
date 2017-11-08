@@ -15,7 +15,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard
 {

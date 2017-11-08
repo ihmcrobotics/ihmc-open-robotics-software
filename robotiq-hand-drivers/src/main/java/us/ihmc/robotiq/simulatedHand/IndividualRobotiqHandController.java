@@ -10,7 +10,7 @@ import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;

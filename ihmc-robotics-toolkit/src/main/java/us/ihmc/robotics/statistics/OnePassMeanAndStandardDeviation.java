@@ -1,6 +1,6 @@
 package us.ihmc.robotics.statistics;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 /**
  *

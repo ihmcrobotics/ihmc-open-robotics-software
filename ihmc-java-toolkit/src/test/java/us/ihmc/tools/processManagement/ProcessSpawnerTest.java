@@ -22,7 +22,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ProcessSpawnerTest

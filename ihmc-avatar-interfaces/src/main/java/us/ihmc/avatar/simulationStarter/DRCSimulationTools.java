@@ -37,9 +37,9 @@ import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.robotEnvironmentAwareness.LidarBasedREAStandaloneLauncher;
 import us.ihmc.robotEnvironmentAwareness.RemoteLidarBasedREAModuleLauncher;
 import us.ihmc.robotEnvironmentAwareness.RemoteLidarBasedREAUILauncher;
-import us.ihmc.tools.FormattingTools;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class DRCSimulationTools
 {

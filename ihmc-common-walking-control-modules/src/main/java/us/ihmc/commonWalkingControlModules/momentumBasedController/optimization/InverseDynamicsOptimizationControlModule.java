@@ -22,7 +22,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -130,7 +130,7 @@ public class InverseDynamicsOptimizationControlModule
       momentumModuleSolution = new MomentumModuleSolution();
 
       boolean hasFloatingBase = toolbox.getRootJoint() != null;
-      SimpleActiveSetQPSolverInterface activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
+      ActiveSetQPSolverWithInactiveVariablesInterface activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
       qpSolver = new InverseDynamicsQPSolver(activeSetQPSolver, numberOfDoFs, rhoSize, hasFloatingBase, registry);
       qpSolver.setAccelerationRegularizationWeight(optimizationSettings.getJointAccelerationWeight());
       qpSolver.setJerkRegularizationWeight(optimizationSettings.getJointJerkWeight());
@@ -162,6 +162,7 @@ public class InverseDynamicsOptimizationControlModule
 
       qpSolver.setMinRho(rhoMin.getDoubleValue());
       qpSolver.setMaxRho(wrenchMatrixCalculator.getRhoMaxMatrix());
+      qpSolver.setActiveRhos(wrenchMatrixCalculator.getActiveRhoMatrix());
 
       setupWrenchesEquilibriumConstraint();
       computePrivilegedJointAccelerations();

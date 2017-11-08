@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
+import java.util.Random;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Assert;
@@ -7,13 +9,9 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInput;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.commons.RandomNumbersTest;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-
-import java.util.Random;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPQPInputTest
