@@ -22,6 +22,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
@@ -356,7 +357,7 @@ public class KinematicsToolboxControllerTest
       };
    }
 
-   public static void recursivelyModifyGraphics(JointDescription joint, YoAppearanceRGBColor ghostApperance)
+   public static void recursivelyModifyGraphics(JointDescription joint, AppearanceDefinition ghostApperance)
    {
       if (joint == null)
          return;
