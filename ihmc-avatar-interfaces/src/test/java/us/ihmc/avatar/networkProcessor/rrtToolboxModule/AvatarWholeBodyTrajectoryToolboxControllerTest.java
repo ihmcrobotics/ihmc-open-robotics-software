@@ -7,6 +7,7 @@ import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeB
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -32,6 +33,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.SegmentedLine3DMeshDataGenerator;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder.ConfigurationSpaceName;
@@ -190,14 +195,29 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       configuration.setInitialConfigration(fullRobotModel);
 
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
+      
+      Graphics3DObject trajectoryViz = new Graphics3DObject();
+
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody hand = fullRobotModel.getHand(robotSide);
          double timeResolution = trajectoryTime / 100.0;
          FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleAxis);
          ConfigurationSpaceName[] unconstrainedDegreesOfFreedom = {YAW, PITCH, ROLL};
-         handTrajectories.add(createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, unconstrainedDegreesOfFreedom));
+         WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, unconstrainedDegreesOfFreedom);
+         handTrajectories.add(trajectory);
+
+         int numberOfWaypoints = trajectory.getNumberOfWaypoints();
+         int radialResolution = 16;
+         double radius = 0.01;
+         SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(numberOfWaypoints, radialResolution, radius);
+         Point3DReadOnly[] waypointPositions = Arrays.stream(trajectory.waypoints).map(pose -> new Point3D(pose.getPosition())).toArray(size -> new Point3D[size]);
+         segmentedLine3DMeshGenerator.compute(waypointPositions);
+         AppearanceDefinition meshAppearance = YoAppearance.Azure();
+         Arrays.stream(segmentedLine3DMeshGenerator.getMeshDataHolders()).forEach(mesh -> trajectoryViz.addMeshData(mesh, meshAppearance));
       }
+      if (visualize)
+         scs.addStaticLinkGraphics(trajectoryViz);
 
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories);
       commandInputManager.submitMessage(message);
