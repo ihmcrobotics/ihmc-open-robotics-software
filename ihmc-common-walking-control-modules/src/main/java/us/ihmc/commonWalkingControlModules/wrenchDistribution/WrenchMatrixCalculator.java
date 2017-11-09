@@ -17,13 +17,13 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WrenchMatrixCalculator
 {
@@ -110,8 +110,9 @@ public class WrenchMatrixCalculator
 
          rigidBodies.add(rigidBody);
 
+         FrictionConeRotationCalculator frictionConeRotation = toolbox.getOptimizationSettings().getFrictionConeRotation();
          PlaneContactStateToWrenchMatrixHelper helper = new PlaneContactStateToWrenchMatrixHelper(contactablePlaneBody, centerOfMassFrame,
-               maxNumberOfContactPoints, numberOfBasisVectorsPerContactPoint, registry);
+               maxNumberOfContactPoints, numberOfBasisVectorsPerContactPoint, frictionConeRotation, registry);
          planeContactStateToWrenchMatrixHelpers.put(rigidBody, helper);
 
          basisVectorsOrigin.addAll(helper.getBasisVectorsOrigin());
