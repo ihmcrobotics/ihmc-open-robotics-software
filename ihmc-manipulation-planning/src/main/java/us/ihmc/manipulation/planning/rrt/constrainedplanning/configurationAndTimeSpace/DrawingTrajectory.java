@@ -21,7 +21,7 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
       
       Point3D arcCenterPoint = new Point3D(0.56, 0.0, 1.1);
       Quaternion arcCenterOrientation = new Quaternion();
-      arcCenterOrientation.appendPitchRotation(-Math.PI * 0.5);
+      arcCenterOrientation.appendPitchRotation(-Math.PI * 0.48);
       
       RigidBodyTransform wallRigidBodyTransform = new RigidBodyTransform(arcCenterOrientation, arcCenterPoint);
       System.out.println(wallRigidBodyTransform);
@@ -80,7 +80,7 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
 
       Point3D arcCenterPoint = new Point3D(0.53, 0.0, 1.2);
       Quaternion arcCenterOrientation = new Quaternion();
-      arcCenterOrientation.appendPitchRotation(-Math.PI * 0.5);
+      arcCenterOrientation.appendPitchRotation(-Math.PI * 0.48);
       
       RigidBodyTransform arcCenterRigidBodyController = new RigidBodyTransform(arcCenterOrientation, arcCenterPoint);
 
@@ -93,13 +93,13 @@ public class DrawingTrajectory extends ConstrainedEndEffectorTrajectory
       ConfigurationSpace holdingConfiguration = new ConfigurationSpace();
 
       holdingConfiguration.setTranslation(-0.2, -0.5, 0.60);
-      holdingConfiguration.setRotation(0.5 * Math.PI, 0.0, -0.5 * Math.PI);
+      holdingConfiguration.setRotation(0.5 * Math.PI, 0.0, -0.4 * Math.PI);
 
       configurationSpaces.put(RobotSide.RIGHT, holdingConfiguration);
 
       ConfigurationSpace drawingConfigurationSpace = new ConfigurationSpace();
       drawingConfigurationSpace.setTranslation(arcCenterRigidBodyController.getTranslationVector());
-      drawingConfigurationSpace.setRotation(0, -0.5 * Math.PI, 0);
+      drawingConfigurationSpace.setRotation(0, -0.4 * Math.PI, -0.0*Math.PI);
 
       configurationSpaces.put(RobotSide.LEFT, drawingConfigurationSpace);
 
