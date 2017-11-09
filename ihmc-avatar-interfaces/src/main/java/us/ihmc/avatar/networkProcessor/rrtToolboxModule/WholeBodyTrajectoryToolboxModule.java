@@ -51,6 +51,11 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    @Override
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
+      return supportedCommands();
+   }
+
+   static List<Class<? extends Command<?, ?>>> supportedCommands()
+   {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
       commands.add(WholeBodyTrajectoryToolboxCommand.class);
       commands.add(WaypointBasedTrajectoryCommand.class);
@@ -60,6 +65,11 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 
    @Override
    public List<Class<? extends SettablePacket<?>>> createListOfSupportedStatus()
+   {
+      return supportedStatus();
+   }
+
+   static List<Class<? extends SettablePacket<?>>> supportedStatus()
    {
       List<Class<? extends SettablePacket<?>>> status = new ArrayList<>();
       status.add(WholeBodyTrajectoryToolboxOutputStatus.class);
