@@ -16,8 +16,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.RequestPacket;
-import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
@@ -50,19 +49,18 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    private final AtomicReference<MessageFilter> messageFilter = new AtomicReference<>(null);
 
    /** All the possible status message that can be sent to the communicator. */
-   private final List<Class<? extends RequestPacket<?>>> listOfSupportedRequestMessages;
+   private final List<Class<? extends SettablePacket<?>>> listOfSupportedRequestMessages;
 
-   /** All the possible status message that can be sent to the communicator. */
-   private final List<Class<? extends StatusPacket<?>>> listOfSupportedStatusMessages;
+   private final List<Class<? extends SettablePacket<?>>> listOfSupportedStatusMessages;
 
    /** All the possible messages that can be sent to the communicator. */
    private final List<Class<? extends Packet<?>>> listOfSupportedControlMessages;
 
    /** Local buffers for each message to ensure proper copying from the controller thread to the communication thread. */
-   private final Map<Class<? extends StatusPacket<?>>, ConcurrentRingBuffer<? extends StatusPacket<?>>> statusMessageClassToBufferMap = new HashMap<>();
+   private final Map<Class<? extends SettablePacket<?>>, ConcurrentRingBuffer<? extends SettablePacket<?>>> statusMessageClassToBufferMap = new HashMap<>();
 
    /** Local buffers for each message to ensure proper copying from the controller thread to the communication thread. */
-   private final Map<Class<? extends RequestPacket<?>>, ConcurrentRingBuffer<? extends RequestPacket<?>>> requestMessageClassToBufferMap = new HashMap<>();
+   private final Map<Class<? extends SettablePacket<?>>, ConcurrentRingBuffer<? extends SettablePacket<?>>> requestMessageClassToBufferMap = new HashMap<>();
 
    public ControllerNetworkSubscriber(CommandInputManager controllerCommandInputManager, StatusMessageOutputManager controllerStatusOutputManager,
          RequestMessageOutputManager controllerRequestOutputManager, PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
@@ -107,7 +105,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    }
 
    @SuppressWarnings("unchecked")
-   private <T extends StatusPacket<T>> void createAllStatusMessageBuffers()
+   private <T extends SettablePacket<T>> void createAllStatusMessageBuffers()
    {
       for (int i = 0; i < listOfSupportedStatusMessages.size(); i++)
       {
@@ -119,7 +117,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    }
 
    @SuppressWarnings("unchecked")
-   private <T extends RequestPacket<T>> void createAllRequestMessageBuffers()
+   private <T extends SettablePacket<T>> void createAllRequestMessageBuffers()
    {
       for (int i = 0; i < listOfSupportedRequestMessages.size(); i++)
       {
@@ -194,13 +192,13 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       GlobalStatusMessageListener globalStatusMessageListener = new GlobalStatusMessageListener()
       {
          @Override
-         public void receivedNewMessageStatus(StatusPacket<?> statusMessage)
+         public void receivedNewMessageStatus(SettablePacket<?> statusMessage)
          {
             copyData(statusMessage);
          }
 
          @SuppressWarnings("unchecked")
-         private <T extends StatusPacket<T>> void copyData(StatusPacket<?> statusMessage)
+         private <T extends SettablePacket<T>> void copyData(SettablePacket<?> statusMessage)
          {
             ConcurrentRingBuffer<T> buffer = (ConcurrentRingBuffer<T>) statusMessageClassToBufferMap.get(statusMessage.getClass());
             T next = buffer.next();
@@ -219,13 +217,13 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       GlobalRequestedMessageListener globalRequestedMessageListener = new GlobalRequestedMessageListener()
       {
          @Override
-         public void receivedNewMessageStatus(RequestPacket<?> requestMessage)
+         public void receivedNewMessageStatus(SettablePacket<?> requestMessage)
          {
             copyData(requestMessage);
          }
 
          @SuppressWarnings("unchecked")
-         private <T extends RequestPacket<T>> void copyData(RequestPacket<?> requestMessage)
+         private <T extends SettablePacket<T>> void copyData(SettablePacket<?> requestMessage)
          {
             ConcurrentRingBuffer<T> buffer = (ConcurrentRingBuffer<T>) requestMessageClassToBufferMap.get(requestMessage.getClass());
             T next = buffer.next();
@@ -244,10 +242,10 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    {
       for (int i = 0; i < listOfSupportedStatusMessages.size(); i++)
       {
-         ConcurrentRingBuffer<? extends StatusPacket<?>> buffer = statusMessageClassToBufferMap.get(listOfSupportedStatusMessages.get(i));
+         ConcurrentRingBuffer<? extends SettablePacket<?>> buffer = statusMessageClassToBufferMap.get(listOfSupportedStatusMessages.get(i));
          if (buffer.poll())
          {
-            StatusPacket<?> statusMessage;
+            SettablePacket<?> statusMessage;
             while ((statusMessage = buffer.read()) != null)
             {
                packetCommunicator.send(statusMessage);
@@ -258,10 +256,10 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
       for (int i = 0; i < listOfSupportedRequestMessages.size(); i++)
       {
-         ConcurrentRingBuffer<? extends RequestPacket<?>> buffer = requestMessageClassToBufferMap.get(listOfSupportedRequestMessages.get(i));
+         ConcurrentRingBuffer<? extends SettablePacket<?>> buffer = requestMessageClassToBufferMap.get(listOfSupportedRequestMessages.get(i));
          if (buffer.poll())
          {
-            RequestPacket<?> requestMessage;
+            SettablePacket<?> requestMessage;
             while ((requestMessage = buffer.read()) != null)
             {
                packetCommunicator.send(requestMessage);

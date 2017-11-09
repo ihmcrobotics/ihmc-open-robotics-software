@@ -93,7 +93,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
    }
 
    @ContinuousIntegrationTest(categoriesOverride = IntegrationCategory.FAST, estimatedDuration = 31.3)
-   @Test(timeout = 160000)
+   @Test(timeout = 190000)
    public void testWalkingWithArmsHoldingInFeetFrame() throws Exception
    {
       Random random = new Random(564654L);

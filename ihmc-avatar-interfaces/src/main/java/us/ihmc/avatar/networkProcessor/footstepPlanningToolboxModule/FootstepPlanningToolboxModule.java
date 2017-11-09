@@ -10,10 +10,10 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.RequestPacket;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
@@ -53,15 +53,15 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    }
 
    @Override
-   public List<Class<? extends StatusPacket<?>>> createListOfSupportedStatus()
+   public List<Class<? extends SettablePacket<?>>> createListOfSupportedStatus()
    {
-      List<Class<? extends StatusPacket<?>>> status = new ArrayList<>();
+      List<Class<? extends SettablePacket<?>>> status = new ArrayList<>();
       status.add(FootstepPlanningToolboxOutputStatus.class);
       return status;
    }
 
    @Override
-   public List<Class<? extends RequestPacket<?>>> createListOfSupportedRequests()
+   public List<Class<? extends SettablePacket<?>>> createListOfSupportedRequests()
    {
       return Collections.singletonList(RequestPlanarRegionsListMessage.class);
    }

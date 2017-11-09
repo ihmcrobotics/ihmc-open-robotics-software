@@ -31,6 +31,8 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
    //private static final double violationFractionToAdd = 1.0;
    //private static final double violationFractionToRemove = 1.0;
    private double convergenceThreshold = 1e-10;
+   //private double convergenceThresholdForLagrangeMultipliers = 0.0;
+   private double convergenceThresholdForLagrangeMultipliers = 1e-10;
    private int maxNumberOfIterations = 10;
 
    private final DenseMatrix64F activeVariables = new DenseMatrix64F(0, 0);
@@ -349,6 +351,8 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
    {
       if (!useWarmStart || problemSizeChanged())
          resetActiveConstraints();
+      else
+         addActiveSetConstraintsAsEqualityConstraints();
 
       int numberOfIterations = 0;
 
@@ -535,7 +539,6 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
       boolean activeSetWasModified = false;
 
       // find the constraints to add
-      int numberOfVariables = quadraticCostQMatrix.getNumRows();
       int numberOfInequalityConstraints = linearInequalityConstraintsCMatrixO.getNumRows();
       int numberOfLowerBoundConstraints = variableLowerBounds.getNumRows();
       int numberOfUpperBoundConstraints = variableUpperBounds.getNumRows();
@@ -635,7 +638,7 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
          minLagrangeUpperBoundMultiplier = CommonOps.elementMin(lagrangeUpperBoundConstraintMultipliersToPack);
 
       double minLagrangeMultiplier = Math.min(minLagrangeInequalityMultiplier, Math.min(minLagrangeLowerBoundMultiplier, minLagrangeUpperBoundMultiplier));
-      double maxLagrangeMultiplierToRemove = -(1.0 - violationFractionToRemove) * minLagrangeMultiplier - convergenceThreshold;
+      double maxLagrangeMultiplierToRemove = -(1.0 - violationFractionToRemove) * minLagrangeMultiplier - convergenceThresholdForLagrangeMultipliers;
 
       inequalityIndicesToRemoveFromActiveSet.reset();
       if (minLagrangeInequalityMultiplier < maxLagrangeMultiplierToRemove)
@@ -716,6 +719,18 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
       }
 
       // Add active set constraints as equality constraints:
+      addActiveSetConstraintsAsEqualityConstraints();
+
+      solveEqualityConstrainedSubproblemEfficiently(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
+                                                    lagrangeLowerBoundConstraintMultipliersToPack, lagrangeUpperBoundConstraintMultipliersToPack);
+
+      return true;
+   }
+
+   private void addActiveSetConstraintsAsEqualityConstraints()
+   {
+      int numberOfVariables = quadraticCostQMatrix.getNumRows();
+
       int sizeOfActiveSet = activeInequalityIndices.size();
 
       CBar.reshape(sizeOfActiveSet, numberOfVariables);
@@ -761,11 +776,6 @@ public class SimpleEfficientActiveSetQPSolver extends AbstractSimpleActiveSetQPS
       }
 
       //printSetChanges();
-
-      solveEqualityConstrainedSubproblemEfficiently(solutionToPack, lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
-                                                    lagrangeLowerBoundConstraintMultipliersToPack, lagrangeUpperBoundConstraintMultipliersToPack);
-
-      return true;
    }
 
    private void printSetChanges()

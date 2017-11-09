@@ -5,12 +5,12 @@ import java.util.Random;
 
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
-import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 
-public class FootstepPlanningToolboxOutputStatus extends StatusPacket<FootstepPlanningToolboxOutputStatus>
+public class FootstepPlanningToolboxOutputStatus extends SettablePacket<FootstepPlanningToolboxOutputStatus>
 {
    public FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
    public FootstepPlanningResult planningResult;

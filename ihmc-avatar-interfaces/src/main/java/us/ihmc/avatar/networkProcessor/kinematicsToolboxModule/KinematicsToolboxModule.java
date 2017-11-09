@@ -8,7 +8,10 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.*;
+import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
+import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
@@ -39,8 +42,7 @@ public class KinematicsToolboxModule extends ToolboxModule
     * these commands that can be sent over the network.
     * <p>
     * Do not forget that this toolbox will ignore any message with a destination different from
-    * {@value KinematicsToolboxModule#PACKET_DESTINATION}. This toolbox will also ignore any message
-    * that does not extend {@link TrackablePacket}.
+    * {@value KinematicsToolboxModule#PACKET_DESTINATION}.
     * </p>
     */
    @Override
@@ -64,27 +66,27 @@ public class KinematicsToolboxModule extends ToolboxModule
     * directed to the source the of the input messages.
     */
    @Override
-   public List<Class<? extends StatusPacket<?>>> createListOfSupportedStatus()
+   public List<Class<? extends SettablePacket<?>>> createListOfSupportedStatus()
    {
       return supportedStatus();
    }
 
-   static List<Class<? extends StatusPacket<?>>> supportedStatus()
+   static List<Class<? extends SettablePacket<?>>> supportedStatus()
    {
-      List<Class<? extends StatusPacket<?>>> status = new ArrayList<>();
+      List<Class<? extends SettablePacket<?>>> status = new ArrayList<>();
       status.add(KinematicsToolboxOutputStatus.class);
       return status;
    }
 
    @Override
-   public List<Class<? extends RequestPacket<?>>> createListOfSupportedRequests()
+   public List<Class<? extends SettablePacket<?>>> createListOfSupportedRequests()
    {
       return supportedRequests();
    }
 
-   static List<Class<? extends RequestPacket<?>>> supportedRequests()
+   static List<Class<? extends SettablePacket<?>>> supportedRequests()
    {
-      List<Class<? extends RequestPacket<?>>> status = new ArrayList<>();
+      List<Class<? extends SettablePacket<?>>> status = new ArrayList<>();
       status.add(RequestPlanarRegionsListMessage.class);
       return status;
    }

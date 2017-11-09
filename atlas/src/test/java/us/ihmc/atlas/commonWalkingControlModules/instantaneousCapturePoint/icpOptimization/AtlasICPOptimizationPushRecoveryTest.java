@@ -57,6 +57,12 @@ public class AtlasICPOptimizationPushRecoveryTest extends AvatarICPOptimizationP
    }
 
    @Override
+   protected double getSizeScale()
+   {
+      return 1.0;
+   }
+
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 60000)
    public void testPushICPOptimizationBackwardPushInSwing() throws SimulationExceededMaximumTimeException

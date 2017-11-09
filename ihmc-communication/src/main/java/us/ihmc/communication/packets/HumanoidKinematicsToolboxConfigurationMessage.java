@@ -1,6 +1,6 @@
 package us.ihmc.communication.packets;
 
-public class HumanoidKinematicsToolboxConfigurationMessage extends TrackablePacket<HumanoidKinematicsToolboxConfigurationMessage>
+public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<HumanoidKinematicsToolboxConfigurationMessage>
 {
    /**
     * When set to {@code true}, the solver will hold the current x and y coordinates of the center
