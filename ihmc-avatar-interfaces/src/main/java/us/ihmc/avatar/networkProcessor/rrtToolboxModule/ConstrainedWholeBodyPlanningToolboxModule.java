@@ -2,7 +2,9 @@ package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -11,8 +13,10 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
+import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxCommand;
+import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
@@ -31,8 +35,10 @@ public class ConstrainedWholeBodyPlanningToolboxModule extends ToolboxModule
 
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
 
-      constrainedWholeBodyPlanningToolboxController = new ConstrainedWholeBodyPlanningToolboxController(drcRobotModel, fullRobotModel, statusOutputManager, registry, yoGraphicsListRegistry, startYoVariableServer);
-      packetCommunicator.attachListener(ConstrainedWholeBodyPlanningToolboxRequestPacket.class, constrainedWholeBodyPlanningToolboxController.createRequestConsumer());
+      constrainedWholeBodyPlanningToolboxController = new ConstrainedWholeBodyPlanningToolboxController(drcRobotModel, fullRobotModel, commandInputManager,
+                                                                                                        statusOutputManager, registry, yoGraphicsListRegistry,
+                                                                                                        startYoVariableServer);
+      commandInputManager.registerConversionHelper(new ConstrainedWholeBodyPlanningToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
    }
 
@@ -46,6 +52,9 @@ public class ConstrainedWholeBodyPlanningToolboxModule extends ToolboxModule
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
+      commands.add(WholeBodyTrajectoryToolboxCommand.class);
+      commands.add(WaypointBasedTrajectoryCommand.class);
+      commands.add(WholeBodyTrajectoryToolboxConfigurationCommand.class);
       return commands;
    }
 
@@ -57,4 +66,12 @@ public class ConstrainedWholeBodyPlanningToolboxModule extends ToolboxModule
       return status;
    }
 
+   @Override
+   public Set<Class<? extends Command<?, ?>>> silentCommands()
+   {
+      Set<Class<? extends Command<?, ?>>> commands = new HashSet<>();
+      commands.add(WaypointBasedTrajectoryCommand.class);
+      commands.add(WholeBodyTrajectoryToolboxConfigurationCommand.class);
+      return commands;
+   }
 }

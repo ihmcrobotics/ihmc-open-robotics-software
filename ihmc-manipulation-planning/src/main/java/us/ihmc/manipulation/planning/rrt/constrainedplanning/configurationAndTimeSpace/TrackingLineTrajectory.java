@@ -93,7 +93,7 @@ public class TrackingLineTrajectory extends ConstrainedEndEffectorTrajectory
    }
 
    @Override
-   protected SideDependentList<ConfigurationSpace> getConfigurationSpace(double time)
+   public SideDependentList<ConfigurationSpace> getConfigurationSpace(double time)
    {
       
       
