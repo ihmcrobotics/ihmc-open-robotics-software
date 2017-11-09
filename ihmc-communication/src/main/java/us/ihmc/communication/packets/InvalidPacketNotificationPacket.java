@@ -1,6 +1,6 @@
 package us.ihmc.communication.packets;
 
-public class InvalidPacketNotificationPacket extends StatusPacket<InvalidPacketNotificationPacket>
+public class InvalidPacketNotificationPacket extends SettablePacket<InvalidPacketNotificationPacket>
 {
    public String packetClass;
    public String errorMessage;

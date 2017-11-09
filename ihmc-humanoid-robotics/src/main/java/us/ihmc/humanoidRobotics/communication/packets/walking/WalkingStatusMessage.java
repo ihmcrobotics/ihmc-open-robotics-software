@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -11,7 +11,7 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 @RosMessagePacket(documentation = "This class is used to report the status of walking.",
       rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/output/walking_status")
-public class WalkingStatusMessage extends StatusPacket<WalkingStatusMessage>
+public class WalkingStatusMessage extends SettablePacket<WalkingStatusMessage>
 {
    public enum Status
    {
