@@ -10,6 +10,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -134,6 +136,10 @@ public class ICPAdjustmentOptimizationController extends AbstractICPOptimization
    public double getOptimizedTimeRemaining()
    {
       throw new RuntimeException("This is not implemented in this solver.");
+   }
+
+   public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
+   {
    }
 }
 

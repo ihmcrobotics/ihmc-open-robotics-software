@@ -16,6 +16,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -478,5 +480,9 @@ public class ICPTimingOptimizationController extends AbstractICPOptimizationCont
    {
       computeTimeRemainingInState();
       return timeRemainingInState.getDoubleValue();
+   }
+
+   public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
+   {
    }
 }

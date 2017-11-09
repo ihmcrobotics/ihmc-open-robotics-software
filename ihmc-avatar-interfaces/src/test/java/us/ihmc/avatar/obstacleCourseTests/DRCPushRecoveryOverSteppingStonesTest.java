@@ -115,6 +115,8 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
+      setupCameraForWalkingOverEasySteppingStones(scs);
+
       for (RobotSide robotSide : RobotSide.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
@@ -129,7 +131,6 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
 
       scs.addYoGraphic(pushRobotController.getForceVisualizer());
 
-      setupCameraForWalkingOverEasySteppingStones(scs);
 
       swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
       double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
@@ -250,7 +251,12 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
       ArrayList<PlanarRegionsListMessage> messages = new ArrayList<>();
       for (int i = 0; i < planarRegions.size(); i++)
       {
-         PlanarRegionMessage message = PlanarRegionMessageConverter.convertToPlanarRegionMessage(planarRegions.get(i));
+         PlanarRegion planarRegion = planarRegions.get(i);
+         PlanarRegionMessage message;
+         if (planarRegion != null)
+            message = PlanarRegionMessageConverter.convertToPlanarRegionMessage(planarRegions.get(i));
+         else
+            message = new PlanarRegionMessage();
          PlanarRegionsListMessage messageList = new PlanarRegionsListMessage(Collections.singletonList(message));
          messages.add(messageList);
       }
