@@ -65,7 +65,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
 
-   private WheneverWholeBodyKinematicsSolver kinematicsSolver;
+   private final WheneverWholeBodyKinematicsSolver kinematicsSolver;
 
    private final WholeBodyTrajectoryToolboxOutputStatus toolboxSolution;
 
@@ -190,6 +190,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       this.state = CWBToolboxState.FIND_INITIAL_GUESS;
 
       this.ctTreeFindInitialGuess = new CTTreeFindInitialGuess(drcRobotModel, 4, registry);
+
+      kinematicsSolver = new WheneverWholeBodyKinematicsSolver(drcRobotModelFactory);
 
       this.toolboxSolution = new WholeBodyTrajectoryToolboxOutputStatus();
       this.toolboxSolution.setDestination(-1);
@@ -571,8 +573,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       /*
        * initialize kinematicsSolver.
        */
-      kinematicsSolver = new WheneverWholeBodyKinematicsSolver(drcRobotModelFactory);
-
       kinematicsSolver.updateRobotConfigurationData(initialConfiguration);
 
       kinematicsSolver.initialize();
@@ -1013,5 +1013,10 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
       currentRobotConfigurationDataReference.set(newConfigurationData);
+   }
+
+   FullHumanoidRobotModel getSolverFullRobotModel()
+   {
+      return kinematicsSolver.getDesiredFullRobotModel();
    }
 }
