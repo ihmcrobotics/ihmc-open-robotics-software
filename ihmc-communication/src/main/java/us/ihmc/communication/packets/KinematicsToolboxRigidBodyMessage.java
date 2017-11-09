@@ -31,7 +31,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
  * @author Sylvain Bertrand
  *
  */
-public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<KinematicsToolboxRigidBodyMessage>
+public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxRigidBodyMessage>
 {
    /**
     * This is the unique hash code of the end-effector to be solved for. It used on the solver side
