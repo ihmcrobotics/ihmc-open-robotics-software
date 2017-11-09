@@ -61,12 +61,6 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
    }
 
    @Override
-   public List<Class<? extends SettablePacket<?>>> createListOfSupportedRequests()
-   {
-      return new ArrayList<>();
-   }
-
-   @Override
    public Set<Class<? extends Command<?, ?>>> silentCommands()
    {
       return Collections.singleton(LidarScanCommand.class);

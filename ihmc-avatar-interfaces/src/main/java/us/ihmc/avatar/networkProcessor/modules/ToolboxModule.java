@@ -14,7 +14,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.CommandInputManager.HasReceivedInputListener;
-import us.ihmc.communication.controllerAPI.RequestMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.PacketConsumer;
@@ -54,7 +53,6 @@ public abstract class ToolboxModule
    protected final PacketCommunicator packetCommunicator;
    protected final CommandInputManager commandInputManager;
    protected final StatusMessageOutputManager statusOutputManager;
-   protected final RequestMessageOutputManager requestOutputManager;
    protected final ControllerNetworkSubscriber controllerNetworkSubscriber;
    private final int thisDesitination;
 
@@ -90,8 +88,7 @@ public abstract class ToolboxModule
       packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(toolboxPort, new IHMCCommunicationKryoNetClassList());
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
-      requestOutputManager = new RequestMessageOutputManager(createListOfSupportedRequests());
-      controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, requestOutputManager, null, packetCommunicator);
+      controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusOutputManager, null, packetCommunicator);
 
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
@@ -373,11 +370,6 @@ public abstract class ToolboxModule
     * @return used to create the {@link StatusMessageOutputManager} and to defines the output API.
     */
    abstract public List<Class<? extends SettablePacket<?>>> createListOfSupportedStatus();
-
-   /**
-    * @return used to create the {@link RequestMessageOutputManager} and to defines the output API.
-    */
-   abstract public List<Class<? extends SettablePacket<?>>> createListOfSupportedRequests();
 
    /**
     * @return the collection of commands that cannot wake up this module.

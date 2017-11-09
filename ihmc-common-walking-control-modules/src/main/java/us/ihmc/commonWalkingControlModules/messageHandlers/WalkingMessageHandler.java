@@ -6,7 +6,6 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.controllerAPI.RequestMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
@@ -30,7 +29,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -61,7 +59,6 @@ public class WalkingMessageHandler
    private final SideDependentList<RecyclingArrayDeque<FootTrajectoryCommand>> upcomingFootTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
 
    private final StatusMessageOutputManager statusOutputManager;
-   private final RequestMessageOutputManager requestOutputManager;
 
    private final YoInteger currentFootstepIndex = new YoInteger("currentFootstepIndex", registry);
    private final YoInteger currentNumberOfFootsteps = new YoInteger("currentNumberOfFootsteps", registry);
@@ -97,18 +94,17 @@ public class WalkingMessageHandler
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, double defaultFinalTransferTime,
                                 SideDependentList<? extends ContactablePlaneBody> contactableFeet, StatusMessageOutputManager statusOutputManager,
-                                RequestMessageOutputManager requestOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+                                YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, defaultFinalTransferTime, contactableFeet, statusOutputManager,
-           requestOutputManager, null, yoGraphicsListRegistry, parentRegistry);
+           null, yoGraphicsListRegistry, parentRegistry);
    }
 
    public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, double defaultFinalTransferTime,
                                 SideDependentList<? extends ContactablePlaneBody> contactableFeet, StatusMessageOutputManager statusOutputManager,
-                                RequestMessageOutputManager requestOutputManager, YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+                                YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
-      this.requestOutputManager = requestOutputManager;
 
       upcomingFootsteps.clear();
       upcomingFootstepTimings.clear();
@@ -140,7 +136,7 @@ public class WalkingMessageHandler
 
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime);
-      planarRegionsListHandler = new PlanarRegionsListHandler(requestOutputManager, registry);
+      planarRegionsListHandler = new PlanarRegionsListHandler(statusOutputManager, registry);
 
       parentRegistry.addChild(registry);
    }

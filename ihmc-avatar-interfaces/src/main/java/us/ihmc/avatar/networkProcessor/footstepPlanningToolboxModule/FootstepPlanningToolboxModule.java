@@ -28,8 +28,7 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
    private final FootstepPlanningToolboxController footstepPlanningToolboxController;
 
    public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel, LogModelProvider modelProvider,
-                                        boolean startYoVariableServer)
-         throws IOException
+                                        boolean startYoVariableServer) throws IOException
    {
       super(fullHumanoidRobotModel, modelProvider, startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
@@ -59,10 +58,5 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
       status.add(FootstepPlanningToolboxOutputStatus.class);
       return status;
    }
-
-   @Override
-   public List<Class<? extends SettablePacket<?>>> createListOfSupportedRequests()
-   {
-      return Collections.singletonList(RequestPlanarRegionsListMessage.class);
-   }
 }
+
