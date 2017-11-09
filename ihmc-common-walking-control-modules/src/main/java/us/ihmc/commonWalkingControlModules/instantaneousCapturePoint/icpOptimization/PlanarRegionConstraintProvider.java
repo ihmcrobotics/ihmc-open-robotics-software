@@ -14,6 +14,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -130,14 +131,15 @@ public class PlanarRegionConstraintProvider
       if (!planarRegionsList.isEmpty())
       {
          PlanarRegion planarRegion = planarRegionsList.getLastPlanarRegion();
+
+         icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, projectedConvexHull,
+                                                                               distanceToPlanarRegionEdgeForNoOverhang.getDoubleValue() - footstepDeadband.getDoubleValue());
+
          ConvexPolygon2D convexHull = planarRegion.getConvexHull();
-
-         icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion, projectedConvexHull);
-
          activePlanarRegion.setConvexPolygon2d(convexHull);
          activePlanarRegionInControlPlane.setConvexPolygon2d(projectedConvexHull);
 
-         solver.setPlanarRegionConstraint(projectedConvexHull, distanceToPlanarRegionEdgeForNoOverhang.getDoubleValue() - footstepDeadband.getDoubleValue());
+         solver.setPlanarRegionConstraint(projectedConvexHull, 0.0);
       }
    }
 

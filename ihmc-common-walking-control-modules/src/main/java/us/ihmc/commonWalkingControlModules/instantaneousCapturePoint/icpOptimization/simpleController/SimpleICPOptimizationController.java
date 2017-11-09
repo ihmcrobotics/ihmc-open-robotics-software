@@ -430,7 +430,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide, solver);
 
       Footstep upcomingFootstep = upcomingFootsteps.get(0);
-      planarRegionConstraintProvider.setActivePlanarRegion(upcomingFootstep.getPlanarRegion());
+
       planarRegionConstraintProvider.computeDistanceFromEdgeForNoOverhang(upcomingFootstep);
       planarRegionConstraintProvider.updatePlanarRegionConstraintForSingleSupport(supportSide, timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
    }
