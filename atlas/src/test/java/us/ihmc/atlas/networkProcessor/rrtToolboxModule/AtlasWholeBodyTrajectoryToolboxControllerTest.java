@@ -1,0 +1,38 @@
+package us.ihmc.atlas.networkProcessor.rrtToolboxModule;
+
+import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.networkProcessor.rrtToolboxModule.AvatarWholeBodyTrajectoryToolboxControllerTest;
+import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+
+public class AtlasWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBodyTrajectoryToolboxControllerTest
+{
+   private DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+   private DRCRobotModel ghostRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+
+   @Override
+   public void testHandCircle() throws Exception, UnreasonableAccelerationException
+   {
+      super.testHandCircle();
+   }
+
+   @Override
+   public DRCRobotModel getRobotModel()
+   {
+      return robotModel;
+   }
+
+   @Override
+   public DRCRobotModel getGhostRobotModel()
+   {
+      return ghostRobotModel;
+   }
+
+   @Override
+   public String getSimpleRobotName()
+   {
+      return getRobotModel().getSimpleRobotName();
+   }
+}
