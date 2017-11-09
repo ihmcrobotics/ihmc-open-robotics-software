@@ -129,7 +129,7 @@ public class CuttingWallTrajectory extends ConstrainedEndEffectorTrajectory
    }
 
    @Override
-   protected SideDependentList<ConfigurationSpace> getConfigurationSpace(double time)
+   public SideDependentList<ConfigurationSpace> getConfigurationSpace(double time)
    {
       double arcAngle = time / getTrajectoryTime() * Math.PI * 2;
 
