@@ -1,5 +1,7 @@
 package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder.ConfigurationSpaceName.PITCH;
 import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder.ConfigurationSpaceName.ROLL;
 import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder.ConfigurationSpaceName.YAW;
@@ -7,10 +9,10 @@ import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeB
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.IntStream;
 
 import org.junit.After;
 import org.junit.Before;
@@ -34,6 +36,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.SegmentedLine3DMeshDataGenerator;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -195,8 +198,6 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       configuration.setInitialConfigration(fullRobotModel);
 
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
-      
-      Graphics3DObject trajectoryViz = new Graphics3DObject();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -204,29 +205,29 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          double timeResolution = trajectoryTime / 100.0;
          FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleAxis);
          ConfigurationSpaceName[] unconstrainedDegreesOfFreedom = {YAW, PITCH, ROLL};
-         WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, unconstrainedDegreesOfFreedom);
+         WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction,
+                                                                             unconstrainedDegreesOfFreedom);
          handTrajectories.add(trajectory);
 
-         int numberOfWaypoints = trajectory.getNumberOfWaypoints();
-         int radialResolution = 16;
-         double radius = 0.01;
-         SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(numberOfWaypoints, radialResolution, radius);
-         Point3DReadOnly[] waypointPositions = Arrays.stream(trajectory.waypoints).map(pose -> new Point3D(pose.getPosition())).toArray(size -> new Point3D[size]);
-         segmentedLine3DMeshGenerator.compute(waypointPositions);
-         AppearanceDefinition meshAppearance = YoAppearance.Azure();
-         Arrays.stream(segmentedLine3DMeshGenerator.getMeshDataHolders()).forEach(mesh -> trajectoryViz.addMeshData(mesh, meshAppearance));
+         if (visualize)
+            scs.addStaticLinkGraphics(createFunctionTrajectoryVisualization(handFunction, 0.0, trajectoryTime, timeResolution, 0.01, YoAppearance.AliceBlue()));
       }
-      if (visualize)
-         scs.addStaticLinkGraphics(trajectoryViz);
 
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories);
       commandInputManager.submitMessage(message);
 
-      WholeBodyTrajectoryToolboxOutputStatus solution = runToolboxController(10000);
-      
+      int maxNumberOfIterations = 10000;
+      WholeBodyTrajectoryToolboxOutputStatus solution = runToolboxController(maxNumberOfIterations);
+
+      if (numberOfIterations.getIntegerValue() < maxNumberOfIterations - 1)
+         assertNotNull("The toolbox is done but did not report a solution.", solution);
+      else
+         fail("The toolbox has run for " + maxNumberOfIterations + " without converging nor aborting.");
+
    }
 
-   private Pose3D computeCircleTrajectory(double time, double trajectoryTime, double circleRadius, Point3DReadOnly circleCenter, Vector3DReadOnly circleAxis)
+   private static Pose3D computeCircleTrajectory(double time, double trajectoryTime, double circleRadius, Point3DReadOnly circleCenter,
+                                                 Vector3DReadOnly circleAxis)
    {
       AxisAngle circleRotation = EuclidGeometryTools.axisAngleFromZUpToVector3D(circleAxis);
 
@@ -238,6 +239,28 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       point.add(circleCenter);
 
       return new Pose3D(point, new Quaternion());
+   }
+
+   private static Graphics3DObject createFunctionTrajectoryVisualization(FunctionTrajectory trajectoryToVisualize, double t0, double tf, double timeResolution,
+                                                                         double radius, AppearanceDefinition appearance)
+   {
+      int numberOfWaypoints = (int) Math.round((tf - t0) / timeResolution) + 1;
+      double dT = (tf - t0) / (numberOfWaypoints - 1);
+
+      int radialResolution = 16;
+      SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(numberOfWaypoints, radialResolution, radius);
+      Point3DReadOnly[] waypoints = IntStream.range(0, numberOfWaypoints)
+                                             .mapToDouble(i -> t0 + i * dT)
+                                             .mapToObj(trajectoryToVisualize::compute)
+                                             .map(pose -> new Point3D(pose.getPosition()))
+                                             .toArray(size -> new Point3D[size]);
+      segmentedLine3DMeshGenerator.compute(waypoints);
+      Graphics3DObject graphics = new Graphics3DObject();
+      for (MeshDataHolder mesh : segmentedLine3DMeshGenerator.getMeshDataHolders())
+      {
+         graphics.addMeshData(mesh, appearance);
+      }
+      return graphics;
    }
 
    private FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration()
@@ -262,23 +285,15 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
       if (visualize)
       {
-         for (int i = 0; i < maxNumberOfIterations; i++)
-         {
+         for (int i = 0; !toolboxController.isDone() && i < maxNumberOfIterations; i++)
             scs.simulateOneTimeStep();
-            if (status.get() != null)
-               return status.getAndSet(null);
-         }
       }
       else
       {
-         for (int i = 0; i < maxNumberOfIterations; i++)
-         {
+         for (int i = 0; !toolboxController.isDone() && i < maxNumberOfIterations; i++)
             toolboxUpdater.doControl();
-            if (status.get() != null)
-               return status.getAndSet(null);
-         }
       }
-      return null;
+      return status.getAndSet(null);
    }
 
    private RobotController createToolboxUpdater()
