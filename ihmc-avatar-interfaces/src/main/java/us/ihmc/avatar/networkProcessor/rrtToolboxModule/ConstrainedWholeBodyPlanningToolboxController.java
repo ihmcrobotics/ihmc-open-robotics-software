@@ -6,7 +6,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -14,6 +13,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -21,12 +21,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.CTTaskNode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.CTTreeTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.GenericTaskNode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
@@ -37,6 +37,7 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTim
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -664,8 +665,10 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    {
       SideDependentList<WaypointBasedTrajectoryCommand> handTrajectories = new SideDependentList<>();
 
-      for (WaypointBasedTrajectoryCommand command : commands)
+      for (int i = 0; i < commands.size(); i++)
       {
+         WaypointBasedTrajectoryCommand command = commands.get(i);
+
          for (RobotSide robotSide : RobotSide.values)
          {
             if (command.getEndEffector().equals(visualizedFullRobotModel.getHand(robotSide)))
@@ -683,7 +686,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          trajectoryTime = Math.max(trajectoryTime, handTrajectories.get(robotSide).getLastWaypointTime());
       }
 
-      SideDependentList<SelectionMatrix6D> controllableSelectionMatrices = new SideDependentList<>();
+      SideDependentList<SelectionMatrix6D> controllableSelectionMatricesRe = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
          SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
@@ -715,7 +718,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
                throw new RuntimeException("Unexpected enum value: " + spaceName);
             }
          }
-         controllableSelectionMatrices.put(robotSide, selectionMatrix6D);
+         controllableSelectionMatricesRe.put(robotSide, selectionMatrix6D);
       }
 
       // TODO Need to clean that up
@@ -739,7 +742,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
             taskNodeRegion.setRandomRegion(7, 0.0, 0.0);
             taskNodeRegion.setRandomRegion(8, 0.0, 0.0);
             taskNodeRegion.setRandomRegion(9, 0.0, 0.0);
-            taskNodeRegion.setRandomRegion(10, 0.0, 0.0);
+            taskNodeRegion.setRandomRegion(10, -160.0 / 180 * Math.PI, -20.0 / 180 * Math.PI);
 
             taskNodeRegion.setRandomRegion(11, 0.0, 0.0);
             taskNodeRegion.setRandomRegion(12, 0.0, 0.0);
@@ -754,7 +757,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          @Override
          public SideDependentList<SelectionMatrix6D> defineControllableSelectionMatrices()
          {
-            return controllableSelectionMatrices;
+            return controllableSelectionMatricesRe;
          }
          
          @Override
@@ -771,7 +774,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          }
          
          @Override
-         protected SideDependentList<ConfigurationSpace> getConfigurationSpace(double time)
+         public SideDependentList<ConfigurationSpace> getConfigurationSpace(double time)
          {
             SideDependentList<ConfigurationSpace> configurationSpace = new SideDependentList<>();
 
@@ -796,14 +799,16 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
                }
 
                double alpha = (time - t0) / (tf - t0);
+               alpha = MathTools.clamp(alpha, 0, 1);               
                current.interpolate(previous, next, alpha);
 
                double x = current.getX();
                double y = current.getY();
                double z = current.getZ();
-               double roll  = current.getRoll();
-               double pitch = current.getPitch();
-               double yaw   = current.getYaw();
+               RotationMatrix rot = new RotationMatrix(current.getOrientation());
+               double roll  = rot.getRoll();
+               double pitch = rot.getPitch();
+               double yaw   = rot.getYaw();
                configurationSpace.put(robotSide, new ConfigurationSpace(x, y, z, roll, pitch, yaw));
             }
 
