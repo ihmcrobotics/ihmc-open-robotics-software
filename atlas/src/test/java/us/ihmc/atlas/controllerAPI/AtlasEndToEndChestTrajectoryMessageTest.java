@@ -69,7 +69,7 @@ public class AtlasEndToEndChestTrajectoryMessageTest extends EndToEndChestTrajec
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 23.6)
-   @Test(timeout = 30000)
+   @Test(timeout = 60000)
    public void testQueuedMessages() throws Exception
    {
       super.testQueuedMessages();

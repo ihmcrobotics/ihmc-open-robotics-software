@@ -53,7 +53,7 @@ public class AtlasEndToEndWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 19.1)
-   @Test(timeout = 30000)
+   @Test(timeout = 60000)
    public void testSingleWaypointUsingMessageOfMessages() throws Exception
    {
       super.testSingleWaypointUsingMessageOfMessages();
@@ -61,7 +61,7 @@ public class AtlasEndToEndWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 19.1)
-   @Test(timeout = 30000)
+   @Test(timeout = 90000)
    public void testSingleWaypointUsingMessageOfMessagesWithDelays() throws Exception
    {
       super.testSingleWaypointUsingMessageOfMessagesWithDelays();

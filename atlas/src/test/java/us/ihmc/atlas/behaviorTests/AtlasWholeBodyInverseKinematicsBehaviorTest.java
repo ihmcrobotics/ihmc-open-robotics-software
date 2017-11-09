@@ -49,7 +49,7 @@ public class AtlasWholeBodyInverseKinematicsBehaviorTest extends WholeBodyInvers
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 40000)
    public void testSolvingForChestAngularControl() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testSolvingForChestAngularControl();

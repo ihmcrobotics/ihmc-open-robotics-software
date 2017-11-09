@@ -1,6 +1,6 @@
 package us.ihmc.communication.packets;
 
-public class ToolboxStateMessage extends TrackablePacket<ToolboxStateMessage>
+public class ToolboxStateMessage extends Packet<ToolboxStateMessage>
 {
    public ToolboxState requestedState;
 
