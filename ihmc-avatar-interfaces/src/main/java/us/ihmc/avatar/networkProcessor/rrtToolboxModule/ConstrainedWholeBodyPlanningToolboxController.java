@@ -1,31 +1,35 @@
 package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.CTTaskNode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.CTTreeTools;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.GenericTaskNode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeFindInitialGuess;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeVisualizer;
@@ -33,9 +37,12 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTim
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -43,6 +50,9 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxController
 {
+   private static final int DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE = 1000;
+   private static final int DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE = 50;
+
    public static double handCoordinateOffsetX = -0.05;//-0.2;
 
    private static double handOffset_NoHand_Version = -0.03;
@@ -89,7 +99,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    private CTTaskNode visualizedNode;
 
-   private KinematicsToolboxOutputStatus initialConfiguration;
+   private final KinematicsToolboxOutputStatus initialConfiguration = new KinematicsToolboxOutputStatus();
+   private final AtomicReference<RobotConfigurationData> currentRobotConfigurationDataReference = new AtomicReference<>(null);
 
    private FullHumanoidRobotModel visualizedFullRobotModel;
 
@@ -113,11 +124,10 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    /*
     * API
     */
-   private final AtomicReference<ConstrainedWholeBodyPlanningToolboxRequestPacket> latestRequestReference = new AtomicReference<ConstrainedWholeBodyPlanningToolboxRequestPacket>(null);
 
-   private int numberOfExpanding = 1;
+   private int maximumExpansionSize = 1;
 
-   private int numberOfInitialGuess = 1;
+   private int numberOfInitialGuesses = 1;
 
    private int numberOfMotionPath = 1;
 
@@ -143,12 +153,15 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    private final CTTreeFindInitialGuess ctTreeFindInitialGuess;
 
+   private final CommandInputManager commandInputManager;
+
    public ConstrainedWholeBodyPlanningToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModel,
-                                                        StatusMessageOutputManager statusOutputManager, YoVariableRegistry registry,
-                                                        YoGraphicsListRegistry yoGraphicsRegistry, boolean startYoVariableServer)
+                                                        CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
+                                                        YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsRegistry, boolean startYoVariableServer)
    {
       super(statusOutputManager, registry);
       this.drcRobotModelFactory = drcRobotModel;
+      this.commandInputManager = commandInputManager;
 
       if (this.drcRobotModelFactory.getHandModel() == null)
       {
@@ -374,7 +387,7 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          if (tree.getNewNode().getTime() == taskRegion.getTrajectoryTime())
          {
             PrintTools.info("terminate expanding");
-            numberOfExpanding = 1; // for terminate
+            maximumExpansionSize = 1; // for terminate
          }
       }
       else
@@ -412,8 +425,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       /*
        * terminate expanding tree.
        */
-      numberOfExpanding--;
-      if (numberOfExpanding == 0)
+      maximumExpansionSize--;
+      if (maximumExpansionSize == 0)
       {
          if (tree.getTreeReachingTime() != 1.0)
          {
@@ -432,8 +445,9 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
    /**
     * state == FIND_INITIAL_GUESS
-    * @throws ExecutionException 
-    * @throws InterruptedException 
+    * 
+    * @throws ExecutionException
+    * @throws InterruptedException
     */
    private void findInitialGuess() throws InterruptedException, ExecutionException
    {
@@ -454,8 +468,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       /*
        * terminate finding initial guess.
        */
-      numberOfInitialGuess -= ctTreeFindInitialGuess.getInitialGuessNodes().size();
-      if (numberOfInitialGuess < 1)
+      numberOfInitialGuesses -= ctTreeFindInitialGuess.getInitialGuessNodes().size();
+      if (numberOfInitialGuesses < 1)
       {
          PrintTools.info("initial guess terminate");
 
@@ -506,8 +520,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       /*
        * terminate finding initial guess.
        */
-      numberOfInitialGuess -= 1;
-      if (numberOfInitialGuess < 1)
+      numberOfInitialGuesses -= 1;
+      if (numberOfInitialGuesses < 1)
       {
          PrintTools.info("initial guess terminate");
 
@@ -538,21 +552,21 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
    protected boolean initialize()
    {
       isDone.set(false);
-      ConstrainedWholeBodyPlanningToolboxRequestPacket request = latestRequestReference.getAndSet(null);
-      if (request == null)
+      if (!commandInputManager.isNewCommandAvailable(WaypointBasedTrajectoryCommand.class))
          return false;
+
+      List<WaypointBasedTrajectoryCommand> trajectoryCommands = commandInputManager.pollNewCommands(WaypointBasedTrajectoryCommand.class);
+
+      constrainedEndEffectorTrajectory = convertCommands(trajectoryCommands);
 
       PrintTools.info("initialize CWB toolbox");
 
       /*
        * bring control parameters from request.
        */
-      numberOfExpanding = request.numberOfExpanding;
-      numberOfInitialGuess = request.numberOfFindInitialGuess;
-
-      initialConfiguration = request.initialConfiguration;
-
-      constrainedEndEffectorTrajectory = PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory;
+      boolean success = updateConfiguration();
+      if (!success)
+         return false;
 
       /*
        * initialize kinematicsSolver.
@@ -570,15 +584,15 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
        */
       rootNode = new GenericTaskNode();
       tree = new CTTaskNodeTree(rootNode);
+      taskRegion = constrainedEndEffectorTrajectory.getTaskRegion();
 
-      tree.setTaskRegion(constrainedEndEffectorTrajectory.getTaskRegion()); //////////////////////////////////////////////////////////
+      tree.setTaskRegion(taskRegion); //////////////////////////////////////////////////////////
 
-      rootNode.convertDataToNormalizedData(constrainedEndEffectorTrajectory.getTaskRegion());
+      rootNode.convertDataToNormalizedData(taskRegion);
 
       /*
        * bring constrainedEndEffectorTrajectory
        */
-      taskRegion = constrainedEndEffectorTrajectory.getTaskRegion();
       // if (startYoVariableServer)
       if (true)
       {
@@ -588,6 +602,220 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
 
       startTime = System.currentTimeMillis();
       return true;
+   }
+
+   private boolean updateConfiguration()
+   {
+      int newMaxExpansionSize = -1;
+      int newNumberOfInitialGuesses = -1;
+      KinematicsToolboxOutputStatus newInitialConfiguration = null;
+
+      if (commandInputManager.isNewCommandAvailable(WholeBodyTrajectoryToolboxConfigurationCommand.class))
+      {
+         WholeBodyTrajectoryToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(WholeBodyTrajectoryToolboxConfigurationCommand.class);
+         newMaxExpansionSize = command.getMaximumExpansionSize();
+         newNumberOfInitialGuesses = command.getNumberOfInitialGuesses();
+
+         if (command.hasInitialConfiguration())
+         {
+            newInitialConfiguration = command.getInitialConfiguration();
+         }
+      }
+
+      if (newMaxExpansionSize > 0)
+      {
+         maximumExpansionSize = newMaxExpansionSize;
+      }
+      else
+      {
+         maximumExpansionSize = DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE;
+      }
+      
+      if (newNumberOfInitialGuesses > 0)
+      {
+         numberOfInitialGuesses = newNumberOfInitialGuesses;
+      }
+      else
+      {
+         numberOfInitialGuesses = DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE;
+      }
+
+      if (newInitialConfiguration != null)
+      {
+         initialConfiguration.set(newInitialConfiguration);
+         return true;
+      }
+
+      RobotConfigurationData currentRobotConfiguration = currentRobotConfigurationDataReference.getAndSet(null);
+      if (currentRobotConfiguration == null)
+         return false;
+
+      initialConfiguration.setRootOrientation(currentRobotConfiguration.getPelvisOrientation());
+      initialConfiguration.setRootTranslation(currentRobotConfiguration.getPelvisTranslation());
+      
+      initialConfiguration.jointNameHash = currentRobotConfiguration.jointNameHash;
+      int length = currentRobotConfiguration.jointAngles.length;
+      initialConfiguration.desiredJointAngles = new float[length];
+      System.arraycopy(currentRobotConfiguration.jointAngles, 0, initialConfiguration.desiredJointAngles, 0, length);
+
+      return true;
+   }
+
+   private ConstrainedEndEffectorTrajectory convertCommands(List<WaypointBasedTrajectoryCommand> commands)
+   {
+      SideDependentList<WaypointBasedTrajectoryCommand> handTrajectories = new SideDependentList<>();
+
+      for (int i = 0; i < commands.size(); i++)
+      {
+         WaypointBasedTrajectoryCommand command = commands.get(i);
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (command.getEndEffector().equals(visualizedFullRobotModel.getHand(robotSide)))
+            {
+               handTrajectories.put(robotSide, command);
+               break;
+            }
+         }
+      }
+
+      double trajectoryTime = 0.0;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         trajectoryTime = Math.max(trajectoryTime, handTrajectories.get(robotSide).getLastWaypointTime());
+      }
+
+      SideDependentList<SelectionMatrix6D> controllableSelectionMatricesRe = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
+         selectionMatrix6D.clearSelection();
+         for (int i = 0; i < handTrajectories.get(robotSide).getNumberOfUnconstrainedDegreesOfFreedom(); i++)
+         {
+            ConfigurationSpaceName spaceName = handTrajectories.get(robotSide).getUnconstrainedDegreeOfFreedom(i);
+            switch (spaceName)
+            {
+            case X:
+               selectionMatrix6D.selectLinearX(true);
+               break;
+            case Y:
+               selectionMatrix6D.selectLinearY(true);
+               break;
+            case Z:
+               selectionMatrix6D.selectLinearZ(true);
+               break;
+            case ROLL:
+               selectionMatrix6D.selectAngularX(true);
+               break;
+            case PITCH:
+               selectionMatrix6D.selectAngularY(true);
+               break;
+            case YAW:
+               selectionMatrix6D.selectAngularZ(true);
+               break;
+            default:
+               throw new RuntimeException("Unexpected enum value: " + spaceName);
+            }
+         }
+         controllableSelectionMatricesRe.put(robotSide, selectionMatrix6D);
+      }
+
+      // TODO Need to clean that up
+      ConstrainedEndEffectorTrajectory endEffectorTrajectory = new ConstrainedEndEffectorTrajectory(trajectoryTime)
+      {
+         
+         @Override
+         public TaskRegion defineTaskRegion()
+         {
+            TaskRegion taskNodeRegion = new TaskRegion(GenericTaskNode.nodeDimension);
+
+            taskNodeRegion.setRandomRegion(0, 0.0, trajectoryTime);
+            
+            taskNodeRegion.setRandomRegion(1, 0.75, 0.90); // Pelvis height
+            taskNodeRegion.setRandomRegion(2, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI); // Chest yaw
+            taskNodeRegion.setRandomRegion(3, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI); // Chest pitch
+            taskNodeRegion.setRandomRegion(4, -8.0 / 180 * Math.PI, 8.0 / 180 * Math.PI); // Chest roll
+
+            taskNodeRegion.setRandomRegion(5, 0.0, 0.0);
+            taskNodeRegion.setRandomRegion(6, 0.0, 0.0);
+            taskNodeRegion.setRandomRegion(7, 0.0, 0.0);
+            taskNodeRegion.setRandomRegion(8, 0.0, 0.0);
+            taskNodeRegion.setRandomRegion(9, 0.0, 0.0);
+            taskNodeRegion.setRandomRegion(10, -160.0 / 180 * Math.PI, -20.0 / 180 * Math.PI);
+
+            taskNodeRegion.setRandomRegion(11, 0.0, 0.0);
+            taskNodeRegion.setRandomRegion(12, 0.0, 0.0);
+            taskNodeRegion.setRandomRegion(13, 0.0, 0.0);
+            taskNodeRegion.setRandomRegion(14, 0.0, 0.0);
+            taskNodeRegion.setRandomRegion(15, 0.0, 0.0);
+            taskNodeRegion.setRandomRegion(16, 0.0, 0.0);
+
+            return taskNodeRegion;
+         }
+         
+         @Override
+         public SideDependentList<SelectionMatrix6D> defineControllableSelectionMatrices()
+         {
+            return controllableSelectionMatricesRe;
+         }
+         
+         @Override
+         public SideDependentList<ConfigurationBuildOrder> defineConfigurationBuildOrders()
+         {
+            SideDependentList<ConfigurationBuildOrder> configurationBuildOrders = new SideDependentList<>();
+
+            for (RobotSide robotSide : RobotSide.values)
+               configurationBuildOrders.put(robotSide,
+                                            new ConfigurationBuildOrder(ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z,
+                                                                        ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL));
+
+            return configurationBuildOrders;
+         }
+         
+         @Override
+         public SideDependentList<ConfigurationSpace> getConfigurationSpace(double time)
+         {
+            SideDependentList<ConfigurationSpace> configurationSpace = new SideDependentList<>();
+
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               Pose3D current = new Pose3D();
+
+               WaypointBasedTrajectoryCommand handTrajectory = handTrajectories.get(robotSide);
+               Pose3D previous = null;
+               Pose3D next = null;
+               double t0 = Double.NaN;
+               double tf = Double.NaN;
+
+               for (int i = 1; i < handTrajectory.getNumberOfWaypoints(); i++)
+               {
+                  t0 = handTrajectory.getWaypointTime(i - 1);
+                  tf = handTrajectory.getWaypointTime(i);
+                  previous = handTrajectory.getWaypoint(i - 1);
+                  next = handTrajectory.getWaypoint(i);
+                  if (time < handTrajectory.getWaypointTime(i))
+                     break;
+               }
+
+               double alpha = (time - t0) / (tf - t0);
+               alpha = MathTools.clamp(alpha, 0, 1);               
+               current.interpolate(previous, next, alpha);
+
+               double x = current.getX();
+               double y = current.getY();
+               double z = current.getZ();
+               RotationMatrix rot = new RotationMatrix(current.getOrientation());
+               double roll  = rot.getRoll();
+               double pitch = rot.getPitch();
+               double yaw   = rot.getYaw();
+               configurationSpace.put(robotSide, new ConfigurationSpace(x, y, z, roll, pitch, yaw));
+            }
+
+            return configurationSpace;
+         }
+      };
+      return endEffectorTrajectory;
    }
 
    private void terminateToolboxController()
@@ -609,22 +837,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       return isDone.getBooleanValue();
    }
 
-   public PacketConsumer<ConstrainedWholeBodyPlanningToolboxRequestPacket> createRequestConsumer()
-   {
-      return new PacketConsumer<ConstrainedWholeBodyPlanningToolboxRequestPacket>()
-      {
-         @Override
-         public void receivedPacket(ConstrainedWholeBodyPlanningToolboxRequestPacket packet)
-         {
-            if (packet == null)
-               return;
-            latestRequestReference.set(packet);
-         }
-      };
-   }
-
    /**
-    * update validity of input node. 
+    * update validity of input node.
     */
    private boolean updateValidity(CTTaskNode node)
    {
@@ -644,8 +858,8 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
       kinematicsSolver.holdCurrentTrajectoryMessages();
 
       /*
-       * set whole body tasks. pose from 'constrainedEndEffectorTrajectory' is
-       * considered as being in MidZUpframe. for kinematicsSolver, append offset
+       * set whole body tasks. pose from 'constrainedEndEffectorTrajectory' is considered as being
+       * in MidZUpframe. for kinematicsSolver, append offset
        */
       SideDependentList<ConfigurationSpace> configurationSpaces = new SideDependentList<>();
 
@@ -794,5 +1008,10 @@ public class ConstrainedWholeBodyPlanningToolboxController extends ToolboxContro
          updateShortcutPath(path, i);
          path.get(i).convertDataToNormalizedData(taskRegion);
       }
+   }
+
+   void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
+   {
+      currentRobotConfigurationDataReference.set(newConfigurationData);
    }
 }

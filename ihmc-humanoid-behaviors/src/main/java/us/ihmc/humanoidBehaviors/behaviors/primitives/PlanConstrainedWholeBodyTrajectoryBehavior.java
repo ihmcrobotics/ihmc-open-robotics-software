@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
@@ -9,6 +10,7 @@ import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
@@ -16,14 +18,23 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.ConstrainedWholeBodyPlanningToolboxOutputConverter;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationBuildOrder.ConfigurationSpaceName;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxOutputStatus;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedWholeBodyPlanningToolboxRequestPacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.WaypointBasedTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.WholeBodyTrajectoryToolboxConfigurationMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.WholeBodyTrajectoryToolboxMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.WholeBodyTrajectoryToolboxMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.WholeBodyTrajectoryToolboxMessageTools.FunctionTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -37,6 +48,8 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
 {
    // TODO : should be replaced with simple packet structure. need to add 'configruationspaces, buildorder etc' on kryonet.
    public static ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
+
+   private List<WaypointBasedTrajectoryMessage> handTrajectoryMessages;
 
    private final boolean DEBUG = true;
 
@@ -88,6 +101,47 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
    {
       PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = constrainedEndEffectorTrajectory;
       this.fullRobotModel = fullRobotModel;
+
+      handTrajectoryMessages = new ArrayList<>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody hand = fullRobotModel.getHand(robotSide);
+         double t0 = 0.0;
+         double tf = constrainedEndEffectorTrajectory.getTrajectoryTime();
+         double timeResolution = 0.05;
+         FunctionTrajectory trajectoryToDiscretize = new FunctionTrajectory()
+         {
+            @Override
+            public Pose3D compute(double time)
+            {
+               ConfigurationBuildOrder configurationBuildOrder = constrainedEndEffectorTrajectory.defineConfigurationBuildOrders().get(robotSide);
+               ConfigurationSpace configurationSpace = constrainedEndEffectorTrajectory.getConfigurationSpace(time).get(robotSide);
+
+               RigidBodyTransform transform = configurationSpace.createRigidBodyTransform(configurationBuildOrder);               
+               return new Pose3D(transform);
+            }
+         };
+
+         List<ConfigurationSpaceName> unconstrainedDegreesOfFreedom = new ArrayList<>();
+
+         SelectionMatrix6D controllableSelectionMatrices = constrainedEndEffectorTrajectory.defineControllableSelectionMatrices().get(robotSide);
+         if (controllableSelectionMatrices.isLinearXSelected())
+            unconstrainedDegreesOfFreedom.add(ConfigurationSpaceName.X);
+         if (controllableSelectionMatrices.isLinearYSelected())
+            unconstrainedDegreesOfFreedom.add(ConfigurationSpaceName.Y);
+         if (controllableSelectionMatrices.isLinearZSelected())
+            unconstrainedDegreesOfFreedom.add(ConfigurationSpaceName.Z);
+         if (controllableSelectionMatrices.isAngularXSelected())
+            unconstrainedDegreesOfFreedom.add(ConfigurationSpaceName.ROLL);
+         if (controllableSelectionMatrices.isAngularYSelected())
+            unconstrainedDegreesOfFreedom.add(ConfigurationSpaceName.PITCH);
+         if (controllableSelectionMatrices.isAngularZSelected())
+            unconstrainedDegreesOfFreedom.add(ConfigurationSpaceName.YAW);
+
+         WaypointBasedTrajectoryMessage handTrajectory = WholeBodyTrajectoryToolboxMessageTools.createTrajectoryMessage(hand, t0, tf, timeResolution, trajectoryToDiscretize, unconstrainedDegreesOfFreedom.toArray(new ConfigurationSpaceName[0]));
+         handTrajectoryMessages.add(handTrajectory);
+      }
    }
    
    public void setNumberOfFindInitialGuess(int value)
@@ -151,16 +205,14 @@ public class PlanConstrainedWholeBodyTrajectoryBehavior extends AbstractBehavior
                TextToSpeechPacket p1 = new TextToSpeechPacket("Requesting Plan");
                sendPacket(p1);
             }
-            ConstrainedWholeBodyPlanningToolboxRequestPacket request = new ConstrainedWholeBodyPlanningToolboxRequestPacket();
-            
-            request.setNumberOfFindInitialGuess(numberOfFindInitialGuess);
-            request.setNumberOfExpanding(numberOfExpanding);
-            request.setInitialRobotConfigration(fullRobotModel);
-            request.setNumberOfEndEffectorWayPoints(numberOfEndEffectorWayPoints);
 
-            request.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
 
-            sendPackageToPlanner(request);
+            WholeBodyTrajectoryToolboxConfigurationMessage configurationMessage = new WholeBodyTrajectoryToolboxConfigurationMessage(numberOfFindInitialGuess, numberOfExpanding);
+            configurationMessage.setInitialConfigration(fullRobotModel);
+            WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configurationMessage, handTrajectoryMessages);
+            message.setDestination(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE);
+
+            sendPackageToPlanner(message);
             PrintTools.info("sendPackageToPlanner");
             
             startTime = System.currentTimeMillis();
