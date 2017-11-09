@@ -269,6 +269,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
             yoDesiredHandOrientation.get(desiredHandOrientation);
             RigidBody hand = fullRobotModel.getHand(robotSide);
             ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
+            
             KinematicsToolboxRigidBodyMessage handMessage = new KinematicsToolboxRigidBodyMessage(hand, handControlFrame, desiredHandPosition,
                                                                                                   desiredHandOrientation);
             handMessage.setWeight(handWeight);
@@ -285,6 +286,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          Quaternion desiredChestOrientation = new Quaternion();
          yoDesiredChestOrientation.get(desiredChestOrientation);
          RigidBody chest = fullRobotModel.getChest();
+         PrintTools.info(""+desiredChestOrientation);
          chestMessage = new KinematicsToolboxRigidBodyMessage(chest, desiredChestOrientation);
          chestMessage.setWeight(chestWeight);
       }
@@ -344,8 +346,10 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          }
       }
 
+      PrintTools.info("aa");
       if (kinematicsToolboxOutputQueue.isNewPacketAvailable() && !hasSentMessageToController.getBooleanValue())
       {
+         PrintTools.info("bb");
          KinematicsToolboxOutputStatus newestSolution = kinematicsToolboxOutputQueue.poll();
 
          double deltaSolutionQuality = currentSolutionQuality.getDoubleValue() - newestSolution.getSolutionQuality();
