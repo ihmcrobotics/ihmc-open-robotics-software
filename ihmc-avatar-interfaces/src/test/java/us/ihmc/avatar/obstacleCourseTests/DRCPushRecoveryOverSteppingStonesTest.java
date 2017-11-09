@@ -241,12 +241,19 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
       locations.add(new Point3D(-10.25, -0.65, 0.3));
 
       List<PlanarRegion> planarRegions = new ArrayList<>();
+      int idStart = 10;
       for (int i = 0; i < locations.size() - 2; i++)
       {
-         planarRegions.add(createSteppingStonePlanarRegion(locations.get(i)));
+         PlanarRegion planarRegion = createSteppingStonePlanarRegion(locations.get(i));
+         planarRegion.setRegionId(idStart + i);
+         planarRegions.add(planarRegion);
       }
-      planarRegions.add(null);
-      planarRegions.add(null);
+
+      PlanarRegion platform = createEndPlanarRegion(locations.get(locations.size() - 2));
+      platform.setRegionId(idStart + locations.size() - 2);
+
+      planarRegions.add(platform);
+      planarRegions.add(platform);
 
       ArrayList<PlanarRegionsListMessage> messages = new ArrayList<>();
       for (int i = 0; i < planarRegions.size(); i++)
@@ -258,6 +265,7 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
          else
             message = new PlanarRegionMessage();
          PlanarRegionsListMessage messageList = new PlanarRegionsListMessage(Collections.singletonList(message));
+         messageList.uniqueId = 5L;
          messages.add(messageList);
       }
 
@@ -297,6 +305,24 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
       return planarRegion;
    }
 
+   private PlanarRegion createEndPlanarRegion(Point3D centered)
+   {
+      ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D();
+      List<Point2D> points = createPlatformFace();
+      for (Point2D point : points)
+      {
+         point.add(centered.getX(), centered.getY());
+         convexPolygon2D.addVertex(point);
+      }
+      convexPolygon2D.update();
+
+      TranslationReferenceFrame planarRegionFrame = new TranslationReferenceFrame("planarRegionFrame", ReferenceFrame.getWorldFrame());
+      planarRegionFrame.updateTranslation(new Vector3D(0.0, 0.0, 0.3));
+
+      PlanarRegion planarRegion = new PlanarRegion(planarRegionFrame.getTransformToWorldFrame(), convexPolygon2D);
+      return planarRegion;
+   }
+
    private List<Point2D> createSteppingStoneFace()
    {
       ArrayList<Point2D> points = new ArrayList<>();
@@ -304,6 +330,17 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
       points.add(new Point2D(-0.25, 0.25));
       points.add(new Point2D(-0.25, -0.25));
       points.add(new Point2D(0.25, -0.25));
+
+      return points;
+   }
+
+   private List<Point2D> createPlatformFace()
+   {
+      ArrayList<Point2D> points = new ArrayList<>();
+      points.add(new Point2D(0.25, 1.0));
+      points.add(new Point2D(-0.25, 1.0));
+      points.add(new Point2D(-0.25, -1.0));
+      points.add(new Point2D(0.25, -1.0));
 
       return points;
    }

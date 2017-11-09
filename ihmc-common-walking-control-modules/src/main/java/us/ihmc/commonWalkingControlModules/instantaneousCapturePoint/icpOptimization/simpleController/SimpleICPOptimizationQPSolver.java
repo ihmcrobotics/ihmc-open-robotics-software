@@ -307,6 +307,11 @@ public class SimpleICPOptimizationQPSolver
       hasPlanarRegionConstraint = planarRegionConstraint.addPlanarRegion(convexPolygon, planarRegionDistanceFromEdge);
    }
 
+   public void setPlanarRegionConstraint(ConvexPolygon2D convexPolygon)
+   {
+      hasPlanarRegionConstraint = planarRegionConstraint.addPlanarRegion(convexPolygon);
+   }
+
    /**
     * Zeros all the pertinent scalars, vectors, and matrices for the solver. Should be called at the beginning of every computation tick.
     */
