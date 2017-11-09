@@ -106,7 +106,7 @@ public class KinematicsToolboxControllerTest
 
       RobotDescription ghostRobotDescription = new KinematicsToolboxControllerTestRobots.SevenDoFArm();
       ghostRobotDescription.setName("Ghost");
-      recursivelyModyfyGraphics(ghostRobotDescription.getChildrenJoints().get(0));
+      recursivelyModifyGraphics(ghostRobotDescription.getChildrenJoints().get(0), ghostApperance);
       ghost = new RobotFromDescription(ghostRobotDescription);
       ghost.setDynamic(false);
       ghost.setGravity(0);
@@ -356,7 +356,7 @@ public class KinematicsToolboxControllerTest
       };
    }
 
-   private static void recursivelyModyfyGraphics(JointDescription joint)
+   public static void recursivelyModifyGraphics(JointDescription joint, YoAppearanceRGBColor ghostApperance)
    {
       if (joint == null)
          return;
@@ -387,7 +387,7 @@ public class KinematicsToolboxControllerTest
 
       for (JointDescription child : joint.getChildrenJoints())
       {
-         recursivelyModyfyGraphics(child);
+         recursivelyModifyGraphics(child, ghostApperance);
       }
    }
 
