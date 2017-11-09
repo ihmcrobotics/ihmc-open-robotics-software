@@ -122,7 +122,7 @@ public class WayPointsTrajectory extends ConstrainedEndEffectorTrajectory
    }
 
    @Override
-   protected SideDependentList<ConfigurationSpace> getConfigurationSpace(double time)
+   public SideDependentList<ConfigurationSpace> getConfigurationSpace(double time)
    {
       if(time > this.trajectoryTime)
          time = this.trajectoryTime;

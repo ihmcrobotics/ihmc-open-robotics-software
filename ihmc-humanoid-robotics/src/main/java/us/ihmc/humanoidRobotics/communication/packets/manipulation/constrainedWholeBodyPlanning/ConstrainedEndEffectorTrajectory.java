@@ -55,5 +55,5 @@ public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedCon
       return this.taskNodeRegion;
    }
 
-   protected abstract SideDependentList<ConfigurationSpace> getConfigurationSpace(double time);
+   public abstract SideDependentList<ConfigurationSpace> getConfigurationSpace(double time);
 }
