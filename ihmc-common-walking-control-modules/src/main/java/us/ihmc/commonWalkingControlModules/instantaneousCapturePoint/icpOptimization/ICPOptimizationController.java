@@ -4,6 +4,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface ICPOptimizationController
@@ -34,4 +36,6 @@ public interface ICPOptimizationController
    public void setReferenceICPVelocity(FrameVector2D referenceICPVelocity);
    public double getOptimizedTimeRemaining();
    public void submitRemainingTimeInSwingUnderDisturbance(double remainingTimeForSwing);
+
+   public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions);
 }

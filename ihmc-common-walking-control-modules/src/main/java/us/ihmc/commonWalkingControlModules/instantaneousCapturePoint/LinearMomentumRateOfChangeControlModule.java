@@ -18,6 +18,8 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -386,4 +388,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
    public abstract double getOptimizedTimeRemaining();
 
    public abstract void setReferenceICPVelocity(FrameVector2D referenceICPVelocity);
+
+   public abstract void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions);
 }

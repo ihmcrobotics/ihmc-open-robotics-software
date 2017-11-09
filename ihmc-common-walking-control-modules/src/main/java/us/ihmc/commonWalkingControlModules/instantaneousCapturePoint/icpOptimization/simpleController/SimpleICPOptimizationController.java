@@ -19,6 +19,8 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -804,5 +806,11 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       double multiplier = 1.0 + angularMomentumIntegratorGain * cumulativeAngularMomentumAfterLeak;
 
       scaledAngularMomentumMinimizationWeight.set(multiplier * angularMomentumMinimizationWeight);
+   }
+
+   public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
+   {
+      // FIXME
+      planarRegionConstraintProvider.setActivePlanarRegion(planarRegions.get(0));
    }
 }
