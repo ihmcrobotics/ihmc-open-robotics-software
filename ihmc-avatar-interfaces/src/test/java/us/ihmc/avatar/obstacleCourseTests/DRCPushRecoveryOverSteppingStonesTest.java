@@ -8,6 +8,10 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.*;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -35,6 +39,7 @@ import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
@@ -90,6 +95,18 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
+
+      List<PlanarRegionsListMessage> planarRegionMessages = createPlanarRegionsListMessages();
+      PacketCommunicator packetCommunication = drcSimulationTestHelper.getControllerCommunicator();
+      packetCommunication.attachListener(RequestPlanarRegionsListMessage.class, new PacketConsumer<RequestPlanarRegionsListMessage>()
+      {
+         @Override
+         public void receivedPacket(RequestPlanarRegionsListMessage packet)
+         {
+            PlanarRegionsListMessage planarRegionsListMessage = planarRegionMessages.remove(0);
+            drcSimulationTestHelper.send(planarRegionsListMessage);
+         }
+      });
 
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       double z = getForcePointOffsetZInChestFrame();
@@ -180,7 +197,6 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
       locations.add(new Point3D(-10.25, -1.0, 0.3));
       locations.add(new Point3D(-10.25, -0.65, 0.3));
 
-
       List<Quaternion> orientations = new ArrayList<>();
       orientations.add(new Quaternion(0.0, 0.0, 1.0, 0.0));
       orientations.add(new Quaternion(0.0, 0.0, 1.0, 0.0));
@@ -190,6 +206,39 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
       orientations.add(new Quaternion(0.0, 0.0, 1.0, 0.0));
       orientations.add(new Quaternion(0.0, 0.0, 1.0, 0.0));
 
+      /*
+      List<PlanarRegion> planarRegions = new ArrayList<>();
+      for (int i = 0; i < locations.size() - 2; i++)
+      {
+         planarRegions.add(createSteppingStonePlanarRegion(locations.get(i)));
+      }
+      planarRegions.add(null);
+      planarRegions.add(null);
+      */
+
+      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, locations.size());
+      for (int i = 0; i < locations.size(); i++)
+      {
+         FramePoint3D placeToStep = new FramePoint3D(ReferenceFrame.getWorldFrame(), locations.get(i));
+         //FootstepDataMessage data = createFootstepDataMessage(robotSides[i], planarRegions.get(i), placeToStep, orientations.get(i));
+         FootstepDataMessage data = createFootstepDataMessage(robotSides[i], null, placeToStep, orientations.get(i));
+         message.add(data);
+      }
+
+      return message;
+   }
+
+   private List<PlanarRegionsListMessage> createPlanarRegionsListMessages()
+   {
+      List<Point3D> locations = new ArrayList<>();
+      locations.add(new Point3D(-7.75, -0.55, 0.3));
+      locations.add(new Point3D(-8.25, -0.95, 0.3));
+      locations.add(new Point3D(-8.75, -0.55, 0.3));
+      locations.add(new Point3D(-9.25, -0.95, 0.3));
+      locations.add(new Point3D(-9.75, -0.55, 0.3));
+      locations.add(new Point3D(-10.25, -1.0, 0.3));
+      locations.add(new Point3D(-10.25, -0.65, 0.3));
+
       List<PlanarRegion> planarRegions = new ArrayList<>();
       for (int i = 0; i < locations.size() - 2; i++)
       {
@@ -198,16 +247,15 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
       planarRegions.add(null);
       planarRegions.add(null);
 
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, locations.size());
-      for (int i = 0; i < locations.size(); i++)
+      ArrayList<PlanarRegionsListMessage> messages = new ArrayList<>();
+      for (int i = 0; i < planarRegions.size(); i++)
       {
-         FramePoint3D placeToStep = new FramePoint3D(ReferenceFrame.getWorldFrame(), locations.get(i));
-         FootstepDataMessage data = createFootstepDataMessage(robotSides[i], planarRegions.get(i), placeToStep, orientations.get(i));
-         //FootstepDataMessage data = createFootstepDataMessage(robotSides[i], null, placeToStep, orientations.get(i));
-         message.add(data);
+         PlanarRegionMessage message = PlanarRegionMessageConverter.convertToPlanarRegionMessage(planarRegions.get(i));
+         PlanarRegionsListMessage messageList = new PlanarRegionsListMessage(Collections.singletonList(message));
+         messages.add(messageList);
       }
 
-      return message;
+      return messages;
    }
 
    private FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, PlanarRegion planarRegion, FramePoint3D placeToStep, Quaternion orientation)
