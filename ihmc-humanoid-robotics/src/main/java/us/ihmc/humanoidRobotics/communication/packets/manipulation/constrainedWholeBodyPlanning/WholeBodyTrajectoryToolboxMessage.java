@@ -3,10 +3,11 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedW
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.TrackablePacket;
 
-public class WholeBodyTrajectoryToolboxMessage extends TrackablePacket<WholeBodyTrajectoryToolboxMessage>
+public class WholeBodyTrajectoryToolboxMessage extends TrackablePacket<WholeBodyTrajectoryToolboxMessage> implements MultiplePacketHolder
 {
    public WholeBodyTrajectoryToolboxConfigurationMessage configuration;
    public List<WaypointBasedTrajectoryMessage> endEffectorTrajectories;
@@ -63,6 +64,17 @@ public class WholeBodyTrajectoryToolboxMessage extends TrackablePacket<WholeBody
    public List<WaypointBasedTrajectoryMessage> getEndEffectorTrajectories()
    {
       return endEffectorTrajectories;
+   }
+
+   @Override
+   public List<Packet<?>> getPackets()
+   {
+      List<Packet<?>> allPackets = new ArrayList<>();
+
+      allPackets.addAll(endEffectorTrajectories);
+      allPackets.add(configuration);
+
+      return allPackets;
    }
 
    @Override
