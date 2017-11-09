@@ -53,7 +53,6 @@ public abstract class ControllerAPIDefinition
 {
    private static final List<Class<? extends Command<?, ?>>> supportedCommands;
    private static final List<Class<? extends SettablePacket<?>>> supportedStatusMessages;
-   private static final List<Class<? extends SettablePacket<?>>> supportedRequestableMessages;
 
    static
    {
@@ -103,13 +102,9 @@ public abstract class ControllerAPIDefinition
       statusMessages.add(ManipulationAbortedStatus.class);
       statusMessages.add(HighLevelStateChangeStatusMessage.class);
       statusMessages.add(TextToSpeechPacket.class);
+      statusMessages.add(RequestPlanarRegionsListMessage.class);
 
       supportedStatusMessages = Collections.unmodifiableList(statusMessages);
-
-      List<Class<? extends SettablePacket<?>>> requestableMessages = new ArrayList<>();
-      requestableMessages.add(RequestPlanarRegionsListMessage.class);
-
-      supportedRequestableMessages = Collections.unmodifiableList(requestableMessages);
    }
 
    public static List<Class<? extends Command<?, ?>>> getControllerSupportedCommands()
@@ -122,8 +117,4 @@ public abstract class ControllerAPIDefinition
       return supportedStatusMessages;
    }
 
-   public static List<Class<? extends SettablePacket<?>>> getControllerSupportedRequestableMessages()
-   {
-      return supportedRequestableMessages;
-   }
 }

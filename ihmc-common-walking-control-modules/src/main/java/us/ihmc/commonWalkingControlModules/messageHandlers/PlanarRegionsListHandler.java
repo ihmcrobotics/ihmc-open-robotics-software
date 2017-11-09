@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
-import us.ihmc.communication.controllerAPI.RequestMessageOutputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
@@ -23,12 +23,12 @@ public class PlanarRegionsListHandler
 
    private final YoBoolean waitingOnNewPlanarRegions = new YoBoolean("waitingOnNewPlanarRegions", registry);
 
-   private final RequestMessageOutputManager requestOutputManager;
+   private final StatusMessageOutputManager statusOutputManager;
    private final RequestPlanarRegionsListMessage planarRegionsRequestMessage = new RequestPlanarRegionsListMessage(RequestType.SINGLE_UPDATE);
 
-   public PlanarRegionsListHandler(RequestMessageOutputManager requestOutputManager, YoVariableRegistry parentRegistry)
+   public PlanarRegionsListHandler(StatusMessageOutputManager requestOutputManager, YoVariableRegistry parentRegistry)
    {
-      this.requestOutputManager = requestOutputManager;
+      this.statusOutputManager = requestOutputManager;
 
       planarRegions.clear();
       planarRegionsRequestMessage.setDestination(PacketDestination.CONTROLLER);
@@ -50,7 +50,7 @@ public class PlanarRegionsListHandler
 
    public void requestPlanarRegions()
    {
-      requestOutputManager.reportRequestMessage(planarRegionsRequestMessage);
+      statusOutputManager.reportStatusMessage(planarRegionsRequestMessage);
       waitingOnNewPlanarRegions.set(true);
    }
 

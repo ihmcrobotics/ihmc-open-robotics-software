@@ -79,19 +79,6 @@ public class KinematicsToolboxModule extends ToolboxModule
    }
 
    @Override
-   public List<Class<? extends SettablePacket<?>>> createListOfSupportedRequests()
-   {
-      return supportedRequests();
-   }
-
-   static List<Class<? extends SettablePacket<?>>> supportedRequests()
-   {
-      List<Class<? extends SettablePacket<?>>> status = new ArrayList<>();
-      status.add(RequestPlanarRegionsListMessage.class);
-      return status;
-   }
-
-   @Override
    public KinematicsToolboxController getToolboxController()
    {
       return kinematicsToolBoxController;
