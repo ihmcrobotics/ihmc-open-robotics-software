@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -84,7 +85,6 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private final double collisionSphereRadius = 0.2;
    private final PacketCommunicator packetCommunicator;
-   private long plannerCount = 0;
    private double dt;
 
    private final YoFootstepPlannerParameters footstepPlanningParameters;
@@ -190,13 +190,12 @@ public class FootstepPlanningToolboxController extends ToolboxController
          yoGraphicPlanarRegionsList.clear();
       }
 
-      sendMessageToUI("Starting To Plan: " + plannerCount + ", " + activePlanner.getEnumValue().toString());
+      sendMessageToUI("Starting To Plan: " + planId.getIntegerValue() + ", " + activePlanner.getEnumValue().toString());
 
       FootstepPlanningResult status = planner.plan();
       FootstepPlan footstepPlan = planner.getPlan();
 
-      sendMessageToUI("Result: " + plannerCount + ", " + status.toString());
-      plannerCount++;
+      sendMessageToUI("Result: " + planId.getIntegerValue() + ", " + status.toString());
 
       reportMessage(packResult(footstepPlan, status));
       isDone.set(true);
