@@ -13,7 +13,7 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.tools.ArrayTools;
 
-public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolboxOutputStatus>
+public class KinematicsToolboxOutputStatus extends SettablePacket<KinematicsToolboxOutputStatus>
 {
    public int jointNameHash;
    public float[] desiredJointAngles;

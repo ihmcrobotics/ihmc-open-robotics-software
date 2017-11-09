@@ -79,7 +79,12 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
 
       FootstepNodeSnapData previousNodeSnapData = snapper.snapFootstepNode(previousNode);
       RigidBodyTransform previousSnapTransform = previousNodeSnapData.getSnapTransform();
-      double heightChange = Math.abs(snapTransform.getTranslationZ() - previousSnapTransform.getTranslationZ());
+      Point3D nodePosition = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(node, parameters.getIdealFootstepWidth()));
+      snapTransform.transform(nodePosition);
+      Point3D previousNodePosition = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(previousNode, parameters.getIdealFootstepWidth()));
+      previousSnapTransform.transform(previousNodePosition);
+
+      double heightChange = Math.abs(nodePosition.getZ() - previousNodePosition.getZ());
       if (heightChange > parameters.getMaximumStepZ())
       {
          if (DEBUG)
@@ -89,10 +94,6 @@ public class SnapBasedNodeChecker implements FootstepNodeChecker
          return false;
       }
 
-      Point3D nodePosition = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(node, parameters.getIdealFootstepWidth()));
-      nodePosition.setZ(snapTransform.getTranslationZ());
-      Point3D previousNodePosition = new Point3D(DistanceAndYawBasedCost.computeMidFootPoint(previousNode, parameters.getIdealFootstepWidth()));
-      previousNodePosition.setZ(previousSnapTransform.getTranslationZ());
       if (planarRegions != null && isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegions, parameters.getBodyGroundClearance()))
       {
          if (DEBUG)

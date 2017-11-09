@@ -29,7 +29,7 @@ public class ICPQPOptimizationSolver
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final int maxNumberOfIterations = 10;
+   private static final int maxNumberOfIterations = 100;
    private static final double convergenceThreshold = 1.0e-100;
 
    /** Index handler that manages the indices for the objectives and solutions in the quadratic program. */
@@ -262,6 +262,7 @@ public class ICPQPOptimizationSolver
 
       solver.setConvergenceThreshold(convergenceThreshold);
       solver.setMaxNumberOfIterations(maxNumberOfIterations);
+      solver.setRequireInequalityConstraintsSatisfied(true);
       /*
       if (!useQuadProg)
          activeSetSolver.setUseWarmStart(icpOptimizationParameters.useWarmStartInSolver());

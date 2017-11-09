@@ -2,7 +2,7 @@ package us.ihmc.communication.packets;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 
-public class RequestPlanarRegionsListMessage extends RequestPacket<RequestPlanarRegionsListMessage>
+public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlanarRegionsListMessage>
 {
    public enum RequestType {SINGLE_UPDATE, CONTINUOUS_UPDATE, STOP_UPDATE, CLEAR};
 
