@@ -23,7 +23,6 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
-import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 /**
@@ -43,7 +42,8 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
  */
 public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialVelocityCommand>
 {
-   public enum ConstraintType {
+   public enum ConstraintType
+   {
       /**
        * A equality condition that is set up in the QP as part of the objective rather than as a constraint
        */
@@ -55,8 +55,22 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       /**
        * A inequality condition that is set up in the QP as a hard inequality constraint
        */
-      INEQUALITY};
-   
+      INEQUALITY;
+
+      public boolean isHardConstraint()
+      {
+         switch (this)
+         {
+         case OBJECTIVE:
+            return false;
+         case EQUALITY:
+         case INEQUALITY:
+         default:
+            return true;
+         }
+      }
+   };
+
    /** Defines the reference frame of interest. It is attached to the end-effector. */
    private final FramePose controlFramePose = new FramePose();
 
@@ -89,10 +103,10 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
 
    /**
     * The command type describes the nature of the constraint that is being imposed on the the end-effector
-    * <p> If the command type is not set it defaults to a {@code ConstraintType.OBJECTIVE} constraint
+    * <p> If the command type is not set it defaults to a {@code ConstraintType#OBJECTIVE} constraint
     */
    private ConstraintType constraintType = ConstraintType.OBJECTIVE;
-   
+
    /**
     * The base is the rigid-body located right before the first joint to be used for controlling the
     * end-effector.
@@ -129,7 +143,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public SpatialVelocityCommand()
    {
-      setAsHardConstraint();
+      setAsHardEqualityConstraint();
    }
 
    /**
@@ -521,14 +535,25 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
 
    /**
     * Sets all the weights to {@link SolverWeightLevels#HARD_CONSTRAINT} such that this command will
-    * be treated as a hard constraint.
+    * be treated as a hard equality constraint.
     * <p>
     * This is usually undesired as with improper commands setup as hard constraints the optimization
     * problem can simply be impossible to solve.
     * </p>
     */
-   public void setAsHardConstraint()
+   public void setAsHardEqualityConstraint()
    {
+      this.constraintType = ConstraintType.EQUALITY;
+      setWeight(HARD_CONSTRAINT);
+   }
+
+   /**
+    * Sets all the weights to {@link SolverWeightLevels#HARD_CONSTRAINT} such that this command will
+    * be treated as a hard inequality constraint
+    */
+   public void setAsHardInequalityConstraint()
+   {
+      this.constraintType = ConstraintType.INEQUALITY;
       setWeight(HARD_CONSTRAINT);
    }
 
@@ -544,6 +569,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeight(double weight)
    {
+      this.constraintType = ConstraintType.OBJECTIVE;
       weightMatrix.setLinearWeights(weight, weight, weight);
       weightMatrix.setAngularWeights(weight, weight, weight);
    }
@@ -561,6 +587,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeight(double angular, double linear)
    {
+      this.constraintType = ConstraintType.OBJECTIVE;
       weightMatrix.setLinearWeights(linear, linear, linear);
       weightMatrix.setAngularWeights(angular, angular, angular);
    }
@@ -578,9 +605,9 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeightMatrix(WeightMatrix6D weightMatrix)
    {
+      this.constraintType = ConstraintType.OBJECTIVE;
       this.weightMatrix.set(weightMatrix);
    }
-
 
    /**
     * Sets the weights to use in the optimization problem for each rotational degree of freedom.
@@ -609,6 +636,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setLinearWeights(Tuple3DReadOnly linear)
    {
+      this.constraintType = ConstraintType.OBJECTIVE;
       weightMatrix.setLinearWeights(linear.getX(), linear.getY(), linear.getZ());
    }
 
@@ -625,6 +653,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setWeights(Tuple3DReadOnly angular, Tuple3DReadOnly linear)
    {
+      this.constraintType = ConstraintType.OBJECTIVE;
       weightMatrix.setLinearWeights(linear.getX(), linear.getY(), linear.getZ());
       weightMatrix.setAngularWeights(angular.getX(), angular.getY(), angular.getZ());
    }
@@ -665,8 +694,9 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public boolean isHardConstraint()
    {
-      return weightMatrix.containsHardConstraint();
+      return constraintType.isHardConstraint();
    }
+
    /**
     * Gets the 6-by-6 weight matrix expressed in the given {@code destinationFrame} to use with
     * this command.
@@ -699,7 +729,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    {
       weightMatrixToPack.set(weightMatrix);
    }
-
 
    /**
     * Packs the control frame and desired spatial velocity held in this command.
@@ -940,10 +969,10 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    {
       return ControllerCoreCommandType.TASKSPACE;
    }
-   
+
    /**
     * Set the type of spatial velocity constraint that should be imposed
-    * @param constraintType
+    * @param constraintType set up the constraint type
     */
    public void setConstraintType(ConstraintType constraintType)
    {
