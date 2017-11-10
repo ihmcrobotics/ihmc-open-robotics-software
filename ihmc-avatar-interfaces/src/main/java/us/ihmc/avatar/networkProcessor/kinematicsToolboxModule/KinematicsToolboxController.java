@@ -562,7 +562,7 @@ public class KinematicsToolboxController extends ToolboxController
       privilegedConfigurationCommandReference.set(privilegedConfigurationCommand);
    }
 
-   void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
+   public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
       latestRobotConfigurationDataReference.set(newConfigurationData);
    }
