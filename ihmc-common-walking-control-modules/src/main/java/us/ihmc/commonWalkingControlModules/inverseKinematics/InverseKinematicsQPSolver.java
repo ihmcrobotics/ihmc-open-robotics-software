@@ -169,7 +169,7 @@ public class InverseKinematicsQPSolver
    public void addMotionInequalityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
       int taskSize = taskJacobian.getNumRows();
-      int previousSize = solverInput_beq.getNumRows();
+      int previousSize = solverInput_bin.getNumRows();
 
       solverInput_Ain.reshape(previousSize + taskSize, numberOfDoFs, true);
       solverInput_bin.reshape(previousSize + taskSize, 1, true);
