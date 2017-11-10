@@ -1,18 +1,14 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import org.fxyz3d.geometry.Vector3D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.FrameScalableBoundingBox3d;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.Ray3d;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -33,6 +29,10 @@ public class ICPControlPlane
    private final FramePoint3D centerOfMassPosition = new FramePoint3D();
    private final FrameVector3D rayDirection = new FrameVector3D();
    private final FramePoint3D intersectionToThrowAway = new FramePoint3D();
+
+   private final ConvexPolygonScaler scaler = new ConvexPolygonScaler();
+
+   private final ConvexPolygon2D scaledConvexHull = new ConvexPolygon2D();
 
    public ICPControlPlane(YoDouble omega0, ReferenceFrame centerOfMassFrame, double gravityZ, YoVariableRegistry parentRegistry)
    {
@@ -112,6 +112,30 @@ public class ICPControlPlane
       for (int vertexIndex = 0; vertexIndex < convexHull.getNumberOfVertices(); vertexIndex++)
       {
          Point2DReadOnly vertex = convexHull.getVertex(vertexIndex);
+         double vertexZ = planarRegion.getPlaneZGivenXY(vertex.getX(), vertex.getY());
+
+         tempFramePoint.setToZero(worldFrame);
+         tempFramePoint.set(vertex, vertexZ);
+         tempFramePoint.changeFrame(centerOfMassFrame);
+
+         projectPoint(tempFramePoint, tempProjectedFramePoint, controlPlaneHeight.getDoubleValue(), tempFramePoint.getZ());
+
+         tempProjectedFramePoint.changeFrame(worldFrame);
+
+         convexPolygonInControlPlaneToPack.addVertex(tempProjectedFramePoint.getX(), tempProjectedFramePoint.getY());
+      }
+      convexPolygonInControlPlaneToPack.update();
+   }
+
+   public void scaleAndProjectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2D convexPolygonInControlPlaneToPack, double distanceInside)
+   {
+      ConvexPolygon2D convexHull = planarRegion.getConvexHull();
+      scaler.scaleConvexPolygon(convexHull, distanceInside, scaledConvexHull);
+      convexPolygonInControlPlaneToPack.clear();
+
+      for (int vertexIndex = 0; vertexIndex < scaledConvexHull.getNumberOfVertices(); vertexIndex++)
+      {
+         Point2DReadOnly vertex = scaledConvexHull.getVertex(vertexIndex);
          double vertexZ = planarRegion.getPlaneZGivenXY(vertex.getX(), vertex.getY());
 
          tempFramePoint.setToZero(worldFrame);
