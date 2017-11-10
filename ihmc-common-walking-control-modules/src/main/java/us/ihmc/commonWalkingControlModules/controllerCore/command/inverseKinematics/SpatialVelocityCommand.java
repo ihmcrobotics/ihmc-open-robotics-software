@@ -42,35 +42,6 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
  */
 public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialVelocityCommand>
 {
-   public enum ConstraintType
-   {
-      /**
-       * A equality condition that is set up in the QP as part of the objective rather than as a constraint
-       */
-      OBJECTIVE,
-      /**
-       * A equality condition that is set up in the QP as a hard constraint
-       */
-      EQUALITY,
-      /**
-       * A inequality condition that is set up in the QP as a hard inequality constraint
-       */
-      INEQUALITY;
-
-      public boolean isHardConstraint()
-      {
-         switch (this)
-         {
-         case OBJECTIVE:
-            return false;
-         case EQUALITY:
-         case INEQUALITY:
-         default:
-            return true;
-         }
-      }
-   };
-
    /** Defines the reference frame of interest. It is attached to the end-effector. */
    private final FramePose controlFramePose = new FramePose();
 
