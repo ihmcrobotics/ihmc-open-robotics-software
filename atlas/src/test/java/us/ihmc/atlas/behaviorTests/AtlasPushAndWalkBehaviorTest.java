@@ -27,7 +27,7 @@ public class AtlasPushAndWalkBehaviorTest extends AvatarPushAndWalkBehaviorTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 150000)
+   @Test(timeout = 300000)
    public void testBehavior() throws SimulationExceededMaximumTimeException
    {
       super.testBehavior();
