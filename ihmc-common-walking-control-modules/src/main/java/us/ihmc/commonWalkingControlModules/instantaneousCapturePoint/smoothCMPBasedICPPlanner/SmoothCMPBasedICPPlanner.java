@@ -260,7 +260,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       clearPlan();
 
       this.initialTime.set(initialTime);
-
       isInitialTransfer.set(isStanding.getBooleanValue());
       isStanding.set(true);
       isDoubleSupport.set(true);
@@ -276,7 +275,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    public void initializeForTransfer(double initialTime)
    {
       this.initialTime.set(initialTime);
-
       isDoubleSupport.set(true);
       isInitialTransfer.set(isStanding.getBooleanValue());
       isStanding.set(false);
@@ -367,7 +365,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
                                                   referenceICPGenerator.getICPPositionDesiredFinalList());
       referenceICPGenerator.getICPPhaseEntryCornerPoints(icpPhaseEntryCornerPoints);
       referenceICPGenerator.getICPPhaseExitCornerPoints(icpPhaseExitCornerPoints);
-      referenceICPGenerator.compute(ZERO_TIME);
       updateListeners();
       // TODO implement requested hold position
       // TODO implement is done walking
