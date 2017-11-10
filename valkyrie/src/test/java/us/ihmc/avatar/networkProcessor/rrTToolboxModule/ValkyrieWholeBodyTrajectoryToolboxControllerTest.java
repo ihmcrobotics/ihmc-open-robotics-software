@@ -12,9 +12,15 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
    private final DRCRobotModel ghostRobotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
 
    @Override
-   public void testHandCircle() throws Exception, UnreasonableAccelerationException
+   public void testHandCirclePositionOnly() throws Exception, UnreasonableAccelerationException
    {
-      super.testHandCircle();
+      super.testHandCirclePositionOnly();
+   }
+
+   @Override
+   public void testHandCircleFullyConstrained() throws Exception, UnreasonableAccelerationException
+   {
+      super.testHandCircleFullyConstrained();
    }
 
    @Override

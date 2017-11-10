@@ -2,12 +2,15 @@ package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
+import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.AvatarHumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus;
+import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.AvatarHumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData;
 import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder.ConfigurationSpaceName.PITCH;
 import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder.ConfigurationSpaceName.ROLL;
 import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder.ConfigurationSpaceName.YAW;
 import static us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools.createTrajectoryMessage;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -20,27 +23,34 @@ import org.junit.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.SegmentedLine3DMeshDataGenerator;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxConfigurationMessage;
@@ -56,6 +66,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Robot;
@@ -199,7 +210,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private final Vector3D circleAxis = new Vector3D(1.0, 0.0, 0.0);
 
    @Test
-   public void testHandCircle() throws Exception, UnreasonableAccelerationException
+   public void testHandCirclePositionOnly() throws Exception, UnreasonableAccelerationException
    {
       double trajectoryTime = 5.0;
       FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
@@ -236,19 +247,133 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       visualizeSolution(solution, 0.1 * timeResolution);
    }
 
+   @Test
+   public void testHandCircleFullyConstrained() throws Exception, UnreasonableAccelerationException
+   {
+      double trajectoryTime = 5.0;
+      FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
+      WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
+      configuration.setInitialConfigration(fullRobotModel);
+
+      List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
+      double timeResolution = trajectoryTime / 100.0;
+
+      SideDependentList<Pose3D> poses = computePrivilegedHandPosesAtPositions(circleCenters);
+      if (poses == null)
+         throw new RuntimeException("Could not solve for positions: " + circleCenters);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         Graphics3DObject graphics3dObject = new Graphics3DObject();
+         graphics3dObject.transform(new RigidBodyTransform(poses.get(robotSide).getOrientation(), poses.get(robotSide).getPosition()));
+         graphics3dObject.addCoordinateSystem(0.1);
+         scs.addStaticLinkGraphics(graphics3dObject);
+
+         RigidBody hand = fullRobotModel.getHand(robotSide);
+
+         QuaternionReadOnly orientation = poses.get(robotSide).getOrientation();
+         boolean ccw = robotSide == RobotSide.RIGHT;
+         double phase = 0.0; //robotSide.negateIfLeftSide(Math.PI / 2.0);
+         FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleAxis,
+                                                                           orientation, ccw, phase);
+         WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction);
+         handTrajectories.add(trajectory);
+
+         if (visualize)
+            scs.addStaticLinkGraphics(createFunctionTrajectoryVisualization(handFunction, 0.0, trajectoryTime, timeResolution, 0.01, YoAppearance.AliceBlue()));
+      }
+
+      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories);
+      commandInputManager.submitMessage(message);
+
+      int maxNumberOfIterations = 10000;
+      WholeBodyTrajectoryToolboxOutputStatus solution = runToolboxController(maxNumberOfIterations);
+
+      if (numberOfIterations.getIntegerValue() < maxNumberOfIterations - 1)
+         assertNotNull("The toolbox is done but did not report a solution.", solution);
+      else
+         fail("The toolbox has run for " + maxNumberOfIterations + " without converging nor aborting.");
+
+      visualizeSolution(solution, 0.1 * timeResolution);
+   }
+
+   private SideDependentList<Pose3D> computePrivilegedHandPosesAtPositions(SideDependentList<Point3D> desiredPositions)
+   {
+      CommandInputManager commandInputManager = new CommandInputManager(KinematicsToolboxModule.supportedCommands());
+      StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
+      FullHumanoidRobotModel desiredFullRobotModel = getRobotModel().createFullRobotModel();
+
+      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
+      HumanoidKinematicsToolboxController whik = new HumanoidKinematicsToolboxController(commandInputManager, statusOutputManager, desiredFullRobotModel,
+                                                                                         new YoGraphicsListRegistry(), new YoVariableRegistry("dummy"));
+
+      FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelWithArmsAtMidRange();
+      whik.updateRobotConfigurationData(extractRobotConfigurationData(fullRobotModelAtInitialConfiguration));
+      whik.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(true, true));
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody hand = desiredFullRobotModel.getHand(robotSide);
+         KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage(hand, desiredPositions.get(robotSide));
+         message.setWeight(20.0);
+         commandInputManager.submitMessage(message);
+      }
+
+      commandInputManager.submitMessage(KinematicsToolboxMessageFactory.holdRigidBodyCurrentOrientation(desiredFullRobotModel.getChest()));
+
+      int counter = 0;
+      int maxIterations = 500;
+
+      while (counter++ <= maxIterations)
+      {
+         whik.update();
+         System.out.println(whik.getSolution().getSolutionQuality());
+         snapGhostToFullRobotModel(desiredFullRobotModel);
+         scs.tickAndUpdate();
+      }
+
+      if (whik.getSolution().getSolutionQuality() > 0.005)
+      {
+         return null;
+      }
+
+      SideDependentList<Pose3D> handPoses = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         Pose3D handPose = new Pose3D();
+         handPoses.put(robotSide, handPose);
+         RigidBody hand = desiredFullRobotModel.getHand(robotSide);
+         RigidBodyTransform transformToWorldFrame = hand.getBodyFixedFrame().getTransformToWorldFrame();
+         handPose.set(transformToWorldFrame);
+      }
+      return handPoses;
+   }
+
    private static Pose3D computeCircleTrajectory(double time, double trajectoryTime, double circleRadius, Point3DReadOnly circleCenter,
                                                  Vector3DReadOnly circleAxis)
    {
+      return computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenter, circleAxis, new Quaternion());
+   }
+
+   private static Pose3D computeCircleTrajectory(double time, double trajectoryTime, double circleRadius, Point3DReadOnly circleCenter,
+                                                 Vector3DReadOnly circleAxis, QuaternionReadOnly constantOrientation)
+   {
+      return computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenter, circleAxis, constantOrientation, false, 0.0);
+   }
+
+   private static Pose3D computeCircleTrajectory(double time, double trajectoryTime, double circleRadius, Point3DReadOnly circleCenter,
+                                                 Vector3DReadOnly circleAxis, QuaternionReadOnly constantOrientation, boolean ccw, double phase)
+   {
       AxisAngle circleRotation = EuclidGeometryTools.axisAngleFromZUpToVector3D(circleAxis);
 
-      double theta = time / trajectoryTime * 2.0 * Math.PI;
+      double theta = (ccw ? -time : time) / trajectoryTime * 2.0 * Math.PI + phase;
       double x = circleRadius * Math.cos(theta);
       double y = circleRadius * Math.sin(theta);
       Point3D point = new Point3D(x, y, 0.0);
       circleRotation.transform(point);
       point.add(circleCenter);
 
-      return new Pose3D(point, new Quaternion());
+      return new Pose3D(point, constantOrientation);
    }
 
    private static Graphics3DObject createFunctionTrajectoryVisualization(FunctionTrajectory trajectoryToVisualize, double t0, double tf, double timeResolution,
@@ -273,11 +398,11 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       return graphics;
    }
 
-   private void visualizeSolution(ConstrainedWholeBodyPlanningToolboxOutputStatus solution, double timeResolution) throws UnreasonableAccelerationException
+   private void visualizeSolution(WholeBodyTrajectoryToolboxOutputStatus solution, double timeResolution) throws UnreasonableAccelerationException
    {
       hideRobot();
       robot.getControllers().clear();
-      
+
       FullHumanoidRobotModel robotForViz = getRobotModel().createFullRobotModel();
       FloatingInverseDynamicsJoint rootJoint = robotForViz.getRootJoint();
       OneDoFJoint[] joints = FullRobotModelUtils.getAllJointsExcludingHands(robotForViz);
@@ -297,7 +422,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       }
    }
 
-   private KinematicsToolboxOutputStatus findFrameFromTime(ConstrainedWholeBodyPlanningToolboxOutputStatus outputStatus, double time)
+   private KinematicsToolboxOutputStatus findFrameFromTime(WholeBodyTrajectoryToolboxOutputStatus outputStatus, double time)
    {
       if (time <= 0.0)
          return outputStatus.getRobotConfigurations()[0];
@@ -344,6 +469,25 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null, null, null);
       drcPerfectSensorReaderFactory.getSensorReader().read();
       return initialFullRobotModel;
+   }
+
+   private FullHumanoidRobotModel createFullRobotModelWithArmsAtMidRange()
+   {
+      FullHumanoidRobotModel robot = createFullRobotModelAtInitialConfiguration();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody chest = robot.getChest();
+         RigidBody hand = robot.getHand(robotSide);
+         Arrays.stream(ScrewTools.createOneDoFJointPath(chest, hand)).forEach(j -> setJointPositionToMidRange(j));
+      }
+      return robot;
+   }
+
+   private static void setJointPositionToMidRange(OneDoFJoint joint)
+   {
+      double jointLimitUpper = joint.getJointLimitUpper();
+      double jointLimitLower = joint.getJointLimitLower();
+      joint.setQ(0.5 * (jointLimitUpper + jointLimitLower));
    }
 
    private WholeBodyTrajectoryToolboxOutputStatus runToolboxController(int maxNumberOfIterations) throws UnreasonableAccelerationException
