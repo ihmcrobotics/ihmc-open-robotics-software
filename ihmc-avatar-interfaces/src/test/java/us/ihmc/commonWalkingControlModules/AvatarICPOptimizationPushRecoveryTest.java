@@ -99,7 +99,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationOutwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationOutwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
 
@@ -109,14 +109,13 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double percentWeight = 0.25;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationOutwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationOutwardPushInSlowSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createSlowForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -127,7 +126,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double percentWeight = 0.11;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -135,7 +133,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationDiagonalOutwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -146,7 +144,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(2.0, -1.0, 0.0);
-      double percentWeight = 0.20;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -154,7 +151,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.appendYawRotation(0.5);
@@ -171,7 +168,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       Vector3D firstForceDirection = new Vector3D(0.0, -1.0, 0.0);
       Vector3D secondForceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double percentWeight = 0.13;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
@@ -207,7 +203,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(success);
    }
 
-   public void testPushICPOptimizationRandomPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationRandomPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -222,14 +218,13 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(xDirection, yDirection, 0.0);
-      double percentWeight = 0.18;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationLongForwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationLongForwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -240,14 +235,13 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
-      double percentWeight = 0.07;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.7 * swingTime;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationLongBackwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationLongBackwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -258,7 +252,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(-1.0, 0.0, 0.0);
-      double percentWeight = 0.15;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.8 * swingTime;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -266,7 +259,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationLongInwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationLongInwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -277,14 +270,13 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double percentWeight = 0.05;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.8 * swingTime;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationOutwardPushInTransfer() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationOutwardPushInTransfer(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -295,7 +287,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double percentWeight = 0.12;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
 
@@ -308,7 +299,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationInwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationInwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -319,14 +310,13 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double percentWeight = 0.18;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationForwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationForwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -337,14 +327,13 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
-      double percentWeight = 0.29;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationForwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationForwardPushInSlowSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createSlowForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -355,14 +344,13 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
-      double percentWeight = 0.2;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationBackwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationBackwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -373,14 +361,13 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(-1.0, 0.0, 0.0);
-      double percentWeight = 0.2;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationOutwardPushOnEachStep() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationOutwardPushOnEachStep(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -394,7 +381,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       // push parameters:
       Vector3D firstForceDirection = new Vector3D(0.0, -1.0, 0.0);
       Vector3D secondForceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double percentWeight = 0.12;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
