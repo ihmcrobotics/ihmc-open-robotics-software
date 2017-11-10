@@ -1406,4 +1406,18 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       else
          return activeTrajectory.getNodeTimes()[activeTrajectory.getNumberOfSegments()];
    }
+
+   public boolean getIsPlanAvailable()
+   {
+      return planIsAvailable.getBooleanValue();
+   }
+
+   public void getDoubleSupportPolygonCentroid(YoFramePoint copPositionToPack)
+   {
+      setFootPolygonFromCurrentState(supportFootPolygon, RobotSide.LEFT);
+      setFootPolygonFromCurrentState(swingFootInitialPolygon, RobotSide.RIGHT);
+      computeMidFeetPointWithChickenSupport(tempFramePoint1, supportFootPolygon, swingFootInitialPolygon);
+      tempFramePoint1.changeFrame(copPositionToPack.getReferenceFrame());
+      copPositionToPack.set(tempFramePoint1);
+   }
 }
