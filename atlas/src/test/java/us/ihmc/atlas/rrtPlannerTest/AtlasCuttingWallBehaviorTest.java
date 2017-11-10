@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.avatar.behaviorTests.rrtPlannerTests.AvatarCuttingWallBehaviorTest;
+import us.ihmc.avatar.behaviorTests.wholeBodyPlanningTest.AvatarCuttingWallBehaviorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;

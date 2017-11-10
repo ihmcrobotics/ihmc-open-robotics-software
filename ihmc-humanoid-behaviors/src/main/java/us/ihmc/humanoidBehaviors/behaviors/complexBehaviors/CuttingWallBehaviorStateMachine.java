@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.CuttingWallBehaviorStateMachine.CuttingWallBehaviorState;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanWholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
@@ -20,7 +20,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
@@ -34,7 +34,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
 {
    private WholeBodyTrajectoryBehavior wholebodyTrajectoryBehavior;
 
-   private PlanConstrainedWholeBodyTrajectoryBehavior planConstrainedWholeBodyTrajectoryBehavior;
+   private PlanWholeBodyTrajectoryBehavior planWholeBodyTrajectoryBehavior;
 
    private CommunicationBridge communicationBridge;
 
@@ -68,7 +68,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
 
       this.fullRobotModel = fullRobotModel;
 
-      this.planConstrainedWholeBodyTrajectoryBehavior = new PlanConstrainedWholeBodyTrajectoryBehavior("CuttingWallPlanning", robotModelFactory,
+      this.planWholeBodyTrajectoryBehavior = new PlanWholeBodyTrajectoryBehavior("CuttingWallPlanning", robotModelFactory,
                                                                                                        communicationBridge, this.fullRobotModel, yoTime);
 
       this.yoTime = yoTime;
@@ -80,9 +80,9 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
       setupStateMachine();
    }
 
-   public PlanConstrainedWholeBodyTrajectoryBehavior getPlanConstrainedWholeBodyTrajectoryBehavior()
+   public PlanWholeBodyTrajectoryBehavior getPlanConstrainedWholeBodyTrajectoryBehavior()
    {
-      return planConstrainedWholeBodyTrajectoryBehavior;
+      return planWholeBodyTrajectoryBehavior;
    }
 
    @Override
@@ -163,7 +163,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
       };
 
       BehaviorAction<CuttingWallBehaviorState> planning = new BehaviorAction<CuttingWallBehaviorState>(CuttingWallBehaviorState.PLANNING,
-                                                                                                       planConstrainedWholeBodyTrajectoryBehavior)
+                                                                                                       planWholeBodyTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -193,14 +193,14 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
             //                                                                                               computeWallOrientation(centerFramePose.getOrientation()),
             //                                                                                               latestPacket.getCuttingRadius(), 20.0);
 
-            planConstrainedWholeBodyTrajectoryBehavior.setInputs(endeffectorTrajectory, fullRobotModel);
+            planWholeBodyTrajectoryBehavior.setInputs(endeffectorTrajectory, fullRobotModel);
 
-            planConstrainedWholeBodyTrajectoryBehavior.setNumberOfEndEffectorWayPoints(30);
-            planConstrainedWholeBodyTrajectoryBehavior.setNumberOfExpanding(1000);
-            planConstrainedWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(320);
-            planConstrainedWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(80);
+            planWholeBodyTrajectoryBehavior.setNumberOfEndEffectorWayPoints(30);
+            planWholeBodyTrajectoryBehavior.setNumberOfExpanding(1000);
+            planWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(320);
+            planWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(80);
 
-            PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
+            PlanWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
          }
       };
 
@@ -238,7 +238,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
             WholeBodyTrajectoryMessage wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
 
             // TODO
-            wholebodyTrajectoryMessage = planConstrainedWholeBodyTrajectoryBehavior.getWholebodyTrajectoryMessage();
+            wholebodyTrajectoryMessage = planWholeBodyTrajectoryBehavior.getWholebodyTrajectoryMessage();
 
             wholebodyTrajectoryBehavior.setInput(wholebodyTrajectoryMessage);
          }
@@ -249,7 +249,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
          @Override
          public boolean checkCondition()
          {
-            boolean condition = planConstrainedWholeBodyTrajectoryBehavior.isDone() && !planConstrainedWholeBodyTrajectoryBehavior.planSuccess();
+            boolean condition = planWholeBodyTrajectoryBehavior.isDone() && !planWholeBodyTrajectoryBehavior.planSuccess();
             if (condition)
                PrintTools.info("planFailedCondition condition okay");
             ;
@@ -262,7 +262,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
          @Override
          public boolean checkCondition()
          {
-            boolean condition = planConstrainedWholeBodyTrajectoryBehavior.isDone() && planConstrainedWholeBodyTrajectoryBehavior.planSuccess();
+            boolean condition = planWholeBodyTrajectoryBehavior.isDone() && planWholeBodyTrajectoryBehavior.planSuccess();
             if (condition)
                PrintTools.info("planSuccededCondition condition okay");
             ;

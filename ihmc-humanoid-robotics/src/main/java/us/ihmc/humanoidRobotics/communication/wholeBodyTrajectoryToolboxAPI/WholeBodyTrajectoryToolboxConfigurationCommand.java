@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.WholeBodyTrajectoryToolboxConfigurationMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxConfigurationMessage;
 
 public class WholeBodyTrajectoryToolboxConfigurationCommand
       implements Command<WholeBodyTrajectoryToolboxConfigurationCommand, WholeBodyTrajectoryToolboxConfigurationMessage>

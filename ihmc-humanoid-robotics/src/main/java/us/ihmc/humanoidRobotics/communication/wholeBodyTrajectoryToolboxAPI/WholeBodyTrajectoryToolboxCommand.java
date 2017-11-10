@@ -5,7 +5,7 @@ import java.util.List;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.controllerAPI.command.MultipleCommandHolder;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.WholeBodyTrajectoryToolboxMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
 public class WholeBodyTrajectoryToolboxCommand implements MultipleCommandHolder<WholeBodyTrajectoryToolboxCommand, WholeBodyTrajectoryToolboxMessage>

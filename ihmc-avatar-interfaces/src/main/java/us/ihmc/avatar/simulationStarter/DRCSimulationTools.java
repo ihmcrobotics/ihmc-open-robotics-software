@@ -74,7 +74,7 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.enableLocalControllerCommunicator(true);
          networkProcessorParameters.enableKinematicsToolbox(modulesToStart.contains(Modules.KINEMATICS_TOOLBOX));
          networkProcessorParameters.enableFootstepPlanningToolbox(modulesToStart.contains(Modules.FOOTSTEP_PLANNING_TOOLBOX));
-         networkProcessorParameters.enableConstrainedWholeBodyPlanningToolbox(modulesToStart.contains(Modules.MANIPULATION_PLANNING_TOOLBOX));
+         networkProcessorParameters.enableWholeBodyTrajectoryToolbox(modulesToStart.contains(Modules.MANIPULATION_PLANNING_TOOLBOX));
          networkProcessorParameters.enableRobotEnvironmentAwerenessModule(modulesToStart.contains(Modules.REA_MODULE));
          networkProcessorParameters.enableMocapModule(modulesToStart.contains(Modules.MOCAP_MODULE));
       }

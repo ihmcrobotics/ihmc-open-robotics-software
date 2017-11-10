@@ -28,7 +28,7 @@ public enum PacketDestination
    LIDAR_SCAN_LOGGER,
    OBJECT_DETECTOR,
    VISIBILITY_GRAPHS,
-   CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE;   
+   WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE;   
 
    public static final PacketDestination[] values = values();
 

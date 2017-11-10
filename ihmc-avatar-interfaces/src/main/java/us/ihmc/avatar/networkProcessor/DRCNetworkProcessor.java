@@ -14,7 +14,7 @@ import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
-import us.ihmc.avatar.networkProcessor.rrtToolboxModule.ConstrainedWholeBodyPlanningToolboxModule;
+import us.ihmc.avatar.networkProcessor.rrtToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.PacketRouter;
@@ -173,14 +173,14 @@ public class DRCNetworkProcessor
       
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
-      new ConstrainedWholeBodyPlanningToolboxModule(robotModel, fullRobotModel, null, params.isConstrainedWholeBodyToolboxVisualizerEnabled());
+      new WholeBodyTrajectoryToolboxModule(robotModel, fullRobotModel, null, params.isConstrainedWholeBodyToolboxVisualizerEnabled());
 
-      PacketCommunicator cwbPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
-      packetRouter.attachPacketCommunicator(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE, cwbPlanningToolboxCommunicator);
+      PacketCommunicator cwbPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
+      packetRouter.attachPacketCommunicator(PacketDestination.WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE, cwbPlanningToolboxCommunicator);
       cwbPlanningToolboxCommunicator.connect();
 
       String methodName = "setupConstrainedWholebodyPlanningModule";
-      printModuleConnectedDebugStatement(PacketDestination.CONSTRAINED_WHOLE_BODY_PLANNING_TOOLBOX_MODULE, methodName);
+      printModuleConnectedDebugStatement(PacketDestination.WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE, methodName);
       PrintTools.info("setupConstrainedWholebodyPlanningToolboxModule");
    }
 

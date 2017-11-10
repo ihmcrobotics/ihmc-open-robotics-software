@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.avatar.behaviorTests.rrtPlannerTests.AvatarCWBPlannerForVRUITest;
+import us.ihmc.avatar.behaviorTests.wholeBodyPlanningTest.AvatarCWBPlannerForVRUITest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
