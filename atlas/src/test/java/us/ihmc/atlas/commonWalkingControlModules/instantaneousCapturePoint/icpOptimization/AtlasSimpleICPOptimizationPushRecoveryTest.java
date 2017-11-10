@@ -117,7 +117,7 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
    @Test(timeout = 80000)
    public void testPushICPOptimizationInwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationInwardPushInSwing(0.18);
+      super.testPushICPOptimizationInwardPushInSwing(0.17);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
