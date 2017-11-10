@@ -265,7 +265,6 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       isDoubleSupport.set(true);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
-
       referenceICPGenerator.setInitialConditionsForAdjustment();
       updateTransferPlan();
    }
@@ -432,33 +431,50 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
    /** {@inheritDoc} */
    public void compute(double time)
    {
-      timer.startMeasurement();
+      if(referenceCoPGenerator.getIsPlanAvailable())
+      {
+         timer.startMeasurement();
 
-      timeInCurrentState.set(time - initialTime.getDoubleValue());
-      timeInCurrentStateRemaining.set(getCurrentStateDuration() - timeInCurrentState.getDoubleValue());
+         timeInCurrentState.set(time - initialTime.getDoubleValue());
+         timeInCurrentStateRemaining.set(getCurrentStateDuration() - timeInCurrentState.getDoubleValue());
 
-      double timeInCurrentState = MathTools.clamp(this.timeInCurrentState.getDoubleValue(), 0.0, referenceCoPGenerator.getCurrentStateFinalTime());
+         double timeInCurrentState = MathTools.clamp(this.timeInCurrentState.getDoubleValue(), 0.0, referenceCoPGenerator.getCurrentStateFinalTime());
 
-      referenceICPGenerator.compute(timeInCurrentState);
-      referenceCoMGenerator.compute(timeInCurrentState);
-      referenceCoPGenerator.update(timeInCurrentState);
-      referenceCMPGenerator.update(timeInCurrentState);
-      angularMomentumGenerator.update(timeInCurrentState);
+         referenceICPGenerator.compute(timeInCurrentState);
+         referenceCoMGenerator.compute(timeInCurrentState);
+         referenceCoPGenerator.update(timeInCurrentState);
+         referenceCMPGenerator.update(timeInCurrentState);
+         angularMomentumGenerator.update(timeInCurrentState);
 
-      referenceCoPGenerator.getDesiredCenterOfPressure(desiredCoPPosition, desiredCoPVelocity);
-      referenceCMPGenerator.getLinearData(desiredCMPPosition, desiredCMPVelocity);
-      referenceICPGenerator.getLinearData(desiredICPPosition, desiredICPVelocity, desiredICPAcceleration);
-      referenceCoMGenerator.getLinearData(desiredCoMPosition, desiredCoMVelocity, desiredCoMAcceleration);
-      angularMomentumGenerator.getDesiredAngularMomentum(desiredCentroidalAngularMomentum, desiredCentroidalTorque);
-      decayDesiredVelocityIfNeeded();
+         referenceCoPGenerator.getDesiredCenterOfPressure(desiredCoPPosition, desiredCoPVelocity);
+         referenceCMPGenerator.getLinearData(desiredCMPPosition, desiredCMPVelocity);
+         referenceICPGenerator.getLinearData(desiredICPPosition, desiredICPVelocity, desiredICPAcceleration);
+         referenceCoMGenerator.getLinearData(desiredCoMPosition, desiredCoMVelocity, desiredCoMAcceleration);
+         angularMomentumGenerator.getDesiredAngularMomentum(desiredCentroidalAngularMomentum, desiredCentroidalTorque);
+         decayDesiredVelocityIfNeeded();
 
-      if (debug)
-         checkCoMDynamics(desiredCoMVelocity.getFrameVectorCopy(), desiredICPPosition.getFramePointCopy(), desiredCoMPosition.getFramePointCopy());
+         if (debug)
+            checkCoMDynamics(desiredCoMVelocity.getFrameVectorCopy(), desiredICPPosition.getFramePointCopy(), desiredCoMPosition.getFramePointCopy());
 
-      timer.stopMeasurement();
-      // done to account for the delayed velocity
-      //computeDesiredCentroidalMomentumPivot(desiredICPPosition, desiredICPVelocity, omega0.getDoubleValue(), desiredCMPPosition);
-      //computeDesiredCentroidalMomentumPivotVelocity(desiredICPVelocity, desiredICPAcceleration, omega0.getDoubleValue(), desiredCMPVelocity);
+         timer.stopMeasurement();
+         // done to account for the delayed velocity
+         //computeDesiredCentroidalMomentumPivot(desiredICPPosition, desiredICPVelocity, omega0.getDoubleValue(), desiredCMPPosition);
+         //computeDesiredCentroidalMomentumPivotVelocity(desiredICPVelocity, desiredICPAcceleration, omega0.getDoubleValue(), desiredCMPVelocity);
+         
+      }
+      else
+      {
+         referenceCoPGenerator.getDoubleSupportPolygonCentroid(desiredCoPPosition);
+         desiredCoPVelocity.setToZero();
+         desiredCMPPosition.set(desiredCoPPosition);
+         desiredCMPVelocity.setToZero();
+         desiredICPPosition.set(desiredCoPPosition);
+         desiredICPVelocity.setToZero();
+         desiredICPAcceleration.setToZero();
+         desiredCoMPosition.set(desiredCoPPosition);
+         desiredCoMVelocity.setToZero();
+         desiredCoMAcceleration.setToZero();
+      }
    }
 
    /** {@inheritDoc} */
