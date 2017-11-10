@@ -508,7 +508,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       };
    }
 
-   private RobotConfigurationData extractRobotConfigurationData(FullHumanoidRobotModel fullRobotModel)
+   public static RobotConfigurationData extractRobotConfigurationData(FullHumanoidRobotModel fullRobotModel)
    {
       OneDoFJoint[] joints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData(joints, new ForceSensorDefinition[0], null, new IMUDefinition[0]);
@@ -518,7 +518,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       return robotConfigurationData;
    }
 
-   private CapturabilityBasedStatus createCapturabilityBasedStatus(boolean isLeftFootInSupport, boolean isRightFootInSupport)
+   public static CapturabilityBasedStatus createCapturabilityBasedStatus(boolean isLeftFootInSupport, boolean isRightFootInSupport)
    {
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
       capturabilityBasedStatus.leftFootSupportPolygonLength = isLeftFootInSupport ? 1 : 0;
