@@ -326,7 +326,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       updateCoMPositionAndFootPoses();
    }
 
-   void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
+   public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
    {
       latestCapturabilityBasedStatusReference.set(newStatus);
    }
