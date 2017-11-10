@@ -13,9 +13,15 @@ public class AtlasWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBo
    private DRCRobotModel ghostRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
    @Override
-   public void testHandCircle() throws Exception, UnreasonableAccelerationException
+   public void testHandCirclePositionOnly() throws Exception, UnreasonableAccelerationException
    {
-      super.testHandCircle();
+      super.testHandCirclePositionOnly();
+   }
+
+   @Override
+   public void testHandCircleFullyConstrained() throws Exception, UnreasonableAccelerationException
+   {
+      super.testHandCircleFullyConstrained();
    }
 
    @Override
