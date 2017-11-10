@@ -30,7 +30,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 26.7)
-   @Test(timeout = 50000)
+   @Test(timeout = 80000)
    public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushLeftEarlySwing();
@@ -55,7 +55,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 44.5)
-   @Test(timeout = 50000)
+   @Test(timeout = 80000)
    public void testPushRightLateSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightLateSwing();
@@ -63,7 +63,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 44.5)
-   @Test(timeout = 50000)
+   @Test(timeout = 80000)
    public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightThenLeftMidSwing();
@@ -71,7 +71,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 31.2)
-   @Test(timeout = 40000)
+   @Test(timeout = 80000)
    public void testPushRightTransferState() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightTransferState();
@@ -79,7 +79,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 29.3)
-   @Test(timeout = 50000)
+   @Test(timeout = 80000)
    public void testPushTowardsTheBack() throws SimulationExceededMaximumTimeException
    {
       super.testPushTowardsTheBack();
@@ -87,7 +87,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 29.0)
-   @Test(timeout = 40000)
+   @Test(timeout = 80000)
    public void testPushTowardsTheFront() throws SimulationExceededMaximumTimeException
    {
       super.testPushTowardsTheFront();
