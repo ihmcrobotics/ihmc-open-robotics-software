@@ -43,6 +43,20 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
  */
 public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialVelocityCommand>
 {
+   public enum ConstraintType {
+      /**
+       * A equality condition that is set up in the QP as part of the objective rather than as a constraint
+       */
+      OBJECTIVE,
+      /**
+       * A equality condition that is set up in the QP as a hard constraint
+       */
+      EQUALITY,
+      /**
+       * A inequality condition that is set up in the QP as a hard inequality constraint
+       */
+      INEQUALITY};
+   
    /** Defines the reference frame of interest. It is attached to the end-effector. */
    private final FramePose controlFramePose = new FramePose();
 
@@ -73,6 +87,12 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
+   /**
+    * The command type describes the nature of the constraint that is being imposed on the the end-effector
+    * <p> If the command type is not set it defaults to a {@code ConstraintType.OBJECTIVE} constraint
+    */
+   private ConstraintType constraintType = ConstraintType.OBJECTIVE;
+   
    /**
     * The base is the rigid-body located right before the first joint to be used for controlling the
     * end-effector.
@@ -919,6 +939,23 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.TASKSPACE;
+   }
+   
+   /**
+    * Set the type of spatial velocity constraint that should be imposed
+    * @param constraintType
+    */
+   public void setConstraintType(ConstraintType constraintType)
+   {
+      this.constraintType = constraintType;
+   }
+
+   /**
+    * Get the type of spatial velocity constraint that should be imposed
+    */
+   public ConstraintType getConstraintType()
+   {
+      return constraintType;
    }
 
    @Override
