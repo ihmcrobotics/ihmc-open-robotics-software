@@ -170,7 +170,7 @@ public class DRCNetworkModuleParameters
       this.useKinematicsToolbox = useKinematicsToolbox;
    }
    
-   public void enableConstrainedWholeBodyPlanningToolbox(boolean useConstrainedWholeBodyPlanningToolbox)
+   public void enableWholeBodyTrajectoryToolbox(boolean useConstrainedWholeBodyPlanningToolbox)
    {
       this.useConstrainedWholeBodyPlanningToolbox = useConstrainedWholeBodyPlanningToolbox;
    }

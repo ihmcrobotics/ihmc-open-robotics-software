@@ -5,7 +5,7 @@ import us.ihmc.communication.packets.SetBooleanParameterPacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WayPointsByVRUIBehaviorStateMachine.WayPointsByVRUIBehaviorState;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanConstrainedWholeBodyTrajectoryBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.PlanWholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
@@ -16,7 +16,7 @@ import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.DualWayPointsPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WayPointsPacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.ConstrainedEndEffectorTrajectory;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DualWayPointsTrajectory;
@@ -31,7 +31,7 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
 {
    private WholeBodyTrajectoryBehavior wholebodyTrajectoryBehavior;
 
-   private PlanConstrainedWholeBodyTrajectoryBehavior planConstrainedWholeBodyTrajectoryBehavior;
+   private PlanWholeBodyTrajectoryBehavior planWholeBodyTrajectoryBehavior;
 
    private CommunicationBridge communicationBridge;
 
@@ -66,7 +66,7 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
 
       this.fullRobotModel = fullRobotModel;
 
-      this.planConstrainedWholeBodyTrajectoryBehavior = new PlanConstrainedWholeBodyTrajectoryBehavior("CuttingWallPlanning", robotModelFactory,
+      this.planWholeBodyTrajectoryBehavior = new PlanWholeBodyTrajectoryBehavior("CuttingWallPlanning", robotModelFactory,
                                                                                                        communicationBridge, this.fullRobotModel, yoTime);
 
       this.yoTime = yoTime;
@@ -79,9 +79,9 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
       setupStateMachine();
    }
 
-   public PlanConstrainedWholeBodyTrajectoryBehavior getPlanConstrainedWholeBodyTrajectoryBehavior()
+   public PlanWholeBodyTrajectoryBehavior getPlanConstrainedWholeBodyTrajectoryBehavior()
    {
-      return planConstrainedWholeBodyTrajectoryBehavior;
+      return planWholeBodyTrajectoryBehavior;
    }
 
    private void setupStateMachine()
@@ -104,7 +104,7 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
       };
 
       BehaviorAction<WayPointsByVRUIBehaviorState> planning = new BehaviorAction<WayPointsByVRUIBehaviorState>(WayPointsByVRUIBehaviorState.PLANNING,
-                                                                                                               planConstrainedWholeBodyTrajectoryBehavior)
+                                                                                                               planWholeBodyTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -118,13 +118,13 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
             //ConstrainedEndEffectorTrajectory endeffectorTrajectory = new WayPointsTrajectory(latestPacket);
             ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DualWayPointsTrajectory(latestPacket);
             
-            planConstrainedWholeBodyTrajectoryBehavior.setInputs(endeffectorTrajectory, fullRobotModel);
+            planWholeBodyTrajectoryBehavior.setInputs(endeffectorTrajectory, fullRobotModel);
 
-            planConstrainedWholeBodyTrajectoryBehavior.setNumberOfEndEffectorWayPoints(30);
-            planConstrainedWholeBodyTrajectoryBehavior.setNumberOfExpanding(1000);
-            planConstrainedWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(80);
+            planWholeBodyTrajectoryBehavior.setNumberOfEndEffectorWayPoints(30);
+            planWholeBodyTrajectoryBehavior.setNumberOfExpanding(1000);
+            planWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(80);
 
-            PlanConstrainedWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
+            PlanWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
          }
       };
 
@@ -161,7 +161,7 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
 
             WholeBodyTrajectoryMessage wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
 
-            wholebodyTrajectoryMessage = planConstrainedWholeBodyTrajectoryBehavior.getWholebodyTrajectoryMessage();
+            wholebodyTrajectoryMessage = planWholeBodyTrajectoryBehavior.getWholebodyTrajectoryMessage();
 
             wholebodyTrajectoryBehavior.setInput(wholebodyTrajectoryMessage);
             
@@ -180,7 +180,7 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
          @Override
          public boolean checkCondition()
          {
-            boolean condition = planConstrainedWholeBodyTrajectoryBehavior.isDone() && !planConstrainedWholeBodyTrajectoryBehavior.planSuccess();
+            boolean condition = planWholeBodyTrajectoryBehavior.isDone() && !planWholeBodyTrajectoryBehavior.planSuccess();
             if (condition)
                PrintTools.info("planFailedCondition condition okay");
             ;
@@ -193,7 +193,7 @@ public class WayPointsByVRUIBehaviorStateMachine extends StateMachineBehavior<Wa
          @Override
          public boolean checkCondition()
          {
-            boolean condition = planConstrainedWholeBodyTrajectoryBehavior.isDone() && planConstrainedWholeBodyTrajectoryBehavior.planSuccess();
+            boolean condition = planWholeBodyTrajectoryBehavior.isDone() && planWholeBodyTrajectoryBehavior.planSuccess();
             if (condition)
                PrintTools.info("planSuccededCondition condition okay");
             ;

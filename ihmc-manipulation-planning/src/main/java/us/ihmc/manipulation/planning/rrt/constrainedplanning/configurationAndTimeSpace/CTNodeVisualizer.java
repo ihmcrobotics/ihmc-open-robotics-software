@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.artifact.CircleArtifact;
 import us.ihmc.graphicsDescription.plotting.artifact.LineArtifact;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.CTTaskNode;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.CTTaskNode;
 import us.ihmc.plotting.Plotter;
 
 public class CTNodeVisualizer

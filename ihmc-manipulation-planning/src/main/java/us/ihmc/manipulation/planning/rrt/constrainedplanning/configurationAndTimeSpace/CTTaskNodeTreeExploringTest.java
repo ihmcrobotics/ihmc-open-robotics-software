@@ -1,8 +1,8 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.CTTaskNode;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.constrainedWholeBodyPlanning.TaskRegion;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.CTTaskNode;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.TaskRegion;
 
 public class CTTaskNodeTreeExploringTest
 {
