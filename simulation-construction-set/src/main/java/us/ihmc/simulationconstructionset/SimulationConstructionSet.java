@@ -3542,7 +3542,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    public void createVideo(File videoFile)
    {
-      if (myGUI != null) myGUI.getViewportPanel().getStandardGUIActions().createVideo(videoFile);
+      if (myGUI != null)
+      {
+         myGUI.getViewportPanel().getStandardGUIActions().createVideo(videoFile);
+      }
+      else
+      {
+         PrintTools.error("Can Not Create a Video if the gui wasn't created! myGUI was null");
+      }
    }
 
    /**
