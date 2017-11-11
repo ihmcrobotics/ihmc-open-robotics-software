@@ -28,15 +28,15 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.WayPointsPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpace;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConstrainedEndEffectorTrajectory;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools.FunctionTrajectory;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.WayPointsTrajectory;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -271,31 +271,33 @@ public abstract class WholeBodyTrajectoryToolboxTest implements MultiRobotTestIn
       /*
        * EE Traj
        */
+      RigidBody leftHand = sdfFullRobotModel.getHand(RobotSide.LEFT);
       Pose3D[] poseOfWayPoints = new Pose3D[4];
+      double[] waypointTimes = new double[4];
       Quaternion wayPointOrientation;
 
       wayPointOrientation = new Quaternion();
       wayPointOrientation.appendPitchRotation(Math.PI * 0.2);
       poseOfWayPoints[0] = new Pose3D(new Point3D(0.6, 0.4, 1.0), wayPointOrientation);
+      waypointTimes[0] = 0.0;
 
       wayPointOrientation = new Quaternion();
       wayPointOrientation.appendPitchRotation(-Math.PI * 0.2);
       wayPointOrientation.appendYawRotation(-Math.PI * 0.3);
       poseOfWayPoints[1] = new Pose3D(new Point3D(0.6, 0.1, 1.5), wayPointOrientation);
+      waypointTimes[1] = 3.33;
 
       wayPointOrientation = new Quaternion();
       wayPointOrientation.appendYawRotation(-Math.PI * 0.2);
       poseOfWayPoints[2] = new Pose3D(new Point3D(0.5, -0.2, 1.0), wayPointOrientation);
+      waypointTimes[2] = 6.66;
 
       wayPointOrientation = new Quaternion();
       wayPointOrientation.appendPitchRotation(Math.PI * 0.2);
       poseOfWayPoints[3] = new Pose3D(new Point3D(0.6, 0.4, 0.8), wayPointOrientation);
+      waypointTimes[3] = 10.0;
 
-      WayPointsPacket wallPosePacket = new WayPointsPacket();
-      wallPosePacket.setRobotSide(RobotSide.LEFT);
-      wallPosePacket.setWayPoints(poseOfWayPoints, 10.0);
-
-      ConstrainedEndEffectorTrajectory endeffectorTrajectory = new WayPointsTrajectory(wallPosePacket);
+      WaypointBasedTrajectoryMessage wallPosePacket = new WaypointBasedTrajectoryMessage(leftHand, waypointTimes, poseOfWayPoints);
 
       /*
        * solver.
@@ -308,16 +310,15 @@ public abstract class WholeBodyTrajectoryToolboxTest implements MultiRobotTestIn
       kinematicsSolver.initialize();
       kinematicsSolver.holdCurrentTrajectoryMessages();
 
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         Pose3D desiredPose = endeffectorTrajectory.getEndEffectorPose(0.0, robotSide, new ConfigurationSpace());
+      RobotSide robotSide = RobotSide.LEFT;
+      FunctionTrajectory trajectory = WholeBodyTrajectoryToolboxMessageTools.createFunctionTrajectory(wallPosePacket);
+      Pose3D desiredPose = trajectory.compute(0.0);
 
-         desiredPose.appendTranslation(-0.0, 0.0, 0.0);
+      desiredPose.appendTranslation(-0.0, 0.0, 0.0);
 
-         kinematicsSolver.setDesiredHandPose(robotSide, desiredPose);
+      kinematicsSolver.setDesiredHandPose(robotSide, desiredPose);
 
-         scs.addStaticLinkGraphics(getXYZAxis(desiredPose));
-      }
+      scs.addStaticLinkGraphics(getXYZAxis(desiredPose));
 
       Quaternion desiredChestOrientation = new Quaternion();
       kinematicsSolver.setDesiredChestOrientation(desiredChestOrientation);
