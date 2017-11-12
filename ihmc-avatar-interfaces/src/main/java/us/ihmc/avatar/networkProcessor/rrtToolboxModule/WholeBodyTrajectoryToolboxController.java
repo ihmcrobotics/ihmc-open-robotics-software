@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -21,12 +22,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.CTTaskNode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.CTTreeTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpace;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.GenericTaskNode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.TaskRegion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
@@ -37,7 +38,6 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTim
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -650,8 +650,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       if (currentRobotConfiguration == null)
          return false;
 
-      initialConfiguration.setRootOrientation(currentRobotConfiguration.getPelvisOrientation());
-      initialConfiguration.setRootTranslation(currentRobotConfiguration.getPelvisTranslation());
+      initialConfiguration.desiredRootOrientation.set(currentRobotConfiguration.getPelvisOrientation());
+      initialConfiguration.desiredRootTranslation.set(currentRobotConfiguration.getPelvisTranslation());
       
       initialConfiguration.jointNameHash = currentRobotConfiguration.jointNameHash;
       int length = currentRobotConfiguration.jointAngles.length;

@@ -5,9 +5,8 @@ import java.util.List;
 
 import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.TrackablePacket;
 
-public class WholeBodyTrajectoryToolboxMessage extends TrackablePacket<WholeBodyTrajectoryToolboxMessage> implements MultiplePacketHolder
+public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajectoryToolboxMessage> implements MultiplePacketHolder
 {
    public WholeBodyTrajectoryToolboxConfigurationMessage configuration;
    public List<WaypointBasedTrajectoryMessage> endEffectorTrajectories;
