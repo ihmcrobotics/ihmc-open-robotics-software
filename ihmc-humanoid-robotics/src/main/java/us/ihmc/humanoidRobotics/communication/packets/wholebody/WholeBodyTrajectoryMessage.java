@@ -57,6 +57,28 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   public WholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage other)
+   {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+
+      if (other.leftHandTrajectoryMessage != null)
+         leftHandTrajectoryMessage = new HandTrajectoryMessage(other.leftHandTrajectoryMessage);
+      if (other.rightHandTrajectoryMessage != null)
+         rightHandTrajectoryMessage = new HandTrajectoryMessage(other.rightHandTrajectoryMessage);
+      if (other.leftArmTrajectoryMessage != null)
+         leftArmTrajectoryMessage = new ArmTrajectoryMessage(other.leftArmTrajectoryMessage);
+      if (other.rightArmTrajectoryMessage != null)
+         rightArmTrajectoryMessage = new ArmTrajectoryMessage(other.rightArmTrajectoryMessage);
+      if (other.chestTrajectoryMessage != null)
+         chestTrajectoryMessage = new ChestTrajectoryMessage(other.chestTrajectoryMessage);
+      if (other.pelvisTrajectoryMessage != null)
+         pelvisTrajectoryMessage = new PelvisTrajectoryMessage(other.pelvisTrajectoryMessage);
+      if (other.leftFootTrajectoryMessage != null)
+         leftFootTrajectoryMessage = new FootTrajectoryMessage(other.leftFootTrajectoryMessage);
+      if (other.rightFootTrajectoryMessage != null)
+         rightFootTrajectoryMessage = new FootTrajectoryMessage(other.rightFootTrajectoryMessage);
+   }
+
    public WholeBodyTrajectoryMessage(Random random)
    {
       leftHandTrajectoryMessage = new HandTrajectoryMessage(random);
