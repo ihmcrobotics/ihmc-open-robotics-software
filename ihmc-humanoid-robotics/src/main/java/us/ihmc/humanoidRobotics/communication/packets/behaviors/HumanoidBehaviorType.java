@@ -28,8 +28,7 @@ public enum HumanoidBehaviorType
    PUSH_AND_WALK,
    COLLABORATIVE_TASK,
    FIRE_FIGHTING,
-   CUTTING_WALL,
-   WAYPOINTS_MOTION_VRUI;
+   CUTTING_WALL;
 
    public static final HumanoidBehaviorType[] values = values();
 }
