@@ -3,10 +3,12 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.SetBooleanParameterPacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.CuttingWallBehaviorStateMachine.CuttingWallBehaviorState;
@@ -20,13 +22,20 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConstrainedEndEffectorTrajectory;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder.ConfigurationSpaceName;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxConfigurationMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools.FunctionTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.FunctionTrajectoryTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -188,19 +197,33 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
             PrintTools.info("transform ");
             System.out.println(transform1);
 
-            ConstrainedEndEffectorTrajectory endeffectorTrajectory = new DrawingTrajectory(20.0);
-            //            ConstrainedEndEffectorTrajectory endeffectorTrajectory = new CuttingWallTrajectory(centerFramePose.getPosition(),
-            //                                                                                               computeWallOrientation(centerFramePose.getOrientation()),
-            //                                                                                               latestPacket.getCuttingRadius(), 20.0);
+            Point3DReadOnly circleCenter = new Point3D(0.56, 0.0, 1.1);
+            Quaternion circleOrientation = new Quaternion();
+            circleOrientation.appendPitchRotation(-0.48 * Math.PI);
+            Quaternion outputOrientation = new Quaternion();
+            outputOrientation.setYawPitchRoll(0.0, -0.4 * Math.PI, 0.0);
+            double radius = 0.35;
+            double angleStart = 0.0;
+            boolean clockwise = true;
+            double t0 = 0.0;
+            double tf = 20.0;
+            FunctionTrajectory circleTrajectory = FunctionTrajectoryTools.circleTrajectory(circleCenter, circleOrientation, outputOrientation, radius, angleStart, clockwise, t0, tf);
+            RigidBody leftHand = fullRobotModel.getHand(RobotSide.LEFT);
+            WaypointBasedTrajectoryMessage circleTrajectoryMessage = WholeBodyTrajectoryToolboxMessageTools.createTrajectoryMessage(leftHand, t0, tf, 0.05, circleTrajectory, ConfigurationSpaceName.YAW);
+            RigidBody rightHand = fullRobotModel.getHand(RobotSide.LEFT);
+            Pose3D rightHandPose = new Pose3D(-0.2, -0.5, 0.6, -0.4 * Math.PI, 0.0, 0.5 * Math.PI);
+            Pose3D[] waypoints = {rightHandPose, rightHandPose};
+            double[] waypointTimes = {t0, tf};
+            WaypointBasedTrajectoryMessage rightHandTrajectoryMessage = new WaypointBasedTrajectoryMessage(rightHand, waypointTimes, waypoints);
 
-            planWholeBodyTrajectoryBehavior.setInputs(endeffectorTrajectory, fullRobotModel);
+            WholeBodyTrajectoryToolboxConfigurationMessage configurationMessage = new WholeBodyTrajectoryToolboxConfigurationMessage(320, 1000);
+            configurationMessage.setInitialConfigration(fullRobotModel);
 
-            planWholeBodyTrajectoryBehavior.setNumberOfEndEffectorWayPoints(30);
-            planWholeBodyTrajectoryBehavior.setNumberOfExpanding(1000);
-            planWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(320);
-            planWholeBodyTrajectoryBehavior.setNumberOfFindInitialGuess(80);
+            WholeBodyTrajectoryToolboxMessage wholeBodyTrajectoryToolboxMessage = new WholeBodyTrajectoryToolboxMessage();
+            wholeBodyTrajectoryToolboxMessage.addEndEffectorTrajectories(circleTrajectoryMessage, rightHandTrajectoryMessage);
+            wholeBodyTrajectoryToolboxMessage.setConfiguration(configurationMessage);
 
-            PlanWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = endeffectorTrajectory;
+            planWholeBodyTrajectoryBehavior.setInput(wholeBodyTrajectoryToolboxMessage);
          }
       };
 
