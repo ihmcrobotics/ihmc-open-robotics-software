@@ -10,6 +10,7 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
 {
    public WholeBodyTrajectoryToolboxConfigurationMessage configuration;
    public List<WaypointBasedTrajectoryMessage> endEffectorTrajectories;
+   public List<RigidBodyExplorationConfigurationMessage> explorationConfigurations;
 
    public WholeBodyTrajectoryToolboxMessage()
    {
@@ -27,6 +28,16 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
    {
       this.configuration = configuration;
       this.endEffectorTrajectories = endEffectorTrajectories;
+      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
+   }
+
+   public WholeBodyTrajectoryToolboxMessage(WholeBodyTrajectoryToolboxConfigurationMessage configuration,
+                                            List<WaypointBasedTrajectoryMessage> endEffectorTrajectories,
+                                            List<RigidBodyExplorationConfigurationMessage> explorationConfigurations)
+   {
+      this.configuration = configuration;
+      this.endEffectorTrajectories = endEffectorTrajectories;
+      this.explorationConfigurations = explorationConfigurations;
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -50,6 +61,21 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
       }
    }
 
+   public void addRigidBodyExplorationConfiguration(RigidBodyExplorationConfigurationMessage explorationConfiguration)
+   {
+      addRigidBodyExplorationConfigurations(explorationConfiguration);
+   }
+
+   public void addRigidBodyExplorationConfigurations(RigidBodyExplorationConfigurationMessage... explorationConfigurations)
+   {
+      if (this.explorationConfigurations == null)
+         this.explorationConfigurations = new ArrayList<>();
+      for (RigidBodyExplorationConfigurationMessage explorationConfiguration : explorationConfigurations)
+      {
+         this.explorationConfigurations.add(explorationConfiguration);
+      }
+   }
+
    public void setEndEffectorTrajectories(List<WaypointBasedTrajectoryMessage> endEffectorTrajectories)
    {
       this.endEffectorTrajectories = endEffectorTrajectories;
@@ -63,6 +89,11 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
    public List<WaypointBasedTrajectoryMessage> getEndEffectorTrajectories()
    {
       return endEffectorTrajectories;
+   }
+
+   public List<RigidBodyExplorationConfigurationMessage> getExplorationConfigurations()
+   {
+      return explorationConfigurations;
    }
 
    @Override
