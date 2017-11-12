@@ -15,9 +15,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -32,8 +31,8 @@ import java.awt.*;
 public class PlanarRegionConstraintProvider
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final YoFrameConvexPolygon2d activePlanarRegion;
-   private final YoFrameConvexPolygon2d activePlanarRegionInControlPlane;
+   private final YoFrameConvexPolygon2d yoActivePlanarRegion;
+   private final YoFrameConvexPolygon2d yoActivePlanarRegionInControlPlane;
 
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
    private final BipedSupportPolygons bipedSupportPolygons;
@@ -44,7 +43,10 @@ public class PlanarRegionConstraintProvider
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
    private final ICPControlPlane icpControlPlane;
 
-   private final ConvexPolygon2D projectedConvexHull = new ConvexPolygon2D();
+   private PlanarRegion activePlanarRegion = null;
+   private final ConvexPolygon2D activePlanarRegionInControlFrame = new ConvexPolygon2D();
+
+   private final ConvexPolygon2D projectedAndShrunkConvexHull = new ConvexPolygon2D();
    private final YoDouble footstepDeadband;
 
    public PlanarRegionConstraintProvider(ICPControlPlane icpControlPlane, WalkingControllerParameters parameters, BipedSupportPolygons bipedSupportPolygons,
@@ -57,14 +59,14 @@ public class PlanarRegionConstraintProvider
 
       captureRegionCalculator = new OneStepCaptureRegionCalculator(bipedSupportPolygons, parameters, yoNamePrefix, registry, yoGraphicsListRegistry);
 
-      activePlanarRegion = new YoFrameConvexPolygon2d(yoNamePrefix + "ActivePlanarRegionConstraint", "", worldFrame, 12, registry);
-      activePlanarRegionInControlPlane = new YoFrameConvexPolygon2d(yoNamePrefix + "ActivePlanarRegionConstraintInControlPlane", "", worldFrame, 12, registry);
+      yoActivePlanarRegion = new YoFrameConvexPolygon2d(yoNamePrefix + "ActivePlanarRegionConstraint", "", worldFrame, 12, registry);
+      yoActivePlanarRegionInControlPlane = new YoFrameConvexPolygon2d(yoNamePrefix + "ActivePlanarRegionConstraintInControlPlane", "", worldFrame, 12, registry);
       distanceToPlanarRegionEdgeForNoOverhang = new YoDouble(yoNamePrefix + "DistanceToPlanarRegionEdgeForNoOverhang", registry);
 
       if (yoGraphicsListRegistry != null)
       {
-         YoArtifactPolygon activePlanarRegionViz = new YoArtifactPolygon("ActivePlanarRegionViz", activePlanarRegion, Color.RED, false, true);
-         YoArtifactPolygon activePlanarRegionInControlPlaneViz = new YoArtifactPolygon("ActivePlanarRegionInControlPlaneViz", activePlanarRegionInControlPlane, Color.RED, false);
+         YoArtifactPolygon activePlanarRegionViz = new YoArtifactPolygon("ActivePlanarRegionViz", yoActivePlanarRegion, Color.RED, false, true);
+         YoArtifactPolygon activePlanarRegionInControlPlaneViz = new YoArtifactPolygon("ActivePlanarRegionInControlPlaneViz", yoActivePlanarRegionInControlPlane, Color.RED, false);
 
          activePlanarRegionViz.setVisible(visualize);
          activePlanarRegionInControlPlaneViz.setVisible(visualize);
@@ -74,6 +76,7 @@ public class PlanarRegionConstraintProvider
       }
    }
 
+   // TODO change this functionality
    public void setActivePlanarRegion(PlanarRegion planarRegion)
    {
       planarRegionsList.clear();
@@ -81,13 +84,20 @@ public class PlanarRegionConstraintProvider
       if (planarRegion != null)
       {
          planarRegionsList.addPlanarRegion(planarRegion);
-         computeProjectedConvexHull();
+         computeProjectedAndShrunkConvexHull();
       }
       else
       {
-         activePlanarRegion.clearAndHide();
-         activePlanarRegionInControlPlane.clearAndHide();
+         yoActivePlanarRegion.clearAndHide();
+         yoActivePlanarRegionInControlPlane.clearAndHide();
       }
+   }
+
+   public void setPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
+   {
+      planarRegionsList.clear();
+      for (int i = 0; i < planarRegions.size(); i++)
+         planarRegionsList.addPlanarRegion(planarRegions.get(i));
    }
 
    public void computeDistanceFromEdgeForNoOverhang(Footstep upcomingFootstep)
@@ -112,19 +122,6 @@ public class PlanarRegionConstraintProvider
       distanceToPlanarRegionEdgeForNoOverhang.set(maxDistance);
    }
 
-   private ConvexPolygon2D computeProjectedConvexHull()
-   {
-      PlanarRegion planarRegion = planarRegionsList.getLastPlanarRegion();
-
-      icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, projectedConvexHull, distanceToPlanarRegionEdgeForNoOverhang.getDoubleValue());
-
-      ConvexPolygon2D convexHull = planarRegion.getConvexHull();
-      activePlanarRegion.setConvexPolygon2d(convexHull);
-      activePlanarRegionInControlPlane.setConvexPolygon2d(projectedConvexHull);
-
-      return projectedConvexHull;
-   }
-
 
    public void updatePlanarRegionConstraintForDoubleSupport(SimpleICPOptimizationQPSolver solver)
    {
@@ -132,7 +129,7 @@ public class PlanarRegionConstraintProvider
       solver.resetPlanarRegionConstraint();
 
       if (!planarRegionsList.isEmpty())
-         computeProjectedConvexHull();
+         computeProjectedAndShrunkConvexHull();
    }
 
    public void updatePlanarRegionConstraintForSingleSupport(RobotSide supportSide, double swingTimeRemaining, FramePoint2D currentICP, double omega0, SimpleICPOptimizationQPSolver solver)
@@ -142,17 +139,84 @@ public class PlanarRegionConstraintProvider
 
       solver.resetPlanarRegionConstraint();
 
-      if (!planarRegionsList.isEmpty())
-         solver.setPlanarRegionConstraint(computeProjectedConvexHull());
+      if (computeActivePlanarRegion())
+      {
+         ConvexPolygon2D projectedAndShrunkPlanarRegion = computeProjectedAndShrunkConvexHull();
+         solver.setPlanarRegionConstraint(projectedAndShrunkPlanarRegion);
+      }
+   }
+
+   private ConvexPolygon2D computeProjectedAndShrunkConvexHull()
+   {
+      icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(activePlanarRegion, projectedAndShrunkConvexHull, distanceToPlanarRegionEdgeForNoOverhang.getDoubleValue());
+
+      return projectedAndShrunkConvexHull;
+   }
+
+
+   private final ConvexPolygon2D tempProjectedPolygon = new ConvexPolygon2D();
+   private final ConvexPolygon2D tempIntersection = new ConvexPolygon2D();
+
+   // FIXME this makes garbage
+   /**
+    * returns whether or not there is a planar region constraint
+    * @return
+    */
+   private boolean computeActivePlanarRegion()
+   {
+      FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
+      captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
+
+      boolean hasPlanarRegion = false;
+      double maxArea = 0.0;
+      activePlanarRegion = null;
+      activePlanarRegionInControlFrame.clear();
+
+      for (int regionIndex = 0; regionIndex < planarRegionsList.getNumberOfPlanarRegions(); regionIndex++)
+      {
+         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(regionIndex);
+         icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion, tempProjectedPolygon);
+
+         // FIXME this makes garbage
+         ConvexPolygonTools.computeIntersectionOfPolygons(captureRegion.getConvexPolygon2d(), tempProjectedPolygon, tempIntersection);
+         double intersectionArea = tempIntersection.getArea();
+
+         if (intersectionArea > maxArea)
+         {
+            maxArea = intersectionArea;
+            activePlanarRegion = planarRegion;
+            activePlanarRegionInControlFrame.setAndUpdate(tempProjectedPolygon);
+            hasPlanarRegion = true;
+         }
+      }
+
+      if (activePlanarRegion != null)
+      {
+         this.yoActivePlanarRegion.setConvexPolygon2d(activePlanarRegion.getConvexHull());
+         this.yoActivePlanarRegionInControlPlane.setConvexPolygon2d(activePlanarRegionInControlFrame);
+      }
+      else
+      {
+         this.yoActivePlanarRegion.clearAndHide();
+         this.yoActivePlanarRegionInControlPlane.clearAndHide();
+      }
+
+      return hasPlanarRegion;
    }
 
    public PlanarRegion getActivePlanarRegion()
    {
-      return planarRegionsList.getLastPlanarRegion();
+      return activePlanarRegion;
    }
 
    public void reset()
    {
-      activePlanarRegion.clearAndHide();
+      planarRegionsList.clear();
+
+      activePlanarRegion = null;
+      activePlanarRegionInControlFrame.clear();
+
+      yoActivePlanarRegion.clearAndHide();
+      yoActivePlanarRegionInControlPlane.clearAndHide();
    }
 }
