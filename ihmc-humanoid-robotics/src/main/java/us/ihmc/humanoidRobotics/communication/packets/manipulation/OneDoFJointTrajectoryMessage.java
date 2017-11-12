@@ -5,7 +5,7 @@ import java.util.Random;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.Abstract1DTrajectoryMessage;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 
 @RosMessagePacket(documentation =

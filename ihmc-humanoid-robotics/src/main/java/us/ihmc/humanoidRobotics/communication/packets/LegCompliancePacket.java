@@ -4,7 +4,7 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**

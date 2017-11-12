@@ -38,7 +38,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -88,7 +88,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    {
       double epsilon = 1.0e-10;
       double yaw = Math.toRadians(5.0);
-      double pitch = Math.toRadians(-10.0);
+      double pitch = Math.toRadians(-6.0);
       double roll = Math.toRadians(-5.0);
       double trajectoryTime = 0.5;
 

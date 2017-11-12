@@ -31,7 +31,7 @@ import us.ihmc.simulationconstructionset.SliderJoint;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class ContactableValveRobotTest

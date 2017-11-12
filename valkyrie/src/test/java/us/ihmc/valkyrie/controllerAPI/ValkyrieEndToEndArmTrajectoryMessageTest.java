@@ -43,7 +43,7 @@ public class ValkyrieEndToEndArmTrajectoryMessageTest extends EndToEndArmTraject
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 65.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 110000)
    public void testQueuedMessages() throws Exception
    {
       super.testQueuedMessages();

@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;

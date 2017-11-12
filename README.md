@@ -182,6 +182,6 @@ dependencies {
 /* OR */
 
 mainDependencies {
-  compile compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion // ihmc-build way of doing things
+  compile group: "us.ihmc", name: "ihmc-java-toolkit", version: groupDependencyVersion // ihmc-build way of doing things
 }
 ```

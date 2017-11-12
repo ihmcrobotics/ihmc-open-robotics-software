@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math;
 
-import static us.ihmc.robotics.MathTools.square;
+import static us.ihmc.commons.MathTools.square;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

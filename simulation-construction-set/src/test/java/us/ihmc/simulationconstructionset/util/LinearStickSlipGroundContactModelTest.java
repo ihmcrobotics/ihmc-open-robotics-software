@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.SlopedPlaneGroundProfile;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class LinearStickSlipGroundContactModelTest
 {

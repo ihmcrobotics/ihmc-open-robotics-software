@@ -5,7 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 /* package-private */class IntraprocessCommunicationNetwork
 {

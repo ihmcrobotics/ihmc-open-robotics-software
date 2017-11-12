@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.tools.FormattingTools;
+import us.ihmc.commons.FormattingTools;
 
 public class FloatingRootJointRobot extends RobotFromDescription
 {

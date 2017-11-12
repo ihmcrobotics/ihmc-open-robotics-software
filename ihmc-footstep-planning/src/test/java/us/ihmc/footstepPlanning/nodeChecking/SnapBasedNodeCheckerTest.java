@@ -30,7 +30,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class SnapBasedNodeCheckerTest
 {

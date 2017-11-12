@@ -26,7 +26,7 @@ import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpa
 import us.ihmc.footstepPlanning.graphSearch.stepCost.DistanceAndYawBasedCost;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;

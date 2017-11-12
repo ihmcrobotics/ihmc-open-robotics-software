@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;

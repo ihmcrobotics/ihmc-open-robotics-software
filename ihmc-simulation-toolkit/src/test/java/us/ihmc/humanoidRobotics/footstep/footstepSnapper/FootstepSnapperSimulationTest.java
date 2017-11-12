@@ -55,7 +55,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 

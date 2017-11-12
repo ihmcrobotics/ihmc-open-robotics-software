@@ -23,7 +23,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -52,7 +52,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -77,7 +77,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;

@@ -4,17 +4,16 @@ import java.util.Random;
 
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.tools.ArrayTools;
 
-public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolboxOutputStatus>
+public class KinematicsToolboxOutputStatus extends SettablePacket<KinematicsToolboxOutputStatus>
 {
    public int jointNameHash;
    public float[] desiredJointAngles;
@@ -139,16 +138,6 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
       }
    }
 
-   public void setRootTranslation(Vector3DReadOnly rootTranslation)
-   {
-      this.desiredRootTranslation.set(rootTranslation);
-   }
-
-   public void setRootOrientation(QuaternionReadOnly rootOrientation)
-   {
-      this.desiredRootOrientation.set(rootOrientation);
-   }
-
    public void setSolutionQuality(double solutionQuality)
    {
       this.solutionQuality = solutionQuality;
@@ -183,13 +172,21 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
       KinematicsToolboxOutputStatus interplateOutputStatus = new KinematicsToolboxOutputStatus();
 
       interplateOutputStatus.desiredJointAngles = new float[outputStatusOne.desiredJointAngles.length];
+      float[] jointAngles1 = outputStatusOne.getJointAngles();
+      float[] jointAngles2 = outputStatusTwo.getJointAngles();
 
       for (int i = 0; i < interplateOutputStatus.desiredJointAngles.length; i++)
-         interplateOutputStatus.desiredJointAngles[i] = (float) TupleTools.interpolate(outputStatusOne.getJointAngles()[i], outputStatusTwo.getJointAngles()[i],
-                                                                                       alpha);
+      {
+         interplateOutputStatus.desiredJointAngles[i] = (float) TupleTools.interpolate(jointAngles1[i], jointAngles2[i], alpha);
+      }
 
-      interplateOutputStatus.desiredRootTranslation.interpolate(outputStatusOne.getPelvisTranslation(), outputStatusTwo.getPelvisTranslation(), alpha);
-      interplateOutputStatus.desiredRootOrientation.interpolate(outputStatusOne.getPelvisOrientation(), outputStatusTwo.getPelvisOrientation(), alpha);
+      Vector3D32 rootTranslation1 = outputStatusOne.getPelvisTranslation();
+      Vector3D32 rootTranslation2 = outputStatusTwo.getPelvisTranslation();
+      Quaternion32 rootOrientation1 = outputStatusOne.getPelvisOrientation();
+      Quaternion32 rootOrientation2 = outputStatusTwo.getPelvisOrientation();
+
+      interplateOutputStatus.desiredRootTranslation.interpolate(rootTranslation1, rootTranslation2, alpha);
+      interplateOutputStatus.desiredRootOrientation.interpolate(rootOrientation1, rootOrientation2, alpha);
 
       interplateOutputStatus.jointNameHash = outputStatusOne.jointNameHash;
 
@@ -212,16 +209,8 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
       if (!MathTools.epsilonEquals(solutionQuality, other.solutionQuality, epsilon))
          return false;
 
-      for (int i = 0; i < desiredJointAngles.length; i++)
-      {
-         if (Math.abs(desiredJointAngles[i] - other.desiredJointAngles[i]) > epsilon)
-         {
-            System.out.println(i);
-            System.out.println("Diff: " + Math.abs(desiredJointAngles[i] - other.desiredJointAngles[i]) + ", this: " + desiredJointAngles[i] + ", other: "
-                  + other.desiredJointAngles[i]);
-            return false;
-         }
-      }
+      if (!ArrayTools.deltaEquals(desiredJointAngles, other.desiredJointAngles, (float) epsilon))
+         return false;
 
       return true;
    }

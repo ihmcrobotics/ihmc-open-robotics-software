@@ -25,7 +25,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunc
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundReaderAndWriter;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 /**
  * Created by agrabertilton on 3/4/15.

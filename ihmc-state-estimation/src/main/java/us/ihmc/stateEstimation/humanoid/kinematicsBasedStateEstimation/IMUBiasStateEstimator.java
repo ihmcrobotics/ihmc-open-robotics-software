@@ -25,7 +25,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.tools.FormattingTools;
+import us.ihmc.commons.FormattingTools;
 
 public class IMUBiasStateEstimator implements IMUBiasProvider
 {

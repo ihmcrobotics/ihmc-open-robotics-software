@@ -17,13 +17,9 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.GraphVisualization;
@@ -115,21 +111,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
    public void setInitialStanceFoot(FramePose stanceFootPose, RobotSide side)
    {
       startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), side);
-      RigidBodyTransform startNodeSnapTransform = computeSnapTransform(startNode, stanceFootPose.getGeometryObject());
+      RigidBodyTransform startNodeSnapTransform = FootstepNodeSnappingTools.computeSnapTransform(startNode, stanceFootPose.getGeometryObject());
       snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransform));
       nodeChecker.addStartNode(startNode, startNodeSnapTransform);
-   }
-
-   public static RigidBodyTransform computeSnapTransform(FootstepNode node, Pose3D footstepPose)
-   {
-      RigidBodyTransform snapTransform = new RigidBodyTransform();
-      RigidBodyTransform stepTransform = new RigidBodyTransform();
-      footstepPose.get(stepTransform);
-
-      FootstepNodeTools.getNodeTransform(node, snapTransform);
-      snapTransform.preMultiplyInvertThis(stepTransform);
-
-      return snapTransform;
    }
 
    @Override

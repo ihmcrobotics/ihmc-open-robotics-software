@@ -20,9 +20,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -30,9 +27,19 @@ import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PlaneContactStateToWrenchMatrixHelper
 {
+   /**
+    * This is used when determining whether two contact points are at the same location. If that is the case
+    * one of them will rotate it's friction cone approximation to get better coverage of the cone through the
+    * basis vectors.
+    */
+   private static final double distanceThresholdBetweenTwoContactPoint = 0.01;
+
    private final int maxNumberOfContactPoints;
    private final int numberOfBasisVectorsPerContactPoint;
    private final double basisVectorAngleIncrement;
@@ -52,6 +59,8 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final DenseMatrix64F desiredCoPWeightMatrix = new DenseMatrix64F(2, 2);
    private final DenseMatrix64F copRateWeightMatrix = new DenseMatrix64F(2, 2);
 
+   private final DenseMatrix64F activeRhoMatrix;
+
    private final YoPlaneContactState yoPlaneContactState;
 
    private final YoBoolean hasReset;
@@ -70,6 +79,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final YoBoolean hasReceivedCenterOfPressureCommand;
    private final YoBoolean isFootholdAreaLargeEnough;
+   private final YoBoolean deactivateRhoWhenNotInContact;
    private final YoFramePoint2d desiredCoPCommandInSoleFrame;
    private final Vector2D desiredCoPCommandWeightInSoleFrame = new Vector2D();
 
@@ -80,8 +90,12 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
 
+   private final FramePoint2D contactPoint2d = new FramePoint2D();
+   private final FrictionConeRotationCalculator coneRotationCalculator;
+
    public PlaneContactStateToWrenchMatrixHelper(ContactablePlaneBody contactablePlaneBody, ReferenceFrame centerOfMassFrame, int maxNumberOfContactPoints,
-         int numberOfBasisVectorsPerContactPoint, YoVariableRegistry parentRegistry)
+                                                int numberOfBasisVectorsPerContactPoint, FrictionConeRotationCalculator coneRotationCalculator,
+                                                YoVariableRegistry parentRegistry)
    {
       List<FramePoint2D> contactPoints2d = contactablePlaneBody.getContactPoints2d();
 
@@ -91,6 +105,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       this.centerOfMassFrame = centerOfMassFrame;
       this.maxNumberOfContactPoints = maxNumberOfContactPoints;
       this.numberOfBasisVectorsPerContactPoint = numberOfBasisVectorsPerContactPoint;
+      this.coneRotationCalculator = coneRotationCalculator;
 
       rhoSize = maxNumberOfContactPoints * numberOfBasisVectorsPerContactPoint;
       basisVectorAngleIncrement = 2.0 * Math.PI / numberOfBasisVectorsPerContactPoint;
@@ -102,6 +117,9 @@ public class PlaneContactStateToWrenchMatrixHelper
       rhoMaxMatrix = new DenseMatrix64F(rhoSize, 1);
       rhoWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
       rhoRateWeightMatrix = new DenseMatrix64F(rhoSize, rhoSize);
+
+      activeRhoMatrix = new DenseMatrix64F(rhoSize, 1);
+      CommonOps.fill(activeRhoMatrix, 1.0);
 
       CommonOps.fill(rhoMaxMatrix, Double.POSITIVE_INFINITY);
 
@@ -117,13 +135,14 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       hasReset = new YoBoolean(namePrefix + "HasReset", registry);
       resetRequested = new YoBoolean(namePrefix + "ResetRequested", registry);
+      deactivateRhoWhenNotInContact = new YoBoolean(namePrefix + "DeactivateRhoWhenNotInContact", registry);
 
       for (int i = 0; i < contactPoints2d.size(); i++)
       {
          YoDouble rhoWeight = new YoDouble(namePrefix + "RhoWeight" + i, registry);
          YoDouble maxContactForce = new YoDouble(namePrefix + "MaxContactForce" + i, registry);
          maxContactForce.set(Double.POSITIVE_INFINITY);
-         
+
          rhoWeights.put(yoPlaneContactState.getContactPoints().get(i), rhoWeight);
          maxContactForces.put(yoPlaneContactState.getContactPoints().get(i), maxContactForce);
       }
@@ -148,6 +167,11 @@ public class PlaneContactStateToWrenchMatrixHelper
       parentRegistry.addChild(registry);
    }
 
+   public void setDeactivateRhoWhenNotInContact(boolean deactivateRhoWhenNotInContact)
+   {
+      this.deactivateRhoWhenNotInContact.set(deactivateRhoWhenNotInContact);
+   }
+
    public void setPlaneContactStateCommand(PlaneContactStateCommand command)
    {
       yoPlaneContactState.updateFromPlaneContactStateCommand(command);
@@ -160,7 +184,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       for (int i = 0; i < command.getNumberOfContactPoints(); i++)
       {
-         rhoWeights.get(yoPlaneContactState.getContactPoints().get(i)).set(command.getRhoWeight(i));         
+         rhoWeights.get(yoPlaneContactState.getContactPoints().get(i)).set(command.getRhoWeight(i));
          if (command.hasMaxContactPointNormalForce())
          {
             maxContactForces.get(yoPlaneContactState.getContactPoints().get(i)).set(command.getMaxContactPointNormalForce(i));
@@ -193,6 +217,29 @@ public class PlaneContactStateToWrenchMatrixHelper
          YoContactPoint contactPoint = contactPoints.get(contactPointIndex);
          boolean inContact = contactPoint.isInContact();
 
+         // rotate each friction cone approximation to point one vector towards the center of the foot
+         double angleOffset = coneRotationCalculator.computeConeRotation(yoPlaneContactState, contactPointIndex);
+
+         // in case the contact point is close to another point rotate it
+         if (inContact)
+         {
+            int matches = 0;
+            for (int j = contactPointIndex + 1; j < contactPoints.size(); j++)
+            {
+               YoContactPoint candidateForMatch = contactPoints.get(j);
+               candidateForMatch.getPosition2d(contactPoint2d);
+               if (candidateForMatch.isInContact() && contactPoint.epsilonEquals(contactPoint2d, distanceThresholdBetweenTwoContactPoint))
+               {
+                  matches++;
+               }
+            }
+            // TODO: If there are more then two contacts in the same spot we should probably disable them.
+            if (matches > 0)
+            {
+               angleOffset += basisVectorAngleIncrement / 2.0;
+            }
+         }
+
          for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
          {
             FramePoint3D basisVectorOrigin = basisVectorsOrigin.get(rhoIndex);
@@ -201,7 +248,7 @@ public class PlaneContactStateToWrenchMatrixHelper
             if (inContact)
             {
                contactPoint.getPosition(basisVectorOrigin);
-               computeBasisVector(basisVectorIndex, normalContactVectorRotationMatrix, basisVector);
+               computeBasisVector(basisVectorIndex, angleOffset, normalContactVectorRotationMatrix, basisVector);
 
                DenseMatrix64F singleRhoJacobian = computeSingleRhoJacobian(basisVectorOrigin, basisVector);
                CommonOps.insert(singleRhoJacobian, rhoJacobianMatrix, 0, rhoIndex);
@@ -214,17 +261,22 @@ public class PlaneContactStateToWrenchMatrixHelper
                {
                   rhoWeight = defaultRhoWeight;
                }
-               
-               rhoWeightMatrix.set(rhoIndex, rhoIndex, rhoWeight * (double) maxNumberOfContactPoints / (double) numberOfContactPointsInContact);
+
+               rhoWeightMatrix.set(rhoIndex, rhoIndex, rhoWeight * maxNumberOfContactPoints / numberOfContactPointsInContact);
 
                if (resetRequested.getBooleanValue())
                   rhoRateWeightMatrix.set(rhoIndex, rhoIndex, 0.0);
                else
                   rhoRateWeightMatrix.set(rhoIndex, rhoIndex, rhoRateWeight);
+
+               activeRhoMatrix.set(rhoIndex, 0, 1.0);
             }
             else
             {
                clear(rhoIndex);
+
+               if (deactivateRhoWhenNotInContact.getBooleanValue())
+                  activeRhoMatrix.set(rhoIndex, 0, 0.0);
             }
 
             //// TODO: 6/5/17 scale this by the vertical magnitude
@@ -232,6 +284,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
             rhoIndex++;
          }
+
       }
 
       isFootholdAreaLargeEnough.set(yoPlaneContactState.getFootholdArea() > 1.0e-3);
@@ -335,9 +388,9 @@ public class PlaneContactStateToWrenchMatrixHelper
       normalContactVectorRotationMatrixToPack.set(normalContactVectorRotation);
    }
 
-   private void computeBasisVector(int basisVectorIndex, RotationMatrix normalContactVectorRotationMatrix, FrameVector3D basisVectorToPack)
+   private void computeBasisVector(int basisVectorIndex, double rotationOffset, RotationMatrix normalContactVectorRotationMatrix, FrameVector3D basisVectorToPack)
    {
-      double angle = basisVectorIndex * basisVectorAngleIncrement;
+      double angle = rotationOffset + basisVectorIndex * basisVectorAngleIncrement;
       double mu = yoPlaneContactState.getCoefficientOfFriction();
 
       // Compute the linear part considering a normal contact vector pointing z-up
@@ -406,6 +459,11 @@ public class PlaneContactStateToWrenchMatrixHelper
    public DenseMatrix64F getRhoJacobian()
    {
       return rhoJacobianMatrix;
+   }
+
+   public DenseMatrix64F getActiveRhoMatrix()
+   {
+      return activeRhoMatrix;
    }
 
    public DenseMatrix64F getRhoMax()

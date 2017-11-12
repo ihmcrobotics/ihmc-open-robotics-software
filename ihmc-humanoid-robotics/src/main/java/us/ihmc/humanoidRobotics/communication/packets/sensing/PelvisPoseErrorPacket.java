@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets.sensing;
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class PelvisPoseErrorPacket extends Packet<PelvisPoseErrorPacket> 
 {

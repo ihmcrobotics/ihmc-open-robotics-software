@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static us.ihmc.robotics.MathTools.square;
+import static us.ihmc.commons.MathTools.square;
 
 import org.apache.commons.math3.util.Precision;
 
@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DReadOnly;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;

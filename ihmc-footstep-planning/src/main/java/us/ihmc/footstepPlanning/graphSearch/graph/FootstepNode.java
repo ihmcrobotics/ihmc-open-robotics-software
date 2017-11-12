@@ -1,10 +1,10 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
+import java.util.Random;
+
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.Random;
 
 public class FootstepNode
 {
@@ -98,7 +98,7 @@ public class FootstepNode
    @Override
    public String toString()
    {
-      return "Node: x=" + getX() + ", y=" + getY() + ", yaw=" + getYaw();
+      return "Node: x=" + getX() + ", y=" + getY() + ", yaw=" + getYaw() + ", side=" + robotSide.getLowerCaseName();
    }
 
 }

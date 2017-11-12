@@ -49,7 +49,7 @@ public class AtlasEndToEndPelvisOrientationTest extends EndToEndPelvisOrientatio
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 50000)
    public void testMultipleTrajectoryPoints() throws SimulationExceededMaximumTimeException
    {
       super.testMultipleTrajectoryPoints();

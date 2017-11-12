@@ -5,7 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.SliderJoint;

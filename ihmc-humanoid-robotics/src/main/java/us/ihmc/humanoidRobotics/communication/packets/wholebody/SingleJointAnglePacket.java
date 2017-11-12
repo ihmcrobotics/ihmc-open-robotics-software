@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosIgnoredField;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class SingleJointAnglePacket extends Packet<SingleJointAnglePacket> implements VisualizablePacket
 {   

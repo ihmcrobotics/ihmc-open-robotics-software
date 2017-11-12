@@ -11,7 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorParameters;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
 

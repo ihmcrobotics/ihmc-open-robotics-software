@@ -19,7 +19,7 @@ import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -162,6 +162,12 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, parameters, visualizer);
       SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygonsInSoleFrame, snapper);
       ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
+
+      if(showPlannerVisualizer)
+      {
+         visualizer.setFootstepSnapper(snapper);
+         nodeChecker.addPlannerListener(visualizer);
+      }
 
       planner = new DepthFirstFootstepPlanner(parameters, snapper, nodeChecker, stepCostCalculator, registry);
       planner.setFeetPolygons(footPolygonsInSoleFrame);
