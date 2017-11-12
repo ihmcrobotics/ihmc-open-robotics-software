@@ -63,11 +63,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    private static final int DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE = 50;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   /*
-    * essential classes
-    */
-   private DRCRobotModel drcRobotModelFactory;
-
    private ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
 
    private final HumanoidKinematicsSolver humanoidKinematicsSolver;
@@ -161,7 +156,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
                                                YoGraphicsListRegistry yoGraphicsListRegistry, boolean visualize)
    {
       super(statusOutputManager, registry);
-      drcRobotModelFactory = drcRobotModel;
       this.commandInputManager = commandInputManager;
 
       visualizedFullRobotModel = fullRobotModel;
@@ -962,11 +956,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    private final double handWeight = 50.0;
    private final double chestWeight = 10.0;
    private final double pelvisWeight = 10.0;
-
-   private KinematicsToolboxRigidBodyMessage createHandMessage(RobotSide robotSide)
-   {
-      return createHandMessage(robotSide, null);
-   }
 
    private KinematicsToolboxRigidBodyMessage createHandMessage(RobotSide robotSide, FramePose desiredPose)
    {
