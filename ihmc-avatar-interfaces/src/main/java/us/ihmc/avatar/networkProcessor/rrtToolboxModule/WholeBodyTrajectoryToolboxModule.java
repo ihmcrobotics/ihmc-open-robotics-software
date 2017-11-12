@@ -28,16 +28,15 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    private final WholeBodyTrajectoryToolboxController wholeBodyTrajectoryToolboxController;
 
    public WholeBodyTrajectoryToolboxModule(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel, LogModelProvider modelProvider,
-                                                    boolean startYoVariableServer)
+                                           boolean startYoVariableServer)
          throws IOException
    {
       super(drcRobotModel.createFullRobotModel(), drcRobotModel.getLogModelProvider(), startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
 
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
 
-      wholeBodyTrajectoryToolboxController = new WholeBodyTrajectoryToolboxController(drcRobotModel, fullRobotModel, commandInputManager,
-                                                                                                        statusOutputManager, registry, yoGraphicsListRegistry,
-                                                                                                        startYoVariableServer);
+      wholeBodyTrajectoryToolboxController = new WholeBodyTrajectoryToolboxController(drcRobotModel, fullRobotModel, commandInputManager, statusOutputManager,
+                                                                                      registry, yoGraphicsListRegistry, startYoVariableServer);
       commandInputManager.registerConversionHelper(new WholeBodyTrajectoryToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
    }
