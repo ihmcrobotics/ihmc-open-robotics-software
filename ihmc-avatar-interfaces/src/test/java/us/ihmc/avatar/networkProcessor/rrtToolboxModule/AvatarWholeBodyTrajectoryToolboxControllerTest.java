@@ -36,7 +36,6 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -79,9 +78,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements MultiRobotTestInterface
 {
-   private static final boolean VERBOSE = false;
-
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final AppearanceDefinition ghostApperance = YoAppearance.DarkGreen();
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
