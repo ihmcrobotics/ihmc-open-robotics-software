@@ -1,7 +1,9 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.tools;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
+import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolverWithInactiveVariables;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -117,8 +119,8 @@ public class WheneverKinematicsSolverSetting implements ControllerCoreOptimizati
    }
 
    @Override
-   public SimpleActiveSetQPSolverInterface getActiveSetQPSolver()
+   public ActiveSetQPSolverWithInactiveVariablesInterface getActiveSetQPSolver()
    {
-      return new JavaQuadProgSolver();
+      return new JavaQuadProgSolverWithInactiveVariables();
    }
 }

@@ -3,13 +3,12 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 import java.util.Arrays;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder.ConfigurationSpaceName;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.ArrayTools;
 
-public class WaypointBasedTrajectoryMessage extends TrackablePacket<WaypointBasedTrajectoryMessage>
+public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajectoryMessage>
 {
    /**
     * This is the unique hash code of the end-effector to be solved for. It used on the solver side

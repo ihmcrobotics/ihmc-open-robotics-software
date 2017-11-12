@@ -2,10 +2,10 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 
-public class WholeBodyTrajectoryToolboxOutputStatus extends StatusPacket<WholeBodyTrajectoryToolboxOutputStatus>
+public class WholeBodyTrajectoryToolboxOutputStatus extends SettablePacket<WholeBodyTrajectoryToolboxOutputStatus>
 {
    /**
     * 0: not completed.

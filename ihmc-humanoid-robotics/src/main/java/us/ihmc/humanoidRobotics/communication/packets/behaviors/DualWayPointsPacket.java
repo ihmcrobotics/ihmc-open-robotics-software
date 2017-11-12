@@ -2,12 +2,12 @@ package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class DualWayPointsPacket extends Packet<DualWayPointsPacket> {
