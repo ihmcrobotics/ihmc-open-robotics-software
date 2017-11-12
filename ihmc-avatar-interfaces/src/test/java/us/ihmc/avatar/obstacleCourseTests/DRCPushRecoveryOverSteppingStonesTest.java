@@ -255,6 +255,24 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
       planarRegions.add(platform);
       planarRegions.add(platform);
 
+      List<PlanarRegionMessage> planarRegionsAsMessages = new ArrayList<>();
+      for (int i = 0; i < planarRegions.size(); i++)
+      {
+         PlanarRegion planarRegion = planarRegions.get(i);
+         if (planarRegion != null)
+            planarRegionsAsMessages.add(PlanarRegionMessageConverter.convertToPlanarRegionMessage(planarRegion));
+      }
+
+      ArrayList<PlanarRegionsListMessage> messages = new ArrayList<>();
+      for (int i = 0; i < planarRegions.size(); i++)
+      {
+         PlanarRegionsListMessage messageList = new PlanarRegionsListMessage(planarRegionsAsMessages);
+         messageList.uniqueId = 5L;
+         messages.add(messageList);
+      }
+
+
+      /*
       ArrayList<PlanarRegionsListMessage> messages = new ArrayList<>();
       for (int i = 0; i < planarRegions.size(); i++)
       {
@@ -268,6 +286,7 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
          messageList.uniqueId = 5L;
          messages.add(messageList);
       }
+      */
 
       return messages;
    }
