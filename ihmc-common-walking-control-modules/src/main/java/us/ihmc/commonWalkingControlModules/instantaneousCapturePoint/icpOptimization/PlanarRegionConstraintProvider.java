@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
+import org.ojalgo.function.multiary.MultiaryFunction;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.captureRegion.CaptureRegionVisualizer;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
@@ -80,14 +81,12 @@ public class PlanarRegionConstraintProvider
       if (planarRegion != null)
       {
          planarRegionsList.addPlanarRegion(planarRegion);
-
-         activePlanarRegion.setConvexPolygon2d(planarRegion.getConvexHull());
-         icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion, projectedConvexHull);
-         activePlanarRegionInControlPlane.setConvexPolygon2d(projectedConvexHull);
+         computeProjectedConvexHull();
       }
       else
       {
          activePlanarRegion.clearAndHide();
+         activePlanarRegionInControlPlane.clearAndHide();
       }
    }
 
@@ -113,14 +112,29 @@ public class PlanarRegionConstraintProvider
       distanceToPlanarRegionEdgeForNoOverhang.set(maxDistance);
    }
 
+   private ConvexPolygon2D computeProjectedConvexHull()
+   {
+      PlanarRegion planarRegion = planarRegionsList.getLastPlanarRegion();
+
+      icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, projectedConvexHull, distanceToPlanarRegionEdgeForNoOverhang.getDoubleValue());
+
+      ConvexPolygon2D convexHull = planarRegion.getConvexHull();
+      activePlanarRegion.setConvexPolygon2d(convexHull);
+      activePlanarRegionInControlPlane.setConvexPolygon2d(projectedConvexHull);
+
+      return projectedConvexHull;
+   }
+
 
    public void updatePlanarRegionConstraintForDoubleSupport(SimpleICPOptimizationQPSolver solver)
    {
       captureRegionCalculator.hideCaptureRegion();
       solver.resetPlanarRegionConstraint();
+
+      if (!planarRegionsList.isEmpty())
+         computeProjectedConvexHull();
    }
 
-   // FIXME this is wrong
    public void updatePlanarRegionConstraintForSingleSupport(RobotSide supportSide, double swingTimeRemaining, FramePoint2D currentICP, double omega0, SimpleICPOptimizationQPSolver solver)
    {
       captureRegionCalculator.calculateCaptureRegion(supportSide.getOppositeSide(), swingTimeRemaining, currentICP, omega0,
@@ -129,18 +143,7 @@ public class PlanarRegionConstraintProvider
       solver.resetPlanarRegionConstraint();
 
       if (!planarRegionsList.isEmpty())
-      {
-         PlanarRegion planarRegion = planarRegionsList.getLastPlanarRegion();
-
-         icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, projectedConvexHull,
-                                                                               distanceToPlanarRegionEdgeForNoOverhang.getDoubleValue() - footstepDeadband.getDoubleValue());
-
-         ConvexPolygon2D convexHull = planarRegion.getConvexHull();
-         activePlanarRegion.setConvexPolygon2d(convexHull);
-         activePlanarRegionInControlPlane.setConvexPolygon2d(projectedConvexHull);
-
-         solver.setPlanarRegionConstraint(projectedConvexHull, 0.0);
-      }
+         solver.setPlanarRegionConstraint(computeProjectedConvexHull());
    }
 
    public PlanarRegion getActivePlanarRegion()

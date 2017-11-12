@@ -38,6 +38,8 @@ public class PlanarRegionsListHandler
 
    public void handlePlanarRegionsListCommand(PlanarRegionsListCommand planarRegionsListCommand)
    {
+      planarRegions.clear();
+
       for (int i = 0; i < planarRegionsListCommand.getNumberOfPlanarRegions(); i++)
       {
          planarRegionsListCommand.getPlanarRegionCommand(i).getPlanarRegion(planarRegions.add());
