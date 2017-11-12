@@ -7,7 +7,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
-public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedConfigurationSpace
+public abstract class ConstrainedEndEffectorTrajectory
 {
    protected TaskRegion taskNodeRegion;
    protected SideDependentList<ConfigurationBuildOrder> configurationBuildOrders;
@@ -39,7 +39,7 @@ public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedCon
 
       ConfigurationSpace finalConfigurationSpace = constrainedConfigurationSpace.overrideConfigurationSpaceCopy(controllableSelectionMatrices.get(robotSide),
                                                                                                                 controllableConfigurationSpace);
-      
+
       Point3D translation;
       Quaternion orientation;
       Pose3D pose3D;
@@ -49,11 +49,17 @@ public abstract class ConstrainedEndEffectorTrajectory implements ConstrainedCon
 
       return pose3D;
    }
-   
+
    public TaskRegion getTaskRegion()
    {
       return this.taskNodeRegion;
    }
+
+   public abstract SideDependentList<SelectionMatrix6D> defineControllableSelectionMatrices();
+
+   public abstract SideDependentList<ConfigurationBuildOrder> defineConfigurationBuildOrders();
+
+   public abstract TaskRegion defineTaskRegion();
 
    public abstract SideDependentList<ConfigurationSpace> getConfigurationSpace(double time);
 }
