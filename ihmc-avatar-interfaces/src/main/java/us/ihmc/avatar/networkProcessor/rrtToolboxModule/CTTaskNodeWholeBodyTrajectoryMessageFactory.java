@@ -27,6 +27,8 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class CTTaskNodeWholeBodyTrajectoryMessageFactory
 {
+   private static final boolean VERBOSE = false;
+
    private ArrayList<CTTaskNode> path;
 
    private ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
@@ -53,7 +55,8 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
       {
          int numberOfTrajectoryPoints = path.size();
 
-         PrintTools.info("" + numberOfTrajectoryPoints);
+         if (VERBOSE)
+            PrintTools.info("" + numberOfTrajectoryPoints);
 
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
 
@@ -64,7 +67,7 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
 
          SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
          orientationCalculator.clear();
-         
+
          for (int i = 0; i < numberOfTrajectoryPoints; i++)
          {
             CTTaskNode trajectoryNode = path.get(i);
@@ -72,21 +75,22 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
             ConfigurationSpace configurationSpace = CTTreeTools.getConfigurationSpace(trajectoryNode, robotSide);
 
             Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(trajectoryNode.getTime(), robotSide, configurationSpace);
-            PrintTools.info(""+robotSide+" "+desiredPose);
+            if (VERBOSE)
+               PrintTools.info("" + robotSide + " " + desiredPose);
 
             double time = firstTrajectoryPointTime + trajectoryNode.getTime();
             euclideanTrajectoryPointCalculator.appendTrajectoryPoint(time, new Point3D(desiredPose.getPosition()));
-            
+
             Quaternion desiredOrientation = new Quaternion(desiredPose.getOrientation());
             orientationCalculator.appendTrajectoryPointOrientation(time, desiredOrientation);
          }
-         
+
          orientationCalculator.compute();
 
          euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(false);
 
          RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
-         
+
          for (int i = 0; i < numberOfTrajectoryPoints; i++)
          {
             CTTaskNode trajectoryNode = path.get(i);
@@ -109,8 +113,9 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
 
             double time = trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
 
-            PrintTools.info(""+i+" "+time +" " + desiredLinearVelocity+" "+ desiredAngularVelocity);
-            
+            if (VERBOSE)
+               PrintTools.info("" + i + " " + time + " " + desiredLinearVelocity + " " + desiredAngularVelocity);
+
             handTrajectoryMessage.setTrajectoryPoint(i, time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, worldFrame);
          }
 
@@ -123,13 +128,15 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
    {
       int numberOfTrajectoryPoints = path.size();
 
-      PrintTools.info("" + numberOfTrajectoryPoints);
+      if (VERBOSE)
+         PrintTools.info("" + numberOfTrajectoryPoints);
 
       chestTrajectoryMessage = new ChestTrajectoryMessage(numberOfTrajectoryPoints);
       chestTrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
       chestTrajectoryMessage.getFrameInformation().setDataReferenceFrame(worldFrame);
 
-      PrintTools.info("" + chestTrajectoryMessage.getNumberOfTrajectoryPoints());
+      if (VERBOSE)
+         PrintTools.info("" + chestTrajectoryMessage.getNumberOfTrajectoryPoints());
 
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
       orientationCalculator.clear();
@@ -166,7 +173,8 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
          Vector3D desiredAngularVelocity = new Vector3D();
          orientationCalculator.getTrajectoryPoints().get(i).getAngularVelocity(desiredAngularVelocity);
 
-         PrintTools.info("" + i + " " + time);
+         if (VERBOSE)
+            PrintTools.info("" + i + " " + time);
 
          chestTrajectoryMessage.setTrajectoryPoint(i, time, desiredOrientation, desiredAngularVelocity, worldFrame);
       }
@@ -256,20 +264,19 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
       {
          configurations[i] = new KinematicsToolboxOutputStatus(path.get(i).getConfiguration());
       }
-         
 
       return configurations;
    }
-   
+
    public double[] getTrajectoryTimes()
    {
       int numberOfConfigurations = path.size();
-      
+
       double[] trajectoryTimes = new double[numberOfConfigurations];
-      
+
       for (int i = 0; i < numberOfConfigurations; i++)
          trajectoryTimes[i] = path.get(i).getTime();
-      
+
       return trajectoryTimes;
    }
 }
