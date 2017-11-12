@@ -19,7 +19,6 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WayPointsByVRUIBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.debug.PartialFootholdBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestICPOptimizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.debug.TestSmoothICPPlannerBehavior;
@@ -291,10 +290,6 @@ public class IHMCHumanoidBehaviorManager
       CuttingWallBehaviorStateMachine cuttingWallBehavior = new CuttingWallBehaviorStateMachine(robotModelFactory, behaviorCommunicationBridge,
                                                                                                 yoTime, fullRobotModel, referenceFrames);
       dispatcher.addBehavior(HumanoidBehaviorType.CUTTING_WALL, cuttingWallBehavior);
-      
-      WayPointsByVRUIBehaviorStateMachine wayPointsByVRUIBehavior = new WayPointsByVRUIBehaviorStateMachine(robotModelFactory, behaviorCommunicationBridge,
-                                                                                                yoTime, fullRobotModel, referenceFrames);
-      dispatcher.addBehavior(HumanoidBehaviorType.WAYPOINTS_MOTION_VRUI, wayPointsByVRUIBehavior);
    }
 
    private void createAndRegisterAutomaticDiagnostic(BehaviorDispatcher<HumanoidBehaviorType> dispatcher, FullHumanoidRobotModel fullRobotModel,
