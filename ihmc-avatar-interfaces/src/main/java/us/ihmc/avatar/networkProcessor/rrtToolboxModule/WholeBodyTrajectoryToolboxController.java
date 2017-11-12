@@ -60,6 +60,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class WholeBodyTrajectoryToolboxController extends ToolboxController
 {
+   private static final boolean VERBOSE = false;
    private static final int DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION = 5;
    private static final int DEFAULT_MAXIMUM_NUMBER_OF_ITERATIONS = 1000;
    private static final int DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE = 1000;
@@ -192,7 +193,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    protected void updateInternal() throws InterruptedException, ExecutionException
    {
       currentNumberOfIterations.increment();
-      // PrintTools.info("" + updateCount.getIntegerValue() + " " + state);
 
       // ************************************************************************************************************** //
       switch (state.getEnumValue())
@@ -290,7 +290,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       }
       else
       {
-         PrintTools.info("Planning is Failed.");
+         if (VERBOSE)
+            PrintTools.info("Planning has Failed.");
       }
    }
 
@@ -345,16 +346,20 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       if (visualize)
          treeVisualizer.update(tree.getPath());
 
-      long time1 = System.currentTimeMillis();
-
       for (int i = 0; i < numberOfIterationForShortcutOptimization.getIntegerValue(); i++)
       {
          updateShortcutPath(tree.getPath());
       }
+      long endTime = System.nanoTime();
 
-      long time2 = System.currentTimeMillis();
-      PrintTools.info("shortcut time is = " + (time2 - time1) / 1000.0);
-      PrintTools.info("the size of the path is " + tree.getPath().size() + " before dismissing " + revertedPathSize);
+      shortcutPathComputationTime.set(Conversions.nanosecondsToSeconds(endTime - shortcutStartTime));
+      motionGenerationStartTime = endTime;
+
+      if (VERBOSE)
+      {
+         PrintTools.info("Shortcut computation time = " + shortcutPathComputationTime.getDoubleValue());
+         PrintTools.info("the size of the path is " + tree.getPath().size() + " before dismissing " + revertedPathSize);
+      }
 
       numberOfMotionPath = tree.getPath().size();
 
@@ -368,9 +373,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
        */
       state.set(CWBToolboxState.GENERATE_MOTION);
 
-      long endTime = System.nanoTime();
-      shortcutPathComputationTime.set(Conversions.nanosecondsToSeconds(endTime - shortcutStartTime));
-      motionGenerationStartTime = endTime;
    }
 
    /**
@@ -393,7 +395,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          tree.connectNewNode(true);
          if (tree.getNewNode().getTime() == taskRegion.getTrajectoryTime())
          {
-            PrintTools.info("terminate expanding");
+            if (VERBOSE)
+               PrintTools.info("Successfully finished tree expansion.");
             currentExpansionSize.set(maximumExpansionSize.getIntegerValue()); // for terminate
          }
       }
@@ -437,7 +440,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       {
          if (tree.getTreeReachingTime() != 1.0)
          {
-            PrintTools.info("Fail to reach end.");
+            if (VERBOSE)
+               PrintTools.info("Failed to complete trajectory.");
 
             terminateToolboxController();
          }
@@ -447,8 +451,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
             long endTime = System.nanoTime();
             treeExpansionComputationTime.set(Conversions.nanosecondsToSeconds(endTime - treeExpansionStartTime));
             shortcutStartTime = endTime;
-
-            PrintTools.info("Total update solver");
          }
       }
    }
@@ -490,11 +492,11 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       if (currentNumberOfInitialGuesses.getIntegerValue() >= desiredNumberOfInitialGuesses.getIntegerValue())
       {
-         PrintTools.info("initial guess terminate");
+         if (VERBOSE)
+            PrintTools.info("Successfully finished initial guess stage.");
 
          if (rootNode.getValidity() == false)
          {
-            PrintTools.info("Real???? ");
             terminateToolboxController();
          }
          else
@@ -526,7 +528,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       constrainedEndEffectorTrajectory = convertCommands(trajectoryCommands);
 
-      PrintTools.info("initialize CWB toolbox");
+      if (VERBOSE)
+         PrintTools.info("initialize CWB toolbox");
 
       /*
        * bring control parameters from request.
@@ -805,6 +808,13 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          totalTime += motionGenerationComputationTime.getDoubleValue();
       totalComputationTime.set(totalTime);
 
+      if (VERBOSE)
+      {
+         PrintTools.info("===========================================");
+         PrintTools.info("toolbox executing time is " + totalComputationTime.getDoubleValue() + " seconds " + currentNumberOfIterations.getIntegerValue());
+         PrintTools.info("===========================================");
+      }
+
       isDone.set(true);
    }
 
@@ -949,7 +959,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       if (nodeDummy.getParentNode() == null)
       {
-         PrintTools.info("no parent!");
+         if (VERBOSE)
+            PrintTools.info("no parent!");
       }
       updateValidity(nodeDummy);
       if (nodeDummy.getValidity())
