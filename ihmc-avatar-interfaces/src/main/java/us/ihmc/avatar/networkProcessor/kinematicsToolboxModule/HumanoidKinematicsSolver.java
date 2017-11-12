@@ -12,6 +12,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -27,12 +28,13 @@ public class HumanoidKinematicsSolver
    private final HumanoidKinematicsToolboxController controller;
    private final CommandInputManager commandInputManager = new CommandInputManager(name, KinematicsToolboxModule.supportedCommands());
 
-   private final YoDouble solutionQualityPrevious = new YoDouble("solutionQualityPrevious", registry);
    private final YoDouble solutionQualityThreshold = new YoDouble("solutionQualityThreshold", registry);
    private final YoDouble solutionStabilityThreshold = new YoDouble("solutionStabilityThreshold", registry);
 
    private final YoInteger numberOfIterations = new YoInteger("numberOfIterations", registry);
    private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterations", registry);
+
+   private final YoBoolean hasConverged = new YoBoolean("hasConverged", registry);
 
    public HumanoidKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory, YoGraphicsListRegistry yoGraphicsListRegistry,
                                    YoVariableRegistry parentRegistry)
@@ -78,9 +80,6 @@ public class HumanoidKinematicsSolver
 
    public void initialize()
    {
-      solutionQualityPrevious.setToNaN();
-      numberOfIterations.set(0);
-
       controller.updateFootSupportState(true, true);
 
       boolean initialized = controller.initialize();
@@ -94,26 +93,31 @@ public class HumanoidKinematicsSolver
    public boolean solve()
    {
       boolean isSolutionGood = false;
+      double solutionQualityCurrent = Double.NaN;
+      double solutionQualityPrevious = Double.NaN;
+      int iteration = 0;
 
-      while (!isSolutionGood && numberOfIterations.getIntegerValue() < maximumNumberOfIterations.getIntegerValue())
+      while (!isSolutionGood && iteration < maximumNumberOfIterations.getIntegerValue())
       {
          controller.updateInternal();
 
          KinematicsToolboxOutputStatus solution = controller.getSolution();
-         double solutionQualityCurrent = solution.getSolutionQuality();
+         solutionQualityCurrent = solution.getSolutionQuality();
 
-         if (!solutionQualityPrevious.isNaN())
+         if (!Double.isNaN(solutionQualityPrevious))
          {
-            double deltaSolutionQuality = solutionQualityCurrent - solutionQualityPrevious.getDoubleValue();
+            double deltaSolutionQuality = solutionQualityCurrent - solutionQualityPrevious;
             boolean isSolutionStable = Math.abs(deltaSolutionQuality) < solutionStabilityThreshold.getDoubleValue();
             boolean isSolutionQualityHigh = solutionQualityCurrent < solutionQualityThreshold.getDoubleValue();
             isSolutionGood = isSolutionStable && isSolutionQualityHigh;
          }
 
-         solutionQualityPrevious.set(solutionQualityCurrent);
-         numberOfIterations.increment();
+         solutionQualityPrevious = solutionQualityCurrent;
+         iteration++;
       }
 
+      numberOfIterations.set(iteration);
+      hasConverged.set(isSolutionGood);
       return isSolutionGood;
    }
 
