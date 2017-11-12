@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsSolver;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -59,6 +60,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class WholeBodyTrajectoryToolboxController extends ToolboxController
 {
+   private static final int DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION = 5;
+   private static final int DEFAULT_MAXIMUM_NUMBER_OF_ITERATIONS = 1000;
    private static final int DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE = 1000;
    private static final int DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE = 50;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -72,12 +75,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    /*
     * YoVariables
     */
-   private final YoInteger updateCount = new YoInteger("updateCount", registry);
-
-   private final YoInteger expandingCount = new YoInteger("expandingCount", registry);
-
-   // check the current pose is valid or not.
-   private final YoBoolean currentIsValid = new YoBoolean("currentIsValid", registry);
+   private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterations", registry);
+   private final YoInteger currentNumberOfIterations = new YoInteger("currentNumberOfIterations", registry);
 
    // check the tree reaching the normalized time from 0.0 to 1.0.
    private final YoDouble currentTrajectoryTime = new YoDouble("currentNormalizedTime", registry);
@@ -86,7 +85,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private final YoDouble jointlimitScore = new YoDouble("jointlimitScore", registry);
 
-   private double bestScoreInitialGuess = 0.0;
+   private final YoDouble bestScoreInitialGuess = new YoDouble("bestScoreInitialGuess", registry);
 
    /*
     * Visualizer
@@ -117,10 +116,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private TaskRegion taskRegion;
 
-   /*
-    * API
-    */
-
    private final YoInteger currentExpansionSize = new YoInteger("currentExpansionSize", registry);
    private final YoInteger maximumExpansionSize = new YoInteger("maximumExpansionSize", registry);
 
@@ -129,11 +124,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private int numberOfMotionPath = 1;
 
-   private int numberOfTimesToShortcut = 5;
-
-   private static int terminateToolboxCondition = 1000;
-
-   // public CTTaskNodeWholeBodyTrajectoryMessageFactory ctTaskNodeWholeBodyTrajectoryMessageFactory;
+   private YoInteger numberOfIterationForShortcutOptimization = new YoInteger("numberOfIterationForShortcutOptimization", registry);
 
    /**
     * Toolbox state
@@ -145,9 +136,16 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       DO_NOTHING, FIND_INITIAL_GUESS, EXPAND_TREE, SHORTCUT_PATH, GENERATE_MOTION
    }
 
-   /*
-    * parallel family.
-    */
+   private final YoDouble initialGuessComputationTime = new YoDouble("initialGuessComputationTime", registry);
+   private final YoDouble treeExpansionComputationTime = new YoDouble("treeExpansionComputationTime", registry);
+   private final YoDouble shortcutPathComputationTime = new YoDouble("shortcutPathComputationTime", registry);
+   private final YoDouble motionGenerationComputationTime = new YoDouble("motionGenerationComputationTime", registry);
+   private final YoDouble totalComputationTime = new YoDouble("totalComputationTime", registry);
+
+   private long initialGuessStartTime;
+   private long treeExpansionStartTime;
+   private long shortcutStartTime;
+   private long motionGenerationStartTime;
 
    private final CommandInputManager commandInputManager;
 
@@ -181,6 +179,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          yoGraphicsListRegistry.registerYoGraphic("" + robotSide + "endeffectorPoseViz", endeffectorFrame.get(robotSide));
       }
 
+      numberOfIterationForShortcutOptimization.set(DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION);
+      maximumNumberOfIterations.set(DEFAULT_MAXIMUM_NUMBER_OF_ITERATIONS);
+
       humanoidKinematicsSolver = new HumanoidKinematicsSolver(drcRobotModel, yoGraphicsListRegistry, registry);
 
       toolboxSolution = new WholeBodyTrajectoryToolboxOutputStatus();
@@ -190,7 +191,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    @Override
    protected void updateInternal() throws InterruptedException, ExecutionException
    {
-      updateCount.increment();
+      currentNumberOfIterations.increment();
       // PrintTools.info("" + updateCount.getIntegerValue() + " " + state);
 
       // ************************************************************************************************************** //
@@ -229,7 +230,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       updateYoVariables();
 
       // ************************************************************************************************************** //
-      if (updateCount.getIntegerValue() == terminateToolboxCondition)
+      if (currentNumberOfIterations.getIntegerValue() == maximumNumberOfIterations.getIntegerValue())
       {
          terminateToolboxController();
       }
@@ -263,6 +264,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
          reportMessage(toolboxSolution);
       }
+
+      long endTime = System.nanoTime();
+      motionGenerationComputationTime.set(Conversions.nanosecondsToSeconds(endTime - motionGenerationStartTime));
    }
 
    // TODO
@@ -343,7 +347,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       long time1 = System.currentTimeMillis();
 
-      for (int i = 0; i < numberOfTimesToShortcut; i++)
+      for (int i = 0; i < numberOfIterationForShortcutOptimization.getIntegerValue(); i++)
       {
          updateShortcutPath(tree.getPath());
       }
@@ -363,6 +367,10 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
        * terminate state
        */
       state.set(CWBToolboxState.GENERATE_MOTION);
+
+      long endTime = System.nanoTime();
+      shortcutPathComputationTime.set(Conversions.nanosecondsToSeconds(endTime - shortcutStartTime));
+      motionGenerationStartTime = endTime;
    }
 
    /**
@@ -370,7 +378,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     */
    private void expandingTree()
    {
-      expandingCount.increment();
+      currentExpansionSize.increment();
 
       tree.updateRandomConfiguration();
 
@@ -424,7 +432,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       /*
        * terminate expanding tree.
        */
-      currentExpansionSize.increment();
 
       if (currentExpansionSize.getIntegerValue() >= maximumExpansionSize.getIntegerValue())
       {
@@ -437,6 +444,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          else
          {
             state.set(CWBToolboxState.SHORTCUT_PATH);
+            long endTime = System.nanoTime();
+            treeExpansionComputationTime.set(Conversions.nanosecondsToSeconds(endTime - treeExpansionStartTime));
+            shortcutStartTime = endTime;
 
             PrintTools.info("Total update solver");
          }
@@ -465,9 +475,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       jointlimitScore.set(jointScore);
 
-      if (bestScoreInitialGuess < jointScore && visualizedNode.getValidity() == true)
+      if (bestScoreInitialGuess.getDoubleValue() < jointScore && visualizedNode.getValidity() == true)
       {
-         bestScoreInitialGuess = jointScore;
+         bestScoreInitialGuess.set(jointScore);
 
          rootNode = new CTTaskNode(visualizedNode);
          rootNode.setValidity(visualizedNode.getValidity());
@@ -493,19 +503,15 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
             rootNode.convertDataToNormalizedData(taskRegion);
 
-            PrintTools.info("" + bestScoreInitialGuess);
-            for (int i = 0; i < rootNode.getDimensionOfNodeData(); i++)
-            {
-               PrintTools.info("" + i + " " + rootNode.getNodeData(i));
-            }
-
             tree = new CTTaskNodeTree(rootNode);
             tree.setTaskRegion(taskRegion);
+
+            long endTime = System.nanoTime();
+            initialGuessComputationTime.set(Conversions.nanosecondsToSeconds(endTime - initialGuessStartTime));
+            treeExpansionStartTime = endTime;
          }
       }
    }
-
-   long startTime;
 
    @Override
    protected boolean initialize()
@@ -551,8 +557,15 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          treeVisualizer.initialize();
       }
 
-      startTime = System.currentTimeMillis();
+      bestScoreInitialGuess.set(0.0);
+
       state.set(CWBToolboxState.FIND_INITIAL_GUESS);
+      initialGuessStartTime = System.nanoTime();
+
+      initialGuessComputationTime.setToNaN();
+      treeExpansionComputationTime.setToNaN();
+      shortcutPathComputationTime.setToNaN();
+      motionGenerationComputationTime.setToNaN();
 
       return true;
    }
@@ -781,11 +794,16 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    {
       state.set(CWBToolboxState.DO_NOTHING);
 
-      long stopTime = System.currentTimeMillis();
-      long elapsedTime = stopTime - startTime;
-      System.out.println("===========================================");
-      System.out.println("toolbox executing time is " + elapsedTime / 1000.0 + " seconds " + updateCount.getIntegerValue());
-      System.out.println("===========================================");
+      double totalTime = 0.0;
+      if (!initialGuessComputationTime.isNaN())
+         totalTime += initialGuessComputationTime.getDoubleValue();
+      if (!treeExpansionComputationTime.isNaN())
+         totalTime += treeExpansionComputationTime.getDoubleValue();
+      if (!shortcutPathComputationTime.isNaN())
+         totalTime += shortcutPathComputationTime.getDoubleValue();
+      if (!motionGenerationComputationTime.isNaN())
+         totalTime += motionGenerationComputationTime.getDoubleValue();
+      totalComputationTime.set(totalTime);
 
       isDone.set(true);
    }
@@ -870,14 +888,13 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     */
    private void updateVisualizers()
    {
+      currentTrajectoryTime.set(visualizedNode.getNormalizedNodeData(0));
+
       if (visualize && visualizedNode != null)
       {
          treeStateVisualizer.setCurrentNormalizedTime(visualizedNode.getNormalizedNodeData(0));
          treeStateVisualizer.setCurrentCTTaskNodeValidity(visualizedNode.getValidity());
          treeStateVisualizer.updateVisualizer();
-
-         currentIsValid.set(visualizedNode.getValidity());
-         currentTrajectoryTime.set(visualizedNode.getNormalizedNodeData(0));
 
          treeVisualizer.update(visualizedNode);
       }
