@@ -1,8 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets.heightQuadTree;
 
-import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.communication.packets.SettablePacket;
 
-public class HeightQuadTreeMessage extends StatusPacket<HeightQuadTreeMessage>
+public class HeightQuadTreeMessage extends SettablePacket<HeightQuadTreeMessage>
 {
    public HeightQuadTreeNodeMessage root;
    public float defaultHeight = Float.NaN;

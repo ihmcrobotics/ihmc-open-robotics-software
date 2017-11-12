@@ -2,10 +2,13 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlOptimizationControlModule;
-import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverWithInactiveVariables;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
 public interface ControllerCoreOptimizationSettings
@@ -23,7 +26,7 @@ public interface ControllerCoreOptimizationSettings
     * invertible. It is should preferably be above {@code 1.0e-8}. A high value will cause the
     * system to become too 'lazy'.
     * </p>
-    * 
+    *
     * @return the weight to use for joint acceleration regularization.
     */
    default double getJointVelocityWeight()
@@ -51,7 +54,7 @@ public interface ControllerCoreOptimizationSettings
     * {@code 1.0e-8}. A high value will cause the system to become too 'lazy'. A value of
     * {@code 0.005} is used for Atlas' simulations.
     * </p>
-    * 
+    *
     * @return the weight to use for joint acceleration regularization.
     */
    double getJointAccelerationWeight();
@@ -63,7 +66,7 @@ public interface ControllerCoreOptimizationSettings
     * used when running the {@link WholeBodyControllerCore} in the
     * {@link WholeBodyControllerCoreMode#INVERSE_DYNAMICS} mode.
     * </p>
-    * 
+    *
     * @return the maximum joint acceleration, the returned value has to be in [0,
     *         {@link Double#POSITIVE_INFINITY}].
     */
@@ -85,7 +88,7 @@ public interface ControllerCoreOptimizationSettings
     * helps to improve smoothness of the resulting motions. A high value will cause the system to
     * become too 'floppy'. A value of {@code 0.1} is used for Atlas' simulations.
     * </p>
-    * 
+    *
     * @return the weight to use for joint jerk regularization.
     */
    double getJointJerkWeight();
@@ -119,7 +122,7 @@ public interface ControllerCoreOptimizationSettings
     * "https://www.researchgate.net/publication/280839675_Design_of_a_Momentum-Based_Control_Framework_and_Application_to_the_Humanoid_Robot_Atlas">
     * Design of a Momentum-Based Control Framework and Application to the Humanoid Robot Atlas.</a>
     * </p>
-    * 
+    *
     * @return the weight to use for contact force regularization.
     */
    double getRhoWeight();
@@ -146,7 +149,7 @@ public interface ControllerCoreOptimizationSettings
     * "https://www.researchgate.net/publication/280839675_Design_of_a_Momentum-Based_Control_Framework_and_Application_to_the_Humanoid_Robot_Atlas">
     * Design of a Momentum-Based Control Framework and Application to the Humanoid Robot Atlas.</a>
     * </p>
-    * 
+    *
     * @return the minimum value for each component of rho.
     */
    double getRhoMin();
@@ -167,7 +170,7 @@ public interface ControllerCoreOptimizationSettings
     * Be careful as the weight is for forces and thus is affected by the total weight of the robot.
     * A higher value should be picked for a lighter robot.
     * </p>
-    * 
+    *
     * @return the weight to use for the regularization of the rate of change of contact forces.
     */
    double getRhoRateDefaultWeight();
@@ -175,7 +178,7 @@ public interface ControllerCoreOptimizationSettings
    /**
     * When required, the controller core can switch to temporarily use a higher weight to regulate
     * variations in contact forces. This is the weight used in such situation.
-    * 
+    *
     * @return the high weight to use for the regularization of the rate of change of contact forces.
     */
    double getRhoRateHighWeight();
@@ -194,7 +197,7 @@ public interface ControllerCoreOptimizationSettings
     * {@link WholeBodyControllerCore} in {@link WholeBodyControllerCoreMode#INVERSE_DYNAMICS} or
     * {@link WholeBodyControllerCoreMode#VIRTUAL_MODEL} respectively.
     * </p>
-    * 
+    *
     * @return the regularization weight to use on the center of pressure location.
     */
    Vector2D getCoPWeight();
@@ -212,8 +215,8 @@ public interface ControllerCoreOptimizationSettings
     * The value should be positive but not necessarily non-zero. It helps smoothing the motion of
     * the center pressure of each contacting body.
     * </p>
-    * 
-    * 
+    *
+    *
     * @return the regularization weight to use for center of pressure variations.
     */
    Vector2D getCoPRateDefaultWeight();
@@ -221,7 +224,7 @@ public interface ControllerCoreOptimizationSettings
    /**
     * When required, the controller core can switch to temporarily use a higher weight to regulate
     * variations in center of pressure. This is the weight used in such situation.
-    * 
+    *
     * @return the high regularization weight to use for center of pressure variations.
     */
    Vector2D getCoPRateHighWeight();
@@ -244,7 +247,7 @@ public interface ControllerCoreOptimizationSettings
     * "https://www.researchgate.net/publication/280839675_Design_of_a_Momentum-Based_Control_Framework_and_Application_to_the_Humanoid_Robot_Atlas">
     * Design of a Momentum-Based Control Framework and Application to the Humanoid Robot Atlas.</a>
     * </p>
-    * 
+    *
     * @return the number of basis vectors to use per contact point.
     */
    int getNumberOfBasisVectorsPerContactPoint();
@@ -260,7 +263,7 @@ public interface ControllerCoreOptimizationSettings
     * <p>
     * It is usually set to four contact points.
     * </p>
-    * 
+    *
     * @return the maximum number of contact points to use per contactable body.
     */
    int getNumberOfContactPointsPerContactableBody();
@@ -274,7 +277,7 @@ public interface ControllerCoreOptimizationSettings
     * {@link WholeBodyControllerCore} in {@link WholeBodyControllerCoreMode#INVERSE_DYNAMICS} or
     * {@link WholeBodyControllerCoreMode#VIRTUAL_MODEL} respectively.
     * </p>
-    * 
+    *
     * @return the number of contactable bodies.
     */
    int getNumberOfContactableBodies();
@@ -290,23 +293,33 @@ public interface ControllerCoreOptimizationSettings
     * "https://www.researchgate.net/publication/280839675_Design_of_a_Momentum-Based_Control_Framework_and_Application_to_the_Humanoid_Robot_Atlas">
     * Design of a Momentum-Based Control Framework and Application to the Humanoid Robot Atlas.</a>
     * </p>
-    * 
+    *
     * @return the size of the vector rho.
     */
    int getRhoSize();
+
+   /**
+    * Returns whether or not the optimization should consider the rho variable when its associated
+    * contact point is not in contact. This reduces the optimization size for the whole body controller,
+    * potentially leading to higher speeds.
+    */
+   default boolean getDeactivateRhoWhenNotInContact()
+   {
+      return true;
+   }
 
    /**
     * Gets a new instance of {@code ActiveSetQPSolver} to be used in the controller core.
     * <p>
     * A QP solver is needed for any of the three modes of the controller core.
     * </p>
-    * 
+    *
     * @return a new instance of the QP solver to be used. By default it is the
     *         {@link SimpleEfficientActiveSetQPSolver}.
     */
-   default SimpleActiveSetQPSolverInterface getActiveSetQPSolver()
+   default ActiveSetQPSolverWithInactiveVariablesInterface getActiveSetQPSolver()
    {
-      return new SimpleEfficientActiveSetQPSolver();
+      return new SimpleEfficientActiveSetQPSolverWithInactiveVariables();
    }
 
    /**
@@ -337,11 +350,21 @@ public interface ControllerCoreOptimizationSettings
     * desired joint velocities remain between the joint velocity lower and upper bounds at all time.
     * </ul>
     * </p>
-    * 
+    *
     * @return {@code true} if the joint velocity limits are to considered, {@code false} otherwise.
     */
    default boolean areJointVelocityLimitsConsidered()
    {
       return true;
+   }
+
+   /**
+    * Adds the ability to define a robot specific friction cone rotation. This can be useful when
+    * using friction cone representations with a low number of basis vectors and for feet with
+    * a lot of contact points. By default this will return a zero offset provider.
+    */
+   default public FrictionConeRotationCalculator getFrictionConeRotation()
+   {
+      return new ZeroConeRotationCalculator();
    }
 }

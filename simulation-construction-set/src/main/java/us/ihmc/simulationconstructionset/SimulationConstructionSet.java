@@ -40,7 +40,7 @@ import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.image.ImageCallback;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.dataBuffer.*;
 import us.ihmc.yoVariables.listener.RewoundListener;
 import us.ihmc.yoVariables.listener.YoVariableRegistryChangedListener;
@@ -3542,7 +3542,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    public void createVideo(File videoFile)
    {
-      if (myGUI != null) myGUI.getViewportPanel().getStandardGUIActions().createVideo(videoFile);
+      if (myGUI != null)
+      {
+         myGUI.getViewportPanel().getStandardGUIActions().createVideo(videoFile);
+      }
+      else
+      {
+         PrintTools.error("Can Not Create a Video if the gui wasn't created! myGUI was null");
+      }
    }
 
    /**

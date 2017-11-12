@@ -191,7 +191,8 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       sensorProcessing.addSensorAlphaFilter(angularVelocityAlphaFilter, false, IMU_ANGULAR_VELOCITY);
       sensorProcessing.addSensorAlphaFilter(linearAccelerationAlphaFilter, false, IMU_LINEAR_ACCELERATION);
 
-      configureFingerProcessing(sensorProcessing);
+      if (runningOnRealRobot)
+         configureFingerProcessing(sensorProcessing);
    }
 
    private void configureFingerProcessing(SensorProcessing sensorProcessing)

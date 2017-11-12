@@ -28,7 +28,7 @@ import us.ihmc.jMonkeyEngineToolkit.camera.SimpleCameraTrackingAndDollyPositionH
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class Graphics3DAdapterExampleOne
 {   

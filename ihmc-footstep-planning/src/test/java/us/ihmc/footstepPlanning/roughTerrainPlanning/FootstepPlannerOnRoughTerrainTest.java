@@ -426,7 +426,7 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       RobotSide initialStanceSide = RobotSide.LEFT;
       FramePose goalPose = new FramePose(worldFrame);
       goalPose.setPosition(numberOfGaps * (boxSize + gapSize), 0.0, boxHeight);
-      goalPose.setOrientation(new AxisAngle(new Vector3D(0.0, 0.0, 1.0), Math.PI));
+      goalPose.setOrientation(new AxisAngle(new Vector3D(0.0, 0.0, 1.0), Math.PI / 4.0));
 
       // run the test
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();

@@ -21,7 +21,7 @@ import us.ihmc.ihmcPerception.vision.shapes.HoughCircleResult;
 import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetector;
 import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetectorFactory;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehaviorService
 {

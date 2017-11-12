@@ -30,7 +30,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTestInterface
@@ -211,13 +211,13 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
 
-      magnitude1 = 90; //TODO: overwritten
+      magnitude1 = 100; //TODO: overwritten
       PrintTools.info("Force magnitude = " + magnitude1 + "N along " + forceDirection1.toString());
       pushRobotController.applyForceDelayed(firstPushCondition, delay1, forceDirection1, magnitude1, duration1);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
 
-      magnitude2 = 90; //TODO:overwritten
+      magnitude2 = 80; //TODO:overwritten
       PrintTools.info("Force magnitude = " + magnitude2 + "N along " + forceDirection2.toString());
       pushRobotController.applyForceDelayed(secondPushCondition, delay2, forceDirection2, magnitude2, duration2);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);

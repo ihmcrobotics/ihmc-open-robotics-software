@@ -284,5 +284,10 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
       {
          return nContactableBodies * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
       }
+
+      public boolean getDeactivateRhoWhenNotInContact()
+      {
+         return false;
+      }
    }
 }

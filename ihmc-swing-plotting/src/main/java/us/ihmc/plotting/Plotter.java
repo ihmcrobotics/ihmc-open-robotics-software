@@ -43,8 +43,8 @@ import us.ihmc.graphicsDescription.plotting.frames.PixelsReferenceFrame;
 import us.ihmc.graphicsDescription.plotting.frames.PlotterFrameSpace;
 import us.ihmc.graphicsDescription.plotting.frames.PlotterSpaceConverter;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.PlotterInterface;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.tools.FormattingTools;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.FormattingTools;
 
 /**
  * TODO Deprecate archaic methods

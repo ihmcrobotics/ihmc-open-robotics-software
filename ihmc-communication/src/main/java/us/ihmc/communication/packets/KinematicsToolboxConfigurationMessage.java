@@ -19,7 +19,7 @@ import us.ihmc.tools.ArrayTools;
  * @author Sylvain Bertrand
  *
  */
-public class KinematicsToolboxConfigurationMessage extends TrackablePacket<KinematicsToolboxConfigurationMessage>
+public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsToolboxConfigurationMessage>
 {
    /**
     * When provided, the solver will attempt to find the solution that is the closest to the

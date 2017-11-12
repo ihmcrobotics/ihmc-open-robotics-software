@@ -27,7 +27,7 @@ public class ValkyrieEndToWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 17.99)
-   @Test(timeout = 30000)
+   @Test(timeout = 40000)
    public void testIssue47BadChestTrajectoryMessage() throws Exception
    {
       super.testIssue47BadChestTrajectoryMessage();
@@ -43,7 +43,7 @@ public class ValkyrieEndToWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 29.3)
-   @Test(timeout = 30000)
+   @Test(timeout = 60000)
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();
@@ -51,7 +51,7 @@ public class ValkyrieEndToWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 28.2)
-   @Test(timeout = 30000)
+   @Test(timeout = 60000)
    public void testSingleWaypointUsingMessageOfMessages() throws Exception
    {
       super.testSingleWaypointUsingMessageOfMessages();
