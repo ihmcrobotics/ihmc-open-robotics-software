@@ -54,6 +54,7 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class WholeBodyTrajectoryToolboxController extends ToolboxController
@@ -80,7 +81,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private final YoInteger expandingCount = new YoInteger("expandingCount", registry);
 
-   // check the current pose is valid or not.   
+   // check the current pose is valid or not.
    private final YoBoolean currentIsValid = new YoBoolean("currentIsValid", registry);
 
    // check the tree reaching the normalized time from 0.0 to 1.0.
@@ -95,7 +96,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    /*
     * Visualizer
     */
-   private boolean startYoVariableServer;
+   private boolean visualize;
 
    private CTTaskNode visualizedNode;
 
@@ -125,9 +126,11 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     * API
     */
 
-   private int maximumExpansionSize = 1;
+   private final YoInteger currentExpansionSize = new YoInteger("currentExpansionSize", registry);
+   private final YoInteger maximumExpansionSize = new YoInteger("maximumExpansionSize", registry);
 
-   private int numberOfInitialGuesses = 1;
+   private final YoInteger currentNumberOfInitialGuesses = new YoInteger("currentNumberOfInitialGuesses", registry);
+   private final YoInteger desiredNumberOfInitialGuesses = new YoInteger("desiredNumberOfInitialGuesses", registry);
 
    private int numberOfMotionPath = 1;
 
@@ -140,7 +143,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    /**
     * Toolbox state
     */
-   private CWBToolboxState state;
+   private final YoEnum<CWBToolboxState> state = new YoEnum<>("", registry, CWBToolboxState.class);
 
    private enum CWBToolboxState
    {
@@ -155,35 +158,39 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    public WholeBodyTrajectoryToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModel, CommandInputManager commandInputManager,
                                                StatusMessageOutputManager statusOutputManager, YoVariableRegistry registry,
-                                               YoGraphicsListRegistry yoGraphicsListRegistry, boolean startYoVariableServer)
+                                               YoGraphicsListRegistry yoGraphicsListRegistry, boolean visualize)
    {
       super(statusOutputManager, registry);
-      this.drcRobotModelFactory = drcRobotModel;
+      drcRobotModelFactory = drcRobotModel;
       this.commandInputManager = commandInputManager;
 
-      this.visualizedFullRobotModel = fullRobotModel;
-      this.isDone.set(false);
+      visualizedFullRobotModel = fullRobotModel;
+      isDone.set(false);
 
-      this.startYoVariableServer = startYoVariableServer;
-      this.treeStateVisualizer = new TreeStateVisualizer("TreeStateVisualizer", "VisualizerGraphicsList", yoGraphicsListRegistry, registry);
-      this.state = CWBToolboxState.DO_NOTHING;
+      this.visualize = visualize;
+      if (visualize)
+      {
+         treeStateVisualizer = new TreeStateVisualizer("TreeStateVisualizer", "VisualizerGraphicsList", yoGraphicsListRegistry, registry);
+      }
+      else
+      {
+         treeStateVisualizer = null;
+      }
+      state.set(CWBToolboxState.DO_NOTHING);
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         this.endeffectorPose.put(robotSide, new YoFramePose("" + robotSide + "endeffectorPose", ReferenceFrame.getWorldFrame(), registry));
+         endeffectorPose.put(robotSide, new YoFramePose("" + robotSide + "endeffectorPose", ReferenceFrame.getWorldFrame(), registry));
 
-         this.endeffectorFrame.put(robotSide,
-                                   new YoGraphicCoordinateSystem("" + robotSide + "endeffectorPoseFrame", this.endeffectorPose.get(robotSide), 0.25));
-         this.endeffectorFrame.get(robotSide).setVisible(true);
-         yoGraphicsListRegistry.registerYoGraphic("" + robotSide + "endeffectorPoseViz", this.endeffectorFrame.get(robotSide));
+         endeffectorFrame.put(robotSide, new YoGraphicCoordinateSystem("" + robotSide + "endeffectorPoseFrame", endeffectorPose.get(robotSide), 0.25));
+         endeffectorFrame.get(robotSide).setVisible(true);
+         yoGraphicsListRegistry.registerYoGraphic("" + robotSide + "endeffectorPoseViz", endeffectorFrame.get(robotSide));
       }
-
-      this.state = CWBToolboxState.FIND_INITIAL_GUESS;
 
       humanoidKinematicsSolver = new HumanoidKinematicsSolver(drcRobotModel, yoGraphicsListRegistry, registry);
 
-      this.toolboxSolution = new WholeBodyTrajectoryToolboxOutputStatus();
-      this.toolboxSolution.setDestination(-1);
+      toolboxSolution = new WholeBodyTrajectoryToolboxOutputStatus();
+      toolboxSolution.setDestination(-1);
    }
 
    @Override
@@ -192,16 +199,15 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       updateCount.increment();
       // PrintTools.info("" + updateCount.getIntegerValue() + " " + state);
 
-      // ************************************************************************************************************** //      
-      switch (state)
+      // ************************************************************************************************************** //
+      switch (state.getEnumValue())
       {
       case DO_NOTHING:
 
          break;
       case FIND_INITIAL_GUESS:
 
-         // findInitialGuess();
-         findInitialGuess2();
+         findInitialGuess();
 
          break;
       case EXPAND_TREE:
@@ -228,9 +234,11 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       updateVisualizers();
       updateYoVariables();
 
-      // ************************************************************************************************************** //      
+      // ************************************************************************************************************** //
       if (updateCount.getIntegerValue() == terminateToolboxCondition)
+      {
          terminateToolboxController();
+      }
    }
 
    /**
@@ -253,7 +261,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
           */
          terminateToolboxController();
 
-         // TODO         
+         // TODO
          setOutputStatus(toolboxSolution, 4);
          setOutputStatus(toolboxSolution, tree.getPath());
 
@@ -303,9 +311,13 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       {
          currentNode = currentNode.getParentNode();
          if (currentNode != null)
+         {
             revertedPath.add(new CTTaskNode(currentNode));
+         }
          else
+         {
             break;
+         }
       }
 
       int revertedPathSize = revertedPath.size();
@@ -318,7 +330,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
          double generalizedTimeGap = revertedPath.get(i - 1).getNormalizedNodeData(0) - tree.getPath().get(currentIndex).getNormalizedNodeData(0);
 
-         if (generalizedTimeGap > tree.dismissibleTimeGap)
+         if (generalizedTimeGap > CTTaskNodeTree.dismissibleTimeGap)
          {
             tree.addNodeOnPath(new CTTaskNode(revertedPath.get(i - 1)));
             currentIndex++;
@@ -332,12 +344,15 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          tree.getPath().get(i + 1).setParentNode(tree.getPath().get(i));
       }
 
-      treeVisualizer.update(tree.getPath());
+      if (visualize)
+         treeVisualizer.update(tree.getPath());
 
       long time1 = System.currentTimeMillis();
 
       for (int i = 0; i < numberOfTimesToShortcut; i++)
+      {
          updateShortcutPath(tree.getPath());
+      }
 
       long time2 = System.currentTimeMillis();
       PrintTools.info("shortcut time is = " + (time2 - time1) / 1000.0);
@@ -345,8 +360,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       numberOfMotionPath = tree.getPath().size();
 
-      //if(startYoVariableServer)
-      if (true)
+      if (visualize)
       {
          treeVisualizer.showUpPath(tree.getPath());
       }
@@ -354,7 +368,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       /*
        * terminate state
        */
-      state = CWBToolboxState.GENERATE_MOTION;
+      state.set(CWBToolboxState.GENERATE_MOTION);
    }
 
    /**
@@ -378,7 +392,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          if (tree.getNewNode().getTime() == taskRegion.getTrajectoryTime())
          {
             PrintTools.info("terminate expanding");
-            maximumExpansionSize = 1; // for terminate
+            currentExpansionSize.set(maximumExpansionSize.getIntegerValue()); // for terminate
          }
       }
       else
@@ -387,15 +401,15 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
          // Option 1 : Two way Expanding strategy.
          //         tree.updateNearestNodeTaskOnly();
-         //                  
-         //         tree.updateNewConfiguration();         
+         //
+         //         tree.updateNewConfiguration();
          //         tree.getNewNode().convertNormalizedDataToData(taskRegion);
-         //                  
+         //
          //         tree.getNewNode().setParentNode(tree.getNearNode());
          //
          //         updateValidity(tree.getNewNode());
          //         if (tree.getNewNode().getValidity())
-         //         {            
+         //         {
          //            tree.connectNewNode(true);
          //            if (tree.getNewNode().getTime() == taskRegion.getTrajectoryTime())
          //            {
@@ -416,8 +430,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       /*
        * terminate expanding tree.
        */
-      maximumExpansionSize--;
-      if (maximumExpansionSize == 0)
+      currentExpansionSize.increment();
+
+      if (currentExpansionSize.getIntegerValue() >= maximumExpansionSize.getIntegerValue())
       {
          if (tree.getTreeReachingTime() != 1.0)
          {
@@ -427,7 +442,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          }
          else
          {
-            state = CWBToolboxState.SHORTCUT_PATH;
+            state.set(CWBToolboxState.SHORTCUT_PATH);
 
             PrintTools.info("Total update solver");
          }
@@ -436,11 +451,11 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    /**
     * state == FIND_INITIAL_GUESS
-    * 
+    *
     * @throws ExecutionException
     * @throws InterruptedException
     */
-   private void findInitialGuess2()
+   private void findInitialGuess()
    {
       CTTaskNode initialGuessNode = new GenericTaskNode();
 
@@ -467,8 +482,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       /*
        * terminate finding initial guess.
        */
-      numberOfInitialGuesses -= 1;
-      if (numberOfInitialGuesses < 1)
+      currentNumberOfInitialGuesses.increment();
+
+      if (currentNumberOfInitialGuesses.getIntegerValue() >= desiredNumberOfInitialGuesses.getIntegerValue())
       {
          PrintTools.info("initial guess terminate");
 
@@ -479,13 +495,15 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          }
          else
          {
-            state = CWBToolboxState.EXPAND_TREE;
+            state.set(CWBToolboxState.EXPAND_TREE);
 
             rootNode.convertDataToNormalizedData(taskRegion);
 
             PrintTools.info("" + bestScoreInitialGuess);
             for (int i = 0; i < rootNode.getDimensionOfNodeData(); i++)
+            {
                PrintTools.info("" + i + " " + rootNode.getNodeData(i));
+            }
 
             tree = new CTTaskNodeTree(rootNode);
             tree.setTaskRegion(taskRegion);
@@ -500,7 +518,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    {
       isDone.set(false);
       if (!commandInputManager.isNewCommandAvailable(WaypointBasedTrajectoryCommand.class))
+      {
          return false;
+      }
 
       List<WaypointBasedTrajectoryCommand> trajectoryCommands = commandInputManager.pollNewCommands(WaypointBasedTrajectoryCommand.class);
 
@@ -513,7 +533,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
        */
       boolean success = updateConfiguration();
       if (!success)
+      {
          return false;
+      }
 
       /*
        * start toolbox
@@ -529,14 +551,15 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       /*
        * bring constrainedEndEffectorTrajectory
        */
-      // if (startYoVariableServer)
-      if (true)
+      if (visualize)
       {
          treeVisualizer = new CTTreeVisualizer(tree);
          treeVisualizer.initialize();
       }
 
       startTime = System.currentTimeMillis();
+      state.set(CWBToolboxState.FIND_INITIAL_GUESS);
+
       return true;
    }
 
@@ -560,20 +583,20 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       if (newMaxExpansionSize > 0)
       {
-         maximumExpansionSize = newMaxExpansionSize;
+         maximumExpansionSize.set(newMaxExpansionSize);
       }
       else
       {
-         maximumExpansionSize = DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE;
+         maximumExpansionSize.set(DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE);
       }
 
       if (newNumberOfInitialGuesses > 0)
       {
-         numberOfInitialGuesses = newNumberOfInitialGuesses;
+         desiredNumberOfInitialGuesses.set(newNumberOfInitialGuesses);
       }
       else
       {
-         numberOfInitialGuesses = DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE;
+         desiredNumberOfInitialGuesses.set(DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE);
       }
 
       if (newInitialConfiguration != null)
@@ -584,7 +607,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       RobotConfigurationData currentRobotConfiguration = currentRobotConfigurationDataReference.getAndSet(null);
       if (currentRobotConfiguration == null)
+      {
          return false;
+      }
 
       initialConfiguration.desiredRootOrientation.set(currentRobotConfiguration.getPelvisOrientation());
       initialConfiguration.desiredRootTranslation.set(currentRobotConfiguration.getPelvisTranslation());
@@ -676,16 +701,16 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
             taskNodeRegion.setRandomRegion(5, 0.0, 0.0);
             taskNodeRegion.setRandomRegion(6, 0.0, 0.0);
             taskNodeRegion.setRandomRegion(7, 0.0, 0.0);
-            taskNodeRegion.setRandomRegion(8, 0.0, 0.0);
-            taskNodeRegion.setRandomRegion(9, 0.0, 0.0);
-            taskNodeRegion.setRandomRegion(10, -160.0 / 180 * Math.PI, -20.0 / 180 * Math.PI);
+            taskNodeRegion.setRandomRegion(8, -Math.PI, Math.PI);
+            taskNodeRegion.setRandomRegion(9, -Math.PI, Math.PI);
+            taskNodeRegion.setRandomRegion(10, -Math.PI, Math.PI);
 
             taskNodeRegion.setRandomRegion(11, 0.0, 0.0);
             taskNodeRegion.setRandomRegion(12, 0.0, 0.0);
             taskNodeRegion.setRandomRegion(13, 0.0, 0.0);
-            taskNodeRegion.setRandomRegion(14, 0.0, 0.0);
-            taskNodeRegion.setRandomRegion(15, 0.0, 0.0);
-            taskNodeRegion.setRandomRegion(16, 0.0, 0.0);
+            taskNodeRegion.setRandomRegion(14, -Math.PI, Math.PI);
+            taskNodeRegion.setRandomRegion(15, -Math.PI, Math.PI);
+            taskNodeRegion.setRandomRegion(16, -Math.PI, Math.PI);
 
             return taskNodeRegion;
          }
@@ -702,9 +727,11 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
             SideDependentList<ConfigurationBuildOrder> configurationBuildOrders = new SideDependentList<>();
 
             for (RobotSide robotSide : RobotSide.values)
+            {
                configurationBuildOrders.put(robotSide,
                                             new ConfigurationBuildOrder(ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z,
                                                                         ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL));
+            }
 
             return configurationBuildOrders;
          }
@@ -731,7 +758,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
                   previous = handTrajectory.getWaypoint(i - 1);
                   next = handTrajectory.getWaypoint(i);
                   if (time < handTrajectory.getWaypointTime(i))
+                  {
                      break;
+                  }
                }
 
                double alpha = (time - t0) / (tf - t0);
@@ -756,7 +785,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private void terminateToolboxController()
    {
-      state = CWBToolboxState.DO_NOTHING;
+      state.set(CWBToolboxState.DO_NOTHING);
 
       long stopTime = System.currentTimeMillis();
       long elapsedTime = stopTime - startTime;
@@ -778,8 +807,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     */
    private boolean updateValidity(CTTaskNode node)
    {
-      long astartTime = System.currentTimeMillis();
-
       if (node.getParentNode() != null && node.getParentNode().getConfiguration() != null)
       {
          humanoidKinematicsSolver.setInitialConfiguration(node.getParentNode().getConfiguration());
@@ -827,11 +854,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       node.setValidity(success);
 
-      long stopTime = System.currentTimeMillis();
-      long elapsedTime = stopTime - astartTime;
-
-      // System.out.println("elapsed time is " + elapsedTime / 1000.0 + " seconds " + cntKinematicSolver.getIntegerValue() +" "+ result);
-
       return success;
    }
 
@@ -854,7 +876,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     */
    private void updateVisualizers()
    {
-      if (visualizedNode != null)
+      if (visualize && visualizedNode != null)
       {
          treeStateVisualizer.setCurrentNormalizedTime(visualizedNode.getNormalizedNodeData(0));
          treeStateVisualizer.setCurrentCTTaskNodeValidity(visualizedNode.getValidity());
@@ -862,9 +884,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
          currentIsValid.set(visualizedNode.getValidity());
          currentTrajectoryTime.set(visualizedNode.getNormalizedNodeData(0));
-         // if (startYoVariableServer)
-         if (true)
-            treeVisualizer.update(visualizedNode);
+
+         treeVisualizer.update(visualizedNode);
       }
    }
 
@@ -950,7 +971,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    private KinematicsToolboxRigidBodyMessage createHandMessage(RobotSide robotSide, FramePose desiredPose)
    {
       RigidBody hand = humanoidKinematicsSolver.getDesiredFullRobotModel().getHand(robotSide);
-      
+
       KinematicsToolboxRigidBodyMessage message;
       if (desiredPose == null)
       {
@@ -965,7 +986,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       }
 
       message.setWeight(handWeight);
-      
+
       return message;
    }
 
