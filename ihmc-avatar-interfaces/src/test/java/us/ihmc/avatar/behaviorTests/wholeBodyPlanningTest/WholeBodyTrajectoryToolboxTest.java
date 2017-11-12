@@ -16,7 +16,6 @@ import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
@@ -29,18 +28,12 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools.FunctionTrajectory;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.ConfigurationBuildOrder;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.ConfigurationSpace;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.FunctionTrajectoryTools;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -251,166 +244,6 @@ public abstract class WholeBodyTrajectoryToolboxTest implements MultiRobotTestIn
 
       drcBehaviorTestHelper.dispatchBehavior(ik);
       assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(8.0));
-
-      System.out.println("End");
-   }
-
-   public void testForTrajSolver() throws SimulationExceededMaximumTimeException, IOException
-   {
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
-      drcBehaviorTestHelper.updateRobotModel();
-
-      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
-      sdfFullRobotModel.updateFrames();
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
-      referenceFrames.updateFrames();
-
-      /*
-       * EE Traj
-       */
-      RigidBody leftHand = sdfFullRobotModel.getHand(RobotSide.LEFT);
-      Pose3D[] poseOfWayPoints = new Pose3D[4];
-      double[] waypointTimes = new double[4];
-      Quaternion wayPointOrientation;
-
-      wayPointOrientation = new Quaternion();
-      wayPointOrientation.appendPitchRotation(Math.PI * 0.2);
-      poseOfWayPoints[0] = new Pose3D(new Point3D(0.6, 0.4, 1.0), wayPointOrientation);
-      waypointTimes[0] = 0.0;
-
-      wayPointOrientation = new Quaternion();
-      wayPointOrientation.appendPitchRotation(-Math.PI * 0.2);
-      wayPointOrientation.appendYawRotation(-Math.PI * 0.3);
-      poseOfWayPoints[1] = new Pose3D(new Point3D(0.6, 0.1, 1.5), wayPointOrientation);
-      waypointTimes[1] = 3.33;
-
-      wayPointOrientation = new Quaternion();
-      wayPointOrientation.appendYawRotation(-Math.PI * 0.2);
-      poseOfWayPoints[2] = new Pose3D(new Point3D(0.5, -0.2, 1.0), wayPointOrientation);
-      waypointTimes[2] = 6.66;
-
-      wayPointOrientation = new Quaternion();
-      wayPointOrientation.appendPitchRotation(Math.PI * 0.2);
-      poseOfWayPoints[3] = new Pose3D(new Point3D(0.6, 0.4, 0.8), wayPointOrientation);
-      waypointTimes[3] = 10.0;
-
-      WaypointBasedTrajectoryMessage wallPosePacket = new WaypointBasedTrajectoryMessage(leftHand, waypointTimes, poseOfWayPoints);
-
-      /*
-       * solver.
-       */
-      WheneverWholeBodyKinematicsSolver kinematicsSolver = new WheneverWholeBodyKinematicsSolver(getRobotModel());
-      kinematicsSolver.updateRobotConfigurationData(new KinematicsToolboxOutputStatus(sdfFullRobotModel.getRootJoint(),
-                                                                                      FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel),
-                                                                                      false));
-
-      kinematicsSolver.initialize();
-      kinematicsSolver.holdCurrentTrajectoryMessages();
-
-      RobotSide robotSide = RobotSide.LEFT;
-      FunctionTrajectory trajectory = WholeBodyTrajectoryToolboxMessageTools.createFunctionTrajectory(wallPosePacket);
-      Pose3D desiredPose = trajectory.compute(0.0);
-
-      desiredPose.appendTranslation(-0.0, 0.0, 0.0);
-
-      kinematicsSolver.setDesiredHandPose(robotSide, desiredPose);
-
-      scs.addStaticLinkGraphics(getXYZAxis(desiredPose));
-
-      Quaternion desiredChestOrientation = new Quaternion();
-      kinematicsSolver.setDesiredChestOrientation(desiredChestOrientation);
-
-      kinematicsSolver.setDesiredPelvisHeight(0.8);
-
-      kinematicsSolver.putTrajectoryMessages();
-
-      /*
-       * result
-       */
-      PrintTools.info("" + kinematicsSolver.solve());
-
-      showUpFullRobotModelWithConfiguration(kinematicsSolver.getDesiredFullRobotModel());
-      //
-      // scs.addStaticLinkGraphics(getXYZAxis(desiredPose));
-
-      System.out.println("End");
-   }
-
-   public void testForSolver() throws SimulationExceededMaximumTimeException, IOException
-   {
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
-      drcBehaviorTestHelper.updateRobotModel();
-
-      FullHumanoidRobotModel sdfFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
-      sdfFullRobotModel.updateFrames();
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(sdfFullRobotModel);
-      referenceFrames.updateFrames();
-
-      /*
-       * reaching initial configuration
-       */
-
-      Quaternion initialOrientation = new Quaternion();
-      initialOrientation.appendPitchRotation(Math.PI * 0.3);
-      HandTrajectoryMessage lhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.LEFT, 1.0, new Point3D(0.0, 0.4, 0.75), initialOrientation,
-                                                                               referenceFrames.getMidFootZUpGroundFrame());
-      drcBehaviorTestHelper.send(lhandTrajectoryMessage);
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
-
-      initialOrientation = new Quaternion();
-      initialOrientation.appendPitchRotation(Math.PI * 0.3);
-      HandTrajectoryMessage rhandTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 1.0, new Point3D(-0.0, -0.4, 0.75), initialOrientation,
-                                                                               referenceFrames.getMidFootZUpGroundFrame());
-      drcBehaviorTestHelper.send(rhandTrajectoryMessage);
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-
-      /*
-       * solver.
-       */
-      WheneverWholeBodyKinematicsSolver kinematicsSolver = new WheneverWholeBodyKinematicsSolver(getRobotModel());
-      kinematicsSolver.updateRobotConfigurationData(new KinematicsToolboxOutputStatus(sdfFullRobotModel.getRootJoint(),
-                                                                                      FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel),
-                                                                                      false));
-
-      kinematicsSolver.initialize();
-      kinematicsSolver.holdCurrentTrajectoryMessages();
-
-      Point3D desiredPoint = new Point3D(0.7, 0.35, 1.0);
-      Quaternion desiredOrientation = new Quaternion();
-      Pose3D desiredPose = new Pose3D(desiredPoint, desiredOrientation);
-
-      kinematicsSolver.setDesiredHandPose(RobotSide.LEFT, desiredPose);
-
-      kinematicsSolver.putTrajectoryMessages();
-      PrintTools.info("" + kinematicsSolver.solve());
-
-      kinematicsSolver.updateRobotConfigurationData(new KinematicsToolboxOutputStatus(sdfFullRobotModel.getRootJoint(),
-                                                                                      FullRobotModelUtils.getAllJointsExcludingHands(sdfFullRobotModel),
-                                                                                      false));
-
-      kinematicsSolver.initialize();
-      kinematicsSolver.holdCurrentTrajectoryMessages();
-
-      desiredPoint = new Point3D(0.6, 0.35, 1.0);
-      desiredOrientation = new Quaternion();
-      desiredPose = new Pose3D(desiredPoint, desiredOrientation);
-
-      kinematicsSolver.setDesiredHandPose(RobotSide.LEFT, desiredPose);
-
-      kinematicsSolver.putTrajectoryMessages();
-      PrintTools.info("" + kinematicsSolver.solve());
-
-      // showUpFullRobotModelWithConfiguration(sdfFullRobotModel);
-      // showUpFullRobotModelWithConfiguration(kinematicsSolver.getDesiredFullRobotModel());
-      // scs.addStaticLinkGraphics(getXYZAxis(desiredPose));
 
       System.out.println("End");
    }
