@@ -19,7 +19,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class HumanoidKinematicsSolver
 {
-   private static final int DEFAULT_MAX_NUMBER_OF_ITERATIONS = 200;
+   private static final int DEFAULT_MAX_NUMBER_OF_ITERATIONS = 60;
    private static final double DEFAULT_QUALITY_THRESHOLD = 0.005;
    private static final double DEFAULT_STABILITY_THRESHOLD = 0.00001;
 
