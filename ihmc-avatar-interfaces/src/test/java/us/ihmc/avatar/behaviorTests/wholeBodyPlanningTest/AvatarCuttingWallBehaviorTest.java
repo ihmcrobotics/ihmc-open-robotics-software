@@ -12,7 +12,6 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
-import us.ihmc.avatar.networkProcessor.rrtToolboxModule.WholeBodyTrajectoryToolboxController;
 import us.ihmc.avatar.networkProcessor.rrtToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
@@ -74,6 +73,11 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
    private KinematicsToolboxModule kinematicsToolboxModule;
    private PacketCommunicator kinematicsToolboxCommunicator;
    private PacketCommunicator cwbToolboxCommunicator;
+
+   public  double handCoordinateOffsetX = -0.05;//-0.2;
+
+   private  double handOffset_NoHand_Version = -0.03;
+   private  double handOffset_DualRobotiQ_Version = -0.2;
 
    private void setupToolboxModule() throws IOException
    {
@@ -156,6 +160,13 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+
+      if (this.getRobotModel().getHandModel() == null)
+      {
+         handCoordinateOffsetX = handOffset_NoHand_Version;
+      }
+      else
+         handCoordinateOffsetX = handOffset_DualRobotiQ_Version;
    }
 
    @After
@@ -334,11 +345,11 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
 
                FullHumanoidRobotModel robotModel = kinematicConverter.getFullRobotModel();
                Pose3D lHandPose = new Pose3D(robotModel.getHand(RobotSide.LEFT).getBodyFixedFrame().getTransformToWorldFrame());
-               lHandPose.appendTranslation(0.0, -WholeBodyTrajectoryToolboxController.handCoordinateOffsetX, 0.0);
+               lHandPose.appendTranslation(0.0, -handCoordinateOffsetX, 0.0);
                scs.addStaticLinkGraphics(getXYZAxis(lHandPose));
                
                Pose3D rHandPose = new Pose3D(robotModel.getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame());
-               rHandPose.appendTranslation(0.0, WholeBodyTrajectoryToolboxController.handCoordinateOffsetX, 0.0);
+               rHandPose.appendTranslation(0.0, handCoordinateOffsetX, 0.0);
                scs.addStaticLinkGraphics(getXYZAxis(rHandPose));
             }
 
@@ -409,6 +420,7 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       FunctionTrajectory circleTrajectory = FunctionTrajectoryTools.circleTrajectory(circleCenter, circleOrientation, outputOrientation, radius, angleStart, clockwise, t0, tf);
       RigidBody leftHand = sdfFullRobotModel.getHand(RobotSide.LEFT);
       WaypointBasedTrajectoryMessage circleTrajectoryMessage = WholeBodyTrajectoryToolboxMessageTools.createTrajectoryMessage(leftHand, t0, tf, 0.05, circleTrajectory, ConfigurationSpaceName.YAW);
+      circleTrajectoryMessage.setControlFramePosition(new Point3D(handCoordinateOffsetX, 0.0, 0.0));
       RigidBody rightHand = sdfFullRobotModel.getHand(RobotSide.LEFT);
       Pose3D rightHandPose = new Pose3D(-0.2, -0.5, 0.6, -0.4 * Math.PI, 0.0, 0.5 * Math.PI);
       Pose3D[] waypoints = {rightHandPose, rightHandPose};

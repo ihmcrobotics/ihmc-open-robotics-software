@@ -69,7 +69,7 @@ public class CTTreeFindInitialGuess
    }
 
    public void findInitialGuess(CTTaskNode node, TaskRegion taskRegion, KinematicsToolboxOutputStatus initialConfiguration,
-                                ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory, double handCoordinateOffsetX)
+                                ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory)
          throws InterruptedException, ExecutionException
    {
       initialGuessNodes.clear();
@@ -96,8 +96,7 @@ public class CTTreeFindInitialGuess
             SideDependentList<YoFramePose> endeffectorPose = endeffectorPoses.get(index);
             YoInteger cntKinematicSolver = cntKinematicsSolvers.get(index);
 
-            updateValidity(initialGuessNode, kinematicsSolver, initialConfiguration, constrainedEndEffectorTrajectory, handCoordinateOffsetX, endeffectorPose,
-                           cntKinematicSolver);
+            updateValidity(initialGuessNode, kinematicsSolver, initialConfiguration, constrainedEndEffectorTrajectory, endeffectorPose, cntKinematicSolver);
             validities.get(index).set(initialGuessNode.getValidity());
          }
       })).get();
@@ -126,7 +125,7 @@ public class CTTreeFindInitialGuess
 
    private static boolean updateValidity(CTTaskNode node, WheneverWholeBodyKinematicsSolver kinematicsSolver,
                                          KinematicsToolboxOutputStatus initialConfiguration, ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory,
-                                         double handCoordinateOffsetX, SideDependentList<YoFramePose> endeffectorPose, YoInteger cntKinematicSolver)
+                                         SideDependentList<YoFramePose> endeffectorPose, YoInteger cntKinematicSolver)
    {
       if (node.getParentNode() != null)
       {
@@ -156,8 +155,6 @@ public class CTTreeFindInitialGuess
 
          endeffectorPose.get(robotSide).setPosition(desiredPose.getPosition());
          endeffectorPose.get(robotSide).setOrientation(desiredPose.getOrientation());
-
-         desiredPose.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);
 
          kinematicsSolver.setDesiredHandPose(robotSide, desiredPose);
       }
