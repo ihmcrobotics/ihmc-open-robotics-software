@@ -795,7 +795,6 @@ public class SimpleICPOptimizationQPSolver
    private void addPlanarRegionConstraint()
    {
       // todo formulate the distance inside
-      planarRegionConstraint.setDeltaInside(0.10);
       planarRegionConstraint.formulateConstraint();
 
       int constraintSize = planarRegionConstraint.getInequalityConstraintSize();
