@@ -45,12 +45,6 @@ public class CTTaskNode
       this.normalizedNodeData = new NodeData(dimensionOfData);
    }
 
-   public final NodeDataPacket getNodeDataPacket()
-   {
-      NodeDataPacket packet = new NodeDataPacket(nodeData);
-      return packet;
-   }
-   
    public final int getDimensionOfNodeData()
    {
       return nodeData.getDimension();

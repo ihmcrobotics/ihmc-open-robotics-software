@@ -70,21 +70,4 @@ public class CTTreeTools
       
       return configurationSpace;
    }
-   
-   public static ConfigurationSpace getConfigurationSpace(NodeDataPacket node, RobotSide robotSide)
-   {
-      ConfigurationSpace configurationSpace = new ConfigurationSpace();
-      if(robotSide == RobotSide.LEFT)
-      {
-         configurationSpace.setTranslation(node.getQ(5), node.getQ(6), node.getQ(7));
-         configurationSpace.setRotation(node.getQ(8), node.getQ(9), node.getQ(10));
-      }
-      else
-      {
-         configurationSpace.setTranslation(node.getQ(11), node.getQ(12), node.getQ(13));
-         configurationSpace.setRotation(node.getQ(14), node.getQ(15), node.getQ(16));
-      }
-      
-      return configurationSpace;
-   }
 }
