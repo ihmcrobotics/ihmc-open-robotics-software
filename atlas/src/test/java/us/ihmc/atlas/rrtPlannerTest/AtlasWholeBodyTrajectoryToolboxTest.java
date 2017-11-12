@@ -43,14 +43,6 @@ public class AtlasWholeBodyTrajectoryToolboxTest extends WholeBodyTrajectoryTool
    {
       super.testForInverseKinematicsToolbox();
    }
-   
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 35000)
-   public void testForTrajSolver() throws SimulationExceededMaximumTimeException, IOException
-   {
-      super.testForTrajSolver();
-   }
          
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
@@ -58,13 +50,5 @@ public class AtlasWholeBodyTrajectoryToolboxTest extends WholeBodyTrajectoryTool
    public void testForConstrainedTrajectory() throws SimulationExceededMaximumTimeException, IOException
    {
       super.testForConstrainedTrajectory();
-   }
-   
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 23000)
-   public void testForSolver() throws SimulationExceededMaximumTimeException, IOException
-   {
-      super.testForSolver();
    }
 }
