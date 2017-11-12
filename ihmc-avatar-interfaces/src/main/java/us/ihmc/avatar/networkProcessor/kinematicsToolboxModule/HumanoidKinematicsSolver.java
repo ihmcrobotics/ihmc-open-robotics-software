@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.KinematicsToolboxCenterOfMassMessage;
@@ -35,6 +36,8 @@ public class HumanoidKinematicsSolver
    private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterations", registry);
 
    private final YoBoolean hasConverged = new YoBoolean("hasConverged", registry);
+
+   private final YoDouble computationTime = new YoDouble("computationTime", registry);
 
    public HumanoidKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory, YoGraphicsListRegistry yoGraphicsListRegistry,
                                    YoVariableRegistry parentRegistry)
@@ -92,6 +95,8 @@ public class HumanoidKinematicsSolver
 
    public boolean solve()
    {
+      long startTime = System.nanoTime();
+
       boolean isSolutionGood = false;
       double solutionQualityCurrent = Double.NaN;
       double solutionQualityPrevious = Double.NaN;
@@ -118,6 +123,11 @@ public class HumanoidKinematicsSolver
 
       numberOfIterations.set(iteration);
       hasConverged.set(isSolutionGood);
+
+      long endTime = System.nanoTime();
+
+      computationTime.set(Conversions.nanosecondsToSeconds(endTime - startTime));
+
       return isSolutionGood;
    }
 
