@@ -6,11 +6,6 @@ import us.ihmc.commons.PrintTools;
 
 public class ConfigurationBuildOrder
 {
-   public enum ConfigurationSpaceName
-   {
-      X, Y, Z, ROLL, PITCH, YAW
-   }
-
    private ArrayList<ConfigurationSpaceName> sequence = new ArrayList<ConfigurationSpaceName>();
 
    public ConfigurationBuildOrder()
