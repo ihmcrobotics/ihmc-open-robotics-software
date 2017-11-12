@@ -1,4 +1,4 @@
-package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
+package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
 public class NodeData
 {
