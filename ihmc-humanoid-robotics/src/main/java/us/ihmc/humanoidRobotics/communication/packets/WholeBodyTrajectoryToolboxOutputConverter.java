@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConstrainedEndEffectorTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -29,8 +28,6 @@ public class WholeBodyTrajectoryToolboxOutputConverter
 
    private double firstTrajectoryPointTime = 6.0;
 
-   private ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
-
    public WholeBodyTrajectoryToolboxOutputConverter(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
       this.fullRobotModelToUseForConversion = fullRobotModelFactory.createFullRobotModel();
@@ -48,11 +45,6 @@ public class WholeBodyTrajectoryToolboxOutputConverter
    public void setMessageToCreate(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage)
    {
       this.wholeBodyTrajectoryMessage = wholebodyTrajectoryMessage;
-   }
-
-   public void setConstrainedEndEffectorTrajectory(ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory)
-   {
-      this.constrainedEndEffectorTrajectory = constrainedEndEffectorTrajectory;
    }
 
    public double getTrajectoryTime()
