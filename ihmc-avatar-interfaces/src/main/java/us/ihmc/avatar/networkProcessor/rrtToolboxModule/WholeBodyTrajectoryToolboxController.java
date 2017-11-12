@@ -26,7 +26,6 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Wayp
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeFindInitialGuess;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeTools;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeVisualizer;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.ConfigurationBuildOrder;
@@ -146,8 +145,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     * parallel family.
     */
 
-   private final CTTreeFindInitialGuess ctTreeFindInitialGuess;
-
    private final CommandInputManager commandInputManager;
 
    public WholeBodyTrajectoryToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModel,
@@ -176,8 +173,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       }
 
       this.state = CWBToolboxState.FIND_INITIAL_GUESS;
-
-      this.ctTreeFindInitialGuess = new CTTreeFindInitialGuess(drcRobotModel, 4, registry);
 
       kinematicsSolver = new WheneverWholeBodyKinematicsSolver(drcRobotModelFactory);
 
@@ -439,50 +434,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     * @throws ExecutionException
     * @throws InterruptedException
     */
-   private void findInitialGuess() throws InterruptedException, ExecutionException
-   {
-      ctTreeFindInitialGuess.findInitialGuess(rootNode, taskRegion, initialConfiguration, constrainedEndEffectorTrajectory);
-
-      double scoreInitialGuess = ctTreeFindInitialGuess.getBestScore();
-      visualizedNode = ctTreeFindInitialGuess.getBestNode();
-
-      jointlimitScore.set(scoreInitialGuess);
-
-      if (bestScoreInitialGuess < scoreInitialGuess)
-      {
-         bestScoreInitialGuess = scoreInitialGuess;
-
-         rootNode = new CTTaskNode(visualizedNode);
-      }
-
-      /*
-       * terminate finding initial guess.
-       */
-      numberOfInitialGuesses -= ctTreeFindInitialGuess.getInitialGuessNodes().size();
-      if (numberOfInitialGuesses < 1)
-      {
-         PrintTools.info("initial guess terminate");
-
-         if (rootNode.getValidity() == false)
-         {
-            terminateToolboxController();
-         }
-         else
-         {
-            state = CWBToolboxState.EXPAND_TREE;
-
-            rootNode.convertDataToNormalizedData(taskRegion);
-
-            PrintTools.info("" + bestScoreInitialGuess);
-            for (int i = 0; i < rootNode.getDimensionOfNodeData(); i++)
-               PrintTools.info("" + i + " " + rootNode.getNodeData(i));
-
-            tree = new CTTaskNodeTree(rootNode);
-            tree.setTaskRegion(taskRegion);
-         }
-      }
-   }
-
    private void findInitialGuess2()
    {
       CTTaskNode initialGuessNode = new GenericTaskNode();
