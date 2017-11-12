@@ -810,8 +810,6 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
    public void submitCurrentPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
    {
-      // FIXME
-      //planarRegionConstraintProvider.setActivePlanarRegion(planarRegions.get(0));
       planarRegionConstraintProvider.setPlanarRegions(planarRegions);
    }
 }
