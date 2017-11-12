@@ -128,8 +128,8 @@ public class PlanarRegionConstraintProvider
       captureRegionCalculator.hideCaptureRegion();
       solver.resetPlanarRegionConstraint();
 
-      if (!planarRegionsList.isEmpty())
-         computeProjectedAndShrunkConvexHull();
+      yoActivePlanarRegion.clearAndHide();
+      yoActivePlanarRegionInControlPlane.clearAndHide();
    }
 
    public void updatePlanarRegionConstraintForSingleSupport(RobotSide supportSide, double swingTimeRemaining, FramePoint2D currentICP, double omega0, SimpleICPOptimizationQPSolver solver)

@@ -96,14 +96,13 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
 
-      List<PlanarRegionsListMessage> planarRegionMessages = createPlanarRegionsListMessages();
+      PlanarRegionsListMessage planarRegionsListMessage = createPlanarRegionsListMessage();
       PacketCommunicator packetCommunication = drcSimulationTestHelper.getControllerCommunicator();
       packetCommunication.attachListener(RequestPlanarRegionsListMessage.class, new PacketConsumer<RequestPlanarRegionsListMessage>()
       {
          @Override
          public void receivedPacket(RequestPlanarRegionsListMessage packet)
          {
-            PlanarRegionsListMessage planarRegionsListMessage = planarRegionMessages.remove(0);
             drcSimulationTestHelper.send(planarRegionsListMessage);
          }
       });
@@ -207,21 +206,10 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
       orientations.add(new Quaternion(0.0, 0.0, 1.0, 0.0));
       orientations.add(new Quaternion(0.0, 0.0, 1.0, 0.0));
 
-      /*
-      List<PlanarRegion> planarRegions = new ArrayList<>();
-      for (int i = 0; i < locations.size() - 2; i++)
-      {
-         planarRegions.add(createSteppingStonePlanarRegion(locations.get(i)));
-      }
-      planarRegions.add(null);
-      planarRegions.add(null);
-      */
-
       RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, locations.size());
       for (int i = 0; i < locations.size(); i++)
       {
          FramePoint3D placeToStep = new FramePoint3D(ReferenceFrame.getWorldFrame(), locations.get(i));
-         //FootstepDataMessage data = createFootstepDataMessage(robotSides[i], planarRegions.get(i), placeToStep, orientations.get(i));
          FootstepDataMessage data = createFootstepDataMessage(robotSides[i], null, placeToStep, orientations.get(i));
          message.add(data);
       }
@@ -229,7 +217,7 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
       return message;
    }
 
-   private List<PlanarRegionsListMessage> createPlanarRegionsListMessages()
+   private PlanarRegionsListMessage createPlanarRegionsListMessage()
    {
       List<Point3D> locations = new ArrayList<>();
       locations.add(new Point3D(-7.75, -0.55, 0.3));
@@ -263,32 +251,10 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
             planarRegionsAsMessages.add(PlanarRegionMessageConverter.convertToPlanarRegionMessage(planarRegion));
       }
 
-      ArrayList<PlanarRegionsListMessage> messages = new ArrayList<>();
-      for (int i = 0; i < planarRegions.size(); i++)
-      {
-         PlanarRegionsListMessage messageList = new PlanarRegionsListMessage(planarRegionsAsMessages);
-         messageList.uniqueId = 5L;
-         messages.add(messageList);
-      }
+      PlanarRegionsListMessage messageList = new PlanarRegionsListMessage(planarRegionsAsMessages);
+      messageList.uniqueId = 5L;
 
-
-      /*
-      ArrayList<PlanarRegionsListMessage> messages = new ArrayList<>();
-      for (int i = 0; i < planarRegions.size(); i++)
-      {
-         PlanarRegion planarRegion = planarRegions.get(i);
-         PlanarRegionMessage message;
-         if (planarRegion != null)
-            message = PlanarRegionMessageConverter.convertToPlanarRegionMessage(planarRegions.get(i));
-         else
-            message = new PlanarRegionMessage();
-         PlanarRegionsListMessage messageList = new PlanarRegionsListMessage(Collections.singletonList(message));
-         messageList.uniqueId = 5L;
-         messages.add(messageList);
-      }
-      */
-
-      return messages;
+      return messageList;
    }
 
    private FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, PlanarRegion planarRegion, FramePoint3D placeToStep, Quaternion orientation)
