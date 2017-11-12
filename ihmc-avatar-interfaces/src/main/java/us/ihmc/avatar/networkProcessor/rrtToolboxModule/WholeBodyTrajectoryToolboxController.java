@@ -6,24 +6,30 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsSolver;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNodeTree;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeTools;
@@ -34,12 +40,15 @@ import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTim
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.GenericTaskNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.TaskRegion;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.TreeStateVisualizer;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -51,6 +60,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 {
    private static final int DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE = 1000;
    private static final int DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE = 50;
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    /*
     * essential classes
@@ -59,7 +69,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
 
-   private final WheneverWholeBodyKinematicsSolver kinematicsSolver;
+   private final HumanoidKinematicsSolver humanoidKinematicsSolver;
 
    private final WholeBodyTrajectoryToolboxOutputStatus toolboxSolution;
 
@@ -78,13 +88,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
-   private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
-
    private final YoDouble jointlimitScore = new YoDouble("jointlimitScore", registry);
 
    private double bestScoreInitialGuess = 0.0;
-
-   private final YoInteger cntKinematicSolver = new YoInteger("cntKinematicSolver", registry);
 
    /*
     * Visualizer
@@ -147,9 +153,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private final CommandInputManager commandInputManager;
 
-   public WholeBodyTrajectoryToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModel,
-                                                        CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                                        YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsRegistry, boolean startYoVariableServer)
+   public WholeBodyTrajectoryToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModel, CommandInputManager commandInputManager,
+                                               StatusMessageOutputManager statusOutputManager, YoVariableRegistry registry,
+                                               YoGraphicsListRegistry yoGraphicsListRegistry, boolean startYoVariableServer)
    {
       super(statusOutputManager, registry);
       this.drcRobotModelFactory = drcRobotModel;
@@ -159,7 +165,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       this.isDone.set(false);
 
       this.startYoVariableServer = startYoVariableServer;
-      this.treeStateVisualizer = new TreeStateVisualizer("TreeStateVisualizer", "VisualizerGraphicsList", yoGraphicsRegistry, registry);
+      this.treeStateVisualizer = new TreeStateVisualizer("TreeStateVisualizer", "VisualizerGraphicsList", yoGraphicsListRegistry, registry);
       this.state = CWBToolboxState.DO_NOTHING;
 
       for (RobotSide robotSide : RobotSide.values)
@@ -169,12 +175,12 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          this.endeffectorFrame.put(robotSide,
                                    new YoGraphicCoordinateSystem("" + robotSide + "endeffectorPoseFrame", this.endeffectorPose.get(robotSide), 0.25));
          this.endeffectorFrame.get(robotSide).setVisible(true);
-         yoGraphicsRegistry.registerYoGraphic("" + robotSide + "endeffectorPoseViz", this.endeffectorFrame.get(robotSide));
+         yoGraphicsListRegistry.registerYoGraphic("" + robotSide + "endeffectorPoseViz", this.endeffectorFrame.get(robotSide));
       }
 
       this.state = CWBToolboxState.FIND_INITIAL_GUESS;
 
-      kinematicsSolver = new WheneverWholeBodyKinematicsSolver(drcRobotModelFactory);
+      humanoidKinematicsSolver = new HumanoidKinematicsSolver(drcRobotModel, yoGraphicsListRegistry, registry);
 
       this.toolboxSolution = new WholeBodyTrajectoryToolboxOutputStatus();
       this.toolboxSolution.setDestination(-1);
@@ -403,7 +409,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       // TODO
       visualizedNode.setValidity(tree.getNewNode().getValidity());
 
-      double jointScore = kinematicsSolver.getArmJointLimitScore();
+      double jointScore = computeArmJointsLimitScore(humanoidKinematicsSolver.getDesiredFullRobotModel());
 
       jointlimitScore.set(jointScore);
 
@@ -446,7 +452,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       visualizedNode = initialGuessNode;
 
-      double jointScore = kinematicsSolver.getArmJointLimitScore();
+      double jointScore = computeArmJointsLimitScore(humanoidKinematicsSolver.getDesiredFullRobotModel());
 
       jointlimitScore.set(jointScore);
 
@@ -510,15 +516,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          return false;
 
       /*
-       * initialize kinematicsSolver.
-       */
-      kinematicsSolver.updateRobotConfigurationData(initialConfiguration);
-
-      kinematicsSolver.initialize();
-      kinematicsSolver.holdCurrentTrajectoryMessages();
-      kinematicsSolver.putTrajectoryMessages();
-
-      /*
        * start toolbox
        */
       rootNode = new GenericTaskNode();
@@ -569,7 +566,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       {
          maximumExpansionSize = DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE;
       }
-      
+
       if (newNumberOfInitialGuesses > 0)
       {
          numberOfInitialGuesses = newNumberOfInitialGuesses;
@@ -591,7 +588,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       initialConfiguration.desiredRootOrientation.set(currentRobotConfiguration.getPelvisOrientation());
       initialConfiguration.desiredRootTranslation.set(currentRobotConfiguration.getPelvisTranslation());
-      
+
       initialConfiguration.jointNameHash = currentRobotConfiguration.jointNameHash;
       int length = currentRobotConfiguration.jointAngles.length;
       initialConfiguration.desiredJointAngles = new float[length];
@@ -663,14 +660,14 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       // TODO Need to clean that up
       ConstrainedEndEffectorTrajectory endEffectorTrajectory = new ConstrainedEndEffectorTrajectory(trajectoryTime)
       {
-         
+
          @Override
          public TaskRegion defineTaskRegion()
          {
             TaskRegion taskNodeRegion = new TaskRegion(GenericTaskNode.nodeDimension);
 
             taskNodeRegion.setRandomRegion(0, 0.0, trajectoryTime);
-            
+
             taskNodeRegion.setRandomRegion(1, 0.75, 0.90); // Pelvis height
             taskNodeRegion.setRandomRegion(2, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI); // Chest yaw
             taskNodeRegion.setRandomRegion(3, -20.0 / 180 * Math.PI, 20.0 / 180 * Math.PI); // Chest pitch
@@ -692,13 +689,13 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
             return taskNodeRegion;
          }
-         
+
          @Override
          public SideDependentList<SelectionMatrix6D> defineControllableSelectionMatrices()
          {
             return controllableSelectionMatricesRe;
          }
-         
+
          @Override
          public SideDependentList<ConfigurationBuildOrder> defineConfigurationBuildOrders()
          {
@@ -711,7 +708,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
             return configurationBuildOrders;
          }
-         
+
          @Override
          public SideDependentList<ConfigurationSpace> getConfigurationSpace(double time)
          {
@@ -738,16 +735,16 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
                }
 
                double alpha = (time - t0) / (tf - t0);
-               alpha = MathTools.clamp(alpha, 0, 1);               
+               alpha = MathTools.clamp(alpha, 0, 1);
                current.interpolate(previous, next, alpha);
 
                double x = current.getX();
                double y = current.getY();
                double z = current.getZ();
                RotationMatrix rot = new RotationMatrix(current.getOrientation());
-               double roll  = rot.getRoll();
+               double roll = rot.getRoll();
                double pitch = rot.getPitch();
-               double yaw   = rot.getYaw();
+               double yaw = rot.getYaw();
                configurationSpace.put(robotSide, new ConfigurationSpace(x, y, z, roll, pitch, yaw));
             }
 
@@ -783,24 +780,27 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    {
       long astartTime = System.currentTimeMillis();
 
-      if (node.getParentNode() != null)
+      if (node.getParentNode() != null && node.getParentNode().getConfiguration() != null)
       {
-         kinematicsSolver.updateRobotConfigurationData(node.getParentNode().getConfiguration());
+         humanoidKinematicsSolver.setInitialConfiguration(node.getParentNode().getConfiguration());
       }
       else
       {
-         kinematicsSolver.updateRobotConfigurationData(initialConfiguration);
+         humanoidKinematicsSolver.setInitialConfiguration(initialConfiguration);
       }
 
-      kinematicsSolver.initialize();
-
-      kinematicsSolver.holdCurrentTrajectoryMessages();
+      humanoidKinematicsSolver.initialize();
 
       /*
        * set whole body tasks. pose from 'constrainedEndEffectorTrajectory' is considered as being
        * in MidZUpframe. for kinematicsSolver, append offset
        */
       SideDependentList<ConfigurationSpace> configurationSpaces = new SideDependentList<>();
+      FullHumanoidRobotModel desiredFullRobotModel = humanoidKinematicsSolver.getDesiredFullRobotModel();
+      desiredFullRobotModel.updateFrames();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
+      referenceFrames.updateFrames();
+      MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -809,37 +809,30 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(node.getNodeData(0), robotSide, configurationSpaces.get(robotSide));
          setEndEffectorPose(robotSide, desiredPose);
 
-         kinematicsSolver.setDesiredHandPose(robotSide, desiredPose);
+         humanoidKinematicsSolver.submit(createHandMessage(robotSide, new FramePose(midFootZUpGroundFrame, desiredPose)));
       }
 
       Quaternion desiredChestOrientation = new Quaternion();
-      desiredChestOrientation.appendYawRotation(node.getNodeData(2));
-      desiredChestOrientation.appendPitchRotation(node.getNodeData(3));
-      desiredChestOrientation.appendRollRotation(node.getNodeData(4));
-      kinematicsSolver.setDesiredChestOrientation(desiredChestOrientation);
+      desiredChestOrientation.setYawPitchRoll(node.getNodeData(2), node.getNodeData(3), node.getNodeData(4));
+      humanoidKinematicsSolver.submit(createChestMessage(new FrameOrientation(midFootZUpGroundFrame, desiredChestOrientation)));
 
-      kinematicsSolver.setDesiredPelvisHeight(node.getNodeData(1));
-
-      kinematicsSolver.putTrajectoryMessages();
+      humanoidKinematicsSolver.submit(createPelvisMessage(new FramePoint3D(midFootZUpGroundFrame, 0.0, 0.0, node.getNodeData(1))));
 
       /*
        * result
        */
-      kinematicsSolver.solve();
-      boolean result = kinematicsSolver.getResult();
+      boolean success = humanoidKinematicsSolver.solve();
 
-      node.setConfigurationJoints(kinematicsSolver.getSolution());
+      node.setConfigurationJoints(humanoidKinematicsSolver.getSolution());
 
-      node.setValidity(result);
-
-      cntKinematicSolver.set(kinematicsSolver.getCntForUpdateInternal());
+      node.setValidity(success);
 
       long stopTime = System.currentTimeMillis();
       long elapsedTime = stopTime - astartTime;
 
       // System.out.println("elapsed time is " + elapsedTime / 1000.0 + " seconds " + cntKinematicSolver.getIntegerValue() +" "+ result);
 
-      return result;
+      return success;
    }
 
    /**
@@ -880,8 +873,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     */
    private void updateYoVariables()
    {
-      solutionQuality.set(kinematicsSolver.getSolution().getSolutionQuality());
-
       for (RobotSide robotSide : RobotSide.values)
       {
          endeffectorFrame.get(robotSide).setVisible(true);
@@ -947,6 +938,79 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       }
    }
 
+   private final double handWeight = 50.0;
+   private final double chestWeight = 10.0;
+   private final double pelvisWeight = 10.0;
+
+   private KinematicsToolboxRigidBodyMessage createHandMessage(RobotSide robotSide)
+   {
+      return createHandMessage(robotSide, null);
+   }
+
+   private KinematicsToolboxRigidBodyMessage createHandMessage(RobotSide robotSide, FramePose desiredPose)
+   {
+      RigidBody hand = humanoidKinematicsSolver.getDesiredFullRobotModel().getHand(robotSide);
+      
+      KinematicsToolboxRigidBodyMessage message;
+      if (desiredPose == null)
+      {
+         message = KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose(hand);
+      }
+      else
+      {
+         desiredPose = new FramePose(desiredPose);
+         desiredPose.changeFrame(worldFrame);
+         message = new KinematicsToolboxRigidBodyMessage(hand);
+         message.setDesiredPose(desiredPose);
+      }
+
+      message.setWeight(handWeight);
+      
+      return message;
+   }
+
+   private KinematicsToolboxRigidBodyMessage createPelvisMessage(FramePoint3D desiredHeight)
+   {
+      desiredHeight = new FramePoint3D(desiredHeight);
+      desiredHeight.changeFrame(worldFrame);
+
+      RigidBody pelvis = humanoidKinematicsSolver.getDesiredFullRobotModel().getPelvis();
+      RigidBodyTransform pelvisTransform = pelvis.getParentJoint().getFrameAfterJoint().getTransformToWorldFrame();
+      Quaternion desiredOrientation = new Quaternion(pelvisTransform.getRotationMatrix());
+      KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage(pelvis, desiredHeight, desiredOrientation);
+      message.setWeight(pelvisWeight);
+      SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+      selectionMatrix.setLinearAxisSelection(false, false, true);
+      message.setSelectionMatrix(selectionMatrix);
+      return message;
+   }
+
+   private KinematicsToolboxRigidBodyMessage createChestMessage(FrameOrientation desiredOrientation)
+   {
+      desiredOrientation = new FrameOrientation(desiredOrientation);
+      desiredOrientation.changeFrame(worldFrame);
+
+      RigidBody chest = humanoidKinematicsSolver.getDesiredFullRobotModel().getChest();
+      KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage(chest);
+      message.setDesiredOrientation(desiredOrientation);
+      message.setSelectionMatrixForAngularControl();
+      message.setWeight(chestWeight);
+
+      return message;
+   }
+
+   private double computeArmJointsLimitScore(FullHumanoidRobotModel fullRobotModel)
+   {
+      double score = 0.0;
+      RigidBody chest = fullRobotModel.getChest();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody hand = fullRobotModel.getHand(robotSide);
+         score += WholeBodyTrajectoryToolboxHelper.kinematicsChainLimitScore(chest, hand);
+      }
+      return score;
+   }
+
    void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
       currentRobotConfigurationDataReference.set(newConfigurationData);
@@ -954,6 +1018,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    FullHumanoidRobotModel getSolverFullRobotModel()
    {
-      return kinematicsSolver.getDesiredFullRobotModel();
+      return humanoidKinematicsSolver.getDesiredFullRobotModel();
    }
 }
