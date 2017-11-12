@@ -129,7 +129,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       statusOutputManager = new StatusMessageOutputManager(WholeBodyTrajectoryToolboxModule.supportedStatus());
 
       toolboxController = new WholeBodyTrajectoryToolboxController(getRobotModel(), desiredFullRobotModel, commandInputManager, statusOutputManager,
-                                                                            mainRegistry, yoGraphicsListRegistry, false);
+                                                                            mainRegistry, yoGraphicsListRegistry, visualize);
       toolboxController.setPacketDestination(PacketDestination.BROADCAST); // The actual destination does not matter, just need to make sure the internal field is != null
 
       robot = robotModel.createHumanoidFloatingRootJointRobot(false);
