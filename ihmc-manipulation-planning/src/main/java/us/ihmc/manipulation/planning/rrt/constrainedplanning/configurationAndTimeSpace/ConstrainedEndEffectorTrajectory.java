@@ -1,4 +1,4 @@
-package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
+package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;

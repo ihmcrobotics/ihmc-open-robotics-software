@@ -1,8 +1,9 @@
-package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
+package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 
 public class ConfigurationBuildOrder
 {

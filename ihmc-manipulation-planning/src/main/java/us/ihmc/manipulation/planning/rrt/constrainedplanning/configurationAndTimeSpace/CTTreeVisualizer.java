@@ -2,8 +2,6 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 
 import java.util.ArrayList;
 
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.CTTaskNode;
-
 public class CTTreeVisualizer
 {
    private int configurationDimension;

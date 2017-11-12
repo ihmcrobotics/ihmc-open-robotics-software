@@ -1,7 +1,8 @@
-package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
+package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 /*
