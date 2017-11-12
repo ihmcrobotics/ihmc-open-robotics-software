@@ -1,59 +1,36 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
-import us.ihmc.communication.packets.ToolboxStateMessage;
-import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.WholeBodyTrajectoryToolboxOutputConverter;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpace;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConstrainedEndEffectorTrajectory;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationBuildOrder.ConfigurationSpaceName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools.FunctionTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.tools.taskExecutor.PipeLine;
+import us.ihmc.tools.taskExecutor.TaskExecutor;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
- * This behavior is to plan whole body trajectory under constrained end effector.
- * The user input is constrained trajectory for both hand. See {@link ConstrainedEndEffectorTrajectory, ConstrainedConfigurationSpace}
- * The output is WholeBodyTrajectoryMessage. See {@link WholeBodyTrajectoryMessage}
+ * This behavior is to plan whole body trajectory under constrained end effector. The user input is
+ * constrained trajectory for both hand. See {@link ConstrainedEndEffectorTrajectory,
+ * ConstrainedConfigurationSpace} The output is WholeBodyTrajectoryMessage. See
+ * {@link WholeBodyTrajectoryMessage}
+ * 
  * @author Edward Inho Lee.
  */
 public class PlanWholeBodyTrajectoryBehavior extends AbstractBehavior
 {
-   // TODO : should be replaced with simple packet structure. need to add 'configruationspaces, buildorder etc' on kryonet.
-   public static ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
-
-   private List<WaypointBasedTrajectoryMessage> handTrajectoryMessages;
-
    private final boolean DEBUG = true;
 
-   private PipeLine pipeLine = new PipeLine();
+   private TaskExecutor taskExecutor = new TaskExecutor();
 
    private boolean planningSuccess = false;
 
@@ -62,111 +39,31 @@ public class PlanWholeBodyTrajectoryBehavior extends AbstractBehavior
    private final SleepBehavior sleepBehavior;
 
    private WholeBodyTrajectoryMessage wholebodyTrajectoryMessage;
-   
-   private SideDependentList<ArrayList<Pose3D>> handTrajectories = new SideDependentList<>();
 
-   private ConcurrentListeningQueue<WholeBodyTrajectoryToolboxOutputStatus> wholeBodyTrajectoryToolboxOutputStatusQueue = new ConcurrentListeningQueue<WholeBodyTrajectoryToolboxOutputStatus>(20);
-   private FullHumanoidRobotModel fullRobotModel;
-
+   private WholeBodyTrajectoryToolboxMessage input = null;
+   private ConcurrentListeningQueue<WholeBodyTrajectoryToolboxOutputStatus> wholeBodyTrajectoryToolboxOutputStatusQueue = new ConcurrentListeningQueue<>(20);
    private WholeBodyTrajectoryToolboxOutputStatus wholeBodyTrajectoryToolboxOutputStatus;
-   
-   private final WholeBodyTrajectoryToolboxOutputConverter outputConverter;
-   
-   private long startTime; // computing time measure.
-   
-   private static int numberOfFindInitialGuess = 320;
-   private static int numberOfExpanding = 1000;
-   private static int numberOfEndEffectorWayPoints = 10;
 
-   public PlanWholeBodyTrajectoryBehavior(String namePrefix, FullHumanoidRobotModelFactory fullRobotModelFactory, CommunicationBridgeInterface communicationBridge, FullHumanoidRobotModel fullRobotModel,
-                                                     YoDouble yoTime)
+   private long startTime; // computing time measure.
+
+   public PlanWholeBodyTrajectoryBehavior(String namePrefix, FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                          CommunicationBridgeInterface communicationBridge, FullHumanoidRobotModel fullRobotModel, YoDouble yoTime)
    {
       super(namePrefix, communicationBridge);
 
       this.attachNetworkListeningQueue(wholeBodyTrajectoryToolboxOutputStatusQueue, WholeBodyTrajectoryToolboxOutputStatus.class);
 
       this.sleepBehavior = new SleepBehavior(communicationBridge, yoTime);
-
-      this.fullRobotModel = fullRobotModel;
-      
-      this.outputConverter = new WholeBodyTrajectoryToolboxOutputConverter(fullRobotModelFactory);
-   }
-   
-   public void setInputs(FullHumanoidRobotModel fullRobotModel)
-   {
-      
    }
 
-   public void setInputs(ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory, FullHumanoidRobotModel fullRobotModel)
+   public void setInput(WholeBodyTrajectoryToolboxMessage input)
    {
-      PlanWholeBodyTrajectoryBehavior.constrainedEndEffectorTrajectory = constrainedEndEffectorTrajectory;
-      this.fullRobotModel = fullRobotModel;
-
-      handTrajectoryMessages = new ArrayList<>();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         RigidBody hand = fullRobotModel.getHand(robotSide);
-         double t0 = 0.0;
-         double tf = constrainedEndEffectorTrajectory.getTrajectoryTime();
-         double timeResolution = 0.05;
-         FunctionTrajectory trajectoryToDiscretize = new FunctionTrajectory()
-         {
-            @Override
-            public Pose3D compute(double time)
-            {
-               ConfigurationBuildOrder configurationBuildOrder = constrainedEndEffectorTrajectory.defineConfigurationBuildOrders().get(robotSide);
-               ConfigurationSpace configurationSpace = constrainedEndEffectorTrajectory.getConfigurationSpace(time).get(robotSide);
-
-               RigidBodyTransform transform = configurationSpace.createRigidBodyTransform(configurationBuildOrder);               
-               return new Pose3D(transform);
-            }
-         };
-
-         List<ConfigurationSpaceName> unconstrainedDegreesOfFreedom = new ArrayList<>();
-
-         SelectionMatrix6D controllableSelectionMatrices = constrainedEndEffectorTrajectory.defineControllableSelectionMatrices().get(robotSide);
-         if (controllableSelectionMatrices.isLinearXSelected())
-            unconstrainedDegreesOfFreedom.add(ConfigurationSpaceName.X);
-         if (controllableSelectionMatrices.isLinearYSelected())
-            unconstrainedDegreesOfFreedom.add(ConfigurationSpaceName.Y);
-         if (controllableSelectionMatrices.isLinearZSelected())
-            unconstrainedDegreesOfFreedom.add(ConfigurationSpaceName.Z);
-         if (controllableSelectionMatrices.isAngularXSelected())
-            unconstrainedDegreesOfFreedom.add(ConfigurationSpaceName.ROLL);
-         if (controllableSelectionMatrices.isAngularYSelected())
-            unconstrainedDegreesOfFreedom.add(ConfigurationSpaceName.PITCH);
-         if (controllableSelectionMatrices.isAngularZSelected())
-            unconstrainedDegreesOfFreedom.add(ConfigurationSpaceName.YAW);
-
-         WaypointBasedTrajectoryMessage handTrajectory = WholeBodyTrajectoryToolboxMessageTools.createTrajectoryMessage(hand, t0, tf, timeResolution, trajectoryToDiscretize, unconstrainedDegreesOfFreedom.toArray(new ConfigurationSpaceName[0]));
-         handTrajectoryMessages.add(handTrajectory);
-      }
-   }
-   
-   public void setNumberOfFindInitialGuess(int value)
-   {
-      numberOfFindInitialGuess = value;
-   }
-   
-   public void setNumberOfExpanding(int value)
-   {
-      numberOfExpanding = value;
-   }
-   
-   public void setNumberOfEndEffectorWayPoints(int value)
-   {
-      numberOfEndEffectorWayPoints = value;
+      this.input = input;
    }
 
    public WholeBodyTrajectoryToolboxOutputStatus getWholeBodyTrajectoryToolboxOutputStatus()
    {
       return wholeBodyTrajectoryToolboxOutputStatus;
-   }
-   
-   public ArrayList<Pose3D> getHandTrajectories(RobotSide robotSide)
-   {
-      return handTrajectories.get(robotSide);
    }
 
    public WholeBodyTrajectoryMessage getWholebodyTrajectoryMessage()
@@ -174,26 +71,10 @@ public class PlanWholeBodyTrajectoryBehavior extends AbstractBehavior
       return wholebodyTrajectoryMessage;
    }
 
+   @SuppressWarnings("rawtypes")
    private void setupPipeline()
    {
-      pipeLine.clearAll();
-
-      BehaviorAction wakeup = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge))
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            if (DEBUG)
-            {
-               TextToSpeechPacket p1 = new TextToSpeechPacket("Telling Planner To Wake Up");
-               sendPacket(p1);
-            }
-            ToolboxStateMessage wakeUp = new ToolboxStateMessage(ToolboxState.WAKE_UP);
-            sendPackageToPlanner(wakeUp);
-            
-            PrintTools.info("initialize Planner");
-         }
-      };
+      taskExecutor.clear();
 
       BehaviorAction requestPlan = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge))
       {
@@ -206,15 +87,9 @@ public class PlanWholeBodyTrajectoryBehavior extends AbstractBehavior
                sendPacket(p1);
             }
 
-
-            WholeBodyTrajectoryToolboxConfigurationMessage configurationMessage = new WholeBodyTrajectoryToolboxConfigurationMessage(numberOfFindInitialGuess, numberOfExpanding);
-            configurationMessage.setInitialConfigration(fullRobotModel);
-            WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configurationMessage, handTrajectoryMessages);
-            message.setDestination(PacketDestination.WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE);
-
-            sendPackageToPlanner(message);
+            sendPackageToPlanner(input);
             PrintTools.info("sendPackageToPlanner");
-            
+
             startTime = System.currentTimeMillis();
          }
       };
@@ -251,23 +126,16 @@ public class PlanWholeBodyTrajectoryBehavior extends AbstractBehavior
                   WholeBodyTrajectoryToolboxOutputStatus uiPacket = new WholeBodyTrajectoryToolboxOutputStatus(wholeBodyTrajectoryToolboxOutputStatus);
                   uiPacket.setDestination(PacketDestination.UI);
                   sendPacketToUI(uiPacket);
-                  
-                  if(wholeBodyTrajectoryToolboxOutputStatus.getRobotConfigurations().length == 0)
+
+                  if (wholeBodyTrajectoryToolboxOutputStatus.getRobotConfigurations().length == 0)
                      PrintTools.info("something wrong");
-                  
-                  PrintTools.info("received size of path is "+wholeBodyTrajectoryToolboxOutputStatus.getRobotConfigurations().length);
-                  
-                  
-                  
+
+                  PrintTools.info("received size of path is " + wholeBodyTrajectoryToolboxOutputStatus.getRobotConfigurations().length);
+
                   wholebodyTrajectoryMessage = wholeBodyTrajectoryToolboxOutputStatus.getWholeBodyTrajectoryMessage();
-                  
-//                  wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-//                  outputConverter.setConstrainedEndEffectorTrajectory(constrainedEndEffectorTrajectory);
-//                  outputConverter.setMessageToCreate(wholebodyTrajectoryMessage);
-//                  outputConverter.updateFullRobotModel(cwbtoolboxOutputStatus);
-                  
+
                   // TODO: deactivate toolbox module.
-                                                      
+
                   long stopTime = System.currentTimeMillis();
                   long elapsedTime = stopTime - startTime;
                   System.out.println("===========================================");
@@ -277,7 +145,7 @@ public class PlanWholeBodyTrajectoryBehavior extends AbstractBehavior
                else
                {
                   planningSuccess = false;
-               }  
+               }
             }
             else
             {
@@ -302,13 +170,9 @@ public class PlanWholeBodyTrajectoryBehavior extends AbstractBehavior
          }
       };
 
-      pipeLine.requestNewStage();
-
-      pipeLine.submitSingleTaskStage(wakeup);
-      pipeLine.submitSingleTaskStage(requestPlan);
-      pipeLine.submitSingleTaskStage(waitForPlan);
-      pipeLine.submitSingleTaskStage(processPlan);
-
+      taskExecutor.submit(requestPlan);
+      taskExecutor.submit(waitForPlan);
+      taskExecutor.submit(processPlan);
    }
 
    private void sendPackageToPlanner(Packet<?> packet)
@@ -320,7 +184,7 @@ public class PlanWholeBodyTrajectoryBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-      pipeLine.doControl();
+      taskExecutor.doControl();
 
    }
 
@@ -335,42 +199,35 @@ public class PlanWholeBodyTrajectoryBehavior extends AbstractBehavior
       setupPipeline();
       planningSuccess = false;
       wholeBodyTrajectoryToolboxOutputStatus = null;
-      wholeBodyTrajectoryToolboxOutputStatusQueue.clear();      
+      wholeBodyTrajectoryToolboxOutputStatusQueue.clear();
 
    }
 
    @Override
    public void onBehaviorAborted()
    {
-      // TODO Auto-generated method stub
-
    }
 
    @Override
    public void onBehaviorPaused()
    {
-      // TODO Auto-generated method stub
-
    }
 
    @Override
    public void onBehaviorResumed()
    {
-      // TODO Auto-generated method stub
-
    }
 
    @Override
    public void onBehaviorExited()
    {
-      // TODO Auto-generated method stub
-
+      input = null;
    }
 
    @Override
    public boolean isDone()
    {
-      return pipeLine.isDone();
+      return taskExecutor.isDone();
    }
 
 }

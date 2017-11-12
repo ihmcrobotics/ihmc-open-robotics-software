@@ -24,6 +24,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -36,7 +37,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools.FunctionTrajectory;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.DrawingTrajectory;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.FunctionTrajectoryTools;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.tools.WheneverWholeBodyKinematicsSolver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -428,17 +429,27 @@ public abstract class WholeBodyTrajectoryToolboxTest implements MultiRobotTestIn
        * constrained end effector trajectory
        */
 
-      DrawingTrajectory endeffectorTrajectory = new DrawingTrajectory(10.0);
+      Point3DReadOnly circleCenter = new Point3D(0.56, 0.0, 1.1);
+      Quaternion circleOrientation = new Quaternion();
+      circleOrientation.appendPitchRotation(-0.48 * Math.PI);
+      Quaternion outputOrientation = new Quaternion();
+      outputOrientation.setYawPitchRoll(0.0, -0.4 * Math.PI, 0.0);
+      double radius = 0.35;
+      double angleStart = 0.0;
+      boolean clockwise = true;
+      double t0 = 0.0;
+      double tf = 10.0;
+      FunctionTrajectory circleTrajectory = FunctionTrajectoryTools.circleTrajectory(circleCenter, circleOrientation, outputOrientation, radius, angleStart, clockwise, t0, tf);
 
-      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(0.0, RobotSide.LEFT, new ConfigurationSpace())));
+      scs.addStaticLinkGraphics(getXYZAxis(circleTrajectory.compute( 0.0)));
 
-      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(3.0, RobotSide.LEFT, new ConfigurationSpace())));
+      scs.addStaticLinkGraphics(getXYZAxis(circleTrajectory.compute( 3.0)));
 
-      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(6.0, RobotSide.LEFT, new ConfigurationSpace())));
+      scs.addStaticLinkGraphics(getXYZAxis(circleTrajectory.compute( 6.0)));
 
-      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(9.0, RobotSide.LEFT, new ConfigurationSpace())));
+      scs.addStaticLinkGraphics(getXYZAxis(circleTrajectory.compute( 9.0)));
 
-      scs.addStaticLinkGraphics(getXYZAxis(endeffectorTrajectory.getEndEffectorPose(10.0, RobotSide.LEFT, new ConfigurationSpace())));
+      scs.addStaticLinkGraphics(getXYZAxis(circleTrajectory.compute(10.0)));
 
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       System.out.println("End");
