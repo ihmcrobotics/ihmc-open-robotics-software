@@ -244,7 +244,8 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       else
          fail("The toolbox has run for " + maxNumberOfIterations + " without converging nor aborting.");
 
-      visualizeSolution(solution, 0.1 * timeResolution);
+      if (visualize)
+         visualizeSolution(solution, 0.1 * timeResolution);
    }
 
    @Test
@@ -294,7 +295,8 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       else
          fail("The toolbox has run for " + maxNumberOfIterations + " without converging nor aborting.");
 
-      visualizeSolution(solution, 0.1 * timeResolution);
+      if (visualize)
+         visualizeSolution(solution, 0.1 * timeResolution);
    }
 
    private SideDependentList<Pose3D> computePrivilegedHandPosesAtPositions(SideDependentList<Point3D> desiredPositions)
