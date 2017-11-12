@@ -53,11 +53,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    private static final int DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE = 1000;
    private static final int DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE = 50;
 
-   public static double handCoordinateOffsetX = -0.05;//-0.2;
-
-   private static double handOffset_NoHand_Version = -0.03;
-   private static double handOffset_DualRobotiQ_Version = -0.2;
-
    /*
     * essential classes
     */
@@ -162,13 +157,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       super(statusOutputManager, registry);
       this.drcRobotModelFactory = drcRobotModel;
       this.commandInputManager = commandInputManager;
-
-      if (this.drcRobotModelFactory.getHandModel() == null)
-      {
-         handCoordinateOffsetX = handOffset_NoHand_Version;
-      }
-      else
-         handCoordinateOffsetX = handOffset_DualRobotiQ_Version;
 
       this.visualizedFullRobotModel = fullRobotModel;
       this.isDone.set(false);
@@ -453,7 +441,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     */
    private void findInitialGuess() throws InterruptedException, ExecutionException
    {
-      ctTreeFindInitialGuess.findInitialGuess(rootNode, taskRegion, initialConfiguration, constrainedEndEffectorTrajectory, handCoordinateOffsetX);
+      ctTreeFindInitialGuess.findInitialGuess(rootNode, taskRegion, initialConfiguration, constrainedEndEffectorTrajectory);
 
       double scoreInitialGuess = ctTreeFindInitialGuess.getBestScore();
       visualizedNode = ctTreeFindInitialGuess.getBestNode();
@@ -869,8 +857,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
          Pose3D desiredPose = constrainedEndEffectorTrajectory.getEndEffectorPose(node.getNodeData(0), robotSide, configurationSpaces.get(robotSide));
          setEndEffectorPose(robotSide, desiredPose);
-
-         desiredPose.appendTranslation(handCoordinateOffsetX, 0.0, 0.0);
 
          kinematicsSolver.setDesiredHandPose(robotSide, desiredPose);
       }

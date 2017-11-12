@@ -64,10 +64,22 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
       WAITING_INPUT, PLANNING, WAITING_CONFIRM, MOTION, PLAN_FALIED, DONE
    }
 
+   public double handCoordinateOffsetX = -0.05;//-0.2;
+
+   private double handOffset_NoHand_Version = -0.03;
+   private double handOffset_DualRobotiQ_Version = -0.2;
+
    public CuttingWallBehaviorStateMachine(FullHumanoidRobotModelFactory robotModelFactory, CommunicationBridge communicationBridge, YoDouble yoTime,
                                           FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
       super("cuttingWallBehaviorState", CuttingWallBehaviorState.class, yoTime, communicationBridge);
+
+      if (fullRobotModel.getHand(RobotSide.LEFT) == null)
+      {
+         handCoordinateOffsetX = handOffset_NoHand_Version;
+      }
+      else
+         handCoordinateOffsetX = handOffset_DualRobotiQ_Version;
 
       this.communicationBridge = communicationBridge;
       this.referenceFrames = referenceFrames;
@@ -210,6 +222,7 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
             FunctionTrajectory circleTrajectory = FunctionTrajectoryTools.circleTrajectory(circleCenter, circleOrientation, outputOrientation, radius, angleStart, clockwise, t0, tf);
             RigidBody leftHand = fullRobotModel.getHand(RobotSide.LEFT);
             WaypointBasedTrajectoryMessage circleTrajectoryMessage = WholeBodyTrajectoryToolboxMessageTools.createTrajectoryMessage(leftHand, t0, tf, 0.05, circleTrajectory, ConfigurationSpaceName.YAW);
+            circleTrajectoryMessage.setControlFramePosition(new Point3D(handCoordinateOffsetX, 0.0, 0.0));
             RigidBody rightHand = fullRobotModel.getHand(RobotSide.LEFT);
             Pose3D rightHandPose = new Pose3D(-0.2, -0.5, 0.6, -0.4 * Math.PI, 0.0, 0.5 * Math.PI);
             Pose3D[] waypoints = {rightHandPose, rightHandPose};
