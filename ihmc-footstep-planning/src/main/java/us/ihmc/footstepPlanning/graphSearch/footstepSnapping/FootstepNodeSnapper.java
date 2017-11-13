@@ -5,7 +5,7 @@ import java.util.HashMap;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public abstract class FootstepNodeSnapper
+public abstract class FootstepNodeSnapper implements FootstepNodeSnapperReadOnly
 {
    private final HashMap<FootstepNode, FootstepNodeSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
@@ -18,18 +18,22 @@ public abstract class FootstepNodeSnapper
 
    public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode)
    {
-      if (planarRegionsList == null)
+      if (snapDataHolder.containsKey(footstepNode))
       {
-         return FootstepNodeSnapData.identityData();
+         return snapDataHolder.get(footstepNode);
       }
-
-      if (!snapDataHolder.containsKey(footstepNode))
+      else if (planarRegionsList == null)
+      {
+         FootstepNodeSnapData identityData = FootstepNodeSnapData.identityData();
+         addSnapData(footstepNode, identityData);
+         return identityData;
+      }
+      else
       {
          FootstepNodeSnapData snapData = snapInternal(footstepNode);
          addSnapData(footstepNode, snapData);
+         return snapData;
       }
-
-      return snapDataHolder.get(footstepNode);
    }
 
    /**
@@ -38,6 +42,12 @@ public abstract class FootstepNodeSnapper
    public void addSnapData(FootstepNode footstepNode, FootstepNodeSnapData snapData)
    {
       snapDataHolder.put(footstepNode, snapData);
+   }
+
+   @Override
+   public FootstepNodeSnapData getSnapData(FootstepNode node)
+   {
+      return snapDataHolder.get(node);
    }
 
    protected abstract FootstepNodeSnapData snapInternal(FootstepNode footstepNode);

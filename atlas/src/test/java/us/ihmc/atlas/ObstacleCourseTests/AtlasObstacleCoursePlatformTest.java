@@ -33,7 +33,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
    @Override
    // "This test is flaky. Sometimes it works, sometimes it doesn't due to threading of the various globalDataProducer and communicators. We need to be able to shut those off or make them not screw up the robot run.")
    @ContinuousIntegrationTest(estimatedDuration = 48.6, categoriesOverride = IntegrationCategory.FLAKY)
-   @Test
+   @Test(timeout = 70000)
    public void testRunsTheSameWayTwiceJustStanding() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
       super.testRunsTheSameWayTwiceJustStanding();
@@ -41,7 +41,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 33.9)
-   @Test
+   @Test(timeout = 60000)
    public void testSidestepOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
       super.testSidestepOverSmallPlatform();
@@ -49,7 +49,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 40.5)
-   @Test
+   @Test(timeout = 70000)
    public void testSidestepOverSmallWall() throws SimulationExceededMaximumTimeException
    {
       super.testSidestepOverSmallWall();
@@ -57,7 +57,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 26.0)
-   @Test
+   @Test(timeout = 60000)
    public void testWalkingOffOfMediumPlatform() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOffOfMediumPlatform();
@@ -65,7 +65,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 35.4)
-   @Test
+   @Test(timeout = 60000)
    public void testWalkingOffOfMediumPlatformSlowSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOffOfMediumPlatformSlowSteps();
@@ -73,7 +73,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 25.6)
-   @Test
+   @Test(timeout = 60000)
    public void testWalkingOntoMediumPlatformToesTouching() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOntoMediumPlatformToesTouching();
@@ -81,7 +81,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 40.5)
-   @Test
+   @Test(timeout = 70000)
    public void testWalkingOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOverSmallPlatform();
@@ -89,7 +89,7 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 25.7)
-   @Test
+   @Test(timeout = 60000)
    public void testWalkingOverSmallPlatformQuickly() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOverSmallPlatformQuickly();

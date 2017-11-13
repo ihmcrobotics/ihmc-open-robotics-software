@@ -124,7 +124,7 @@ public class BlendedPoseTrajectoryGeneratorTest
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test
+   @Test(timeout = 30000)
    public void testNoConstraints()
    {
       Random random = new Random();
@@ -149,7 +149,7 @@ public class BlendedPoseTrajectoryGeneratorTest
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test
+   @Test(timeout = 30000)
    public void testInitialPoseConstraint()
    {
       Random random = new Random();
@@ -188,7 +188,7 @@ public class BlendedPoseTrajectoryGeneratorTest
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test
+   @Test(timeout = 30000)
    public void testInitialPoseAndTwistConstraint()
    {
       Random random = new Random();
@@ -226,7 +226,7 @@ public class BlendedPoseTrajectoryGeneratorTest
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test
+   @Test(timeout = 30000)
    public void testFinalPoseConstraint()
    {
       Random random = new Random();
@@ -265,7 +265,7 @@ public class BlendedPoseTrajectoryGeneratorTest
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test
+   @Test(timeout = 30000)
    public void testFinalPoseAndTwistConstraint()
    {
       Random random = new Random();
@@ -303,7 +303,7 @@ public class BlendedPoseTrajectoryGeneratorTest
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test
+   @Test(timeout = 30000)
    public void testInitialAndFinalConstraint()
    {
       Random random = new Random();

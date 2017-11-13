@@ -538,13 +538,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
          integrationSettings.put(jointMap.getNeckJointName(name), neckJointSettings);
 
       JointAccelerationIntegrationSettings elbowJointSettings = new JointAccelerationIntegrationSettings();
-      elbowJointSettings.setAlphaPosition(0.999);
-      elbowJointSettings.setAlphaVelocity(0.83);
+      elbowJointSettings.setAlphaPosition(0.9998);
+      elbowJointSettings.setAlphaVelocity(0.86);
       elbowJointSettings.setMaxPositionError(0.2);
       elbowJointSettings.setMaxVelocity(2.0);
 
       JointAccelerationIntegrationSettings wristJointSettings = new JointAccelerationIntegrationSettings();
-      wristJointSettings.setAlphaPosition(0.999);
+      wristJointSettings.setAlphaPosition(0.9995);
       wristJointSettings.setAlphaVelocity(0.83);
       wristJointSettings.setMaxPositionError(0.2);
       wristJointSettings.setMaxVelocity(2.0);

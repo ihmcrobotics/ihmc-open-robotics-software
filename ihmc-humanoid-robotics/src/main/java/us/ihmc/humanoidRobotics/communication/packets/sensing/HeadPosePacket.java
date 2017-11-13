@@ -4,7 +4,7 @@ import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class HeadPosePacket extends Packet<HeadPosePacket>

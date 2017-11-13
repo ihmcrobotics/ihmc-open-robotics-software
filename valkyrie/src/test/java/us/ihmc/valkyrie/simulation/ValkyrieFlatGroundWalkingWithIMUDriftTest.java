@@ -30,7 +30,7 @@ public class ValkyrieFlatGroundWalkingWithIMUDriftTest extends DRCFlatGroundWalk
     */
    @Ignore
 	@ContinuousIntegrationTest(estimatedDuration = 50.3)
-	@Test
+	@Test(timeout = 30000)
    public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage(getSimulationTestingParameters().getShowWindows());

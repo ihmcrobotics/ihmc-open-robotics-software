@@ -44,7 +44,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -56,7 +56,7 @@ public class KinematicsToolboxControllerTest
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
    static
    {
@@ -158,7 +158,7 @@ public class KinematicsToolboxControllerTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testHoldBodyPose() throws Exception
    {
       Pair<FloatingInverseDynamicsJoint, OneDoFJoint[]> initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
@@ -179,7 +179,7 @@ public class KinematicsToolboxControllerTest
                  toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testRandomHandPositions() throws Exception
    {
       if (VERBOSE)
@@ -215,7 +215,7 @@ public class KinematicsToolboxControllerTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testRandomHandPoses() throws Exception
    {
       if (VERBOSE)

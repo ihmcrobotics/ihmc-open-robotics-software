@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.FormattingTools;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlLowLevelController;
 
 public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener

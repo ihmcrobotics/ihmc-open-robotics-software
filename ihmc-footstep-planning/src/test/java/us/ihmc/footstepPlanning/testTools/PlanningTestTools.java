@@ -39,7 +39,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class PlanningTestTools
@@ -203,9 +203,9 @@ public class PlanningTestTools
    public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FootstepPlannerGoal goal,
                                          PlanarRegionsList planarRegionsList, boolean assertPlannerReturnedResult)
    {
+      planner.setPlanarRegions(planarRegionsList);
       planner.setInitialStanceFoot(initialStanceFootPose, initialStanceSide);
       planner.setGoal(goal);
-      planner.setPlanarRegions(planarRegionsList);
 
       ExecutionTimer timer = new ExecutionTimer("Timer", 0.0, new YoVariableRegistry("Timer"));
       timer.startMeasurement();

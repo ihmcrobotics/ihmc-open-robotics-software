@@ -6,8 +6,10 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -15,6 +17,7 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 
 import static org.junit.Assert.assertEquals;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
 {
    private static final double epsilon = 1e-4;
@@ -291,7 +294,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
    @Test(timeout = 30000)
    public void testSimpleCasesWithBoundsConstraints()
    {
-      testSimpleCasesWithBoundsConstraints(0, 1, 6, true);
+      testSimpleCasesWithBoundsConstraints(0, 1, 2, 6, true);
    }
 
    @Override /** have to override because quad prog uses different iterations */
@@ -306,7 +309,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
    @Test(timeout = 30000)
    public void testMaxIterations()
    {
-      testMaxIterations(6);
+      testMaxIterations(6, false);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

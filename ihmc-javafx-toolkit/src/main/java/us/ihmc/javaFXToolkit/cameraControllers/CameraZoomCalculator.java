@@ -8,7 +8,7 @@ import javafx.event.EventHandler;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.transform.Translate;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 /**
  * This class provides the tools necessary to build a simple controller for the zoom of a JavaFX {@link PerspectiveCamera}.

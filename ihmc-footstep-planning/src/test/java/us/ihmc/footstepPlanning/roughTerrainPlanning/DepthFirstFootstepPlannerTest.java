@@ -14,13 +14,12 @@ import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlanarRegionBipedalFootstepPlannerVisualizer;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapAndWiggleBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SnapBasedNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -133,29 +132,6 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 10000.0)
    @Test(timeout = 300000)
-   public void testPartialGaps()
-   {
-      parameters.set(new DefaultFootstepPlanningParameters()
-      {
-         @Override
-         public double getMinimumFootholdPercent()
-         {
-            return 0.4;
-         }
-
-         @Override
-         public boolean getRejectIfCannotFullyWiggleInside()
-         {
-            return false;
-         }
-      });
-
-      super.testPartialGaps(!visualize);
-   }
-
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 10000.0)
-   @Test(timeout = 300000)
    public void testWalkingAroundBox()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
@@ -186,6 +162,12 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygonsInSoleFrame, parameters, visualizer);
       SnapBasedNodeChecker nodeChecker = new SnapBasedNodeChecker(parameters, footPolygonsInSoleFrame, snapper);
       ConstantFootstepCost stepCostCalculator = new ConstantFootstepCost(1.0);
+
+      if(showPlannerVisualizer)
+      {
+         visualizer.setFootstepSnapper(snapper);
+         nodeChecker.addPlannerListener(visualizer);
+      }
 
       planner = new DepthFirstFootstepPlanner(parameters, snapper, nodeChecker, stepCostCalculator, registry);
       planner.setFeetPolygons(footPolygonsInSoleFrame);

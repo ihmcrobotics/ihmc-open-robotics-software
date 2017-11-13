@@ -9,9 +9,9 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.graphicsDescription.input.mouse.Mouse3DListener;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class Mouse3DJoystickTest

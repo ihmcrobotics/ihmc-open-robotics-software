@@ -211,10 +211,10 @@ public class PlanarRegionsListExamples
    public static PlanarRegionsList generateSteppingStonesEnvironment(double pathRadius)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      double cinderBlockWidth = 0.15;
-      double cinderBlockLength = 0.25;
-      double cinderBlockSeparationWidth = 0.2;
-      double cinderBlockSeparationLength = 0.3;
+      double cinderBlockWidth = 0.25;
+      double cinderBlockLength = 0.35;
+      double cinderBlockSeparationWidth = 0.25;
+      double cinderBlockSeparationLength = 0.35;
 
       double quarterCircleLength = 0.5 * Math.PI * pathRadius;
       int numberOfSteps = (int) Math.round(quarterCircleLength / cinderBlockSeparationLength);

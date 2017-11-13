@@ -16,7 +16,7 @@ import us.ihmc.robotics.lists.GenericTypeBuilder;
 public class ControllerAPIDefinitionTest
 {
 
-   @Test
+   @Test(timeout = 30000)
    public void testCommandSetters()
    {
       Random random = new Random();

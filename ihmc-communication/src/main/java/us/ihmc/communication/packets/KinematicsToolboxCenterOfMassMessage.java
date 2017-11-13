@@ -1,16 +1,16 @@
 package us.ihmc.communication.packets;
 
-import static us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage.*;
+import static us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage.nullEqualsAndEpsilonEquals;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 /**
@@ -24,7 +24,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
  * @author Sylvain Bertrand
  *
  */
-public class KinematicsToolboxCenterOfMassMessage extends TrackablePacket<KinematicsToolboxCenterOfMassMessage>
+public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolboxCenterOfMassMessage>
 {
    /**
     * This is the desired center of mass position. The data is assumed to be expressed in world

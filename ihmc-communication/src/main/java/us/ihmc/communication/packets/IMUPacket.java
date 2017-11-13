@@ -2,7 +2,7 @@ package us.ihmc.communication.packets;
 
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 
 public class IMUPacket extends Packet<IMUPacket>

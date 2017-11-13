@@ -2,7 +2,7 @@ package us.ihmc.robotics.trajectories;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class WaypointMotionGenerator
 {

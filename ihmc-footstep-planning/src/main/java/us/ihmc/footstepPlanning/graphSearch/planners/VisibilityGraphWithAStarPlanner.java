@@ -30,7 +30,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -151,21 +151,33 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
          NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(planarRegionsList.getPlanarRegionsAsList());
          Point3D startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
          Point3D goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
-         List<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
 
-         if (path.size() < 2)
+         try
          {
+            List<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+
+            if (path.size() < 2)
+            {
+               double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
+               timeSpentBeforeFootstepPlanner.set(seconds);
+               timeSpentInFootstepPlanner.set(0.0);
+               yoResult.set(FootstepPlanningResult.PLANNER_FAILED);
+               return yoResult.getEnumValue();
+            }
+
+            for (Point3D waypoint3d : path)
+            {
+               waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
+            }
+         }
+         catch (Exception e)
+         {
+            e.printStackTrace();
             double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
             timeSpentBeforeFootstepPlanner.set(seconds);
             timeSpentInFootstepPlanner.set(0.0);
             yoResult.set(FootstepPlanningResult.PLANNER_FAILED);
-//            PointCloudTools.savePlanarRegionsToFile(planarRegionsList, startPos, goalPos);
             return yoResult.getEnumValue();
-         }
-
-         for (Point3D waypoint3d : path)
-         {
-            waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
          }
       }
 

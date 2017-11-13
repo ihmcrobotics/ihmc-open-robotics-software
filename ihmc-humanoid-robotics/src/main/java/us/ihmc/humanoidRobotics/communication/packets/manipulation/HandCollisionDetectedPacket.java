@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandCollisionDetectedPacket extends Packet<HandCollisionDetectedPacket>
