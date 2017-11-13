@@ -11,6 +11,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -23,6 +24,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 
@@ -30,6 +32,8 @@ import java.awt.*;
 
 public class PlanarRegionConstraintProvider
 {
+   private static final double maxNormalAngleFromVertical = 0.3;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoFrameConvexPolygon2d yoActivePlanarRegion;
    private final YoFrameConvexPolygon2d yoActivePlanarRegionInControlPlane;
@@ -39,6 +43,7 @@ public class PlanarRegionConstraintProvider
 
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private final YoDouble distanceToPlanarRegionEdgeForNoOverhang;
+   private final YoInteger numberOfPlanarListsToConsider;
 
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
    private final ICPControlPlane icpControlPlane;
@@ -62,6 +67,7 @@ public class PlanarRegionConstraintProvider
       yoActivePlanarRegion = new YoFrameConvexPolygon2d(yoNamePrefix + "ActivePlanarRegionConstraint", "", worldFrame, 12, registry);
       yoActivePlanarRegionInControlPlane = new YoFrameConvexPolygon2d(yoNamePrefix + "ActivePlanarRegionConstraintInControlPlane", "", worldFrame, 12, registry);
       distanceToPlanarRegionEdgeForNoOverhang = new YoDouble(yoNamePrefix + "DistanceToPlanarRegionEdgeForNoOverhang", registry);
+      numberOfPlanarListsToConsider = new YoInteger(yoNamePrefix + "NumberOfPlanarListsToConsider", registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -93,11 +99,26 @@ public class PlanarRegionConstraintProvider
       }
    }
 
+   private final Vector3D planeNormal = new Vector3D();
+   private final Vector3D verticalAxis = new Vector3D(0.0, 0.0, 1.0);
    public void setPlanarRegions(RecyclingArrayList<PlanarRegion> planarRegions)
    {
       planarRegionsList.clear();
+      numberOfPlanarListsToConsider.set(0);
+
       for (int i = 0; i < planarRegions.size(); i++)
-         planarRegionsList.addPlanarRegion(planarRegions.get(i));
+      {
+         PlanarRegion planarRegion = planarRegions.get(i);
+         planarRegion.getNormal(planeNormal);
+
+         double angle = planeNormal.angle(verticalAxis);
+
+         if (angle < maxNormalAngleFromVertical)
+         {
+            planarRegionsList.addPlanarRegion(planarRegions.get(i));
+            numberOfPlanarListsToConsider.increment();
+         }
+      }
    }
 
    public void computeDistanceFromEdgeForNoOverhang(Footstep upcomingFootstep)
