@@ -14,6 +14,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -117,6 +118,33 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
 
       double simulationTime = (swingTime + transferTime) * 4 + 1.0;
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+
+      Point3D center = new Point3D(1.05, 0.0, 1.0893768421917251);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+   }
+
+   public void testForwardPush() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+
+      double totalMass  = getRobotModel().createFullRobotModel().getTotalMass();
+      StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.5 * swingTime;
+      Vector3D firstForceDirection = new Vector3D(1.0, 0.0, 0.0);
+      double percentWeight = 0.4;
+      double magnitude = percentWeight * totalMass * 9.81;
+      double duration = 0.1;
+      pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
+
+      double simulationTime = (swingTime + transferTime) * 4 + 1.0;
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+
+      Point3D center = new Point3D(1.05, 0.0, 1.0893768421917251);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
    private FootstepDataListMessage createFootstepDataListMessage(double swingTime, double transferTime)

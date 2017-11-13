@@ -28,6 +28,14 @@ public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
    }
 
    @Override
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 70000)
+   public void testForwardPush() throws SimulationExceededMaximumTimeException
+   {
+      super.testForwardPush();
+   }
+
+   @Override
    public DRCRobotModel getRobotModel()
    {
       AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false)
