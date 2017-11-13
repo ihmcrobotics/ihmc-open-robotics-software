@@ -7,7 +7,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.TrackablePacket;
 
 public class PacketRouter<T extends Enum<T>>
 {
@@ -96,8 +95,7 @@ public class PacketRouter<T extends Enum<T>>
 
       T destination = getPacketDestination(sourceCommunicator, packet);
 
-      if (packet instanceof TrackablePacket)
-         ((TrackablePacket<?>) packet).setSource(source.ordinal());
+      packet.setSource(source.ordinal());
 
       PacketCommunicator destinationCommunicator = communicators.get(destination);
       if (isBroadcast(destination))

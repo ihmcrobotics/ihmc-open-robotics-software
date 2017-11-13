@@ -14,7 +14,7 @@ import net.wimpi.modbus.msg.WriteMultipleRegistersRequest;
 import net.wimpi.modbus.net.TCPMasterConnection;
 import net.wimpi.modbus.procimg.InputRegister;
 import net.wimpi.modbus.procimg.Register;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class JamodTCPMaster
 {

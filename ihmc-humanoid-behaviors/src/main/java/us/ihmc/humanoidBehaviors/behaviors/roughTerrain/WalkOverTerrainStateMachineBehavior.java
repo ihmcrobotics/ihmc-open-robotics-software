@@ -31,7 +31,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.FormattingTools;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.tools.taskExecutor.PipeLine;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;

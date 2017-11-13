@@ -4,7 +4,7 @@ import java.util.EnumMap;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;

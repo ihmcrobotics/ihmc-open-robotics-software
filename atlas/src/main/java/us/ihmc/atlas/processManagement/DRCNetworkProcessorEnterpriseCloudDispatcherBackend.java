@@ -19,7 +19,7 @@ import us.ihmc.communication.net.tcpServer.ReconnectingTCPServer;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.tools.processManagement.UnsignedByteTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runnable
 {

@@ -13,7 +13,6 @@ import com.jme3.math.Vector3f;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
@@ -303,7 +302,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public HandModel getHandModel()
+   public ValkyrieHandModel getHandModel()
    {
       return new ValkyrieHandModel();
    }

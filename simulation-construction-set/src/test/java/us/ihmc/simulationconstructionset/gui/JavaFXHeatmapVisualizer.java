@@ -24,7 +24,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class JavaFXHeatmapVisualizer
 {

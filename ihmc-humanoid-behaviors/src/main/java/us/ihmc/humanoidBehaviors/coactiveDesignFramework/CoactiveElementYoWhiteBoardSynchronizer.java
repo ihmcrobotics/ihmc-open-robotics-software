@@ -7,7 +7,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.simulationConstructionSetTools.whiteBoard.TCPYoWhiteBoard;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable
 {

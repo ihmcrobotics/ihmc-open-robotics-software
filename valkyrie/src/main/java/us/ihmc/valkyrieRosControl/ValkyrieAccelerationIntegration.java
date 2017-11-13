@@ -5,11 +5,12 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ValkyrieAccelerationIntegration
 {
@@ -17,48 +18,39 @@ public class ValkyrieAccelerationIntegration
 
    private final List<YoEffortJointHandleHolder> processedJointHandles = new ArrayList<>();
 
-   private final YoDouble alphaAccelerationIntegration = new YoDouble("alphaAccelerationIntegration", registry);
-
+   private final List<YoDouble> kPositionList = new ArrayList<>();
    private final List<YoDouble> kVelocityList = new ArrayList<>();
 
-   private final List<YoDouble> desiredVelocityList = new ArrayList<>();
-
+   private final List<YoDouble> tauFromPositionList = new ArrayList<>();
    private final List<YoDouble> tauFromVelocityList = new ArrayList<>();
-
-   private final List<YoBoolean> enabledList = new ArrayList<>();
-
-   private final double updateDT;
 
    /**
     * Need to be extracted to a config file
     */
-   private final String[] jointShortNamesToProcess = new String[]{"Hip", "Knee", "Ankle", "Shoulder", "Elbow", "Torso"};
-   private final String[] legs = new String[]{"Hip", "Knee", "Ankle"};
-   private final String[] arms = new String[]{"Shoulder", "Elbow"};
+   private final String[] legs = new String[] {"Hip", "Knee", "Ankle"};
+   private final String[] upperarms = new String[] {"Shoulder", "Elbow"};
+   private final String[] forearms = new String[] {"Forearm", "Wrist"};
 
    public ValkyrieAccelerationIntegration(List<YoEffortJointHandleHolder> yoEffortJointHandleHolders, double updateDT, YoVariableRegistry parentRegistry)
    {
-      this.updateDT = updateDT;
       parentRegistry.addChild(registry);
 
       for (YoEffortJointHandleHolder jointHandle : yoEffortJointHandleHolders)
       {
          OneDoFJoint joint = jointHandle.getOneDoFJoint();
          String jointName = joint.getName();
-         if (!arrayContainsIgnoreCase(jointShortNamesToProcess, jointName))
-            continue;
 
          processedJointHandles.add(jointHandle);
 
+         YoDouble kPosition = new YoDouble("kPosition_" + jointName, registry);
          YoDouble kVelocity = new YoDouble("kVelocity_" + jointName, registry);
-         YoDouble desiredVelocity = new YoDouble("qd_d_AccInt_" + jointName, registry);
+         YoDouble tauFromPosition = new YoDouble("tau_pos_" + jointName, registry);
          YoDouble tauFromVelocity = new YoDouble("tau_vel_" + jointName, registry);
-         YoBoolean enabled = new YoBoolean(jointName + "AccelIntEnabled", registry);
 
+         kPositionList.add(kPosition);
          kVelocityList.add(kVelocity);
-         desiredVelocityList.add(desiredVelocity);
+         tauFromPositionList.add(tauFromPosition);
          tauFromVelocityList.add(tauFromVelocity);
-         enabledList.add(enabled);
       }
       setGains();
    }
@@ -68,8 +60,6 @@ public class ValkyrieAccelerationIntegration
     */
    private void setGains()
    {
-      alphaAccelerationIntegration.set(0.9);
-
       for (int i = 0; i < processedJointHandles.size(); i++)
       {
          YoEffortJointHandleHolder jointHandle = processedJointHandles.get(i);
@@ -80,9 +70,18 @@ public class ValkyrieAccelerationIntegration
          {
             kVelocityList.get(i).set(4.75);
          }
-         else if (arrayContainsIgnoreCase(arms, jointName))
+         else if (arrayContainsIgnoreCase(upperarms, jointName))
          {
             kVelocityList.get(i).set(6.0);
+         }
+         else if (jointName.contains("ForearmYaw"))
+         {
+            kPositionList.get(i).set(7.0);
+         }
+         else if (jointName.contains("Wrist"))
+         {
+            kPositionList.get(i).set(20.0);
+            kVelocityList.get(i).set(0.5);
          }
       }
    }
@@ -92,39 +91,46 @@ public class ValkyrieAccelerationIntegration
       for (int i = 0; i < processedJointHandles.size(); i++)
       {
          YoEffortJointHandleHolder jointHandle = processedJointHandles.get(i);
-         OneDoFJoint joint = jointHandle.getOneDoFJoint();
-
-         boolean enabled = joint.getIntegrateDesiredAccelerations();
-         enabledList.get(i).set(enabled);
-         
-         if (enabled && !joint.getResetDesiredAccelerationIntegrator())
-            computeAndApplyDesiredTauOffset(i);
-         else
-            reset(i);
+         JointDesiredOutput desiredJointData = jointHandle.getDesiredJointData();
+         computeAndApplyDesiredTauOffset(i, desiredJointData);
       }
    }
 
-   private void computeAndApplyDesiredTauOffset(int index)
+   private void computeAndApplyDesiredTauOffset(int index, JointDesiredOutputReadOnly desiredJointData)
    {
       YoEffortJointHandleHolder jointHandle = processedJointHandles.get(index);
       OneDoFJoint joint = jointHandle.getOneDoFJoint();
-      double alpha = alphaAccelerationIntegration.getDoubleValue();
-      double qd = joint.getQd();
-      double qd_d_previous = desiredVelocityList.get(index).getDoubleValue();
-      double qdd_d = jointHandle.getControllerQddDesired();
 
-      double qd_d_new = alpha * (qd_d_previous + qdd_d * updateDT) + (1.0 - alpha) * qd;
-      double tau_vel = kVelocityList.get(index).getDoubleValue() * (qd_d_new - qd);
+      double tau_pos;
 
-      jointHandle.addOffetControllerTauDesired(tau_vel);
+      if (desiredJointData.hasDesiredPosition())
+      {
+         double q = joint.getQ();
+         double q_d = desiredJointData.getDesiredPosition();
+         double kp = kPositionList.get(index).getDoubleValue();
+         tau_pos = kp * (q_d - q);
+      }
+      else
+      {
+         tau_pos = 0.0;
+      }
+      tauFromPositionList.get(index).set(tau_pos);
 
-      desiredVelocityList.get(index).set(qd_d_new);
+      double tau_vel;
+      if (desiredJointData.hasDesiredVelocity())
+      {
+         double qd = joint.getQd();
+         double qd_d = desiredJointData.getDesiredVelocity();
+         double kd = kVelocityList.get(index).getDoubleValue();
+         tau_vel = kd * (qd_d - qd);
+      }
+      else
+      {
+         tau_vel = 0.0;
+      }
       tauFromVelocityList.get(index).set(tau_vel);
-   }
 
-   private void reset(int index)
-   {
-      desiredVelocityList.get(index).set(0.0);
+      jointHandle.addOffetControllerTauDesired(tau_pos + tau_vel);
    }
 
    private boolean arrayContainsIgnoreCase(String[] arrayToCheck, String searchString)

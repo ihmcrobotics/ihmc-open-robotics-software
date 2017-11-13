@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.Footstep;

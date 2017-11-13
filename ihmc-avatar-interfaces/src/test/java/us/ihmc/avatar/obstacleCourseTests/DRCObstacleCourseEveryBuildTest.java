@@ -8,7 +8,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
@@ -26,7 +25,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestInterface
 {
@@ -37,7 +36,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
    @Before
    public void showMemoryUsageBeforeTest()
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 

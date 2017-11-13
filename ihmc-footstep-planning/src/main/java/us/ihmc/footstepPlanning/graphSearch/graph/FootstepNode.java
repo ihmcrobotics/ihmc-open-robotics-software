@@ -1,5 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
+import java.util.Random;
+
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -53,6 +56,12 @@ public class FootstepNode
       return Math.sqrt(dx * dx + dy * dy);
    }
 
+   public static FootstepNode generateRandomFootstepNode(Random random, double minMaxXY)
+   {
+      return new FootstepNode(EuclidCoreRandomTools.generateRandomDouble(random, minMaxXY), EuclidCoreRandomTools.generateRandomDouble(random, minMaxXY),
+                              EuclidCoreRandomTools.generateRandomDouble(random, Math.PI), RobotSide.generateRandomRobotSide(random));
+   }
+
    @Override
    public int hashCode()
    {
@@ -89,7 +98,7 @@ public class FootstepNode
    @Override
    public String toString()
    {
-      return "Node: x=" + getX() + ", y=" + getY() + ", yaw=" + getYaw();
+      return "Node: x=" + getX() + ", y=" + getY() + ", yaw=" + getYaw() + ", side=" + robotSide.getLowerCaseName();
    }
 
 }

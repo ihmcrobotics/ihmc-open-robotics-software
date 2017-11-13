@@ -28,7 +28,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobot
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class ExampleRockContactSimulation
 {

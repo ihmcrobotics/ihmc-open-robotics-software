@@ -7,6 +7,7 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
 {
    private final boolean runningOnRealRobot;
    private final boolean useAngularMomentum = false;
+   private final boolean useStepAdjustment = false;
 
    public AtlasSimpleICPOptimizationParameters(boolean runningOnRealRobot)
    {
@@ -43,7 +44,7 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    @Override
    public double getFootstepRegularizationWeight()
    {
-      return runningOnRealRobot ? 0.001 : 0.005;
+      return runningOnRealRobot ? 0.001 : 0.001;
    }
 
    /** {@inheritDoc} */
@@ -71,21 +72,29 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    @Override
    public double getFeedbackParallelGain()
    {
-      return runningOnRealRobot ? 3.0 : 3.0;
+      return runningOnRealRobot ? 3.0 : 2.5;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getFeedbackOrthogonalGain()
    {
-      return runningOnRealRobot ? 2.5 : 2.5;
+      return runningOnRealRobot ? 2.5 : 1.5;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getDynamicRelaxationWeight()
    {
-      return runningOnRealRobot ? 10000.0 : (useAngularMomentum ? 100000.0 : 1000.0);
+      if (runningOnRealRobot)
+         return 10000.0;
+      else if (useAngularMomentum)
+         return 100000.0;
+      else if (useStepAdjustment)
+         return 1000.0;
+      else
+         return 10000.0;
+      //return runningOnRealRobot ? 10000.0 : (useAngularMomentum ? 100000.0 : 1000.0);
    }
 
    /** {@inheritDoc} */
@@ -94,8 +103,10 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    {
       if (useAngularMomentum)
          return runningOnRealRobot ? 50.0 : 100.0;
-      else
+      else if (useStepAdjustment)
          return runningOnRealRobot ? 1.0 : 4.0;
+      else
+         return 1.0;
    }
 
    /** {@inheritDoc} */
@@ -137,7 +148,7 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    @Override
    public boolean useStepAdjustment()
    {
-      return true;
+      return useStepAdjustment;
    }
 
    /** {@inheritDoc} */
@@ -151,7 +162,7 @@ public class AtlasSimpleICPOptimizationParameters extends ICPOptimizationParamet
    @Override
    public double getSafeCoPDistanceToEdge()
    {
-      return 0.002;
+      return 0.001;
    }
 
    /** {@inheritDoc} */

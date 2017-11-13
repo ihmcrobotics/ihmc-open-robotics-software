@@ -27,7 +27,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class GroundProfileTest
 {

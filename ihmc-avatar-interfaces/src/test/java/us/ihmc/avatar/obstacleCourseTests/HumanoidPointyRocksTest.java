@@ -58,7 +58,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -77,7 +77,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    private SideDependentList<YoFrameConvexPolygon2d> supportPolygons = null;
    private SideDependentList<ArrayList<Point2D>> footContactsInAnkleFrame = null;
 
-   private static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private PushRobotController pushController;
@@ -86,6 +86,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    }
 
    @After

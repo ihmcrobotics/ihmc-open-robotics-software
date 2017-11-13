@@ -51,14 +51,14 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimpleOcclusionTests
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getKeepSCSUp();
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -72,7 +72,7 @@ public class SimpleOcclusionTests
    @Rule
    public TestName name = new TestName();
 
-   @Test
+   @Test(timeout = 30000)
    public void testSimpleOcclusions()
    {
       FramePose startPose = new FramePose();
@@ -81,7 +81,7 @@ public class SimpleOcclusionTests
       runTest(startPose, goalPose, regions);
    }
 
-   @Test
+   @Test(timeout = 30000)
    @Ignore
    public void testMazeWithOcclusions()
    {

@@ -29,7 +29,7 @@ import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class QuadrupedControllerInputProviderTest
 {

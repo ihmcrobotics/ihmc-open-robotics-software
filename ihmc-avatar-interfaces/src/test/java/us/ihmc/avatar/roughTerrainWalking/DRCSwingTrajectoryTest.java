@@ -27,7 +27,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -131,7 +131,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
 
    public void testMultipleHeightFootsteps() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       simulationTestingParameters.setRunMultiThreaded(false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -182,7 +182,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
 
    public void testReallyHighFootstep() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       simulationTestingParameters.setRunMultiThreaded(false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -211,7 +211,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
 
    public void testNegativeSwingHeight() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       simulationTestingParameters.setRunMultiThreaded(false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 

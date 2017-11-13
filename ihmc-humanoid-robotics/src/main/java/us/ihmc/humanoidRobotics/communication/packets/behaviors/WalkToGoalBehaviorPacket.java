@@ -52,4 +52,16 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket> {
 		return ret;
 	}
 
+	@Override
+	public String toString()
+	{
+		String ret = getClass().getSimpleName() + "\n";
+
+		ret += "x: " + xGoal + "\n";
+		ret += "y: " + yGoal + "\n";
+		ret += "theta: " + thetaGoal + "\n";
+		ret += "side: " + goalSide.toString() + "\n";
+
+		return ret;
+	}
 }

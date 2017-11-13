@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.Random;
 
-import us.ihmc.communication.packets.TrackablePacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
@@ -12,7 +12,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
  * A third order polynomial function is used to interpolate between trajectory points.
  */
 
-public abstract class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T>> extends TrackablePacket<T>
+public abstract class Abstract1DTrajectoryMessage<T extends Abstract1DTrajectoryMessage<T>> extends Packet<T>
 {
    @RosExportedField(documentation = "List of trajectory points to go through while executing the trajectory.")
    public TrajectoryPoint1DMessage[] trajectoryPoints;

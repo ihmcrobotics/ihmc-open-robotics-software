@@ -30,13 +30,13 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTestInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private DRCRobotModel robotModel;
    private FullHumanoidRobotModel fullRobotModel;
@@ -129,7 +129,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       return new FootstepDataListMessage();
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testForwardWalk() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -172,7 +172,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       controllerSpy.assertCheckpointsReached();
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testForwardWalkWithForceDisturbances() throws SimulationExceededMaximumTimeException
    {
       setupTest();

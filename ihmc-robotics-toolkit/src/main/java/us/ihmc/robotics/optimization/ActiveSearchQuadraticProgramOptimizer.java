@@ -6,7 +6,7 @@ import org.ejml.alg.dense.mult.VectorVectorMult;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 /**
  * @author twan

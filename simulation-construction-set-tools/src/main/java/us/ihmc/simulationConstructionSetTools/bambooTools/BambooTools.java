@@ -19,7 +19,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.util.gui.GUIMessageFrame;
-import us.ihmc.tools.FormattingTools;
+import us.ihmc.commons.FormattingTools;
 
 public class BambooTools
 {
@@ -204,6 +204,14 @@ public class BambooTools
    private static String determineEraseableBambooDataAndVideosRootDirectoryToUse()
    {
       String rootDirectoryToTry = System.getProperty("create.videos.dir");
+      if(rootDirectoryToTry != null)
+      {
+         if(!rootDirectoryToTry.endsWith("/") && !rootDirectoryToTry.endsWith("\\"))
+         {
+            rootDirectoryToTry += "/";
+         }
+      }
+      
       if (rootDirectoryToTry == null)
       {
          if (SystemUtils.IS_OS_WINDOWS)

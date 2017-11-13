@@ -23,7 +23,7 @@ import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;

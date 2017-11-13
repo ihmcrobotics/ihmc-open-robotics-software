@@ -15,7 +15,7 @@ import org.apache.commons.lang3.SystemUtils;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class BambooVideoWall
 {
