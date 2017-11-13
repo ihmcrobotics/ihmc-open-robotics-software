@@ -177,7 +177,7 @@ public class PlanarRegionConstraintProvider
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(regionIndex);
          icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion, tempProjectedPolygon);
 
-         // FIXME this makes garbage
+         // FIXME this makes a lot of garbage
          ConvexPolygonTools.computeIntersectionOfPolygons(captureRegion.getConvexPolygon2d(), tempProjectedPolygon, tempIntersection);
          double intersectionArea = tempIntersection.getArea();
 
