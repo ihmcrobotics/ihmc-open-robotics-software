@@ -76,14 +76,16 @@ public abstract class TransferState extends WalkingState
    {
       boolean touchdownTimeElapsed = getTimeInCurrentState() > touchdownDuration.getDoubleValue();
       boolean icpErrorTooGreat = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToAbortTouchdown.getDoubleValue();
-      if(touchdownTimeElapsed || icpErrorTooGreat || !isInTouchdown.getBooleanValue())
+      
+      if(isInTouchdown.getBooleanValue() && (touchdownTimeElapsed || icpErrorTooGreat))
       {
-         if(isInTouchdown.getBooleanValue())
-         {
-            feetManager.initializeContactStatesForDoubleSupport(transferToSide);
-            updateICPPlan();
-            isInTouchdown.set(false);
-         }
+         feetManager.initializeContactStatesForDoubleSupport(transferToSide);
+         updateICPPlan();
+         isInTouchdown.set(false);
+      }
+      
+      if(!isInTouchdown.getBooleanValue())
+      {
          feetManager.updateContactStatesInDoubleSupport(transferToSide);
       }
       
