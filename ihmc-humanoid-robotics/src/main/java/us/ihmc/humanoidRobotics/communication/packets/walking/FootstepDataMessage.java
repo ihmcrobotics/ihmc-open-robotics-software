@@ -471,6 +471,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       boolean sameTimings = MathTools.epsilonEquals(swingDuration, footstepData.swingDuration, epsilon);
       sameTimings = sameTimings && MathTools.epsilonEquals(transferDuration, footstepData.transferDuration, epsilon);
+      sameTimings = sameTimings && MathTools.epsilonEquals(touchdownDuration, footstepData.touchdownDuration, epsilon);
 
       boolean swingTrajectoryBlendDurationEquals = MathTools.epsilonEquals(swingTrajectoryBlendDuration, footstepData.swingTrajectoryBlendDuration, epsilon);
 
@@ -517,6 +518,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       this.swingDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
       this.transferDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
+      this.touchdownDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
 
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
