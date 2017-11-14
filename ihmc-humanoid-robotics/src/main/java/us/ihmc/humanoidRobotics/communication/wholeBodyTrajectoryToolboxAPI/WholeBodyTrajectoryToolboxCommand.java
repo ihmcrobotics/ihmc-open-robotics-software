@@ -13,14 +13,16 @@ public class WholeBodyTrajectoryToolboxCommand implements MultipleCommandHolder<
    private boolean hasConfiguration = false;
    private final WholeBodyTrajectoryToolboxConfigurationCommand configuration = new WholeBodyTrajectoryToolboxConfigurationCommand();
    private final RecyclingArrayList<WaypointBasedTrajectoryCommand> endEffectorTrajectories = new RecyclingArrayList<>(WaypointBasedTrajectoryCommand.class);
+   private final RecyclingArrayList<RigidBodyExplorationConfigurationCommand> rigidBodyExplorationConfigurations = new RecyclingArrayList<>(RigidBodyExplorationConfigurationCommand.class);
    private final List<Command<?, ?>> commands = new ArrayList<>();
-
+   
    @Override
    public void clear()
    {
       hasConfiguration = false;
       configuration.clear();
       endEffectorTrajectories.clear();
+      rigidBodyExplorationConfigurations.clear();
       commands.clear();
    }
 
@@ -42,6 +44,13 @@ public class WholeBodyTrajectoryToolboxCommand implements MultipleCommandHolder<
          commands.add(endEffectorTrajectory);
       }
       
+      for (int i = 0; i < other.rigidBodyExplorationConfigurations.size(); i++)
+      {
+         RigidBodyExplorationConfigurationCommand rigidBodyExplorationConfigurations = other.rigidBodyExplorationConfigurations.add();
+         rigidBodyExplorationConfigurations.set(other.rigidBodyExplorationConfigurations.get(i));
+         commands.add(rigidBodyExplorationConfigurations);
+      }
+      
    }
 
    @Override
@@ -60,6 +69,13 @@ public class WholeBodyTrajectoryToolboxCommand implements MultipleCommandHolder<
       {
          WaypointBasedTrajectoryCommand endEffectorTrajectory = endEffectorTrajectories.add();
          endEffectorTrajectory.set(message.getEndEffectorTrajectories().get(i));
+         commands.add(endEffectorTrajectory);
+      }
+      
+      for (int i = 0; i < message.getEndEffectorTrajectories().size(); i++)
+      {
+         RigidBodyExplorationConfigurationCommand endEffectorTrajectory = rigidBodyExplorationConfigurations.add();
+         endEffectorTrajectory.set(message.getExplorationConfigurations().get(i));
          commands.add(endEffectorTrajectory);
       }
    }
@@ -85,5 +101,25 @@ public class WholeBodyTrajectoryToolboxCommand implements MultipleCommandHolder<
    public boolean isCommandValid()
    {
       return endEffectorTrajectories.size() > 0;
+   }
+
+   public boolean hasConfiguration()
+   {
+      return hasConfiguration;
+   }
+   
+   public WholeBodyTrajectoryToolboxConfigurationCommand getConfigurationCommand()
+   {
+      return configuration;
+   }
+   
+   public RecyclingArrayList<WaypointBasedTrajectoryCommand> getEndEffectorTrajectories()
+   {
+      return endEffectorTrajectories;
+   }
+   
+   public RecyclingArrayList<RigidBodyExplorationConfigurationCommand> getRigidBodyExplorationConfigurations()
+   {
+      return rigidBodyExplorationConfigurations;
    }
 }
