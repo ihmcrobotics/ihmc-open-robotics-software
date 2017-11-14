@@ -29,7 +29,6 @@ public class ContactStateRhoRamping
    private final YoDouble timeInTrajectory;
    private final YoDouble duration;
    private final YoPolynomial polynomial;
-   private final double dt;
 
    /**
     * This class ramps the Rho weights of contact points not in contact at initialization
@@ -39,10 +38,9 @@ public class ContactStateRhoRamping
     * @param dt used to increment the time in duration on update
     * @param parentRegistry
     */
-   public ContactStateRhoRamping(RobotSide robotSide, YoPlaneContactState contactState, double finalRhoWeight, double dt, YoVariableRegistry parentRegistry)
+   public ContactStateRhoRamping(RobotSide robotSide, YoPlaneContactState contactState, double finalRhoWeight, YoVariableRegistry parentRegistry)
    {  
       this.contactState = contactState;
-      this.dt = dt;
       this.contactPoints = contactState.getContactPoints();
       this.contactPointRhoRampingActivated = new boolean[contactPoints.size()];
 
@@ -92,9 +90,9 @@ public class ContactStateRhoRamping
    /**
     * uses the internal polynomial to set the rho weight for contact points with ramping enabled
     */
-   public void update()
+   public void update(double time)
    {
-      timeInTrajectory.add(dt);
+      timeInTrajectory.set(time);
       polynomial.compute(timeInTrajectory.getDoubleValue());
 
       //rho initial is bigger than rho final
