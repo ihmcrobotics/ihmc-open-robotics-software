@@ -21,7 +21,7 @@ import us.ihmc.communication.util.NetworkPorts;
 
 public class PacketCommunicator implements Connectable
 {
-   public static final int BUFFER_SIZE = 2097152 * 20;
+   public static final int BUFFER_SIZE = Integer.MAX_VALUE;
    
    private final NetworkedObjectCommunicator communicator;
    private final HashMap<Class<?>, HashMap<PacketConsumer<?>, ObjectConsumer<?>>> consumers = new HashMap<>();
