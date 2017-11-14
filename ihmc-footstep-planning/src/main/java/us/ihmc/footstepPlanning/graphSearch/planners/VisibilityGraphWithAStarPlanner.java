@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.planners;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +33,8 @@ import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -43,6 +47,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 {
+   private static final boolean DEBUG = false;
    private static final double defaultHeuristicWeight = 15.0;
    private static final double planningHorizon = 1.0;
 
@@ -140,7 +145,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    {
       long startTime = System.currentTimeMillis();
       waypoints.clear();
-
+      
       if (planarRegionsList == null)
       {
          waypoints.add(new Point2D(bodyStartPose.getX(), bodyStartPose.getY()));
@@ -151,6 +156,17 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
          NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(planarRegionsList.getPlanarRegionsAsList());
          Point3D startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
          Point3D goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
+         
+         if(DEBUG)
+         {
+            PrintTools.info("Starting to plan using )" + getClass().getSimpleName());
+            PrintTools.info("Body start pose: " + startPos);
+            PrintTools.info("Body goal pose:  " + goalPos);            
+            
+            String homePath = System.getProperty("user.home");
+            Path path = Paths.get(homePath, "footstepPlannerData", PlanarRegionFileTools.getDate() + "_PlannerData");
+            PlanarRegionFileTools.exportPlanarRegionData(path, planarRegionsList);
+         }
 
          try
          {
