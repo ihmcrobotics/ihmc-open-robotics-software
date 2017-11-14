@@ -40,7 +40,7 @@ public abstract class TransferState extends WalkingState
    private final FramePoint2D desiredCoP = new FramePoint2D();
    private final FramePoint3D nextExitCMP = new FramePoint3D();
    
-   private final YoBoolean isTouchdownEnabled;
+   private final YoBoolean isInTouchdown;
    private final YoDouble touchdownDuration;
    private final YoDouble icpErrorThresholdToAbortTouchdown;
 
@@ -63,7 +63,7 @@ public abstract class TransferState extends WalkingState
       touchdownDuration = new YoDouble("touchdownDuration", registry);
       icpErrorThresholdToAbortTouchdown = new YoDouble("icpErrorThresholdToAbortTouchdown", registry);
       icpErrorThresholdToAbortTouchdown.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
-      isTouchdownEnabled = new YoBoolean("isTouchdownEnabled", registry);
+      isInTouchdown = new YoBoolean("isInTouchdown", registry);
    }
 
    public RobotSide getTransferToSide()
@@ -76,13 +76,13 @@ public abstract class TransferState extends WalkingState
    {
       boolean touchdownTimeElapsed = getTimeInCurrentState() > touchdownDuration.getDoubleValue();
       boolean icpErrorTooGreat = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToAbortTouchdown.getDoubleValue();
-      if(touchdownTimeElapsed || icpErrorTooGreat || !isTouchdownEnabled.getBooleanValue())
+      if(touchdownTimeElapsed || icpErrorTooGreat || !isInTouchdown.getBooleanValue())
       {
-         if(isTouchdownEnabled.getBooleanValue())
+         if(isInTouchdown.getBooleanValue())
          {
             feetManager.initializeContactStatesForDoubleSupport(transferToSide);
             updateICPPlan();
-            isTouchdownEnabled.set(false);
+            isInTouchdown.set(false);
          }
          feetManager.updateContactStatesInDoubleSupport(transferToSide);
       }
@@ -96,7 +96,7 @@ public abstract class TransferState extends WalkingState
    @Override
    public boolean isDone()
    {
-      if(isTouchdownEnabled.getBooleanValue())
+      if(isInTouchdown.getBooleanValue())
       {
          return false;
       }
@@ -147,12 +147,12 @@ public abstract class TransferState extends WalkingState
       if(supportFootWasSwinging && touchdownDuration.getDoubleValue() > controllerToolbox.getControlDT())
       {
          feetManager.initializeContactStatesForTouchdown(transferToSide);
-         isTouchdownEnabled.set(true);
+         isInTouchdown.set(true);
       }
       else
       {
          feetManager.initializeContactStatesForDoubleSupport(transferToSide);
-         isTouchdownEnabled.set(false);
+         isInTouchdown.set(false);
          updateICPPlan();
       }
    }
@@ -191,8 +191,8 @@ public abstract class TransferState extends WalkingState
       feetManager.reset();
    }
 
-   public boolean isTouchdownEnabled()
+   public boolean isInTouchdown()
    {
-      return isTouchdownEnabled.getBooleanValue();
+      return isInTouchdown.getBooleanValue();
    }
 }
