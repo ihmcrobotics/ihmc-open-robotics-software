@@ -9,6 +9,7 @@ import org.junit.Before;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -27,7 +28,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -187,7 +187,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       boolean success;
-      double currentHeight = 0.6;
+      double currentHeight = 10.0;
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(flatGroundEnvironment);
@@ -241,7 +241,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
    private FootstepDataListMessage createBasicFootstepFromDefaultForSwingHeightTest(double swingHeight)
    {
       FootstepDataListMessage desiredFootsteps = new FootstepDataListMessage(0.0, 0.0);
-      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.RIGHT, new Point3D(0.4, -0.125, 0.085), new Quaternion(0, 0, 0, 1));
+      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.RIGHT, new Point3D(0.4, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
       footstep.setSwingHeight(swingHeight);
       desiredFootsteps.footstepDataList.add(footstep);
@@ -252,17 +252,17 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
    private FootstepDataListMessage createFootstepsForSwingHeightTest(double swingHeight)
    {
       FootstepDataListMessage desiredFootsteps = new FootstepDataListMessage(0.0, 0.0);
-      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.RIGHT, new Point3D(0.6, -0.125, 0.085), new Quaternion(0, 0, 0, 1));
+      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.RIGHT, new Point3D(0.6, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
       footstep.setSwingHeight(swingHeight);
       desiredFootsteps.footstepDataList.add(footstep);
 
-      footstep = new FootstepDataMessage(RobotSide.LEFT, new Point3D(1.2, 0.125, 0.085), new Quaternion(0, 0, 0, 1));
+      footstep = new FootstepDataMessage(RobotSide.LEFT, new Point3D(1.2, 0.125, 0.0), new Quaternion(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
       footstep.setSwingHeight(swingHeight);
       desiredFootsteps.footstepDataList.add(footstep);
 
-      footstep = new FootstepDataMessage(RobotSide.RIGHT, new Point3D(1.2, -0.125, 0.085), new Quaternion(0, 0, 0, 1));
+      footstep = new FootstepDataMessage(RobotSide.RIGHT, new Point3D(1.2, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
       footstep.setSwingHeight(swingHeight);
       desiredFootsteps.footstepDataList.add(footstep);
