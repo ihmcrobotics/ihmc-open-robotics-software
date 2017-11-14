@@ -6,7 +6,7 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Rigi
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
-public class RigidBodyData
+public class ConstrainedRigidBodyData
 {
    /**
     * The first way point time.
@@ -27,18 +27,18 @@ public class RigidBodyData
    private double explorationLowerLimit;
    
    // TODO
-   public RigidBodyData(WaypointBasedTrajectoryCommand trajectoryMessage, RigidBodyExplorationConfigurationCommand explorationMessage)
+   public ConstrainedRigidBodyData(WaypointBasedTrajectoryCommand trajectoryMessage, RigidBodyExplorationConfigurationCommand explorationMessage)
    {
       t0 = trajectoryMessage.getWaypointTime(0);
       tf = trajectoryMessage.getLastWaypointTime();
    }
    
-   public RigidBodyData(RigidBodyExplorationConfigurationCommand explorationMessage)
+   public ConstrainedRigidBodyData(RigidBodyExplorationConfigurationCommand explorationMessage)
    {
       
    }
    
-   public RigidBodyData(long rigidBodyHashCode)
+   public ConstrainedRigidBodyData(long rigidBodyHashCode)
    {
       
    }
