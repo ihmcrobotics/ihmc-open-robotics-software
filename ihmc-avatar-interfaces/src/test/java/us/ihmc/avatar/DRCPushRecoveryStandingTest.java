@@ -248,7 +248,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 4.0);
 
-      forceMagnitude = 400.0;
+      forceMagnitude = 300.0;
 
       // push the robot
       pushRobotController.applyForce(forceDirection, forceMagnitude, forceDuration);
