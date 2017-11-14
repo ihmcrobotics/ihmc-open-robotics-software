@@ -747,10 +747,4 @@ public class SwingState extends AbstractUnconstrainedState
       yoDesiredSoleLinearVelocity.setToNaN();
       yoDesiredSoleAngularVelocity.setToNaN();
    }
-   
-   @Override
-   public boolean isDone() 
-   {
-      return false;
-   }
 }
