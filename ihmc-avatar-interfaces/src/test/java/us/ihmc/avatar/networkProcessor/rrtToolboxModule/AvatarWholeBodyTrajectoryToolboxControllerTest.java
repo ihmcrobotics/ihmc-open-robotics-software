@@ -51,6 +51,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.RigidBodyExplorationConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessage;
@@ -125,7 +126,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       statusOutputManager = new StatusMessageOutputManager(WholeBodyTrajectoryToolboxModule.supportedStatus());
 
       toolboxController = new WholeBodyTrajectoryToolboxController(getRobotModel(), desiredFullRobotModel, commandInputManager, statusOutputManager,
-                                                                            mainRegistry, yoGraphicsListRegistry, visualize);
+                                                                   mainRegistry, yoGraphicsListRegistry, visualize);
       toolboxController.setPacketDestination(PacketDestination.BROADCAST); // The actual destination does not matter, just need to make sure the internal field is != null
 
       robot = robotModel.createHumanoidFloatingRootJointRobot(false);
@@ -204,6 +205,59 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private final double circleRadius = 0.25;
    private final SideDependentList<Point3D> circleCenters = new SideDependentList<>(new Point3D(0.4, 0.3, 1.1), new Point3D(0.4, -0.3, 1.1));
    private final Vector3D circleAxis = new Vector3D(1.0, 0.0, 0.0);
+
+   @Test
+   public void testHandCirclePositionOnlyAndNoChestNoPelvis() throws Exception, UnreasonableAccelerationException
+   {
+      double trajectoryTime = 5.0;
+      FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
+      WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
+      configuration.setInitialConfigration(fullRobotModel);
+      configuration.setMaximumExpansionSize(1000);
+
+      List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
+      List<RigidBodyExplorationConfigurationMessage> rigidBodyConfigurations = new ArrayList<>();
+      
+      double timeResolution = trajectoryTime / 100.0;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody hand = fullRobotModel.getHand(robotSide);
+         FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleAxis);
+         ConfigurationSpaceName[] unconstrainedDegreesOfFreedom = {YAW, PITCH, ROLL};
+         WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction,
+                                                                             unconstrainedDegreesOfFreedom);
+         handTrajectories.add(trajectory);
+
+         ConfigurationSpaceName[] handConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.YAW.PITCH, ConfigurationSpaceName.ROLL};
+         RigidBodyExplorationConfigurationMessage rigidBodyConfiguration = new RigidBodyExplorationConfigurationMessage(hand, handConfigurations);
+         
+         rigidBodyConfigurations.add(rigidBodyConfiguration);
+
+         if (visualize)
+            scs.addStaticLinkGraphics(createFunctionTrajectoryVisualization(handFunction, 0.0, trajectoryTime, timeResolution, 0.01, YoAppearance.AliceBlue()));
+      }
+
+//      RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis());
+//      RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest());
+//      rigidBodyConfigurations.add(pelvisConfigurationMessage);
+//      rigidBodyConfigurations.add(chestConfigurationMessage);
+      
+      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
+      commandInputManager.submitMessage(message);
+
+      System.out.println("submit done");
+      int maxNumberOfIterations = 10000;
+      WholeBodyTrajectoryToolboxOutputStatus solution = runToolboxController(maxNumberOfIterations);
+
+      if (numberOfIterations.getIntegerValue() < maxNumberOfIterations - 1)
+         assertNotNull("The toolbox is done but did not report a solution.", solution);
+      else
+         fail("The toolbox has run for " + maxNumberOfIterations + " without converging nor aborting.");
+
+      if (visualize)
+         visualizeSolution(solution, 0.1 * timeResolution);
+   }
 
    @Test
    public void testHandCirclePositionOnly() throws Exception, UnreasonableAccelerationException
@@ -382,11 +436,8 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
       int radialResolution = 16;
       SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(numberOfWaypoints, radialResolution, radius);
-      Point3DReadOnly[] waypoints = IntStream.range(0, numberOfWaypoints)
-                                             .mapToDouble(i -> t0 + i * dT)
-                                             .mapToObj(trajectoryToVisualize::compute)
-                                             .map(pose -> new Point3D(pose.getPosition()))
-                                             .toArray(size -> new Point3D[size]);
+      Point3DReadOnly[] waypoints = IntStream.range(0, numberOfWaypoints).mapToDouble(i -> t0 + i * dT).mapToObj(trajectoryToVisualize::compute)
+                                             .map(pose -> new Point3D(pose.getPosition())).toArray(size -> new Point3D[size]);
       segmentedLine3DMeshGenerator.compute(waypoints);
       Graphics3DObject graphics = new Graphics3DObject();
       for (MeshDataHolder mesh : segmentedLine3DMeshGenerator.getMeshDataHolders())

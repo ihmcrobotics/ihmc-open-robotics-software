@@ -26,9 +26,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.RigidBodyExplorationConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
@@ -526,7 +529,27 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       List<WaypointBasedTrajectoryCommand> trajectoryCommands = commandInputManager.pollNewCommands(WaypointBasedTrajectoryCommand.class);
 
-      constrainedEndEffectorTrajectory = convertCommands(trajectoryCommands);
+      List<RigidBodyExplorationConfigurationCommand> rigidBodyCommands = commandInputManager.pollNewCommands(RigidBodyExplorationConfigurationCommand.class);
+      
+      WholeBodyTrajectoryToolboxConfigurationCommand configurationCommand = commandInputManager.pollNewestCommand(WholeBodyTrajectoryToolboxConfigurationCommand.class);
+      
+      PrintTools.info("received ! ");
+      
+      
+      
+      commandInputManager.isNewCommandAvailable(RigidBodyExplorationConfigurationCommand.class);
+      
+      PrintTools.info("received ! ");
+      System.out.println(trajectoryCommands.size());
+      System.out.println(rigidBodyCommands.size());
+      System.out.println(configurationCommand.getMaximumExpansionSize());
+      
+      
+      
+      
+      
+      
+      //constrainedEndEffectorTrajectory = convertCommands(trajectoryCommands);
 
       if (VERBOSE)
          PrintTools.info("initialize CWB toolbox");

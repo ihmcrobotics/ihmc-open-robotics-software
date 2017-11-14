@@ -102,6 +102,7 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
       List<Packet<?>> allPackets = new ArrayList<>();
 
       allPackets.addAll(endEffectorTrajectories);
+      allPackets.addAll(explorationConfigurations);
       allPackets.add(configuration);
 
       return allPackets;
@@ -119,6 +120,13 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
       for (int i = 0; i < endEffectorTrajectories.size(); i++)
       {
          if (!endEffectorTrajectories.get(i).epsilonEquals(other.endEffectorTrajectories.get(i), epsilon))
+            return false;
+      }
+      if (explorationConfigurations.size() != other.explorationConfigurations.size())
+         return false;
+      for (int i = 0; i < explorationConfigurations.size(); i++)
+      {
+         if (!explorationConfigurations.get(i).epsilonEquals(other.explorationConfigurations.get(i), epsilon))
             return false;
       }
       return true;

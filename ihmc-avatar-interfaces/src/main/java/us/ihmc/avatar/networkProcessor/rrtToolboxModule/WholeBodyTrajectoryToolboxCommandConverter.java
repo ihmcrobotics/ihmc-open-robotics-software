@@ -11,8 +11,7 @@ import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxAPI;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -69,17 +68,19 @@ public class WholeBodyTrajectoryToolboxCommandConverter implements CommandConver
    @Override
    public <C extends Command<?, M>, M extends Packet<M>> boolean isConvertible(C command, M message)
    {
-      return message instanceof WaypointBasedTrajectoryMessage;
+      if (message instanceof WholeBodyTrajectoryToolboxAPI<?>)
+         return true;
+      return false;
    }
-
+   
    /**
     * Retrieves the end-effector and convert the message into its command counterpart.
     */
+   @SuppressWarnings("unchecked")
    @Override
    public <C extends Command<?, M>, M extends Packet<M>> void process(C command, M message)
    {
-      WaypointBasedTrajectoryMessage rigiBodyMessage = (WaypointBasedTrajectoryMessage) message;
-      WaypointBasedTrajectoryCommand rigiBodyCommand = (WaypointBasedTrajectoryCommand) command;
-      rigiBodyCommand.set(rigiBodyMessage, rigidBodyNamedBasedHashMap, referenceFrameHashCodeResolver);
+      WholeBodyTrajectoryToolboxAPI<M> wholeBodyTrajectoryCommand = (WholeBodyTrajectoryToolboxAPI<M>) command;
+      wholeBodyTrajectoryCommand.set(message, rigidBodyNamedBasedHashMap, referenceFrameHashCodeResolver);
    }
 }
