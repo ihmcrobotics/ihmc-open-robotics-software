@@ -108,13 +108,12 @@ public class TouchDownState extends AbstractFootControlState
       String namePrefix = footControlHelper.getRobotSide().getCamelCaseNameForStartOfExpression();
       registry = new YoVariableRegistry(namePrefix + name);
 
-      double controlDT = controllerToolbox.getControlDT();
       double rhoWeight = momentumOptimizationSettings.getRhoWeight();
       
       lineContactActivationMethod = new YoEnum<>("lineContactActivationMethod", registry, LineContactActivationMethod.class);
       lineContactActivationMethod.set(LineContactActivationMethod.FOOT_ORIENTATION);
       
-      footContactRhoRamper = new ContactStateRhoRamping(robotSide, contactState, rhoWeight, controlDT, registry);
+      footContactRhoRamper = new ContactStateRhoRamping(robotSide, contactState, rhoWeight, registry);
       orientationTrajectory = new HermiteCurveBasedOrientationTrajectoryGenerator(namePrefix + "OrientationTrajectory", worldFrame, registry);
 
       initialOrientation = new YoFrameQuaternion(namePrefix + "initialOrientation", worldFrame, registry);
@@ -158,7 +157,7 @@ public class TouchDownState extends AbstractFootControlState
       double timeInCurrentState = getTimeInCurrentState();
 
       timeInContact.set(timeInCurrentState);
-      footContactRhoRamper.update();
+      footContactRhoRamper.update(timeInCurrentState);
 
       orientationTrajectory.compute(timeInCurrentState);
       orientationTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
