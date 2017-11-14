@@ -107,4 +107,9 @@ public class MotionQPInput
    {
       this.constraintType = constraintType;
    }
+
+   public ConstraintType getConstraintType()
+   {
+      return constraintType;
+   }
 }

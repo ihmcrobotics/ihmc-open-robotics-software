@@ -105,17 +105,23 @@ public class InverseKinematicsQPSolver
 
    public void addMotionInput(MotionQPInput input)
    {
-      if (input.isMotionConstraint())
+      switch (input.getConstraintType())
       {
-         if(input.isEqualityConstraint())
-            addMotionEqualityConstraint(input.taskJacobian, input.taskObjective);
-         else 
-            addMotionInequalityConstraint(input.taskJacobian, input.taskObjective);
+      case OBJECTIVE:
+         if (input.useWeightScalar())
+            addMotionTask(input.taskJacobian, input.taskObjective, input.getWeightScalar());
+         else
+            addMotionTask(input.taskJacobian, input.taskObjective, input.taskWeightMatrix);
+         break;
+      case EQUALITY: 
+         addMotionEqualityConstraint(input.taskJacobian, input.taskObjective);
+         break;
+      case INEQUALITY:
+         addMotionInequalityConstraint(input.taskJacobian, input.taskObjective);
+         break;
+      default:
+         break;
       }
-      else if (input.useWeightScalar())
-         addMotionTask(input.taskJacobian, input.taskObjective, input.getWeightScalar());
-      else
-         addMotionTask(input.taskJacobian, input.taskObjective, input.taskWeightMatrix);
    }
 
    public void addMotionTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, double taskWeight)
