@@ -16,9 +16,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -27,9 +24,14 @@ import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class OnToesState extends AbstractFootControlState
 {
+   private final SelectionMatrix6D feedbackControlSelectionMatrix = new SelectionMatrix6D();
+   private final SelectionMatrix6D zeroAccelerationSelectionMatrix = new SelectionMatrix6D();
    private final SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
    private final SpatialAccelerationCommand zeroAccelerationCommand = new SpatialAccelerationCommand();
 
@@ -103,13 +105,11 @@ public class OnToesState extends AbstractFootControlState
       zeroAccelerationCommand.set(rootBody, contactableFoot.getRigidBody());
       zeroAccelerationCommand.setPrimaryBase(pelvis);
 
-      SelectionMatrix6D feedbackControlSelectionMatrix = new SelectionMatrix6D();
       feedbackControlSelectionMatrix.setSelectionFrames(contactableFoot.getSoleFrame(), worldFrame);
       feedbackControlSelectionMatrix.selectLinearZ(false); // We want to do zero acceleration along z-world.
       feedbackControlSelectionMatrix.selectAngularY(false); // Remove pitch
       feedbackControlCommand.setSelectionMatrix(feedbackControlSelectionMatrix);
 
-      SelectionMatrix6D zeroAccelerationSelectionMatrix = new SelectionMatrix6D();
       zeroAccelerationSelectionMatrix.clearSelection();
       zeroAccelerationSelectionMatrix.setSelectionFrames(worldFrame, worldFrame);
       zeroAccelerationSelectionMatrix.selectLinearZ(true);
@@ -185,15 +185,23 @@ public class OnToesState extends AbstractFootControlState
 
       if (blockToMaximumPitch)
       {
+         feedbackControlSelectionMatrix.selectAngularY(true); // Add pitch
+         zeroAccelerationSelectionMatrix.selectAngularY(false);
+
          toeOffDesiredPitchAngle.set(maximumToeOffAngleProvider.getValue());
          toeOffDesiredPitchVelocity.set(0.0);
       }
       else
       {
+         feedbackControlSelectionMatrix.selectAngularY(false); // Remove pitch
+         zeroAccelerationSelectionMatrix.selectAngularY(true);
+
          toeOffDesiredPitchAngle.set(desiredOrientation.getPitch());
          toeOffDesiredPitchVelocity.set(footTwist.getAngularPartY());
       }
 
+      feedbackControlCommand.setSelectionMatrix(feedbackControlSelectionMatrix);
+      zeroAccelerationCommand.setSelectionMatrix(zeroAccelerationSelectionMatrix);
       toeOffDesiredPitchAcceleration.set(0.0);
 
       ToeSlippingDetector toeSlippingDetector = footControlHelper.getToeSlippingDetector();
