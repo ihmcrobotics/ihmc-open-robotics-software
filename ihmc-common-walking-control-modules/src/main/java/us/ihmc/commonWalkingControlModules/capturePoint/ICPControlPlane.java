@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -23,6 +24,8 @@ public class ICPControlPlane
    private final ReferenceFrame centerOfMassFrame;
 
    private final FramePoint3D tempFramePoint = new FramePoint3D();
+   private final RigidBodyTransform planarRegionTransformToWorld = new RigidBodyTransform();
+   private final ReferenceFrame planarRegionFrame;
    private final FramePoint3D tempProjectedFramePoint = new FramePoint3D();
    private final FramePoint2D tempFramePoint2D = new FramePoint2D();
 
@@ -39,6 +42,15 @@ public class ICPControlPlane
       this.centerOfMassFrame = centerOfMassFrame;
       controlPlaneHeight = new YoDouble("controlPlaneHeight", registry);
       parentRegistry.addChild(registry);
+
+      planarRegionFrame = new ReferenceFrame("planarRegionFrame", worldFrame)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.set(planarRegionTransformToWorld);
+         }
+      };
 
       omega0.addVariableChangedListener(new VariableChangedListener()
       {
@@ -109,13 +121,20 @@ public class ICPControlPlane
       ConvexPolygon2D convexHull = planarRegion.getConvexHull();
       convexPolygonInControlPlaneToPack.clear();
 
+      planarRegion.getTransformToWorld(planarRegionTransformToWorld);
+      planarRegionFrame.update();
+
       for (int vertexIndex = 0; vertexIndex < convexHull.getNumberOfVertices(); vertexIndex++)
       {
          Point2DReadOnly vertex = convexHull.getVertex(vertexIndex);
-         double vertexZ = planarRegion.getPlaneZGivenXY(vertex.getX(), vertex.getY());
+         tempFramePoint2D.setToZero(planarRegionFrame);
+         tempFramePoint2D.set(vertex);
+         tempFramePoint2D.changeFrame(worldFrame);
+
+         double vertexZ = planarRegion.getPlaneZGivenXY(tempFramePoint2D.getX(), tempFramePoint.getY());
 
          tempFramePoint.setToZero(worldFrame);
-         tempFramePoint.set(vertex, vertexZ);
+         tempFramePoint.set(tempFramePoint2D, vertexZ);
          tempFramePoint.changeFrame(centerOfMassFrame);
 
          projectPoint(tempFramePoint, tempProjectedFramePoint, controlPlaneHeight.getDoubleValue(), tempFramePoint.getZ());
@@ -130,16 +149,24 @@ public class ICPControlPlane
    public void scaleAndProjectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2D convexPolygonInControlPlaneToPack, double distanceInside)
    {
       ConvexPolygon2D convexHull = planarRegion.getConvexHull();
-      scaler.scaleConvexPolygon(convexHull, distanceInside, scaledConvexHull);
       convexPolygonInControlPlaneToPack.clear();
+
+      planarRegion.getTransformToWorld(planarRegionTransformToWorld);
+      planarRegionFrame.update();
+
+      scaler.scaleConvexPolygon(convexHull, distanceInside, scaledConvexHull);
 
       for (int vertexIndex = 0; vertexIndex < scaledConvexHull.getNumberOfVertices(); vertexIndex++)
       {
          Point2DReadOnly vertex = scaledConvexHull.getVertex(vertexIndex);
-         double vertexZ = planarRegion.getPlaneZGivenXY(vertex.getX(), vertex.getY());
+         tempFramePoint2D.setToZero(planarRegionFrame);
+         tempFramePoint2D.set(vertex);
+         tempFramePoint2D.changeFrame(worldFrame);
+
+         double vertexZ = planarRegion.getPlaneZGivenXY(tempFramePoint2D.getX(), tempFramePoint2D.getY());
 
          tempFramePoint.setToZero(worldFrame);
-         tempFramePoint.set(vertex, vertexZ);
+         tempFramePoint.set(tempFramePoint2D, vertexZ);
          tempFramePoint.changeFrame(centerOfMassFrame);
 
          projectPoint(tempFramePoint, tempProjectedFramePoint, controlPlaneHeight.getDoubleValue(), tempFramePoint.getZ());
