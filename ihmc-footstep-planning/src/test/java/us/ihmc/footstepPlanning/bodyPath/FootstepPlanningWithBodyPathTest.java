@@ -7,6 +7,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -81,6 +83,7 @@ public class FootstepPlanningWithBodyPathTest
    }
 
    @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testMaze()
    {
       WaypointDefinedBodyPathPlan bodyPath = new WaypointDefinedBodyPathPlan();
