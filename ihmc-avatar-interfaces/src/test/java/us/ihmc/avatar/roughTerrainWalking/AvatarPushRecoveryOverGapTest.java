@@ -58,7 +58,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       double platform2Length = 1.0;
       double gapWidth = 0.10;
 
-      GapPlanarRegionEnvironment environment = new GapPlanarRegionEnvironment(platform1Length, platform2Length, gapWidth);
+      GapPlanarRegionEnvironment environment = new GapPlanarRegionEnvironment(platform1Length, platform2Length, 0.6, gapWidth, 0.05);
 
       DRCRobotModel robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
@@ -149,6 +149,28 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
+   public void testSidePush() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+
+      double totalMass  = getRobotModel().createFullRobotModel().getTotalMass();
+      StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
+      double delay = 0.5 * swingTime;
+      Vector3D firstForceDirection = new Vector3D(0.0, 1.0, 0.0);
+      double percentWeight = 0.3;
+      double magnitude = percentWeight * totalMass * 9.81;
+      double duration = 0.1;
+      pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
+
+      double simulationTime = (swingTime + transferTime) * 4 + 1.0;
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      Point3D center = new Point3D(1.05, 0.0, 1.0893768421917251);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+   }
+
    private FootstepDataListMessage createFootstepDataListMessage(double swingTime, double transferTime)
    {
       FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
@@ -202,13 +224,20 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
 
    private class GapPlanarRegionEnvironment extends PlanarRegionEnvironmentInterface
    {
-      public GapPlanarRegionEnvironment(double platform1Length, double platform2Length, double gapSize)
+      public GapPlanarRegionEnvironment(double platform1Length, double platform2Length, double platformWidth, double forwardGapSize, double sideGapSize)
       {
          generator.translate(0.0, 0.0, -0.01);
-         generator.addCubeReferencedAtBottomMiddle(platform1Length, 1.0, 0.01); // ground
+         generator.addCubeReferencedAtBottomMiddle(platform1Length, platformWidth, 0.01); // ground
 
-         generator.translate(0.5 * (platform1Length + platform2Length) + gapSize, 0.0, 0.0);
-         generator.addCubeReferencedAtBottomMiddle(platform2Length, 1.0, 0.01); // ground
+         double platform2Center = 0.5 * (platform1Length + platform2Length) + forwardGapSize;
+         generator.translate(0.5 * (platform1Length + platform2Length) + forwardGapSize, 0.0, 0.0);
+         generator.addCubeReferencedAtBottomMiddle(platform2Length, platformWidth, 0.01); // ground
+
+         double sideWidth = 0.15;
+         double sideLength = platform1Length + platform2Length + forwardGapSize;
+         double distanceToCenter = 0.5 * sideLength - 0.5 * platform1Length;
+         generator.translate(-platform2Center + distanceToCenter, 0.5 * platformWidth  + sideGapSize + 0.5 * sideWidth, 0.0);
+         generator.addCubeReferencedAtBottomMiddle(sideLength, sideWidth, 0.01); // ground
       }
 
    }
