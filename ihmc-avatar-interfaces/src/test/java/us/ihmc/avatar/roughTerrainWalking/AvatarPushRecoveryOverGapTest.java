@@ -32,6 +32,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import static junit.framework.TestCase.assertTrue;
+
 public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
@@ -117,7 +119,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       setupTest();
 
       double simulationTime = (swingTime + transferTime) * 4 + 1.0;
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
 
       Point3D center = new Point3D(1.05, 0.0, 1.0893768421917251);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
@@ -139,7 +141,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
 
       double simulationTime = (swingTime + transferTime) * 4 + 1.0;
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
 
       Point3D center = new Point3D(1.05, 0.0, 1.0893768421917251);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);

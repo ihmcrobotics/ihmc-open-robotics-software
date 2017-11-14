@@ -432,7 +432,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       Footstep upcomingFootstep = upcomingFootsteps.get(0);
 
       planarRegionConstraintProvider.computeDistanceFromEdgeForNoOverhang(upcomingFootstep);
-      planarRegionConstraintProvider.updatePlanarRegionConstraintForSingleSupport(supportSide, timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
+      planarRegionConstraintProvider.updatePlanarRegionConstraintForSingleSupport(upcomingFootstep, timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
    }
 
    private void initializeOnContactChange(double initialTime)
@@ -584,7 +584,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       {
          copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue(), solver);
          planarRegionConstraintProvider
-               .updatePlanarRegionConstraintForSingleSupport(supportSide.getEnumValue(), timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
+               .updatePlanarRegionConstraintForSingleSupport(upcomingFootsteps.get(0), timeRemainingInState.getDoubleValue(), currentICP, omega0, solver);
       }
 
       solver.resetFootstepConditions();
