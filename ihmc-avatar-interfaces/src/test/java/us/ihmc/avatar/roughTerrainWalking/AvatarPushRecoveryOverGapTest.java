@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
@@ -55,10 +54,11 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    {
       String className = getClass().getSimpleName();
 
-      double platformLength = 1.0;
+      double platform1Length = 0.7;
+      double platform2Length = 1.0;
       double gapWidth = 0.10;
 
-      GapPlanarRegionEnvironment environment = new GapPlanarRegionEnvironment(platformLength, gapWidth);
+      GapPlanarRegionEnvironment environment = new GapPlanarRegionEnvironment(platform1Length, platform2Length, gapWidth);
 
       DRCRobotModel robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
@@ -132,7 +132,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       setupTest();
 
       double totalMass  = getRobotModel().createFullRobotModel().getTotalMass();
-      StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
       double delay = 0.5 * swingTime;
       Vector3D firstForceDirection = new Vector3D(1.0, 0.0, 0.0);
       double percentWeight = 0.4;
@@ -174,6 +174,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    public void showMemoryUsageBeforeTest()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @After
@@ -201,13 +202,13 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
 
    private class GapPlanarRegionEnvironment extends PlanarRegionEnvironmentInterface
    {
-      public GapPlanarRegionEnvironment(double platformLength, double gapSize)
+      public GapPlanarRegionEnvironment(double platform1Length, double platform2Length, double gapSize)
       {
          generator.translate(0.0, 0.0, -0.01);
-         generator.addCubeReferencedAtBottomMiddle(platformLength, 1.0, 0.01); // ground
+         generator.addCubeReferencedAtBottomMiddle(platform1Length, 1.0, 0.01); // ground
 
-         generator.translate(platformLength + gapSize, 0.0, 0.0);
-         generator.addCubeReferencedAtBottomMiddle(platformLength, 1.0, 0.01); // ground
+         generator.translate(0.5 * (platform1Length + platform2Length) + gapSize, 0.0, 0.0);
+         generator.addCubeReferencedAtBottomMiddle(platform2Length, 1.0, 0.01); // ground
       }
 
    }
