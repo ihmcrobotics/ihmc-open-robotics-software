@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public class RigidBodyExplorationConfigurationCommand implements Command<RigidBodyExplorationConfigurationCommand, RigidBodyExplorationConfigurationMessage>
+public class RigidBodyExplorationConfigurationCommand implements Command<RigidBodyExplorationConfigurationCommand, RigidBodyExplorationConfigurationMessage>, WholeBodyTrajectoryToolboxAPI<RigidBodyExplorationConfigurationMessage>
 {
    private long rigidBodyNameBasedashCode;
    private RigidBody rigidBody;
@@ -56,6 +56,7 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
       set(message, null, null);
    }
 
+   @Override
    public void set(RigidBodyExplorationConfigurationMessage message, Map<Long, RigidBody> rigidBodyNamedBasedHashMap,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {

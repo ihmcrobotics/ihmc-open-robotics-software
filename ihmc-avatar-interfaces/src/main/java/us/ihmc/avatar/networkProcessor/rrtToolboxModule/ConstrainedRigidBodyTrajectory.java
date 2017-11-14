@@ -6,7 +6,7 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Rigi
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
-public class ConstrainedRigidBodyData
+public class ConstrainedRigidBodyTrajectory
 {
    /**
     * The first way point time.
@@ -27,18 +27,18 @@ public class ConstrainedRigidBodyData
    private double explorationLowerLimit;
    
    // TODO
-   public ConstrainedRigidBodyData(WaypointBasedTrajectoryCommand trajectoryMessage, RigidBodyExplorationConfigurationCommand explorationMessage)
+   public ConstrainedRigidBodyTrajectory(WaypointBasedTrajectoryCommand trajectoryMessage, RigidBodyExplorationConfigurationCommand explorationMessage)
    {
       t0 = trajectoryMessage.getWaypointTime(0);
       tf = trajectoryMessage.getLastWaypointTime();
    }
    
-   public ConstrainedRigidBodyData(RigidBodyExplorationConfigurationCommand explorationMessage)
+   public ConstrainedRigidBodyTrajectory(RigidBodyExplorationConfigurationCommand explorationMessage)
    {
       
    }
    
-   public ConstrainedRigidBodyData(long rigidBodyHashCode)
+   public ConstrainedRigidBodyTrajectory(long rigidBodyHashCode)
    {
       
    }
@@ -50,11 +50,30 @@ public class ConstrainedRigidBodyData
       return rigidBodyNameBasedHashCode;
    }
    
-   // TODO
    // this is for the kinematicsSolver.
    public SelectionMatrix6D getSelectionMatrix()
-   {
-      return new SelectionMatrix6D();
+   {      
+      SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+      
+      if(trajectorySelectionMatrix.getLinearPart().isXSelected() || explorationSelectionMatrix.getLinearPart().isXSelected())
+         selectionMatrix.getLinearPart().selectXAxis(true);
+      
+      if(trajectorySelectionMatrix.getLinearPart().isYSelected() || explorationSelectionMatrix.getLinearPart().isYSelected())
+         selectionMatrix.getLinearPart().selectYAxis(true);
+      
+      if(trajectorySelectionMatrix.getLinearPart().isZSelected() || explorationSelectionMatrix.getLinearPart().isZSelected())
+         selectionMatrix.getLinearPart().selectZAxis(true);
+      
+      if(trajectorySelectionMatrix.getAngularPart().isXSelected() || explorationSelectionMatrix.getAngularPart().isXSelected())
+         selectionMatrix.getAngularPart().selectXAxis(true);
+      
+      if(trajectorySelectionMatrix.getAngularPart().isYSelected() || explorationSelectionMatrix.getAngularPart().isYSelected())
+         selectionMatrix.getAngularPart().selectYAxis(true);
+      
+      if(trajectorySelectionMatrix.getAngularPart().isZSelected() || explorationSelectionMatrix.getAngularPart().isZSelected())
+         selectionMatrix.getAngularPart().selectZAxis(true);
+      
+      return selectionMatrix;
    }
    
    // TODO
@@ -69,6 +88,8 @@ public class ConstrainedRigidBodyData
          putTime = tf;
       else
          ;
+      
+      
       
       return new Pose3D();
    }

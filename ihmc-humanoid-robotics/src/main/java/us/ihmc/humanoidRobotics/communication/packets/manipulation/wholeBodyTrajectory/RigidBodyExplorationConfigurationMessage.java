@@ -18,12 +18,21 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   public RigidBodyExplorationConfigurationMessage(RigidBody rigidBody)
+   {
+      this.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
+      this.degreesOfFreedomToExplore = null;
+      this.explorationRangeLowerLimits = null;
+      this.explorationRangeUpperLimits = null;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+   }
+   
    public RigidBodyExplorationConfigurationMessage(RigidBody rigidBody, ConfigurationSpaceName[] degreesOfFreedomToExplore)
    {
-      rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
+      this.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
       this.degreesOfFreedomToExplore = degreesOfFreedomToExplore;
-      explorationRangeLowerLimits = WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationLowerLimitArray(degreesOfFreedomToExplore);
-      explorationRangeUpperLimits = WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationUpperLimitArray(degreesOfFreedomToExplore);
+      this.explorationRangeLowerLimits = WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationLowerLimitArray(degreesOfFreedomToExplore);
+      this.explorationRangeUpperLimits = WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationUpperLimitArray(degreesOfFreedomToExplore);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -36,7 +45,7 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
                + ", explorationRangeLowerLimits.length = " + explorationRangeLowerLimits.length + ", explorationRangeUpperLimits.length = "
                + explorationRangeUpperLimits.length);
 
-      rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
+      this.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
       this.degreesOfFreedomToExplore = degreesOfFreedomToExplore;
       this.explorationRangeLowerLimits = explorationRangeLowerLimits;
       this.explorationRangeUpperLimits = explorationRangeUpperLimits;

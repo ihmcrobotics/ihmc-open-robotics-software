@@ -37,7 +37,7 @@ public class WholeBodyTrajectoryToolboxData
     * Chest
     * Pelvis 
     */
-   private List<ConstrainedRigidBodyData> listOfRigidBodyData;
+   private List<ConstrainedRigidBodyTrajectory> listOfRigidBodyData;
    
    public WholeBodyTrajectoryToolboxData(WholeBodyTrajectoryToolboxCommand wholeBodyTrajectoryToolboxCommand)
    {
@@ -68,7 +68,7 @@ public class WholeBodyTrajectoryToolboxData
       return initialConfiguration;
    }
    
-   public ConstrainedRigidBodyData getRigidBodyData(long rigidBodyHashCode)
+   public ConstrainedRigidBodyTrajectory getRigidBodyData(long rigidBodyHashCode)
    {
       for(int i=0;i<listOfRigidBodyData.size();i++)
       {

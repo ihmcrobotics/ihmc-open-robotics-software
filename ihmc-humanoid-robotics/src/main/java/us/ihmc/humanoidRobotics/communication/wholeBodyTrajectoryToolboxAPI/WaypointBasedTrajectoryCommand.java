@@ -14,7 +14,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTrajectoryCommand, WaypointBasedTrajectoryMessage>
+public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTrajectoryCommand, WaypointBasedTrajectoryMessage>, WholeBodyTrajectoryToolboxAPI<WaypointBasedTrajectoryMessage>
 {
    /** This is the unique hash code of the end-effector to be solved for. */
    private long endEffectorNameBasedHashCode;
@@ -61,6 +61,7 @@ public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTraj
       set(message, null, null);
    }
 
+   @Override
    public void set(WaypointBasedTrajectoryMessage message, Map<Long, RigidBody> rigidBodyNamedBasedHashMap,
                    ReferenceFrameHashCodeResolver referenceFrameResolver)
    {

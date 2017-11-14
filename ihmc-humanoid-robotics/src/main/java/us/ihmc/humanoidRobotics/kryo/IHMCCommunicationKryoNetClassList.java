@@ -362,6 +362,9 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(WholeBodyTrajectoryToolboxConfigurationMessage.class);
       registerPacketClass(WaypointBasedTrajectoryMessage.class);
       registerPacketClass(RigidBodyExplorationConfigurationMessage.class);
+      registerPacketFields(WholeBodyTrajectoryToolboxConfigurationMessage.class);
+      registerPacketFields(WaypointBasedTrajectoryMessage.class);
+      registerPacketFields(RigidBodyExplorationConfigurationMessage.class);
       registerPacketFields(ConfigurationSpaceName.class);
       registerPacketFields(ConfigurationSpaceName[].class);
 

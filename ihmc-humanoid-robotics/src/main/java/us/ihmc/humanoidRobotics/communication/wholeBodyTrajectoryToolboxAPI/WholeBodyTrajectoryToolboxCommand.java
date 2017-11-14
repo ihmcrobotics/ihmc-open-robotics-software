@@ -46,9 +46,9 @@ public class WholeBodyTrajectoryToolboxCommand implements MultipleCommandHolder<
       
       for (int i = 0; i < other.rigidBodyExplorationConfigurations.size(); i++)
       {
-         RigidBodyExplorationConfigurationCommand rigidBodyExplorationConfigurations = other.rigidBodyExplorationConfigurations.add();
-         rigidBodyExplorationConfigurations.set(other.rigidBodyExplorationConfigurations.get(i));
-         commands.add(rigidBodyExplorationConfigurations);
+         RigidBodyExplorationConfigurationCommand rigidBodyExplorationConfiguration = rigidBodyExplorationConfigurations.add();
+         rigidBodyExplorationConfiguration.set(other.rigidBodyExplorationConfigurations.get(i));
+         commands.add(rigidBodyExplorationConfiguration);
       }
       
    }
@@ -72,11 +72,11 @@ public class WholeBodyTrajectoryToolboxCommand implements MultipleCommandHolder<
          commands.add(endEffectorTrajectory);
       }
       
-      for (int i = 0; i < message.getEndEffectorTrajectories().size(); i++)
+      for (int i = 0; i < message.getExplorationConfigurations().size(); i++)
       {
-         RigidBodyExplorationConfigurationCommand endEffectorTrajectory = rigidBodyExplorationConfigurations.add();
-         endEffectorTrajectory.set(message.getExplorationConfigurations().get(i));
-         commands.add(endEffectorTrajectory);
+         RigidBodyExplorationConfigurationCommand rigidBodyExplorationConfiguration = rigidBodyExplorationConfigurations.add();
+         rigidBodyExplorationConfiguration.set(message.getExplorationConfigurations().get(i));
+         commands.add(rigidBodyExplorationConfiguration);
       }
    }
 
