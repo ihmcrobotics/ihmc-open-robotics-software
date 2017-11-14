@@ -23,7 +23,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerData
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -38,13 +41,11 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
@@ -72,7 +73,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -237,7 +237,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 1.5);
          assertTrue(success);
       }
-      
+
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
 
       // TODO: add assert to make sure the hand did not move significantly.
@@ -383,7 +383,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          controllerTrajectoryPoint.setTime(expectedTrajectoryPoint.getTime());
          assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
       }
-      
+
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
@@ -421,7 +421,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          }
          drcSimulationTestHelper.send(message);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0 * getRobotModel().getControllerDT());
          assertTrue(success);
 
          RigidBodyControlMode controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(handName, scs);
@@ -443,7 +443,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          }
          drcSimulationTestHelper.send(message);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0 * getRobotModel().getControllerDT());
          assertTrue(success);
 
          RigidBodyControlMode controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(handName, scs);
@@ -634,7 +634,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       lastPoint.changeFrame(worldFrame);
       EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy().getPoint(), desiredPosition, 0.001);
       EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy().getQuaternion(), desiredOrientation, 0.001);
-      
+
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
