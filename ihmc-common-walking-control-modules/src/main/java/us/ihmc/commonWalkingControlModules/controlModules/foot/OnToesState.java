@@ -186,7 +186,6 @@ public class OnToesState extends AbstractFootControlState
       if (blockToMaximumPitch)
       {
          feedbackControlSelectionMatrix.selectAngularY(true); // Add pitch
-         zeroAccelerationSelectionMatrix.selectAngularY(false);
 
          toeOffDesiredPitchAngle.set(maximumToeOffAngleProvider.getValue());
          toeOffDesiredPitchVelocity.set(0.0);
@@ -194,7 +193,6 @@ public class OnToesState extends AbstractFootControlState
       else
       {
          feedbackControlSelectionMatrix.selectAngularY(false); // Remove pitch
-         zeroAccelerationSelectionMatrix.selectAngularY(true);
 
          toeOffDesiredPitchAngle.set(desiredOrientation.getPitch());
          toeOffDesiredPitchVelocity.set(footTwist.getAngularPartY());
