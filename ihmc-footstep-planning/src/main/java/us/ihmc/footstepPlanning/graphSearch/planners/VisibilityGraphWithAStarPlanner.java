@@ -51,7 +51,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
    private static final double defaultHeuristicWeight = 15.0;
    private static final double planningHorizon = 1.0;
 
@@ -163,11 +163,13 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
          
          if(startPos == null)
          {
+            PrintTools.info("adding plane at start foot");
             startPos = new Point3D(bodyStartPose.getX(), bodyStartPose.getY(), 0.0);
             addPlanarRegionAtZeroHeight(bodyStartPose.getX(), bodyStartPose.getY());
          }
          if(goalPos == null)
          {
+            PrintTools.info("adding plane at goal pose");
             goalPos = new Point3D(bodyGoalPose.getX(), bodyGoalPose.getY(), 0.0);
             addPlanarRegionAtZeroHeight(bodyGoalPose.getX(), bodyGoalPose.getY());            
          }
@@ -254,7 +256,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       polygon.addVertex(0.3, 0.3);
       polygon.addVertex(-0.3, 0.3);
       polygon.addVertex(0.3, -0.3);
-      polygon.addVertex(-0.3, -0.3);
+      polygon.addVertex(-0.3, -0.25);
       polygon.update();
 
       PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new AxisAngle(), new Vector3D(xLocation, yLocation, 0.0)), polygon);
