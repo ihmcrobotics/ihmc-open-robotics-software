@@ -31,7 +31,7 @@ public class AtlasObstacleCourseRocksTest extends DRCObstacleCourseRocksTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 51.6)
-   @Test(timeout = 80000)
+   @Test(timeout = 160000)
    public void testWalkingOntoRocks() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOntoRocks();
