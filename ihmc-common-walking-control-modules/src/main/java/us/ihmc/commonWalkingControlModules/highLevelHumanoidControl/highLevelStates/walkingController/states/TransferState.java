@@ -21,6 +21,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class TransferState extends WalkingState
 {
+   private static final boolean ENABLE_TOUCHDOWN_STATE = true;
    protected final RobotSide transferToSide;
 
    protected final WalkingMessageHandler walkingMessageHandler;
@@ -67,7 +68,7 @@ public abstract class TransferState extends WalkingState
       icpErrorThresholdToAbortTouchdown.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       isInTouchdown = new YoBoolean("isInTouchdown", registry);
       touchdownIsEnabled = new YoBoolean("touchdownIsEnabled", registry);
-      touchdownIsEnabled.set(false);
+      touchdownIsEnabled.set(ENABLE_TOUCHDOWN_STATE);
    }
 
    public RobotSide getTransferToSide()
