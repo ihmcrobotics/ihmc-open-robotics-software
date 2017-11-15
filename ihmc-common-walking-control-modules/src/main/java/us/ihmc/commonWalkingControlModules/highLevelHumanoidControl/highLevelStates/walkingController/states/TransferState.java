@@ -40,11 +40,13 @@ public abstract class TransferState extends WalkingState
    private final FramePoint2D desiredCoP = new FramePoint2D();
    private final FramePoint3D nextExitCMP = new FramePoint3D();
    
+   private final YoBoolean touchdownIsEnabled;
    private final YoBoolean isInTouchdown;
    private final YoDouble touchdownDuration;
    private final YoDouble icpErrorThresholdToAbortTouchdown;
 
    private final Footstep nextFootstep = new Footstep();
+
 
    public TransferState(RobotSide transferToSide, WalkingStateEnum transferStateEnum, WalkingControllerParameters walkingControllerParameters,
          WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
@@ -64,6 +66,8 @@ public abstract class TransferState extends WalkingState
       icpErrorThresholdToAbortTouchdown = new YoDouble("icpErrorThresholdToAbortTouchdown", registry);
       icpErrorThresholdToAbortTouchdown.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       isInTouchdown = new YoBoolean("isInTouchdown", registry);
+      touchdownIsEnabled = new YoBoolean("touchdownIsEnabled", registry);
+      touchdownIsEnabled.set(false);
    }
 
    public RobotSide getTransferToSide()
@@ -146,7 +150,7 @@ public abstract class TransferState extends WalkingState
    {
       touchdownDuration.set(walkingMessageHandler.getNextTouchdownDuration());
       boolean supportFootWasSwinging = feetManager.getCurrentConstraintType(transferToSide) == ConstraintType.SWING;
-      if(supportFootWasSwinging && touchdownDuration.getDoubleValue() > controllerToolbox.getControlDT())
+      if(supportFootWasSwinging && touchdownDuration.getDoubleValue() > controllerToolbox.getControlDT() && touchdownIsEnabled.getBooleanValue())
       {
          feetManager.initializeContactStatesForTouchdown(transferToSide);
          isInTouchdown.set(true);
