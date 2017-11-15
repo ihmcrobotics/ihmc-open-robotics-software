@@ -5,6 +5,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
@@ -35,8 +37,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -149,7 +149,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    {
       long startTime = System.currentTimeMillis();
       waypoints.clear();
-      
+
       if (planarRegionsList == null)
       {
          waypoints.add(new Point2D(bodyStartPose.getX(), bodyStartPose.getY()));
@@ -160,7 +160,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
          NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(planarRegionsList.getPlanarRegionsAsList());
          Point3D startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
          Point3D goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
-         
+
          if(startPos == null)
          {
             PrintTools.info("adding plane at start foot");
@@ -171,15 +171,15 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
          {
             PrintTools.info("adding plane at goal pose");
             goalPos = new Point3D(bodyGoalPose.getX(), bodyGoalPose.getY(), 0.0);
-            addPlanarRegionAtZeroHeight(bodyGoalPose.getX(), bodyGoalPose.getY());            
+            addPlanarRegionAtZeroHeight(bodyGoalPose.getX(), bodyGoalPose.getY());
          }
-         
+
          if(DEBUG)
          {
             PrintTools.info("Starting to plan using )" + getClass().getSimpleName());
             PrintTools.info("Body start pose: " + startPos);
-            PrintTools.info("Body goal pose:  " + goalPos);            
-            
+            PrintTools.info("Body goal pose:  " + goalPos);
+
             String homePath = System.getProperty("user.home");
             Path path = Paths.get(homePath, "footstepPlannerData", PlanarRegionFileTools.getDate() + "_PlannerData");
             PlanarRegionFileTools.exportPlanarRegionData(path, planarRegionsList);
@@ -248,7 +248,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
       return yoResult.getEnumValue();
    }
-   
+
    // TODO hack to add start and goal planar regions
    private void addPlanarRegionAtZeroHeight(double xLocation, double yLocation)
    {
@@ -272,7 +272,15 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
          bodyPath.getPointAlongPath(percent, tempPose);
          Point3D position = new Point3D();
          position.set(tempPose.getPosition());
-         bodyPathPoints.get(i).set(PlanarRegionTools.projectPointToPlanesVertically(position, planarRegionsList));
+         Point3D projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(position, planarRegionsList);
+         if (projectedPoint != null)
+         {
+            bodyPathPoints.get(i).set(projectedPoint);
+         }
+         else
+         {
+            bodyPathPoints.get(i).setToNaN();
+         }
       }
    }
 
