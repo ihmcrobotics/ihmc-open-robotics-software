@@ -29,7 +29,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 public class PlanarRegion
 {
    public static final int NO_REGION_ID = -1;
-   public static final double DEFAULT_BOUNDING_BOX_EPSILON = 1e-15;
+   public static final double DEFAULT_BOUNDING_BOX_EPSILON = 0.0;
 
    private int regionId = NO_REGION_ID;
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
