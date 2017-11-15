@@ -520,7 +520,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       this.swingDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
       this.transferDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
-      this.touchdownDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
+      //TODO: when the footstep data list ros message gets regenerated uncomment this! -shrews
+//      this.touchdownDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
 
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
