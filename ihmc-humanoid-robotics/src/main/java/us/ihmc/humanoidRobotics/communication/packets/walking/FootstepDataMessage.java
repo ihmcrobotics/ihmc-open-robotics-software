@@ -71,8 +71,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    @RosExportedField(documentation = "The transferDuration is the time spent with the feet in ground contact before a step."
          + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration.")
    public double transferDuration = -1.0;
-   @RosExportedField(documentation = "The touchdown duration is the time spent trying to do a soft touchdown."
-         + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration. If the default is set to zero, the touchdown state will be disabled")
+   
+//   this needs to be tested on the real robot before it's exposed in ROS. -shrews
+//   @RosExportedField(documentation = "The touchdown duration is the time spent trying to do a soft touchdown."
+//         + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration. If the default is set to zero, the touchdown state will be disabled")
    public double touchdownDuration = -1.0;
 
    /** the time to delay this command on the controller side before being executed **/
