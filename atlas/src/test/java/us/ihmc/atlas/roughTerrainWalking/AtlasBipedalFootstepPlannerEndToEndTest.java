@@ -12,6 +12,8 @@ import us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTe
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
+import us.ihmc.wholeBodyController.FootContactPoints;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
 public class AtlasBipedalFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPlannerEndToEndTest
@@ -19,7 +21,8 @@ public class AtlasBipedalFootstepPlannerEndToEndTest extends AvatarBipedalFootst
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+      FootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(5, 3, true, false);
+      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
    }
 
    @Override
