@@ -80,20 +80,20 @@ public class SmoothCapturePointAdjustmentToolboxTest
          double t0 = 0.0;
          FramePoint3D cmp0 = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
 
-         double scale1 = 1.0 / random.nextDouble();
-         double t1 = t0 + scale1 * random.nextDouble();
+         //double scale1 = 1.0 / random.nextDouble();
+         double t1 = t0 + 0.1 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp1 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp1 = new FramePoint3D(worldFrame);
          cmp1.add(cmp0, dcmp1);
 
-         double scale2 = 1.0 / random.nextDouble();
-         double t2 = t1 + scale2 * random.nextDouble();
+         //double scale2 = 1.0 / random.nextDouble();
+         double t2 = t1 + 0.1 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp2 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp2 = new FramePoint3D(worldFrame);
          cmp2.add(cmp1, dcmp2);
 
-         double scale3 = 1.0 / random.nextDouble();
-         double t3 = t2 + scale3 * random.nextDouble();
+         //double scale3 = 1.0 / random.nextDouble();
+         double t3 = t2 + 0.1 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp3 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp3 = new FramePoint3D(worldFrame);
          cmp3.add(cmp2, dcmp3);
@@ -195,26 +195,26 @@ public class SmoothCapturePointAdjustmentToolboxTest
          double t0 = 0.0;
          FramePoint3D cmp0 = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
 
-         double scale1 = 1.0 / random.nextDouble();
-         double t1 = t0 + scale1 * random.nextDouble();
+         //double scale1 = 1.0 / random.nextDouble();
+         double t1 = t0 + 0.1 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp1 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp1 = new FramePoint3D(worldFrame);
          cmp1.add(cmp0, dcmp1);
 
-         double scale2 = 1.0 / random.nextDouble();
-         double t2 = t1 + scale2 * random.nextDouble();
+         //double scale2 = 1.0 / random.nextDouble();
+         double t2 = t1 + 0.1 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp2 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp2 = new FramePoint3D(worldFrame);
          cmp2.add(cmp1, dcmp2);
 
-         double scale3 = 1.0 / random.nextDouble();
-         double t3 = t2 + scale3 * random.nextDouble();
+         //double scale3 = 1.0 / random.nextDouble();
+         double t3 = t2 + 0.1 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp3 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp3 = new FramePoint3D(worldFrame);
          cmp3.add(cmp2, dcmp3);
 
-         double scale4 = 1.0 / random.nextDouble();
-         double t4 = t3 + scale4 * random.nextDouble();
+         //double scale4 = 1.0 / random.nextDouble();
+         double t4 = t3 + 0.1 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp4 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp4 = new FramePoint3D(worldFrame);
          cmp4.add(cmp3, dcmp4);
@@ -340,26 +340,26 @@ public class SmoothCapturePointAdjustmentToolboxTest
          double t0 = 0.0;
          FramePoint3D cmp0 = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
 
-         double scale1 = 1.0 / random.nextDouble();
-         double t1 = t0 + scale1 * random.nextDouble();
+         //double scale1 = 1.0 / random.nextDouble();
+         double t1 = t0 + 0.1 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp1 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp1 = new FramePoint3D(worldFrame);
          cmp1.add(cmp0, dcmp1);
 
-         double scale2 = 1.0 / random.nextDouble();
-         double t2 = t1 + scale2 * random.nextDouble();
+         //double scale2 = 1.0 / random.nextDouble();
+         double t2 = t1 + 0.1 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp2 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp2 = new FramePoint3D(worldFrame);
          cmp2.add(cmp1, dcmp2);
 
-         double scale3 = 1.0 / random.nextDouble();
-         double t3 = t2 + scale3 * random.nextDouble();
+         //double scale3 = 1.0 / random.nextDouble();
+         double t3 = t2 + 0.1 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp3 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp3 = new FramePoint3D(worldFrame);
          cmp3.add(cmp2, dcmp3);
 
-         double scale4 = 1.0 / random.nextDouble();
-         double t4 = t3 + scale4 * random.nextDouble();
+         //double scale4 = 1.0 / random.nextDouble();
+         double t4 = t3 + 0.1 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp4 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp4 = new FramePoint3D(worldFrame);
          cmp4.add(cmp3, dcmp4);
@@ -490,20 +490,20 @@ public class SmoothCapturePointAdjustmentToolboxTest
          double t0 = 0.0;
          FramePoint3D cmp0 = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
 
-         double scale1 = 1.0 / random.nextDouble();
-         double t1 = t0 + scale1 * random.nextDouble();
+         //double scale1 = 1.0 / random.nextDouble();
+         double t1 = t0 + 1.0 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp1 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp1 = new FramePoint3D(worldFrame);
          cmp1.add(cmp0, dcmp1);
 
-         double scale2 = 1.0 / random.nextDouble();
-         double t2 = t1 + scale2 * random.nextDouble();
+         //double scale2 = 1.0 / random.nextDouble();
+         double t2 = t1 + 1.0 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp2 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp2 = new FramePoint3D(worldFrame);
          cmp2.add(cmp1, dcmp2);
 
-         double scale3 = 1.0 / random.nextDouble();
-         double t3 = t2 + scale3 * random.nextDouble();
+         //double scale3 = 1.0 / random.nextDouble();
+         double t3 = t2 + 1.0 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp3 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp3 = new FramePoint3D(worldFrame);
          cmp3.add(cmp2, dcmp3);
@@ -555,7 +555,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
 
             FrameTuple3D<?, ?> cmp2QuantityAfter = new FramePoint3D();
             cubic3DSegment2.getDerivative(j, cubic3DSegment2.getFinalTime(), cmp2QuantityAfter);
-            EuclidCoreTestTools.assertTuple3DEquals("", cmp2QuantitiesBefore.get(j), cmp2QuantityAfter, EPSILON);
+            EuclidCoreTestTools.assertTuple3DEquals("" + j, cmp2QuantitiesBefore.get(j), cmp2QuantityAfter, EPSILON);
 
             FrameTuple3D<?, ?> cmp1QuantitySegment1 = new FramePoint3D();
             cubic3DSegment1.getDerivative(j, cubic3DSegment1.getFinalTime(), cmp1QuantitySegment1);
@@ -605,26 +605,26 @@ public class SmoothCapturePointAdjustmentToolboxTest
          double t0 = 0.0;
          FramePoint3D cmp0 = new FramePoint3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
 
-         double scale1 = 1.0 / random.nextDouble();
-         double t1 = t0 + scale1 * random.nextDouble();
+         //double scale1 = 1.0 / random.nextDouble();
+         double t1 = t0 + 1.0 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp1 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp1 = new FramePoint3D(worldFrame);
          cmp1.add(cmp0, dcmp1);
 
-         double scale2 = 1.0 / random.nextDouble();
-         double t2 = t1 + scale2 * random.nextDouble();
+         //double scale2 = 1.0 / random.nextDouble();
+         double t2 = t1 + 1.0 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp2 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp2 = new FramePoint3D(worldFrame);
          cmp2.add(cmp1, dcmp2);
 
-         double scale3 = 1.0 / random.nextDouble();
-         double t3 = t2 + scale3 * random.nextDouble();
+         //double scale3 = 1.0 / random.nextDouble();
+         double t3 = t2 + 1.0 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp3 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp3 = new FramePoint3D(worldFrame);
          cmp3.add(cmp2, dcmp3);
 
-         double scale4 = 1.0 / random.nextDouble();
-         double t4 = t3 + scale4 * random.nextDouble();
+         //double scale4 = 1.0 / random.nextDouble();
+         double t4 = t3 + 1.0 * (random.nextDouble() + 0.1);
          FrameVector3D dcmp4 = new FrameVector3D(worldFrame, new Point3D(random.nextDouble(), random.nextDouble(), 0.0));
          FramePoint3D cmp4 = new FramePoint3D(worldFrame);
          cmp4.add(cmp3, dcmp4);
@@ -681,7 +681,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
             FrameTuple3D<?, ?> icp1QuantityAfter = new FramePoint3D();
             icpToolbox.calculateICPQuantityFromCorrespondingCMPPolynomial3D(omega0, cubic3DSegment2.getInitialTime(), j, cubic3DSegment2,
                                                                             exitCornerPointsTransfer.get(0), icp1QuantityAfter);
-            EuclidCoreTestTools.assertTuple3DEquals("", icp1QuantitiesBefore.get(j), icp1QuantityAfter, EPSILON);
+            EuclidCoreTestTools.assertTuple3DEquals("" + j, icp1QuantitiesBefore.get(j), icp1QuantityAfter, EPSILON);
 
             FrameTuple3D<?, ?> cmp1QuantityAfter = new FramePoint3D();
             cubic3DSegment2.getDerivative(j, cubic3DSegment2.getInitialTime(), cmp1QuantityAfter);
