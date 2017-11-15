@@ -342,6 +342,11 @@ public class BalanceManager
    {
       return icpPlanner.getTransferDuration(1);
    }
+   
+   public double getCurrentTouchdownDuration()
+   {
+      return icpPlanner.getTouchdownDuration(0);
+   }
 
 
    public boolean checkAndUpdateFootstep(Footstep footstep)

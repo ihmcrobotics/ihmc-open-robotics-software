@@ -114,7 +114,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       }
 
       referenceCoPGenerator = new ReferenceCoPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, bipedSupportPolygons,
-                                                                  contactableFeet, numberFootstepsToConsider, swingDurations, transferDurations,
+                                                                  contactableFeet, numberFootstepsToConsider, swingDurations, transferDurations, touchdownDurations,
                                                                   swingDurationAlphas, swingDurationShiftFractions, transferDurationAlphas, registry);
       referenceCMPGenerator = new ReferenceCMPTrajectoryGenerator(namePrefix, maxNumberOfFootstepsToConsider, numberFootstepsToConsider, registry);
 
@@ -212,6 +212,7 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       {
          swingDurations.get(i).setToNaN();
          transferDurations.get(i).setToNaN();
+         touchdownDurations.get(i).setToNaN();
          swingDurationAlphas.get(i).setToNaN();
          transferDurationAlphas.get(i).setToNaN();
          swingDurationShiftFractions.get(i).setToNaN();
@@ -235,15 +236,23 @@ public class SmoothCMPBasedICPPlanner extends AbstractICPPlanner
       referenceCoPGenerator.addFootstepToPlan(footstep, timing);
 
       int footstepIndex = referenceCoPGenerator.getNumberOfFootstepsRegistered() - 1;
-      if (Double.isFinite(timing.getSwingTime()))
-         swingDurations.get(footstepIndex).set(timing.getSwingTime());
-      else
-         swingDurations.get(footstepIndex).set(1.0);
-
-      if (Double.isFinite(timing.getTransferTime()))
-         transferDurations.get(footstepIndex).set(timing.getTransferTime());
-      else
-         transferDurations.get(footstepIndex).set(1.0);
+      
+      double swingDuration = timing.getSwingTime();
+      double touchdownDuration = timing.getTouchdownDuration();
+      double transferTime = timing.getTransferTime();
+      
+      if (!Double.isFinite(swingDuration) || swingDuration < 0.0)
+         swingDuration = 1.0;
+      
+      if (!Double.isFinite(touchdownDuration) || touchdownDuration < 0.0)
+         touchdownDuration = 0.0;
+      
+      if (!Double.isFinite(transferTime) || transferTime < 0.0)
+         transferTime = 1.0;
+      
+      swingDurations.get(footstepIndex).set(swingDuration);
+      touchdownDurations.get(footstepIndex).set(touchdownDuration);
+      transferDurations.get(footstepIndex).set(transferTime);
 
       swingDurationAlphas.get(footstepIndex).set(defaultSwingDurationAlpha.getDoubleValue());
       transferDurationAlphas.get(footstepIndex).set(defaultTransferDurationAlpha.getDoubleValue());
