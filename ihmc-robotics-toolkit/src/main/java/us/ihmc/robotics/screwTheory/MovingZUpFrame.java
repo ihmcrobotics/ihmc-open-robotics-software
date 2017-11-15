@@ -25,7 +25,15 @@ public class MovingZUpFrame extends MovingReferenceFrame
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
       nonZUpFrame.getTransformToDesiredFrame(transformToParent, rootFrame);
-      transformToParent.getRotationYawPitchRoll(yawPitchRoll);
+
+      // If we get the values from the built in method in the transformToParent a pitch close to
+      // pi/2 will cause the values to become nan. This is because it becomes numerically hard
+      // to determine yaw at that point. However, for a reference frame that behavior can cause
+      // controller crashes. It is better to accept that the yaw will not be precise in that case.
+      yawPitchRoll[0] = Math.atan2(transformToParent.getM10(), transformToParent.getM00());
+      yawPitchRoll[1] = Math.asin(-transformToParent.getM20());
+      yawPitchRoll[2] = Math.atan2(transformToParent.getM21(), transformToParent.getM22());
+
       transformToParent.setRotationYaw(yawPitchRoll[0]);
    }
 
