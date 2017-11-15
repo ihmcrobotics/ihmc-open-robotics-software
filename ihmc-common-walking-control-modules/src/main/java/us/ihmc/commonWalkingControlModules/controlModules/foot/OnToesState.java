@@ -131,43 +131,22 @@ public class OnToesState extends AbstractFootControlState
    @Override
    public void doSpecificAction()
    {
-      desiredOrientation.setToZero(contactableFoot.getFrameAfterParentJoint());
-      desiredOrientation.changeFrame(soleZUpFrame);
-      desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
-
-      // the current pitch can become NaN when it approaches pi/2
-      double currentPitch = tempYawPitchRoll[1];
-      if (!Double.isNaN(currentPitch))
-      {
-         toeOffCurrentPitchAngle.set(tempYawPitchRoll[1]);
-      }
-
-      contactableFoot.getFrameAfterParentJoint().getTwistOfFrame(footTwist);
-
-      toeOffCurrentPitchVelocity.set(footTwist.getAngularPartY());
-
-      desiredPosition.setToZero(contactableFoot.getFrameAfterParentJoint());
-      desiredPosition.changeFrame(worldFrame);
-
-      computeDesiredsForFreeMotion();
+      updateCurrentYoVariables();
+      updateToeSlippingDetector();
 
       desiredOrientation.setIncludingFrame(startOrientation);
-      desiredOrientation.changeFrame(soleZUpFrame);
-      desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
-      tempYawPitchRoll[1] = toeOffDesiredPitchAngle.getDoubleValue();
-      desiredOrientation.setYawPitchRoll(tempYawPitchRoll);
+      desiredPosition.setIncludingFrame(desiredContactPointPosition);
+
       desiredOrientation.changeFrame(worldFrame);
+      desiredAngularVelocity.setToZero(worldFrame);
+      desiredAngularAcceleration.setToZero(worldFrame);
 
+      desiredPosition.changeFrame(worldFrame);
       desiredLinearVelocity.setToZero(worldFrame);
-      desiredAngularVelocity.setIncludingFrame(soleZUpFrame, 0.0, toeOffDesiredPitchVelocity.getDoubleValue(), 0.0);
-      desiredAngularVelocity.changeFrame(worldFrame);
-
       desiredLinearAcceleration.setToZero(worldFrame);
-      desiredAngularAcceleration.setIncludingFrame(soleZUpFrame, 0.0, toeOffDesiredPitchAcceleration.getDoubleValue(), 0.0);
-      desiredAngularAcceleration.changeFrame(worldFrame);
 
       feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-      feedbackControlCommand.set(desiredContactPointPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      feedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       zeroAccelerationCommand.setSpatialAccelerationToZero(toeOffFrame);
 
       if (usePointContact.getBooleanValue())
@@ -180,12 +159,23 @@ public class OnToesState extends AbstractFootControlState
       }
    }
 
-   private void computeDesiredsForFreeMotion()
+   private void updateCurrentYoVariables()
    {
-      toeOffDesiredPitchAngle.set(desiredOrientation.getPitch());
-      toeOffDesiredPitchVelocity.set(footTwist.getAngularPartY());
-      toeOffDesiredPitchAcceleration.set(0.0);
+      desiredOrientation.setToZero(contactableFoot.getFrameAfterParentJoint());
+      desiredOrientation.changeFrame(soleZUpFrame);
+      desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
+      // the current pitch can become NaN when it approaches pi/2
+      double currentPitch = tempYawPitchRoll[1];
+      if (!Double.isNaN(currentPitch))
+      {
+         toeOffCurrentPitchAngle.set(tempYawPitchRoll[1]);
+      }
+      contactableFoot.getFrameAfterParentJoint().getTwistOfFrame(footTwist);
+      toeOffCurrentPitchVelocity.set(footTwist.getAngularPartY());
+   }
 
+   private void updateToeSlippingDetector()
+   {
       ToeSlippingDetector toeSlippingDetector = footControlHelper.getToeSlippingDetector();
       if (toeSlippingDetector != null)
          toeSlippingDetector.update();
