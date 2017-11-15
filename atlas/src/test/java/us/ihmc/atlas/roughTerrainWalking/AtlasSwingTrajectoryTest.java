@@ -35,7 +35,7 @@ public class AtlasSwingTrajectoryTest extends DRCSwingTrajectoryTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 32.9)
-   @Test(timeout = 40000)
+   @Test(timeout = 100000)
    public void testNegativeSwingHeight() throws SimulationExceededMaximumTimeException
    {
       super.testNegativeSwingHeight();
