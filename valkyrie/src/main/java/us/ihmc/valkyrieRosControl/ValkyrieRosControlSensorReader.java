@@ -21,6 +21,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.tools.TimestampProvider;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoForceTorqueSensorHandle;
 import us.ihmc.valkyrieRosControl.dataHolders.YoIMUHandleHolder;
@@ -52,7 +53,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    public ValkyrieRosControlSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
          SensorProcessingConfiguration sensorProcessingConfiguration, TimestampProvider timestampProvider,
          List<YoEffortJointHandleHolder> yoEffortJointHandleHolders, List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, List<YoJointStateHandleHolder> yoJointStateHandleHolders,
-         List<YoIMUHandleHolder> yoIMUHandleHolders, List<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles, YoVariableRegistry registry)
+         List<YoIMUHandleHolder> yoIMUHandleHolders, List<YoForceTorqueSensorHandle> yoForceTorqueSensorHandles, ValkyrieJointMap jointMap, YoVariableRegistry registry)
    {
 
       this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
@@ -64,7 +65,8 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       this.yoForceTorqueSensorHandles = yoForceTorqueSensorHandles;
 
       double estimatorDT = sensorProcessingConfiguration.getEstimatorDT();
-      lowlLevelController = new ValkyrieRosControlLowLevelController(timestampProvider, estimatorDT, yoEffortJointHandleHolders, yoPositionJointHandleHolders, registry);
+      lowlLevelController = new ValkyrieRosControlLowLevelController(timestampProvider, estimatorDT, yoEffortJointHandleHolders, yoPositionJointHandleHolders,
+                                                                     jointMap, registry);
    }
 
    public void setDoIHMCControlRatio(double controlRatio)
