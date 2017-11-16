@@ -20,15 +20,14 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousCMPBasedICPPlanner;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -41,6 +40,7 @@ import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -51,7 +51,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
    protected final static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private static final double swingStartTimeEpsilon = 0.02;
+   private static final double swingStartTimeEpsilon = 0.016;
 
    public void testTakingStepsWithAbsoluteTimings() throws SimulationExceededMaximumTimeException
    {
@@ -66,7 +66,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       scs.setCameraPosition(8.0, -8.0, 5.0);
       scs.setCameraFix(1.5, 0.0, 0.8);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
-      Random random = new Random(42494924L);
+      Random random = new Random();
 
       double swingStartInterval = 1.125;
       int steps = 20;
@@ -78,6 +78,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double finalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
+      double finalTouchdownTime = walkingControllerParameters.getDefaultTouchdownTime();
 
       FootstepDataListMessage footstepMessage1 = new FootstepDataListMessage();
       footstepMessage1.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS);
@@ -103,6 +104,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
          double transferTime = defaultTransferTime + random.nextDouble() * 0.5;
          double swingTime = defaultSwingTime + random.nextDouble() * 0.5 - 0.2;
+         double touchdownTime = transferTime * random.nextDouble() * 0.3;
 
          if (stepIndex == 0)
          {
@@ -118,6 +120,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          }
 
          footstepData.setSwingDuration(swingTime);
+         footstepData.setTouchdownDuration(touchdownTime);
 
          takeOffTime += previousSwingTime + footstepData.getTransferDuration();
          PrintTools.info(stepIndex + ": " + takeOffTime);
