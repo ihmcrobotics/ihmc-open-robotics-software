@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
 
@@ -20,14 +21,13 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
 
    public WholeBodyTrajectoryToolboxMessage(List<WaypointBasedTrajectoryMessage> endEffectorTrajectories)
    {
-      this(null, endEffectorTrajectories);
+      this(null, endEffectorTrajectories, null);
    }
 
    public WholeBodyTrajectoryToolboxMessage(WholeBodyTrajectoryToolboxConfigurationMessage configuration,
                                             List<WaypointBasedTrajectoryMessage> endEffectorTrajectories)
    {
-      this.configuration = configuration;
-      this.endEffectorTrajectories = endEffectorTrajectories;
+      this(configuration, endEffectorTrajectories, null);
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
