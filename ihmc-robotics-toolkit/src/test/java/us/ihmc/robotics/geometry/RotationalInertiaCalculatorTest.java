@@ -8,9 +8,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class RotationalInertiaCalculatorTest
 {

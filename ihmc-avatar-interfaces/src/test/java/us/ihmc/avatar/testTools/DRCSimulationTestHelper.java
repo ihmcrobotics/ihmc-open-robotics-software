@@ -6,7 +6,6 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.avatar.DRCStartingLocation;
@@ -33,14 +32,12 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureException;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -56,7 +53,7 @@ import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterf
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -346,6 +343,14 @@ public class DRCSimulationTestHelper
          BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName, scs, callStackHeight);
       }
    }
+   
+   public void createVideo(String videoName)
+   {
+      if (simulationTestingParameters.getCreateSCSVideos())
+      {
+         BambooTools.createVideoWithDateTimeAndStoreInDefaultDirectory(scs, videoName);
+      }
+   }
 
    public RobotSide[] createRobotSidesStartingFrom(RobotSide robotSide, int length)
    {
@@ -364,13 +369,21 @@ public class DRCSimulationTestHelper
    {
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
 
-      Random randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent = new Random();
-      Vector3D randomCameraOffset = RandomGeometry.nextVector3D(randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent, 0.05);
-      cameraFix.add(randomCameraOffset);
-
       cameraConfiguration.setCameraFix(cameraFix);
       cameraConfiguration.setCameraPosition(cameraPosition);
       cameraConfiguration.setCameraTracking(false, true, true, false);
+      cameraConfiguration.setCameraDolly(false, true, true, false);
+      scs.setupCamera(cameraConfiguration);
+      scs.selectCamera("testCamera");
+   }
+
+   public void setupCameraForUnitTest(boolean enableTracking, Point3D cameraFix, Point3D cameraPosition)
+   {
+      CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
+      
+      cameraConfiguration.setCameraFix(cameraFix);
+      cameraConfiguration.setCameraPosition(cameraPosition);
+      cameraConfiguration.setCameraTracking(enableTracking, true, true, false);
       cameraConfiguration.setCameraDolly(false, true, true, false);
       scs.setupCamera(cameraConfiguration);
       scs.selectCamera("testCamera");

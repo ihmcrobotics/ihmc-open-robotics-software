@@ -2,16 +2,16 @@ package us.ihmc.communication.controllerAPI.command;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionMode;
 
 /**
- * A QueueableCommand is a {@link #Command} that can be queued for execution inside the controller. It implements command
+ * A QueueableCommand is a {@link Command} that can be queued for execution inside the controller. It implements command
  * IDs that are used to ensure no commands were dropped in the network.
  *
  * @author Georg
  *
- * @param <C> Type of the final implementation of this command (see {@link #Command}).
- * @param <M> Type of the network message associated with this command (see {@link #Command}).
+ * @param <C> Type of the final implementation of this command (see {@link Command}).
+ * @param <M> Type of the network message associated with this command (see {@link Command}).
  */
 public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M extends QueueableMessage<M>> implements Command<C, M>
 {
@@ -19,7 +19,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    private long commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
    /** The ID of the previous command. Used to make sure only consecutive commands are queued. */
    private long previousCommandId = Packet.INVALID_MESSAGE_ID;
-   /** The {@link #ExecutionMode} of this command. */
+   /** The {@link ExecutionMode} of this command. */
    private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
    /** the time to delay this command on the controller side before being executed **/
    private double executionDelayTime;
@@ -39,7 +39,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    }
 
    /**
-    * Copies the variables associated with command queuing from the given {@link #QueueableCommand} into this one.
+    * Copies the variables associated with command queuing from the given {@link QueueableCommand} into this one.
     */
    public void setQueueableCommandVariables(QueueableCommand<?, ?> other)
    {
@@ -51,7 +51,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    }
 
    /**
-    * Copies the variables associated with command queuing from the given {@link #QueueableMessage} into this one.
+    * Copies the variables associated with command queuing from the given {@link QueueableMessage} into this one.
     */
    public void setQueueableCommandVariables(QueueableMessage<?> message)
    {

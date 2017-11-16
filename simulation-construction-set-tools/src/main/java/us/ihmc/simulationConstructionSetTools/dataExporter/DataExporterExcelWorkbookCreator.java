@@ -20,19 +20,19 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 
 public class DataExporterExcelWorkbookCreator
 {
@@ -336,10 +336,10 @@ public class DataExporterExcelWorkbookCreator
          Vector3D offset = new Vector3D();
          joint.getOffset(offset);
 
-         for (Direction direction : Direction.values())
+         for (Axis axis : Axis.values())
          {
-            addHeaderEntry(configDataSheet, column, "Joint offset " + direction.toString().toLowerCase());
-            addNumberToSheet(configDataSheet, column++, row, Direction.get(offset, direction));
+            addHeaderEntry(configDataSheet, column, "Joint offset " + axis.toString().toLowerCase());
+            addNumberToSheet(configDataSheet, column++, row, Axis.get(offset, axis));
          }
 
          // Mass
@@ -351,10 +351,10 @@ public class DataExporterExcelWorkbookCreator
          Vector3D comOffset = new Vector3D();
          link.getComOffset(comOffset);
 
-         for (Direction direction : Direction.values())
+         for (Axis axis : Axis.values())
          {
-            addHeaderEntry(configDataSheet, column, "CoM offset " + direction.toString().toLowerCase());
-            addNumberToSheet(configDataSheet, column++, row, Direction.get(offset, direction));
+            addHeaderEntry(configDataSheet, column, "CoM offset " + axis.toString().toLowerCase());
+            addNumberToSheet(configDataSheet, column++, row, Axis.get(offset, axis));
          }
 
          // Mass moment of inertia

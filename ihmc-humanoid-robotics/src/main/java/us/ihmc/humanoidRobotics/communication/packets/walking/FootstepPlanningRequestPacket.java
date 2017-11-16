@@ -1,16 +1,19 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningRequestPacket>
 {
+   public static final int NO_PLAN_ID = -1;
+
    public RobotSide initialStanceSide;
    public Point3D32 stanceFootPositionInWorld;
    public Quaternion32 stanceFootOrientationInWorld;
@@ -18,12 +21,17 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public Quaternion32 goalOrientationInWorld;
    public boolean assumeFlatGround = true;
    public FootstepPlannerType requestedPlannerType;
+   public double timeout;
+   public boolean requestDebugPacket = false;
+   public int planId = NO_PLAN_ID;
 
    public enum FootstepPlannerType
    {
       PLANAR_REGION_BIPEDAL,
       PLAN_THEN_SNAP,
-      A_STAR
+      A_STAR,
+      SIMPLE_BODY_PATH,
+      VIS_GRAPH_WITH_A_STAR
    }
 
    public FootstepPlanningRequestPacket()
@@ -45,18 +53,21 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    {
       this.initialStanceSide = initialStanceSide;
 
-      Point3D tempPoint = new Point3D();
-      Quaternion tempOrientation = new Quaternion();
+      FramePoint3D initialFramePoint = initialStanceFootPose.getFramePointCopy();
+      initialFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+      stanceFootPositionInWorld = new Point3D32(initialFramePoint.getPoint());
 
-      initialStanceFootPose.getPosition(tempPoint);
-      initialStanceFootPose.getOrientation(tempOrientation);
-      stanceFootPositionInWorld = new Point3D32(tempPoint);
-      stanceFootOrientationInWorld = new Quaternion32(tempOrientation);
+      FrameOrientation initialFrameOrientation = initialStanceFootPose.getFrameOrientationCopy();
+      initialFrameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      stanceFootOrientationInWorld = new Quaternion32(initialFrameOrientation.getQuaternion());
 
-      goalPose.getPosition(tempPoint);
-      goalPose.getOrientation(tempOrientation);
-      goalPositionInWorld = new Point3D32(tempPoint);
-      goalOrientationInWorld = new Quaternion32(tempOrientation);
+      FramePoint3D goalFramePoint = goalPose.getFramePointCopy();
+      goalFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+      goalPositionInWorld = new Point3D32(goalFramePoint.getPoint());
+
+      FrameOrientation goalFrameOrientation = goalPose.getFrameOrientationCopy();
+      goalFrameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      goalOrientationInWorld = new Quaternion32(goalFrameOrientation.getQuaternion());
 
       this.requestedPlannerType = requestedPlannerType;
    }
@@ -64,6 +75,26 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public void setAssumeFlatGround(boolean assumeFlatGround)
    {
       this.assumeFlatGround = assumeFlatGround;
+   }
+
+   public void setTimeout(double timeout)
+   {
+      this.timeout = timeout;
+   }
+
+   public double getTimeout()
+   {
+      return timeout;
+   }
+
+   public void setRequestDebugPacket(boolean requestDebugPacket)
+   {
+      this.requestDebugPacket = requestDebugPacket;
+   }
+
+   public void setPlannerRequestId(int planId)
+   {
+      this.planId = planId;
    }
 
    @Override

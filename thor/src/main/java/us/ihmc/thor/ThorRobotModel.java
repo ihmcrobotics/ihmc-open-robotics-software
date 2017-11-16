@@ -466,4 +466,10 @@ public class ThorRobotModel implements DRCRobotModel, SDFDescriptionMutator
       linkHolder.getInertia().setM12(-9.8165e-09); // i_yz
       linkHolder.getInertia().setM22(0.00178402); // i_zz
    }
+
+   @Override
+   public InputStream getWholeBodyControllerParametersFile()
+   {
+      return null;
+   }
 }

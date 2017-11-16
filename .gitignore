@@ -41,6 +41,9 @@
 **/.LSOverride
 **/.AppleDouble
 **/pitest
+**/pit-test
+**/pit-reports
+**/Configurations
 **/generated-src2
 
 

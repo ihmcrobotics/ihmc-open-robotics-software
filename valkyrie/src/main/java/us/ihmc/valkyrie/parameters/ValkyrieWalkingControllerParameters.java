@@ -116,9 +116,9 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    // USE THESE FOR Real Robot and sims when controlling pelvis height instead of CoM.
-   private final double minimumHeightAboveGround = 0.595 + 0.23;
-   private double nominalHeightAboveGround = 0.675 + 0.23 - 0.01;
-   private final double maximumHeightAboveGround = 0.735 + 0.23;
+   private final double minimumHeightAboveGround = 0.595 + 0.23 + 0.08;
+   private double nominalHeightAboveGround = 0.675 + 0.23 - 0.01 + 0.08;
+   private final double maximumHeightAboveGround = 0.735 + 0.23 + 0.08;
 
    @Override
    public double minimumHeightAboveAnkle()
@@ -538,13 +538,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
          integrationSettings.put(jointMap.getNeckJointName(name), neckJointSettings);
 
       JointAccelerationIntegrationSettings elbowJointSettings = new JointAccelerationIntegrationSettings();
-      elbowJointSettings.setAlphaPosition(0.999);
-      elbowJointSettings.setAlphaVelocity(0.83);
+      elbowJointSettings.setAlphaPosition(0.9998);
+      elbowJointSettings.setAlphaVelocity(0.86);
       elbowJointSettings.setMaxPositionError(0.2);
       elbowJointSettings.setMaxVelocity(2.0);
 
       JointAccelerationIntegrationSettings wristJointSettings = new JointAccelerationIntegrationSettings();
-      wristJointSettings.setAlphaPosition(0.999);
+      wristJointSettings.setAlphaPosition(0.9995);
       wristJointSettings.setAlphaVelocity(0.83);
       wristJointSettings.setMaxPositionError(0.2);
       wristJointSettings.setMaxVelocity(2.0);
@@ -641,12 +641,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       gains.setOrientationMaxFeedbackAndFeedbackRate(maxAngularAcceleration, maxAngularJerk);
 
       return gains;
-   }
-
-   @Override
-   public boolean doPrepareManipulationForLocomotion()
-   {
-      return true;
    }
 
    @Override

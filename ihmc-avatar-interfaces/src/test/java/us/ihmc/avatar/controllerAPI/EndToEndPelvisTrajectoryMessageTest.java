@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.RateBasedDe
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -41,7 +42,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
@@ -50,16 +50,15 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPoint;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -71,16 +70,17 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final double EPSILON_FOR_DESIREDS = 1.2e-4;
    private static final double EPSILON_FOR_HEIGHT = 1.0e-2;
 
@@ -106,10 +106,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       double trajectoryTime = 1.0;
       RigidBody pelvis = fullRobotModel.getPelvis();
 
-      FramePose desiredRandomPelvisPose = new FramePose(pelvis.getBodyFixedFrame());
-      desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
-      desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.05, 0.05, 0.05));
-      desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.1);
+      FramePose desiredRandomPelvisPose = getRandomPelvisPose(random, pelvis);
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
 
@@ -183,10 +180,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       double trajectoryTime = 1.0;
       RigidBody pelvis = fullRobotModel.getPelvis();
 
-      FramePose desiredRandomPelvisPose = new FramePose(pelvis.getBodyFixedFrame());
-//      desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
-//      desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
-      desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.05);
+      FramePose desiredRandomPelvisPose = getRandomPelvisPose(random, pelvis);
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
 
@@ -693,6 +687,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       double trajectoryDuration = 10.0;
       int numberOfWaypoints = 100;
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(numberOfWaypoints);
+      pelvisTrajectoryMessage.setEnableUserPelvisControlDuringWalking(true);
       
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame(); 
       
@@ -721,25 +716,25 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
          double x = radius * Math.cos(angle);
          double y = radius * Math.sin(angle);
-         double z = 0.0;//0.05 * Math.sin(angle * 10.0);
+         double z = Math.sin(angle) * 0.03;//0.05 * Math.sin(angle * 10.0);
          
          position.set(x,y,z);
          
          double dx = radius * -Math.sin(angle) * angleDot;
          double dy = radius * Math.cos(angle) * angleDot;
-         double dz = 0.0;//0.05 * 10.0 * Math.cos(angle * 10.0) * angleDot;
+         double dz =  Math.cos(angle) * 0.03 * angleDot;//0.05 * 10.0 * Math.cos(angle * 10.0) * angleDot;
          
          linearVelocity.set(dx, dy, dz);
          
-         double yaw = 0.0;
-         double pitch = -Math.cos(angle) * 0.10;
-         double roll = Math.sin(angle) * 0.10;
+         double yaw = Math.cos(angle) * 0.05;
+         double pitch = -Math.cos(angle) * 0.1;
+         double roll = Math.cos(angle) * 0.1;
          
          orientation.setYawPitchRoll(yaw, pitch, roll);
          
-         double yawRate = 0.0;
-         double pitchRate = 0.10 * Math.sin(angle) * angleDot;
-         double rollRate = 0.10 * Math.cos(angle) * angleDot;
+         double yawRate = 0.05 * -Math.sin(angle) * angleDot;
+         double pitchRate = 0.1 * Math.sin(angle) * angleDot;
+         double rollRate = 0.1 * -Math.sin(angle) * angleDot;
          
          RotationTools.computeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate(yaw, pitch, roll, yawRate, pitchRate, rollRate, angularVelocity);
          
@@ -770,7 +765,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       
    }
    
-   public void testFiveDoFMovementsOfPelvis() throws SimulationExceededMaximumTimeException
+   public void testSixDoFMovementsOfPelvis() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -784,9 +779,6 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       String pelvisName = fullRobotModel.getPelvis().getName();
 
-      double timePerWaypoint = 0.1;
-      int numberOfTrajectoryPoints = 15;
-      double trajectoryTime = numberOfTrajectoryPoints * timePerWaypoint;
       RigidBody pelvis = fullRobotModel.getPelvis();
 
       FramePoint3D pelvisPosition = new FramePoint3D(pelvis.getParentJoint().getFrameAfterJoint());
@@ -800,8 +792,9 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       PelvisTrajectoryMessage pelvisTrajectoryMessage = generateHoolaHoopTrajectory(scs, pelvisZUpFrame);
       drcSimulationTestHelper.send(pelvisTrajectoryMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(pelvisTrajectoryMessage.getTrajectoryTime() + 1.0);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
       assertTrue(success);
+      
 
       RigidBodyTransform fromWorldToMidFeetZUpTransform = new RigidBodyTransform();
       Vector3D midFeetZup = findVector3d(CommonHumanoidReferenceFramesVisualizer.class.getSimpleName(), "midFeetZUp", scs);
@@ -815,7 +808,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
       assertTrue(success);
 
-      assertNumberOfWaypoints(numberOfTrajectoryPoints + 1, scs);
+      int numberOfTrajectoryPoints = pelvisTrajectoryMessage.getNumberOfTrajectoryPoints();
+      assertNumberOfWaypoints(numberOfTrajectoryPoints, scs);
 
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {
@@ -823,28 +817,34 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
          expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
          expectedTrajectoryPoint.applyTransform(fromWorldToMidFeetZUpTransform);
-         SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findTrajectoryPoint(pelvisName, trajectoryPointIndex + 1, scs);
-
-
-         assertEquals(expectedTrajectoryPoint.getPositionX(), controllerTrajectoryPoint.getPositionX(), EPSILON_FOR_DESIREDS);
-         assertEquals(expectedTrajectoryPoint.getPositionY(), controllerTrajectoryPoint.getPositionY(), EPSILON_FOR_DESIREDS);
-         assertEquals(expectedTrajectoryPoint.getLinearVelocityX(), controllerTrajectoryPoint.getLinearVelocityX(), EPSILON_FOR_DESIREDS);
-         assertEquals(expectedTrajectoryPoint.getLinearVelocityY(), controllerTrajectoryPoint.getLinearVelocityY(), EPSILON_FOR_DESIREDS);
-
-         // only check a few orientation points since the trajectory in the controller used is shorter
-         if (trajectoryPointIndex + 1 < RigidBodyTaskspaceControlState.maxPointsInGenerator)
+         
+         if (trajectoryPointIndex < MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints - 1)
          {
-            assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
-            expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
-            EuclidCoreTestTools.assertQuaternionEquals(expectedTrajectoryPoint.getOrientationCopy(), controllerTrajectoryPoint.getOrientationCopy(), EPSILON_FOR_DESIREDS);
-            EuclidCoreTestTools.assertTuple3DEquals(expectedTrajectoryPoint.getAngularVelocityCopy(), controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
-            assertEquals(expectedTrajectoryPoint.getLinearVelocityZ(), controllerTrajectoryPoint.getLinearVelocityZ(), EPSILON_FOR_DESIREDS);
-            System.out.println(expectedTrajectoryPoint.getPositionZ() + " : " + controllerTrajectoryPoint.getPositionZ());
-            assertEquals(expectedTrajectoryPoint.getPositionZ(), controllerTrajectoryPoint.getPositionZ(), 0.006); //something is wrong with the frame change, just check we are within 6mm
+            SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findTrajectoryPoint(pelvisName, trajectoryPointIndex + 1, scs);
+
+            assertEquals(expectedTrajectoryPoint.getPositionX(), controllerTrajectoryPoint.getPositionX(), EPSILON_FOR_DESIREDS);
+            assertEquals(expectedTrajectoryPoint.getPositionY(), controllerTrajectoryPoint.getPositionY(), EPSILON_FOR_DESIREDS);
+            assertEquals(expectedTrajectoryPoint.getLinearVelocityX(), controllerTrajectoryPoint.getLinearVelocityX(), EPSILON_FOR_DESIREDS);
+            assertEquals(expectedTrajectoryPoint.getLinearVelocityY(), controllerTrajectoryPoint.getLinearVelocityY(), EPSILON_FOR_DESIREDS);
+
+            // only check a few orientation points since the trajectory in the controller used is shorter
+            if (trajectoryPointIndex + 1 < RigidBodyTaskspaceControlState.maxPointsInGenerator)
+            {
+               assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
+               expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity,
+                     fromMessage.angularVelocity);
+               EuclidCoreTestTools.assertQuaternionEquals(expectedTrajectoryPoint.getOrientationCopy(), controllerTrajectoryPoint.getOrientationCopy(),
+                     EPSILON_FOR_DESIREDS);
+               EuclidCoreTestTools.assertTuple3DEquals(expectedTrajectoryPoint.getAngularVelocityCopy(), controllerTrajectoryPoint.getAngularVelocityCopy(),
+                     EPSILON_FOR_DESIREDS);
+               assertEquals(expectedTrajectoryPoint.getLinearVelocityZ(), controllerTrajectoryPoint.getLinearVelocityZ(), EPSILON_FOR_DESIREDS);
+               System.out.println(expectedTrajectoryPoint.getPositionZ() + " : " + controllerTrajectoryPoint.getPositionZ());
+               assertEquals(expectedTrajectoryPoint.getPositionZ(), controllerTrajectoryPoint.getPositionZ(), 0.006); //something is wrong with the frame change, just check we are within 6mm
+            }
          }
       }
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(pelvisTrajectoryMessage.getTrajectoryTime() + 1.0);
       assertTrue(success);
 
       SE3TrajectoryPointMessage fromMessage = pelvisTrajectoryMessage.getLastTrajectoryPoint();
@@ -856,11 +856,11 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       // Not check the height on purpose as it is non-trivial.
       assertEquals(expectedTrajectoryPoint.getPositionX(), controllerTrajectoryPoint.getPositionX(), EPSILON_FOR_DESIREDS);
       assertEquals(expectedTrajectoryPoint.getPositionY(), controllerTrajectoryPoint.getPositionY(), EPSILON_FOR_DESIREDS);
-      EuclidCoreTestTools.assertTuple3DEquals(expectedTrajectoryPoint.getLinearVelocityCopy(), controllerTrajectoryPoint.getLinearVelocityCopy(), EPSILON_FOR_DESIREDS);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedTrajectoryPoint.getLinearVelocityCopy(), controllerTrajectoryPoint.getLinearVelocityCopy(), 6e-3);
 
       expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
       EuclidCoreTestTools.assertQuaternionEquals(expectedTrajectoryPoint.getOrientationCopy(), controllerTrajectoryPoint.getOrientationCopy(), EPSILON_FOR_DESIREDS);
-      EuclidCoreTestTools.assertTuple3DEquals(expectedTrajectoryPoint.getAngularVelocityCopy(), controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedTrajectoryPoint.getAngularVelocityCopy(), controllerTrajectoryPoint.getAngularVelocityCopy(), 1e-3);
       
 
    }
@@ -1021,7 +1021,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       FramePose desiredRandomPelvisPose = new FramePose(pelvis.getBodyFixedFrame());
       desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
       desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
-      desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.1);
+      desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.15);
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
 
@@ -1119,7 +1119,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    {
       return ((YoBoolean) scs.getVariable(LookAheadCoMHeightTrajectoryGenerator.class.getSimpleName(), "isPelvisOffsetHeightTrajectoryStopped")).getBooleanValue();
    }
-
+   
    public static int findControllerNumberOfWaypointsForXY(SimulationConstructionSet scs)
    {
       String pelvisPrefix = "pelvisOffset";
@@ -1128,6 +1128,15 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       int numberOfWaypoints = ((YoInteger) scs.getVariable(positionTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
       return numberOfWaypoints;
+   }
+   
+   public static int findControllerNumberOfCommandsInQueueForXY(SimulationConstructionSet scs)
+   {
+      String nameSpace = PelvisICPBasedTranslationManager.class.getSimpleName();
+      String queuedCommandsVariableName = "PelvisXYTranslationNumberOfQueuedCommands";
+
+      int numberOfCommands = (int) ((YoLong) scs.getVariable(nameSpace, queuedCommandsVariableName)).getLongValue();
+      return numberOfCommands;
    }
 
    public static int findControllerNumberOfWaypointsForHeight(SimulationConstructionSet scs, RigidBody rigidBody)
@@ -1234,8 +1243,21 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
    public static void assertNumberOfWaypoints(int expectedNumberOfWaypoints, SimulationConstructionSet scs)
    {
+      
+      //The controller queues waypoints, got to check both banks of points
+      if(expectedNumberOfWaypoints > MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints)
+      {
+         assertEquals(MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints, findControllerNumberOfWaypointsForXY(scs));
+         
+         //not the most intuitive, the pelvis xy manager queues the command itself
+         assertEquals(1, findControllerNumberOfCommandsInQueueForXY(scs));
+      }
+      else
+      {
+         assertEquals(expectedNumberOfWaypoints, findControllerNumberOfWaypointsForXY(scs));
+      }
+      
 //      assertEquals(expectedNumberOfWaypoints, findControllerNumberOfWaypointsForOrientation(scs));
-      assertEquals(expectedNumberOfWaypoints, findControllerNumberOfWaypointsForXY(scs));
 //      assertEquals(expectedNumberOfWaypoints, findControllerNumberOfWaypointsForHeight(scs));
    }
 
@@ -1261,5 +1283,14 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   protected FramePose getRandomPelvisPose(Random random, RigidBody pelvis)
+   {
+      FramePose desiredRandomPelvisPose = new FramePose(pelvis.getBodyFixedFrame());
+      desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
+      desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.05, 0.05, 0.05));
+      desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.1);
+      return desiredRandomPelvisPose;
    }
 }

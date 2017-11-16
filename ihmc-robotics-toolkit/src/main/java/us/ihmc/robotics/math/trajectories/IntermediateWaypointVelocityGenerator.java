@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 /**
  * This velocity generator will generate velocities at intermediate way points of a trajectory which will result in a smooth path trough those way points.

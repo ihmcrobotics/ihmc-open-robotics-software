@@ -30,12 +30,12 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final double EPSILON_FOR_DESIREDS = 1.0e-5;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -79,6 +79,8 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       humanoidReferenceFrames.updateFrames();
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       assertSingleWaypointExecuted(desiredRandomChestOrientation.getQuaternion(), head.getName(), scs);
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testLookingLeftAndRight() throws SimulationExceededMaximumTimeException
@@ -123,6 +125,8 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
 
       drcSimulationTestHelper.send(lookStraightAheadMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    private void setupTest() throws SimulationExceededMaximumTimeException
@@ -187,6 +191,10 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
+      
+      head = null;
+      chest = null;
+      neckJoints = null;
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }

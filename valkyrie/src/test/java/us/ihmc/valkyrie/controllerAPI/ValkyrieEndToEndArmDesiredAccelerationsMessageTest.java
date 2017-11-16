@@ -27,7 +27,7 @@ public class ValkyrieEndToEndArmDesiredAccelerationsMessageTest extends EndToEnd
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSimpleCommands() throws Exception
    {
       super.testSimpleCommands();

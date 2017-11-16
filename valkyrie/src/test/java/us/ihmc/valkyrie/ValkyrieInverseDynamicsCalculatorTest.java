@@ -18,7 +18,7 @@ public class ValkyrieInverseDynamicsCalculatorTest extends DRCInverseDynamicsCal
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test
+   @Test(timeout = 30000)
    public void testInverseDynamicsStartingWithRandomAccelerationsInInverseDynamics() throws UnreasonableAccelerationException
    {
       super.testInverseDynamicsStartingWithRandomAccelerationsInInverseDynamics();
@@ -26,7 +26,7 @@ public class ValkyrieInverseDynamicsCalculatorTest extends DRCInverseDynamicsCal
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test
+   @Test(timeout = 30000)
    public void testInverseDynamicsStartingWithRandomTorquesInSCS() throws UnreasonableAccelerationException
    {
       super.testInverseDynamicsStartingWithRandomTorquesInSCS();

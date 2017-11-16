@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -12,7 +13,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.TrajectoryPoint3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -20,7 +21,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class CenterOfMassTrajectoryHandlerTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testSimpleExample()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
@@ -72,7 +73,7 @@ public class CenterOfMassTrajectoryHandlerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testNonZeroStartTime()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
@@ -127,7 +128,7 @@ public class CenterOfMassTrajectoryHandlerTest
 
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testQueuing()
    {
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");

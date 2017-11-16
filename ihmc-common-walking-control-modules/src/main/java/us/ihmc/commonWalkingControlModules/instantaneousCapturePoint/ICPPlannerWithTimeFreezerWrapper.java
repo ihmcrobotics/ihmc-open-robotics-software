@@ -162,11 +162,11 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void updateCurrentPlan(boolean updateUpcomingCoPs)
+   public void updateCurrentPlan()
    {
       timeDelay.set(0.0);
       previousTime.set(getTimeInCurrentState());
-      icpPlanner.updateCurrentPlan(updateUpcomingCoPs);
+      icpPlanner.updateCurrentPlan();
    }
 
    /** {@inheritDoc} */
@@ -307,6 +307,18 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
    public void setSwingDuration(int stepNumber, double duration)
    {
       icpPlanner.setSwingDuration(stepNumber, duration);
+   }
+   
+   @Override
+   public void setTouchdownDuration(int stepNumber, double duration)
+   {
+      icpPlanner.setTouchdownDuration(stepNumber, duration);
+   }
+
+   @Override
+   public double getTouchdownDuration(int stepNumber)
+   {
+      return icpPlanner.getTouchdownDuration(stepNumber);
    }
 
    /** {@inheritDoc} */

@@ -24,6 +24,9 @@ public abstract class Packet<T extends Packet<T>> implements EpsilonComparable<T
    public byte destination = (byte) PacketDestination.BROADCAST.ordinal();
 
    @RosIgnoredField
+   public byte source = (byte) PacketDestination.BROADCAST.ordinal();
+
+   @RosIgnoredField
    @Optional(value = "scripting")
    public String notes;
 
@@ -38,6 +41,21 @@ public abstract class Packet<T extends Packet<T>> implements EpsilonComparable<T
       this.destination = (byte) destination;
    }
 
+   public int getDestination()
+   {
+      return destination;
+   }
+
+   public void setSource(int source)
+   {
+      this.source = (byte) source;
+   }
+
+   public int getSource()
+   {
+      return source;
+   }
+
    public long getUniqueId()
    {
       return uniqueId;
@@ -46,11 +64,6 @@ public abstract class Packet<T extends Packet<T>> implements EpsilonComparable<T
    public void setUniqueId(long uniqueId)
    {
       this.uniqueId = uniqueId;
-   }
-
-   public int getDestination()
-   {
-      return destination;
    }
 
    public boolean isClonable()

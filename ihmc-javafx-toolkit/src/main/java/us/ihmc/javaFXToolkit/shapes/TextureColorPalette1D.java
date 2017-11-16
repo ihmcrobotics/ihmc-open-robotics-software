@@ -10,7 +10,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 /**
  * Provides a HSB-based color palette with only one variable, i.e. either the hue, saturation, or brightness, the two other remain constant in the image.

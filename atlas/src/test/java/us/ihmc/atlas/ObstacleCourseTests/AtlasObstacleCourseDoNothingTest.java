@@ -30,7 +30,7 @@ public class AtlasObstacleCourseDoNothingTest extends DRCObstacleCourseDoNothing
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 11.1)
-   @Test
+   @Test(timeout = 100000)
    public void testDoNothing1() throws SimulationExceededMaximumTimeException
    {
       super.testDoNothing1();

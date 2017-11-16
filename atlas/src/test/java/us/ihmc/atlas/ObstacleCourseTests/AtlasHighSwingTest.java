@@ -30,7 +30,7 @@ public class AtlasHighSwingTest extends DRCHighSwingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 81.8)
-   @Test
+   @Test(timeout = 200000)
    public void testWalkingWithHighSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingWithHighSteps();

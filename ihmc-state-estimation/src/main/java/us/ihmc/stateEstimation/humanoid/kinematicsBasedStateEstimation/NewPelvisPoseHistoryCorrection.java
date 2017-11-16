@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -175,13 +175,13 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       
       if(ENABLE_GRAPHICS && yoGraphicsListRegistry != null)
       {
-         YoGraphicCoordinateSystem yoCorrectedPelvisPoseInWorldFrameGraphic = new YoGraphicCoordinateSystem("yoCorrectedPelvisPoseInWorldFrameGraphic", yoCorrectedPelvisPoseInWorldFrame, 0.5, YoAppearance.Yellow());
+         YoGraphicCoordinateSystem yoCorrectedPelvisPoseInWorldFrameGraphic = new YoGraphicCoordinateSystem("yoCorrectedPelvisPoseInWorldFrameGraphic", yoCorrectedPelvisPoseInWorldFrame, 0.1, YoAppearance.Yellow());
          yoGraphicsListRegistry.registerYoGraphic("yoCorrectedPelvisPoseInWorldFrame", yoCorrectedPelvisPoseInWorldFrameGraphic);
          
-         YoGraphicCoordinateSystem yoIterativeClosestPointPoseInWorldFrameGraphic = new YoGraphicCoordinateSystem("yoIterativeClosestPointPoseInWorldFrameGraphic", yoIterativeClosestPointPoseInWorldFrame, 0.5, YoAppearance.Red());
+         YoGraphicCoordinateSystem yoIterativeClosestPointPoseInWorldFrameGraphic = new YoGraphicCoordinateSystem("yoIterativeClosestPointPoseInWorldFrameGraphic", yoIterativeClosestPointPoseInWorldFrame, 0.1, YoAppearance.Red());
          yoGraphicsListRegistry.registerYoGraphic("yoIterativeClosestPointPoseInWorldFrameGraphic", yoIterativeClosestPointPoseInWorldFrameGraphic);
          
-         YoGraphicCoordinateSystem yoStateEstimatorInWorldFramePoseGraphic = new YoGraphicCoordinateSystem("yoStateEstimatorInWorldFramePoseGraphic", yoStateEstimatorInWorldFramePose, 0.5, YoAppearance.Gray());
+         YoGraphicCoordinateSystem yoStateEstimatorInWorldFramePoseGraphic = new YoGraphicCoordinateSystem("yoStateEstimatorInWorldFramePoseGraphic", yoStateEstimatorInWorldFramePose, 0.1, YoAppearance.Gray());
          yoGraphicsListRegistry.registerYoGraphic("yoCorrectedPelvisPoseInWorldFrame", yoStateEstimatorInWorldFramePoseGraphic);
       }
    }

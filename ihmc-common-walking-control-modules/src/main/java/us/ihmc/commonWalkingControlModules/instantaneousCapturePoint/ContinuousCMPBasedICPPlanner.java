@@ -21,7 +21,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -303,7 +303,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       this.initialTime.set(initialTime);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
-      updateTransferPlan(true);
+      updateTransferPlan();
    }
 
    @Override
@@ -320,7 +320,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
          transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
       }
 
-      updateTransferPlan(true);
+      updateTransferPlan();
    }
 
 
@@ -364,13 +364,13 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
       yoSingleSupportInitialCoM.set(desiredCoMPosition);
       desiredCoMPosition.getFrameTuple(singleSupportInitialCoM);
-      updateSingleSupportPlan(true);
+      updateSingleSupportPlan();
    }
 
 
    @Override
    /** {@inheritDoc} */
-   protected void updateTransferPlan(boolean computeUpcomingCMPs)
+   protected void updateTransferPlan()
    {
       RobotSide transferToSide = this.transferToSide.getEnumValue();
       if (transferToSide == null)
@@ -379,10 +379,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       icpSingleSupportTrajectoryGenerator.hideVisualization();
 
       referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoConstantCMPsPerSupport.getBooleanValue());
-      if (computeUpcomingCMPs)
-         referenceCMPsCalculator.computeReferenceCMPsStartingFromDoubleSupport(isStanding.getBooleanValue(), transferToSide);
-      else
-         referenceCMPsCalculator.computeSupportFeetReferenceCMPsDuringDoubleSupport(isStanding.getBooleanValue(), transferToSide);
+      referenceCMPsCalculator.computeReferenceCMPsStartingFromDoubleSupport(isStanding.getBooleanValue(), transferToSide);
 
       referenceCMPsCalculator.update();
 
@@ -394,15 +391,12 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
    @Override
    /** {@inheritDoc} */
-   protected void updateSingleSupportPlan(boolean computeUpcomingCMPs)
+   protected void updateSingleSupportPlan()
    {
       RobotSide supportSide = this.supportSide.getEnumValue();
 
       referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoConstantCMPsPerSupport.getBooleanValue());
-      if (computeUpcomingCMPs)
-         referenceCMPsCalculator.computeReferenceCMPsStartingFromSingleSupport(supportSide);
-      else
-         referenceCMPsCalculator.computeSupportFootReferenceCMPsDuringSingleSupport(supportSide);
+      referenceCMPsCalculator.computeReferenceCMPsStartingFromSingleSupport(supportSide);
       referenceCMPsCalculator.update();
 
       ReferenceFrame supportSoleFrame = initializeSwingTrajectory();

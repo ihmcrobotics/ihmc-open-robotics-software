@@ -251,7 +251,8 @@ public class WholeBodyControlCoreToolbox
    {
       if (qpBoundCalculator == null)
       {
-         qpBoundCalculator = new InverseDynamicsQPBoundCalculator(jointIndexHandler, controlDT, registry);
+         boolean areJointVelocityLimitsConsidered = optimizationSettings.areJointVelocityLimitsConsidered();
+         qpBoundCalculator = new InverseDynamicsQPBoundCalculator(jointIndexHandler, controlDT, areJointVelocityLimitsConsidered, registry);
       }
       return qpBoundCalculator;
    }
@@ -441,5 +442,10 @@ public class WholeBodyControlCoreToolbox
    public int getRhoSize()
    {
       return optimizationSettings.getRhoSize();
+   }
+
+   public boolean getDeactiveRhoWhenNotInContact()
+   {
+      return optimizationSettings.getDeactivateRhoWhenNotInContact();
    }
 }

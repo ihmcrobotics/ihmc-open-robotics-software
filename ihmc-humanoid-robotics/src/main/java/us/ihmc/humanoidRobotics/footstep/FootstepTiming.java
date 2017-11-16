@@ -7,6 +7,9 @@ public class FootstepTiming
 {
    /** The nominal swing duration of a footstep as specified in the FootstepData */
    private double swingTime = Double.NaN;
+   
+   /** The time the controller spends ensuring a soft touchdown **/
+   private double touchdownDuration = 0.0;
 
    /** The nominal transfer duration of a footstep as specified in the FootstepData */
    private double transferTime = Double.NaN;
@@ -29,6 +32,11 @@ public class FootstepTiming
       setTimings(swingTime, transferTime);
    }
 
+   public FootstepTiming(double swingTime, double touchdownTime, double transferTime)
+   {
+      setTimings(swingTime, touchdownTime, transferTime);
+   }
+
    /**
     * Sets the {@link #swingTime} and {@link #transferTime} of the footstep.
     */
@@ -36,6 +44,17 @@ public class FootstepTiming
    {
       this.swingTime = swingTime;
       this.transferTime = transferTime;
+      this.touchdownDuration = 0.0;
+   }
+   
+   /**
+    * Sets the {@link #swingTime} and {@link #transferTime} of the footstep.
+    */
+   public void setTimings(double swingTime, double touchdownTime, double transferTime)
+   {
+      this.swingTime = swingTime;
+      this.transferTime = transferTime;
+      this.touchdownDuration = touchdownTime;
    }
 
    /**
@@ -55,13 +74,22 @@ public class FootstepTiming
    }
 
    /**
+    * Returns the time to devote to a soft touchdown
+    */
+   public double getTouchdownDuration()
+   {
+      return touchdownDuration;
+   }
+
+   /**
     * Returns the sum of {@link #swingTime} and {@link #transferTime}. This is the total time the step takes from
     * beginning of transferring weight to the stance foot to the touch-down of the swing foot.
     */
    public double getStepTime()
    {
-      return swingTime + transferTime;
+      return swingTime + transferTime + touchdownDuration;
    }
+   
 
    /**
     * Returns true if the footstep has an absolute timing requirement.
@@ -116,6 +144,7 @@ public class FootstepTiming
    {
       swingTime = other.swingTime;
       transferTime = other.transferTime;
+      touchdownDuration = other.touchdownDuration;
       hasAbsoluteTime = other.hasAbsoluteTime;
       swingStartTime = other.swingStartTime;
       executionStartTime = other.executionStartTime;

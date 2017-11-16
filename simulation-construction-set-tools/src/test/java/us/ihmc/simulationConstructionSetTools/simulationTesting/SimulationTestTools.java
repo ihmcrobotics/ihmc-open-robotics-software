@@ -175,7 +175,7 @@ public class SimulationTestTools
        */
       for (int i = 0; i < nIterations; i++)
       {
-//         System.out.println("Starting Run " + i + ". Current index: " + scss.get(0).getIndex());
+//         System.out.println("Starting Run " + i + ". Current index: " + scss.get(0).ordinal());
 
          double simTime = random.nextDouble() * maxSimTime;
 

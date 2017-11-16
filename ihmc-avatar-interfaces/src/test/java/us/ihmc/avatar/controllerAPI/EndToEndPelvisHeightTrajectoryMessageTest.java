@@ -22,11 +22,11 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private static final boolean DEBUG = false;
 
@@ -54,9 +54,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       double trajectoryTime = 1.0;
       RigidBody pelvis = fullRobotModel.getPelvis();
 
-      FramePoint3D desiredRandomPelvisPosition = new FramePoint3D(pelvis.getBodyFixedFrame());
-      desiredRandomPelvisPosition.set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
-      desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ() - 0.1);
+      FramePoint3D desiredRandomPelvisPosition = getRandomPelvisPosition(random, pelvis);
       Point3D desiredPosition = new Point3D();
 
       desiredRandomPelvisPosition.get(desiredPosition);
@@ -77,7 +75,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       drcSimulationTestHelper.send(pelvisHeightTrajectoryMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 + trajectoryTime);
       assertTrue(success);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -88,6 +86,16 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       // Ending up doing a rough check on the actual height
       double pelvisHeight = scs.getVariable("PelvisLinearStateUpdater", "estimatedRootJointPositionZ").getValueAsDouble();
       assertEquals(desiredPosition.getZ(), pelvisHeight, 0.01);
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
+   }
+
+   protected FramePoint3D getRandomPelvisPosition(Random random, RigidBody pelvis)
+   {
+      FramePoint3D desiredRandomPelvisPosition = new FramePoint3D(pelvis.getBodyFixedFrame());
+      desiredRandomPelvisPosition.set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
+      desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ() - 0.1);
+      return desiredRandomPelvisPosition;
    }
 
    public void testSingleWaypointInUserMode() throws Exception
@@ -111,9 +119,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       double trajectoryTime = 1.0;
       RigidBody pelvis = fullRobotModel.getPelvis();
 
-      FramePoint3D desiredRandomPelvisPosition = new FramePoint3D(pelvis.getBodyFixedFrame());
-      desiredRandomPelvisPosition.set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
-      desiredRandomPelvisPosition.setZ(desiredRandomPelvisPosition.getZ() - 0.05);
+      FramePoint3D desiredRandomPelvisPosition = getRandomPelvisPosition(random, pelvis);
       Point3D desiredPosition = new Point3D();
 
       desiredRandomPelvisPosition.get(desiredPosition);
@@ -134,6 +140,8 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
 
       double pelvisHeight = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame().getTranslationZ();
       assertEquals(desiredPosition.getZ(), pelvisHeight, 0.01);
+      
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    @Before

@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingState;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
@@ -420,7 +420,12 @@ public class WalkingCommandConsumer
          if (handManagers.get(robotSide) != null)
             handManagers.get(robotSide).handleStopAllTrajectoryCommand(command);
       }
-      chestManager.handleStopAllTrajectoryCommand(command);
+      
+      if(chestManager != null)
+      {
+         chestManager.handleStopAllTrajectoryCommand(command);
+      }
+      
       feetManager.handleStopAllTrajectoryCommand(command);
       comHeightManager.handleStopAllTrajectoryCommand(command);
       balanceManager.handleStopAllTrajectoryCommand(command);
