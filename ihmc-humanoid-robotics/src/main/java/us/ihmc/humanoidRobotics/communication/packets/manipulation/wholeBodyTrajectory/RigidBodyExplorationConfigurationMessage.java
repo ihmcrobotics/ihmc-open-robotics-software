@@ -13,34 +13,38 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
    public double[] explorationRangeLowerLimits;
    public double[] explorationRangeUpperLimits;
 
+   /**
+    * To set enable exploration for all degree of freedom, do not send this message.
+    */
    public RigidBodyExplorationConfigurationMessage()
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   /**
+    * To set disable exploration on this rigid body.
+    */
    public RigidBodyExplorationConfigurationMessage(RigidBody rigidBody)
    {
-      this.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
-      this.degreesOfFreedomToExplore = null;
-      this.explorationRangeLowerLimits = null;
-      this.explorationRangeUpperLimits = null;
+      this(rigidBody, new ConfigurationSpaceName[] {ConfigurationSpaceName.X}, new double[] {0.0}, new double[] {0.0});
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
-   
+
+   /**
+    * To set enable exploration on this rigid body with following order of ConfigurationSpaceName.
+    */
    public RigidBodyExplorationConfigurationMessage(RigidBody rigidBody, ConfigurationSpaceName[] degreesOfFreedomToExplore)
    {
-      this.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
-      this.degreesOfFreedomToExplore = degreesOfFreedomToExplore;
-      this.explorationRangeLowerLimits = WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationLowerLimitArray(degreesOfFreedomToExplore);
-      this.explorationRangeUpperLimits = WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationUpperLimitArray(degreesOfFreedomToExplore);
+      this(rigidBody, degreesOfFreedomToExplore,
+           WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationLowerLimitArray(degreesOfFreedomToExplore),
+           WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationUpperLimitArray(degreesOfFreedomToExplore));
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public RigidBodyExplorationConfigurationMessage(RigidBody rigidBody, ConfigurationSpaceName[] degreesOfFreedomToExplore,
                                                    double[] explorationRangeLowerLimits, double[] explorationRangeUpperLimits)
    {
-      if (degreesOfFreedomToExplore.length != explorationRangeLowerLimits.length
-            || degreesOfFreedomToExplore.length != explorationRangeUpperLimits.length)
+      if (degreesOfFreedomToExplore.length != explorationRangeLowerLimits.length || degreesOfFreedomToExplore.length != explorationRangeUpperLimits.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length
                + ", explorationRangeLowerLimits.length = " + explorationRangeLowerLimits.length + ", explorationRangeUpperLimits.length = "
                + explorationRangeUpperLimits.length);
