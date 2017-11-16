@@ -178,6 +178,39 @@ public class ICPControlPlane
       convexPolygonInControlPlaneToPack.update();
    }
 
+   public void scaleAndProjectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2D footstepPolygon,
+         ConvexPolygon2D convexPolygonInControlPlaneToPack, double distanceInside)
+   {
+      ConvexPolygon2D convexHull = planarRegion.getConvexHull();
+      convexPolygonInControlPlaneToPack.clear();
+
+      planarRegion.getTransformToWorld(planarRegionTransformToWorld);
+      planarRegionFrame.update();
+
+      scaler.scaleConvexPolygonToContainInteriorPolygon(convexHull, footstepPolygon, distanceInside, scaledConvexHull);
+
+      for (int vertexIndex = 0; vertexIndex < scaledConvexHull.getNumberOfVertices(); vertexIndex++)
+      {
+         Point2DReadOnly vertex = scaledConvexHull.getVertex(vertexIndex);
+         tempFramePoint2D.setToZero(planarRegionFrame);
+         tempFramePoint2D.set(vertex);
+         tempFramePoint2D.changeFrame(worldFrame);
+
+         double vertexZ = planarRegion.getPlaneZGivenXY(tempFramePoint2D.getX(), tempFramePoint2D.getY());
+
+         tempFramePoint.setToZero(worldFrame);
+         tempFramePoint.set(tempFramePoint2D, vertexZ);
+         tempFramePoint.changeFrame(centerOfMassFrame);
+
+         projectPoint(tempFramePoint, tempProjectedFramePoint, controlPlaneHeight.getDoubleValue(), tempFramePoint.getZ());
+
+         tempProjectedFramePoint.changeFrame(worldFrame);
+
+         convexPolygonInControlPlaneToPack.addVertex(tempProjectedFramePoint.getX(), tempProjectedFramePoint.getY());
+      }
+      convexPolygonInControlPlaneToPack.update();
+   }
+
    private static void projectPointOntoControlPlane(FramePoint3D pointToProject, FramePoint3D projectionToPack, double planeHeight)
    {
       double unprojectedHeight = pointToProject.getZ();
