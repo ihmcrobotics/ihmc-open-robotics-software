@@ -3,9 +3,11 @@ package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 import java.util.Arrays;
 import java.util.Collection;
 
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class WholeBodyTrajectoryToolboxHelper
 {
@@ -47,5 +49,32 @@ public class WholeBodyTrajectoryToolboxHelper
 
       // Yoshikawa's definition.
       return diffUpper * diffLower / (motionRange * motionRange);
+   }
+   
+   public static void setSelectionMatrix(SelectionMatrix6D selectionMatrix, ConfigurationSpaceName configurationSpaceName, boolean select)
+   {
+      switch (configurationSpaceName)
+      {
+      case X:
+         selectionMatrix.selectLinearX(select);
+         break;
+      case Y:
+         selectionMatrix.selectLinearY(select);
+         break;
+      case Z:
+         selectionMatrix.selectLinearZ(select);
+         break;
+      case ROLL:
+         selectionMatrix.selectAngularX(select);
+         break;
+      case PITCH:
+         selectionMatrix.selectAngularY(select);
+         break;
+      case YAW:
+         selectionMatrix.selectAngularZ(select);
+         break;
+      default:
+         throw new RuntimeException("Unexpected enum value: " + configurationSpaceName);
+      }
    }
 }
