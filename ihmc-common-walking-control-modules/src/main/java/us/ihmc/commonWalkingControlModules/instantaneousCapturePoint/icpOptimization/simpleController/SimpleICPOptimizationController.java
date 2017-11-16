@@ -244,7 +244,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, VISUALIZE,
                                                                                        registry, yoGraphicsListRegistry);
       planarRegionConstraintProvider = new PlanarRegionConstraintProvider(icpControlPlane, walkingControllerParameters, bipedSupportPolygons, contactableFeet,
-                                                                          solutionHandler.getFootstepDeadband(), yoNamePrefix, VISUALIZE, registry, yoGraphicsListRegistry);
+                                                                          yoNamePrefix, VISUALIZE, registry, yoGraphicsListRegistry);
 
       if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry);

@@ -31,7 +31,10 @@ import java.awt.*;
 public class PlanarRegionConstraintProvider
 {
    private static final double maxNormalAngleFromVertical = 0.3;
-   private static final double distanceFromEdge = 0.05;
+   private static final double distanceFromEdgeForStepping = 0.05;
+   private static final double distanceFromEdgeForSwitching = 0.02;
+
+   private static final double minimumAreaForSearch = 0.08;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoFrameConvexPolygon2d yoActivePlanarRegion;
@@ -57,7 +60,8 @@ public class PlanarRegionConstraintProvider
    private final ReferenceFrame planeReferenceFrame;
 
    public PlanarRegionConstraintProvider(ICPControlPlane icpControlPlane, WalkingControllerParameters parameters, BipedSupportPolygons bipedSupportPolygons,
-                                         SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoDouble footstepDeadband, String yoNamePrefix, boolean visualize, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                         SideDependentList<? extends ContactablePlaneBody> contactableFeet, String yoNamePrefix, boolean visualize,
+                                         YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.icpControlPlane = icpControlPlane;
       this.contactableFeet = contactableFeet;
@@ -180,7 +184,6 @@ public class PlanarRegionConstraintProvider
       solver.resetPlanarRegionConstraint();
 
       boolean planarRegionNeedsUpdating = true;
-      boolean hasValidPlanarRegion;
 
       if (activePlanarRegion == null)
          findPlanarRegionAttachedToFootstep(footstep);
@@ -189,11 +192,9 @@ public class PlanarRegionConstraintProvider
          planarRegionNeedsUpdating = checkCurrentPlanarRegion();
 
       if (planarRegionNeedsUpdating)
-         hasValidPlanarRegion = findPlanarRegionWithLargestIntersectionArea();
-      else
-         hasValidPlanarRegion = true;
+         activePlanarRegion = findPlanarRegionWithLargestIntersectionArea();
 
-      if (hasValidPlanarRegion)
+      if (activePlanarRegion != null)
       {
          ConvexPolygon2D projectedAndShrunkPlanarRegion = computeShrunkAndProjectedConvexHull(activePlanarRegion, footstep);
          solver.setPlanarRegionConstraint(projectedAndShrunkPlanarRegion);
@@ -225,7 +226,7 @@ public class PlanarRegionConstraintProvider
          }
          footstepPolygon.update();
       }
-      icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, footstepPolygon, projectedAndShrunkConvexHull, distanceFromEdge);
+      icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, footstepPolygon, projectedAndShrunkConvexHull, distanceFromEdgeForStepping);
       yoShrunkActivePlanarRegion.setConvexPolygon2d(projectedAndShrunkConvexHull);
 
       return projectedAndShrunkConvexHull;
@@ -262,6 +263,7 @@ public class PlanarRegionConstraintProvider
       }
    }
 
+   // FIXME makes garbage
    /**
     * Returns whether or not the current planar region needs updating
     */
@@ -270,10 +272,10 @@ public class PlanarRegionConstraintProvider
       FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
       captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
-      icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(activePlanarRegion, tempProjectedPolygon);
+      icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(activePlanarRegion, tempProjectedPolygon, distanceFromEdgeForSwitching);
       ConvexPolygonTools.computeIntersectionOfPolygons(captureRegion.getConvexPolygon2d(), tempProjectedPolygon, tempIntersection);
 
-      if (tempIntersection.getArea() > 0.0)
+      if (tempIntersection.getArea() > minimumAreaForSearch)
       {
          yoActivePlanarRegion.setConvexPolygon2d(activePlanarRegion.getConvexHull());
 
@@ -289,20 +291,20 @@ public class PlanarRegionConstraintProvider
    /**
     * returns whether or not there is a planar region that intersects the capture region
     */
-   private boolean findPlanarRegionWithLargestIntersectionArea()
+   private PlanarRegion findPlanarRegionWithLargestIntersectionArea()
    {
       FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
       captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
-      boolean hasPlanarRegion = false;
       double maxArea = 0.0;
-      activePlanarRegion = null;
+      PlanarRegion activePlanarRegion = null;
       activePlanarRegionInControlFrame.clear();
 
       for (int regionIndex = 0; regionIndex < planarRegionsList.getNumberOfPlanarRegions(); regionIndex++)
       {
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(regionIndex);
-         icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion, tempProjectedPolygon);
+
+         icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, tempProjectedPolygon, distanceFromEdgeForSwitching);
 
          // FIXME this makes a lot of garbage
          ConvexPolygonTools.computeIntersectionOfPolygons(captureRegion.getConvexPolygon2d(), tempProjectedPolygon, tempIntersection);
@@ -315,10 +317,11 @@ public class PlanarRegionConstraintProvider
 
             icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(activePlanarRegion, tempProjectedPolygon);
             activePlanarRegionInControlFrame.setAndUpdate(tempProjectedPolygon);
-
-            hasPlanarRegion = true;
          }
       }
+
+      if (activePlanarRegion == null)
+         activePlanarRegion = this.activePlanarRegion;
 
       if (activePlanarRegion != null)
       {
@@ -332,7 +335,7 @@ public class PlanarRegionConstraintProvider
          yoActivePlanarRegionInControlPlane.clearAndHide();
       }
 
-      return hasPlanarRegion;
+      return activePlanarRegion;
    }
 
    public PlanarRegion getActivePlanarRegion()
