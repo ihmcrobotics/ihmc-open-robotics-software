@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajectoryToolboxMessage> implements MultiplePacketHolder
 {
@@ -37,7 +38,7 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
    {
       this.configuration = configuration;
       this.endEffectorTrajectories = endEffectorTrajectories;
-      this.explorationConfigurations = explorationConfigurations;
+      this.explorationConfigurations = explorationConfigurations;      
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
