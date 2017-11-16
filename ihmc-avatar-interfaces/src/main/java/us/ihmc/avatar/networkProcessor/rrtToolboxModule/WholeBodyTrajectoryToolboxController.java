@@ -26,12 +26,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.RigidBodyExplorationConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
@@ -528,27 +526,58 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       }
 
       List<WaypointBasedTrajectoryCommand> trajectoryCommands = commandInputManager.pollNewCommands(WaypointBasedTrajectoryCommand.class);
+      if(trajectoryCommands.size() < 1)
+         return false;
 
       List<RigidBodyExplorationConfigurationCommand> rigidBodyCommands = commandInputManager.pollNewCommands(RigidBodyExplorationConfigurationCommand.class);
       
       WholeBodyTrajectoryToolboxConfigurationCommand configurationCommand = commandInputManager.pollNewestCommand(WholeBodyTrajectoryToolboxConfigurationCommand.class);
-      
-      PrintTools.info("received ! ");
-      
-      
-      
-      commandInputManager.isNewCommandAvailable(RigidBodyExplorationConfigurationCommand.class);
-      
-      PrintTools.info("received ! ");
+            
+      PrintTools.info("received ! WaypointBasedTrajectoryCommand");
       System.out.println(trajectoryCommands.size());
+      for(int i=0;i<trajectoryCommands.size();i++)
+      {
+         System.out.println(trajectoryCommands.get(i).getEndEffector().getName());
+         int numberOfUnconstrainedDegreesOfFreedom = trajectoryCommands.get(i).getNumberOfUnconstrainedDegreesOfFreedom();
+         for(int j=0;j<numberOfUnconstrainedDegreesOfFreedom;j++)
+            System.out.println(trajectoryCommands.get(i).getUnconstrainedDegreeOfFreedom(j));         
+      }
+      
+      PrintTools.info("received ! RigidBodyExplorationConfigurationCommand");      
       System.out.println(rigidBodyCommands.size());
+      for(int i=0;i<rigidBodyCommands.size();i++)
+      {
+         System.out.println(rigidBodyCommands.get(i).getRigidBody().getName());
+         int numberOfDegreesOfFreedomToExplore = rigidBodyCommands.get(i).getNumberOfDegreesOfFreedomToExplore();
+         for(int j=0;j<numberOfDegreesOfFreedomToExplore;j++)
+         {
+            System.out.println(rigidBodyCommands.get(i).getDegreeOfFreedomToExplore(j));
+            // System.out.println(rigidBodyCommands.get(i).getExplorationUpperLimit(j));
+            // System.out.println(rigidBodyCommands.get(i).getExplorationLowerLimit(j));
+         }   
+      }
+      
+      PrintTools.info("received ! WholeBodyTrajectoryToolboxConfigurationCommand");
       System.out.println(configurationCommand.getMaximumExpansionSize());
       
       
+      // ******************************************************************************** //
+      // Convert command into WholeBodyTrajectoryToolboxData.
+      // ******************************************************************************** //
+      
+      
+      WholeBodyTrajectoryToolboxData toolboxData = new WholeBodyTrajectoryToolboxData(this.visualizedFullRobotModel, configurationCommand, trajectoryCommands, rigidBodyCommands);
+      
+      PrintTools.info("initialize success");
       
       
       
       
+      
+      
+      // ******************************************************************************** //
+      // Convert WholeBodyTrajectoryToolboxData into constrainedEndEffectorTrajectory.
+      // ******************************************************************************** //      
       //constrainedEndEffectorTrajectory = convertCommands(trajectoryCommands);
 
       if (VERBOSE)

@@ -229,7 +229,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                                                                              unconstrainedDegreesOfFreedom);
          handTrajectories.add(trajectory);
 
-         ConfigurationSpaceName[] handConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.YAW.PITCH, ConfigurationSpaceName.ROLL};
+         ConfigurationSpaceName[] handConfigurations = {YAW, PITCH, ROLL};
          RigidBodyExplorationConfigurationMessage rigidBodyConfiguration = new RigidBodyExplorationConfigurationMessage(hand, handConfigurations);
          
          rigidBodyConfigurations.add(rigidBodyConfiguration);
@@ -238,10 +238,10 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
             scs.addStaticLinkGraphics(createFunctionTrajectoryVisualization(handFunction, 0.0, trajectoryTime, timeResolution, 0.01, YoAppearance.AliceBlue()));
       }
 
-//      RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis());
-//      RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest());
-//      rigidBodyConfigurations.add(pelvisConfigurationMessage);
-//      rigidBodyConfigurations.add(chestConfigurationMessage);
+      RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis());
+      RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest());
+      rigidBodyConfigurations.add(pelvisConfigurationMessage);
+      rigidBodyConfigurations.add(chestConfigurationMessage);
       
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
       commandInputManager.submitMessage(message);

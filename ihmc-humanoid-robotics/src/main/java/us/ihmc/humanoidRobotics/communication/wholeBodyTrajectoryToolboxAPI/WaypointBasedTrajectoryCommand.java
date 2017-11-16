@@ -25,6 +25,8 @@ public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTraj
    private final RecyclingArrayList<Pose3D> waypoints = new RecyclingArrayList<>(Pose3D.class);
    private final List<ConfigurationSpaceName> unconstrainedDegreesOfFreedom = new ArrayList<>();
 
+   // TODO : control Frame TransformationMatrix;
+   
    @Override
    public void clear()
    {
