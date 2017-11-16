@@ -238,11 +238,12 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
             scs.addStaticLinkGraphics(createFunctionTrajectoryVisualization(handFunction, 0.0, trajectoryTime, timeResolution, 0.01, YoAppearance.AliceBlue()));
       }
 
-      RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis());
+      ConfigurationSpaceName[] pelvisConfigurations = {ConfigurationSpaceName.Z};
+      RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis(), pelvisConfigurations);
       RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest());
       rigidBodyConfigurations.add(pelvisConfigurationMessage);
-      rigidBodyConfigurations.add(chestConfigurationMessage);
-      
+      //rigidBodyConfigurations.add(chestConfigurationMessage);
+            
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
       commandInputManager.submitMessage(message);
 

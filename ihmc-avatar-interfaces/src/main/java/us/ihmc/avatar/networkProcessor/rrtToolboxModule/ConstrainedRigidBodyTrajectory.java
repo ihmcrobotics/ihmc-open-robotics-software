@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
@@ -34,7 +35,7 @@ public class ConstrainedRigidBodyTrajectory
    private final SelectionMatrix6D trajectorySelectionMatrix;
    private final SelectionMatrix6D explorationSelectionMatrix;
 
-   private final List<ConfigurationSpaceName> degreesOfFreedomToExplore = new ArrayList<>();
+   private final List<ConfigurationSpaceName> explorationConfigurationSpaces = new ArrayList<>();
    private final TDoubleArrayList explorationRangeUpperLimits = new TDoubleArrayList();
    private final TDoubleArrayList explorationRangeLowerLimits = new TDoubleArrayList();
 
@@ -65,7 +66,7 @@ public class ConstrainedRigidBodyTrajectory
          }
       }
 
-      degreesOfFreedomToExplore.clear();
+      explorationConfigurationSpaces.clear();
       explorationRangeUpperLimits.reset();
       explorationRangeLowerLimits.reset();
       explorationSelectionMatrix = new SelectionMatrix6D();
@@ -78,7 +79,7 @@ public class ConstrainedRigidBodyTrajectory
             WholeBodyTrajectoryToolboxHelper.setSelectionMatrix(explorationSelectionMatrix, explorationCommand.getDegreeOfFreedomToExplore(i), true);
             explorationRangeUpperLimits.add(explorationCommand.getExplorationUpperLimit(i));
             explorationRangeLowerLimits.add(explorationCommand.getExplorationLowerLimit(i));
-            degreesOfFreedomToExplore.add(explorationCommand.getDegreeOfFreedomToExplore(i));
+            explorationConfigurationSpaces.add(explorationCommand.getDegreeOfFreedomToExplore(i));
          }
       }
    }
@@ -93,20 +94,15 @@ public class ConstrainedRigidBodyTrajectory
       waypointTimes.add(0.0);
       Pose3D originOfRigidBody;      
       if(rigidBody == fullRobotModel.getHand(RobotSide.LEFT))
-         originOfRigidBody = new Pose3D(fullRobotModel.getHand(RobotSide.LEFT).getBodyFixedFrame().getTransformToWorldFrame());
-      
+         originOfRigidBody = new Pose3D(fullRobotModel.getHand(RobotSide.LEFT).getBodyFixedFrame().getTransformToWorldFrame());      
       else if(rigidBody == fullRobotModel.getHand(RobotSide.RIGHT))
-         originOfRigidBody = new Pose3D(fullRobotModel.getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame());
-      
+         originOfRigidBody = new Pose3D(fullRobotModel.getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame());      
       else if(rigidBody == fullRobotModel.getChest())
-         originOfRigidBody = new Pose3D(fullRobotModel.getChest().getBodyFixedFrame().getTransformToWorldFrame());
-      
+         originOfRigidBody = new Pose3D(fullRobotModel.getChest().getBodyFixedFrame().getTransformToWorldFrame());      
       else if(rigidBody == fullRobotModel.getPelvis())
-         originOfRigidBody = new Pose3D(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
-      
+         originOfRigidBody = new Pose3D(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame());      
       else      
          throw new RuntimeException("Unexpected rigid body: " + rigidBody.getName());
-      
       waypoints.add(originOfRigidBody);
 
       t0 = 0.0;
@@ -115,7 +111,7 @@ public class ConstrainedRigidBodyTrajectory
       trajectorySelectionMatrix = new SelectionMatrix6D();
       trajectorySelectionMatrix.clearSelection();
 
-      degreesOfFreedomToExplore.clear();
+      explorationConfigurationSpaces.clear();
       explorationRangeUpperLimits.reset();
       explorationRangeLowerLimits.reset();
       explorationSelectionMatrix = new SelectionMatrix6D();
@@ -128,17 +124,40 @@ public class ConstrainedRigidBodyTrajectory
             WholeBodyTrajectoryToolboxHelper.setSelectionMatrix(explorationSelectionMatrix, explorationCommand.getDegreeOfFreedomToExplore(i), true);
             explorationRangeUpperLimits.add(explorationCommand.getExplorationUpperLimit(i));
             explorationRangeLowerLimits.add(explorationCommand.getExplorationLowerLimit(i));
-            degreesOfFreedomToExplore.add(explorationCommand.getDegreeOfFreedomToExplore(i));
+            explorationConfigurationSpaces.add(explorationCommand.getDegreeOfFreedomToExplore(i));
          }
       }
    }
-
-   public String getExplorationConfigurationName(int i)
+   
+   public ArrayList<String> getExplorationConfigurationNames()
    {
-      if (i >= degreesOfFreedomToExplore.size())
+      ArrayList<String> ret = new ArrayList<String>();
+      for(int i=0;i<getExplorationDimension();i++)
+         ret.add(getExplorationConfigurationName(i));
+      return ret;
+   }
+
+   public TDoubleArrayList getExplorationRangeUpperLimits()
+   {
+      return explorationRangeUpperLimits;
+   }
+
+   public TDoubleArrayList getExplorationRangeLowerLimits()
+   {
+      return explorationRangeLowerLimits;
+   }
+
+   private String getExplorationConfigurationName(int i)
+   {
+      if (i >= explorationConfigurationSpaces.size())
          throw new RuntimeException("Try to get over size " + this);
 
-      return getRigidBody().getName() + "_" + degreesOfFreedomToExplore.get(i).name();
+      return getRigidBody().getName() + "_" + explorationConfigurationSpaces.get(i).name();
+   }
+   
+   public int getExplorationDimension()
+   {
+      return explorationConfigurationSpaces.size();
    }
 
    public RigidBody getRigidBody()

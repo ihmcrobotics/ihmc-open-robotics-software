@@ -27,10 +27,8 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
     */
    public RigidBodyExplorationConfigurationMessage(RigidBody rigidBody)
    {
-      //this(rigidBody, new ConfigurationSpaceName[] {ConfigurationSpaceName.X}, new double[] {0.0}, new double[] {0.0});
       this.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
       
-      //this(rigidBody, null, null, null);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 

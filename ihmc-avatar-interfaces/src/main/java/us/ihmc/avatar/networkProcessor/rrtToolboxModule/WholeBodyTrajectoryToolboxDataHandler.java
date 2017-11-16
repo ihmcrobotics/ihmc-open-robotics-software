@@ -8,7 +8,7 @@ public class WholeBodyTrajectoryToolboxDataHandler
    private CTTaskNode rootNode;
    private CTTaskNodeTree tree;
    
-   public WholeBodyTrajectoryToolboxDataHandler()
+   public WholeBodyTrajectoryToolboxDataHandler(WholeBodyTrajectoryToolboxData toolboxData)
    {
       
    }

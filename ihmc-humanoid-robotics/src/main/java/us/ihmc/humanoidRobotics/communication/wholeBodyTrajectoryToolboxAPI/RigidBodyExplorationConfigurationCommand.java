@@ -9,6 +9,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.RigidBodyExplorationConfigurationMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
@@ -22,6 +23,17 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
 
    public RigidBodyExplorationConfigurationCommand()
    {
+   }
+   
+   public RigidBodyExplorationConfigurationCommand(RigidBody rigidBody, ConfigurationSpaceName... configurationSpaces)
+   {
+      clear();
+      this.rigidBody = rigidBody;
+      this.rigidBodyNameBasedashCode = rigidBody.getNameBasedHashCode();      
+      for(int i=0;i<configurationSpaces.length;i++)
+         this.degreesOfFreedomToExplore.add(configurationSpaces[i]);            
+      this.explorationRangeLowerLimits.addAll(WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationLowerLimitArray(degreesOfFreedomToExplore));
+      this.explorationRangeUpperLimits.addAll(WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationUpperLimitArray(degreesOfFreedomToExplore));
    }
 
    @Override
