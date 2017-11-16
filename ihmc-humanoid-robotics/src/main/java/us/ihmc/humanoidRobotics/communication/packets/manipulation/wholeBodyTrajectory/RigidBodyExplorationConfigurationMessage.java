@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 
 import java.util.Arrays;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.ArrayTools;
@@ -26,7 +27,10 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
     */
    public RigidBodyExplorationConfigurationMessage(RigidBody rigidBody)
    {
-      this(rigidBody, new ConfigurationSpaceName[] {ConfigurationSpaceName.X}, new double[] {0.0}, new double[] {0.0});
+      //this(rigidBody, new ConfigurationSpaceName[] {ConfigurationSpaceName.X}, new double[] {0.0}, new double[] {0.0});
+      this.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
+      
+      //this(rigidBody, null, null, null);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -63,6 +67,8 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
 
    public int getNumberOfDegreesOfFreedomToExplore()
    {
+      if(degreesOfFreedomToExplore == null)
+         return 0;
       return degreesOfFreedomToExplore.length;
    }
 
