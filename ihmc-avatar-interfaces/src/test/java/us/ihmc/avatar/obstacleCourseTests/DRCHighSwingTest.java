@@ -11,6 +11,7 @@ import org.junit.Before;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -29,7 +30,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
@@ -68,7 +68,7 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
 
    public void testWalkingWithHighSteps() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
@@ -126,14 +126,14 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
       Vector3D verticalVector = new Vector3D(0.0, 0.0, 1.0);
       FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime, transferTime);
       RotationTools.computeQuaternionFromYawAndZNormal(0.0 / 4.0 * Math.PI, verticalVector, orientation);
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(0.0, .15, 0.08), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(0.0, -.15, 0.08), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(0.4, .15, 0.08), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(0.8, -.15, 0.08), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(1.2, .15, 0.08), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(1.6, -.15, 0.08), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(2.0, .15, 0.08), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(2.0, -.15, 0.08), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(0.0, .15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(0.0, -.15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(0.4, .15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(0.8, -.15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(1.2, .15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(1.6, -.15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.LEFT, new Point3D(2.0, .15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepDataMessage(RobotSide.RIGHT, new Point3D(2.0, -.15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
 
 
       return footstepDataList;

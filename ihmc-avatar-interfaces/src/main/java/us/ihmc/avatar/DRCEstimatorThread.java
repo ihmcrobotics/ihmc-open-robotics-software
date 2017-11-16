@@ -66,7 +66,9 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSens
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
+import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -112,7 +114,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    
    private final LowLevelOutputWriter outputWriter;
 
-   public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, RobotContactPointParameters contactPointParameters,
+   public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, RobotContactPointParameters contactPointParameters, WholeBodyControllerParameters wholeBodyControllerParameters,
          StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer,
          PeriodicThreadScheduler poseCommunicatorScheduler, HumanoidGlobalDataProducer dataProducer, LowLevelOutputWriter outputWriter, RobotVisualizer robotVisualizer, double gravity)
    {
@@ -225,6 +227,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          }
          
       }
+      
+      ParameterLoaderHelper.loadParameters(this, wholeBodyControllerParameters.getWholeBodyControllerParametersFile(), estimatorRegistry);
 
       if (robotVisualizer != null)
       {

@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class VaryingStairGroundProfile extends GroundProfileFromHeightMap
 {

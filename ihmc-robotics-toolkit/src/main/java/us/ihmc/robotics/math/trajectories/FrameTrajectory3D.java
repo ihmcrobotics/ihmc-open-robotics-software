@@ -5,13 +5,13 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
-import us.ihmc.robotics.geometry.Direction;
 
 public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHolder
 {
@@ -524,9 +524,9 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
                                                     zddIntermediate.getVector(), zFinal.getPoint(), zdFinal.getVector());
    }
 
-   public void setDirectly(Direction direction, DenseMatrix64F coefficients)
+   public void setDirectly(Axis axis, DenseMatrix64F coefficients)
    {
-      getTrajectory(direction).setDirectly(coefficients);
+      getTrajectory(axis).setDirectly(coefficients);
    }
 
    public FramePoint3D getFramePosition()

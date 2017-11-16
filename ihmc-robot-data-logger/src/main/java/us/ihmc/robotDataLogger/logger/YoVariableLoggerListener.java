@@ -101,7 +101,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       }
       else
       {
-         PrintTools.warn(this, "cameras.yaml not found, disabling video");
+         PrintTools.warn(this, "Video capture disabled. Ignoring camera's and network streams");
       }
 
    }

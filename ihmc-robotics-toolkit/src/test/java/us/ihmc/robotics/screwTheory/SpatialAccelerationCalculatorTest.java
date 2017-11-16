@@ -469,7 +469,7 @@ public class SpatialAccelerationCalculatorTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testWithDoVelocityTermsSetToFalse() throws Exception
    {
       Random random = new Random(435345L);

@@ -20,6 +20,13 @@ public interface FootstepPlanner
    public void setGoal(FootstepPlannerGoal goal);
 
    /**
+    * Sets a timeout after which the planner will give up if no solution was found. By default this
+    * is set to infinity.
+    * @param timeout timeout of the planner.
+    */
+   public void setTimeout(double timeout);
+
+   /**
     * Set possible stepping regions for the footstep planner. If null is passed the
     * planner will assume flat ground.
     * @param planarRegionsList   List of planar regions that describe the environment

@@ -3,9 +3,7 @@ package us.ihmc.robotics.math.trajectories;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
-import us.ihmc.robotics.math.trajectories.YoTrajectory;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoTrajectoryTest
@@ -18,7 +16,7 @@ public class YoTrajectoryTest
       registry.clear();
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testGetDerivative()
    {
       YoTrajectory traj = new YoTrajectory("Trajectory", 10, registry);

@@ -15,7 +15,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -412,7 +412,7 @@ public class RotationToolsTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testComputeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate() throws Exception
    {
       double dt = 1.0e-8;
@@ -449,7 +449,7 @@ public class RotationToolsTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testComputeAngularVelocityInWorldFrameFromYawPitchRollAnglesRate() throws Exception
    {
       for (int i = 0; i < 1000; i++)
@@ -476,7 +476,7 @@ public class RotationToolsTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void computeYawPitchRollAngleRatesFromAngularVelocityInBodyFrame() throws Exception
    {
       for (int i = 0; i < 1000; i++)
@@ -501,7 +501,7 @@ public class RotationToolsTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void computeYawPitchRollAngleRatesFromAngularVelocityInWorldFrame() throws Exception
    {
       for (int i = 0; i < 1000; i++)

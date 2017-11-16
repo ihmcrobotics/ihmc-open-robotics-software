@@ -80,6 +80,8 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
    private final YoBoolean waitForReader;
    /** When this is created as a {@link RemoteYoGraphic}, it is consider as a READER and thus turns on this flag to let the WRITER know that it has processed the current mesh. */
    private final YoBoolean hasReaderProcessedMesh;
+   /** When the writer is used to render the graphics, this is used to block the processing if planar regions until this flag turns to true. */
+   private final YoBoolean hasWriterProcessedMesh;
 
    /**
     * Buffer of vertices used to store one or more polygons to render.
@@ -157,6 +159,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
 
       waitForReader = new YoBoolean(name + "WaitForReader", registry);
       hasReaderProcessedMesh = new YoBoolean(name + "HasReaderProcessedMesh", registry);
+      hasWriterProcessedMesh = new YoBoolean(name + "HasWriterProcessedMesh", registry);
 
       vertexBuffer = new ArrayList<>(vertexBufferSize);
 
@@ -228,6 +231,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
 
       waitForReader = (YoBoolean) yoVariables[variableIndex++];
       hasReaderProcessedMesh = (YoBoolean) yoVariables[variableIndex++];
+      hasWriterProcessedMesh = (YoBoolean) yoVariables[variableIndex++];
 
       for (int vertexIndex = 0; vertexIndex < vertexBufferSize; vertexIndex++)
       {
@@ -277,7 +281,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
    /**
     * Update the mesh that will display a portion of the {@link PlanarRegionsList} being processed.
     * This method only reads the YoVariables to update the mesh.
-    * 
+    *
     * When used as a remote YoGraphic, only this method should be called.
     */
    @Override
@@ -302,6 +306,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       }
       case WRITER:
       {
+         hasWriterProcessedMesh.set(true);
          if (clear.getBooleanValue())
          {
             for (int meshIndex = 0; meshIndex < meshBufferSize; meshIndex++)
@@ -550,8 +555,25 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     */
    public void processPlanarRegionsListQueue()
    {
-      if (waitForReader.getBooleanValue() && !hasReaderProcessedMesh.getBooleanValue())
-         return;
+      processPlanarRegionsListQueue(true);
+   }
+
+   public void processPlanarRegionsListQueue(boolean callUpdate)
+   {
+      if (waitForReader.getBooleanValue())
+      {
+         if (!hasReaderProcessedMesh.getBooleanValue())
+         {
+            return;
+         }
+      }
+      else
+      {
+         if (!hasWriterProcessedMesh.getBooleanValue())
+         {
+            return;
+         }
+      }
 
       if (clear.getBooleanValue())
          return;
@@ -683,9 +705,13 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
       isPlanarRegionsListComplete.set(planarRegionsListToProcess.isEmpty());
 
       hasReaderProcessedMesh.set(false);
+      hasWriterProcessedMesh.set(false);
 
       // Update the polygon mesh
-      update();
+      if(callUpdate)
+      {
+         update();
+      }
    }
 
    /**
@@ -732,6 +758,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
 
       allVariables.add(waitForReader);
       allVariables.add(hasReaderProcessedMesh);
+      allVariables.add(hasWriterProcessedMesh);
 
       for (int i = 0; i < vertexBufferSize; i++)
       {

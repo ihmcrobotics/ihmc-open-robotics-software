@@ -10,12 +10,12 @@ import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.Direction;
 
 public class YoConcatenatedSplinesTest
 {
@@ -47,10 +47,10 @@ public class YoConcatenatedSplinesTest
             FramePoint3D actualPosition = concatenatedSplines.getPosition();
             FrameVector3D expectedVelocity = velocities[i];
             FrameVector3D actualVelocity = concatenatedSplines.getVelocity();
-            for (Direction direction : Direction.values())
+            for (Axis axis : Axis.values())
             {
-               assertEquals(expectedPosition.getElement(direction.getIndex()), actualPosition.getElement(direction.getIndex()), EPSILON);
-               assertEquals(expectedVelocity.getElement(direction.getIndex()), actualVelocity.getElement(direction.getIndex()), EPSILON);
+               assertEquals(expectedPosition.getElement(axis.ordinal()), actualPosition.getElement(axis.ordinal()), EPSILON);
+               assertEquals(expectedVelocity.getElement(axis.ordinal()), actualVelocity.getElement(axis.ordinal()), EPSILON);
             }
          }
       }
@@ -87,10 +87,10 @@ public class YoConcatenatedSplinesTest
          FramePoint3D actualPosition = concatenatedSplines.getPosition();
          FrameVector3D expectedVelocity = velocities[i];
          FrameVector3D actualVelocity = concatenatedSplines.getVelocity();
-         for (Direction direction : Direction.values())
+         for (Axis axis : Axis.values())
          {
-            assertEquals(expectedPosition.getElement(direction.getIndex()), actualPosition.getElement(direction.getIndex()), EPSILON);
-            assertEquals(expectedVelocity.getElement(direction.getIndex()), actualVelocity.getElement(direction.getIndex()), EPSILON);
+            assertEquals(expectedPosition.getElement(axis.ordinal()), actualPosition.getElement(axis.ordinal()), EPSILON);
+            assertEquals(expectedVelocity.getElement(axis.ordinal()), actualVelocity.getElement(axis.ordinal()), EPSILON);
          }
       }
    }
@@ -125,10 +125,10 @@ public class YoConcatenatedSplinesTest
             FramePoint3D respacedPosition = respacedSplines.getPosition();
             FrameVector3D originalVelocity = originalSplines.getVelocity();
             FrameVector3D respacedVelocity = respacedSplines.getVelocity();
-            for (Direction direction : Direction.values())
+            for (Axis axis : Axis.values())
             {
-               assertEquals(originalPosition.getElement(direction.getIndex()), respacedPosition.getElement(direction.getIndex()), EPSILON);
-               assertEquals(originalVelocity.getElement(direction.getIndex()), respacedVelocity.getElement(direction.getIndex()), EPSILON);
+               assertEquals(originalPosition.getElement(axis.ordinal()), respacedPosition.getElement(axis.ordinal()), EPSILON);
+               assertEquals(originalVelocity.getElement(axis.ordinal()), respacedVelocity.getElement(axis.ordinal()), EPSILON);
             }
          }
       }
@@ -196,9 +196,9 @@ public class YoConcatenatedSplinesTest
       {
          positions[i] = new FramePoint3D(worldFrame);
 
-         for (Direction direction : Direction.values())
+         for (Axis axis : Axis.values())
          {
-            positions[i].setElement(direction.ordinal(), RandomNumbers.nextDouble(random, -5.0, 5.0));
+            positions[i].setElement(axis.ordinal(), RandomNumbers.nextDouble(random, -5.0, 5.0));
          }
       }
 
@@ -212,9 +212,9 @@ public class YoConcatenatedSplinesTest
       {
          velocities[i] = new FrameVector3D(worldFrame);
 
-         for (Direction direction : Direction.values())
+         for (Axis axis : Axis.values())
          {
-            velocities[i].setElement(direction.ordinal(), RandomNumbers.nextDouble(random, -5.0, 5.0));
+            velocities[i].setElement(axis.ordinal(), RandomNumbers.nextDouble(random, -5.0, 5.0));
          }
       }
 

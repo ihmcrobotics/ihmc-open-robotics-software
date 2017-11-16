@@ -94,8 +94,11 @@ public class KinematicsToolboxHelper
    {
       RootJointDesiredConfigurationDataReadOnly outputForRootJoint = controllerCoreOutput.getRootJointDesiredConfigurationData();
 
-      rootJoint.setConfiguration(outputForRootJoint.getDesiredConfiguration(), 0);
-      rootJoint.setVelocity(outputForRootJoint.getDesiredVelocity(), 0);
+      if (rootJoint != null)
+      {
+         rootJoint.setConfiguration(outputForRootJoint.getDesiredConfiguration(), 0);
+         rootJoint.setVelocity(outputForRootJoint.getDesiredVelocity(), 0);
+      }
 
       LowLevelOneDoFJointDesiredDataHolderReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
       for (OneDoFJoint joint : oneDoFJoints)
@@ -110,7 +113,10 @@ public class KinematicsToolboxHelper
          }
       }
 
-      rootJoint.getPredecessor().updateFramesRecursively();
+      if (rootJoint != null)
+         rootJoint.getPredecessor().updateFramesRecursively();
+      else
+         oneDoFJoints[0].getPredecessor().updateFramesRecursively();
    }
 
    /**
@@ -136,13 +142,16 @@ public class KinematicsToolboxHelper
          oneDoFJoints[i].setQd(0.0);
       }
 
-      Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
-      desiredRootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
-      Quaternion32 orientation = robotConfigurationData.getPelvisOrientation();
-      desiredRootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
-      desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
-
-      desiredRootJoint.getPredecessor().updateFramesRecursively();
+      if (desiredRootJoint != null)
+      {
+         Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
+         desiredRootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
+         Quaternion32 orientation = robotConfigurationData.getPelvisOrientation();
+         desiredRootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
+         desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
+         
+         desiredRootJoint.getPredecessor().updateFramesRecursively();
+      }
    }
 
    /**

@@ -103,7 +103,7 @@ public class SpringFlamingoSimulationTest
 //
 //      ThreadTools.sleep(500);
 //
-//      int index = scs.getIndex();
+//      int index = scs.ordinal();
 //      int inPoint = scs.getInPoint();
 //      assertEquals(index, inPoint);
 //

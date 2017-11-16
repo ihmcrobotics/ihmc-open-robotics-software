@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.jointLimits;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;

@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainFilterType;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 

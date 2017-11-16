@@ -27,14 +27,13 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateComm
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMELidarScanVisualizer;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.WallAtDistanceEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTestInterface
 {
@@ -44,7 +43,7 @@ public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTe
    private static final boolean ALLOW_PERCENTAGE_OUT_OF_RANGE = true;
    private static final double PERCENT_ALLOWABLE_OUT_OF_RANGE = .05;
 
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private int numberOfLidarScansConsumed = 0;
    private long numberOfLidarPointsConsumed = 0;

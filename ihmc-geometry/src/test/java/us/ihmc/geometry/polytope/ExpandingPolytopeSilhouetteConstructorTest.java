@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 public class ExpandingPolytopeSilhouetteConstructorTest
 {
 
-   @Test
+   @Test(timeout = 30000)
    public void testSilhouetteConstructorWithTetrahedron()
    {
       Point3D pointOne = new Point3D(-1.0, -1.0, -1.0);
@@ -64,7 +64,7 @@ public class ExpandingPolytopeSilhouetteConstructorTest
       assertEquals(0, edge.getEdgeIndex());
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testSilhouetteConstructorWithIcoSphere()
    {
       IcoSphereCreator creator = new IcoSphereCreator();

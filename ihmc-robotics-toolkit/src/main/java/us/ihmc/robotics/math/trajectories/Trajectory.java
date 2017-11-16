@@ -6,7 +6,7 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 
 import us.ihmc.commons.Epsilons;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 /**
  * Simple trajectory class. Does not use the {@code Polynomial} class since its weird

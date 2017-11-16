@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.FormattingTools;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlLowLevelController;
 
 public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
@@ -31,9 +31,9 @@ public class RemoteValkyrieVisualizer implements SCSVisualizerStateListener
       System.out.println("Connecting to host " + host);
 
       SCSVisualizer scsVisualizer = new SCSVisualizer(BUFFER_SIZE);
-      scsVisualizer.setDisplayOneInNPackets(3);
+      scsVisualizer.setDisplayOneInNPackets(5);
       scsVisualizer.addSCSVisualizerStateListener(this);
-      scsVisualizer.setShowOverheadView(false);
+      scsVisualizer.setShowOverheadView(true);
 
       YoVariableClient client = new YoVariableClient(scsVisualizer);
       client.start();

@@ -28,7 +28,7 @@ public class YoEffortJointHandleHolder
 
       this.handle = handle;
       this.joint = joint;
-      this.desiredJointData = desiredJointData;
+      this.desiredJointData = desiredJointData != null ? desiredJointData : new JointDesiredOutput();
 
       this.tauMeasured = new YoDouble(name + "TauMeasured", registry);
       this.q = new YoDouble(name + "_q", registry);
@@ -45,8 +45,15 @@ public class YoEffortJointHandleHolder
       this.q.set(handle.getPosition());
       this.qd.set(handle.getVelocity());
       this.tauMeasured.set(handle.getEffort());
-      this.controllerTauDesired.set(desiredJointData.getDesiredTorque());
-      this.controllerQddDesired.set(desiredJointData.getDesiredAcceleration());
+      if (desiredJointData.hasDesiredTorque())
+         this.controllerTauDesired.set(desiredJointData.getDesiredTorque());
+      else
+         this.controllerTauDesired.set(0.0);
+      
+      if (desiredJointData.hasDesiredAcceleration())
+         this.controllerQddDesired.set(desiredJointData.getDesiredAcceleration());
+      else
+         this.controllerQddDesired.set(0.0);
    }
 
    public void setDesiredEffort(double effort)
@@ -59,7 +66,7 @@ public class YoEffortJointHandleHolder
    {
       return joint;
    }
-   
+
    public JointDesiredOutput getDesiredJointData()
    {
       return desiredJointData;

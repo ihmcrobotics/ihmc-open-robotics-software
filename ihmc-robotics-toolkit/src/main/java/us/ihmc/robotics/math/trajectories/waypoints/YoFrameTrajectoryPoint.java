@@ -4,7 +4,7 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
 
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameWaypoint;

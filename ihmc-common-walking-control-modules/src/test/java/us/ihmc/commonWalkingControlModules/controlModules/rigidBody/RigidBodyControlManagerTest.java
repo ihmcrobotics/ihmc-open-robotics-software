@@ -37,7 +37,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
@@ -75,14 +75,14 @@ public class RigidBodyControlManagerTest
    private double q2_home = random.nextDouble();
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testConstuctor()
    {
       createManager();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(expected = RuntimeException.class)
+   @Test(timeout = 30000, expected = RuntimeException.class)
    public void testFailWithoutGains()
    {
       RigidBodyControlManager manager = createManager();
@@ -91,7 +91,7 @@ public class RigidBodyControlManagerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testInitialize()
    {
       // create manager
@@ -127,7 +127,7 @@ public class RigidBodyControlManagerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testTaskspaceMessage()
    {
       RigidBodyControlManager manager = createManager();
@@ -263,7 +263,7 @@ public class RigidBodyControlManagerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testTaskspaceWeightAndSelectionMatrixFromMessage()
    {
       RigidBodyControlManager manager = createManager();
@@ -383,7 +383,7 @@ public class RigidBodyControlManagerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test
+   @Test(timeout = 30000)
    public void testTaskspaceMessageWithCustomControlFrame()
    {
       RigidBodyControlManager manager = createManager();

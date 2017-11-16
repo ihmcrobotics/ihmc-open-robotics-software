@@ -23,7 +23,7 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
 
    /**
     * Clone constructor.
-    * @param neckTrajectoryMessage message to clone.
+    * @param trajectoryMessage message to clone.
     */
    public AbstractJointspaceTrajectoryMessage(T trajectoryMessage)
    {
