@@ -75,9 +75,9 @@ public class AtlasEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisTraj
       super.testSingleWaypointAndAbort();
    }
 
+   @Override
    @ContinuousIntegrationTest(estimatedDuration = 58.7)
    @Test(timeout = 80000)
-   @Test
    public void testSingleWaypointAndWalk() throws Exception
    {
       super.testSingleWaypointAndWalk();
