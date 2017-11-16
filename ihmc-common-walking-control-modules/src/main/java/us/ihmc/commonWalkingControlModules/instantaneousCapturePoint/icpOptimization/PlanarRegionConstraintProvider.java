@@ -18,7 +18,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -31,10 +30,10 @@ import java.awt.*;
 public class PlanarRegionConstraintProvider
 {
    private static final double maxNormalAngleFromVertical = 0.3;
-   private static final double distanceFromEdgeForStepping = 0.05;
-   private static final double distanceFromEdgeForSwitching = 0.02;
+   private static final double distanceFromEdgeForStepping = 0.06;
+   private static final double distanceFromEdgeForSwitching = 0.03;
 
-   private static final double minimumAreaForSearch = 0.08;
+   private static final double minimumAreaForSearch = 0.01;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoFrameConvexPolygon2d yoActivePlanarRegion;
@@ -263,7 +262,7 @@ public class PlanarRegionConstraintProvider
       }
    }
 
-   // FIXME makes garbage
+   // FIXME makes garbage. It's also not quite working properly.
    /**
     * Returns whether or not the current planar region needs updating
     */

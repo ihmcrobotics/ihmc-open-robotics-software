@@ -234,7 +234,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
          generator.translate(0.5 * (platform1Length + platform2Length) + forwardGapSize, 0.0, 0.0);
          generator.addCubeReferencedAtBottomMiddle(platform2Length, platformWidth, 0.01); // ground
 
-         double sideWidth = 0.15;
+         double sideWidth = 0.18;
          double sideLength = platform1Length + platform2Length + forwardGapSize;
          double distanceToCenter = 0.5 * sideLength - 0.5 * platform1Length;
          generator.translate(-platform2Center + distanceToCenter, 0.5 * platformWidth  + sideGapSize + 0.5 * sideWidth, 0.0);
