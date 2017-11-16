@@ -60,6 +60,12 @@ public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
                }
 
                @Override
+               public double getMinimumSwingTimeForDisturbanceRecovery()
+               {
+                  return 0.5;
+               }
+
+               @Override
                public ICPOptimizationParameters getICPOptimizationParameters()
                {
                   return new AtlasSimpleICPOptimizationParameters(false)

@@ -57,8 +57,9 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       double platform1Length = 0.7;
       double platform2Length = 1.0;
       double gapWidth = 0.10;
+      double sideGapWidth = 0.04;
 
-      GapPlanarRegionEnvironment environment = new GapPlanarRegionEnvironment(platform1Length, platform2Length, 0.6, gapWidth, 0.05);
+      GapPlanarRegionEnvironment environment = new GapPlanarRegionEnvironment(platform1Length, platform2Length, 0.55, gapWidth, sideGapWidth);
 
       DRCRobotModel robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
@@ -135,7 +136,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
       double delay = 0.5 * swingTime;
       Vector3D firstForceDirection = new Vector3D(1.0, 0.0, 0.0);
-      double percentWeight = 0.4;
+      double percentWeight = 0.5;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
