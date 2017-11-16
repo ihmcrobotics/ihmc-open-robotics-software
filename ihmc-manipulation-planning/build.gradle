@@ -37,6 +37,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-whole-body-controller", version: groupDependencyVersion
+   compile group: "us.ihmc", name: "ihmc-humanoid-robotics", version: groupDependencyVersion
 }
 
 testDependencies {
