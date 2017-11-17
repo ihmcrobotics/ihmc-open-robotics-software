@@ -86,6 +86,7 @@ public class SimpleOcclusionTests
    }
 
    @Test(timeout = 300000)
+   @Ignore
    public void testOcclusionsFromData()
    {
       FramePose startPose = new FramePose(worldFrame);
