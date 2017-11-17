@@ -25,7 +25,7 @@ public class SCSPlanarRegionBipedalFootstepPlannerVisualizer
 
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      PlanarRegionBipedalFootstepPlannerVisualizer footstepPlannerVisualizer = new PlanarRegionBipedalFootstepPlannerVisualizer(10, footPolygonsInSoleFrame, registry, graphicsListRegistry);
+      PlanarRegionBipedalFootstepPlannerVisualizer footstepPlannerVisualizer = new PlanarRegionBipedalFootstepPlannerVisualizer(30, footPolygonsInSoleFrame, registry, graphicsListRegistry);
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Test"));
       
       footstepPlannerVisualizer.setTickAndUpdatable(scs);
