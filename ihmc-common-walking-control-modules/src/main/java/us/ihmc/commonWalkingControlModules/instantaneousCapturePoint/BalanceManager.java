@@ -653,6 +653,11 @@ public class BalanceManager
       icpErrorToPack.setIncludingFrame(desiredCapturePoint2d);
       icpErrorToPack.sub(capturePoint2d);
    }
+   
+   public boolean isPrecomputedICPPlannerActive()
+   {
+      return precomputedICPPlanner.isWithinInterval(yoTime.getDoubleValue());
+   }
 
    public boolean isICPPlanDone()
    {
