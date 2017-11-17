@@ -906,8 +906,20 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private double getTransferSegmentTimes(int segmentIndex, int footstepIndex)
    {
       double transferTime = transferDurations.get(footstepIndex).getDoubleValue();
+      
+      if(footstepIndex > 0 && touchdownDurations.size() > 0)
+      {
+         int previousSwingTouchdownIndex = footstepIndex - 1;
+         double touchdownDuration = touchdownDurations.get(previousSwingTouchdownIndex).getDoubleValue();
+         if (Double.isFinite(touchdownDuration) && touchdownDuration > 0.0)
+         {
+            transferTime -= touchdownDuration;
+         }
+      }
+      
       if (transferTime <= 0.0 || !Double.isFinite(transferTime))
          transferTime = defaultTransferTime;
+      
       if (useTransferSplitFractionFor.get(footstepIndex) == UseSplitFractionFor.TIME)
       {
          switch (segmentIndex)
