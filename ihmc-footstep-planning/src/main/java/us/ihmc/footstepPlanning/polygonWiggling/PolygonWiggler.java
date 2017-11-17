@@ -304,4 +304,38 @@ public class PolygonWiggler
       }
    }
 
+   public static void constrainPolygonInsideOtherPolygon(ConvexPolygon2D polygonExteriorInWorld, ConvexPolygon2D polygonInteriorRelative, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   {
+      int constraints = polygonExteriorInWorld.getNumberOfVertices();
+      A.reshape(constraints, 2);
+      b.reshape(constraints, 1);
+
+      Vector2D tempVector = new Vector2D();
+
+      for (int exteriorVertexIndex = 0; exteriorVertexIndex < constraints; exteriorVertexIndex++)
+      {
+         Point2DReadOnly firstPoint = polygonExteriorInWorld.getVertex(exteriorVertexIndex);
+         Point2DReadOnly secondPoint = polygonExteriorInWorld.getNextVertex(exteriorVertexIndex);
+
+         tempVector.set(secondPoint);
+         tempVector.sub(firstPoint);
+
+         tempVector.normalize();
+
+         A.set(exteriorVertexIndex, 0, -tempVector.getY());
+         A.set(exteriorVertexIndex, 1, tempVector.getX());
+
+         double additionalDistanceInside = 0.0;
+         for (int interiorVertexIndex = 0; interiorVertexIndex < polygonInteriorRelative.getNumberOfVertices(); interiorVertexIndex++)
+         {
+            Point2DReadOnly interiorVertex = polygonInteriorRelative.getVertex(interiorVertexIndex);
+            additionalDistanceInside = Math.max(additionalDistanceInside, tempVector.getY() * interiorVertex.getX() - tempVector.getX() * interiorVertex.getY());
+         }
+
+         A.set(exteriorVertexIndex, 0, -tempVector.getY());
+         A.set(exteriorVertexIndex, 1, tempVector.getX());
+         b.set(exteriorVertexIndex, -(deltaInside + additionalDistanceInside) + firstPoint.getY() * (tempVector.getX()) - firstPoint.getX() * (tempVector.getY()));
+      }
+   }
+
 }
