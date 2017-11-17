@@ -1,13 +1,20 @@
 package us.ihmc.footstepPlanning.graphSearch.planners;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -30,8 +37,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -43,6 +51,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 {
+   private static final boolean DEBUG = false;
    private static final double defaultHeuristicWeight = 15.0;
    private static final double planningHorizon = 1.0;
 
@@ -151,21 +160,57 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
          NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(planarRegionsList.getPlanarRegionsAsList());
          Point3D startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
          Point3D goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
-         List<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
 
-         if (path.size() < 2)
+         if(startPos == null)
          {
+            PrintTools.info("adding plane at start foot");
+            startPos = new Point3D(bodyStartPose.getX(), bodyStartPose.getY(), 0.0);
+            addPlanarRegionAtZeroHeight(bodyStartPose.getX(), bodyStartPose.getY());
+         }
+         if(goalPos == null)
+         {
+            PrintTools.info("adding plane at goal pose");
+            goalPos = new Point3D(bodyGoalPose.getX(), bodyGoalPose.getY(), 0.0);
+            addPlanarRegionAtZeroHeight(bodyGoalPose.getX(), bodyGoalPose.getY());
+         }
+
+         if(DEBUG)
+         {
+            PrintTools.info("Starting to plan using )" + getClass().getSimpleName());
+            PrintTools.info("Body start pose: " + startPos);
+            PrintTools.info("Body goal pose:  " + goalPos);
+
+            String homePath = System.getProperty("user.home");
+            Path path = Paths.get(homePath, "footstepPlannerData", PlanarRegionFileTools.getDate() + "_PlannerData");
+            PlanarRegionFileTools.exportPlanarRegionData(path, planarRegionsList);
+         }
+
+         try
+         {
+            List<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
+
+            if (path.size() < 2)
+            {
+               double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
+               timeSpentBeforeFootstepPlanner.set(seconds);
+               timeSpentInFootstepPlanner.set(0.0);
+               yoResult.set(FootstepPlanningResult.PLANNER_FAILED);
+               return yoResult.getEnumValue();
+            }
+
+            for (Point3D waypoint3d : path)
+            {
+               waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
+            }
+         }
+         catch (Exception e)
+         {
+            e.printStackTrace();
             double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
             timeSpentBeforeFootstepPlanner.set(seconds);
             timeSpentInFootstepPlanner.set(0.0);
             yoResult.set(FootstepPlanningResult.PLANNER_FAILED);
-//            PointCloudTools.savePlanarRegionsToFile(planarRegionsList, startPos, goalPos);
             return yoResult.getEnumValue();
-         }
-
-         for (Point3D waypoint3d : path)
-         {
-            waypoints.add(new Point2D(waypoint3d.getX(), waypoint3d.getY()));
          }
       }
 
@@ -204,6 +249,20 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       return yoResult.getEnumValue();
    }
 
+   // TODO hack to add start and goal planar regions
+   private void addPlanarRegionAtZeroHeight(double xLocation, double yLocation)
+   {
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
+      polygon.addVertex(0.3, 0.3);
+      polygon.addVertex(-0.3, 0.3);
+      polygon.addVertex(0.3, -0.3);
+      polygon.addVertex(-0.3, -0.25);
+      polygon.update();
+
+      PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(new AxisAngle(), new Vector3D(xLocation, yLocation, 0.0)), polygon);
+      planarRegionsList.addPlanarRegion(planarRegion);
+   }
+
    private void updateBodyPathVisualization()
    {
       Pose2D tempPose = new Pose2D();
@@ -213,7 +272,15 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
          bodyPath.getPointAlongPath(percent, tempPose);
          Point3D position = new Point3D();
          position.set(tempPose.getPosition());
-         bodyPathPoints.get(i).set(PlanarRegionTools.projectPointToPlanesVertically(position, planarRegionsList));
+         Point3D projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(position, planarRegionsList);
+         if (projectedPoint != null)
+         {
+            bodyPathPoints.get(i).set(projectedPoint);
+         }
+         else
+         {
+            bodyPathPoints.get(i).setToNaN();
+         }
       }
    }
 

@@ -27,12 +27,12 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
 public class MocapToPelvisFrameConverterVisualTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final String modelDirectory = "models/GFE/atlas_description/meshes_unplugged/";
    private final Random random = new Random(456654321123L);
 

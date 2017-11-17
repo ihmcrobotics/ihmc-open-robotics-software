@@ -31,11 +31,11 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationConstructionSetTools.simulationTesting.SimulationRunsSameWayTwiceVerifier;
 import us.ihmc.tools.ArrayTools;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterface
 {
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private BlockingSimulationRunner blockingSimulationRunner;
    private DRCSimulationTestHelper drcSimulationTestHelper;
 

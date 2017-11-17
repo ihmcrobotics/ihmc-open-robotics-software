@@ -55,12 +55,12 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final double EPSILON_FOR_DESIREDS = 1.0e-10;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -167,7 +167,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
    //Picks up a foot, moves that foot to a position, and puts it down. Done using both sides
    @ContinuousIntegrationTest(estimatedDuration = 41.5)
-   @Test
+   @Test(timeout = 30000)
    public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -206,7 +206,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
    //Picks up a foot and puts it down. Done using both sides
    @ContinuousIntegrationTest(estimatedDuration = 41.5)
-   @Test
+   @Test(timeout = 70000)
    public void testPickUpAndPutDown() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -532,7 +532,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
    
    //picks the foot up, sends queued messages, the last with the wrong previous queued message ID. (Should see sysout about this) Checks that the number of waypoints is cleared, then puts the foot back on the ground. Done for both sides
    @ContinuousIntegrationTest(estimatedDuration = 32.1)
-   @Test
+   @Test(timeout = 30000)
    public void testQueueWithWrongPreviousId() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

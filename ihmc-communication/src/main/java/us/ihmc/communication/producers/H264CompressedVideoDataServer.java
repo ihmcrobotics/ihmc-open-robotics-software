@@ -17,7 +17,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class H264CompressedVideoDataServer implements ConnectionStateListener, CompressedVideoDataServer
 {

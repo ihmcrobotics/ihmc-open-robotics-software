@@ -2,13 +2,14 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlPolygons;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.recursiveController.ICPQPOptimizationSolver;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.simpleController.SimpleICPOptimizationQPSolver;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ICPOptimizationCoPConstraintHandler
 {
-   private static final boolean useControlPolygons = true;
+   private static final boolean useControlPolygons = false;
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPControlPolygons icpControlPolygons;

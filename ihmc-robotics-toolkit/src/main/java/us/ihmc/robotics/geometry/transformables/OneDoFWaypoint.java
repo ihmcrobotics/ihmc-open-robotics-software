@@ -5,7 +5,7 @@ import java.text.NumberFormat;
 
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.interfaces.OneDoFWaypointInterface;
 
 public class OneDoFWaypoint implements GeometryObject<OneDoFWaypoint>, OneDoFWaypointInterface<OneDoFWaypoint>

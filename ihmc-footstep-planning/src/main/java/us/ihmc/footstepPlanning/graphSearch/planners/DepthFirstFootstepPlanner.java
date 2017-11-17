@@ -19,6 +19,7 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
@@ -129,7 +130,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
    {
       stanceFootPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       startNode = new FootstepNode(stanceFootPose.getX(), stanceFootPose.getY(), stanceFootPose.getYaw(), initialSide);
-      RigidBodyTransform startNodeSnapTransform = AStarFootstepPlanner.computeSnapTransform(startNode, stanceFootPose.getGeometryObject());
+      RigidBodyTransform startNodeSnapTransform = FootstepNodeSnappingTools.computeSnapTransform(startNode, stanceFootPose.getGeometryObject());
       snapper.addSnapData(startNode, new FootstepNodeSnapData(startNodeSnapTransform));
       checker.addStartNode(startNode, startNodeSnapTransform);
    }
@@ -231,6 +232,7 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
          if (goalNodes.get(nodeToExpand.getRobotSide()).equals(nodeToExpand))
          {
             bestGoalNode = goalNodes.get(nodeToExpand.getRobotSide());
+            notifyListenerSolutionWasFound(nodeToExpand);
             if (exitAfterInitialSolution.getBooleanValue())
                break;
             else
@@ -282,11 +284,31 @@ public class DepthFirstFootstepPlanner implements FootstepPlanner
       return nodeList;
    }
 
-   private void notifyListenerSolutionWasFound(FootstepPlan footstepPlan)
+   private void notifyListenerSolutionWasFound(FootstepNode endNode)
    {
       if (listener != null)
       {
-         listener.solutionWasFound(footstepPlan);
+         FootstepPlan plan = new FootstepPlan();
+         List<FootstepNode> path = footstepGraph.getPathFromStart(bestGoalNode);
+         path.add(goalNodes.get(bestGoalNode.getRobotSide().getOppositeSide()));
+
+         for (int i = 1; i < path.size(); i++)
+         {
+            RobotSide robotSide = path.get(i).getRobotSide();
+
+            RigidBodyTransform footstepPose = new RigidBodyTransform();
+            footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());
+            footstepPose.setTranslationX(path.get(i).getX());
+            footstepPose.setTranslationY(path.get(i).getY());
+
+            RigidBodyTransform snapTransform = snapper.snapFootstepNode(path.get(i)).getSnapTransform();
+            if(!snapTransform.containsNaN())
+               snapTransform.transform(footstepPose);
+
+            plan.addFootstep(robotSide, new FramePose(ReferenceFrame.getWorldFrame(), footstepPose));
+         }
+
+         listener.solutionWasFound(plan);
       }
    }
 

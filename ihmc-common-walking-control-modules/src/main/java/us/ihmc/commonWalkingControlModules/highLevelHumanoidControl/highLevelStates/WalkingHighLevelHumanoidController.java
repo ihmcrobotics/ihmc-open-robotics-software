@@ -18,7 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.*;
@@ -280,7 +280,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       for (RobotSide transferToSide : RobotSide.values)
       {
-         TransferToFlamingoStanceState transferState = new TransferToFlamingoStanceState(transferToSide, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, registry);
+         TransferToFlamingoStanceState transferState = new TransferToFlamingoStanceState(transferToSide, walkingControllerParameters, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, registry);
          flamingoTransferStates.put(transferToSide, transferState);
          stateMachine.addState(transferState);
       }

@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 /**
  * Based on a {@link JavaFXMeshBuilder}, this class can combine different meshes with different colors into a single mesh.

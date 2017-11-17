@@ -60,14 +60,14 @@ public class AtlasFlatGroundSideSteppingTest extends AvatarFlatGroundSideSteppin
    private final Vector3D forceDirection2 = new Vector3D(1.0, 0.0, 0.0);
 
    @Override
-   @Test
+   @Test(timeout = 520000)
    public void testSideStepping() throws SimulationExceededMaximumTimeException
    {
       super.testSideStepping();
    }
 
    @Override
-   @Test
+   @Test(timeout = 520000)
    public void testSideSteppingWithForceDisturbances() throws SimulationExceededMaximumTimeException
    {
       super.testSideSteppingWithForceDisturbances();

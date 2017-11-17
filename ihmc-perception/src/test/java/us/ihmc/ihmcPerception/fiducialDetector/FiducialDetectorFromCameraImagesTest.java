@@ -38,12 +38,12 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class FiducialDetectorFromCameraImagesTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    @ContinuousIntegrationTest(estimatedDuration = 5.0)
    @Test(timeout = 300000)

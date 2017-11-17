@@ -34,9 +34,9 @@ public class FeatherstoneAlgorithmTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   @Test
+   @Test(timeout = 30000)
    public void testSinglePendulumAgainstLagrangianCalculation()
    {
       double epsilon = 1e-7;
@@ -44,7 +44,7 @@ public class FeatherstoneAlgorithmTest
       testAgainstLagrangianCalculation(pendulumRobot, epsilon);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testDoublePendulumAgainstLagrangianCalculation()
    {
       double epsilon = 1e-6;
@@ -52,7 +52,7 @@ public class FeatherstoneAlgorithmTest
       testAgainstLagrangianCalculation(pendulumRobot, epsilon);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testCartPoleAgainstLagrangianCalculation()
    {
       double epsilon = 1e-2;
@@ -60,7 +60,7 @@ public class FeatherstoneAlgorithmTest
       testAgainstLagrangianCalculation(cartPoleRobot, epsilon);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testUniversalJointAgainLagrangianCalculation()
    {
       double epsilon = 1e-4;

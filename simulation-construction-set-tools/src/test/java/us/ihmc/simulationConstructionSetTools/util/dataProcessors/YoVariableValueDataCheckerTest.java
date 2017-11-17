@@ -22,7 +22,7 @@ public class YoVariableValueDataCheckerTest
 {
    private double EPSILON = 1e-10;
 
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    @After
    public void destroySimulationAndRecycleMemory()
@@ -46,7 +46,7 @@ public class YoVariableValueDataCheckerTest
 
       robot.addYoVariableRegistry(registry);
 
-      SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromEnvironmentVariables();
+      SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationConstructionSetParameters);
 
@@ -97,7 +97,7 @@ public class YoVariableValueDataCheckerTest
 
       robot.addYoVariableRegistry(registry);
 
-      SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromEnvironmentVariables();
+      SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationConstructionSetParameters);
 
@@ -153,7 +153,7 @@ public class YoVariableValueDataCheckerTest
 
       robot.addYoVariableRegistry(registry);
 
-      SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromEnvironmentVariables();
+      SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationConstructionSetParameters);
 
@@ -208,7 +208,7 @@ public class YoVariableValueDataCheckerTest
 
       robot.addYoVariableRegistry(registry);
 
-      SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromEnvironmentVariables();
+      SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
       simulationConstructionSetParameters.setCreateGUI(false);
       simulationConstructionSetParameters.setShowSplashScreen(false);
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationConstructionSetParameters);
@@ -255,7 +255,7 @@ public class YoVariableValueDataCheckerTest
 
       robot.addYoVariableRegistry(registry);
 
-      SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromEnvironmentVariables();
+      SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationConstructionSetParameters);
 
@@ -283,7 +283,7 @@ public class YoVariableValueDataCheckerTest
 
       robot.addYoVariableRegistry(registry);
 
-      SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromEnvironmentVariables();
+      SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromSystemProperties();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationConstructionSetParameters);
 

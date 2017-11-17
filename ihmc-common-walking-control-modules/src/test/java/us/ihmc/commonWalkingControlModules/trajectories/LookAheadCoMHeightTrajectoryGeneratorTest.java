@@ -41,7 +41,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.ViewportConfiguration;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.ArrayTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class LookAheadCoMHeightTrajectoryGeneratorTest
 {
@@ -78,7 +78,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
       YoEnum<RobotSide> supportLegFrameSide = new YoEnum<RobotSide>("supportLegFrameSide", registry, RobotSide.class);
 
-      SimulationTestingParameters testingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      SimulationTestingParameters testingParameters = SimulationTestingParameters.createFromSystemProperties();
       testingParameters.setDataBufferSize(2048);
 
       Robot robot = new Robot("Dummy");

@@ -6,7 +6,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class DummyOneDegreeOfFreedomJointTest
 {
@@ -33,7 +33,7 @@ public class DummyOneDegreeOfFreedomJointTest
 
       if (keepSCSUp)
       {
-         SimulationConstructionSetParameters parameters = SimulationTestingParameters.createFromEnvironmentVariables();
+         SimulationConstructionSetParameters parameters = SimulationTestingParameters.createFromSystemProperties();
          SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
          scs.startOnAThread();
          ThreadTools.sleepForever();

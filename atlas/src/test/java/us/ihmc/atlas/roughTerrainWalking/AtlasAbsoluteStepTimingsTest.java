@@ -14,8 +14,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 public class AtlasAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsTest
 {
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 75.0)
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 105.0)
+   @Test(timeout = 150000)
    public void testTakingStepsWithAbsoluteTimings() throws SimulationExceededMaximumTimeException
    {
       super.testTakingStepsWithAbsoluteTimings();
@@ -23,7 +23,7 @@ public class AtlasAbsoluteStepTimingsTest extends AvatarAbsoluteStepTimingsTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @Test(timeout = 150000)
    public void testMinimumTransferTimeIsRespected() throws SimulationExceededMaximumTimeException
    {
       super.testMinimumTransferTimeIsRespected();

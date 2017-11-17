@@ -26,32 +26,32 @@ public class ValkyrieEndToWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 10.9)
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 17.99)
+   @Test(timeout = 40000)
    public void testIssue47BadChestTrajectoryMessage() throws Exception
    {
       super.testIssue47BadChestTrajectoryMessage();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 10.8)
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 13.1)
+   @Test(timeout = 30000)
    public void testIssue47BadPelvisTrajectoryMessage() throws Exception
    {
       super.testIssue47BadPelvisTrajectoryMessage();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 19.1)
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 29.3)
+   @Test(timeout = 60000)
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 19.1)
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 28.2)
+   @Test(timeout = 60000)
    public void testSingleWaypointUsingMessageOfMessages() throws Exception
    {
       super.testSingleWaypointUsingMessageOfMessages();
@@ -59,7 +59,7 @@ public class ValkyrieEndToWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 19.1)
-   @Test
+   @Test(timeout = 70000)
    public void testSingleWaypointUsingMessageOfMessagesWithDelays() throws Exception
    {
       super.testSingleWaypointUsingMessageOfMessagesWithDelays();

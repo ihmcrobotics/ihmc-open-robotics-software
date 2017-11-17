@@ -7,6 +7,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -43,13 +45,13 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FootstepPlanningWithBodyPathTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getKeepSCSUp();
 
    @Rule
    public TestName name = new TestName();
 
-   @Test
+   @Test(timeout = 30000)
    public void testWaypointPathOnFlat()
    {
       YoVariableRegistry registry = new YoVariableRegistry(name.getMethodName());
@@ -80,7 +82,8 @@ public class FootstepPlanningWithBodyPathTest
          PlanningTestTools.visualizeAndSleep(null, footstepPlan, goalPose, bodyPath);
    }
 
-   @Test
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testMaze()
    {
       WaypointDefinedBodyPathPlan bodyPath = new WaypointDefinedBodyPathPlan();

@@ -4,12 +4,12 @@ import static java.lang.Math.PI;
 import static java.lang.Math.cos;
 import static java.lang.Math.min;
 import static java.lang.Math.sin;
-import static us.ihmc.robotics.MathTools.checkIntervalContains;
-import static us.ihmc.robotics.MathTools.clamp;
-import static us.ihmc.robotics.MathTools.square;
+import static us.ihmc.commons.MathTools.checkIntervalContains;
+import static us.ihmc.commons.MathTools.clamp;
+import static us.ihmc.commons.MathTools.square;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.unknownTriangleSideLengthByLawOfCosine;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 

@@ -13,7 +13,6 @@ import com.jme3.math.Vector3f;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
@@ -68,7 +67,6 @@ import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.wholeBodyController.DRCHandType;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.UIParameters;
@@ -232,7 +230,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public DRCRobotJointMap getJointMap()
+   public ValkyrieJointMap getJointMap()
    {
       return jointMap;
    }
@@ -308,7 +306,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public HandModel getHandModel()
+   public ValkyrieHandModel getHandModel()
    {
       return new ValkyrieHandModel();
    }

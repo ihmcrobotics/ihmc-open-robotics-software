@@ -28,7 +28,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class RobotTest
 {

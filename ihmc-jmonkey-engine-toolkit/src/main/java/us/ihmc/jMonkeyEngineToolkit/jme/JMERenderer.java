@@ -98,7 +98,7 @@ import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMENodeTools;
 import us.ihmc.jMonkeyEngineToolkit.stlLoader.STLLoader;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.tools.thread.CloseableAndDisposable;

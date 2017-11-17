@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadFactory;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class DrillDetectionStatusSubscriber implements PacketConsumer<DrillDetectionPacket>
 {

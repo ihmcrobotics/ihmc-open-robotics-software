@@ -70,7 +70,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -80,7 +80,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final double EPSILON_FOR_DESIREDS = 1.2e-4;
    private static final double EPSILON_FOR_HEIGHT = 1.0e-2;
 
@@ -91,7 +91,12 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
+      testSingleWaypintInternal();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+   
+   private void testSingleWaypintInternal() throws SimulationExceededMaximumTimeException
+   {
       Random random = new Random(564574L);
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
@@ -106,10 +111,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       double trajectoryTime = 1.0;
       RigidBody pelvis = fullRobotModel.getPelvis();
 
-      FramePose desiredRandomPelvisPose = new FramePose(pelvis.getBodyFixedFrame());
-      desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
-      desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.05, 0.05, 0.05));
-      desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.1);
+      FramePose desiredRandomPelvisPose = getRandomPelvisPose(random, pelvis);
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
 
@@ -163,6 +165,21 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       String pelvisName = fullRobotModel.getPelvis().getName();
       assertSingleWaypointExecuted(pelvisName, fullRobotModel, desiredPosition, desiredOrientation, scs);
    }
+   
+
+   public void testSingleWaypointAndAbort() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      testSingleWaypintInternal();
+
+      StopAllTrajectoryMessage stopAll = new StopAllTrajectoryMessage();
+      drcSimulationTestHelper.send(stopAll);
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
 
    public void testSingleWaypointAndWalk() throws Exception
    {
@@ -183,10 +200,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       double trajectoryTime = 1.0;
       RigidBody pelvis = fullRobotModel.getPelvis();
 
-      FramePose desiredRandomPelvisPose = new FramePose(pelvis.getBodyFixedFrame());
-//      desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
-//      desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
-      desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.05);
+      FramePose desiredRandomPelvisPose = getRandomPelvisPose(random, pelvis);
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
 
@@ -1289,5 +1303,14 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   protected FramePose getRandomPelvisPose(Random random, RigidBody pelvis)
+   {
+      FramePose desiredRandomPelvisPose = new FramePose(pelvis.getBodyFixedFrame());
+      desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
+      desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.05, 0.05, 0.05));
+      desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.1);
+      return desiredRandomPelvisPose;
    }
 }

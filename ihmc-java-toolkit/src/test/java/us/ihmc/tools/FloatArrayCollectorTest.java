@@ -11,14 +11,14 @@ import static org.junit.Assert.*;
 
 public class FloatArrayCollectorTest
 {
-   @Test
+   @Test(timeout = 30000)
    public void testCollectZeroItemsToAZeroLengthArray()
    {
       float[] collectedArrayOfFloats = Collections.<Double> emptyList().stream().collect(FloatArrayCollector.create());
       assertEquals(0, collectedArrayOfFloats.length);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testCollectOneItem()
    {
       float[] collectedArrayOfFloats = Collections.singletonList(1.0).stream().collect(FloatArrayCollector.create());
@@ -26,7 +26,7 @@ public class FloatArrayCollectorTest
       assertEquals(1.0f, collectedArrayOfFloats[0], 1e-5);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testCollectManyItems()
    {
       float[] collectedArrayOfFloats = Arrays.stream(new double[8192]).mapToObj(Double::new).collect(FloatArrayCollector.create());
@@ -37,7 +37,7 @@ public class FloatArrayCollectorTest
       assertEquals(0, sum, 1e-5);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testCollectParallel()
    {
       final int n = 8192;

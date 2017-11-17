@@ -10,7 +10,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.MANUAL)
 public class SimulationConstructionSetTest
