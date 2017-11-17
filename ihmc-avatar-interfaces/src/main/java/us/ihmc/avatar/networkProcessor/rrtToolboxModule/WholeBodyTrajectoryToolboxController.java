@@ -196,38 +196,38 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       currentNumberOfIterations.increment();
 
       // ************************************************************************************************************** //
-      switch (state.getEnumValue())
-      {
-      case DO_NOTHING:
-
-         break;
-      case FIND_INITIAL_GUESS:
-
-         findInitialGuess();
-
-         break;
-      case EXPAND_TREE:
-
-         expandingTree();
-
-         break;
-      case SHORTCUT_PATH:
-
-         shortcutPath();
-
-         break;
-      case GENERATE_MOTION:
-
-         generateMotion();
-
-         break;
-      }
+//      switch (state.getEnumValue())
+//      {
+//      case DO_NOTHING:
+//
+//         break;
+//      case FIND_INITIAL_GUESS:
+//
+//         findInitialGuess();
+//
+//         break;
+//      case EXPAND_TREE:
+//
+//         expandingTree();
+//
+//         break;
+//      case SHORTCUT_PATH:
+//
+//         shortcutPath();
+//
+//         break;
+//      case GENERATE_MOTION:
+//
+//         generateMotion();
+//
+//         break;
+//      }
       // ************************************************************************************************************** //
 
       // ************************************************************************************************************** //
 
       updateVisualizerRobotConfiguration();
-      updateVisualizers();
+      //updateVisualizers();
       updateYoVariables();
 
       // ************************************************************************************************************** //
@@ -516,6 +516,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       }
    }
 
+   
+   private WholeBodyTrajectoryToolboxData toolboxData;
+   
    @Override
    protected boolean initialize()
    {
@@ -531,8 +534,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       List<RigidBodyExplorationConfigurationCommand> rigidBodyCommands = commandInputManager.pollNewCommands(RigidBodyExplorationConfigurationCommand.class);
       
-      WholeBodyTrajectoryToolboxConfigurationCommand configurationCommand = commandInputManager.pollNewestCommand(WholeBodyTrajectoryToolboxConfigurationCommand.class);
-            
       PrintTools.info("received ! WaypointBasedTrajectoryCommand");
       System.out.println(trajectoryCommands.size());
       for(int i=0;i<trajectoryCommands.size();i++)
@@ -557,18 +558,14 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          }   
       }
       
-      PrintTools.info("received ! WholeBodyTrajectoryToolboxConfigurationCommand");
-      System.out.println(configurationCommand.getMaximumExpansionSize());
-      
       
       // ******************************************************************************** //
       // Convert command into WholeBodyTrajectoryToolboxData.
       // ******************************************************************************** //
       
+      toolboxData = new WholeBodyTrajectoryToolboxData(this.visualizedFullRobotModel, trajectoryCommands, rigidBodyCommands);
       
-      WholeBodyTrajectoryToolboxData toolboxData = new WholeBodyTrajectoryToolboxData(this.visualizedFullRobotModel, configurationCommand, trajectoryCommands, rigidBodyCommands);
       
-      PrintTools.info("initialize success");
       
       
       
@@ -582,7 +579,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       if (VERBOSE)
          PrintTools.info("initialize CWB toolbox");
-
+      
       /*
        * bring control parameters from request.
        */
@@ -591,27 +588,25 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       {
          return false;
       }
-
       /*
        * start toolbox
        */
-      rootNode = new GenericTaskNode();
-      tree = new CTTaskNodeTree(rootNode);
-      taskRegion = constrainedEndEffectorTrajectory.getTaskRegion();
-
-      tree.setTaskRegion(taskRegion); //////////////////////////////////////////////////////////
-
-      rootNode.convertDataToNormalizedData(taskRegion);
+//      rootNode = new GenericTaskNode();
+//      tree = new CTTaskNodeTree(rootNode);
+//      taskRegion = constrainedEndEffectorTrajectory.getTaskRegion();
+//
+//      tree.setTaskRegion(taskRegion); 
+//      rootNode.convertDataToNormalizedData(taskRegion);
 
       /*
        * bring constrainedEndEffectorTrajectory
        */
-      if (visualize)
-      {
-         treeVisualizer = new CTTreeVisualizer(tree);
-         treeVisualizer.initialize();
-      }
-
+//      if (visualize)
+//      {
+//         treeVisualizer = new CTTreeVisualizer(tree);
+//         treeVisualizer.initialize();
+//      }
+      
       bestScoreInitialGuess.set(0.0);
 
       state.set(CWBToolboxState.FIND_INITIAL_GUESS);
@@ -622,8 +617,108 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       shortcutPathComputationTime.setToNaN();
       motionGenerationComputationTime.setToNaN();
 
+      
+      
+      
+      
+      
+      
+      CTTaskNode testNode = new CTTaskNode(11);
+      testNode.setNodeData(0, 0.5);
+      
+      testNode.setNodeData(1, -0.5*Math.PI);
+      testNode.setNodeData(2, 0.0*Math.PI);
+      testNode.setNodeData(3, 0.0*Math.PI);
+      
+      testNode.setNodeData(4, 0.5*Math.PI);
+      testNode.setNodeData(5, 0.0*Math.PI);
+      testNode.setNodeData(6, 0.0*Math.PI);
+      
+      testNode.setNodeData(7, 0.85);
+      
+      testNode.setNodeData(8, 0.0*Math.PI);
+      testNode.setNodeData(9, 0.0*Math.PI);
+      testNode.setNodeData(10, 0.0*Math.PI);
+      
+      updateValidity2(testNode);
+      visualizedNode = testNode;
+      PrintTools.info("initialize success");
+      
+      
       return true;
    }
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   private boolean updateValidity2(CTTaskNode node)
+   {
+      if (node.getParentNode() != null && node.getParentNode().getConfiguration() != null)
+      {
+         humanoidKinematicsSolver.setInitialConfiguration(node.getParentNode().getConfiguration());
+      }
+      else
+      {
+         humanoidKinematicsSolver.setInitialConfiguration(initialConfiguration);
+      }
+      humanoidKinematicsSolver.initialize();
+
+      /*
+       * set whole body tasks. pose from 'constrainedEndEffectorTrajectory' is considered as being
+       * in MidZUpframe. for kinematicsSolver, append offset
+       */
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FramePose framePose = toolboxData.getFramePose(node, visualizedFullRobotModel, visualizedFullRobotModel.getHand(robotSide));
+         PrintTools.info(""+framePose);
+         humanoidKinematicsSolver.submit(createHandMessage(robotSide, framePose));
+      }
+      //humanoidKinematicsSolver.submit(createChestMessage(new FrameOrientation(midFootZUpGroundFrame, desiredChestOrientation)));
+      FramePose framePose = toolboxData.getFramePose(node, visualizedFullRobotModel, visualizedFullRobotModel.getChest());
+      humanoidKinematicsSolver.submit(createChestMessage(framePose));
+
+      //humanoidKinematicsSolver.submit(createPelvisMessage(new FramePoint3D(midFootZUpGroundFrame, 0.0, 0.0, node.getNodeData(1))));
+      FramePose framePose2 = toolboxData.getFramePose(node, visualizedFullRobotModel, visualizedFullRobotModel.getPelvis());
+      humanoidKinematicsSolver.submit(createPelvisMessage(framePose2));
+
+      /*
+       * result
+       */
+      boolean success = humanoidKinematicsSolver.solve();
+
+      node.setConfigurationJoints(humanoidKinematicsSolver.getSolution());
+
+      node.setValidity(success);
+
+      PrintTools.info(""+success);
+      
+      return success;
+   }
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
 
    private boolean updateConfiguration()
    {
@@ -1054,11 +1149,30 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          message.setDesiredPose(desiredPose);
       }
 
+      // bring from toolbox data.
       message.setWeight(handWeight);
 
       return message;
    }
 
+   private KinematicsToolboxRigidBodyMessage createPelvisMessage(FramePose desiredPose)
+   {
+      FramePoint3D desiredHeight = desiredPose.getFramePointCopy();
+      desiredHeight.changeFrame(worldFrame);
+
+      RigidBody pelvis = humanoidKinematicsSolver.getDesiredFullRobotModel().getPelvis();
+      RigidBodyTransform pelvisTransform = pelvis.getParentJoint().getFrameAfterJoint().getTransformToWorldFrame();
+      Quaternion desiredOrientation = new Quaternion(pelvisTransform.getRotationMatrix());
+      KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage(pelvis, desiredHeight, desiredOrientation);
+      message.setWeight(pelvisWeight);
+      
+      // bring from toolbox data.
+      SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+      selectionMatrix.setLinearAxisSelection(false, false, true);
+      message.setSelectionMatrix(selectionMatrix);
+      return message;
+   }
+   
    private KinematicsToolboxRigidBodyMessage createPelvisMessage(FramePoint3D desiredHeight)
    {
       desiredHeight = new FramePoint3D(desiredHeight);
@@ -1069,9 +1183,27 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       Quaternion desiredOrientation = new Quaternion(pelvisTransform.getRotationMatrix());
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage(pelvis, desiredHeight, desiredOrientation);
       message.setWeight(pelvisWeight);
-      SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+      
+      // bring from toolbox data.
+      SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();      
       selectionMatrix.setLinearAxisSelection(false, false, true);
       message.setSelectionMatrix(selectionMatrix);
+      return message;
+   }
+   
+   private KinematicsToolboxRigidBodyMessage createChestMessage(FramePose desiredPose)
+   {
+      FrameOrientation desiredOrientation = desiredPose.getFrameOrientationCopy();
+      desiredOrientation.changeFrame(worldFrame);
+
+      RigidBody chest = humanoidKinematicsSolver.getDesiredFullRobotModel().getChest();
+      KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage(chest);
+      message.setDesiredOrientation(desiredOrientation);
+
+      // bring from toolbox data.
+      message.setSelectionMatrixForAngularControl();
+      message.setWeight(chestWeight);
+
       return message;
    }
 
@@ -1083,6 +1215,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       RigidBody chest = humanoidKinematicsSolver.getDesiredFullRobotModel().getChest();
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage(chest);
       message.setDesiredOrientation(desiredOrientation);
+      
+      // bring from toolbox data.
       message.setSelectionMatrixForAngularControl();
       message.setWeight(chestWeight);
 

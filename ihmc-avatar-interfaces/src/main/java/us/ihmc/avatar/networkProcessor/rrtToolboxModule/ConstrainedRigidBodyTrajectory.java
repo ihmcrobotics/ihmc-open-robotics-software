@@ -2,14 +2,17 @@ package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -57,6 +60,8 @@ public class ConstrainedRigidBodyTrajectory
 
       trajectorySelectionMatrix = new SelectionMatrix6D();
       trajectorySelectionMatrix.resetSelection();
+      explorationSelectionMatrix = new SelectionMatrix6D();
+      explorationSelectionMatrix.clearSelection();
 
       if (trajectoryCommand.getNumberOfUnconstrainedDegreesOfFreedom() > 0)
       {
@@ -66,22 +71,7 @@ public class ConstrainedRigidBodyTrajectory
          }
       }
 
-      explorationConfigurationSpaces.clear();
-      explorationRangeUpperLimits.reset();
-      explorationRangeLowerLimits.reset();
-      explorationSelectionMatrix = new SelectionMatrix6D();
-      explorationSelectionMatrix.clearSelection();
-
-      if (explorationCommand.getNumberOfDegreesOfFreedomToExplore() > 0)
-      {
-         for (int i = 0; i < explorationCommand.getNumberOfDegreesOfFreedomToExplore(); i++)
-         {
-            WholeBodyTrajectoryToolboxHelper.setSelectionMatrix(explorationSelectionMatrix, explorationCommand.getDegreeOfFreedomToExplore(i), true);
-            explorationRangeUpperLimits.add(explorationCommand.getExplorationUpperLimit(i));
-            explorationRangeLowerLimits.add(explorationCommand.getExplorationLowerLimit(i));
-            explorationConfigurationSpaces.add(explorationCommand.getDegreeOfFreedomToExplore(i));
-         }
-      }
+      setRigidBodyExplorationConfigurationCommand(explorationCommand);
    }
 
    // Exploration only.
@@ -92,6 +82,7 @@ public class ConstrainedRigidBodyTrajectory
       waypointTimes.clear();
       waypoints.clear();
       waypointTimes.add(0.0);
+      waypointTimes.add(Double.MAX_VALUE);
       Pose3D originOfRigidBody;      
       if(rigidBody == fullRobotModel.getHand(RobotSide.LEFT))
          originOfRigidBody = new Pose3D(fullRobotModel.getHand(RobotSide.LEFT).getBodyFixedFrame().getTransformToWorldFrame());      
@@ -104,18 +95,27 @@ public class ConstrainedRigidBodyTrajectory
       else      
          throw new RuntimeException("Unexpected rigid body: " + rigidBody.getName());
       waypoints.add(originOfRigidBody);
+      waypoints.add(originOfRigidBody);
+      
+      PrintTools.info(""+rigidBody);
+      PrintTools.info(""+originOfRigidBody);
 
       t0 = 0.0;
       tf = Double.MAX_VALUE;
 
       trajectorySelectionMatrix = new SelectionMatrix6D();
       trajectorySelectionMatrix.clearSelection();
+      explorationSelectionMatrix = new SelectionMatrix6D();
+      explorationSelectionMatrix.clearSelection();
 
+      setRigidBodyExplorationConfigurationCommand(explorationCommand);
+   }
+   
+   private void setRigidBodyExplorationConfigurationCommand(RigidBodyExplorationConfigurationCommand explorationCommand)
+   {      
       explorationConfigurationSpaces.clear();
       explorationRangeUpperLimits.reset();
       explorationRangeLowerLimits.reset();
-      explorationSelectionMatrix = new SelectionMatrix6D();
-      explorationSelectionMatrix.clearSelection();
 
       if (explorationCommand.getNumberOfDegreesOfFreedomToExplore() > 0)
       {
@@ -128,11 +128,11 @@ public class ConstrainedRigidBodyTrajectory
          }
       }
    }
-   
+
    public ArrayList<String> getExplorationConfigurationNames()
    {
       ArrayList<String> ret = new ArrayList<String>();
-      for(int i=0;i<getExplorationDimension();i++)
+      for (int i = 0; i < getExplorationDimension(); i++)
          ret.add(getExplorationConfigurationName(i));
       return ret;
    }
@@ -154,7 +154,7 @@ public class ConstrainedRigidBodyTrajectory
 
       return getRigidBody().getName() + "_" + explorationConfigurationSpaces.get(i).name();
    }
-   
+
    public int getExplorationDimension()
    {
       return explorationConfigurationSpaces.size();
@@ -193,20 +193,70 @@ public class ConstrainedRigidBodyTrajectory
 
    // TODO
    // from trajectoryFunction
-   public Pose3D getPoseFromTrajectory(double time)
+   public Pose3D getPoseFromTrajectory(CTTaskNode node, Map<Integer, RigidBody> map)
    {
-      double putTime;
+      double time = node.getTime();
+      MathTools.clamp(time, t0, tf);
 
-      if (time < t0)
-         putTime = t0;
-      else if (time > tf)
-         putTime = tf;
-      else
-         ;
+      int dimensionOfExploration = getExplorationDimension();
 
-      return new Pose3D();
+      double[] configurations = new double[dimensionOfExploration];
+      int curConfiguration = 0;
+      for (int i = 0; i < map.size(); i++)
+      {
+         if (getRigidBody() == map.get(i + 1))
+         {
+            configurations[curConfiguration] = node.getNodeData(i + 1);
+            curConfiguration++;
+         }
+      }
+      
+      Pose3D pose = getPose(time);
+      
+      for (int i = 0; i < configurations.length; i++)
+      {
+         appendConfiguration(pose, i, configurations[i]);
+      }
+      
+      return pose;
    }
 
+   public Pose3D getPose(double time)
+   {
+      Pose3D current = new Pose3D();
+      
+      Pose3D previous = null;
+      Pose3D next = null;
+      double t0 = Double.NaN;
+      double tf = Double.NaN;
+
+      for (int i = 1; i < waypoints.size(); i++)
+      {
+         t0 = waypointTimes.get(i - 1);
+         tf = waypointTimes.get(i);
+         previous = waypoints.get(i - 1);
+         next = waypoints.get(i);
+         if (time < tf)
+         {
+            break;
+         }
+      }
+
+      double alpha = (time - t0) / (tf - t0);
+      alpha = MathTools.clamp(alpha, 0, 1);
+      current.interpolate(previous, next, alpha);
+      
+      PrintTools.info("origin pose");
+      PrintTools.info(""+current);
+      
+      return current;
+   }
+   
+   public void appendConfiguration(Pose3D pose, int index, double configuration)
+   {
+      pose.appendTransform(explorationConfigurationSpaces.get(index).getLocalRigidBodyTransform(configuration));
+   }
+   
    // TODO
    // default value
    public RigidBodyTransform getControlFrameTransformation()
@@ -214,17 +264,11 @@ public class ConstrainedRigidBodyTrajectory
       return new RigidBodyTransform();
    }
 
-   public double getRandomConfiguration(int i)
-   {
-
-      return 0.0;
-   }
-
-   // TODO
-   // based on upper lower limit
-   // some rigidbodydata has default region
-   public RigidBodyTransform getRandomTransformation()
-   {
-      return new RigidBodyTransform();
-   }
+   //   // TODO
+   //   // based on upper lower limit
+   //   // some rigidbodydata has default region
+   //   public RigidBodyTransform getRandomTransformation()
+   //   {
+   //      return new RigidBodyTransform();
+   //   }
 }
