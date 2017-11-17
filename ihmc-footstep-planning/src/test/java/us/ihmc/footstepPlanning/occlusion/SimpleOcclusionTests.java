@@ -1,6 +1,8 @@
 package us.ihmc.footstepPlanning.occlusion;
 
 import java.awt.Color;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +30,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -38,6 +41,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -63,7 +67,7 @@ public class SimpleOcclusionTests
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int maxSteps = 100;
-   private static final int rays = 500;
+   private static final int rays = 1000;
    private static final int maxPolygonsToVisualize = 10;
    private static final int maxPolygonsVertices = 50;
    private static final int stepsPerSideToVisualize = 4;
@@ -82,6 +86,37 @@ public class SimpleOcclusionTests
    }
 
    @Test(timeout = 300000)
+   public void testOcclusionsFromData()
+   {
+      FramePose startPose = new FramePose(worldFrame);
+      startPose.setPosition(0.25, -0.25, 0.0);
+
+      FramePose goalPose = new FramePose(worldFrame);
+      goalPose.setPosition(2.75, 0.95, 0.0);
+      BestEffortPlannerParameters parameters = new BestEffortPlannerParameters();
+
+      Path path = Paths.get("Data", "PlanarRegions_20171114_090937");
+      PlanarRegionsList regions = PlanarRegionFileTools.importPlanRegionData(path.toFile());
+
+      runTest(startPose, goalPose, regions, parameters);
+   }
+
+   private class BestEffortPlannerParameters extends DefaultFootstepPlanningParameters
+   {
+      @Override
+      public boolean getReturnBestEffortPlan()
+      {
+         return true;
+      }
+
+      @Override
+      public int getMinimumStepsForBestEffortPlan()
+      {
+         return 3;
+      }
+   }
+
+   @Test(timeout = 300000)
    @Ignore
    public void testMazeWithOcclusions()
    {
@@ -93,9 +128,13 @@ public class SimpleOcclusionTests
 
    private void runTest(FramePose startPose, FramePose goalPose, PlanarRegionsList regions)
    {
+      runTest(startPose, goalPose, regions, getParameters());
+   }
+
+   private void runTest(FramePose startPose, FramePose goalPose, PlanarRegionsList regions, FootstepPlannerParameters parameters)
+   {
       YoVariableRegistry registry = new YoVariableRegistry(name.getMethodName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      FootstepPlannerParameters parameters = getParameters();
 
       FootstepPlanner planner = getPlanner(parameters, graphicsListRegistry, registry);
       FootstepPlannerGoal goal = createPlannerGoal(goalPose);
