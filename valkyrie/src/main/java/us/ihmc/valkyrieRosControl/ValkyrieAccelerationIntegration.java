@@ -103,33 +103,33 @@ public class ValkyrieAccelerationIntegration
 
          if (jointName.contains("Hip"))
          {
-            kVelocityList.get(i).set(30.0);
-            kPositionList.get(i).set(3.0);
+            kPositionList.get(i).set(30.0);
+            kVelocityList.get(i).set(3.0);
          }
          else if (jointName.contains("Knee"))
          {
-            kVelocityList.get(i).set(30.0);
-            kPositionList.get(i).set(4.0);
+            kPositionList.get(i).set(30.0);
+            kVelocityList.get(i).set(4.0);
          }
          else if (jointName.contains("Ankle"))
          {
-            kVelocityList.get(i).set(60.0);
-            kPositionList.get(i).set(6.0);
+            kPositionList.get(i).set(60.0);
+            kVelocityList.get(i).set(6.0);
          }
          else if (jointName.contains("torso"))
          {
-            kVelocityList.get(i).set(50.0);
-            kPositionList.get(i).set(1.0);
+            kPositionList.get(i).set(50.0);
+            kVelocityList.get(i).set(1.0);
          }
          else if (jointName.contains("Shoulder"))
          {
-            kVelocityList.get(i).set(30.0);
-            kPositionList.get(i).set(2.0);
+            kPositionList.get(i).set(30.0);
+            kVelocityList.get(i).set(2.0);
          }
          else if (jointName.contains("Elbow"))
          {
-            kVelocityList.get(i).set(30.0);
-            kPositionList.get(i).set(2.0);
+            kPositionList.get(i).set(30.0);
+            kVelocityList.get(i).set(2.0);
          }
          else if (jointName.contains("ForearmYaw"))
          {
