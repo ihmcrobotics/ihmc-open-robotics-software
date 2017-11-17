@@ -38,6 +38,8 @@ public class HumanoidKinematicsSolver
    private final YoBoolean hasConverged = new YoBoolean("hasConverged", registry);
 
    private final YoDouble computationTime = new YoDouble("computationTime", registry);
+   
+   private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
 
    public HumanoidKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory, YoGraphicsListRegistry yoGraphicsListRegistry,
                                    YoVariableRegistry parentRegistry)
@@ -98,7 +100,7 @@ public class HumanoidKinematicsSolver
       long startTime = System.nanoTime();
 
       boolean isSolutionGood = false;
-      double solutionQualityCurrent = Double.NaN;
+      solutionQuality.set(Double.NaN);
       double solutionQualityPrevious = Double.NaN;
       int iteration = 0;
 
@@ -107,17 +109,17 @@ public class HumanoidKinematicsSolver
          controller.updateInternal();
 
          KinematicsToolboxOutputStatus solution = controller.getSolution();
-         solutionQualityCurrent = solution.getSolutionQuality();
+         solutionQuality.set(solution.getSolutionQuality());
 
          if (!Double.isNaN(solutionQualityPrevious))
          {
-            double deltaSolutionQuality = solutionQualityCurrent - solutionQualityPrevious;
+            double deltaSolutionQuality = solutionQuality.getDoubleValue() - solutionQualityPrevious;
             boolean isSolutionStable = Math.abs(deltaSolutionQuality) < solutionStabilityThreshold.getDoubleValue();
-            boolean isSolutionQualityHigh = solutionQualityCurrent < solutionQualityThreshold.getDoubleValue();
+            boolean isSolutionQualityHigh = solutionQuality.getDoubleValue() < solutionQualityThreshold.getDoubleValue();
             isSolutionGood = isSolutionStable && isSolutionQualityHigh;
          }
 
-         solutionQualityPrevious = solutionQualityCurrent;
+         solutionQualityPrevious = solutionQuality.getDoubleValue();
          iteration++;
       }
 
