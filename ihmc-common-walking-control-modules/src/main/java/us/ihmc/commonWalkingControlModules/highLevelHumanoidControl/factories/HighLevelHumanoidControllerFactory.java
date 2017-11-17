@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -14,9 +13,9 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserD
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootstepDataMessageGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
@@ -42,11 +41,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
-import us.ihmc.robotics.sensors.ContactSensorHolder;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.robotics.sensors.*;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
@@ -73,7 +68,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    private final YoEnum<HighLevelControllerName> requestedHighLevelControllerState = new YoEnum<>("requestedHighLevelControllerState", registry,
                                                                                                   HighLevelControllerName.class, true);
-   private final AtomicReference<HighLevelControllerName> fallbackControllerForFailure = new AtomicReference<>();
    private HighLevelControllerName initialControllerState;
 
    private final ContactableBodiesFactory contactableBodiesFactory;
@@ -126,7 +120,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       managerFactory.setCapturePointPlannerParameters(icpPlannerParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
    }
-
 
    private ComponentBasedFootstepDataMessageGenerator footstepGenerator;
 
@@ -356,11 +349,12 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
+      double defaultTouchdownTime = walkingControllerParameters.getDefaultTouchdownTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
-                                                                              defaultFinalTransferTime, feet, statusMessageOutputManager, yoTime,
-                                                                              yoGraphicsListRegistry, registry);
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultTouchdownTime,
+                                                                              defaultInitialTransferTime, defaultFinalTransferTime, feet,
+                                                                              statusMessageOutputManager, yoTime, yoGraphicsListRegistry, registry);
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
@@ -372,9 +366,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       humanoidHighLevelControllerManager = new HumanoidHighLevelControllerManager(commandInputManager, statusMessageOutputManager, initialControllerState,
                                                                                   highLevelControllerParameters, walkingControllerParameters,
                                                                                   icpPlannerParameters, requestedHighLevelControllerState,
-                                                                                  controllerFactoriesMap, stateTransitionFactories, managerFactory, controllerToolbox,
-                                                                                  centerOfPressureDataHolderForEstimator, forceSensorDataHolder,
-                                                                                  lowLevelControllerOutput);
+                                                                                  controllerFactoriesMap, stateTransitionFactories, managerFactory,
+                                                                                  controllerToolbox, centerOfPressureDataHolderForEstimator,
+                                                                                  forceSensorDataHolder, lowLevelControllerOutput);
       humanoidHighLevelControllerManager.addYoVariableRegistry(registry);
       humanoidHighLevelControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
       return humanoidHighLevelControllerManager;
