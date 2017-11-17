@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 
@@ -284,6 +286,25 @@ public interface FootstepPlannerParameters
    public default double getMinimumDistanceFromCliffBottoms()
    {
       return 0.0;
+   }
+
+   /**
+    * The maximum number of steps that the planner can return in its {@link FootstepPlan}
+    */
+   public default int getMaximumStepsInPlan()
+   {
+      return Integer.MAX_VALUE;
+   }
+
+   /**
+    * When the planner is done planning and cannot find a path to the goal, this flag indicates whether the
+    * planner should return the best plan that it found. If this value is false, the planner will return
+    * a {@link FootstepPlan} of type {@link FootstepPlanningResult#NO_PATH_EXISTS}. Otherwise it will return
+    * the "best" effort plan, where "best" is determined by the planner.
+    */
+   public default boolean getReturnBestEffortPlan()
+   {
+      return false;
    }
 
    /**
