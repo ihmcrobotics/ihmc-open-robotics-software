@@ -204,6 +204,14 @@ public class BambooTools
    private static String determineEraseableBambooDataAndVideosRootDirectoryToUse()
    {
       String rootDirectoryToTry = System.getProperty("create.videos.dir");
+      if(rootDirectoryToTry != null)
+      {
+         if(!rootDirectoryToTry.endsWith("/") && !rootDirectoryToTry.endsWith("\\"))
+         {
+            rootDirectoryToTry += "/";
+         }
+      }
+      
       if (rootDirectoryToTry == null)
       {
          if (SystemUtils.IS_OS_WINDOWS)

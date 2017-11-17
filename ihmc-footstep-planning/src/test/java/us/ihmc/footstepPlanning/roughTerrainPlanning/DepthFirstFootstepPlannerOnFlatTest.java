@@ -90,20 +90,20 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
       registry = new YoVariableRegistry("test");
       parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters());
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
+      FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
 
       PlanarRegionBipedalFootstepPlannerVisualizer visualizer = null;
       if (showPlannerVisualizer)
       {
-          visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame, registry);
-         planner.setBipedalFootstepPlannerListener(visualizer);
+         visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame, registry);
       }
 
-      FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
       AlwaysValidNodeChecker nodeChecker = new AlwaysValidNodeChecker();
       ConstantFootstepCost footstepCost = new ConstantFootstepCost(1.0);
       planner = new DepthFirstFootstepPlanner(parameters, snapper, nodeChecker, footstepCost, registry);
       planner.setFeetPolygons(footPolygonsInSoleFrame);
       planner.setMaximumNumberOfNodesToExpand(1000);
+      planner.setBipedalFootstepPlannerListener(visualizer);
    }
 
    @Override

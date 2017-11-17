@@ -1244,7 +1244,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    private void setFootPolygonFromCurrentState(FrameConvexPolygon2d framePolygonToPack, RobotSide robotSide)
    {
-      if (!supportFootPolygonsInSoleZUpFrames.get(robotSide).isEmpty())
+      if (!supportFootPolygonsInSoleZUpFrames.get(robotSide).isEmpty() && ! (supportFootPolygonsInSoleZUpFrames.get(robotSide).getNumberOfVertices() < 3))
          framePolygonToPack.setIncludingFrame(supportFootPolygonsInSoleZUpFrames.get(robotSide));
       else
       {
@@ -1405,5 +1405,19 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          return 0.0;
       else
          return activeTrajectory.getNodeTimes()[activeTrajectory.getNumberOfSegments()];
+   }
+
+   public boolean getIsPlanAvailable()
+   {
+      return planIsAvailable.getBooleanValue();
+   }
+
+   public void getDoubleSupportPolygonCentroid(YoFramePoint copPositionToPack)
+   {
+      setFootPolygonFromCurrentState(supportFootPolygon, RobotSide.LEFT);
+      setFootPolygonFromCurrentState(swingFootInitialPolygon, RobotSide.RIGHT);
+      computeMidFeetPointWithChickenSupport(tempFramePoint1, supportFootPolygon, swingFootInitialPolygon);
+      tempFramePoint1.changeFrame(copPositionToPack.getReferenceFrame());
+      copPositionToPack.set(tempFramePoint1);
    }
 }

@@ -111,6 +111,11 @@ public class KinematicsToolboxOptimizationSettings implements ControllerCoreOpti
       return 0;
    }
 
+   public boolean getDeactivateRhoWhenNotInContact()
+   {
+      return true;
+   }
+
    @Override
    public ActiveSetQPSolverWithInactiveVariablesInterface getActiveSetQPSolver()
    {

@@ -79,6 +79,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final YoBoolean hasReceivedCenterOfPressureCommand;
    private final YoBoolean isFootholdAreaLargeEnough;
+   private final YoBoolean deactivateRhoWhenNotInContact;
    private final YoFramePoint2d desiredCoPCommandInSoleFrame;
    private final Vector2D desiredCoPCommandWeightInSoleFrame = new Vector2D();
 
@@ -134,6 +135,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       hasReset = new YoBoolean(namePrefix + "HasReset", registry);
       resetRequested = new YoBoolean(namePrefix + "ResetRequested", registry);
+      deactivateRhoWhenNotInContact = new YoBoolean(namePrefix + "DeactivateRhoWhenNotInContact", registry);
 
       for (int i = 0; i < contactPoints2d.size(); i++)
       {
@@ -163,6 +165,11 @@ public class PlaneContactStateToWrenchMatrixHelper
       wrenchFromRho.setToZero(bodyFixedFrame, centerOfMassFrame);
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setDeactivateRhoWhenNotInContact(boolean deactivateRhoWhenNotInContact)
+   {
+      this.deactivateRhoWhenNotInContact.set(deactivateRhoWhenNotInContact);
    }
 
    public void setPlaneContactStateCommand(PlaneContactStateCommand command)
@@ -267,7 +274,9 @@ public class PlaneContactStateToWrenchMatrixHelper
             else
             {
                clear(rhoIndex);
-               activeRhoMatrix.set(rhoIndex, 0, 0.0);
+
+               if (deactivateRhoWhenNotInContact.getBooleanValue())
+                  activeRhoMatrix.set(rhoIndex, 0, 0.0);
             }
 
             //// TODO: 6/5/17 scale this by the vertical magnitude

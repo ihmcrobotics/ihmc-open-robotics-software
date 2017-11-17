@@ -299,6 +299,16 @@ public interface ControllerCoreOptimizationSettings
    int getRhoSize();
 
    /**
+    * Returns whether or not the optimization should consider the rho variable when its associated
+    * contact point is not in contact. This reduces the optimization size for the whole body controller,
+    * potentially leading to higher speeds.
+    */
+   default boolean getDeactivateRhoWhenNotInContact()
+   {
+      return true;
+   }
+
+   /**
     * Gets a new instance of {@code ActiveSetQPSolver} to be used in the controller core.
     * <p>
     * A QP solver is needed for any of the three modes of the controller core.
