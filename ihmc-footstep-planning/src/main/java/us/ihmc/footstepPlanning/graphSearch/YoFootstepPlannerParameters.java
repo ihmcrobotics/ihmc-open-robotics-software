@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class YoFootstepPlannerParameters implements FootstepPlannerParameters
 {
@@ -32,6 +33,8 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoDouble yawWeight = new YoDouble("yawWeight", registry);
    private final YoDouble costPerStep = new YoDouble("costPerStep", registry);
    private final YoDouble bodyGroundClearance = new YoDouble("bodyGroundClearance", registry);
+   private final YoBoolean returnBestEffortPlan = new YoBoolean("returnBestEffortPlan", registry);
+   private final YoInteger minimumStepForBestEffortPlan = new YoInteger("minimumStepForBestEffortPlan", registry);
 
    public YoFootstepPlannerParameters(YoVariableRegistry parentRegistry, FootstepPlannerParameters defaults)
    {
@@ -65,6 +68,8 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       yawWeight.set(defaults.getYawWeight());
       costPerStep.set(defaults.getCostPerStep());
       bodyGroundClearance.set(defaults.getBodyGroundClearance());
+      returnBestEffortPlan.set(defaults.getReturnBestEffortPlan());
+      minimumStepForBestEffortPlan.set(defaults.getMinimumStepsForBestEffortPlan());
    }
 
    @Override
@@ -211,4 +216,15 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       return bodyGroundClearance.getDoubleValue();
    }
 
+   @Override
+   public boolean getReturnBestEffortPlan()
+   {
+      return returnBestEffortPlan.getBooleanValue();
+   }
+   
+   @Override
+   public int getMinimumStepsForBestEffortPlan()
+   {
+      return minimumStepForBestEffortPlan.getIntegerValue();
+   }
 }
