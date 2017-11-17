@@ -71,6 +71,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
    private final ArrayList<YoDouble> swingSplitFractions = new ArrayList<>();
    private final ArrayList<YoDouble> swingDurationShiftFractions = new ArrayList<>();
    private final ArrayList<YoDouble> transferDurations = new ArrayList<>();
+   private final ArrayList<YoDouble> touchdownDurations = new ArrayList<>();
    private final ArrayList<YoDouble> transferSplitFractions = new ArrayList<>();
 
    @Before
@@ -121,12 +122,14 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
          YoDouble swingSplitFraction = new YoDouble("swingSplitFraction" + i, parentRegistry);
          YoDouble swingDurationShiftFraction = new YoDouble("swingDurationShiftFraction" + i, parentRegistry);
          YoDouble transferDuration = new YoDouble("transferDuration" + i, parentRegistry);
+         YoDouble touchdownDuration = new YoDouble("touchdownDuration" + i, parentRegistry);
          YoDouble transferSplitFraction = new YoDouble("transferSplitFraction" + i, parentRegistry);
 
          swingDurations.add(swingDuration);
          swingSplitFractions.add(swingSplitFraction);
          swingDurationShiftFractions.add(swingDurationShiftFraction);
          transferDurations.add(transferDuration);
+         touchdownDurations.add(touchdownDuration);
          transferSplitFractions.add(transferSplitFraction);
       }
       YoDouble transferDuration = new YoDouble("transferDuration" + numberOfFootstepsToConsider.getIntegerValue(), parentRegistry);
@@ -137,7 +140,7 @@ public class ReferenceCenterOfPressureWaypointCalculatorTest
       int numberOfPointsInFoot = plannerParameters.getNumberOfCoPWayPointsPerFoot();
       int maxNumberOfFootstepsToConsider = plannerParameters.getNumberOfFootstepsToConsider();
       testCoPGenerator = new ReferenceCoPTrajectoryGenerator("TestCoPPlanner", maxNumberOfFootstepsToConsider, bipedSupportPolygons,
-                                                             contactableFeet, numberOfFootstepsToConsider, swingDurations, transferDurations,
+                                                             contactableFeet, numberOfFootstepsToConsider, swingDurations, transferDurations, touchdownDurations,
                                                              swingSplitFractions, swingDurationShiftFractions, transferSplitFractions, parentRegistry);
       testCoPGenerator.initializeParameters(plannerParameters);
       assertTrue("Object not initialized", testCoPGenerator != null);

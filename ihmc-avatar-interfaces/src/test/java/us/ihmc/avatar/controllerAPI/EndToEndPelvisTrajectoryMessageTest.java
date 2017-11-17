@@ -91,7 +91,12 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    public void testSingleWaypoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
+      testSingleWaypintInternal();
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+   
+   private void testSingleWaypintInternal() throws SimulationExceededMaximumTimeException
+   {
       Random random = new Random(564574L);
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
@@ -159,6 +164,21 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       String pelvisName = fullRobotModel.getPelvis().getName();
       assertSingleWaypointExecuted(pelvisName, fullRobotModel, desiredPosition, desiredOrientation, scs);
+   }
+   
+
+   public void testSingleWaypointAndAbort() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      testSingleWaypintInternal();
+
+      StopAllTrajectoryMessage stopAll = new StopAllTrajectoryMessage();
+      drcSimulationTestHelper.send(stopAll);
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    public void testSingleWaypointAndWalk() throws Exception

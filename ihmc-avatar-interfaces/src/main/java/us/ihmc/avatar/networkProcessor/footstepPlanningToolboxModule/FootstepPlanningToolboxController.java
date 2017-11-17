@@ -85,8 +85,6 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private long plannerCount = 0;
    private double dt;
 
-   public static final double timeout = 10.0;
-
    private final YoFootstepPlannerParameters footstepPlanningParameters;
 
    public FootstepPlanningToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel,
@@ -137,7 +135,6 @@ public class FootstepPlanningToolboxController extends ToolboxController
       //      FootstepNodeExpansion expansion = robotModel.getPlanarRegionFootstepPlannerParameters().getReachableFootstepExpansion();
       FootstepNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlanningParameters);
       AStarFootstepPlanner planner = AStarFootstepPlanner.createRoughTerrainPlanner(footstepPlanningParameters, null, footPolygons, expansion, registry);
-      planner.setTimeout(timeout);
       return planner;
    }
 
@@ -158,7 +155,6 @@ public class FootstepPlanningToolboxController extends ToolboxController
       footstepPlanner.setFeetPolygons(footPolygonsInSoleFrame, footPolygonsInSoleFrame);
       footstepPlanner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
       footstepPlanner.setExitAfterInitialSolution(false);
-      footstepPlanner.setTimeout(timeout);
 
       return footstepPlanner;
    }

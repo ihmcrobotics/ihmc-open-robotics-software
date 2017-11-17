@@ -2,6 +2,7 @@ package us.ihmc.valkyrie.parameters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,8 @@ import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -31,6 +34,7 @@ import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -539,7 +543,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
       JointAccelerationIntegrationSettings elbowJointSettings = new JointAccelerationIntegrationSettings();
       elbowJointSettings.setAlphaPosition(0.9998);
-      elbowJointSettings.setAlphaVelocity(0.86);
+      elbowJointSettings.setAlphaVelocity(0.84);
       elbowJointSettings.setMaxPositionError(0.2);
       elbowJointSettings.setMaxVelocity(2.0);
 
@@ -557,6 +561,47 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       }
 
       return integrationSettings;
+   }
+
+   @Override
+   public boolean enableJointAccelerationIntegrationForAllJoints()
+   {
+      return true;
+   }
+
+   @Override
+   public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParameters()
+   {
+      List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> ret = new ArrayList<>();
+
+      for (LegJointName legJointName : new LegJointName[]{LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.HIP_ROLL})
+      { // Hip joints
+         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
+         parameters.setAlphas(0.9992, 0.85);
+         List<String> jointNames = new ArrayList<>();
+         for (RobotSide robotSide : RobotSide.values)
+            jointNames.add(jointMap.getLegJointName(robotSide, legJointName));
+         ret.add(new ImmutableTriple<>(legJointName.getCamelCaseName(), parameters, jointNames));
+      }
+
+      for (LegJointName legJointName : new LegJointName[]{LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL})
+      { // Knee and ankle joints
+         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
+         List<String> jointNames = new ArrayList<>();
+         for (RobotSide robotSide : RobotSide.values)
+            jointNames.add(jointMap.getLegJointName(robotSide, legJointName));
+         ret.add(new ImmutableTriple<>(legJointName.getCamelCaseName(), parameters, jointNames));
+      }
+
+      for (SpineJointName spineJointName : jointMap.getSpineJointNames())
+      {
+         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
+         parameters.setAlphas(0.9996, 0.85);
+         List<String> jointNames = Collections.singletonList(jointMap.getSpineJointName(spineJointName));
+         ret.add(new ImmutableTriple<>(spineJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
+      }
+
+      return ret;
    }
 
    @Override
