@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -185,7 +185,9 @@ public class WalkingSingleSupportState extends SingleSupportState
    public boolean isDone()
    {
       if (super.isDone())
+      {
          return true;
+      }
 
       return finishSingleSupportWhenICPPlannerIsDone.getBooleanValue() && balanceManager.isICPPlanDone();
    }
@@ -197,12 +199,13 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       double defaultSwingTime = walkingMessageHandler.getDefaultSwingTime();
       double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
+      double defaultTouchdownTime = walkingMessageHandler.getDefaultTouchdownTime();
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
 
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
          swingTime = defaultSwingTime;
-         footstepTiming.setTimings(swingTime, defaultTransferTime);
+         footstepTiming.setTimings(swingTime, defaultTouchdownTime, defaultTransferTime);
          balanceManager.packFootstepForRecoveringFromDisturbance(swingSide, defaultSwingTime, nextFootstep);
          nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
          walkingMessageHandler.reportWalkingAbortRequested();
@@ -237,9 +240,10 @@ public class WalkingSingleSupportState extends SingleSupportState
          double currentTransferDuration = balanceManager.getCurrentTransferDurationAdjustedForReachability();
          double currentSwingDuration = balanceManager.getCurrentSwingDurationAdjustedForReachability();
          double nextTransferDuration = balanceManager.getNextTransferDurationAdjustedForReachability();
+         double currentTouchdownDuration = balanceManager.getCurrentTouchdownDuration();
 
          swingTime = currentSwingDuration;
-         footstepTiming.setTimings(currentSwingDuration, currentTransferDuration);
+         footstepTiming.setTimings(currentSwingDuration, currentTouchdownDuration, currentTransferDuration);
 
          if (isLastStep)
          {
@@ -248,8 +252,8 @@ public class WalkingSingleSupportState extends SingleSupportState
          else
          {
             double nextSwingTime = footstepTimings[0].getSwingTime();
-            footstepTimings[0].setTimings(nextSwingTime, nextTransferDuration);
-            walkingMessageHandler.adjustTimings(0, nextSwingTime, nextTransferDuration);
+            footstepTimings[0].setTimings(nextSwingTime, currentTouchdownDuration, nextTransferDuration);
+            walkingMessageHandler.adjustTimings(0, nextSwingTime, currentTouchdownDuration, nextTransferDuration);
          }
       }
 
@@ -259,7 +263,8 @@ public class WalkingSingleSupportState extends SingleSupportState
          balanceManager.requestICPPlannerToHoldCurrentCoMInNextDoubleSupport();
       }
 
-      feetManager.requestSwing(swingSide, nextFootstep, swingTime);
+      double touchdownTime = footstepTiming.getTouchdownDuration();
+      feetManager.requestSwing(swingSide, nextFootstep, swingTime, touchdownTime);
 
       legConfigurationManager.startSwing(swingSide);
       legConfigurationManager.useHighWeight(swingSide.getOppositeSide());

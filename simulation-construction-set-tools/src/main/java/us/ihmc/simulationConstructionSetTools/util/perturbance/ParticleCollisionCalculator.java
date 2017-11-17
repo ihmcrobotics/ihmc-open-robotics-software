@@ -1,7 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.perturbance;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class ParticleCollisionCalculator
 {

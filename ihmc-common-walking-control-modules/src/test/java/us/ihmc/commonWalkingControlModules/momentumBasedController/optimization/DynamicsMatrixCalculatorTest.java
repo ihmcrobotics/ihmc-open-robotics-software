@@ -559,5 +559,10 @@ public class DynamicsMatrixCalculatorTest
       {
          return nContactableBodies * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
       }
+
+      public boolean getDeactivateRhoWhenNotInContact()
+      {
+         return false;
+      }
    }
 }

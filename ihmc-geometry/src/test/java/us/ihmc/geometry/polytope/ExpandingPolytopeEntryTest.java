@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 public class ExpandingPolytopeEntryTest
 {
 
-   @Test
+   @Test(timeout = 30000)
    public void testManuallyAssembledTetrahedron()
    {
       Point3D pointOne = new Point3D(0.0, 0.0, 0.0);
@@ -68,7 +68,7 @@ public class ExpandingPolytopeEntryTest
 
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testAutomaticallyAssembledTetrahedron()
    {
       Point3D pointOne = new Point3D(0.0, 0.0, 0.0);
@@ -130,7 +130,7 @@ public class ExpandingPolytopeEntryTest
    }
    
    
-   @Test
+   @Test(timeout = 30000)
    public void testTroublesomeTetrahedron()
    {         
       Point3D pointOne = new Point3D(-0.9490913237594096, 0.30106983928716424, 3.560641277995469);

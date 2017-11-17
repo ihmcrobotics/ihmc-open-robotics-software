@@ -306,6 +306,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          {
             handZUpFrame.update();
          }
+         footReferenceFrames.get(robotSide).update();
          soleFrames.get(robotSide).update();
          soleZUpFrames.get(robotSide).update();
       }

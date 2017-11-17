@@ -33,7 +33,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
@@ -55,7 +55,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -63,11 +63,11 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements MultiRobotTestInterface
 {
-   private static final boolean VERBOSE = true;
+   private static final boolean VERBOSE = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
    static
    {
@@ -183,7 +183,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testHoldBodyPose() throws Exception
    {
       FullHumanoidRobotModel initialFullRobotModel = createFullRobotModelAtInitialConfiguration();
@@ -207,7 +207,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
                  toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testRandomHandPositions() throws Exception
    {
       if (VERBOSE)
@@ -256,7 +256,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testRandomHandPoses() throws Exception
    {
       if (VERBOSE)
@@ -315,7 +315,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       assertTrue("Poor average solution quality: " + averageSolutionQuality, averageSolutionQuality < 5.0e-5);
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testSingleSupport() throws Exception
    {
       if (VERBOSE)
@@ -389,7 +389,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       {
          PrintTools.info(this, "Solution quality: average = " + averageSolutionQuality + ", worst = " + worstSolutionQuality);
       }
-      assertTrue("Poor worst solution quality: " + worstSolutionQuality, worstSolutionQuality < 1.0e-3);
+      assertTrue("Poor worst solution quality: " + worstSolutionQuality, worstSolutionQuality < 2.0e-3);
       assertTrue("Poor average solution quality: " + averageSolutionQuality, averageSolutionQuality < 1.0e-4);
    }
 

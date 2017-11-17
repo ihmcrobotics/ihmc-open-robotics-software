@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
@@ -15,7 +15,7 @@ public abstract class ControllerAPIDefinition
 {
    private static final List<Class<? extends Command<?, ?>>> supportedCommands;
 
-   private static final List<Class<? extends StatusPacket<?>>> supportedStatusMessages;
+   private static final List<Class<? extends SettablePacket<?>>> supportedStatusMessages;
 
    static
    {
@@ -55,7 +55,7 @@ public abstract class ControllerAPIDefinition
 
       supportedCommands = Collections.unmodifiableList(commands);
 
-      List<Class<? extends StatusPacket<?>>> statusMessages = new ArrayList<>();
+      List<Class<? extends SettablePacket<?>>> statusMessages = new ArrayList<>();
       statusMessages.add(CapturabilityBasedStatus.class);
       statusMessages.add(FootstepStatus.class);
       statusMessages.add(PlanOffsetStatus.class);
@@ -73,7 +73,7 @@ public abstract class ControllerAPIDefinition
       return supportedCommands;
    }
 
-   public static List<Class<? extends StatusPacket<?>>> getControllerSupportedStatusMessages()
+   public static List<Class<? extends SettablePacket<?>>> getControllerSupportedStatusMessages()
    {
       return supportedStatusMessages;
    }

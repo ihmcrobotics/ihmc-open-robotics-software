@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.CoMGeneration;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -15,6 +12,9 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Tim Seyde
@@ -35,7 +35,6 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final List<FrameTrajectory3D> cmpTrajectories = new ArrayList<>(defaultSize);
 
-   private List<FramePoint3D> icpDesiredInitialPositions = new ArrayList<>(defaultSize);
    private List<FramePoint3D> icpDesiredFinalPositions = new ArrayList<>(defaultSize);
 
    private final FramePoint3D comPositionDesiredCurrent = new FramePoint3D();
@@ -51,7 +50,6 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
 
    private final YoInteger currentSegmentIndex;
 
-   private final YoBoolean isStanding;
    private final YoBoolean isInitialTransfer;
    private final YoBoolean isDoubleSupport;
 
@@ -70,12 +68,11 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
    private final SmoothCapturePointToolbox icpToolbox = new SmoothCapturePointToolbox();
    private final SmoothCoMIntegrationToolbox comToolbox = new SmoothCoMIntegrationToolbox(icpToolbox);
 
-   public ReferenceCoMTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider, YoBoolean isStanding,
+   public ReferenceCoMTrajectoryGenerator(String namePrefix, YoDouble omega0, YoInteger numberOfFootstepsToConsider,
                                           YoBoolean isInitialTransfer, YoBoolean isDoubleSupport, YoVariableRegistry registry)
    {
       this.omega0 = omega0;
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
-      this.isStanding = isStanding;
       this.isInitialTransfer = isInitialTransfer;
       this.isDoubleSupport = isDoubleSupport;
 
@@ -104,13 +101,11 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
    }
 
    public void initializeForTransfer(double initialTime, List<? extends SegmentedFrameTrajectory3D> transferCMPTrajectories,
-                                     List<? extends SegmentedFrameTrajectory3D> swingCMPTrajectories, List<FramePoint3D> icpDesiredInitialPositions,
-                                     List<FramePoint3D> icpDesiredFinalPositions)
+                                     List<? extends SegmentedFrameTrajectory3D> swingCMPTrajectories, List<FramePoint3D> icpDesiredFinalPositions)
    {
       reset();
       startTimeOfCurrentPhase.set(initialTime);
 
-      this.icpDesiredInitialPositions = icpDesiredInitialPositions;
       this.icpDesiredFinalPositions = icpDesiredFinalPositions;
 
       int numberOfSteps = Math.min(numberOfFootstepsRegistered, numberOfFootstepsToConsider.getIntegerValue());
@@ -153,13 +148,11 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
    }
 
    public void initializeForSwing(double initialTime, List<? extends SegmentedFrameTrajectory3D> transferCMPTrajectories,
-                                  List<? extends SegmentedFrameTrajectory3D> swingCMPTrajectories, List<FramePoint3D> icpDesiredInitialPositions,
-                                  List<FramePoint3D> icpDesiredFinalPositions)
+                                  List<? extends SegmentedFrameTrajectory3D> swingCMPTrajectories, List<FramePoint3D> icpDesiredFinalPositions)
    {
       reset();
       startTimeOfCurrentPhase.set(initialTime);
 
-      this.icpDesiredInitialPositions = icpDesiredInitialPositions;
       this.icpDesiredFinalPositions = icpDesiredFinalPositions;
 
       SegmentedFrameTrajectory3D swingCMPTrajectory = swingCMPTrajectories.get(0);
@@ -221,7 +214,7 @@ public class ReferenceCoMTrajectoryGenerator implements PositionTrajectoryGenera
          comAccelerationDesiredInitialCurrentSegment.set(comAccelerationDesiredCurrent);
       }
 
-      comToolbox.computeDesiredCenterOfMassCornerData(icpDesiredInitialPositions, icpDesiredFinalPositions, comDesiredInitialPositions,
+      comToolbox.computeDesiredCenterOfMassCornerData(icpDesiredFinalPositions, comDesiredInitialPositions,
                                                       comDesiredFinalPositions, comDesiredInitialVelocities, comDesiredFinalVelocities,
                                                       comDesiredInitialAccelerations, comDesiredFinalAccelerations, cmpTrajectories,
                                                       comPositionDesiredInitialCurrentSegment, comVelocityDesiredInitialCurrentSegment,

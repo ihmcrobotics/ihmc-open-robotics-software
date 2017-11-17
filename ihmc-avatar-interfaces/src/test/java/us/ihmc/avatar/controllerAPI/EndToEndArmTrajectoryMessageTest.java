@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
@@ -36,7 +37,6 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -46,7 +46,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 {
    private static boolean DEBUG = false;
 
-   protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -178,7 +178,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
          assertSingleWaypointExecuted(armJoints, desiredJointPositions, desiredJointVelocities, epsilon, scs);
       }
-      
+
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
@@ -212,7 +212,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          }
          drcSimulationTestHelper.send(message);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 * getRobotModel().getControllerDT());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0 * getRobotModel().getControllerDT());
          assertTrue(success);
 
          String bodyName = fullRobotModel.getHand(robotSide).getName();
@@ -231,7 +231,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          }
          drcSimulationTestHelper.send(message);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 * getRobotModel().getControllerDT());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0 * getRobotModel().getControllerDT());
          assertTrue(success);
 
          String bodyName = fullRobotModel.getHand(robotSide).getName();

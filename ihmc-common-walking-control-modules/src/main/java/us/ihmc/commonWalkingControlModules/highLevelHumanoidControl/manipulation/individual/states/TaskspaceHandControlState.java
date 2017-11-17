@@ -31,7 +31,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTra
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
-import us.ihmc.tools.FormattingTools;
+import us.ihmc.commons.FormattingTools;
 
 import java.util.Collection;
 

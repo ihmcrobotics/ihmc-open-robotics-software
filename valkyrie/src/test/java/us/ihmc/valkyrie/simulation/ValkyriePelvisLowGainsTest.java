@@ -35,7 +35,7 @@ public class ValkyriePelvisLowGainsTest extends DRCPelvisLowGainsTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 38.0)
-   @Test
+   @Test(timeout = 30000)
    public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException
    {
       super.testStandingWithLowPelvisOrientationGains();

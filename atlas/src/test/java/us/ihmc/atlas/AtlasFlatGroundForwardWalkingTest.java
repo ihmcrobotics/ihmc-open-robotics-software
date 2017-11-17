@@ -61,14 +61,14 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
    private final Vector3D forceDirection2 = new Vector3D(1.0, 0.0, 0.0);
 
    @Override
-   @Test
+   @Test(timeout = 520000)
    public void testForwardWalk() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalk();
    }
 
    @Override
-   @Test
+   @Test(timeout = 520000)
    public void testForwardWalkWithForceDisturbances() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalkWithForceDisturbances();

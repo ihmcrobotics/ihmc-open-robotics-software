@@ -24,7 +24,7 @@ import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.ihmcPerception.vision.shapes.HoughCircleResult;
 import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetector;
 import us.ihmc.ihmcPerception.vision.shapes.OpenCVColoredCircularBlobDetectorFactory;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
 

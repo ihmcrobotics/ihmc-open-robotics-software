@@ -72,10 +72,10 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControlJavaBridge
 {
-   private static final String[] controlledJoints = { "leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
+   private static final String[] controlledJoints = {"leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll",
          "rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll", "torsoYaw", "torsoPitch", "torsoRoll",
          "leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch", "rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw",
-         "rightElbowPitch" };
+         "rightElbowPitch"};
 
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, true);
 
@@ -144,7 +144,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
        */
       double diagnosticControllerDT = robotModel.getEstimatorDT();
       yoVariableServer = new YoVariableServer(getClass(), new PeriodicRealtimeThreadSchedulerFactory(ValkyriePriorityParameters.LOGGER_PRIORITY),
-            robotModel.getLogModelProvider(), robotModel.getLogSettings(), diagnosticControllerDT);
+                                              robotModel.getLogModelProvider(), robotModel.getLogSettings(), diagnosticControllerDT);
 
       /*
        * Create sensor reader
@@ -155,12 +155,17 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
 
       ValkyrieDiagnosticParameters diagnosticParameters = new ValkyrieDiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER, robotModel, true);
       DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters,
-            stateEstimatorParameters, estimatorDesiredJointDataHolder);
+                                                                                                                                    stateEstimatorParameters,
+                                                                                                                                    estimatorDesiredJointDataHolder);
 
       HashMap<String, PositionJointHandle> emptyPositionJointHandles = new HashMap<>();
       HashMap<String, JointStateHandle> emptyJointStateHandles = new HashMap<>();
       ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(timestampProvider,
-            diagnosticSensorProcessingConfiguration, jointHandles, emptyPositionJointHandles, emptyJointStateHandles, imuHandles, forceTorqueSensorHandles, sensorInformation);
+                                                                                                            diagnosticSensorProcessingConfiguration,
+                                                                                                            jointHandles, emptyPositionJointHandles,
+                                                                                                            emptyJointStateHandles, imuHandles,
+                                                                                                            forceTorqueSensorHandles, robotModel.getJointMap(),
+                                                                                                            sensorInformation);
 
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
@@ -168,7 +173,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       ContactSensorHolder contactSensorHolder = new ContactSensorHolder(Arrays.asList(fullRobotModel.getContactSensorDefinitions()));
       RawJointSensorDataHolderMap rawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(fullRobotModel);
       sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, contactSensorHolder, rawJointSensorDataHolderMap,
-            estimatorDesiredJointDataHolder, registry);
+                                estimatorDesiredJointDataHolder, registry);
       sensorReader = sensorReaderFactory.getSensorReader();
       SensorOutputMapReadOnly sensorOutputMap = sensorReader.getSensorOutputMapReadOnly();
 
@@ -182,8 +187,9 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
        * Create diagnostic controller
        */
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      DiagnosticControllerToolbox toolbox = new DiagnosticControllerToolbox(fullRobotModel, estimatorDesiredJointDataHolder, sensorOutputMap, diagnosticParameters, walkingControllerParameters,
-            diagnosticControllerTime, diagnosticControllerDT, diagnosticSensorProcessingConfiguration, registry);
+      DiagnosticControllerToolbox toolbox = new DiagnosticControllerToolbox(fullRobotModel, estimatorDesiredJointDataHolder, sensorOutputMap,
+                                                                            diagnosticParameters, walkingControllerParameters, diagnosticControllerTime,
+                                                                            diagnosticControllerDT, diagnosticSensorProcessingConfiguration, registry);
 
       InputStream gainStream = getClass().getClassLoader().getResourceAsStream(diagnosticGainsFilePath);
       InputStream setpointStream = getClass().getClassLoader().getResourceAsStream(diagnosticSetPointsFilePath);
@@ -230,7 +236,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
 
       diagnosticController.doControl();
       sensorReader.writeCommandsToRobot();
-      
+
       diagnosticControllerTime.set(Conversions.nanosecondsToSeconds(time - startTime.getLongValue()));
 
       yoVariableServer.update(time);
@@ -239,7 +245,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
    }
 
    private DRCKinematicsBasedStateEstimator createStateEstimator(DRCRobotModel robotModel, double gravity, SensorOutputMapReadOnly sensorOutputMapReadOnly,
-         FullHumanoidRobotModel fullRobotModel)
+                                                                 FullHumanoidRobotModel fullRobotModel)
    {
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(fullRobotModel);
       RobotContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
@@ -248,7 +254,8 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
 
       HumanoidReferenceFrames estimatorReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
-      SideDependentList<? extends ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, estimatorReferenceFrames);
+      SideDependentList<? extends ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel,
+                                                                                                                         estimatorReferenceFrames);
 
       double gravityMagnitude = Math.abs(gravity);
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravityMagnitude;
@@ -265,7 +272,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
          ContactablePlaneBody contactablePlaneBody = bipedFeet.get(robotSide);
          RigidBody rigidBody = contactablePlaneBody.getRigidBody();
          bipedFeetMap.put(rigidBody, contactablePlaneBody);
-         
+
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
          ForceSensorDataReadOnly footForceSensorForEstimator = forceSensorDataHolderToUpdate.getByName(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
@@ -274,7 +281,8 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
          double contactThresholdForce = stateEstimatorParameters.getContactThresholdForce();
 
          WrenchBasedFootSwitch wrenchBasedFootSwitch = new WrenchBasedFootSwitch(namePrefix, footForceSensorForEstimator, footSwitchCoPThresholdFraction,
-               totalRobotWeight, bipedFeet.get(robotSide), null, contactThresholdForce, registry);
+                                                                                 totalRobotWeight, bipedFeet.get(robotSide), null, contactThresholdForce,
+                                                                                 registry);
          footSwitchMap.put(rigidBody, wrenchBasedFootSwitch);
 
       }
@@ -283,9 +291,11 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
 
       // Create the sensor readers and state estimator here:
       DRCKinematicsBasedStateEstimator stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            sensorOutputMapReadOnly, forceSensorDataHolderToUpdate, centerOfMassDataHolderToUpdate,
-            imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap, null,
-            new RobotMotionStatusHolder(), bipedFeetMap, yoGraphicsListRegistry);
+                                                                                             sensorOutputMapReadOnly, forceSensorDataHolderToUpdate,
+                                                                                             centerOfMassDataHolderToUpdate, imuSensorsToUseInStateEstimator,
+                                                                                             gravityMagnitude, footSwitchMap, null,
+                                                                                             new RobotMotionStatusHolder(), bipedFeetMap,
+                                                                                             yoGraphicsListRegistry);
 
       registry.addChild(stateEstimator.getYoVariableRegistry());
 

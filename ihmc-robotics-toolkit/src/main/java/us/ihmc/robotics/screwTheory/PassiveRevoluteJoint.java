@@ -4,7 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class PassiveRevoluteJoint extends RevoluteJoint
 {

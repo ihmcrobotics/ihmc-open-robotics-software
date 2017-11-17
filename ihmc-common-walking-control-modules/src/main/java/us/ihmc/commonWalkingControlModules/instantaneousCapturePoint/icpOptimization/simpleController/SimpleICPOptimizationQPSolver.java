@@ -3,11 +3,11 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPAdjustmentOptimizationController;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.recursiveController.ICPAdjustmentOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ConstraintToConvexRegion;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.qpInput.ICPQPInput;
-import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -25,7 +25,8 @@ public class SimpleICPOptimizationQPSolver
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-
+   // FIXME this cannot be true until we setup resetting the active set based on state changes
+   private static final boolean useWarmStart = false;
    private static final int maxNumberOfIterations = 10;
    private static final double convergenceThreshold = 1.0e-20;
 
@@ -103,7 +104,7 @@ public class SimpleICPOptimizationQPSolver
    private final DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
 
    /** Flag to use the quad prog QP solver vs. the active set QP solver. **/
-   private final JavaQuadProgSolver solver = new JavaQuadProgSolver();
+   private final SimpleEfficientActiveSetQPSolver solver = new SimpleEfficientActiveSetQPSolver();
 
    /** Full solution vector to the quadratic program. */
    private final DenseMatrix64F solution;
@@ -232,6 +233,7 @@ public class SimpleICPOptimizationQPSolver
 
       solver.setConvergenceThreshold(convergenceThreshold);
       solver.setMaxNumberOfIterations(maxNumberOfIterations);
+      solver.setUseWarmStart(useWarmStart);
    }
 
    public void setMaxNumberOfIterations(int maxNumberOfIterations)
@@ -673,7 +675,7 @@ public class SimpleICPOptimizationQPSolver
     */
    private void addFeedbackTask()
    {
-      inputCalculator.computeFeedbackTask(feedbackTaskInput, feedbackWeight);
+      SimpleICPQPInputCalculator.computeFeedbackTask(feedbackTaskInput, feedbackWeight);
 
       if (hasFeedbackRegularizationTerm)
          inputCalculator.computeFeedbackRegularizationTask(feedbackTaskInput, feedbackRegularizationWeight, previousFeedbackDeltaSolution);
@@ -686,7 +688,7 @@ public class SimpleICPOptimizationQPSolver
     */
    private void addAngularMomentumMinimizationTask()
    {
-      inputCalculator.computeAngularMomentumMinimizationTask(angularMomentumMinimizationTask, angularMomentumMinimizationWeight);
+      SimpleICPQPInputCalculator.computeAngularMomentumMinimizationTask(angularMomentumMinimizationTask, angularMomentumMinimizationWeight);
       inputCalculator.submitAngularMomentumMinimizationTask(angularMomentumMinimizationTask, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
@@ -844,26 +846,12 @@ public class SimpleICPOptimizationQPSolver
       MatrixTools.setMatrixBlock(previousFootstepLocation, 0, 0, footstepLocationSolution, 2 * stepIndex, 0, 2, 1, 1.0);
    }
 
-   public void setPreviousFootstepSolutionFromCurrent()
-   {
-      if (indexHandler.useStepAdjustment())
-      {
-         int stepIndex = 0;
-         MatrixTools.setMatrixBlock(previousFootstepLocation, 0, 0, footstepLocationSolution, 2 * stepIndex, 0, 2, 1, 1.0);
-      }
-   }
-
    /**
     * Sets the location of the previous CMP feedback for the feedback regularization task.
     *
     * @param feedbackDeltaSolution amount of CMP feedback.
     */
    private void setPreviousFeedbackDeltaSolution(DenseMatrix64F feedbackDeltaSolution)
-   {
-      previousFeedbackDeltaSolution.set(feedbackDeltaSolution);
-   }
-
-   public void setPreviousFeedbackDeltaSolutionFromCurrent()
    {
       previousFeedbackDeltaSolution.set(feedbackDeltaSolution);
    }
@@ -1020,5 +1008,15 @@ public class SimpleICPOptimizationQPSolver
    public int getNumberOfIterations()
    {
       return numberOfIterations;
+   }
+
+   public ConstraintToConvexRegion getCoPLocationConstraint()
+   {
+      return copLocationConstraint;
+   }
+
+   public ConstraintToConvexRegion getCMPLocationConstraint()
+   {
+      return cmpLocationConstraint;
    }
 }

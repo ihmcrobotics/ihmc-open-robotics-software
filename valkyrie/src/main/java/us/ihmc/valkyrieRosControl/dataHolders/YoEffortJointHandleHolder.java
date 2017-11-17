@@ -27,7 +27,7 @@ public class YoEffortJointHandleHolder
 
       this.handle = handle;
       this.joint = joint;
-      this.desiredJointData = desiredJointData;
+      this.desiredJointData = desiredJointData != null ? desiredJointData : new JointDesiredOutput();
 
       yoDesiredJointData = new YoJointDesiredOutput(name, registry, "JointHandle");
 

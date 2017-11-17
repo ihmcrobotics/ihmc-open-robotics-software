@@ -4,17 +4,14 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.CommandInputManager.HasReceivedInputListener;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -23,19 +20,17 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.packets.ToolboxStateMessage;
-import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -197,25 +192,15 @@ public abstract class ToolboxModule
                return false;
             }
 
-            if (message instanceof TrackablePacket)
+            if (toolboxTaskScheduled == null)
             {
-               TrackablePacket<?> trackableMessage = (TrackablePacket<?>) message;
-               if (toolboxTaskScheduled == null)
-               {
-                  wakeUp(trackableMessage.getSource());
-               }
-               else if (activeMessageSource.getOrdinal() != trackableMessage.getSource())
-               {
-                  if (DEBUG)
-                     PrintTools.error(ToolboxModule.this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: "
-                           + PacketDestination.values[trackableMessage.getSource()]);
-                  return false;
-               }
+               wakeUp(message.getSource());
             }
-            else
+            else if (activeMessageSource.getOrdinal() != message.getSource())
             {
                if (DEBUG)
-                  PrintTools.error(ToolboxModule.this, "Received a message from unknow source. Needs to implement: " + TrackablePacket.class.getSimpleName());
+                  PrintTools.error(ToolboxModule.this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: "
+                        + PacketDestination.values[message.getSource()]);
                return false;
             }
 
@@ -384,7 +369,7 @@ public abstract class ToolboxModule
    /**
     * @return used to create the {@link StatusMessageOutputManager} and to defines the output API.
     */
-   abstract public List<Class<? extends StatusPacket<?>>> createListOfSupportedStatus();
+   abstract public List<Class<? extends SettablePacket<?>>> createListOfSupportedStatus();
    
    /**
     * @return the collection of commands that cannot wake up this module.

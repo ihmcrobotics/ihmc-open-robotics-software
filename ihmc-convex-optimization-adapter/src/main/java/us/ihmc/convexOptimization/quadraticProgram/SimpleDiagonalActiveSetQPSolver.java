@@ -170,15 +170,6 @@ public class SimpleDiagonalActiveSetQPSolver extends SimpleEfficientActiveSetQPS
       return computedObjectiveFunctionValue.get(0, 0) + quadraticCostScalar;
    }
 
-   private final DenseMatrix64F temporaryMatrix = new DenseMatrix64F(0, 0);
-
-   private void multQuad(DenseMatrix64F xVector, DenseMatrix64F QMatrix, DenseMatrix64F xTransposeQx)
-   {
-      temporaryMatrix.reshape(xVector.numCols, QMatrix.numCols);
-      CommonOps.multTransA(xVector, QMatrix, temporaryMatrix);
-      CommonOps.mult(temporaryMatrix, xVector, xTransposeQx);
-   }
-
    @Override
    public void setLinearEqualityConstraints(double[][] linearEqualityConstraintsAMatrix, double[] linearEqualityConstraintsBVector)
    {

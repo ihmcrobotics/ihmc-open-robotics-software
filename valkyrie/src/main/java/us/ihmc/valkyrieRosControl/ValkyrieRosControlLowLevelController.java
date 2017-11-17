@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
@@ -14,8 +15,12 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMess
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.tools.TimestampProvider;
+import us.ihmc.valkyrie.fingers.ValkyrieFingerController;
+import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
@@ -34,7 +39,7 @@ public class ValkyrieRosControlLowLevelController
    private final YoDouble yoTime = new YoDouble("lowLevelControlTime", registry);
    private final YoDouble wakeUpTime = new YoDouble("lowLevelControlWakeUpTime", registry);
 
-   private final ValkyrieTorqueHysteresisCompensator torqueHysteresisCompensator;
+   private final ValkyrieFingerController fingerController;
 
    private final AtomicReference<HighLevelControllerName> currentHighLevelControllerState = new AtomicReference<HighLevelControllerName>(null);
 
@@ -42,13 +47,16 @@ public class ValkyrieRosControlLowLevelController
 
    public ValkyrieRosControlLowLevelController(TimestampProvider timestampProvider, final double updateDT,
                                                List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
-                                               List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, YoVariableRegistry parentRegistry)
+                                               List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, ValkyrieJointMap jointMap, YoVariableRegistry parentRegistry)
    {
       this.timestampProvider = timestampProvider;
 
       wakeUpTime.set(Double.NaN);
 
-      torqueHysteresisCompensator = new ValkyrieTorqueHysteresisCompensator(yoEffortJointHandleHolders, yoTime, registry);
+      fingerController = new ValkyrieFingerController(yoTime, updateDT, yoEffortJointHandleHolders, registry);
+
+      // Remove the finger joints to let the finger controller be the only controlling them
+      yoEffortJointHandleHolders = yoEffortJointHandleHolders.stream().filter(h -> !isFingerJoint(h)).collect(Collectors.toList());
 
       Map<String, Double> offsetMap = ValkyrieTorqueOffsetPrinter.loadTorqueOffsetsFromFile();
 
@@ -80,11 +88,7 @@ public class ValkyrieRosControlLowLevelController
 
       yoTime.set(Conversions.nanosecondsToSeconds(timestamp) - wakeUpTime.getDoubleValue());
 
-      if (currentHighLevelControllerState.get() == HighLevelControllerName.WALKING)
-      {
-         torqueHysteresisCompensator.compute();
-      }
-
+      fingerController.doControl();
       updateCommandCalculators();
    }
 
@@ -146,5 +150,22 @@ public class ValkyrieRosControlLowLevelController
 
    public void setupLowLevelControlWithPacketCommunicator(PacketCommunicator packetCommunicator)
    {
+      fingerController.setupCommunication(packetCommunicator);
+   }
+
+   /**
+    * Very inefficient way of checking if a joint is a finger joint that should be used only at construction time.
+    */
+   private static boolean isFingerJoint(YoEffortJointHandleHolder handle)
+   {
+      for (ValkyrieHandJointName valkyrieHandJointName : ValkyrieHandJointName.values)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (handle.getName().equals(valkyrieHandJointName.getJointName(robotSide)))
+               return true;
+         }
+      }
+      return false;
    }
 }

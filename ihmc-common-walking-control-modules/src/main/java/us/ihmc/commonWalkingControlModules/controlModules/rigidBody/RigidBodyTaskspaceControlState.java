@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -20,7 +21,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTra
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
@@ -377,20 +377,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       setTrajectoryStartTimeToCurrentTime();
       queueInitialPoint();
 
-      if (hasOrientaionGains.getBooleanValue() && hasPositionGains.getBooleanValue())
-      {
-         selectionMatrix.resetSelection();
-         trajectoryDone.set(false);
-         trackingOrientation.set(true);
-         trackingPosition.set(true);
-      }
-      else if (hasOrientaionGains.getBooleanValue())
-      {
-         selectionMatrix.setToAngularSelectionOnly();
-         trajectoryDone.set(false);
-         trackingOrientation.set(true);
-         trackingPosition.set(false);
-      }
+      startTracking();
    }
 
    public void goToPoseFromCurrent(FramePose homePose, double trajectoryTime)
@@ -408,20 +395,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       homePoint.setPosition(homePose.getPosition());
       homePoint.setOrientation(homePose.getOrientation());
 
-      if (hasOrientaionGains.getBooleanValue() && hasPositionGains.getBooleanValue())
-      {
-         selectionMatrix.resetSelection();
-         trajectoryDone.set(false);
-         trackingOrientation.set(true);
-         trackingPosition.set(true);
-      }
-      else if (hasOrientaionGains.getBooleanValue())
-      {
-         selectionMatrix.setToAngularSelectionOnly();
-         trajectoryDone.set(false);
-         trackingOrientation.set(true);
-         trackingPosition.set(false);
-      }
+      startTracking();
    }
 
    public void goToPose(FramePose desiredPose, FramePose initialPose, double trajectoryTime)
@@ -439,6 +413,11 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       homePoint.setPosition(desiredPose.getPosition());
       homePoint.setOrientation(desiredPose.getOrientation());
 
+      startTracking();
+   }
+
+   private void startTracking()
+   {
       if (hasOrientaionGains.getBooleanValue() && hasPositionGains.getBooleanValue())
       {
          selectionMatrix.resetSelection();
@@ -452,6 +431,13 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          trajectoryDone.set(false);
          trackingOrientation.set(true);
          trackingPosition.set(false);
+      }
+      else if (hasPositionGains.getBooleanValue())
+      {
+         selectionMatrix.setToLinearSelectionOnly();
+         trajectoryDone.set(false);
+         trackingOrientation.set(false);
+         trackingPosition.set(true);
       }
    }
 

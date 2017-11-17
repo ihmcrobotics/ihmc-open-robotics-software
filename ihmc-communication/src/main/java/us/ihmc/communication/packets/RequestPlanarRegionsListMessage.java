@@ -1,6 +1,6 @@
 package us.ihmc.communication.packets;
 
-public class RequestPlanarRegionsListMessage extends TrackablePacket<RequestPlanarRegionsListMessage>
+public class RequestPlanarRegionsListMessage extends Packet<RequestPlanarRegionsListMessage>
 {
    public enum RequestType {SINGLE_UPDATE, CONTINUOUS_UPDATE, STOP_UPDATE, CLEAR};
 

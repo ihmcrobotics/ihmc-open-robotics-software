@@ -2,6 +2,7 @@ package us.ihmc.valkyrie.parameters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -595,13 +596,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
          integrationSettings.put(jointMap.getNeckJointName(name), neckJointSettings);
 
       JointAccelerationIntegrationSettings elbowJointSettings = new JointAccelerationIntegrationSettings();
-      elbowJointSettings.setAlphaPosition(0.999);
-      elbowJointSettings.setAlphaVelocity(0.83);
+      elbowJointSettings.setAlphaPosition(0.9998);
+      elbowJointSettings.setAlphaVelocity(0.84);
       elbowJointSettings.setMaxPositionError(0.2);
       elbowJointSettings.setMaxVelocity(2.0);
 
       JointAccelerationIntegrationSettings wristJointSettings = new JointAccelerationIntegrationSettings();
-      wristJointSettings.setAlphaPosition(0.999);
+      wristJointSettings.setAlphaPosition(0.9995);
       wristJointSettings.setAlphaVelocity(0.83);
       wristJointSettings.setMaxPositionError(0.2);
       wristJointSettings.setMaxVelocity(2.0);
@@ -614,6 +615,47 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       }
 
       return integrationSettings;
+   }
+
+   @Override
+   public boolean enableJointAccelerationIntegrationForAllJoints()
+   {
+      return true;
+   }
+
+   @Override
+   public List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> getJointAccelerationIntegrationParameters()
+   {
+      List<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>> ret = new ArrayList<>();
+
+      for (LegJointName legJointName : new LegJointName[]{LegJointName.HIP_YAW, LegJointName.HIP_PITCH, LegJointName.HIP_ROLL})
+      { // Hip joints
+         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
+         parameters.setAlphas(0.9992, 0.85);
+         List<String> jointNames = new ArrayList<>();
+         for (RobotSide robotSide : RobotSide.values)
+            jointNames.add(jointMap.getLegJointName(robotSide, legJointName));
+         ret.add(new ImmutableTriple<>(legJointName.getCamelCaseName(), parameters, jointNames));
+      }
+
+      for (LegJointName legJointName : new LegJointName[]{LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL})
+      { // Knee and ankle joints
+         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
+         List<String> jointNames = new ArrayList<>();
+         for (RobotSide robotSide : RobotSide.values)
+            jointNames.add(jointMap.getLegJointName(robotSide, legJointName));
+         ret.add(new ImmutableTriple<>(legJointName.getCamelCaseName(), parameters, jointNames));
+      }
+
+      for (SpineJointName spineJointName : jointMap.getSpineJointNames())
+      {
+         JointAccelerationIntegrationParameters parameters = new JointAccelerationIntegrationParameters();
+         parameters.setAlphas(0.9996, 0.85);
+         List<String> jointNames = Collections.singletonList(jointMap.getSpineJointName(spineJointName));
+         ret.add(new ImmutableTriple<>(spineJointName.getCamelCaseNameForStartOfExpression(), parameters, jointNames));
+      }
+
+      return ret;
    }
 
    @Override

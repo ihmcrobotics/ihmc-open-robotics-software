@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public class ContactableDoorRobotTest
 {   
@@ -23,7 +23,7 @@ public class ContactableDoorRobotTest
    
    private Robot[] robots;
    
-   private final SimulationConstructionSetParameters parameters = SimulationConstructionSetParameters.createFromEnvironmentVariables();
+   private final SimulationConstructionSetParameters parameters = SimulationConstructionSetParameters.createFromSystemProperties();
    private final SimulationTestingParameters testingParams = new SimulationTestingParameters();
    
    RigidBodyTransform doorToWorldTransform = new RigidBodyTransform();

@@ -45,7 +45,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -53,7 +53,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    private static final double DESIRED_QUAT_EPSILON = 0.01;
    private static final double MAX_SPEED_FOR_CONTINOUS = 10.0;
 
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private final Random random = new Random(1991L);
    private DRCSimulationTestHelper drcSimulationTestHelper;

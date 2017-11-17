@@ -18,7 +18,7 @@ import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -49,7 +49,7 @@ public class FootstepDataListMessage extends QueueableMessage<FootstepDataListMe
    @RosExportedField(documentation = "The transferDuration is the time spent with the feet in ground contact before a step."
          + "\nEach step in a list of footsteps might have a different transfer duration. The value specified here is a default"
          + "\nvalue, used if a footstep in this list was created without a transferDuration.")
-   public double defaultTransferDuration = 0.0;
+   public double defaultTransferDuration = -1.0;
 
    @RosExportedField(documentation = "Specifies the time used to return to a stable standing stance after the execution of the"
          + "\nfootstep list is finished. If the value is negative the defaultTransferDuration will be used.")
