@@ -19,7 +19,7 @@ public class ConvexPolygonScaler
 
    private final Line2D edgeOnQ = new Line2D();
    private final Vector2D vectorPerpendicularToEdgeOnQ = new Vector2D();
-   private final Line2D LinePerpendicularToEdgeOnQ = new Line2D();
+   private final Line2D linePerpendicularToEdgeOnQ = new Line2D();
    private final Point2D referencePoint = new Point2D();
    private final Vector2D normalizedVector = new Vector2D();
    
@@ -140,8 +140,8 @@ public class ConvexPolygonScaler
          edgeOnQ.set(vertexQ, nextVertexQ);
          edgeOnQ.perpendicularVector(vectorPerpendicularToEdgeOnQ);
          vectorPerpendicularToEdgeOnQ.negate();
-         LinePerpendicularToEdgeOnQ.set(vertexQ, vectorPerpendicularToEdgeOnQ);
-         LinePerpendicularToEdgeOnQ.pointOnLineGivenParameter(distance, referencePoint);
+         linePerpendicularToEdgeOnQ.set(vertexQ, vectorPerpendicularToEdgeOnQ);
+         linePerpendicularToEdgeOnQ.pointOnLineGivenParameter(distance, referencePoint);
          edgeOnQ.getDirection(normalizedVector);
          
          
@@ -165,7 +165,152 @@ public class ConvexPolygonScaler
 
       return foundSolution;
    }
-   
+
+
+   private final Vector2D vectorToInteriorPolygonVertex = new Vector2D();
+   /**
+    * Grows or shrinks the size of the polygon, If distance is positive it shrinks the polygon in by the distance in meters,
+    * If the distance is negative it grows the polygon. If polygonQ is a line and the distance is negative, a 6 point polygon is returned around the line. If
+    * polygonQ is a point, a square is returned around the point. polygonQ is not changed.
+    */
+   public boolean scaleConvexPolygonToContainInteriorPolygon(ConvexPolygon2D exteriorPolygon, ConvexPolygon2D interiorPolygon, double distance, ConvexPolygon2D scaledPolygonToPack)
+   {
+      if (Math.abs(distance) < 1.0e-10 && interiorPolygon.getArea() <= 1.0 -10)
+      {
+         scaledPolygonToPack.setAndUpdate(exteriorPolygon);
+         return true;
+      }
+
+      // TODO
+      if (exteriorPolygon.getNumberOfVertices() == 2)
+      {
+         Point2DReadOnly vertex0 = exteriorPolygon.getVertex(0);
+         Point2DReadOnly vertex1 = exteriorPolygon.getVertex(1);
+         polygonAsLineSegment.set(vertex0, vertex1);
+
+         if(distance < 0.0)
+         {
+            scaledPolygonToPack.clear();
+            polygonAsLineSegment.direction(true, normalizedVector);
+            normalizedVector.scale(-distance);
+            scaledPolygonToPack.addVertex(vertex0.getX() - normalizedVector.getX(), vertex0.getY() - normalizedVector.getY());
+            scaledPolygonToPack.addVertex(vertex1.getX() + normalizedVector.getX(), vertex1.getY() + normalizedVector.getY());
+
+            polygonAsLineSegment.perpendicular(true, normalizedVector);
+            normalizedVector.scale(distance);
+
+            scaledPolygonToPack.addVertex(vertex0.getX() + normalizedVector.getX(), vertex0.getY() + normalizedVector.getY());
+            scaledPolygonToPack.addVertex(vertex0.getX() - normalizedVector.getX(), vertex0.getY() - normalizedVector.getY());
+            scaledPolygonToPack.addVertex(vertex1.getX() + normalizedVector.getX(), vertex1.getY() + normalizedVector.getY());
+            scaledPolygonToPack.addVertex(vertex1.getX() - normalizedVector.getX(), vertex1.getY() - normalizedVector.getY());
+            scaledPolygonToPack.update();
+            return true;
+         }
+
+         if (vertex0.distance(vertex1) < 2.0 * distance)
+         {
+            Point2D midPoint = new Point2D(vertex0);
+            midPoint.add(vertex1);
+            midPoint.scale(0.5);
+
+            scaledPolygonToPack.clear();
+            scaledPolygonToPack.addVertex(midPoint);
+            scaledPolygonToPack.update();
+            return false;
+         }
+
+         double percentageAlongSegment = distance / polygonAsLineSegment.length();
+         polygonAsLineSegment.pointBetweenEndpointsGivenPercentage(percentageAlongSegment, newVertex0);
+         polygonAsLineSegment.pointBetweenEndpointsGivenPercentage(1 - percentageAlongSegment, newVertex1);
+
+         newVertices.clear();
+         newVertices.add(newVertex0);
+         newVertices.add(newVertex1);
+
+         scaledPolygonToPack.setAndUpdate(newVertices, 2);
+
+         return true;
+      }
+
+      // TODO
+      if (exteriorPolygon.getNumberOfVertices() == 1)
+      {
+         if(distance < 0.0)
+         {
+            Point2DReadOnly vertex0 = exteriorPolygon.getVertex(0);
+            scaledPolygonToPack.addVertex(vertex0.getX() + distance, vertex0.getY() + distance);
+            scaledPolygonToPack.addVertex(vertex0.getX() + distance, vertex0.getY() - distance);
+            scaledPolygonToPack.addVertex(vertex0.getX() - distance, vertex0.getY() + distance);
+            scaledPolygonToPack.addVertex(vertex0.getX() - distance, vertex0.getY() - distance);
+            scaledPolygonToPack.update();
+            return true;
+         }
+         scaledPolygonToPack.setAndUpdate(exteriorPolygon);
+         return false;
+      }
+
+      rays.clear();
+
+      int leftMostIndexOnExteriorPolygon = exteriorPolygon.getMinXIndex();
+      Point2DReadOnly exteriorVertex = exteriorPolygon.getVertex(leftMostIndexOnExteriorPolygon);
+      int nextExteriorVertexIndex = exteriorPolygon.getNextVertexIndex(leftMostIndexOnExteriorPolygon);
+      Point2DReadOnly nextExteriorVertex = exteriorPolygon.getVertex(nextExteriorVertexIndex);
+
+      for (int i = 0; i < exteriorPolygon.getNumberOfVertices(); i++)
+      {
+         edgeOnQ.set(exteriorVertex, nextExteriorVertex);
+         edgeOnQ.perpendicularVector(vectorPerpendicularToEdgeOnQ);
+         vectorPerpendicularToEdgeOnQ.negate();
+         linePerpendicularToEdgeOnQ.set(exteriorVertex, vectorPerpendicularToEdgeOnQ);
+
+
+         double extraDistance = 0.0;
+
+         int leftMostIndexOnInteriorPolygon = interiorPolygon.getMinXIndex();
+         Point2DReadOnly interiorVertex = interiorPolygon.getVertex(leftMostIndexOnInteriorPolygon);
+         int nextInteriorVertexIndex = interiorPolygon.getNextVertexIndex(leftMostIndexOnInteriorPolygon);
+         Point2DReadOnly nextInteriorVertex = interiorPolygon.getVertex(nextInteriorVertexIndex);
+
+         for (int j = 0; j < interiorPolygon.getNumberOfVertices(); j++)
+         {
+            vectorToInteriorPolygonVertex.set(interiorVertex);
+            //vectorToInteriorPolygonVertex.sub(interiorCentroid);
+
+            double distancePerpendicularToEdge = linePerpendicularToEdgeOnQ.getDirectionX() * vectorToInteriorPolygonVertex.getX() +
+                  linePerpendicularToEdgeOnQ.getDirectionY() * vectorToInteriorPolygonVertex.getY();
+
+            extraDistance = Math.max(extraDistance, -distancePerpendicularToEdge);
+
+            interiorVertex = nextInteriorVertex;
+            nextInteriorVertexIndex = interiorPolygon.getNextVertexIndex(nextInteriorVertexIndex);
+            nextInteriorVertex = interiorPolygon.getVertex(nextInteriorVertexIndex);
+         }
+
+
+         linePerpendicularToEdgeOnQ.pointOnLineGivenParameter(distance + extraDistance, referencePoint);
+         edgeOnQ.getDirection(normalizedVector);
+
+         Line2D newEdge = getARay(rays.size());
+         newEdge.set(referencePoint, normalizedVector);
+         rays.add(newEdge);
+
+         exteriorVertex = nextExteriorVertex;
+         nextExteriorVertexIndex = exteriorPolygon.getNextVertexIndex(nextExteriorVertexIndex);
+         nextExteriorVertex = exteriorPolygon.getVertex(nextExteriorVertexIndex);
+      }
+
+
+      boolean foundSolution = convexPolygonConstructorFromInteriorOfRays.constructFromInteriorOfRays(rays, scaledPolygonToPack);
+      if (!foundSolution)
+      {
+         scaledPolygonToPack.clear();
+         scaledPolygonToPack.addVertex(exteriorPolygon.getCentroid());
+         scaledPolygonToPack.update();
+      }
+
+      return foundSolution;
+   }
+
    /**
     * Grows or shrinks the size of the polygon, If distance is positive it shrinks the polygon in by the distance in meters,
     * If the distance is negative it grows the polygon. If polygonQ is a line and the distance is negative, a 6 point polygon is returned around the line. If
