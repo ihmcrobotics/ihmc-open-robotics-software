@@ -14,13 +14,13 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getIdealFootstepLength()
    {
-      return 0.2;
+      return 0.15;
    }
 
    @Override
    public double getMaximumStepReach()
    {
-      return 0.4;
+      return 0.25;
    }
 
    @Override
@@ -50,6 +50,6 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getMaximumStepWidth()
    {
-      return 0.4;
+      return 0.3;
    }
 }

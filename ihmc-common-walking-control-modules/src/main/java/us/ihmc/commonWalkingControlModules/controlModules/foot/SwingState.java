@@ -153,7 +153,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final YoFrameQuaternion yoDesiredSoleOrientation;
    private final YoFrameVector yoDesiredSoleLinearVelocity;
    private final YoFrameVector yoDesiredSoleAngularVelocity;
-
+   
    private final SwingTrajectoryParameters swingTrajectoryParameters;
 
    public SwingState(FootControlHelper footControlHelper, YoFrameVector yoTouchdownVelocity, YoFrameVector yoTouchdownAcceleration,
@@ -676,6 +676,13 @@ public class SwingState extends AbstractUnconstrainedState
       setFootstep(newFootstep, swingTime);
       doContinuousReplanning.set(continuousReplan);
    }
+   
+   public void getDesireds(FramePose desiredPoseToPack, FrameVector3D desiredLinearVelocityToPack, FrameVector3D desiredAngularVelocityToPack)
+   {
+      desiredPoseToPack.setIncludingFrame(this.desiredPose);
+      desiredAngularVelocityToPack.setIncludingFrame(this.desiredAngularVelocity);
+      desiredLinearVelocityToPack.setIncludingFrame(this.desiredLinearVelocity);
+   };
 
    private double computeSwingTimeRemaining()
    {

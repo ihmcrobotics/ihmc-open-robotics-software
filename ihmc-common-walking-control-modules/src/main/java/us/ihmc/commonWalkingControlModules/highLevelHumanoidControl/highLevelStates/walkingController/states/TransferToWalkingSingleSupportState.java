@@ -30,7 +30,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
                                               WalkingFailureDetectionControlModule failureDetectionControlModule, double minimumTransferTime,
                                               YoVariableRegistry parentRegistry)
    {
-      super(transferToSide, WalkingStateEnum.getWalkingTransferState(transferToSide), walkingMessageHandler, controllerToolbox, managerFactory,
+      super(transferToSide, WalkingStateEnum.getWalkingTransferState(transferToSide), walkingControllerParameters, walkingMessageHandler, controllerToolbox, managerFactory,
             failureDetectionControlModule, parentRegistry);
 
       this.minimumTransferTime.set(minimumTransferTime);
@@ -41,10 +41,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   protected void updateICPPlan()
    {
-      super.doTransitionIntoAction();
-
+      super.updateICPPlan();
       boolean initialTransfer = isInitialTransfer();
 
       if (initialTransfer)
@@ -73,7 +72,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
          if (i == 0)
          {
             adjustTiming(timing);
-            walkingMessageHandler.adjustTimings(0, timing.getSwingTime(), timing.getTransferTime());
+            walkingMessageHandler.adjustTimings(0, timing.getSwingTime(), timing.getTouchdownDuration(), timing.getTransferTime());
          }
 
          balanceManager.addFootstepToPlan(footstep, timing);
@@ -89,8 +88,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
       {
          double currentTransferDuration = balanceManager.getCurrentTransferDurationAdjustedForReachability();
          double currentSwingDuration = balanceManager.getCurrentSwingDurationAdjustedForReachability();
+         double currentTouchdownDuration = balanceManager.getCurrentTouchdownDuration();
 
-         firstTiming.setTimings(currentSwingDuration, currentTransferDuration);
+         firstTiming.setTimings(currentSwingDuration, currentTouchdownDuration, currentTransferDuration);
       }
 
       pelvisOrientationManager.setUpcomingFootstep(footsteps[0]);
@@ -137,6 +137,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
       // make sure transfer does not get too short
       adjustedTransferTime = Math.max(adjustedTransferTime, minimumTransferTime.getDoubleValue());
+      double touchdownDuration = stepTiming.getTouchdownDuration();
 
       // GW TODO - possible improvement:
       // If the adjustment is capped by the minimum transfer time adjust also the upcoming transfer times here. That
@@ -145,6 +146,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       // to debug. If we have big adjustments a lot we should revisit this.
 
       // keep swing times and only adjust transfers for now
-      stepTiming.setTimings(originalSwingTime, adjustedTransferTime);
+      stepTiming.setTimings(originalSwingTime, touchdownDuration, adjustedTransferTime);
    }
 }

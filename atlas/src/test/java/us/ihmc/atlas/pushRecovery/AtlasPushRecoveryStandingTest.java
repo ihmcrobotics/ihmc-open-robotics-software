@@ -1,5 +1,6 @@
 package us.ihmc.atlas.pushRecovery;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -18,17 +19,18 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 public class AtlasPushRecoveryStandingTest extends DRCPushRecoveryStandingTest
 {
    @Override
-	public DRCRobotModel getRobotModel() 
+	public DRCRobotModel getRobotModel()
 	{
 		return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 	}
 
 	@Override
-	public String getSimpleRobotName() 
+	public String getSimpleRobotName()
 	{
 		return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
 	}
-	
+
+	@Ignore("Needs to be improved")
 	@ContinuousIntegrationTest(estimatedDuration = 53.2, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 270000)
 	@Override
@@ -36,7 +38,7 @@ public class AtlasPushRecoveryStandingTest extends DRCPushRecoveryStandingTest
 	{
 	   super.testDoublePushForwardInDoubleSupportAndContinueWalking();
 	}
-	
+
 	@ContinuousIntegrationTest(estimatedDuration = 80.2)
    @Test(timeout = 270000)
 	@Override
@@ -44,7 +46,7 @@ public class AtlasPushRecoveryStandingTest extends DRCPushRecoveryStandingTest
 	{
 	   super.testPushBackwardForwardInDoubleSupportAndContinueWalking();
 	}
-	
+
 	@ContinuousIntegrationTest(estimatedDuration = 70.2)
    @Test(timeout = 270000)
 	@Override
@@ -52,7 +54,7 @@ public class AtlasPushRecoveryStandingTest extends DRCPushRecoveryStandingTest
 	{
 	   super.testPushBackwardInDoubleSupportAndContinueWalking();
 	}
-	
+
 	@ContinuousIntegrationTest(estimatedDuration = 53.2)
    @Test(timeout = 270000)
 	@Override
@@ -60,7 +62,7 @@ public class AtlasPushRecoveryStandingTest extends DRCPushRecoveryStandingTest
 	{
 	   super.testPushForwardInDoubleSupport();
 	}
-	
+
 	@ContinuousIntegrationTest(estimatedDuration = 75.0)
    @Test(timeout = 270000)
 	@Override

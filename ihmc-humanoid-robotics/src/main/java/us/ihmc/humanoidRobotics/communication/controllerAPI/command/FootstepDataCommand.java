@@ -35,6 +35,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private double swingTrajectoryBlendDuration = 0.0;
    private double swingDuration = Double.NaN;
    private double transferDuration = Double.NaN;
+   private double touchdownDuration = Double.NaN;
 
    private ReferenceFrame trajectoryFrame;
    
@@ -60,6 +61,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       customPositionWaypoints.clear();
       swingTrajectory.clear();
 
+      touchdownDuration = Double.NaN;
       swingDuration = Double.NaN;
       transferDuration = Double.NaN;
    }
@@ -103,6 +105,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       }
 
       swingDuration = message.swingDuration;
+      touchdownDuration = message.touchdownDuration;
       transferDuration = message.transferDuration;
       
       this.executionDelayTime = message.executionDelayTime;
@@ -134,6 +137,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
          predictedContactPoints.add().set(otherPredictedContactPoints.get(i));
 
       swingDuration = other.swingDuration;
+      touchdownDuration = other.touchdownDuration;
       transferDuration = other.transferDuration;
       this.executionDelayTime = other.executionDelayTime;
    }
@@ -236,6 +240,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    {
       return transferDuration;
    }
+   
+   public double getTouchdownDuration()
+   {
+      return touchdownDuration;
+   }
 
    @Override
    public Class<FootstepDataMessage> getMessageClass()
@@ -299,6 +308,4 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    {
       return true;
    }
-
-
 }

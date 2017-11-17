@@ -41,6 +41,7 @@ import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.fingers.ValkyrieHandStateCommunicator;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
@@ -251,8 +252,9 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
+      ValkyrieJointMap jointMap = robotModel.getJointMap();
       ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(timestampProvider, stateEstimatorParameters,
-            effortJointHandles, positionJointHandles, jointStateHandles, imuHandles, forceTorqueSensorHandles, sensorInformation);
+            effortJointHandles, positionJointHandles, jointStateHandles, imuHandles, forceTorqueSensorHandles, jointMap, sensorInformation);
 
       /*
        * Create controllers
