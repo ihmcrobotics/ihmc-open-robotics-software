@@ -619,7 +619,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       String varnamePosition = handName + "ErrorPosition";
       Vector3D positionError = findVector3d(nameSpacePosition, varnamePosition, scs);
 
-      assertTrue(rotationError.length() < Math.toRadians(10.0));
+      assertTrue(rotationError.length() < Math.toRadians(15.0));
       assertTrue(positionError.length() < 0.05);
 
       // check internal desired matches last trajectory point:
