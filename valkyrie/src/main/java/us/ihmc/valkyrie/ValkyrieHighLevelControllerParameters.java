@@ -62,7 +62,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       if (state != HighLevelControllerName.WALKING)
          return standPrepParameters.getProportionalGain(jointName);
       else
-         return 0.0;
+         return walkingParameters.getProportionalGain(jointName);
    }
 
    @Override
@@ -71,7 +71,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       if (state != HighLevelControllerName.WALKING)
          return standPrepParameters.getDerivativeGain(jointName);
       else
-         return 0.0;
+         return walkingParameters.getDerivativeGain(jointName);
    }
 
    @Override
