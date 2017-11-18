@@ -5,8 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
@@ -26,6 +29,8 @@ public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTraj
    private final List<ConfigurationSpaceName> unconstrainedDegreesOfFreedom = new ArrayList<>();
 
    // TODO : control Frame TransformationMatrix;
+   private Point3D32 controlFramePositionInEndEffector;
+   private Quaternion32 controlFrameOrientationInEndEffector;
    
    @Override
    public void clear()
@@ -55,6 +60,15 @@ public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTraj
       {
          unconstrainedDegreesOfFreedom.add(other.unconstrainedDegreesOfFreedom.get(i));
       }
+      
+      if(other.controlFramePositionInEndEffector == null)
+         controlFramePositionInEndEffector = null;
+      else
+         controlFramePositionInEndEffector = new Point3D32(other.controlFramePositionInEndEffector);
+      if(other.controlFrameOrientationInEndEffector == null)
+         controlFrameOrientationInEndEffector = null;
+      else
+         controlFrameOrientationInEndEffector = new Quaternion32(other.controlFrameOrientationInEndEffector);
    }
 
    @Override
@@ -85,6 +99,15 @@ public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTraj
       {
          unconstrainedDegreesOfFreedom.add(message.getUnconstrainedDegreeOfFreedom(i));
       }
+      
+      if(message.controlFramePositionInEndEffector == null)
+         controlFramePositionInEndEffector = null;
+      else
+         controlFramePositionInEndEffector = new Point3D32(message.controlFramePositionInEndEffector);
+      if(message.controlFrameOrientationInEndEffector == null)
+         controlFrameOrientationInEndEffector = null;
+      else
+         controlFrameOrientationInEndEffector = new Quaternion32(message.controlFrameOrientationInEndEffector);
    }
 
    public RigidBody getEndEffector()
@@ -120,6 +143,16 @@ public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTraj
    public int getNumberOfUnconstrainedDegreesOfFreedom()
    {
       return unconstrainedDegreesOfFreedom.size();
+   }
+   
+   public Point3D32 getControlFramePositionEndEffector()
+   {
+      return controlFramePositionInEndEffector;         
+   }
+   
+   public Quaternion32 getControlFrameOrientationEndEffector()
+   {
+      return controlFrameOrientationInEndEffector;         
    }
 
    @Override

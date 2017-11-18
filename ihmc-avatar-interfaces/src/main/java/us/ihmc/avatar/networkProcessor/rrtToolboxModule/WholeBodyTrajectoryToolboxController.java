@@ -527,7 +527,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       {
          return false;
       }
-
+      
       List<WaypointBasedTrajectoryCommand> trajectoryCommands = commandInputManager.pollNewCommands(WaypointBasedTrajectoryCommand.class);
       if(trajectoryCommands.size() < 1)
          return false;
@@ -623,22 +623,22 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       
       
       
-      CTTaskNode testNode = new CTTaskNode(11);
-      testNode.setNodeData(0, 0.5);
+      CTTaskNode testNode = new CTTaskNode(5);
+      testNode.setNodeData(0, 0.0);
       
-      testNode.setNodeData(1, -0.5*Math.PI);
+//      testNode.setNodeData(1, -0.0*Math.PI);
+//      testNode.setNodeData(2, 0.0*Math.PI);
+//      testNode.setNodeData(3, 0.0*Math.PI);
+//      
+//      testNode.setNodeData(4, 0.0*Math.PI);
+//      testNode.setNodeData(5, 0.0*Math.PI);
+//      testNode.setNodeData(6, 0.0*Math.PI);
+      
+      testNode.setNodeData(1, 0.80);
+      
       testNode.setNodeData(2, 0.0*Math.PI);
       testNode.setNodeData(3, 0.0*Math.PI);
-      
-      testNode.setNodeData(4, 0.5*Math.PI);
-      testNode.setNodeData(5, 0.0*Math.PI);
-      testNode.setNodeData(6, 0.0*Math.PI);
-      
-      testNode.setNodeData(7, 0.85);
-      
-      testNode.setNodeData(8, 0.0*Math.PI);
-      testNode.setNodeData(9, 0.0*Math.PI);
-      testNode.setNodeData(10, 0.0*Math.PI);
+      testNode.setNodeData(4, 0.0*Math.PI);
       
       updateValidity2(testNode);
       visualizedNode = testNode;
@@ -674,16 +674,16 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
        */
       for (RobotSide robotSide : RobotSide.values)
       {
-         FramePose framePose = toolboxData.getFramePose(node, visualizedFullRobotModel, visualizedFullRobotModel.getHand(robotSide));
-         PrintTools.info(""+framePose);
+         FramePose framePose = toolboxData.getFramePose(node, visualizedFullRobotModel.getHand(robotSide));
+
          humanoidKinematicsSolver.submit(createHandMessage(robotSide, framePose));
       }
       //humanoidKinematicsSolver.submit(createChestMessage(new FrameOrientation(midFootZUpGroundFrame, desiredChestOrientation)));
-      FramePose framePose = toolboxData.getFramePose(node, visualizedFullRobotModel, visualizedFullRobotModel.getChest());
+      FramePose framePose = toolboxData.getFramePose(node, visualizedFullRobotModel.getChest());
       humanoidKinematicsSolver.submit(createChestMessage(framePose));
 
       //humanoidKinematicsSolver.submit(createPelvisMessage(new FramePoint3D(midFootZUpGroundFrame, 0.0, 0.0, node.getNodeData(1))));
-      FramePose framePose2 = toolboxData.getFramePose(node, visualizedFullRobotModel, visualizedFullRobotModel.getPelvis());
+      FramePose framePose2 = toolboxData.getFramePose(node, visualizedFullRobotModel.getPelvis());
       humanoidKinematicsSolver.submit(createPelvisMessage(framePose2));
 
       /*

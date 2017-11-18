@@ -129,31 +129,18 @@ public class WholeBodyTrajectoryToolboxData
 
       }
 
-      // only for pelvis height.
-      if (explorationConfigurationNames.contains("pelvis_Z"))
-      {
-         explorationRangeUpperLimits.replace(explorationConfigurationNames.indexOf("pelvis_Z"), 0.90);
-         explorationRangeLowerLimits.replace(explorationConfigurationNames.indexOf("pelvis_Z"), 0.75);
-      }
-
       // check exploration configurations.
+      PrintTools.info("Total dimension "+explorationConfigurationNames.size());
       for (int j = 0; j < explorationConfigurationNames.size(); j++)
       {
          PrintTools.info("" + explorationConfigurationNames.get(j) + " " + explorationRangeUpperLimits.get(j) + " " + explorationRangeLowerLimits.get(j));
       }
    }
 
-   public FramePose getFramePose(CTTaskNode node, FullHumanoidRobotModel desiredFullRobotModel, RigidBody rigidBody)
+   public FramePose getFramePose(CTTaskNode node, RigidBody rigidBody)
    {
-      desiredFullRobotModel.updateFrames();
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
-      referenceFrames.updateFrames();
-      //MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
-      ReferenceFrame midFootZUpGroundFrame = referenceFrames.getWorldFrame();
-
       Pose3D pose = new Pose3D();
 
-      PrintTools.info(""+rigidBody);
       for (int i = 0; i < listOfRigidBodyData.size(); i++)
       {
          if(listOfRigidBodyData.get(i).getRigidBody() == rigidBody)
@@ -162,11 +149,9 @@ public class WholeBodyTrajectoryToolboxData
             break;
          }         
       }
+            
+      FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), pose);
 
-      FramePose framePose = new FramePose(midFootZUpGroundFrame, pose);
-
-      PrintTools.info("final pose");
-      PrintTools.info(""+framePose);
       return framePose;
    }
 
@@ -175,17 +160,4 @@ public class WholeBodyTrajectoryToolboxData
       return trajectoryTime;
    }
 
-//   public ConstrainedRigidBodyTrajectory getConstrainedRigidBodyTrajectory(RigidBody rigidBody)
-//   {
-//      for (int i = 0; i < listOfRigidBodyData.size(); i++)
-//      {
-//         if (rigidBody == listOfRigidBodyData.get(i).getRigidBody())
-//         {
-//            return listOfRigidBodyData.get(i);
-//         }
-//      }
-//
-//      // warning message.
-//      return null;
-//   }
 }

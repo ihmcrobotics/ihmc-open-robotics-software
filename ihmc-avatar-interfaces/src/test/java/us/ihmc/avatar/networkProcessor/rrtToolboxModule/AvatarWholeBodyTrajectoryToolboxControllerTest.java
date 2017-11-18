@@ -27,6 +27,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematic
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -36,6 +37,8 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.rotationConversion.RotationVectorConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -209,6 +212,12 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    @Test
    public void testHandCirclePositionOnlyAndNoChestNoPelvis() throws Exception, UnreasonableAccelerationException
    {
+      double circleRadius = 0.25;
+      SideDependentList<Point3D> circleCenters = new SideDependentList<>(new Point3D(0.5, 0.3, 1.1), new Point3D(0.5, -0.3, 1.1));
+      Quaternion circleOrientation = new Quaternion();
+      circleOrientation.appendYawRotation(Math.PI * 0.1);
+      circleOrientation.appendPitchRotation(Math.PI * 0.5);
+
       double trajectoryTime = 5.0;
       FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
@@ -217,21 +226,46 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
       List<RigidBodyExplorationConfigurationMessage> rigidBodyConfigurations = new ArrayList<>();
-      
+
       double timeResolution = trajectoryTime / 100.0;
 
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody hand = fullRobotModel.getHand(robotSide);
-         FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleAxis);
-         ConfigurationSpaceName[] unconstrainedDegreesOfFreedom = {YAW, PITCH, ROLL};
+
+         // orientation
+         FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleOrientation,
+                                                                           false, 0.0);
+
+         ConfigurationSpaceName[] unconstrainedDegreesOfFreedom = {};
          WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction,
                                                                              unconstrainedDegreesOfFreedom);
-         handTrajectories.add(trajectory);
 
-         ConfigurationSpaceName[] handConfigurations = {YAW, PITCH, ROLL};
+         Point3D controlPoint = new Point3D();
+         Quaternion controlOrientation = new Quaternion();
+         if (robotSide == RobotSide.LEFT)
+         {
+            // TODO ...??
+            controlPoint.addY(0.2);
+            controlOrientation.appendPitchRotation(-0.5 * Math.PI);
+            controlOrientation.appendYawRotation(0.5 * Math.PI);
+            
+         }
+         else
+         {
+            controlPoint.addY(-0.2);
+
+            controlOrientation.appendPitchRotation(-0.5 * Math.PI);
+            controlOrientation.appendYawRotation(-0.5 * Math.PI);
+            
+         }
+         trajectory.setControlFrameOrientation(controlOrientation);
+         trajectory.setControlFramePosition(controlPoint);
+
+         handTrajectories.add(trajectory);
+         ConfigurationSpaceName[] handConfigurations = {};
          RigidBodyExplorationConfigurationMessage rigidBodyConfiguration = new RigidBodyExplorationConfigurationMessage(hand, handConfigurations);
-         
+
          rigidBodyConfigurations.add(rigidBodyConfiguration);
 
          if (visualize)
@@ -239,11 +273,13 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       }
 
       ConfigurationSpaceName[] pelvisConfigurations = {ConfigurationSpaceName.Z};
-      RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis(), pelvisConfigurations);
+      RigidBodyExplorationConfigurationMessage pelvisConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getPelvis(),
+                                                                                                                         pelvisConfigurations,
+                                                                                                                         new double[] {0.75},
+                                                                                                                         new double[] {0.90});
       RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest());
       rigidBodyConfigurations.add(pelvisConfigurationMessage);
       //rigidBodyConfigurations.add(chestConfigurationMessage);
-            
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
       commandInputManager.submitMessage(message);
 
@@ -427,6 +463,23 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       point.add(circleCenter);
 
       return new Pose3D(point, constantOrientation);
+   }
+
+   private static Pose3D computeCircleTrajectory(double time, double trajectoryTime, double circleRadius, Point3DReadOnly circleCenter,
+                                                 QuaternionReadOnly circleOrientation, boolean ccw, double phase)
+   {
+      double theta = (ccw ? -time : time) / trajectoryTime * 2.0 * Math.PI + phase;
+      double x = circleRadius * Math.cos(theta);
+      double y = circleRadius * Math.sin(theta);
+      Point3D point = new Point3D(x, y, 0.0);
+      circleOrientation.transform(point);
+      
+      Quaternion orientation = new Quaternion(circleOrientation);
+      orientation.appendPitchRotation(-0.5*Math.PI);
+      RotationMatrix matrix = new RotationMatrix(orientation);
+      point.add(circleCenter);
+
+      return new Pose3D(point, orientation);
    }
 
    private static Graphics3DObject createFunctionTrajectoryVisualization(FunctionTrajectory trajectoryToVisualize, double t0, double tf, double timeResolution,
