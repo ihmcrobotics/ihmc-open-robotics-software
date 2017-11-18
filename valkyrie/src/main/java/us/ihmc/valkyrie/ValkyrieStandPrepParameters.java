@@ -72,6 +72,9 @@ public class ValkyrieStandPrepParameters implements WholeBodySetpointParameters,
          setJointGains(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), 15.0, 0.0, 1.5);
          setJointGains(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), 12.0, 0.0, 1.2);
          setJointGains(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), 12.0, 0.0, 3.0);
+         setJointGains(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), 15.0, 0.0, 0.0);
+         setJointGains(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), 6.0, 0.0, 0.3);
+         setJointGains(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), 6.0, 0.0, 0.3);
 
          setJointGains(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 30.0, 0.0, 6.2);
          setJointGains(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 150.0, 0.0, 7.5);
