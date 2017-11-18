@@ -89,6 +89,11 @@ public class CTTaskNode
    {
       normalizedNodeData.setQ(index, data);
    }
+   
+   public final void setTimeData(double time)
+   {
+      nodeData.setQ(0, time);
+   }
 
    public final void addChildNode(CTTaskNode node)
    {
