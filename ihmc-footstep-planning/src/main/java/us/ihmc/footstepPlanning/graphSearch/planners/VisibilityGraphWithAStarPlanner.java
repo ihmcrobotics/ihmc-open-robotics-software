@@ -34,6 +34,7 @@ import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCost;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
@@ -54,6 +55,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    private static final boolean DEBUG = false;
    private static final double defaultHeuristicWeight = 15.0;
    private static final double planningHorizon = 1.0;
+   private static final double defaultTimeout = 5.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoDouble timeout = new  YoDouble("timeout", registry);
@@ -93,6 +95,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       heuristics.setWeight(defaultHeuristicWeight);
       footstepPlanner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, postProcessingSnapper, registry);
 
+      timeout.set(defaultTimeout);
       visualizing = graphicsListRegistry != null;
       if (visualizing)
       {
@@ -282,6 +285,11 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
             bodyPathPoints.get(i).setToNaN();
          }
       }
+   }
+
+   public BodyPathPlanner getBodyPathPlanner()
+   {
+      return bodyPath;
    }
 
    @Override

@@ -119,13 +119,13 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
    public void testWalking() throws SimulationExceededMaximumTimeException
    {
-      double epsilon = 1.0e-3;
+      double epsilon = 3.0e-3;
       int steps = 4;
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       double walkingTime = createWalkingMessage(steps, footsteps, true);
       drcSimulationTestHelper.send(footsteps);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingTime + 0.5);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingTime + 1.0);
 
       assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
       humanoidReferenceFrames.updateFrames();
@@ -140,7 +140,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
    public void testWalkingAfterTrajectory() throws SimulationExceededMaximumTimeException
    {
-      double epsilon = 1.0e-3;
+      double epsilon = 3.0e-3;
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       if (!walkingControllerParameters.doPreparePelvisForLocomotion())

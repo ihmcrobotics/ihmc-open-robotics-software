@@ -1,6 +1,10 @@
 package us.ihmc.footstepPlanning.occlusion;
 
 import java.awt.Color;
+import java.io.File;
+import java.io.FileInputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +32,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPlanner;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -38,6 +43,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
+import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -63,11 +69,11 @@ public class SimpleOcclusionTests
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int maxSteps = 100;
-   private static final int rays = 500;
+   private static final int rays = 1000;
    private static final int maxPolygonsToVisualize = 10;
    private static final int maxPolygonsVertices = 50;
    private static final int stepsPerSideToVisualize = 4;
-   private static final double maxAllowedSolveTime = 1.0;
+   private static final double defaultMaxAllowedSolveTime = 1.0;
 
    @Rule
    public TestName name = new TestName();
@@ -78,7 +84,38 @@ public class SimpleOcclusionTests
       FramePose startPose = new FramePose();
       FramePose goalPose = new FramePose();
       PlanarRegionsList regions = createSimpleOcclusionField(startPose, goalPose);
-      runTest(startPose, goalPose, regions);
+      runTest(startPose, goalPose, regions, defaultMaxAllowedSolveTime);
+   }
+
+   @Test(timeout = 300000)
+   public void testOcclusionsFromData()
+   {
+      FramePose startPose = new FramePose(worldFrame);
+      startPose.setPosition(0.25, -0.25, 0.0);
+
+      FramePose goalPose = new FramePose(worldFrame);
+      goalPose.setPosition(2.75, 0.95, 0.0);
+      BestEffortPlannerParameters parameters = new BestEffortPlannerParameters();
+
+      Path path = Paths.get(getClass().getClassLoader().getResource("PlanarRegions_20171114_090937").getPath());
+      PlanarRegionsList regions = PlanarRegionFileTools.importPlanRegionData(path.toFile());
+
+      runTest(startPose, goalPose, regions, parameters, 2.0);
+   }
+
+   private class BestEffortPlannerParameters extends DefaultFootstepPlanningParameters
+   {
+      @Override
+      public boolean getReturnBestEffortPlan()
+      {
+         return true;
+      }
+
+      @Override
+      public int getMinimumStepsForBestEffortPlan()
+      {
+         return 3;
+      }
    }
 
    @Test(timeout = 300000)
@@ -88,14 +125,18 @@ public class SimpleOcclusionTests
       FramePose startPose = new FramePose();
       FramePose goalPose = new FramePose();
       PlanarRegionsList regions = createMazeOcclusionField(startPose, goalPose);
-      runTest(startPose, goalPose, regions);
+      runTest(startPose, goalPose, regions, defaultMaxAllowedSolveTime);
    }
 
-   private void runTest(FramePose startPose, FramePose goalPose, PlanarRegionsList regions)
+   private void runTest(FramePose startPose, FramePose goalPose, PlanarRegionsList regions, double maxAllowedSolveTime)
+   {
+      runTest(startPose, goalPose, regions, getParameters(), maxAllowedSolveTime);
+   }
+
+   private void runTest(FramePose startPose, FramePose goalPose, PlanarRegionsList regions, FootstepPlannerParameters parameters, double maxAllowedSolveTime)
    {
       YoVariableRegistry registry = new YoVariableRegistry(name.getMethodName());
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      FootstepPlannerParameters parameters = getParameters();
 
       FootstepPlanner planner = getPlanner(parameters, graphicsListRegistry, registry);
       FootstepPlannerGoal goal = createPlannerGoal(goalPose);
