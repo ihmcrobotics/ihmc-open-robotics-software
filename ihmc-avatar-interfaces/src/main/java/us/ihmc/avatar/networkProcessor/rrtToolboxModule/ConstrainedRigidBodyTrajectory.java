@@ -8,7 +8,6 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
@@ -260,12 +259,8 @@ public class ConstrainedRigidBodyTrajectory
       alpha = MathTools.clamp(alpha, 0, 1);
       current.interpolate(previous, next, alpha);
 
-      // inverse control frame 
-      RigidBodyTransform endEffectorToDesired = new RigidBodyTransform(controlFrameOrienataion, controlFramePoint);
-      endEffectorToDesired.invert();
-      
-      current.appendTransform(endEffectorToDesired);
-      
+      current.appendRotation(controlFrameOrienataion);
+      current.appendTranslation(controlFramePoint);
       return current;
    }
 

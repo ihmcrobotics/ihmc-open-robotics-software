@@ -213,7 +213,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    public void testHandCirclePositionOnlyAndNoChestNoPelvis() throws Exception, UnreasonableAccelerationException
    {
       double circleRadius = 0.25;
-      SideDependentList<Point3D> circleCenters = new SideDependentList<>(new Point3D(0.5, 0.3, 1.1), new Point3D(0.5, -0.3, 1.1));
+      SideDependentList<Point3D> circleCenters = new SideDependentList<>(new Point3D(0.5, 0.4, 1.1), new Point3D(0.5, -0.4, 1.1));
       Quaternion circleOrientation = new Quaternion();
       circleOrientation.appendYawRotation(Math.PI * 0.1);
       circleOrientation.appendPitchRotation(Math.PI * 0.5);
@@ -245,19 +245,17 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          Quaternion controlOrientation = new Quaternion();
          if (robotSide == RobotSide.LEFT)
          {
-            // TODO ...??
-            controlPoint.addY(0.2);
-            controlOrientation.appendPitchRotation(-0.5 * Math.PI);
-            controlOrientation.appendYawRotation(0.5 * Math.PI);
-            
+            // REMARK1 : Rotation to make original Hand Frame to customized Hand Frame.
+            // REMARK2 : Translation to make original Hand Frame to customized Hand Frame.
+            controlPoint.addY(-0.2);
+            controlOrientation.appendYawRotation(-0.5 * Math.PI);
+            controlOrientation.appendPitchRotation(0.5 * Math.PI);                  
          }
          else
          {
-            controlPoint.addY(-0.2);
-
-            controlOrientation.appendPitchRotation(-0.5 * Math.PI);
-            controlOrientation.appendYawRotation(-0.5 * Math.PI);
-            
+            controlPoint.addY(0.2);
+            controlOrientation.appendYawRotation(0.5 * Math.PI);
+            controlOrientation.appendPitchRotation(0.5 * Math.PI);
          }
          trajectory.setControlFrameOrientation(controlOrientation);
          trajectory.setControlFramePosition(controlPoint);
