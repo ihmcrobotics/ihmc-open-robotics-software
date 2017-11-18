@@ -35,11 +35,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
@@ -209,7 +207,7 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
       for (int i = 0; i < locations.size(); i++)
       {
          FramePoint3D placeToStep = new FramePoint3D(ReferenceFrame.getWorldFrame(), locations.get(i));
-         FootstepDataMessage data = createFootstepDataMessage(robotSides[i], null, placeToStep, orientations.get(i));
+         FootstepDataMessage data = createFootstepDataMessage(robotSides[i], placeToStep, orientations.get(i));
          message.add(data);
       }
 
@@ -256,7 +254,7 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
       return messageList;
    }
 
-   private FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, PlanarRegion planarRegion, FramePoint3D placeToStep, Quaternion orientation)
+   private FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, FramePoint3D placeToStep, Quaternion orientation)
    {
       FootstepDataMessage footstepData = new FootstepDataMessage();
 
@@ -265,7 +263,6 @@ public abstract class DRCPushRecoveryOverSteppingStonesTest implements MultiRobo
 
       footstepData.setLocation(placeToStepInWorld);
       footstepData.setOrientation(orientation);
-      footstepData.setPlanarRegion(planarRegion);
       footstepData.setRobotSide(robotSide);
 
       return footstepData;
