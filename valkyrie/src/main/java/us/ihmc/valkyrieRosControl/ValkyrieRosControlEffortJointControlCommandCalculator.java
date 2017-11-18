@@ -25,7 +25,7 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
       String pdControllerBaseName = yoEffortJointHandleHolder.getName();
       YoVariableRegistry registry = new YoVariableRegistry(pdControllerBaseName + "Command");
 
-      pidController = new PIDController(pdControllerBaseName + "PositionController", registry);
+      pidController = new PIDController(pdControllerBaseName + "LowLevel", registry);
       tauOffset = new YoDouble("tau_offset_" + pdControllerBaseName, registry);
 
       pidController.setMaxIntegralError(50.0);
