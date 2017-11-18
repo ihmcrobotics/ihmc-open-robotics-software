@@ -62,5 +62,5 @@ public class WholeBodyTrajectoryToolboxSettings
          configurationSpaces = null;
       
       return configurationSpaces;
-   }
+   }     
 }
