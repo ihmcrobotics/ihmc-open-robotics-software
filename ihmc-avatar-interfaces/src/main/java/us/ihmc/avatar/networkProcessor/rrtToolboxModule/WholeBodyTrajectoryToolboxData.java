@@ -21,7 +21,8 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**
- * This class is for packing input of the controller as like as a packet {@link WholeBodyTrajectoryToolboxMessage}.
+ * This class is for packing input of the controller as like as a packet
+ * {@link WholeBodyTrajectoryToolboxMessage}.
  * <p>
  * - trajectory time, initial configuration.
  * <p>
@@ -31,8 +32,8 @@ import us.ihmc.robotics.screwTheory.RigidBody;
  * <p>
  * 
  * @link {WholeBodyTrajectoryToolboxMessage is converted to (this).
- * <p>
- * This will be used for {@link HumanoidKinematicsSolver}.
+ *       <p>
+ *       This will be used for {@link HumanoidKinematicsSolver}.
  * @author Inho, Sylvain.
  *
  */
@@ -41,12 +42,9 @@ public class WholeBodyTrajectoryToolboxData
    private final FullHumanoidRobotModel fullRobotModel;
 
    private double trajectoryTime;
-   
+
    /**
-    * Left hand
-    * Right hand
-    * Chest
-    * Pelvis 
+    * Left hand Right hand Chest Pelvis
     */
    private final List<ConstrainedRigidBodyTrajectory> listOfRigidBodyData = new ArrayList<ConstrainedRigidBodyTrajectory>();
 
@@ -129,7 +127,7 @@ public class WholeBodyTrajectoryToolboxData
       }
 
       // check exploration configurations.
-      PrintTools.info("Total dimension "+explorationConfigurationNames.size());
+      PrintTools.info("Total dimension " + explorationConfigurationNames.size());
       for (int j = 0; j < explorationConfigurationNames.size(); j++)
       {
          PrintTools.info("" + explorationConfigurationNames.get(j) + " " + explorationRangeUpperLimits.get(j) + " " + explorationRangeLowerLimits.get(j));
@@ -142,13 +140,13 @@ public class WholeBodyTrajectoryToolboxData
 
       for (int i = 0; i < listOfRigidBodyData.size(); i++)
       {
-         if(listOfRigidBodyData.get(i).getRigidBody() == rigidBody)
+         if (listOfRigidBodyData.get(i).getRigidBody() == rigidBody)
          {
-            pose = listOfRigidBodyData.get(i).getPoseFromTrajectory(node, nodeIndexBasedHashMap);            
+            pose = listOfRigidBodyData.get(i).getPoseFromTrajectory(node, nodeIndexBasedHashMap);
             break;
-         }         
+         }
       }
-            
+
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), pose);
 
       return framePose;

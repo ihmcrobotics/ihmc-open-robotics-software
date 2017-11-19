@@ -218,24 +218,24 @@ public class ConstrainedRigidBodyTrajectory
       {
          if (getRigidBody() == map.get(i + 1))
          {
-            PrintTools.info(""+rigidBody +" "+node.getNodeData(i + 1));
+            PrintTools.info("" + rigidBody + " " + node.getNodeData(i + 1));
             configurations[curConfiguration] = node.getNodeData(i + 1);
             curConfiguration++;
          }
       }
 
       Pose3D pose = getPose(time);
-      
+
       for (int i = 0; i < configurations.length; i++)
       {
          appendConfiguration(pose, i, configurations[i]);
-      }  
-      
+      }
+
       return pose;
    }
 
    public Pose3D getPose(double time)
-   {  
+   {
       Pose3D current = new Pose3D();
 
       Pose3D previous = null;
@@ -268,6 +268,5 @@ public class ConstrainedRigidBodyTrajectory
    {
       pose.appendTransform(explorationConfigurationSpaces.get(index).getLocalRigidBodyTransform(configuration));
    }
-
 
 }
