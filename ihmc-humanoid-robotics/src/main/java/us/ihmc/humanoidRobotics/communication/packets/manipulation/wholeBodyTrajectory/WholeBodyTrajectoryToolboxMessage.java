@@ -3,10 +3,8 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajectoryToolboxMessage> implements MultiplePacketHolder
 {

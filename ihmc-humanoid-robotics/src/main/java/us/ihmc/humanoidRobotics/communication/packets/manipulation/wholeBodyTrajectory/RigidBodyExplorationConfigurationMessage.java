@@ -2,7 +2,6 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 
 import java.util.Arrays;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.ArrayTools;
