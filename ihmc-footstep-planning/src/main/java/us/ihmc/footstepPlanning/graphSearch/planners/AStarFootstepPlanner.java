@@ -144,12 +144,15 @@ public class AStarFootstepPlanner implements FootstepPlanner
    @Override
    public FootstepPlanningResult plan()
    {
+      if(debug)
+         PrintTools.info("A* planner is starting");
+      
       initialize();
       planInternal();
       FootstepPlanningResult result = checkResult();
       if (debug)
       {
-         PrintTools.info("Planning statistics for " + result);
+         PrintTools.info("A* Footstep planning statistics for " + result);
          System.out.println("   Finished planning after " + Precision.round(planningTime.getDoubleValue(), 2) + " seconds.");
          System.out.println("   Expanded each node to an average of " + numberOfExpandedNodes.getLongValue() + " children nodes.");
          System.out.println("   Planning took a total of "+ itarationCount.getLongValue() + " iterations.");
@@ -228,7 +231,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private void planInternal()
    {
       long planningStartTime = System.nanoTime();
-
+      
       long rejectedNodesCount = 0;
       long expandedNodesCount = 0;
       long iterations = 0;
