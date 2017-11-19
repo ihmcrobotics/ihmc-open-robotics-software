@@ -39,6 +39,8 @@ import us.ihmc.robotics.screwTheory.RigidBody;
  */
 public class WholeBodyTrajectoryToolboxData
 {
+   private static final boolean VERBOSE = false;
+
    private final FullHumanoidRobotModel fullRobotModel;
 
    private double trajectoryTime;
@@ -80,7 +82,8 @@ public class WholeBodyTrajectoryToolboxData
             if (waypointBasedTrajectoryCommand.getEndEffector() == rigidBodyExplorationConfigurationCommand.getRigidBody())
             {
                hasWayPointBasedTrajectoryCommand = true;
-               PrintTools.info("" + rigidBodyExplorationConfigurationCommand.getRigidBody().getName() + " has trajectory and exploration");
+               if (VERBOSE)
+                  PrintTools.info("" + rigidBodyExplorationConfigurationCommand.getRigidBody().getName() + " has trajectory and exploration");
                listOfRigidBodyData.add(new ConstrainedRigidBodyTrajectory(waypointBasedTrajectoryCommand, rigidBodyExplorationConfigurationCommand));
                continue;
             }
@@ -88,7 +91,8 @@ public class WholeBodyTrajectoryToolboxData
 
          if (!hasWayPointBasedTrajectoryCommand)
          {
-            PrintTools.info("" + rigidBodyExplorationConfigurationCommand.getRigidBody().getName() + " has NO trajectory");
+            if (VERBOSE)
+               PrintTools.info("" + rigidBodyExplorationConfigurationCommand.getRigidBody().getName() + " has NO trajectory");
             listOfRigidBodyData.add(new ConstrainedRigidBodyTrajectory(this.fullRobotModel, rigidBodyExplorationConfigurationCommand));
          }
       }
@@ -103,7 +107,8 @@ public class WholeBodyTrajectoryToolboxData
       {
          if (!tempRigidBodyList.contains(listOfRigidBody.get(i)))
          {
-            PrintTools.info("Has no " + listOfRigidBody.get(i) + " command");
+            if (VERBOSE)
+               PrintTools.info("Has no " + listOfRigidBody.get(i) + " command");
             ConfigurationSpaceName[] configurationSpaces = WholeBodyTrajectoryToolboxSettings.getDefaultExplorationConfiguratSpaces(fullRobotModel,
                                                                                                                                     listOfRigidBody.get(i));
             RigidBodyExplorationConfigurationCommand dummyCommand = new RigidBodyExplorationConfigurationCommand(listOfRigidBody.get(i), configurationSpaces);
@@ -127,10 +132,13 @@ public class WholeBodyTrajectoryToolboxData
       }
 
       // check exploration configurations.
-      PrintTools.info("Total dimension " + explorationConfigurationNames.size());
-      for (int j = 0; j < explorationConfigurationNames.size(); j++)
+      if (VERBOSE)
       {
-         PrintTools.info("" + explorationConfigurationNames.get(j) + " " + explorationRangeUpperLimits.get(j) + " " + explorationRangeLowerLimits.get(j));
+         PrintTools.info("Total dimension " + explorationConfigurationNames.size());
+         for (int j = 0; j < explorationConfigurationNames.size(); j++)
+         {
+            PrintTools.info("" + explorationConfigurationNames.get(j) + " " + explorationRangeUpperLimits.get(j) + " " + explorationRangeLowerLimits.get(j));
+         }
       }
    }
 
