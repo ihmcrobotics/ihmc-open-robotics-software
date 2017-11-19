@@ -100,9 +100,12 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
    {
       List<Packet<?>> allPackets = new ArrayList<>();
 
-      allPackets.addAll(endEffectorTrajectories);
-      allPackets.addAll(explorationConfigurations);
-      allPackets.add(configuration);
+      if (endEffectorTrajectories != null)
+         allPackets.addAll(endEffectorTrajectories);
+      if (explorationConfigurations != null)
+         allPackets.addAll(explorationConfigurations);
+      if (configuration != null)
+         allPackets.add(configuration);
 
       return allPackets;
    }
