@@ -10,14 +10,13 @@ public class WholeBodyTrajectoryToolboxRequestPacket extends Packet<WholeBodyTra
    public int numberOfExpanding;
 
    public int numberOfFindInitialGuess;
-   
+
    public int numerOfEndEffectorWayPoints;
 
    public KinematicsToolboxOutputStatus initialConfiguration;
 
    /*
-    * ConstrainedEndEffectorTrajectory cannot be imported in
-    * IHMCHumanoidRobotics.
+    * ConstrainedEndEffectorTrajectory cannot be imported in IHMCHumanoidRobotics.
     */
    // public ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
 
@@ -28,7 +27,8 @@ public class WholeBodyTrajectoryToolboxRequestPacket extends Packet<WholeBodyTra
 
    public void setInitialRobotConfigration(FullHumanoidRobotModel fullRobotModel)
    {
-      this.initialConfiguration = new KinematicsToolboxOutputStatus(fullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel), false);
+      this.initialConfiguration = new KinematicsToolboxOutputStatus(fullRobotModel.getRootJoint(),
+                                                                    FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel), false);
    }
 
    public void setNumberOfExpanding(int value)
@@ -45,7 +45,7 @@ public class WholeBodyTrajectoryToolboxRequestPacket extends Packet<WholeBodyTra
    {
       this.numerOfEndEffectorWayPoints = value;
    }
-   
+
    @Override
    public boolean epsilonEquals(WholeBodyTrajectoryToolboxRequestPacket other, double epsilon)
    {

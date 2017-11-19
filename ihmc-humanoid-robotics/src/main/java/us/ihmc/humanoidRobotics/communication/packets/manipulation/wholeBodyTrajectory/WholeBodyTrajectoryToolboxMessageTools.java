@@ -7,7 +7,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class WholeBodyTrajectoryToolboxMessageTools
-{   
+{
    public static interface FunctionTrajectory
    {
       public Pose3D compute(double time);
@@ -83,7 +83,7 @@ public class WholeBodyTrajectoryToolboxMessageTools
          lowerLimit[i] = degreesOfFreedomToExplore.get(i).getDefaultExplorationLowerLimit();
       return lowerLimit;
    }
-   
+
    public static double[] createDefaultExplorationUpperLimitArray(ConfigurationSpaceName... configurationSpaceNames)
    {
       double[] upperLimit = new double[configurationSpaceNames.length];

@@ -36,7 +36,7 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
    {
       this.configuration = configuration;
       this.endEffectorTrajectories = endEffectorTrajectories;
-      this.explorationConfigurations = explorationConfigurations;      
+      this.explorationConfigurations = explorationConfigurations;
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
