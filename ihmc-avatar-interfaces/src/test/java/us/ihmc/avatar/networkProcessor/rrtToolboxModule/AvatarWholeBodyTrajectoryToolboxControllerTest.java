@@ -27,18 +27,14 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematic
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.rotationConversion.RotationVectorConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -53,13 +49,8 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.RigidBodyExplorationConfigurationMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxConfigurationMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.*;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools.FunctionTrajectory;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotController.RobotController;
@@ -87,7 +78,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
    static
    {
-      simulationTestingParameters.setKeepSCSUp(true);
+      simulationTestingParameters.setKeepSCSUp(false);
       simulationTestingParameters.setDataBufferSize(1 << 16);
    }
 
@@ -217,6 +208,8 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       Quaternion circleOrientation = new Quaternion();
       circleOrientation.appendYawRotation(Math.PI * 0.1);
       circleOrientation.appendPitchRotation(Math.PI * 0.5);
+      Quaternion handOrientation = new Quaternion(circleOrientation);
+      handOrientation.appendPitchRotation(-0.5 * Math.PI);
 
       double trajectoryTime = 5.0;
       FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
@@ -235,7 +228,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
          // orientation
          FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleOrientation,
-                                                                           false, 0.0);
+                                                                           handOrientation, false, 0.0);
 
          ConfigurationSpaceName[] unconstrainedDegreesOfFreedom = {};
          WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction,
@@ -249,7 +242,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
             // REMARK2 : Translation to make original Hand Frame to customized Hand Frame.
             controlPoint.addY(-0.2);
             controlOrientation.appendYawRotation(-0.5 * Math.PI);
-            controlOrientation.appendPitchRotation(0.5 * Math.PI);                  
+            controlOrientation.appendPitchRotation(0.5 * Math.PI);
          }
          else
          {
@@ -277,7 +270,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                                                                                                                          new double[] {0.90});
       RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest());
       rigidBodyConfigurations.add(pelvisConfigurationMessage);
-      //rigidBodyConfigurations.add(chestConfigurationMessage);
+      rigidBodyConfigurations.add(chestConfigurationMessage);
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
       commandInputManager.submitMessage(message);
 
@@ -313,24 +306,12 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction,
                                                                              unconstrainedDegreesOfFreedom);
          handTrajectories.add(trajectory);
-
-         if (visualize)
-            scs.addStaticLinkGraphics(createFunctionTrajectoryVisualization(handFunction, 0.0, trajectoryTime, timeResolution, 0.01, YoAppearance.AliceBlue()));
       }
 
-      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories);
-      commandInputManager.submitMessage(message);
-
       int maxNumberOfIterations = 10000;
-      WholeBodyTrajectoryToolboxOutputStatus solution = runToolboxController(maxNumberOfIterations);
+      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories);
 
-      if (numberOfIterations.getIntegerValue() < maxNumberOfIterations - 1)
-         assertNotNull("The toolbox is done but did not report a solution.", solution);
-      else
-         fail("The toolbox has run for " + maxNumberOfIterations + " without converging nor aborting.");
-
-      if (visualize)
-         visualizeSolution(solution, 0.1 * timeResolution);
+      runTest(message, maxNumberOfIterations);
    }
 
    @Test
@@ -350,29 +331,55 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         Graphics3DObject graphics3dObject = new Graphics3DObject();
-         graphics3dObject.transform(new RigidBodyTransform(poses.get(robotSide).getOrientation(), poses.get(robotSide).getPosition()));
-         graphics3dObject.addCoordinateSystem(0.1);
-         scs.addStaticLinkGraphics(graphics3dObject);
-
          RigidBody hand = fullRobotModel.getHand(robotSide);
 
          QuaternionReadOnly orientation = poses.get(robotSide).getOrientation();
          boolean ccw = robotSide == RobotSide.RIGHT;
-         double phase = 0.0; //robotSide.negateIfLeftSide(Math.PI / 2.0);
+         double phase = 0.0;
          FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleAxis,
                                                                            orientation, ccw, phase);
          WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction);
          handTrajectories.add(trajectory);
-
-         if (visualize)
-            scs.addStaticLinkGraphics(createFunctionTrajectoryVisualization(handFunction, 0.0, trajectoryTime, timeResolution, 0.01, YoAppearance.AliceBlue()));
       }
 
+      int maxNumberOfIterations = 10000;
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories);
+
+      runTest(message, maxNumberOfIterations);
+   }
+
+   private void runTest(WholeBodyTrajectoryToolboxMessage message, int maxNumberOfIterations) throws UnreasonableAccelerationException
+   {
+      List<WaypointBasedTrajectoryMessage> endEffectorTrajectories = message.getEndEffectorTrajectories();
+      double t0 = Double.POSITIVE_INFINITY;
+      double tf = Double.NEGATIVE_INFINITY;
+
+      if (endEffectorTrajectories != null)
+      {
+         for (WaypointBasedTrajectoryMessage trajectoryMessage : endEffectorTrajectories)
+         {
+            t0 = Math.min(t0, trajectoryMessage.getWaypointTime(0));
+            tf = Math.max(t0, trajectoryMessage.getLastWaypointTime());
+
+            // Visualize the position part if it is commanded
+            List<ConfigurationSpaceName> unconstrainedDoFs = Arrays.asList(trajectoryMessage.getUnconstrainedDegreesOfFreedom());
+
+            boolean isXUnconstrained = unconstrainedDoFs.stream().anyMatch(dof -> dof == ConfigurationSpaceName.X);
+            boolean isYUnconstrained = unconstrainedDoFs.stream().anyMatch(dof -> dof == ConfigurationSpaceName.Y);
+            boolean isZUnconstrained = unconstrainedDoFs.stream().anyMatch(dof -> dof == ConfigurationSpaceName.Z);
+
+            if (isXUnconstrained && isYUnconstrained && isZUnconstrained)
+               continue; // The position part is not dictated by trajectory, let's not visualize.
+
+            if (visualize)
+               createTrajectoryMessageVisualization(trajectoryMessage, 0.01, YoAppearance.AliceBlue());
+         }
+      }
+
+      double trajectoryTime = tf - t0;
+
       commandInputManager.submitMessage(message);
 
-      int maxNumberOfIterations = 10000;
       WholeBodyTrajectoryToolboxOutputStatus solution = runToolboxController(maxNumberOfIterations);
 
       if (numberOfIterations.getIntegerValue() < maxNumberOfIterations - 1)
@@ -381,7 +388,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          fail("The toolbox has run for " + maxNumberOfIterations + " without converging nor aborting.");
 
       if (visualize)
-         visualizeSolution(solution, 0.1 * timeResolution);
+         visualizeSolution(solution, trajectoryTime / 1000.0);
    }
 
    private SideDependentList<Pose3D> computePrivilegedHandPosesAtPositions(SideDependentList<Point3D> desiredPositions)
@@ -451,8 +458,14 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private static Pose3D computeCircleTrajectory(double time, double trajectoryTime, double circleRadius, Point3DReadOnly circleCenter,
                                                  Vector3DReadOnly circleAxis, QuaternionReadOnly constantOrientation, boolean ccw, double phase)
    {
-      AxisAngle circleRotation = EuclidGeometryTools.axisAngleFromZUpToVector3D(circleAxis);
+      Quaternion circleRotation = new Quaternion(EuclidGeometryTools.axisAngleFromZUpToVector3D(circleAxis));
 
+      return computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenter, circleRotation, constantOrientation, ccw, phase);
+   }
+
+   private static Pose3D computeCircleTrajectory(double time, double trajectoryTime, double circleRadius, Point3DReadOnly circleCenter,
+                                                 Quaternion circleRotation, QuaternionReadOnly constantOrientation, boolean ccw, double phase)
+   {
       double theta = (ccw ? -time : time) / trajectoryTime * 2.0 * Math.PI + phase;
       double x = circleRadius * Math.cos(theta);
       double y = circleRadius * Math.sin(theta);
@@ -461,23 +474,6 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       point.add(circleCenter);
 
       return new Pose3D(point, constantOrientation);
-   }
-
-   private static Pose3D computeCircleTrajectory(double time, double trajectoryTime, double circleRadius, Point3DReadOnly circleCenter,
-                                                 QuaternionReadOnly circleOrientation, boolean ccw, double phase)
-   {
-      double theta = (ccw ? -time : time) / trajectoryTime * 2.0 * Math.PI + phase;
-      double x = circleRadius * Math.cos(theta);
-      double y = circleRadius * Math.sin(theta);
-      Point3D point = new Point3D(x, y, 0.0);
-      circleOrientation.transform(point);
-      
-      Quaternion orientation = new Quaternion(circleOrientation);
-      orientation.appendPitchRotation(-0.5*Math.PI);
-      RotationMatrix matrix = new RotationMatrix(orientation);
-      point.add(circleCenter);
-
-      return new Pose3D(point, orientation);
    }
 
    private static Graphics3DObject createFunctionTrajectoryVisualization(FunctionTrajectory trajectoryToVisualize, double t0, double tf, double timeResolution,
@@ -497,6 +493,16 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          graphics.addMeshData(mesh, appearance);
       }
       return graphics;
+   }
+
+   private static Graphics3DObject createTrajectoryMessageVisualization(WaypointBasedTrajectoryMessage trajectoryMessage, double radius,
+                                                                        AppearanceDefinition appearance)
+   {
+      double t0 = trajectoryMessage.getWaypointTime(0);
+      double tf = trajectoryMessage.getLastWaypointTime();
+      double timeResolution = (tf - t0) / trajectoryMessage.getNumberOfWaypoints();
+      FunctionTrajectory trajectoryToVisualize = WholeBodyTrajectoryToolboxMessageTools.createFunctionTrajectory(trajectoryMessage);
+      return createFunctionTrajectoryVisualization(trajectoryToVisualize, t0, tf, timeResolution, radius, appearance);
    }
 
    private void visualizeSolution(WholeBodyTrajectoryToolboxOutputStatus solution, double timeResolution) throws UnreasonableAccelerationException
