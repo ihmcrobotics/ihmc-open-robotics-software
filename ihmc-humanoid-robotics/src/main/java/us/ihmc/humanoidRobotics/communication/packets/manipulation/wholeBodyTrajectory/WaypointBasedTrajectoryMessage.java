@@ -51,7 +51,7 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
    }
 
    public WaypointBasedTrajectoryMessage(RigidBody endEffector, double[] waypointTimes, Pose3D[] waypoints,
-                                               ConfigurationSpaceName[] unconstrainedDegreesOfFreedom)
+                                         ConfigurationSpaceName[] unconstrainedDegreesOfFreedom)
    {
       endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
       setWaypoints(waypointTimes, waypoints);

@@ -18,12 +18,12 @@ public class WholeBodyTrajectoryToolboxSettings
       controlRigidBodyDefinitions.add(fullRobotModel.getPelvis());
       return controlRigidBodyDefinitions;
    }
-   
+
    public static ConfigurationSpaceName[] getDefaultExplorationConfiguratSpaces(FullHumanoidRobotModel fullRobotModel, RigidBody rigidBody)
    {
       ConfigurationSpaceName[] configurationSpaces;
-            
-      if(rigidBody == fullRobotModel.getHand(RobotSide.LEFT))
+
+      if (rigidBody == fullRobotModel.getHand(RobotSide.LEFT))
       {
          configurationSpaces = new ConfigurationSpaceName[6];
          configurationSpaces[0] = ConfigurationSpaceName.X;
@@ -33,7 +33,7 @@ public class WholeBodyTrajectoryToolboxSettings
          configurationSpaces[4] = ConfigurationSpaceName.PITCH;
          configurationSpaces[5] = ConfigurationSpaceName.ROLL;
       }
-      else if(rigidBody == fullRobotModel.getHand(RobotSide.RIGHT))
+      else if (rigidBody == fullRobotModel.getHand(RobotSide.RIGHT))
       {
          configurationSpaces = new ConfigurationSpaceName[6];
          configurationSpaces[0] = ConfigurationSpaceName.X;
@@ -43,15 +43,15 @@ public class WholeBodyTrajectoryToolboxSettings
          configurationSpaces[4] = ConfigurationSpaceName.PITCH;
          configurationSpaces[5] = ConfigurationSpaceName.ROLL;
       }
-      else if(rigidBody == fullRobotModel.getPelvis())
+      else if (rigidBody == fullRobotModel.getPelvis())
       {
          configurationSpaces = new ConfigurationSpaceName[1];
          configurationSpaces[0] = ConfigurationSpaceName.Z;
-//         configurationSpaces[1] = ConfigurationSpaceName.YAW;
-//         configurationSpaces[2] = ConfigurationSpaceName.PITCH;
-//         configurationSpaces[3] = ConfigurationSpaceName.ROLL;
+         //         configurationSpaces[1] = ConfigurationSpaceName.YAW;
+         //         configurationSpaces[2] = ConfigurationSpaceName.PITCH;
+         //         configurationSpaces[3] = ConfigurationSpaceName.ROLL;
       }
-      else if(rigidBody == fullRobotModel.getChest())
+      else if (rigidBody == fullRobotModel.getChest())
       {
          configurationSpaces = new ConfigurationSpaceName[3];
          configurationSpaces[0] = ConfigurationSpaceName.YAW;
@@ -60,7 +60,7 @@ public class WholeBodyTrajectoryToolboxSettings
       }
       else
          configurationSpaces = null;
-      
+
       return configurationSpaces;
-   }     
+   }
 }
