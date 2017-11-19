@@ -29,9 +29,13 @@ public class WholeBodyTrajectoryToolboxHelper
    /**
     * This joint limit score is defined in the following paper (proposed by Yoshikawa).
     * <p>
-    * Nelson, Khosla, "Strategies for increasing the tracking region of an eye-in-hand system by singularity and joint limit avoidance.", The International journal of robotics research 14.3 (1995): 255-269.
+    * Nelson, Khosla, "Strategies for increasing the tracking region of an eye-in-hand system by
+    * singularity and joint limit avoidance.", The International journal of robotics research 14.3
+    * (1995): 255-269.
     * <p>
-    * See {@link <p> http://repository.cmu.edu/cgi/viewcontent.cgi?article=1581&context=isr}
+    * See {@link
+    * <p>
+    * http://repository.cmu.edu/cgi/viewcontent.cgi?article=1581&context=isr}
     * <p>
     * See equation 24, 26. Joint limit score is stated on the head of natural exponential.
     * 
@@ -50,7 +54,7 @@ public class WholeBodyTrajectoryToolboxHelper
       // Yoshikawa's definition.
       return diffUpper * diffLower / (motionRange * motionRange);
    }
-   
+
    public static void setSelectionMatrix(SelectionMatrix6D selectionMatrix, ConfigurationSpaceName configurationSpaceName, boolean select)
    {
       switch (configurationSpaceName)
