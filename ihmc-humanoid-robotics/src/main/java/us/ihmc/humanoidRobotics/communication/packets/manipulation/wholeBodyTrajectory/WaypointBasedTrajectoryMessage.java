@@ -182,6 +182,11 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       return waypointTimes[i];
    }
 
+   public double getLastWaypointTime()
+   {
+      return waypointTimes[getNumberOfWaypoints() - 1];
+   }
+
    public double[] getWaypointTimes()
    {
       return waypointTimes;
