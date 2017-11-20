@@ -233,23 +233,8 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
 
          // This is for Atlas with RobotiQ hand. Control frame to original frame.
-         Point3D controlPoint = new Point3D();
-         Quaternion controlOrientation = new Quaternion();         
-         if(robotSide == RobotSide.LEFT)
-         {
-            controlPoint.setY(0.2);
-            controlOrientation.appendYawRotation(0.5 * Math.PI);
-            controlOrientation.appendRollRotation(-0.5 * Math.PI);
-         }
-         else
-         {
-            controlPoint.setY(-0.2);
-            controlOrientation.appendYawRotation(-0.5 * Math.PI);
-            controlOrientation.appendRollRotation(0.5 * Math.PI);
-         }
-
-         trajectory.setControlFrameOrientation(controlOrientation);
-         trajectory.setControlFramePosition(controlPoint);
+         trajectory.setControlFrameOrientation(WholeBodyTrajectoryToolboxSettings.getAtlasRobotiQHandControlFrame(robotSide).getOrientation());
+         trajectory.setControlFramePosition(WholeBodyTrajectoryToolboxSettings.getAtlasRobotiQHandControlFrame(robotSide).getPosition());
 
          handTrajectories.add(trajectory);
          //ConfigurationSpaceName[] handConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
