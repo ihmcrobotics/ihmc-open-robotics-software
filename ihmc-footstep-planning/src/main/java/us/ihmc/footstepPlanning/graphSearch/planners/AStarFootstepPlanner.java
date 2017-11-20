@@ -148,6 +148,10 @@ public class AStarFootstepPlanner implements FootstepPlanner
          PrintTools.info("A* planner is starting");
       
       initialize();
+      
+      if(debug)
+         PrintTools.info("A* planner has initialized");
+
       planInternal();
       FootstepPlanningResult result = checkResult();
       if (debug)
@@ -196,7 +200,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
          throw new RuntimeException("Need to set initial conditions before planning.");
       if (goalNodes == null)
          throw new RuntimeException("Need to set goal before planning.");
-
+      
       graph.initialize(startNode);
       NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
@@ -239,6 +243,12 @@ public class AStarFootstepPlanner implements FootstepPlanner
       while (!stack.isEmpty())
       {
          iterations++;
+
+         if(debug)
+         {
+            if(iterations % 150 == 0)
+               PrintTools.info("A* planner is on iteration " + iterations);            
+         }
 
          FootstepNode nodeToExpand = stack.poll();
          if (expandedNodes.contains(nodeToExpand))
