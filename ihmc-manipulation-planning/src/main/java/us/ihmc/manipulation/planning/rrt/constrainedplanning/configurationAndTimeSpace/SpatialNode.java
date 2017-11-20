@@ -7,13 +7,11 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.TupleTools;
-import us.ihmc.robotics.geometry.AngleTools;
 
 public class SpatialNode
 {
    private double time;
-   private String[] names;
-   private Pose3D[] spatials;
+   private SpatialData spatialData;
 
    private SpatialNode parent;
    private final List<SpatialNode> children = new ArrayList<>();
@@ -25,91 +23,61 @@ public class SpatialNode
    {
    }
 
-   public SpatialNode(String[] names, Pose3D[] spatials)
+   public SpatialNode(SpatialData spatialData)
    {
-      this(0.0, names, spatials);
+      this(0.0, spatialData);
    }
 
-   public SpatialNode(double time, String[] names, Pose3D[] spatials)
+   public SpatialNode(double time, SpatialData spatialData)
    {
       this.time = time;
-      this.names = names;
-      this.spatials = spatials;
+      this.spatialData = spatialData;
    }
 
    public SpatialNode(SpatialNode other)
    {
       time = other.time;
-      names = new String[other.getSize()];
-      spatials = new Pose3D[other.getSize()];
+      spatialData = new SpatialData(other.getSpatialData());
 
-      for (int i = 0; i < other.getSize(); i++)
-      {
-         names[i] = other.names[i];
-         spatials[i] = new Pose3D(other.spatials[i]);
-      }
+      parent = other.getParent();
+      children.addAll(other.getChildren());
 
-      parent = other.parent;
-      children.addAll(other.children);
-
-      validity = other.validity;
+      validity = other.isValid();
       if (other.configuration != null)
          configuration = new KinematicsToolboxOutputStatus(other.configuration);
    }
 
    public double getTimeGap(SpatialNode other)
    {
-      return other.time - time;
+      if (getTime() > other.getTime())
+         return Double.MAX_VALUE;
+      else
+         return other.getTime() - getTime();
    }
 
-   public double getGreatestPositionDistance(SpatialNode other)
+   public double getPositionDistance(SpatialNode other)
    {
-      double distance = Double.NEGATIVE_INFINITY;
-
-      for (int i = 0; i < spatials.length; i++)
-         distance = Math.max(distance, spatials[i].getPositionDistance(other.spatials[i]));
-
-      return distance;
+      return spatialData.getPositionDistance(other.getSpatialData());
    }
 
-   public double getGreatestOrientationDistance(SpatialNode other)
+   public double getOrientationDistance(SpatialNode other)
    {
-      double distance = Double.NEGATIVE_INFINITY;
-
-      for (int i = 0; i < spatials.length; i++)
-      {
-         double orientationDistance = spatials[i].getOrientationDistance(other.spatials[i]);
-         orientationDistance = AngleTools.trimAngleMinusPiToPi(orientationDistance);
-         orientationDistance = Math.abs(orientationDistance);
-         distance = Math.max(distance, orientationDistance);
-      }
-
-      return distance;
+      return spatialData.getOrientationDistance(other.getSpatialData());
    }
 
+   /**
+    * Distance from this to other.
+    */
    public double computeDistance(double timeWeight, double positionWeight, double orientationWeight, SpatialNode other)
    {
-      double distanceSquared = MathTools.square(timeWeight * getTimeGap(other));
-      for (int i = 0; i < spatials.length; i++)
-      {
-         distanceSquared += MathTools.square(positionWeight * getGreatestPositionDistance(other));
-         distanceSquared += MathTools.square(orientationWeight * getGreatestOrientationDistance(other));
-      }
-      return Math.sqrt(distanceSquared);
+      return (timeWeight * getTimeGap(other) + positionWeight * getPositionDistance(other) + orientationWeight * getOrientationDistance(other));
    }
 
    public void interpolate(SpatialNode nodeOne, SpatialNode nodeTwo, double alpha)
    {
-      names = nodeOne.names;
-      spatials = new Pose3D[names.length];
-
       time = TupleTools.interpolate(nodeOne.time, nodeTwo.time, alpha);
 
-      for (int i = 0; i < names.length; i++)
-      {
-         spatials[i] = new Pose3D();
-         spatials[i].interpolate(nodeOne.spatials[i], nodeTwo.spatials[i], alpha);
-      }
+      spatialData.interpolate(nodeOne.getSpatialData(), nodeTwo.getSpatialData(), alpha);
    }
 
    public SpatialNode createNodeWithinMaxDistance(double maxTimeInterval, double maxPositionDistance, double maxOrientationDistance, SpatialNode query)
@@ -117,8 +85,8 @@ public class SpatialNode
       double alpha = 1.0;
 
       double timeGap = getTimeGap(query);
-      double greatestPositionDistance = getGreatestPositionDistance(query);
-      double greatestOrientationDistance = getGreatestOrientationDistance(query);
+      double greatestPositionDistance = spatialData.getMaximumPositionDistance(query.getSpatialData());
+      double greatestOrientationDistance = spatialData.getMaximumOrientationDistance(query.getSpatialData());
 
       if (timeGap > maxTimeInterval)
          alpha = Math.min(alpha, maxTimeInterval / timeGap);
@@ -143,6 +111,11 @@ public class SpatialNode
       }
    }
 
+   public SpatialData getSpatialData()
+   {
+      return spatialData;
+   }
+
    public void addChild(SpatialNode child)
    {
       child.setParent(this);
@@ -157,6 +130,11 @@ public class SpatialNode
    public int getNumberOfChildren()
    {
       return children.size();
+   }
+
+   public List<SpatialNode> getChildren()
+   {
+      return children;
    }
 
    public void setParent(SpatialNode parent)
@@ -206,22 +184,22 @@ public class SpatialNode
 
    public int getSize()
    {
-      return names.length;
+      return spatialData.getRigidBodyNames().size();
    }
 
    public String getName(int index)
    {
-      return names[index];
+      return spatialData.getRigidBodyNames().get(index);
    }
 
    public Pose3D getSpatial(int index)
    {
-      return spatials[index];
+      return spatialData.getRigidBodySpatials().get(index);
    }
 
    public void setSpatialsAndConfiguration(SpatialNode other)
    {
-      spatials = other.spatials;
+      spatialData = new SpatialData(other.getSpatialData());
       configuration = other.configuration;
    }
 }

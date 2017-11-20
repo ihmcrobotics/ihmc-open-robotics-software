@@ -1,6 +1,11 @@
 package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsSolver;
 import us.ihmc.commons.PrintTools;
@@ -9,6 +14,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialData;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialNode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -32,7 +38,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
  */
 public class WholeBodyTrajectoryToolboxData
 {
-   private static final boolean VERBOSE = true;
+   private static final boolean VERBOSE = false;
 
    private double trajectoryTime;
 
@@ -59,7 +65,7 @@ public class WholeBodyTrajectoryToolboxData
       }
 
       Map<RigidBody, RigidBodyExplorationConfigurationCommand> explorationMap = new HashMap<>();
-      
+
       for (int i = 0; i < explorationConfigurations.size(); i++)
       {
          RigidBodyExplorationConfigurationCommand exp = explorationConfigurations.get(i);
@@ -87,30 +93,37 @@ public class WholeBodyTrajectoryToolboxData
          }
          rigidBodyDataMap.put(rigidBody, new ConstrainedRigidBodyTrajectory(trajectory, exploration));
       }
+
+      for (int i = 0; i < allRigidBodies.size(); i++)
+      {
+         RigidBody rigidBody = allRigidBodies.get(i);
+         int size = rigidBodyDataMap.get(rigidBody).explorationConfigurationSpaces.size();
+         for (int j = 0; j < size; j++)
+         {
+            if (VERBOSE)
+               PrintTools.info("" + rigidBody.getName() + " " + rigidBodyDataMap.get(rigidBody).explorationConfigurationSpaces.get(j));
+         }
+      }
    }
 
    public SpatialNode createRandomNode()
    {
-      int size = allRigidBodies.size();
-      String[] names = new String[size];
-      Pose3D[] spatials = new Pose3D[size];
+      SpatialData spatialData = new SpatialData();
 
-      for (int i = 0; i < size; i++)
+      for (int i = 0; i < allRigidBodies.size(); i++)
       {
          RigidBody rigidBody = allRigidBodies.get(i);
 
-         names[i] = rigidBody.getName();
-         spatials[i] = rigidBodyDataMap.get(rigidBody).generateRandomPose();
+         rigidBodyDataMap.get(rigidBody).appendRandomSpatial(spatialData);
       }
 
-      return new SpatialNode(names, spatials);
+      return new SpatialNode(spatialData);
    }
 
    public List<KinematicsToolboxRigidBodyMessage> createMessages(SpatialNode node)
    {
       List<KinematicsToolboxRigidBodyMessage> messages = new ArrayList<>();
       double timeInTrajectory = node.getTime();
-
       for (int i = 0; i < node.getSize(); i++)
       {
          RigidBody rigidBody = nameToRigidBodyMap.get(node.getName(i));

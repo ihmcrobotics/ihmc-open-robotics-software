@@ -68,8 +68,10 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
    private final YoDouble jointlimitScore = new YoDouble("jointlimitScore", registry);
-
+   
    private final YoDouble bestScoreInitialGuess = new YoDouble("bestScoreInitialGuess", registry);
+   
+   private final YoBoolean isValidNode = new YoBoolean("isValidNode", registry);
 
    /*
     * Visualizer
@@ -425,9 +427,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    {
       SpatialNode initialGuessNode = toolboxData.createRandomNode();
       initialGuessNode.setTime(0.0);
-
       updateValidity(initialGuessNode);
-
+      
       visualizedNode = initialGuessNode;
 
       double jointScore = computeArmJointsLimitScore(humanoidKinematicsSolver.getDesiredFullRobotModel());
@@ -537,7 +538,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       bestScoreInitialGuess.set(0.0);
 
       state.set(CWBToolboxState.FIND_INITIAL_GUESS);
-      //state.set(CWBToolboxState.DO_NOTHING);
       initialGuessStartTime = System.nanoTime();
 
       initialGuessComputationTime.setToNaN();
@@ -688,6 +688,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    private void updateVisualizers()
    {
       currentTrajectoryTime.set(visualizedNode.getTime());
+      isValidNode.set(visualizedNode.isValid());
 
       if (visualize && visualizedNode != null)
       {
