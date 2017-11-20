@@ -32,7 +32,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
  */
 public class WholeBodyTrajectoryToolboxData
 {
-   private static final boolean VERBOSE = false;
+   private static final boolean VERBOSE = true;
 
    private double trajectoryTime;
 
