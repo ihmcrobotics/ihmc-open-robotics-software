@@ -73,6 +73,11 @@ public class HumanoidKinematicsSolver
       controller.updateRobotConfigurationData(robotConfigurationData);
    }
 
+   public void submit(Iterable<KinematicsToolboxRigidBodyMessage> rigidBodyMessages)
+   {
+      rigidBodyMessages.forEach(this::submit);
+   }
+
    public void submit(KinematicsToolboxRigidBodyMessage rigidBodyMessage)
    {
       commandInputManager.submitMessage(rigidBodyMessage);
