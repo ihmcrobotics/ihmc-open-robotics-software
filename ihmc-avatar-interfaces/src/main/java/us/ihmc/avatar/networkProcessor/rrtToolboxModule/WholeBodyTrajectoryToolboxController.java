@@ -45,8 +45,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 {
    private static final boolean VERBOSE = true;
    private static final int DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION = 5;
-   private static final int DEFAULT_MAXIMUM_NUMBER_OF_ITERATIONS = 10000;
-   private static final int DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE = 10000;
+   private static final int DEFAULT_MAXIMUM_NUMBER_OF_ITERATIONS = 1500;
+   private static final int DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE = 1000;
    private static final int DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE = 100;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -179,7 +179,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       switch (state.getEnumValue())
       {
       case DO_NOTHING:
-
+         
          break;
       case FIND_INITIAL_GUESS:
 
@@ -278,6 +278,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       while (true)
       {
+         // TODO add terminal.
          currentNode = currentNode.getParent();
          if (currentNode != null)
          {
@@ -331,7 +332,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       if (VERBOSE)
       {
          PrintTools.info("Shortcut computation time = " + shortcutPathComputationTime.getDoubleValue());
-         PrintTools.info("the size of the path is " + path.size() + " before dismissing " + revertedPathSize);
+         PrintTools.info("the size of the path is " + path.size() + " before dismissing " + revertedPathSize);         
       }
 
       if (visualize)
@@ -495,7 +496,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       // ******************************************************************************** //
 
       toolboxData = new WholeBodyTrajectoryToolboxData(this.visualizedFullRobotModel, trajectoryCommands, rigidBodyCommands);
-
+      
       if (VERBOSE)
          PrintTools.info("initialize CWB toolbox");
 
@@ -508,9 +509,35 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          return false;
       }
 
+
+      
+      
+      
+      
+//      SpatialNode node1 = toolboxData.createRandomNode();
+//            
+//      node1.setTime(0.0);
+//      
+//      if (VERBOSE)
+//         PrintTools.info("initialize CWB toolbox");
+//      
+//      updateValidity(node1);
+//
+//      visualizedNode = node1;
+      
+
+      
+      
+      
+      
+      
+      
+      
+      
       bestScoreInitialGuess.set(0.0);
 
       state.set(CWBToolboxState.FIND_INITIAL_GUESS);
+      //state.set(CWBToolboxState.DO_NOTHING);
       initialGuessStartTime = System.nanoTime();
 
       initialGuessComputationTime.setToNaN();
@@ -519,7 +546,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       motionGenerationComputationTime.setToNaN();
 
       rootNode = null;
-
+      
       return true;
    }
 
@@ -668,7 +695,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          treeStateVisualizer.setCurrentCTTaskNodeValidity(visualizedNode.isValid());
          treeStateVisualizer.updateVisualizer();
 
-         //FIXME
+         //FIXME TODO
          //         treeVisualizer.update(visualizedNode);
       }
    }

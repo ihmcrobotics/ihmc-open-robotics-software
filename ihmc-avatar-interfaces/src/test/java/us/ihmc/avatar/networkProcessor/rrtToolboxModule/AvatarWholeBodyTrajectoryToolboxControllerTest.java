@@ -227,29 +227,32 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleOrientation,
                                                                            handOrientation, false, 0.0);
 
-         WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, null);
+         SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+         selectionMatrix.clearSelection();
+         selectionMatrix.resetLinearSelection();
+         WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
 
+         // This is for Atlas with RobotiQ hand. Control frame to original frame.
          Point3D controlPoint = new Point3D();
-         Quaternion controlOrientation = new Quaternion();
-         if (robotSide == RobotSide.LEFT)
+         Quaternion controlOrientation = new Quaternion();         
+         if(robotSide == RobotSide.LEFT)
          {
-            // Notice  : This customizing control frame is for atlas with robotiQ hand.
-            // REMARK1 : Rotation to make original Hand Frame to customized Hand Frame.
-            // REMARK2 : Translation to make original Hand Frame to customized Hand Frame.
-            controlPoint.addY(-0.2);
-            controlOrientation.appendYawRotation(-0.5 * Math.PI);
-            controlOrientation.appendPitchRotation(0.5 * Math.PI);
+            controlPoint.setY(0.2);
+            controlOrientation.appendYawRotation(0.5 * Math.PI);
+            controlOrientation.appendRollRotation(-0.5 * Math.PI);
          }
          else
          {
-            controlPoint.addY(0.2);
-            controlOrientation.appendYawRotation(0.5 * Math.PI);
-            controlOrientation.appendPitchRotation(0.5 * Math.PI);
+            controlPoint.setY(-0.2);
+            controlOrientation.appendYawRotation(-0.5 * Math.PI);
+            controlOrientation.appendRollRotation(0.5 * Math.PI);
          }
+
          trajectory.setControlFrameOrientation(controlOrientation);
          trajectory.setControlFramePosition(controlPoint);
 
          handTrajectories.add(trajectory);
+         //ConfigurationSpaceName[] handConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
          ConfigurationSpaceName[] handConfigurations = {};
          RigidBodyExplorationConfigurationMessage rigidBodyConfiguration = new RigidBodyExplorationConfigurationMessage(hand, handConfigurations);
 
@@ -267,8 +270,8 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       ConfigurationSpaceName[] chestConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
       RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest(),
                                                                                                                         chestConfigurations,
-                                                                                                                        new double[] {-0.5, -0.5, -0.5},
-                                                                                                                        new double[] {0.5, 0.5, 0.5});
+                                                                                                                        new double[] {-0.1*Math.PI, -0.1*Math.PI, -0.1*Math.PI},
+                                                                                                                        new double[] {0.1*Math.PI, 0.1*Math.PI, 0.1*Math.PI});
       rigidBodyConfigurations.add(pelvisConfigurationMessage);
       rigidBodyConfigurations.add(chestConfigurationMessage);
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
@@ -303,7 +306,8 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          RigidBody hand = fullRobotModel.getHand(robotSide);
          Quaternion orientation = new Quaternion();
          orientation.setToYawQuaternion(robotSide.negateIfLeftSide(Math.PI / 2.0));
-         FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleAxis, orientation);
+         FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleAxis,
+                                                                           orientation);
          SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
          selectionMatrix6D.clearAngularSelection();
          WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix6D);
@@ -323,8 +327,8 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       }
 
       {
-         double[] lowerLimits = {0,0,0};//{-0.35, -0.35, -0.35};
-         double[] upperLimits = {0,0,0};//{0.35, 0.35, 0.35};
+         double[] lowerLimits = {0, 0, 0};//{-0.35, -0.35, -0.35};
+         double[] upperLimits = {0, 0, 0};//{0.35, 0.35, 0.35};
          explorationConfigurationMessages.add(new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest(), spaces, lowerLimits, upperLimits));
       }
 
@@ -492,7 +496,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
       return new Pose3D(point, constantOrientation);
    }
-   
+
    private static Graphics3DObject createFunctionTrajectoryVisualization(FunctionTrajectory trajectoryToVisualize, double t0, double tf, double timeResolution,
                                                                          double radius, AppearanceDefinition appearance)
    {

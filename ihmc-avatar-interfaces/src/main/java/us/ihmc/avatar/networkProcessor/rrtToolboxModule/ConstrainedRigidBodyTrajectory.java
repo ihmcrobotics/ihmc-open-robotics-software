@@ -6,6 +6,7 @@ import java.util.Random;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -19,6 +20,8 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class ConstrainedRigidBodyTrajectory
 {
+   private static final boolean VERBOSE = false;
+   
    private final Random random = new Random();
    private final RigidBody rigidBody;
 
@@ -158,13 +161,13 @@ public class ConstrainedRigidBodyTrajectory
       message.setDesiredPose(desiredEndEffectorPose);
       message.setControlFramePose(controlFramePose);
       message.setSelectionMatrix(getSelectionMatrix());
-      message.setWeight(0.5);
+      message.setWeight(50.0);   // Sylvain's value :: 0.5
 
       return message;
    }
 
    public Pose3D generateRandomPose()
-   {
+   {      
       Pose3D randomPose = new Pose3D();
       for (int i = 0; i < explorationConfigurationSpaces.size(); i++)
       {
@@ -173,7 +176,10 @@ public class ConstrainedRigidBodyTrajectory
          double lowerBound = explorationRangeLowerLimits.get(i);
          double upperBound = explorationRangeUpperLimits.get(i);
          double value = RandomNumbers.nextDouble(random, lowerBound, upperBound);
-
+         
+         if (VERBOSE)
+            PrintTools.info(""+i +" "+rigidBody + " " +value + " " +lowerBound + " " +upperBound);
+         
          switch (configurationSpaceName)
          {
          case X:
@@ -198,6 +204,7 @@ public class ConstrainedRigidBodyTrajectory
             break;
          }
       }
+      
       return randomPose;
    }
 }
