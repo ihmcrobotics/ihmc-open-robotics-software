@@ -17,6 +17,7 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Rigi
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -42,7 +43,7 @@ public class WholeBodyTrajectoryToolboxData
    private final FullHumanoidRobotModel fullRobotModel;
 
    private double trajectoryTime;
-   
+
    /**
     * Left hand
     * Right hand
@@ -96,7 +97,7 @@ public class WholeBodyTrajectoryToolboxData
          }
       }
 
-      // non defined rigid body
+      // for non defined rigid body.
       ArrayList<RigidBody> tempRigidBodyList = new ArrayList<RigidBody>();
       for (int i = 0; i < listOfRigidBodyData.size(); i++)
          tempRigidBodyList.add(listOfRigidBodyData.get(i).getRigidBody());
@@ -130,7 +131,7 @@ public class WholeBodyTrajectoryToolboxData
       }
 
       // check exploration configurations.
-      PrintTools.info("Total dimension "+explorationConfigurationNames.size());
+      PrintTools.info("Total dimension " + getDimensionOfExplorationConfigurations());
       for (int j = 0; j < explorationConfigurationNames.size(); j++)
       {
          PrintTools.info("" + explorationConfigurationNames.get(j) + " " + explorationRangeUpperLimits.get(j) + " " + explorationRangeLowerLimits.get(j));
@@ -143,21 +144,46 @@ public class WholeBodyTrajectoryToolboxData
 
       for (int i = 0; i < listOfRigidBodyData.size(); i++)
       {
-         if(listOfRigidBodyData.get(i).getRigidBody() == rigidBody)
+         if (listOfRigidBodyData.get(i).getRigidBody() == rigidBody)
          {
-            pose = listOfRigidBodyData.get(i).getPoseFromTrajectory(node, nodeIndexBasedHashMap);            
+            pose = listOfRigidBodyData.get(i).getPoseFromTrajectory(node, nodeIndexBasedHashMap);
             break;
-         }         
+         }
       }
-            
+
       FramePose framePose = new FramePose(ReferenceFrame.getWorldFrame(), pose);
 
       return framePose;
    }
 
+   public void randomizeNode(CTTaskNode node, double treeReachingTime)
+   {
+      CTTreeTools.setRandomTimeData(node, getTrajectoryTime(), treeReachingTime);
+      
+      for (int i = 0; i < listOfRigidBodyData.size(); i++)
+      {
+         listOfRigidBodyData.get(i).randomizeNode(node, nodeIndexBasedHashMap);
+      }
+   }
+   
+   public void convertNodeDataToNormalizedData(CTTaskNode node)
+   {  
+      node.setNormalizedNodeData(0, node.getTime()/getTrajectoryTime());
+      for (int i = 0; i < listOfRigidBodyData.size(); i++)
+      {
+         listOfRigidBodyData.get(i).normalizeNodeData(node, nodeIndexBasedHashMap);
+      }
+   }
+   
+
    public double getTrajectoryTime()
    {
       return trajectoryTime;
+   }
+   
+   public int getDimensionOfExplorationConfigurations()
+   {
+      return explorationConfigurationNames.size();
    }
 
 }

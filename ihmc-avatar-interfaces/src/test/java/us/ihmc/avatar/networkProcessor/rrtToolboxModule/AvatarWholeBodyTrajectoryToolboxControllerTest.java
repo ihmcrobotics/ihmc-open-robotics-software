@@ -233,7 +233,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       {
          RigidBody hand = fullRobotModel.getHand(robotSide);
 
-         // orientation
+         // orientation is defined
          FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleOrientation,
                                                                            false, 0.0);
 
@@ -245,11 +245,12 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          Quaternion controlOrientation = new Quaternion();
          if (robotSide == RobotSide.LEFT)
          {
+            // Notice  : This customizing control frame is for atlas with robotiQ hand.
             // REMARK1 : Rotation to make original Hand Frame to customized Hand Frame.
             // REMARK2 : Translation to make original Hand Frame to customized Hand Frame.
             controlPoint.addY(-0.2);
             controlOrientation.appendYawRotation(-0.5 * Math.PI);
-            controlOrientation.appendPitchRotation(0.5 * Math.PI);                  
+            controlOrientation.appendPitchRotation(0.5 * Math.PI);
          }
          else
          {
@@ -275,9 +276,13 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                                                                                                                          pelvisConfigurations,
                                                                                                                          new double[] {0.75},
                                                                                                                          new double[] {0.90});
-      RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest());
+      ConfigurationSpaceName[] chestConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
+      RigidBodyExplorationConfigurationMessage chestConfigurationMessage = new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest(),
+                                                                                                                        chestConfigurations,
+                                                                                                                        new double[] {-0.5, -0.5, -0.5},
+                                                                                                                        new double[] {0.5, 0.5, 0.5});
       rigidBodyConfigurations.add(pelvisConfigurationMessage);
-      //rigidBodyConfigurations.add(chestConfigurationMessage);
+      rigidBodyConfigurations.add(chestConfigurationMessage);
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
       commandInputManager.submitMessage(message);
 
@@ -471,9 +476,9 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       double y = circleRadius * Math.sin(theta);
       Point3D point = new Point3D(x, y, 0.0);
       circleOrientation.transform(point);
-      
+
       Quaternion orientation = new Quaternion(circleOrientation);
-      orientation.appendPitchRotation(-0.5*Math.PI);
+      orientation.appendPitchRotation(-0.5 * Math.PI);
       RotationMatrix matrix = new RotationMatrix(orientation);
       point.add(circleCenter);
 
