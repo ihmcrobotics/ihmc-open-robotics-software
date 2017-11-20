@@ -5,6 +5,7 @@ import java.util.List;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class WholeBodyTrajectoryToolboxMessageTools
 {
@@ -48,7 +49,7 @@ public class WholeBodyTrajectoryToolboxMessageTools
 
    public static WaypointBasedTrajectoryMessage createTrajectoryMessage(RigidBody endEffector, double t0, double tf, double timeResolution,
                                                                         FunctionTrajectory trajectoryToDiscretize,
-                                                                        ConfigurationSpaceName... unconstrainedDegreesOfFreedom)
+                                                                        SelectionMatrix6D selectionMatrix)
    {
       int numberOfWaypoints = (int) Math.round((tf - t0) / timeResolution) + 1;
       // Adjust the timeResolution using the numberOfWaypoints:
@@ -65,7 +66,7 @@ public class WholeBodyTrajectoryToolboxMessageTools
          waypoints[i] = trajectoryToDiscretize.compute(waypointTime);
       }
 
-      return new WaypointBasedTrajectoryMessage(endEffector, waypointTimes, waypoints, unconstrainedDegreesOfFreedom);
+      return new WaypointBasedTrajectoryMessage(endEffector, waypointTimes, waypoints, selectionMatrix);
    }
 
    public static double[] createDefaultExplorationUpperLimitArray(List<ConfigurationSpaceName> configurationSpaceNames)

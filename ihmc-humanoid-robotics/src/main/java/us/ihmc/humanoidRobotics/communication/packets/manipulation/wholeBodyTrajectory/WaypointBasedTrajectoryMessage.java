@@ -1,8 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
-import java.util.Arrays;
-
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -12,6 +11,7 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.tools.ArrayTools;
 
 public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajectoryMessage>
@@ -23,7 +23,8 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
    public long endEffectorNameBasedHashCode;
    public double[] waypointTimes;
    public Pose3D[] waypoints;
-   public ConfigurationSpaceName[] unconstrainedDegreesOfFreedom;
+   public SelectionMatrix3DMessage angularSelectionMatrix = new SelectionMatrix3DMessage();
+   public SelectionMatrix3DMessage linearSelectionMatrix = new SelectionMatrix3DMessage();
    /**
     * This is the position of the control frame's origin expressed in
     * {@code endEffector.getBodyFixedFrame()}. By default the control frame is coincident to
@@ -50,12 +51,15 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       this(endEffector, waypointTimes, waypoints, null);
    }
 
-   public WaypointBasedTrajectoryMessage(RigidBody endEffector, double[] waypointTimes, Pose3D[] waypoints,
-                                         ConfigurationSpaceName[] unconstrainedDegreesOfFreedom)
+   public WaypointBasedTrajectoryMessage(RigidBody endEffector, double[] waypointTimes, Pose3D[] waypoints, SelectionMatrix6D selectionMatrix)
    {
       endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
       setWaypoints(waypointTimes, waypoints);
-      this.unconstrainedDegreesOfFreedom = unconstrainedDegreesOfFreedom;
+      if (selectionMatrix != null)
+      {
+         angularSelectionMatrix.set(selectionMatrix.getAngularPart());
+         linearSelectionMatrix.set(selectionMatrix.getLinearPart());
+      }
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -68,9 +72,67 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       this.waypoints = waypoints;
    }
 
-   public void setUnconstrainedDegreesOfFreedom(ConfigurationSpaceName[] unconstrainedDegreesOfFreedom)
+   /**
+    * Enables the control of all the degrees of freedom of the end-effector.
+    */
+   public void setSelectionMatrixToIdentity()
    {
-      this.unconstrainedDegreesOfFreedom = unconstrainedDegreesOfFreedom;
+      angularSelectionMatrix = new SelectionMatrix3DMessage();
+      linearSelectionMatrix = new SelectionMatrix3DMessage();
+   }
+
+   /**
+    * Enables the control for the translational degrees of freedom of the end-effector and disable
+    * the rotational part.
+    */
+   public void setSelectionMatrixForLinearControl()
+   {
+      angularSelectionMatrix = new SelectionMatrix3DMessage();
+      angularSelectionMatrix.setAxisSelection(false, false, false);
+      linearSelectionMatrix = new SelectionMatrix3DMessage();
+   }
+
+   /**
+    * Enables the control for the rotational degrees of freedom of the end-effector and disable the
+    * translational part.
+    */
+   public void setSelectionMatrixForAngularControl()
+   {
+      angularSelectionMatrix = new SelectionMatrix3DMessage();
+      linearSelectionMatrix = new SelectionMatrix3DMessage();
+      linearSelectionMatrix.setAxisSelection(false, false, false);
+   }
+
+   /**
+    * Sets the selection matrix to use for executing this message.
+    * <p>
+    * The selection matrix is used to determinate which degree of freedom of the end-effector should
+    * be controlled. When it is NOT provided, the controller will assume that all the degrees of
+    * freedom of the end-effector should be controlled.
+    * </p>
+    * <p>
+    * The selection frames coming along with the given selection matrix are used to determine to
+    * what reference frame the selected axes are referring to. For instance, if only the hand height
+    * in world should be controlled on the linear z component of the selection matrix should be
+    * selected and the reference frame should be world frame. When no reference frame is provided
+    * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
+    * frame if not defined otherwise.
+    * </p>
+    * 
+    * @param selectionMatrix the selection matrix to use when executing this trajectory message. Not
+    *           modified.
+    */
+   public void setSelectionMatrix(SelectionMatrix6D selectionMatrix6D)
+   {
+      if (angularSelectionMatrix == null)
+         angularSelectionMatrix = new SelectionMatrix3DMessage(selectionMatrix6D.getAngularPart());
+      else
+         angularSelectionMatrix.set(selectionMatrix6D.getAngularPart());
+
+      if (linearSelectionMatrix == null)
+         linearSelectionMatrix = new SelectionMatrix3DMessage(selectionMatrix6D.getLinearPart());
+      else
+         linearSelectionMatrix.set(selectionMatrix6D.getLinearPart());
    }
 
    /**
@@ -202,24 +264,18 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       return waypoints;
    }
 
-   public ConfigurationSpaceName getUnconstrainedDegreeOfFreedom(int i)
+   public void getSelectionMatrix(SelectionMatrix6D selectionMatrixToPack)
    {
-      return unconstrainedDegreesOfFreedom[i];
-   }
-
-   public ConfigurationSpaceName[] getUnconstrainedDegreesOfFreedom()
-   {
-      return unconstrainedDegreesOfFreedom;
+      selectionMatrixToPack.resetSelection();
+      if (angularSelectionMatrix != null)
+         angularSelectionMatrix.getSelectionMatrix(selectionMatrixToPack.getAngularPart());
+      if (linearSelectionMatrix != null)
+         linearSelectionMatrix.getSelectionMatrix(selectionMatrixToPack.getLinearPart());
    }
 
    public int getNumberOfWaypoints()
    {
       return waypoints.length;
-   }
-
-   public int getNumberOfUnconstrainedDegreesOfFreedom()
-   {
-      return unconstrainedDegreesOfFreedom == null ? 0 : unconstrainedDegreesOfFreedom.length;
    }
 
    public void getControlFramePose(RigidBody endEffector, FramePose controlFramePoseToPack)
@@ -248,7 +304,9 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
             return false;
       }
 
-      if (!Arrays.equals(unconstrainedDegreesOfFreedom, other.unconstrainedDegreesOfFreedom))
+      if (!angularSelectionMatrix.epsilonEquals(other.angularSelectionMatrix, epsilon))
+         return false;
+      if (!linearSelectionMatrix.epsilonEquals(other.linearSelectionMatrix, epsilon))
          return false;
 
       return true;
