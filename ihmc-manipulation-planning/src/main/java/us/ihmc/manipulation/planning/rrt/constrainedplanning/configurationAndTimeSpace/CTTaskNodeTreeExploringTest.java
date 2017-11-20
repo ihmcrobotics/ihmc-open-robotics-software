@@ -38,7 +38,7 @@ public class CTTaskNodeTreeExploringTest
 
       tree.setTaskRegion(taskRegion);
 
-      treeVisualizer = new CTTreeVisualizer(tree);
+      treeVisualizer = new CTTreeVisualizer(tree, true);
       treeVisualizer.initialize();
 
       treeVisualizer.update(rootNode);

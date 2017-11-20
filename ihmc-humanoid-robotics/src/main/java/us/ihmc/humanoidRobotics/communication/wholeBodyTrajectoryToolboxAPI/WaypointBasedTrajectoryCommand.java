@@ -1,20 +1,17 @@
 package us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTrajectoryCommand, WaypointBasedTrajectoryMessage>, WholeBodyTrajectoryToolboxAPI<WaypointBasedTrajectoryMessage>
@@ -26,11 +23,9 @@ public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTraj
 
    private final TDoubleArrayList waypointTimes = new TDoubleArrayList();
    private final RecyclingArrayList<Pose3D> waypoints = new RecyclingArrayList<>(Pose3D.class);
-   private final List<ConfigurationSpaceName> unconstrainedDegreesOfFreedom = new ArrayList<>();
+   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
-   // TODO : control Frame TransformationMatrix;
-   private Point3D32 controlFramePositionInEndEffector;
-   private Quaternion32 controlFrameOrientationInEndEffector;
+   private final FramePose controlFramePose = new FramePose();
    
    @Override
    public void clear()
@@ -39,7 +34,8 @@ public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTraj
       endEffector = null;
       waypointTimes.clear();
       waypoints.clear();
-      unconstrainedDegreesOfFreedom.clear();
+      controlFramePose.setToNaN(ReferenceFrame.getWorldFrame());
+      selectionMatrix.resetSelection();
    }
 
    @Override
@@ -56,19 +52,9 @@ public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTraj
          waypoints.add().set(other.waypoints.get(i));
       }
 
-      for (int i = 0; i < other.unconstrainedDegreesOfFreedom.size(); i++)
-      {
-         unconstrainedDegreesOfFreedom.add(other.unconstrainedDegreesOfFreedom.get(i));
-      }
-      
-      if(other.controlFramePositionInEndEffector == null)
-         controlFramePositionInEndEffector = null;
-      else
-         controlFramePositionInEndEffector = new Point3D32(other.controlFramePositionInEndEffector);
-      if(other.controlFrameOrientationInEndEffector == null)
-         controlFrameOrientationInEndEffector = null;
-      else
-         controlFrameOrientationInEndEffector = new Quaternion32(other.controlFrameOrientationInEndEffector);
+      selectionMatrix.set(other.selectionMatrix);
+
+      controlFramePose.setIncludingFrame(other.controlFramePose);
    }
 
    @Override
@@ -95,19 +81,8 @@ public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTraj
          waypoints.add().set(message.getWaypoint(i));
       }
 
-      for (int i = 0; i < message.getNumberOfUnconstrainedDegreesOfFreedom(); i++)
-      {
-         unconstrainedDegreesOfFreedom.add(message.getUnconstrainedDegreeOfFreedom(i));
-      }
-      
-      if(message.controlFramePositionInEndEffector == null)
-         controlFramePositionInEndEffector = null;
-      else
-         controlFramePositionInEndEffector = new Point3D32(message.controlFramePositionInEndEffector);
-      if(message.controlFrameOrientationInEndEffector == null)
-         controlFrameOrientationInEndEffector = null;
-      else
-         controlFrameOrientationInEndEffector = new Quaternion32(message.controlFrameOrientationInEndEffector);
+      message.getControlFramePose(endEffector, controlFramePose);
+      message.getSelectionMatrix(selectionMatrix);
    }
 
    public RigidBody getEndEffector()
@@ -130,9 +105,9 @@ public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTraj
       return waypoints.get(i);
    }
 
-   public ConfigurationSpaceName getUnconstrainedDegreeOfFreedom(int i)
+   public SelectionMatrix6D getSelectionMatrix()
    {
-      return unconstrainedDegreesOfFreedom.get(i);
+      return selectionMatrix;
    }
 
    public int getNumberOfWaypoints()
@@ -140,19 +115,9 @@ public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTraj
       return waypoints.size();
    }
 
-   public int getNumberOfUnconstrainedDegreesOfFreedom()
+   public FramePose getControlFramePose()
    {
-      return unconstrainedDegreesOfFreedom.size();
-   }
-   
-   public Point3D32 getControlFramePositionEndEffector()
-   {
-      return controlFramePositionInEndEffector;         
-   }
-   
-   public Quaternion32 getControlFrameOrientationEndEffector()
-   {
-      return controlFrameOrientationInEndEffector;         
+      return controlFramePose;
    }
 
    @Override
