@@ -8,14 +8,14 @@ public class CTTreeVisualizer
    
    private ArrayList<CTNodeVisualizer> nodeVisualizers;
    
-   public CTTreeVisualizer(CTTaskNodeTree tree)
+   public CTTreeVisualizer(CTTaskNodeTree tree, boolean showUp)
    {
       this.configurationDimension = tree.getDimensionOfTask();
       
       this.nodeVisualizers = new ArrayList<CTNodeVisualizer>();
       for(int i=0;i<configurationDimension;i++)
       {
-         CTNodeVisualizer nodeVisualizer = new CTNodeVisualizer(tree.getTaskName(i+1), i+1, tree.getTaskNodeRegion().isEnable(i+1));
+         CTNodeVisualizer nodeVisualizer = new CTNodeVisualizer(tree.getTaskName(i+1), i+1, showUp);
          this.nodeVisualizers.add(nodeVisualizer);
       }
    }

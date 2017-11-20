@@ -14,6 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -205,7 +206,7 @@ public class ConstrainedRigidBodyTrajectory
       return selectionMatrix;
    }
 
-   public Pose3D getPoseFromTrajectory(CTTaskNode node, Map<Integer, RigidBody> map)
+   public Pose3D getPoseFromTrajectory(CTTaskNode node, Map<Integer, RigidBody> nodeIndexBasedHashMap)
    {
       double time = node.getTime();
       MathTools.clamp(time, t0, tf);
@@ -214,11 +215,10 @@ public class ConstrainedRigidBodyTrajectory
 
       double[] configurations = new double[dimensionOfExploration];
       int curConfiguration = 0;
-      for (int i = 0; i < map.size(); i++)
+      for (int i = 0; i < nodeIndexBasedHashMap.size(); i++)
       {
-         if (getRigidBody() == map.get(i + 1))
+         if (getRigidBody() == nodeIndexBasedHashMap.get(i + 1))
          {
-            PrintTools.info(""+rigidBody +" "+node.getNodeData(i + 1));
             configurations[curConfiguration] = node.getNodeData(i + 1);
             curConfiguration++;
          }
@@ -267,6 +267,36 @@ public class ConstrainedRigidBodyTrajectory
    private void appendConfiguration(Pose3D pose, int index, double configuration)
    {
       pose.appendTransform(explorationConfigurationSpaces.get(index).getLocalRigidBodyTransform(configuration));
+   }
+
+   public void randomizeNode(CTTaskNode node, Map<Integer, RigidBody> nodeIndexBasedHashMap)
+   {
+      int curConfiguration = 0;
+      for (int i = 0; i < nodeIndexBasedHashMap.size(); i++)
+      {
+         if (getRigidBody() == nodeIndexBasedHashMap.get(i + 1))
+         {
+            double lowerLimit = explorationRangeLowerLimits.get(curConfiguration);
+            double upperLimit = explorationRangeUpperLimits.get(curConfiguration);
+            CTTreeTools.setRandomConfigurationData(node, i+1, lowerLimit, upperLimit, true);
+            curConfiguration++;
+         }
+      }
+   }
+
+   public void normalizeNodeData(CTTaskNode node, Map<Integer, RigidBody> nodeIndexBasedHashMap)
+   {
+      int curConfiguration = 0;
+      for (int i = 0; i < nodeIndexBasedHashMap.size(); i++)
+      {
+         if (getRigidBody() == nodeIndexBasedHashMap.get(i + 1))
+         {
+            double lowerLimit = explorationRangeLowerLimits.get(curConfiguration);
+            double upperLimit = explorationRangeUpperLimits.get(curConfiguration);
+            node.setNormalizedNodeData(i+1, (node.getNodeData(i+1) - lowerLimit)/(upperLimit-lowerLimit));
+            curConfiguration++;
+         }
+      }
    }
 
 

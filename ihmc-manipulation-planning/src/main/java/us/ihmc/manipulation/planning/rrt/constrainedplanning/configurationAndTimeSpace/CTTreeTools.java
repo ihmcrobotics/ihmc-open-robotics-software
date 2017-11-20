@@ -2,6 +2,7 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 
 import java.util.Random;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class CTTreeTools
@@ -10,6 +11,7 @@ public class CTTreeTools
     * 50 okay . why 1 has problem? angular velocity problem on chest.
     */
    static Random randomManager = new Random(3);
+   static double timeCoefficient = 3.0;
 
    public static void setRandomNormalizedNodeData(CTTaskNode node, boolean isUniform, double treeReachingTime)
    {
@@ -19,13 +21,8 @@ public class CTTreeTools
 
    public static void setRandomNormalizedNodeData(CTTaskNode node, int index, boolean isUniform, double treeReachingTime)
    {
-      setRandomNormalizedNodeData(node, randomManager, index, isUniform, treeReachingTime);
-   }
-
-   public static void setRandomNormalizedNodeData(CTTaskNode node, Random randomManager, int index, boolean isUniform, double treeReachingTime)
-   {
       //double exceedIntentionalTimeRatio = 3.0;
-      double exceedIntentionalTimeRatio = 3.0 * treeReachingTime;
+      double exceedIntentionalTimeRatio = timeCoefficient * treeReachingTime;
       // double exceedIntentionalTimeRatio = 3.0 * treeReachingTime;
 
       double exceedIntentionalRatio = 0.5;
@@ -53,7 +50,7 @@ public class CTTreeTools
       node.setNormalizedNodeData(index, value);
    }
 
-   public static void updateRandomConfigurationData(double randomConfigurationData, double lowerLimit, double upperLimit, boolean isUniform)
+   public static void setRandomConfigurationData(CTTaskNode node, int index, double lowerLimit, double upperLimit, boolean isUniform)
    {
       double exceedIntentionalRatio = 0.5;
 
@@ -72,12 +69,13 @@ public class CTTreeTools
       if (value <= 0)
          value = 0;
 
-      randomConfigurationData = lowerLimit + value*(upperLimit-lowerLimit);
+      double randomConfigurationData = lowerLimit + value*(upperLimit-lowerLimit);
+      node.setNodeData(index, randomConfigurationData);
    }
 
-   public static void updateRandomTimeData(double randomTimeData, double trajectoryTime, double treeReachingTime)
+   public static void setRandomTimeData(CTTaskNode node, double trajectoryTime, double treeReachingTime)
    {
-      double exceedIntentionalTimeRatio = 3.0 * treeReachingTime;
+      double exceedIntentionalTimeRatio = timeCoefficient * treeReachingTime;
 
       double value;
 
@@ -86,7 +84,8 @@ public class CTTreeTools
       if (value > 1)
          value = 1;
 
-      randomTimeData = value * trajectoryTime;
+      double randomTimeData = value * trajectoryTime;
+      node.setTimeData(randomTimeData);
    }
 
    public static ConfigurationSpace getConfigurationSpace(CTTaskNode node, RobotSide robotSide)
