@@ -2,7 +2,6 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 
 import java.util.Arrays;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.ArrayTools;
@@ -28,7 +27,7 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
    public RigidBodyExplorationConfigurationMessage(RigidBody rigidBody)
    {
       this.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
-      
+
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -37,8 +36,7 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
     */
    public RigidBodyExplorationConfigurationMessage(RigidBody rigidBody, ConfigurationSpaceName[] degreesOfFreedomToExplore)
    {
-      this(rigidBody, degreesOfFreedomToExplore,
-           WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationLowerLimitArray(degreesOfFreedomToExplore),
+      this(rigidBody, degreesOfFreedomToExplore, WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationLowerLimitArray(degreesOfFreedomToExplore),
            WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationUpperLimitArray(degreesOfFreedomToExplore));
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
@@ -65,7 +63,7 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
 
    public int getNumberOfDegreesOfFreedomToExplore()
    {
-      if(degreesOfFreedomToExplore == null)
+      if (degreesOfFreedomToExplore == null)
          return 0;
       return degreesOfFreedomToExplore.length;
    }

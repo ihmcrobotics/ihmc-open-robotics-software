@@ -37,7 +37,6 @@ import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputCon
 import us.ihmc.humanoidRobotics.communication.packets.WholeBodyTrajectoryToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
@@ -49,6 +48,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -419,7 +419,11 @@ public abstract class AvatarCuttingWallBehaviorTest implements MultiRobotTestInt
       double tf = 20.0;
       FunctionTrajectory circleTrajectory = FunctionTrajectoryTools.circleTrajectory(circleCenter, circleOrientation, outputOrientation, radius, angleStart, clockwise, t0, tf);
       RigidBody leftHand = sdfFullRobotModel.getHand(RobotSide.LEFT);
-      WaypointBasedTrajectoryMessage circleTrajectoryMessage = WholeBodyTrajectoryToolboxMessageTools.createTrajectoryMessage(leftHand, t0, tf, 0.05, circleTrajectory, ConfigurationSpaceName.YAW);
+      SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+      selectionMatrix.clearSelection();
+      selectionMatrix.setAngularAxisSelection(true, true, false);
+      
+      WaypointBasedTrajectoryMessage circleTrajectoryMessage = WholeBodyTrajectoryToolboxMessageTools.createTrajectoryMessage(leftHand, t0, tf, 0.05, circleTrajectory, selectionMatrix);
       circleTrajectoryMessage.setControlFramePosition(new Point3D(handCoordinateOffsetX, 0.0, 0.0));
       RigidBody rightHand = sdfFullRobotModel.getHand(RobotSide.LEFT);
       Pose3D rightHandPose = new Pose3D(-0.2, -0.5, 0.6, -0.4 * Math.PI, 0.0, 0.5 * Math.PI);

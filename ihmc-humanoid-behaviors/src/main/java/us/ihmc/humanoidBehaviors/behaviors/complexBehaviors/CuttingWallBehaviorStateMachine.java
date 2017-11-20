@@ -36,6 +36,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -221,7 +222,10 @@ public class CuttingWallBehaviorStateMachine extends StateMachineBehavior<Cuttin
             double tf = 20.0;
             FunctionTrajectory circleTrajectory = FunctionTrajectoryTools.circleTrajectory(circleCenter, circleOrientation, outputOrientation, radius, angleStart, clockwise, t0, tf);
             RigidBody leftHand = fullRobotModel.getHand(RobotSide.LEFT);
-            WaypointBasedTrajectoryMessage circleTrajectoryMessage = WholeBodyTrajectoryToolboxMessageTools.createTrajectoryMessage(leftHand, t0, tf, 0.05, circleTrajectory, ConfigurationSpaceName.YAW);
+            SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+            selectionMatrix.clearSelection();
+            selectionMatrix.setAngularAxisSelection(true, true, false);
+            WaypointBasedTrajectoryMessage circleTrajectoryMessage = WholeBodyTrajectoryToolboxMessageTools.createTrajectoryMessage(leftHand, t0, tf, 0.05, circleTrajectory, selectionMatrix);
             circleTrajectoryMessage.setControlFramePosition(new Point3D(handCoordinateOffsetX, 0.0, 0.0));
             RigidBody rightHand = fullRobotModel.getHand(RobotSide.LEFT);
             Pose3D rightHandPose = new Pose3D(-0.2, -0.5, 0.6, -0.4 * Math.PI, 0.0, 0.5 * Math.PI);

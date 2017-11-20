@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
@@ -73,14 +72,14 @@ public class WholeBodyTrajectoryToolboxCommandConverter implements CommandConver
          return true;
       return false;
    }
-   
+
    /**
     * Retrieves the end-effector and convert the message into its command counterpart.
     */
    //@SuppressWarnings("unchecked")
    @Override
    public <C extends Command<?, M>, M extends Packet<M>> void process(C command, M message)
-   {      
+   {
       WholeBodyTrajectoryToolboxAPI<M> wholeBodyTrajectoryCommand = (WholeBodyTrajectoryToolboxAPI<M>) command;
       wholeBodyTrajectoryCommand.set(message, rigidBodyNamedBasedHashMap, referenceFrameHashCodeResolver);
    }

@@ -39,7 +39,7 @@ public enum ConfigurationSpaceName
          throw new RuntimeException("Unexpected value: " + this);
       }
    }
-   
+
    public RigidBodyTransform getLocalRigidBodyTransform(double configuration)
    {
       RigidBodyTransform ret = new RigidBodyTransform();

@@ -3,10 +3,8 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajectoryToolboxMessage> implements MultiplePacketHolder
 {
@@ -38,7 +36,7 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
    {
       this.configuration = configuration;
       this.endEffectorTrajectories = endEffectorTrajectories;
-      this.explorationConfigurations = explorationConfigurations;      
+      this.explorationConfigurations = explorationConfigurations;
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -102,9 +100,12 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
    {
       List<Packet<?>> allPackets = new ArrayList<>();
 
-      allPackets.addAll(endEffectorTrajectories);
-      allPackets.addAll(explorationConfigurations);
-      allPackets.add(configuration);
+      if (endEffectorTrajectories != null)
+         allPackets.addAll(endEffectorTrajectories);
+      if (explorationConfigurations != null)
+         allPackets.addAll(explorationConfigurations);
+      if (configuration != null)
+         allPackets.add(configuration);
 
       return allPackets;
    }
