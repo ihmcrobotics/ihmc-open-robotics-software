@@ -22,6 +22,7 @@ public class HumanoidKinematicsSolver
    private static final int DEFAULT_MAX_NUMBER_OF_ITERATIONS = 100;
    private static final double DEFAULT_QUALITY_THRESHOLD = 0.005;
    private static final double DEFAULT_STABILITY_THRESHOLD = 0.00001;
+   private static final double DEFAULT_MIN_PROGRESSION = 0.005;
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -31,6 +32,7 @@ public class HumanoidKinematicsSolver
 
    private final YoDouble solutionQualityThreshold = new YoDouble("solutionQualityThreshold", registry);
    private final YoDouble solutionStabilityThreshold = new YoDouble("solutionStabilityThreshold", registry);
+   private final YoDouble solutionMinimumProgression = new YoDouble("solutionProgressionThreshold", registry);
 
    private final YoInteger numberOfIterations = new YoInteger("numberOfIterations", registry);
    private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterations", registry);
@@ -38,7 +40,7 @@ public class HumanoidKinematicsSolver
    private final YoBoolean hasConverged = new YoBoolean("hasConverged", registry);
 
    private final YoDouble computationTime = new YoDouble("computationTime", registry);
-   
+
    private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
 
    public HumanoidKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -54,6 +56,7 @@ public class HumanoidKinematicsSolver
       maximumNumberOfIterations.set(DEFAULT_MAX_NUMBER_OF_ITERATIONS);
       solutionQualityThreshold.set(DEFAULT_QUALITY_THRESHOLD);
       solutionStabilityThreshold.set(DEFAULT_STABILITY_THRESHOLD);
+      solutionMinimumProgression.set(DEFAULT_MIN_PROGRESSION);
 
       parentRegistry.addChild(registry);
    }
@@ -105,6 +108,7 @@ public class HumanoidKinematicsSolver
       long startTime = System.nanoTime();
 
       boolean isSolutionGood = false;
+      boolean isSolverStuck = false;
       solutionQuality.set(Double.NaN);
       double solutionQualityPrevious = Double.NaN;
       int iteration = 0;
@@ -118,14 +122,22 @@ public class HumanoidKinematicsSolver
 
          if (!Double.isNaN(solutionQualityPrevious))
          {
-            double deltaSolutionQuality = solutionQuality.getDoubleValue() - solutionQualityPrevious;
-            boolean isSolutionStable = Math.abs(deltaSolutionQuality) < solutionStabilityThreshold.getDoubleValue();
+            double deltaSolutionQuality = Math.abs(solutionQuality.getDoubleValue() - solutionQualityPrevious);
+            boolean isSolutionStable = deltaSolutionQuality < solutionStabilityThreshold.getDoubleValue();
             boolean isSolutionQualityHigh = solutionQuality.getDoubleValue() < solutionQualityThreshold.getDoubleValue();
             isSolutionGood = isSolutionStable && isSolutionQualityHigh;
+
+            if (!isSolutionGood)
+               isSolverStuck = (deltaSolutionQuality / solutionQuality.getDoubleValue()) < solutionMinimumProgression.getDoubleValue();
+            else
+               isSolverStuck = false;
          }
 
          solutionQualityPrevious = solutionQuality.getDoubleValue();
          iteration++;
+
+         if (isSolverStuck)
+            break;
       }
 
       numberOfIterations.set(iteration);
