@@ -237,8 +237,8 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          trajectory.setControlFramePosition(WholeBodyTrajectoryToolboxSettings.getAtlasRobotiQHandControlFrame(robotSide).getPosition());
 
          handTrajectories.add(trajectory);
-         //ConfigurationSpaceName[] handConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
-         ConfigurationSpaceName[] handConfigurations = {};
+         ConfigurationSpaceName[] handConfigurations = {ConfigurationSpaceName.YAW, ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
+         //ConfigurationSpaceName[] handConfigurations = {};
          RigidBodyExplorationConfigurationMessage rigidBodyConfiguration = new RigidBodyExplorationConfigurationMessage(hand, handConfigurations);
 
          rigidBodyConfigurations.add(rigidBodyConfiguration);

@@ -14,6 +14,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialData;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -31,7 +32,7 @@ public class ConstrainedRigidBodyTrajectory
    private final SelectionMatrix6D trajectorySelectionMatrix = new SelectionMatrix6D();
    private final SelectionMatrix6D explorationSelectionMatrix = new SelectionMatrix6D();
 
-   private final List<ConfigurationSpaceName> explorationConfigurationSpaces = new ArrayList<>();
+   public final List<ConfigurationSpaceName> explorationConfigurationSpaces = new ArrayList<>();
    private final TDoubleArrayList explorationRangeUpperLimits = new TDoubleArrayList();
    private final TDoubleArrayList explorationRangeLowerLimits = new TDoubleArrayList();
 
@@ -90,7 +91,6 @@ public class ConstrainedRigidBodyTrajectory
       return rigidBody;
    }
 
-   // this is for the kinematicsSolver.
    public SelectionMatrix6D getSelectionMatrix()
    {
       SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
@@ -206,5 +206,54 @@ public class ConstrainedRigidBodyTrajectory
       }
       
       return randomPose;
+   }
+
+   public void appendRandomSpatial(SpatialData spatialData)
+   {
+      Pose3D randomPose = new Pose3D();
+      
+      String[] configurationNames = new String[explorationConfigurationSpaces.size()];
+      double[] configurationData = new double[explorationConfigurationSpaces.size()];
+      
+      for (int i = 0; i < explorationConfigurationSpaces.size(); i++)
+      {
+         ConfigurationSpaceName configurationSpaceName = explorationConfigurationSpaces.get(i);
+         
+         double lowerBound = explorationRangeLowerLimits.get(i);
+         double upperBound = explorationRangeUpperLimits.get(i);
+         double value = RandomNumbers.nextDouble(random, lowerBound, upperBound);
+         
+         configurationNames[i] = configurationSpaceName.name();
+         configurationData[i] = value;
+         
+         if (VERBOSE)
+            PrintTools.info(""+i +" "+rigidBody + " " +value + " " +lowerBound + " " +upperBound);
+                  
+         switch (configurationSpaceName)
+         {
+         case X:
+            randomPose.appendTranslation(value, 0.0, 0.0);
+            break;
+         case Y:
+            randomPose.appendTranslation(0.0, value, 0.0);
+            break;
+         case Z:
+            randomPose.appendTranslation(0.0, 0.0, value);
+            break;
+         case ROLL:
+            randomPose.appendRollRotation(value);
+            break;
+         case PITCH:
+            randomPose.appendPitchRotation(value);
+            break;
+         case YAW:
+            randomPose.appendYawRotation(value);
+            break;
+         default:
+            break;
+         }
+      }
+      
+      spatialData.appendSpatial(getRigidBody().getName(), configurationNames, configurationData, randomPose);
    }
 }
