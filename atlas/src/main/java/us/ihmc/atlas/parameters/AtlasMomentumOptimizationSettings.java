@@ -375,4 +375,10 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    {
       return useWarmStartInSolver;
    }
+
+   @Override
+   public boolean getDeactivateRhoWhenNotInContact()
+   {
+      return false;
+   }
 }
