@@ -57,10 +57,7 @@ import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Robot;
@@ -78,7 +75,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
    static
    {
-      simulationTestingParameters.setKeepSCSUp(false);
+      simulationTestingParameters.setKeepSCSUp(visualize);
       simulationTestingParameters.setDataBufferSize(1 << 16);
    }
 
@@ -230,9 +227,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleOrientation,
                                                                            handOrientation, false, 0.0);
 
-         ConfigurationSpaceName[] unconstrainedDegreesOfFreedom = {};
-         WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction,
-                                                                             unconstrainedDegreesOfFreedom);
+         WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, null);
 
          Point3D controlPoint = new Point3D();
          Quaternion controlOrientation = new Quaternion();
@@ -290,7 +285,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    @Test
    public void testHandCirclePositionOnly() throws Exception, UnreasonableAccelerationException
    {
-      double trajectoryTime = 5.0;
+      double trajectoryTime = 3.0;
       FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
@@ -301,15 +296,35 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody hand = fullRobotModel.getHand(robotSide);
-         FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleAxis);
-         ConfigurationSpaceName[] unconstrainedDegreesOfFreedom = {YAW, PITCH, ROLL};
-         WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction,
-                                                                             unconstrainedDegreesOfFreedom);
+         Quaternion orientation = new Quaternion();
+         orientation.setToYawQuaternion(robotSide.negateIfLeftSide(Math.PI / 2.0));
+         FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleAxis, orientation);
+         SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
+         selectionMatrix6D.clearAngularSelection();
+         WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix6D);
          handTrajectories.add(trajectory);
       }
 
+      List<RigidBodyExplorationConfigurationMessage> explorationConfigurationMessages = new ArrayList<>();
+
+      ConfigurationSpaceName[] spaces = {YAW, PITCH, ROLL};
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody hand = fullRobotModel.getHand(robotSide);
+         double[] lowerLimits = {-0.7, -0.7, -0.7};
+         double[] upperLimits = {0.7, 0.7, 0.7};
+         explorationConfigurationMessages.add(new RigidBodyExplorationConfigurationMessage(hand, spaces, lowerLimits, upperLimits));
+      }
+
+      {
+         double[] lowerLimits = {0,0,0};//{-0.35, -0.35, -0.35};
+         double[] upperLimits = {0,0,0};//{0.35, 0.35, 0.35};
+         explorationConfigurationMessages.add(new RigidBodyExplorationConfigurationMessage(fullRobotModel.getChest(), spaces, lowerLimits, upperLimits));
+      }
+
       int maxNumberOfIterations = 10000;
-      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories);
+      WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, explorationConfigurationMessages);
 
       runTest(message, maxNumberOfIterations);
    }
@@ -338,7 +353,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          double phase = 0.0;
          FunctionTrajectory handFunction = time -> computeCircleTrajectory(time, trajectoryTime, circleRadius, circleCenters.get(robotSide), circleAxis,
                                                                            orientation, ccw, phase);
-         WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction);
+         WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, null);
          handTrajectories.add(trajectory);
       }
 
@@ -361,18 +376,15 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
             t0 = Math.min(t0, trajectoryMessage.getWaypointTime(0));
             tf = Math.max(t0, trajectoryMessage.getLastWaypointTime());
 
+            SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
             // Visualize the position part if it is commanded
-            List<ConfigurationSpaceName> unconstrainedDoFs = Arrays.asList(trajectoryMessage.getUnconstrainedDegreesOfFreedom());
+            trajectoryMessage.getSelectionMatrix(selectionMatrix);
 
-            boolean isXUnconstrained = unconstrainedDoFs.stream().anyMatch(dof -> dof == ConfigurationSpaceName.X);
-            boolean isYUnconstrained = unconstrainedDoFs.stream().anyMatch(dof -> dof == ConfigurationSpaceName.Y);
-            boolean isZUnconstrained = unconstrainedDoFs.stream().anyMatch(dof -> dof == ConfigurationSpaceName.Z);
-
-            if (isXUnconstrained && isYUnconstrained && isZUnconstrained)
+            if (!selectionMatrix.isLinearXSelected() && !selectionMatrix.isLinearYSelected() && !selectionMatrix.isLinearZSelected())
                continue; // The position part is not dictated by trajectory, let's not visualize.
 
             if (visualize)
-               createTrajectoryMessageVisualization(trajectoryMessage, 0.01, YoAppearance.AliceBlue());
+               scs.addStaticLinkGraphics(createTrajectoryMessageVisualization(trajectoryMessage, 0.01, YoAppearance.AliceBlue()));
          }
       }
 

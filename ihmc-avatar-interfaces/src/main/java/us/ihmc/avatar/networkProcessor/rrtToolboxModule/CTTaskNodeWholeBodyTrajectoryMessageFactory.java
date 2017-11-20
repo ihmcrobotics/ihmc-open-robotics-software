@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
@@ -13,10 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTaskNode;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.CTTreeTools;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.ConfigurationSpace;
-import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.ConstrainedEndEffectorTrajectory;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.*;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
@@ -29,12 +27,11 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
 {
    private static final boolean VERBOSE = false;
 
-   private ArrayList<CTTaskNode> path;
-
-   private ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory;
+   private List<SpatialNode> path;
 
    private double firstTrajectoryPointTime = 3.0;
    private double trajectoryTime;
+   private WholeBodyTrajectoryToolboxData toolboxData;
 
    private WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
 
@@ -70,7 +67,7 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
 
          for (int i = 0; i < numberOfTrajectoryPoints; i++)
          {
-            CTTaskNode trajectoryNode = path.get(i);
+            SpatialNode trajectoryNode = path.get(i);
 
             ConfigurationSpace configurationSpace = CTTreeTools.getConfigurationSpace(trajectoryNode, robotSide);
 
@@ -229,10 +226,10 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
       }
    }
 
-   public void setCTTaskNodePath(ArrayList<CTTaskNode> path, ConstrainedEndEffectorTrajectory constrainedEndEffectorTrajectory)
+   public void setCTTaskNodePath(List<SpatialNode> path, WholeBodyTrajectoryToolboxData toolboxData)
    {
-      this.constrainedEndEffectorTrajectory = constrainedEndEffectorTrajectory;
-      this.trajectoryTime = constrainedEndEffectorTrajectory.getTrajectoryTime();
+      this.toolboxData = toolboxData;
+      this.trajectoryTime = toolboxData.getTrajectoryTime();
 
       this.path = path;
    }
@@ -240,6 +237,7 @@ public class CTTaskNodeWholeBodyTrajectoryMessageFactory
    public WholeBodyTrajectoryMessage getWholeBodyTrajectoryMessage()
    {
       wholeBodyTrajectoryMessage.clear();
+
 
       updateHandTrajectoryMessages();
       updateChestTrajectoryMessage();
