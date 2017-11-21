@@ -106,7 +106,10 @@ public class SimpleEfficientActiveSetQPSolverWithInactiveVariables extends Simpl
       for (int variableIndex = 0; variableIndex < solutionToPack.getNumRows(); variableIndex++)
       {
          if (activeVariables.get(variableIndex) != 1.0)
+         {
+            solutionToPack.set(variableIndex, 0, 0.0);
             continue;
+         }
 
          solutionToPack.set(variableIndex, 0, activeVariableSolution.get(activeVariableIndex, 0));
          activeVariableIndex++;

@@ -34,6 +34,7 @@ import us.ihmc.tools.taskExecutor.Task;
 import us.ihmc.tools.taskExecutor.TaskExecutor;
 import us.ihmc.valkyrie.fingers.ValkyrieFingerController;
 import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
@@ -76,7 +77,6 @@ public class ValkyrieRosControlLowLevelController
    private final YoEnum<ValkyrieLowLevelControlModeMessage.ControlMode> requestedLowLevelControlMode = new YoEnum<>("requestedLowLevelControlMode", registry, ValkyrieLowLevelControlModeMessage.ControlMode.class, true);
    private final AtomicReference<ValkyrieLowLevelControlModeMessage.ControlMode> requestedLowLevelControlModeAtomic = new AtomicReference<>(null);
 
-   private final ValkyrieTorqueHysteresisCompensator torqueHysteresisCompensator;
    private final ValkyrieAccelerationIntegration accelerationIntegration;
    private final ValkyrieFingerController fingerController;
 
@@ -95,7 +95,7 @@ public class ValkyrieRosControlLowLevelController
 
    @SuppressWarnings("unchecked")
    public ValkyrieRosControlLowLevelController(TimestampProvider timestampProvider, final double updateDT, List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
-         List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, YoVariableRegistry parentRegistry)
+         List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, ValkyrieJointMap jointMap, YoVariableRegistry parentRegistry)
    {
       this.timestampProvider = timestampProvider;
 
@@ -115,8 +115,7 @@ public class ValkyrieRosControlLowLevelController
       // Remove the finger joints to let the finger controller be the only controlling them
       yoEffortJointHandleHolders = yoEffortJointHandleHolders.stream().filter(h -> !isFingerJoint(h)).collect(Collectors.toList());
       
-      torqueHysteresisCompensator = new ValkyrieTorqueHysteresisCompensator(yoEffortJointHandleHolders, yoTime, registry);
-      accelerationIntegration = new ValkyrieAccelerationIntegration(yoEffortJointHandleHolders, updateDT, registry);
+      accelerationIntegration = new ValkyrieAccelerationIntegration(jointMap, yoEffortJointHandleHolders, updateDT, registry);
 
       requestedLowLevelControlMode.addVariableChangedListener(new VariableChangedListener()
       {
@@ -361,7 +360,6 @@ public class ValkyrieRosControlLowLevelController
             break;
          }
 
-         torqueHysteresisCompensator.compute();
          if (ValkyrieRosControlController.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
             accelerationIntegration.compute();
          break;

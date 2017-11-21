@@ -424,6 +424,16 @@ public class WalkingMessageHandler
       }
       return hasNewFootstepAdjustment.getBooleanValue();
    }
+   
+   public boolean isNextFootstepUsingAbsoluteTiming()
+   {
+      if (!hasUpcomingFootsteps())
+      {
+         return false;
+      }
+
+      return upcomingFootstepTimings.get(0).hasAbsoluteTime();
+   }
 
    public boolean isNextFootstepFor(RobotSide swingSide)
    {
