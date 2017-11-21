@@ -1,8 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -12,16 +9,9 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class WholeBodyTrajectoryToolboxSettings
 {
-   public static List<RigidBody> getListOfRigidBody(FullHumanoidRobotModel fullRobotModel)
-   {
-      List<RigidBody> controlRigidBodyDefinitions = new ArrayList<RigidBody>();
-      controlRigidBodyDefinitions.add(fullRobotModel.getHand(RobotSide.LEFT));
-      controlRigidBodyDefinitions.add(fullRobotModel.getHand(RobotSide.RIGHT));
-      controlRigidBodyDefinitions.add(fullRobotModel.getChest());
-      controlRigidBodyDefinitions.add(fullRobotModel.getPelvis());
-      return controlRigidBodyDefinitions;
-   }
+   public static double timeCoefficient = 3.0;
 
+   // TODO : this is useless..?
    public static ConfigurationSpaceName[] getDefaultExplorationConfiguratSpaces(FullHumanoidRobotModel fullRobotModel, RigidBody rigidBody)
    {
       ConfigurationSpaceName[] configurationSpaces;
