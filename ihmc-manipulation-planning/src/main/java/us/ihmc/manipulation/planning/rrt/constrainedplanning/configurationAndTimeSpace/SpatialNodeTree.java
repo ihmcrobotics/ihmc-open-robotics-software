@@ -6,6 +6,7 @@ import java.util.List;
 public class SpatialNodeTree
 {
    private SpatialNode rootNode;
+   private double mostAdvancedTime = 0.0;
    private List<SpatialNode> validNodes = new ArrayList<>();
 
    private List<SpatialNode> invalidNodes = new ArrayList<>();
@@ -170,5 +171,10 @@ public class SpatialNodeTree
    public List<SpatialNode> getValidNodes()
    {
       return validNodes;
+   }
+   
+   public double getMostAdvancedTime()
+   {
+      return mostAdvancedTime;
    }
 }

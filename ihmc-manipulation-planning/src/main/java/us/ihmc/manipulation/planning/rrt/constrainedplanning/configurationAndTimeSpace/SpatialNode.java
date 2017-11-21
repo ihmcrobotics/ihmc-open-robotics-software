@@ -3,7 +3,6 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.TupleTools;
@@ -109,6 +108,16 @@ public class SpatialNode
          spatialNode.interpolate(this, query, alpha);
          return spatialNode;
       }
+   }
+   
+   public double getConfigurationData(int index)
+   {
+      return spatialData.getConfigurationData().get(index);
+   }
+   
+   public String getConfigurationName(int index)
+   {
+      return spatialData.getConfigurationNames().get(index);
    }
 
    public SpatialData getSpatialData()

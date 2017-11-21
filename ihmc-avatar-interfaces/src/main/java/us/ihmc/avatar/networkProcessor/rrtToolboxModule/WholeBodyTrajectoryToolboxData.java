@@ -38,17 +38,15 @@ import us.ihmc.robotics.screwTheory.RigidBody;
  */
 public class WholeBodyTrajectoryToolboxData
 {
-   private static final boolean VERBOSE = false;
+   private static final boolean VERBOSE = true;
 
    private double trajectoryTime;
+   private int dimensionOfExploration = 0;
 
-   /**
-    * Left hand Right hand Chest Pelvis
-    */
    private final List<RigidBody> allRigidBodies = new ArrayList<>();
    private final Map<String, RigidBody> nameToRigidBodyMap = new HashMap<>();
    private final Map<RigidBody, ConstrainedRigidBodyTrajectory> rigidBodyDataMap = new HashMap<>();
-
+   
    public WholeBodyTrajectoryToolboxData(FullHumanoidRobotModel fullRobotModel, List<WaypointBasedTrajectoryCommand> endEffectorTrajectories,
                                          List<RigidBodyExplorationConfigurationCommand> explorationConfigurations)
    {
@@ -92,21 +90,21 @@ public class WholeBodyTrajectoryToolboxData
             PrintTools.info(message);
          }
          rigidBodyDataMap.put(rigidBody, new ConstrainedRigidBodyTrajectory(trajectory, exploration));
+         dimensionOfExploration = dimensionOfExploration + exploration.getNumberOfDegreesOfFreedomToExplore();         
       }
-
-      for (int i = 0; i < allRigidBodies.size(); i++)
-      {
-         RigidBody rigidBody = allRigidBodies.get(i);
-         int size = rigidBodyDataMap.get(rigidBody).explorationConfigurationSpaces.size();
-         for (int j = 0; j < size; j++)
-         {
-            if (VERBOSE)
-               PrintTools.info("" + rigidBody.getName() + " " + rigidBodyDataMap.get(rigidBody).explorationConfigurationSpaces.get(j));
-         }
-      }
+      
+      if(VERBOSE)
+         PrintTools.info("Total exploration dimension is "+ dimensionOfExploration);
    }
 
    public SpatialNode createRandomNode()
+   {
+      double randomTime = 0.0;
+
+      return new SpatialNode(randomTime, createRandomSpatialData());
+   }
+   
+   public SpatialData createRandomSpatialData()
    {
       SpatialData spatialData = new SpatialData();
 
@@ -117,7 +115,7 @@ public class WholeBodyTrajectoryToolboxData
          rigidBodyDataMap.get(rigidBody).appendRandomSpatial(spatialData);
       }
 
-      return new SpatialNode(spatialData);
+      return spatialData;
    }
 
    public List<KinematicsToolboxRigidBodyMessage> createMessages(SpatialNode node)
@@ -137,5 +135,10 @@ public class WholeBodyTrajectoryToolboxData
    public double getTrajectoryTime()
    {
       return trajectoryTime;
+   }
+   
+   public int getExplorationDimension()
+   {
+      return dimensionOfExploration;
    }
 }

@@ -32,7 +32,7 @@ public class ConstrainedRigidBodyTrajectory
    private final SelectionMatrix6D trajectorySelectionMatrix = new SelectionMatrix6D();
    private final SelectionMatrix6D explorationSelectionMatrix = new SelectionMatrix6D();
 
-   public final List<ConfigurationSpaceName> explorationConfigurationSpaces = new ArrayList<>();
+   private final List<ConfigurationSpaceName> explorationConfigurationSpaces = new ArrayList<>();
    private final TDoubleArrayList explorationRangeUpperLimits = new TDoubleArrayList();
    private final TDoubleArrayList explorationRangeLowerLimits = new TDoubleArrayList();
 
@@ -223,7 +223,7 @@ public class ConstrainedRigidBodyTrajectory
          double upperBound = explorationRangeUpperLimits.get(i);
          double value = RandomNumbers.nextDouble(random, lowerBound, upperBound);
          
-         configurationNames[i] = configurationSpaceName.name();
+         configurationNames[i] = rigidBody+"_"+configurationSpaceName.name();
          configurationData[i] = value;
          
          if (VERBOSE)
