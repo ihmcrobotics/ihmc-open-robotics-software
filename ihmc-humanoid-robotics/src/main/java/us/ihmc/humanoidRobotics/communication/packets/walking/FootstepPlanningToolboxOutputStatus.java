@@ -26,7 +26,7 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
    // body path planner fields
    public Point2D[] bodyPath;
    public Pose2D lowLevelPlannerGoal;
-   public Point2D[] navigableExtrusions;
+   public Point3D[][] navigableExtrusions;
 
    public FootstepPlanningToolboxOutputStatus()
    {
@@ -48,10 +48,16 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
 
       lowLevelPlannerGoal = new Pose2D(random.nextDouble(), random.nextDouble(), random.nextDouble());
 
-      navigableExtrusions = new Point2D[random.nextInt(40)];
+      navigableExtrusions = new Point3D[random.nextInt(40) + 1][];
       for (int i = 0; i < navigableExtrusions.length; i++)
       {
-         navigableExtrusions[i] = EuclidCoreRandomTools.generateRandomPoint2D(random);
+         int numberOfPoints = random.nextInt(5) + 1;
+         navigableExtrusions[i] = new Point3D[numberOfPoints];
+
+         for (int j = 0; j < numberOfPoints; j++)
+         {
+            navigableExtrusions[i][j] = EuclidCoreRandomTools.generateRandomPoint3D(random);
+         }
       }
    }
 
@@ -75,7 +81,7 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
       this.lowLevelPlannerGoal = lowLevelPlannerGoal;
    }
 
-   public void setNavigableExtrusions(Point2D[] navigableExtrusions)
+   public void setNavigableExtrusions(Point3D[][] navigableExtrusions)
    {
       this.navigableExtrusions = navigableExtrusions;
    }
@@ -110,8 +116,11 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
       {
          for (int i = 0; i < navigableExtrusions.length; i++)
          {
-            if(!navigableExtrusions[i].epsilonEquals(other.navigableExtrusions[i], epsilon))
-               return false;
+            for (int j = 0; j < navigableExtrusions[i].length; j++)
+            {
+               if(!navigableExtrusions[i][j].epsilonEquals(other.navigableExtrusions[i][j], epsilon))
+                  return false;
+            }
          }
       }
 
