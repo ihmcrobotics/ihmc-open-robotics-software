@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.artifact.CircleArtifact;
 import us.ihmc.graphicsDescription.plotting.artifact.LineArtifact;
@@ -94,7 +95,7 @@ public class SpatialNodePlotter
 
          double configurationData = node.getConfigurationData(nodeIndex);
 
-         if (node.getParent() != null)
+         if (node.getParent() != null && node.isValid())
          {
             SpatialNode parentNode = node.getParent();
             double parentTime = parentNode.getTime() / trajectoryTime;
