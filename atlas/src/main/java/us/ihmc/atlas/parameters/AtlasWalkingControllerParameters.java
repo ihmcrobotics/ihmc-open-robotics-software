@@ -88,7 +88,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       angularMomentumModifierParameters = new ICPAngularMomentumModifierParameters();
 
       minimumHeightAboveGround = jointMap.getModelScale() * ( 0.625 );
-      nominalHeightAboveGround = jointMap.getModelScale() * ( 0.705 + 0.07 );
+      nominalHeightAboveGround = jointMap.getModelScale() * ( 0.705 );
       maximumHeightAboveGround = jointMap.getModelScale() * ( 0.765 + 0.08 );
 
       runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
@@ -505,7 +505,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 0.0);
       jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 0.0);
 
-      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), 0.95);
+      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), 0.0);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -531,7 +531,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       bodyHomeConfiguration = new HashMap<String, Pose3D>();
 
       Pose3D homeChestPoseInPelvisZUpFrame = new Pose3D();
-      homeChestPoseInPelvisZUpFrame.appendPitchRotation(Math.toRadians(12.5));
       bodyHomeConfiguration.put(jointMap.getChestName(), homeChestPoseInPelvisZUpFrame);
 
       return bodyHomeConfiguration;

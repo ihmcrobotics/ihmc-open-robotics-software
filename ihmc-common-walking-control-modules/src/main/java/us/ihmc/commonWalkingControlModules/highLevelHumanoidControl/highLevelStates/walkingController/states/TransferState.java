@@ -10,9 +10,11 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -45,6 +47,7 @@ public abstract class TransferState extends WalkingState
    private final YoBoolean isInTouchdown;
    private final YoDouble touchdownDuration;
    private final YoDouble icpErrorThresholdToAbortTouchdown;
+   private final FootstepTiming stepTiming = new FootstepTiming();
 
    private final Footstep nextFootstep = new Footstep();
 
@@ -108,16 +111,26 @@ public abstract class TransferState extends WalkingState
          return false;
       }
       
-      if (!balanceManager.isICPPlanDone())
-         return false;
-      balanceManager.getCapturePoint(capturePoint2d);
-      FrameConvexPolygon2d supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();
-      boolean isICPInsideSupportPolygon = supportPolygonInWorld.isPointInside(capturePoint2d);
+      //If we're using a precomputed icp trajectory we can't rely on the icp planner's state to dictate when to exit transfer.
+      boolean transferTimeElapsedUnderPrecomputedICPPlan = false;
+      if(balanceManager.isPrecomputedICPPlannerActive())
+      {
+         transferTimeElapsedUnderPrecomputedICPPlan = getTimeInCurrentState() > (walkingMessageHandler.getNextTransferTime() + touchdownDuration.getDoubleValue());
+      }
+      
+      if (balanceManager.isICPPlanDone() || transferTimeElapsedUnderPrecomputedICPPlan)
+      {
+         balanceManager.getCapturePoint(capturePoint2d);
+         FrameConvexPolygon2d supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();
+         boolean isICPInsideSupportPolygon = supportPolygonInWorld.isPointInside(capturePoint2d);
 
-      if (!isICPInsideSupportPolygon)
-         return true;
-      else
-         return balanceManager.isTransitionToSingleSupportSafe(transferToSide);
+         if (!isICPInsideSupportPolygon)
+            return true;
+         else
+            return balanceManager.isTransitionToSingleSupportSafe(transferToSide);
+      }
+      
+      return false;
    }
 
    public void switchToToeOffIfPossible()
@@ -149,6 +162,7 @@ public abstract class TransferState extends WalkingState
    @Override
    public void doTransitionIntoAction()
    {
+      adjustTouchdownDuration();
       touchdownDuration.set(walkingMessageHandler.getNextTouchdownDuration());
       boolean supportFootWasSwinging = feetManager.getCurrentConstraintType(transferToSide) == ConstraintType.SWING;
       if(supportFootWasSwinging && touchdownDuration.getDoubleValue() > controllerToolbox.getControlDT() && touchdownIsEnabled.getBooleanValue())
@@ -162,6 +176,32 @@ public abstract class TransferState extends WalkingState
          isInTouchdown.set(false);
          updateICPPlan();
       }
+   }
+   
+   /**
+    * If we're using absolute timings and the swing was too long, we should reduce the touchdown duration
+    */
+   private void adjustTouchdownDuration()
+   {
+      if (!walkingMessageHandler.isNextFootstepUsingAbsoluteTiming())
+         return;
+
+      walkingMessageHandler.peekTiming(0, stepTiming);
+
+      double originalSwingTime = stepTiming.getSwingTime();
+      double currentTime = controllerToolbox.getYoTime().getDoubleValue();
+      double timeInFootstepPlan = currentTime - stepTiming.getExecutionStartTime();
+      double adjustedTransferTime = stepTiming.getSwingStartTime() - timeInFootstepPlan;
+      double percentageToShrinkTouchdown = MathTools.clamp(adjustedTransferTime / stepTiming.getTransferTime(), 0.0, 1.0);
+      double touchdownDuration = stepTiming.getTouchdownDuration();
+      
+      if(Double.isFinite(touchdownDuration))
+      {
+         touchdownDuration = Math.max(0.0, touchdownDuration * percentageToShrinkTouchdown);
+      }
+      
+      stepTiming.setTimings(originalSwingTime, touchdownDuration, adjustedTransferTime);
+      walkingMessageHandler.adjustTimings(0, stepTiming.getSwingTime(), touchdownDuration, stepTiming.getTransferTime());
    }
    
    protected void updateICPPlan()

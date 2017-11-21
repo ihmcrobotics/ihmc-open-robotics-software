@@ -27,6 +27,7 @@ import us.ihmc.footstepPlanning.graphSearch.planners.VisibilityGraphWithAStarPla
 import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPlanarRegionsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.PlanarRegionBipedalFootstepPlannerVisualizerFactory;
 import us.ihmc.humanoidRobotics.communication.packets.walking.*;
@@ -79,6 +80,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final WalkingControllerParameters walkingControllerParameters;
    private final LogModelProvider logModelProvider;
    private final FootstepDataListWithSwingOverTrajectoriesAssembler footstepDataListWithSwingOverTrajectoriesAssembler;
+   private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
    private final double collisionSphereRadius = 0.2;
    private final PacketCommunicator packetCommunicator;
@@ -89,7 +91,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    public FootstepPlanningToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel,
                                             StatusMessageOutputManager statusOutputManager, PacketCommunicator packetCommunicator,
-                                            YoVariableRegistry parentRegistry, double dt)
+                                            YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry, double dt)
    {
       super(statusOutputManager, parentRegistry);
       this.packetCommunicator = packetCommunicator;
@@ -97,6 +99,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       this.walkingControllerParameters = drcRobotModel.getWalkingControllerParameters();
       this.logModelProvider = drcRobotModel.getLogModelProvider();
       this.dt = dt;
+      this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("FootstepPlannerToolboxPlanarRegions", 200, 30, registry);
       packetCommunicator.attachListener(PlanarRegionsListMessage.class, createPlanarRegionsConsumer());
 
       SideDependentList<ConvexPolygon2D> contactPointsInSoleFrame = createFootPolygonsFromContactPoints(contactPointParameters);
@@ -104,7 +107,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       humanoidReferenceFrames = createHumanoidReferenceFrames(fullHumanoidRobotModel);
       footstepDataListWithSwingOverTrajectoriesAssembler = new FootstepDataListWithSwingOverTrajectoriesAssembler(humanoidReferenceFrames,
                                                                                                                   walkingControllerParameters, parentRegistry,
-                                                                                                                  new YoGraphicsListRegistry());
+                                                                                                                 graphicsListRegistry);
       footstepDataListWithSwingOverTrajectoriesAssembler.setCollisionSphereRadius(collisionSphereRadius);
 
       footstepPlanningParameters = new YoFootstepPlannerParameters(registry, drcRobotModel.getFootstepPlannerParameters());
@@ -117,7 +120,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       plannerMap.put(FootstepPlanningRequestPacket.FootstepPlannerType.SIMPLE_BODY_PATH,
                      new BodyPathBasedFootstepPlanner(footstepPlanningParameters, contactPointsInSoleFrame, parentRegistry));
       plannerMap.put(FootstepPlanningRequestPacket.FootstepPlannerType.VIS_GRAPH_WITH_A_STAR,
-                     new VisibilityGraphWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, null, parentRegistry));
+                     new VisibilityGraphWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, graphicsListRegistry, parentRegistry));
       activePlanner.set(FootstepPlanningRequestPacket.FootstepPlannerType.PLANAR_REGION_BIPEDAL);
 
       usePlanarRegions.set(true);
@@ -173,6 +176,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       FootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
 
+      yoGraphicPlanarRegionsList.clear();
       if (usePlanarRegions.getBooleanValue())
       {
          if (!requestAndWaitForPlanarRegions(planner))
@@ -209,6 +213,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
       planner.setPlanarRegions(planarRegions);
       planarRegionsList = Optional.of(planarRegions);
+      yoGraphicPlanarRegionsList.submitPlanarRegionsListToRender(planarRegions);
 
       return true;
    }
