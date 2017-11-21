@@ -81,7 +81,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final static double DESIRED_ATLAS_HEIGHT = 0.66;
    private final static double DESIRED_ATLAS_WEIGHT = 15;
 
-   private final boolean USE_SMOOTH_CMP_PLANNER;
+   private static final boolean USE_SMOOTH_CMP_PLANNER = true;
 
    private final double HARDSTOP_RESTRICTION_ANGLE = Math.toRadians(5.0);
 
@@ -128,11 +128,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints,
          boolean createAdditionalContactPoints)
    {
-      if(target == RobotTarget.SCS || target == RobotTarget.GAZEBO)
-         USE_SMOOTH_CMP_PLANNER = true;
-      else
-         USE_SMOOTH_CMP_PLANNER = false;
-
       if (SCALE_ATLAS)
       {
          atlasPhysicalProperties  = new AtlasPhysicalProperties(DESIRED_ATLAS_HEIGHT, DESIRED_ATLAS_WEIGHT);
