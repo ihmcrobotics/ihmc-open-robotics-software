@@ -9,11 +9,11 @@
 /src/*/bin
 
 # Top level directories in sub-projects
-*/classes
-*/bin
-*/out
+**/classes
+**/bin
+**/out
 */target
-*/build
+**/build
 */pit-reports
 */install
 */src/*/bin
