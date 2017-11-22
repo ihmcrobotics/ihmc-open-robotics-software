@@ -2,7 +2,6 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 
 import java.util.Random;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class CTTreeTools
@@ -69,7 +68,7 @@ public class CTTreeTools
       if (value <= 0)
          value = 0;
 
-      double randomConfigurationData = lowerLimit + value*(upperLimit-lowerLimit);
+      double randomConfigurationData = lowerLimit + value * (upperLimit - lowerLimit);
       node.setNodeData(index, randomConfigurationData);
    }
 

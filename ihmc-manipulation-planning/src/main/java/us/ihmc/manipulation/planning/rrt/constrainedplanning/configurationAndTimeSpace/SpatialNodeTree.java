@@ -11,7 +11,7 @@ public class SpatialNodeTree
 
    private List<SpatialNode> invalidNodes = new ArrayList<>();
 
-   private double timeWeight = 0.5;
+   private double timeWeight = 0.3;
    private double positionWeight = 1.0;
    private double orientationWeight = 0.01;
 

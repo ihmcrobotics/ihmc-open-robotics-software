@@ -1,6 +1,5 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.TupleTools;
@@ -33,14 +32,14 @@ public class SpatialNode
    public SpatialNode(SpatialNode other)
    {
       time = other.time;
-      spatialData = new SpatialData(other.getSpatialData());
+      spatialData = new SpatialData(other.spatialData);
 
-      if (other.getParent() != null)
-         parent = new SpatialNode(other.getParent());
+      if (other.parent != null)
+         parent = new SpatialNode(other.parent);
       else
          parent = null;
 
-      validity = other.isValid();
+      validity = other.validity;
       if (other.configuration != null)
          configuration = new KinematicsToolboxOutputStatus(other.configuration);
    }
@@ -200,7 +199,9 @@ public class SpatialNode
 
    public void setSpatialsAndConfiguration(SpatialNode other)
    {
+      time = other.time;
       spatialData = new SpatialData(other.getSpatialData());
-      configuration = other.configuration;
+      configuration = new KinematicsToolboxOutputStatus(other.configuration);
+      validity = other.validity;
    }
 }
