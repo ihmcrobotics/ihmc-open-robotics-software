@@ -46,7 +46,7 @@ public class WholeBodyTrajectoryToolboxData
    private final List<RigidBody> allRigidBodies = new ArrayList<>();
    private final Map<String, RigidBody> nameToRigidBodyMap = new HashMap<>();
    private final Map<RigidBody, ConstrainedRigidBodyTrajectory> rigidBodyDataMap = new HashMap<>();
-   
+
    public WholeBodyTrajectoryToolboxData(FullHumanoidRobotModel fullRobotModel, List<WaypointBasedTrajectoryCommand> endEffectorTrajectories,
                                          List<RigidBodyExplorationConfigurationCommand> explorationConfigurations)
    {
@@ -90,20 +90,13 @@ public class WholeBodyTrajectoryToolboxData
             PrintTools.info(message);
          }
          rigidBodyDataMap.put(rigidBody, new ConstrainedRigidBodyTrajectory(trajectory, exploration));
-         dimensionOfExploration = dimensionOfExploration + exploration.getNumberOfDegreesOfFreedomToExplore();         
+         dimensionOfExploration = dimensionOfExploration + exploration.getNumberOfDegreesOfFreedomToExplore();
       }
-      
-      if(VERBOSE)
-         PrintTools.info("Total exploration dimension is "+ dimensionOfExploration);
+
+      if (VERBOSE)
+         PrintTools.info("Total exploration dimension is " + dimensionOfExploration);
    }
 
-   public SpatialNode createRandomNode()
-   {
-      double randomTime = 0.0;
-
-      return new SpatialNode(randomTime, createRandomSpatialData());
-   }
-   
    public SpatialData createRandomSpatialData()
    {
       SpatialData spatialData = new SpatialData();
@@ -136,7 +129,7 @@ public class WholeBodyTrajectoryToolboxData
    {
       return trajectoryTime;
    }
-   
+
    public int getExplorationDimension()
    {
       return dimensionOfExploration;

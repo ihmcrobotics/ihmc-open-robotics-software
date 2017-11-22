@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
+import java.util.Random;
+
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -10,6 +12,8 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 public class WholeBodyTrajectoryToolboxSettings
 {
    public static double timeCoefficient = 3.0;
+   // TODO : will be get rid of. just for test.
+   public static Random randomManager = new Random(1);
 
    // TODO : this is useless..?
    public static ConfigurationSpaceName[] getDefaultExplorationConfiguratSpaces(FullHumanoidRobotModel fullRobotModel, RigidBody rigidBody)

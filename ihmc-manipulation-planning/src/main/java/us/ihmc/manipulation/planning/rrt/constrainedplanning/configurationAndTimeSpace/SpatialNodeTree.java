@@ -11,30 +11,29 @@ public class SpatialNodeTree
 
    private List<SpatialNode> invalidNodes = new ArrayList<>();
 
-   private double timeWeight = 2.0;
-   private double positionWeight = 0.5;
-   private double orientationWeight = 1.5;
+   private double timeWeight = 0.5;
+   private double positionWeight = 1.0;
+   private double orientationWeight = 0.01;
 
-   private double maxTimeInterval = 0.25;
-   private double maxPositionDistance = 0.30;
-   private double maxOrientationDistance = Math.toRadians(45.0);
+   public double dismissableTimeStep = 0.05;
+   private double maxTimeInterval = 0.5;
+   private double maxPositionDistance = 0.1;
+   private double maxOrientationDistance = Math.toRadians(10);
 
    private SpatialNode currentCandidate = null;
    private SpatialNode currentCandidateParent = null;
-   private SpatialNode lastNodeAdded = null;
-   private SpatialNode mostAdvancedNode = null;
+
+   private SpatialNode randomNode = null;
 
    public SpatialNodeTree(SpatialNode rootNode)
    {
       this.rootNode = rootNode;
-      lastNodeAdded = rootNode;
-      mostAdvancedNode = rootNode;
       validNodes.add(rootNode);
    }
 
-   public void setCandidate(SpatialNode candidate)
+   public void setRandomNode(SpatialNode node)
    {
-      currentCandidate = candidate;
+      randomNode = node;
    }
 
    public SpatialNode getCandidate()
@@ -42,41 +41,37 @@ public class SpatialNodeTree
       return currentCandidate;
    }
 
-   public SpatialNode getMostAdvancedNode()
-   {
-      return mostAdvancedNode;
-   }
-
    public void findNearestValidNodeToCandidate(boolean includeTimeComparison)
    {
       double distanceToNearestNode = Double.POSITIVE_INFINITY;
       SpatialNode nearestNode = null;
 
-      for (SpatialNode candidate : validNodes)
+      for (SpatialNode candidateForParent : validNodes)
       {
-         if (currentCandidate.getTime() < candidate.getTime())
+         if (randomNode.getTime() < candidateForParent.getTime())
             continue;
 
          double distance;
+
          if (includeTimeComparison)
-            distance = candidate.computeDistance(timeWeight, positionWeight, orientationWeight, currentCandidate);
+            distance = candidateForParent.computeDistance(timeWeight, positionWeight, orientationWeight, randomNode);
          else
-            distance = candidate.computeDistance(0.0, positionWeight, orientationWeight, currentCandidate);
+            distance = candidateForParent.computeDistance(0.0, positionWeight, orientationWeight, randomNode);
 
          if (distance < distanceToNearestNode)
          {
             distanceToNearestNode = distance;
-            nearestNode = candidate;
+            nearestNode = candidateForParent;
          }
       }
 
       currentCandidateParent = nearestNode;
    }
 
-   public SpatialNode limitCandidateDistanceFromParent()
+   public void limitCandidateDistanceFromParent()
    {
-      currentCandidate = currentCandidateParent.createNodeWithinMaxDistance(maxTimeInterval, maxPositionDistance, maxOrientationDistance, currentCandidate);
-      return currentCandidate;
+      currentCandidate = currentCandidateParent.createNodeWithinMaxDistance(maxTimeInterval, maxPositionDistance, maxOrientationDistance, randomNode);
+      currentCandidate.setParent(currentCandidateParent);
    }
 
    public void attachCandidate()
@@ -84,13 +79,14 @@ public class SpatialNodeTree
       if (!currentCandidate.isValid())
          throw new RuntimeException("Should only attach valid nodes to this tree.");
 
-      lastNodeAdded = currentCandidate;
-      if (mostAdvancedNode == null || currentCandidate.getTime() > mostAdvancedNode.getTime())
-         mostAdvancedNode = currentCandidate;
-      validNodes.add(currentCandidate);
-      currentCandidateParent.addChild(currentCandidate);
-      currentCandidate = null;
-      currentCandidateParent = null;
+      mostAdvancedTime = Math.max(currentCandidate.getTime(), mostAdvancedTime);
+      validNodes.add(new SpatialNode(currentCandidate));
+   }
+
+   public void attachCandidate(SpatialNode node)
+   {
+      mostAdvancedTime = Math.max(node.getTime(), mostAdvancedTime);
+      validNodes.add(new SpatialNode(node));
    }
 
    public void dismissCandidate()
@@ -98,14 +94,13 @@ public class SpatialNodeTree
       if (currentCandidate.isValid())
          throw new RuntimeException("Should attach valid nodes to this tree.");
 
+      currentCandidate.clearParent();
       invalidNodes.add(currentCandidate);
-      currentCandidate = null;
-      currentCandidateParent = null;
    }
 
    public SpatialNode getLastNodeAdded()
    {
-      return lastNodeAdded;
+      return validNodes.get(validNodes.size() - 1);
    }
 
    public double getTimeWeight()
@@ -172,7 +167,7 @@ public class SpatialNodeTree
    {
       return validNodes;
    }
-   
+
    public double getMostAdvancedTime()
    {
       return mostAdvancedTime;

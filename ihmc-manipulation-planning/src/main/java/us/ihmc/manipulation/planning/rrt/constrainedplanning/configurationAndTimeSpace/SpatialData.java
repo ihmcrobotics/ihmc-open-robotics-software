@@ -33,8 +33,9 @@ public class SpatialData
    public SpatialData(SpatialData other)
    {
       this();
+      for (int i = 0; i < other.getRigidBodySpatials().size(); i++)
+         rigidBodySpatials.add(new Pose3D(other.getRigidBodySpatials().get(i)));
       rigidBodyNames.addAll(other.getRigidBodyNames());
-      rigidBodySpatials.addAll(other.getRigidBodySpatials());
       configurationNames.addAll(other.getConfigurationNames());
       configurationData.addAll(other.getConfigurationData());
    }
@@ -52,7 +53,17 @@ public class SpatialData
    public void interpolate(SpatialData dataOne, SpatialData dataTwo, double alpha)
    {
       for (int i = 0; i < rigidBodySpatials.size(); i++)
-         dataOne.getRigidBodySpatials().get(i).interpolate(dataOne.getRigidBodySpatials().get(i), dataTwo.getRigidBodySpatials().get(i), alpha);
+         rigidBodySpatials.get(i).interpolate(dataOne.getRigidBodySpatials().get(i), dataTwo.getRigidBodySpatials().get(i), alpha);
+
+      for (int i = 0; i < configurationData.size(); i++)
+      {
+         double double1 = dataOne.getConfigurationData().get(i);
+         double double2 = dataTwo.getConfigurationData().get(i);
+         double doubleInterpolate = double1 + (double2 - double1) * alpha;
+
+         configurationData.remove(i);
+         configurationData.add(i, doubleInterpolate);
+      }
    }
 
    public double getPositionDistance(SpatialData other)
@@ -61,8 +72,9 @@ public class SpatialData
 
       for (int i = 0; i < rigidBodySpatials.size(); i++)
       {
-         if (getRigidBodyNames().get(i) != other.getRigidBodyNames().get(i))
+         if (rigidBodyNames.get(i) != other.getRigidBodyNames().get(i))
             PrintTools.warn("other spatial data has different order");
+
          distance = distance + rigidBodySpatials.get(i).getPositionDistance(other.getRigidBodySpatials().get(i));
       }
 
@@ -74,11 +86,11 @@ public class SpatialData
       double distance = 0.0;
 
       for (int i = 0; i < rigidBodySpatials.size(); i++)
-      {         
+      {
          double orientationDistance = rigidBodySpatials.get(i).getOrientationDistance(other.getRigidBodySpatials().get(i));
          orientationDistance = AngleTools.trimAngleMinusPiToPi(orientationDistance);
          orientationDistance = Math.abs(orientationDistance);
-         
+
          distance = orientationDistance + rigidBodySpatials.get(i).getOrientationDistance(other.getRigidBodySpatials().get(i));
       }
 
@@ -106,7 +118,6 @@ public class SpatialData
       for (int i = 0; i < rigidBodySpatials.size(); i++)
       {
          double orientationDistance = rigidBodySpatials.get(i).getOrientationDistance(other.getRigidBodySpatials().get(i));
-
          orientationDistance = AngleTools.trimAngleMinusPiToPi(orientationDistance);
          orientationDistance = Math.abs(orientationDistance);
          if (distance < orientationDistance)
