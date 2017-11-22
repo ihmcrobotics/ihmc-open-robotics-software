@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "gradle.plugin.us.ihmc:ihmc-build:0.10.5"
+      classpath "gradle.plugin.us.ihmc:ihmc-build:0.10.8"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -25,14 +25,14 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
    compile group: 'us.ihmc', name: 'euclid', version: '0.6.1'
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.4'
-   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+   compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
    compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
    compile group: 'org.ejml', name: 'core', version: '0.30'
    compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
    compile group: 'org.ejml', name: 'dense64', version: '0.30'
    compile group: 'com.google.guava', name: 'guava', version: '18.0'
    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.8'
-   compile group: "us.ihmc", name: "ihmc-commons", version: "0.12.1"
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.17.0"
    compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-common-walking-control-modules", version: groupDependencyVersion
    compile group: "us.ihmc", name: "ihmc-convex-optimization-adapter", version: groupDependencyVersion
@@ -48,10 +48,10 @@ mainDependencies {
 }
 
 testDependencies {
-   compile group: 'junit', name: 'junit', version: '4.11'
-   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.16.8"
+   compile group: "junit", name: "junit", version: "4.12"
+   compile group: "us.ihmc", name: "ihmc-ci-core-api", version: "0.17.0"
    compile group: 'com.google.caliper', name: 'caliper', version: '1.0-beta-2'
-   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.12.1"
+   compile group: "us.ihmc", name: "ihmc-commons-testing", version: "0.17.0"
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit-test", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set", version: groupDependencyVersion
    compile group: "us.ihmc", name: "simulation-construction-set-test", version: groupDependencyVersion
