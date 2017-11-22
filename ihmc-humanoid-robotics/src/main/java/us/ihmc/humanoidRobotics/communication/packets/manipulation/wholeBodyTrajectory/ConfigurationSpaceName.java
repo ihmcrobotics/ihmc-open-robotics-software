@@ -17,7 +17,7 @@ public enum ConfigurationSpaceName
       case ROLL:
       case PITCH:
       case YAW:
-         return -Math.PI;
+         return -0.5*Math.PI;
       default:
          throw new RuntimeException("Unexpected value: " + this);
       }
@@ -34,7 +34,7 @@ public enum ConfigurationSpaceName
       case ROLL:
       case PITCH:
       case YAW:
-         return Math.PI;
+         return 0.5*Math.PI;
       default:
          throw new RuntimeException("Unexpected value: " + this);
       }
