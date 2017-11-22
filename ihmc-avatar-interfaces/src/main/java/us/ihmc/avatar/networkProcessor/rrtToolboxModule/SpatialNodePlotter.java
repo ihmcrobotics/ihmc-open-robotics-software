@@ -45,7 +45,7 @@ public class SpatialNodePlotter
          upperLimits[i] = Double.NEGATIVE_INFINITY;
          lowerLimits[i] = Double.POSITIVE_INFINITY;
 
-         String plotterName = toolboxData.createRandomNode().getConfigurationName(i);
+         String plotterName = toolboxData.createRandomSpatialData().getConfigurationNames().get(i);
 
          if (enabled)
             plotter.showInNewWindow(plotterName, false);

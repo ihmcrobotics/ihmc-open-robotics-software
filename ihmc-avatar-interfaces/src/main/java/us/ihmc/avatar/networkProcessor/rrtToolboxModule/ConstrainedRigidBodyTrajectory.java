@@ -12,6 +12,7 @@ import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxSettings;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialData;
@@ -22,8 +23,8 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 public class ConstrainedRigidBodyTrajectory
 {
    private static final boolean VERBOSE = false;
-   
-   private final Random random = new Random();
+
+   private final Random randomManager = new Random();
    private final RigidBody rigidBody;
 
    private final TDoubleArrayList waypointTimes = new TDoubleArrayList();
@@ -161,74 +162,32 @@ public class ConstrainedRigidBodyTrajectory
       message.setDesiredPose(desiredEndEffectorPose);
       message.setControlFramePose(controlFramePose);
       message.setSelectionMatrix(getSelectionMatrix());
-      message.setWeight(50.0);   // Sylvain's value :: 0.5
+      message.setWeight(50.0); // Sylvain's value :: 0.5
 
       return message;
-   }
-
-   public Pose3D generateRandomPose()
-   {      
-      Pose3D randomPose = new Pose3D();
-      for (int i = 0; i < explorationConfigurationSpaces.size(); i++)
-      {
-         ConfigurationSpaceName configurationSpaceName = explorationConfigurationSpaces.get(i);
-
-         double lowerBound = explorationRangeLowerLimits.get(i);
-         double upperBound = explorationRangeUpperLimits.get(i);
-         double value = RandomNumbers.nextDouble(random, lowerBound, upperBound);
-         
-         if (VERBOSE)
-            PrintTools.info(""+i +" "+rigidBody + " " +value + " " +lowerBound + " " +upperBound);
-         
-         switch (configurationSpaceName)
-         {
-         case X:
-            randomPose.appendTranslation(value, 0.0, 0.0);
-            break;
-         case Y:
-            randomPose.appendTranslation(0.0, value, 0.0);
-            break;
-         case Z:
-            randomPose.appendTranslation(0.0, 0.0, value);
-            break;
-         case ROLL:
-            randomPose.appendRollRotation(value);
-            break;
-         case PITCH:
-            randomPose.appendPitchRotation(value);
-            break;
-         case YAW:
-            randomPose.appendYawRotation(value);
-            break;
-         default:
-            break;
-         }
-      }
-      
-      return randomPose;
    }
 
    public void appendRandomSpatial(SpatialData spatialData)
    {
       Pose3D randomPose = new Pose3D();
-      
+
       String[] configurationNames = new String[explorationConfigurationSpaces.size()];
       double[] configurationData = new double[explorationConfigurationSpaces.size()];
-      
+
       for (int i = 0; i < explorationConfigurationSpaces.size(); i++)
       {
          ConfigurationSpaceName configurationSpaceName = explorationConfigurationSpaces.get(i);
-         
+
          double lowerBound = explorationRangeLowerLimits.get(i);
          double upperBound = explorationRangeUpperLimits.get(i);
-         double value = RandomNumbers.nextDouble(random, lowerBound, upperBound);
-         
-         configurationNames[i] = rigidBody+"_"+configurationSpaceName.name();
+         double value = RandomNumbers.nextDouble(WholeBodyTrajectoryToolboxSettings.randomManager, lowerBound, upperBound);
+
+         configurationNames[i] = rigidBody + "_" + configurationSpaceName.name();
          configurationData[i] = value;
-         
+
          if (VERBOSE)
-            PrintTools.info(""+i +" "+rigidBody + " " +value + " " +lowerBound + " " +upperBound);
-                  
+            PrintTools.info("" + i + " " + rigidBody + " " + value + " " + lowerBound + " " + upperBound);
+
          switch (configurationSpaceName)
          {
          case X:
@@ -253,7 +212,7 @@ public class ConstrainedRigidBodyTrajectory
             break;
          }
       }
-      
+
       spatialData.appendSpatial(getRigidBody().getName(), configurationNames, configurationData, randomPose);
    }
 }

@@ -24,6 +24,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.RigidBodyExplorationConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WaypointBasedTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.WholeBodyTrajectoryToolboxConfigurationCommand;
+import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialData;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialNode;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialNodeTree;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.TreeStateVisualizer;
@@ -45,11 +46,11 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    private static final boolean VERBOSE = true;
    private static final int DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION = 5;
    private static final int DEFAULT_MAXIMUM_NUMBER_OF_ITERATIONS = 1500;
-   private static final int DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE = 10;
-   private static final int DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE = 100;
+   private static final int DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE = 1000;
+   private static final int DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE = 200;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final Random random = new Random(435345636);
+   private final Random randomManager = new Random(1);
 
    private final HumanoidKinematicsSolver humanoidKinematicsSolver;
 
@@ -67,9 +68,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
    private final YoDouble jointlimitScore = new YoDouble("jointlimitScore", registry);
-   
+
    private final YoDouble bestScoreInitialGuess = new YoDouble("bestScoreInitialGuess", registry);
-   
+
    private final YoBoolean isValidNode = new YoBoolean("isValidNode", registry);
 
    /*
@@ -180,7 +181,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       switch (state.getEnumValue())
       {
       case DO_NOTHING:
-         
+
          break;
       case FIND_INITIAL_GUESS:
 
@@ -282,13 +283,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          // TODO add terminal.
          currentNode = currentNode.getParent();
          if (currentNode != null)
-         {
             revertedPath.add(new SpatialNode(currentNode));
-         }
          else
-         {
             break;
-         }
       }
 
       int revertedPathSize = revertedPath.size();
@@ -309,6 +306,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          }
       }
       path.add(new SpatialNode(revertedPath.get(0)));
+
+      PrintTools.info("" + revertedPathSize + " " + path.size());
 
       // set every parent nodes.
       for (int i = 0; i < path.size() - 1; i++)
@@ -333,7 +332,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       if (VERBOSE)
       {
          PrintTools.info("Shortcut computation time = " + shortcutPathComputationTime.getDoubleValue());
-         PrintTools.info("the size of the path is " + path.size() + " before dismissing " + revertedPathSize);         
+         PrintTools.info("the size of the path is " + path.size() + " before dismissing " + revertedPathSize);
       }
 
       if (visualize)
@@ -355,29 +354,44 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    {
       currentExpansionSize.increment();
 
-      SpatialNode randomNode = toolboxData.createRandomNode();
-      double randomTime = random.nextDouble() * toolboxData.getTrajectoryTime()* (1.0 + WholeBodyTrajectoryToolboxSettings.timeCoefficient * tree.getMostAdvancedTime());
-      
-      randomTime = MathTools.clamp(randomTime, 0.0, toolboxData.getTrajectoryTime());
-      randomNode.setTime(randomTime);
-      tree.setCandidate(randomNode);
-      
-      updateValidity(randomNode);
-      
-      nodePlotter.update(randomNode, 1);
-      
-      
-//      tree.findNearestValidNodeToCandidate(true);
-//      tree.limitCandidateDistanceFromParent();
+      SpatialNode randomNode;
+      // near the time terminal condition, set small window.
+      if (tree.getMostAdvancedTime() + tree.dismissableTimeStep >= toolboxData.getTrajectoryTime())
+      {
+         PrintTools.info("try near ");
+         randomNode = new SpatialNode(tree.getLastNodeAdded());
+         randomNode.setTime(toolboxData.getTrajectoryTime());
+      }
+      else
+      {
+         SpatialData randomData = toolboxData.createRandomSpatialData();
+         double nextDouble = WholeBodyTrajectoryToolboxSettings.randomManager.nextDouble();
+         double randomTime = nextDouble * (1.0 + WholeBodyTrajectoryToolboxSettings.timeCoefficient * tree.getMostAdvancedTime());
+         randomTime = MathTools.clamp(randomTime, 0.0, toolboxData.getTrajectoryTime());
+
+         randomNode = new SpatialNode(randomTime, randomData);
+      }
+
+      // for visualizing random data.
+      //nodePlotter.update(randomNode, 3);
+
+      tree.setRandomNode(randomNode);
+      tree.findNearestValidNodeToCandidate(true);
+      tree.limitCandidateDistanceFromParent();
 
       SpatialNode candidate = tree.getCandidate();
       updateValidity(candidate);
+      /*
+       * visualize
+       */
+      visualizedNode = new SpatialNode(candidate);
+      nodePlotter.update(candidate, 1);
 
       if (candidate.isValid())
       {
          tree.attachCandidate();
 
-         if (tree.getLastNodeAdded().getTime() >= toolboxData.getTrajectoryTime())
+         if (tree.getMostAdvancedTime() >= toolboxData.getTrajectoryTime())
          {
             if (VERBOSE)
                PrintTools.info("Successfully finished tree expansion.");
@@ -389,14 +403,12 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          tree.dismissCandidate();
       }
 
-      visualizedNode = new SpatialNode(tree.getLastNodeAdded());
-
       /*
        * terminate expanding tree.
        */
       if (currentExpansionSize.getIntegerValue() >= maximumExpansionSize.getIntegerValue())
       {
-         if (tree.getMostAdvancedNode() == null || tree.getMostAdvancedNode().getTime() < toolboxData.getTrajectoryTime())
+         if (tree.getMostAdvancedTime() < toolboxData.getTrajectoryTime())
          {
             if (VERBOSE)
                PrintTools.info("Failed to complete trajectory.");
@@ -421,14 +433,19 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     */
    private void findInitialGuess()
    {
-      SpatialNode initialGuessNode = toolboxData.createRandomNode();
-      initialGuessNode.setTime(0.0);
+      SpatialData initialGuessData = toolboxData.createRandomSpatialData();
+
+      SpatialNode initialGuessNode = new SpatialNode(0.0, initialGuessData);
       updateValidity(initialGuessNode);
-      
+
       visualizedNode = initialGuessNode;
       nodePlotter.update(visualizedNode, 1);
 
-      double jointScore = computeArmJointsLimitScore(humanoidKinematicsSolver.getDesiredFullRobotModel());
+      double jointScore;
+      if (visualizedNode.isValid())
+         jointScore = computeArmJointsLimitScore(humanoidKinematicsSolver.getDesiredFullRobotModel());
+      else
+         jointScore = 0.0;
 
       jointlimitScore.set(jointScore);
 
@@ -461,10 +478,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
             if (VERBOSE)
                PrintTools.info("Successfully finished initial guess stage.");
             state.set(CWBToolboxState.EXPAND_TREE);
-            
-//            if (VERBOSE)
-//               for(int i=0;i<toolboxData.getExplorationDimension();i++)
-//                  PrintTools.info(""+rootNode.getConfigurationData(i));               
 
             tree = new SpatialNodeTree(rootNode);
 
@@ -497,7 +510,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       // ******************************************************************************** //
 
       toolboxData = new WholeBodyTrajectoryToolboxData(this.visualizedFullRobotModel, trajectoryCommands, rigidBodyCommands);
-      
+
       if (VERBOSE)
          PrintTools.info("initialize CWB toolbox");
 
@@ -509,7 +522,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       {
          return false;
       }
-      
+
       bestScoreInitialGuess.set(0.0);
 
       state.set(CWBToolboxState.FIND_INITIAL_GUESS);
@@ -522,7 +535,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       rootNode = null;
       nodePlotter = new SpatialNodePlotter(toolboxData, visualize);
-      
+
       return true;
    }
 
@@ -668,7 +681,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       if (visualize && visualizedNode != null)
       {
-         treeStateVisualizer.setCurrentNormalizedTime(visualizedNode.getTime());
+         treeStateVisualizer.setCurrentNormalizedTime(visualizedNode.getTime() / toolboxData.getTrajectoryTime());
          treeStateVisualizer.setCurrentCTTaskNodeValidity(visualizedNode.isValid());
          treeStateVisualizer.updateVisualizer();
 
