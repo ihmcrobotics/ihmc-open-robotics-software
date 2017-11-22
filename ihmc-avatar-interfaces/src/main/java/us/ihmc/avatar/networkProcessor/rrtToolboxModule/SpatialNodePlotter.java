@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.artifact.CircleArtifact;
 import us.ihmc.graphicsDescription.plotting.artifact.LineArtifact;
@@ -34,13 +33,13 @@ public class SpatialNodePlotter
       {
          Plotter plotter = new Plotter();
 
-         plotter.setPreferredSize(700, 700);
+         plotter.setPreferredSize(400, 600);
 
-         plotter.setViewRange(1.5);
+         plotter.setViewRange(2.0);
          plotter.setXYZoomEnabled(true);
          plotter.setShowLabels(true);
          plotter.setFocusPointX(0.5);
-         plotter.setFocusPointY(0.5);
+         plotter.setFocusPointY(0.0);
          plotters.add(plotter);
          upperLimits[i] = Double.NEGATIVE_INFINITY;
          lowerLimits[i] = Double.POSITIVE_INFINITY;
@@ -76,7 +75,7 @@ public class SpatialNodePlotter
             else
             {
                prefix = "" + cnt + "_invalid_" + nodeIndex;
-               color = Color.red;
+               color = Color.red;                              
             }
             break;
          case 2:
@@ -108,7 +107,9 @@ public class SpatialNodePlotter
             plotters.get(nodeIndex).addArtifact(lineArtifact);
          }
 
-         CircleArtifact nodeArtifact = new CircleArtifact(prefix + "_node", normalizedTime, configurationData, 0.02, true);
+         double diameter = 0.02;
+
+         CircleArtifact nodeArtifact = new CircleArtifact(prefix + "_node", normalizedTime, configurationData, diameter, true);
          nodeArtifact.setColor(color);
 
          plotters.get(nodeIndex).addArtifact(nodeArtifact);

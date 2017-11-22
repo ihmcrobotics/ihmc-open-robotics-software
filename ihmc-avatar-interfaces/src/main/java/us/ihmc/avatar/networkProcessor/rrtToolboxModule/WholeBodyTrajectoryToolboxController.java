@@ -44,7 +44,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class WholeBodyTrajectoryToolboxController extends ToolboxController
 {
    private static final boolean VERBOSE = true;
-   private static final int DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION = 5;
+   private static final int DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION = 20;
    private static final int DEFAULT_MAXIMUM_NUMBER_OF_ITERATIONS = 1500;
    private static final int DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE = 1000;
    private static final int DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE = 200;
@@ -222,29 +222,32 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    /**
     * state == GENERATE_MOTION
     */
+   private int currentNode = 0;
+
    private void generateMotion()
    {
-      int sizeOfPath = path.size();
-
-      SpatialNode node = path.get(sizeOfPath - 1);
-
-      visualizedNode = node;
+      visualizedNode = path.get(currentNode);
+      updateValidity(path.get(currentNode));
+      currentNode++;
 
       /*
-       * generate WholeBodyTrajectoryMessage.
+       * terminate generateMotion.
        */
-      terminateToolboxController();
+      if (currentNode == path.size())
+      {
+         long endTime = System.nanoTime();
+         motionGenerationComputationTime.set(Conversions.nanosecondsToSeconds(endTime - motionGenerationStartTime));
 
-      // TODO
-      setOutputStatus(toolboxSolution, 4);
-      setOutputStatus(toolboxSolution, path);
+         // TODO : pack out output.
+         setOutputStatus(toolboxSolution, 4);
+         setOutputStatus(toolboxSolution, path);
 
-      toolboxSolution.setDestination(PacketDestination.BEHAVIOR_MODULE);
+         toolboxSolution.setDestination(PacketDestination.BEHAVIOR_MODULE);
 
-      reportMessage(toolboxSolution);
+         reportMessage(toolboxSolution);
 
-      long endTime = System.nanoTime();
-      motionGenerationComputationTime.set(Conversions.nanosecondsToSeconds(endTime - motionGenerationStartTime));
+         terminateToolboxController();
+      }
    }
 
    // TODO
@@ -280,7 +283,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       while (true)
       {
-         // TODO add terminal.
          currentNode = currentNode.getParent();
          if (currentNode != null)
             revertedPath.add(new SpatialNode(currentNode));
@@ -292,6 +294,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       path.add(new SpatialNode(revertedPath.get(revertedPathSize - 1)));
 
+      // filtering out too short time gap node.
       int currentIndex = 0;
       for (int j = 0; j < revertedPathSize - 2; j++)
       {
@@ -307,23 +310,22 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       }
       path.add(new SpatialNode(revertedPath.get(0)));
 
-      PrintTools.info("" + revertedPathSize + " " + path.size());
-
       // set every parent nodes.
       for (int i = 0; i < path.size() - 1; i++)
-      {
          path.get(i + 1).setParent(path.get(i));
-      }
 
-      if (visualize)
-      { // FIXME
-        //         treeVisualizer.update(path);
-      }
+      // plotting before smoothing.
+      for (int i = 0; i < path.size(); i++)
+         nodePlotter.update(path.get(i), 2);
 
+      // smoothing over one mile stone node.
       for (int i = 0; i < numberOfIterationForShortcutOptimization.getIntegerValue(); i++)
-      {
          updateShortcutPath(path);
-      }
+
+      // plotting final result.
+      for (int i = 0; i < path.size(); i++)
+         nodePlotter.update(path.get(i), 3);
+
       long endTime = System.nanoTime();
 
       shortcutPathComputationTime.set(Conversions.nanosecondsToSeconds(endTime - shortcutStartTime));
@@ -335,16 +337,10 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          PrintTools.info("the size of the path is " + path.size() + " before dismissing " + revertedPathSize);
       }
 
-      if (visualize)
-      {// FIXME
-       //         treeVisualizer.showUpPath(path);
-      }
-
       /*
        * terminate state
        */
       state.set(CWBToolboxState.GENERATE_MOTION);
-
    }
 
    /**
@@ -355,10 +351,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       currentExpansionSize.increment();
 
       SpatialNode randomNode;
-      // near the time terminal condition, set small window.
+      // TODO : near the time terminal condition, set small window.
       if (tree.getMostAdvancedTime() + tree.dismissableTimeStep >= toolboxData.getTrajectoryTime())
       {
-         PrintTools.info("try near ");
          randomNode = new SpatialNode(tree.getLastNodeAdded());
          randomNode.setTime(toolboxData.getTrajectoryTime());
       }
@@ -372,15 +367,13 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          randomNode = new SpatialNode(randomTime, randomData);
       }
 
-      // for visualizing random data.
-      //nodePlotter.update(randomNode, 3);
-
       tree.setRandomNode(randomNode);
       tree.findNearestValidNodeToCandidate(true);
       tree.limitCandidateDistanceFromParent();
 
       SpatialNode candidate = tree.getCandidate();
       updateValidity(candidate);
+      
       /*
        * visualize
        */
@@ -616,6 +609,10 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       if (VERBOSE)
       {
          PrintTools.info("===========================================");
+         PrintTools.info("initialGuessComputationTime is " + initialGuessComputationTime.getDoubleValue());
+         PrintTools.info("treeExpansionComputationTime is " + treeExpansionComputationTime.getDoubleValue());
+         PrintTools.info("shortcutPathComputationTime is " + shortcutPathComputationTime.getDoubleValue());
+         PrintTools.info("motionGenerationComputationTime is " + motionGenerationComputationTime.getDoubleValue());
          PrintTools.info("toolbox executing time is " + totalComputationTime.getDoubleValue() + " seconds " + currentNumberOfIterations.getIntegerValue());
          PrintTools.info("===========================================");
       }
