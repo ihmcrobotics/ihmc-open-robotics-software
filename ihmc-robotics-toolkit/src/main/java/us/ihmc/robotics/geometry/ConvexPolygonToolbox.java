@@ -20,7 +20,6 @@ public class ConvexPolygonToolbox
 {
    private static final boolean DEBUG = false;
 
-   // FIXME check this for garbage
    /**
     * Assumes that the polygons are disjoint. Find the vertex indices corresponding to the end
     * points of the two connecting edges.
@@ -151,7 +150,6 @@ public class ConvexPolygonToolbox
       return true;
    }
 
-   // FIXME check this for garbage
    private final VerticesIndices polygon1VerticesIndices = new VerticesIndices();
    private final VerticesIndices polygon2VerticesIndices = new VerticesIndices();
    /**
@@ -163,7 +161,7 @@ public class ConvexPolygonToolbox
     *           containing polygon1 and polygon2.
     * @param connectingEdge1ToPack LineSegment2d first connecting edge between polygon1 and
     *           polygon2.
-    * @param connectingEdge2Topack LineSegment2d second connecting edge between polygon1 and
+    * @param connectingEdge2ToPack LineSegment2d second connecting edge between polygon1 and
     *           polygon2.
     * @return true if succeeded, false if failed
     */
@@ -207,11 +205,6 @@ public class ConvexPolygonToolbox
     */
    public boolean combineDisjointPolygons(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, ConvexPolygon2dAndConnectingEdges combinedPolygonAndEdgesToPack)
    {
-      /*
-      ConvexPolygon2D combinedPolygon = new ConvexPolygon2D();
-      LineSegment2D connectingEdge1 = new LineSegment2D();
-      LineSegment2D connectingEdge2 = new LineSegment2D();
-      */
       if (!combineDisjointPolygons(polygon1, polygon2, combinedPolygon, connectingEdge1, connectingEdge2))
          return false;
 
@@ -679,77 +672,9 @@ public class ConvexPolygonToolbox
       return constructPolygonForIntersection(crossingIndices, polygonP, polygonQ, intersectingPolygonToPack);
    }
 
-   // FIXME check this for garbage
-   public static ConvexPolygon2D shrinkInto(ConvexPolygon2D polygonP, Point2DReadOnly referencePointInP, ConvexPolygon2D polygonQ)
-   {
-      if (!polygonQ.isEmpty() && polygonQ.getNumberOfVertices() < 3)
-      {
-         return new ConvexPolygon2D(polygonQ);
-      }
 
-      ArrayList<Line2D> rays = new ArrayList<Line2D>();
-
-      Point2D referencePointInPCopy = new Point2D(referencePointInP);
-
-      int leftMostIndexOnPolygonQ = polygonQ.getMinXIndex();
-      Point2DReadOnly vertexQ = polygonQ.getVertex(leftMostIndexOnPolygonQ);
-      int nextVertexQIndex = polygonQ.getNextVertexIndex(leftMostIndexOnPolygonQ);
-      Point2DReadOnly nextVertexQ = polygonQ.getVertex(nextVertexQIndex);
-
-      int leftMostIndexOnPolygonP = polygonP.getMinXIndex();
-      Point2DReadOnly vertexP = polygonP.getVertex(leftMostIndexOnPolygonP);
-      int nextVertexPIndex = polygonP.getNextVertexIndex(leftMostIndexOnPolygonP);
-      Point2DReadOnly nextVertexP = polygonP.getVertex(nextVertexPIndex);
-
-      forEachPolygonQ: for (int i = 0; i < polygonQ.getNumberOfVertices(); i++)
-      {
-         Vector2D edgeOnQ = new Vector2D(nextVertexQ.getX() - vertexQ.getX(), nextVertexQ.getY() - vertexQ.getY());
-
-         int j = 0;
-         while (j < polygonP.getNumberOfVertices())
-         {
-            Vector2D edgeOnP = new Vector2D(nextVertexP.getX() - vertexP.getX(), nextVertexP.getY() - vertexP.getY());
-            double crossProduct = edgeOnQ.getX() * edgeOnP.getY() - edgeOnP.getX() * edgeOnQ.getY();
-            if (crossProduct <= 0.0)
-            {
-               referencePointInPCopy.setX(referencePointInP.getX() + vertexQ.getX() - vertexP.getX());
-               referencePointInPCopy.setY(referencePointInP.getY() + vertexQ.getY() - vertexP.getY());
-               Line2D ray = new Line2D(referencePointInPCopy, edgeOnQ);
-               rays.add(ray);
-
-               vertexQ = nextVertexQ;
-               nextVertexQIndex = polygonQ.getNextVertexIndex(nextVertexQIndex);
-               nextVertexQ = polygonQ.getVertex(nextVertexQIndex);
-
-               continue forEachPolygonQ;
-            }
-            else
-            {
-               j++;
-               vertexP = nextVertexP;
-               nextVertexPIndex = polygonP.getNextVertexIndex(nextVertexPIndex);
-               nextVertexP = polygonP.getVertex(nextVertexPIndex);
-            }
-         }
-
-         throw new RuntimeException("Should never get here!!");
-      }
-
-      ConvexPolygonConstructorFromInteriorOfRays convexPolygonConstructorFromInteriorOfRays = new ConvexPolygonConstructorFromInteriorOfRays();
-
-      ConvexPolygon2D polygonToReturn = new ConvexPolygon2D();
-
-      boolean foundPolygon = convexPolygonConstructorFromInteriorOfRays.constructFromInteriorOfRays(rays, polygonToReturn);
-      if (foundPolygon)
-         return polygonToReturn;
-      return null;
-   }
-
-   // FIXME check this for garbage
    private final ConvexPolygon2dAndConnectingEdges combinedPolygonAndEdges = new ConvexPolygon2dAndConnectingEdges();
    /**
-    * generates garbage
-    * 
     * @param polygon1
     * @param polygon2
     * @return success
@@ -771,7 +696,6 @@ public class ConvexPolygonToolbox
    }
 
 
-   // FIXME check this for garbage
    /**
     * This function changes the polygon given, such that it has the desired number of vertices. It
     * is conservative in the sense, that the modified polygon will be contained in the original
@@ -845,7 +769,6 @@ public class ConvexPolygonToolbox
 
    }
 
-   // FIXME check this for garbage
    /**
     * This function changes the polygon given, such that it has the desired number of vertices. It
     * is conservative in the sense, that the modified polygon will be contained in the original

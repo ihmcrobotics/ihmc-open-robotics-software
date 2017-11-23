@@ -235,8 +235,11 @@ public class ConvexPolygonToolboxTest
 
          ConvexPolygon2dAndConnectingEdges actualPolygon = new ConvexPolygon2dAndConnectingEdges();
          boolean success = toolbox.combineDisjointPolygons(polygon1, polygon2, actualPolygon);
+         ConvexPolygon2dAndConnectingEdges actualPolygon2 = ConvexPolygonTools.combineDisjointPolygons(polygon1, polygon2);
 
          assertTrue(success);
+         assertTrue("Iteration: " + i + ", expected\n" + expectedPolygon + "\nactual\n" + actualPolygon2.getConvexPolygon2d(),
+               expectedPolygon.epsilonEquals(actualPolygon2.getConvexPolygon2d(), epsilon));
          assertTrue("Iteration: " + i + ", expected\n" + expectedPolygon + "\nactual\n" + actualPolygon.getConvexPolygon2d(),
                expectedPolygon.epsilonEquals(actualPolygon.getConvexPolygon2d(), epsilon));
       }
@@ -341,9 +344,6 @@ public class ConvexPolygonToolboxTest
          shrinker.scaleConvexPolygon(polygonWithOnePoint, random.nextDouble(), shrunkenOnePointPolygon);
 
          assertTrue(shrunkenOnePointPolygon.epsilonEquals(polygonWithOnePoint, 1e-7));
-
-         assertEquals(1, toolbox.shrinkInto(sparePolygon, arbitraryPoint0, polygonWithOnePoint).getNumberOfVertices());
-         assertTrue(toolbox.shrinkInto(sparePolygon, arbitraryPoint0, polygonWithOnePoint).getVertex(0).equals(pointThatDefinesThePolygon));
       }
    }
 
@@ -550,7 +550,7 @@ public class ConvexPolygonToolboxTest
          // computeIntersectionOfPolygons
          ConvexPolygon2D polygonIntersection = new ConvexPolygon2D();
          success = toolbox.computeIntersectionOfPolygons(polygonWithTwoPoints, sparePolygon, polygonIntersection);
-         
+
          if (!success)
             assertTrue(sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon) == null);
          else if (polygonIntersection.getNumberOfVertices() == 1)
@@ -590,10 +590,6 @@ public class ConvexPolygonToolboxTest
          shrinker.scaleConvexPolygon(polygonWithTwoPoints, shrinkDistance, shrunkenPolygon);
 
          assertTrue(shrunkenPolygon.getNumberOfVertices() == 1);
-         ConvexPolygon2D shrinkInto = toolbox.shrinkInto(sparePolygon, arbitraryPoint0, polygonWithTwoPoints);
-         assertEquals(2, shrinkInto.getNumberOfVertices());
-         shrinkInto = toolbox.shrinkInto(sparePolygon, arbitraryPoint0, polygonWithTwoPoints);
-         assertEqualsInEitherOrder(shrinkInto.getVertex(0), shrinkInto.getVertex(1), pointThatDefinesThePolygon0, pointThatDefinesThePolygon1);
       }
    }
 
