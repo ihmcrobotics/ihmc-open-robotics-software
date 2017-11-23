@@ -415,26 +415,28 @@ public class ConvexPolygonToolboxTest
          success = toolbox.findConnectingEdgesVerticesIndexes(polygon1, polygon2, verticesIndices1, verticesIndices2);
          assertTrue(success);
 
+         assertTrue(verticesIndices[0][0] == verticesIndices1.getIndex(0));
+         assertTrue(verticesIndices[0][1] == verticesIndices1.getIndex(1));
+         assertTrue(verticesIndices[1][0] == verticesIndices2.getIndex(0));
+         assertTrue(verticesIndices[1][1] == verticesIndices2.getIndex(1));
+
          originalCombinedPolygon.clear();
          polygon1.getVerticesInClockwiseOrder(verticesIndices[0][1], verticesIndices[0][0], originalCombinedPolygon);
          polygon2.getVerticesInClockwiseOrder(verticesIndices[1][0], verticesIndices[1][1], originalCombinedPolygon);
          originalCombinedPolygon.update();
 
          newCombinedPolygon.clear();
-         polygon1.getVerticesInClockwiseOrder(verticesIndices[0][1], verticesIndices[0][0], newCombinedPolygon);
-         polygon2.getVerticesInClockwiseOrder(verticesIndices[1][0], verticesIndices[1][1], newCombinedPolygon);
+         polygon1.getVerticesInClockwiseOrder(verticesIndices1.getIndex(1), verticesIndices1.getIndex(0), newCombinedPolygon);
+         polygon2.getVerticesInClockwiseOrder(verticesIndices2.getIndex(0), verticesIndices2.getIndex(1), newCombinedPolygon);
          newCombinedPolygon.update();
 
-         ConvexPolygonTools.getConnectingEdges(polygon1, polygon2, originalConnectingEdge1, originalConnectingEdge1, verticesIndices);
+         assertTrue("Iteration: " + i + ", expected\n" + originalCombinedPolygon + "\nactual\n" + newCombinedPolygon,
+               originalCombinedPolygon.epsilonEquals(newCombinedPolygon, epsilon));
+
+         ConvexPolygonTools.getConnectingEdges(polygon1, polygon2, originalConnectingEdge1, originalConnectingEdge2, verticesIndices);
 
          toolbox.getConnectingEdges(polygon1, polygon2, newConnectingEdge1, newConnectingEdge2, verticesIndices1, verticesIndices2);
 
-
-         toolbox.combineDisjointPolygons(polygon1, polygon2, newCombinedPolygon, newConnectingEdge1, newConnectingEdge2);
-
-         assertTrue(success);
-         assertTrue("Iteration: " + i + ", expected\n" + originalCombinedPolygon + "\nactual\n" + newCombinedPolygon,
-               originalCombinedPolygon.epsilonEquals(newCombinedPolygon, epsilon));
          assertTrue("Iteration: " + i + ", expected\n" + originalConnectingEdge1 + "\nactual\n" + newConnectingEdge1,
                originalConnectingEdge1.epsilonEquals(newConnectingEdge1, epsilon));
          assertTrue("Iteration: " + i + ", expected\n" + originalConnectingEdge2 + "\nactual\n" + newConnectingEdge2,

@@ -188,10 +188,10 @@ public class ConvexPolygonTools
    }
 
    static void getConnectingEdges(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, LineSegment2D connectingEdge1ToPack,
-                                          LineSegment2D connectingEdge2Topack, int[][] verticesIndices)
+                                          LineSegment2D connectingEdge2ToPack, int[][] verticesIndices)
    {
       connectingEdge1ToPack.set(polygon1.getVertex(verticesIndices[0][0]), polygon2.getVertex(verticesIndices[1][0]));
-      connectingEdge2Topack.set(polygon2.getVertex(verticesIndices[1][1]), polygon1.getVertex(verticesIndices[0][1]));
+      connectingEdge2ToPack.set(polygon2.getVertex(verticesIndices[1][1]), polygon1.getVertex(verticesIndices[0][1]));
    }
 
    /**
