@@ -496,11 +496,11 @@ public class ConvexPolygonToolboxTest
          Point2D[] expectedIntersectionWithSparePolygon = sparePolygon.intersectionWith(new LineSegment2D(pointThatDefinesThePolygon0,
                pointThatDefinesThePolygon1));
          ConvexPolygon2D actualIntersectionWithSparePolygon = new ConvexPolygon2D();
-         toolbox.computeIntersectionOfPolygons(sparePolygon, polygonWithTwoPoints, actualIntersectionWithSparePolygon);
+         boolean success = toolbox.computeIntersectionOfPolygons(sparePolygon, polygonWithTwoPoints, actualIntersectionWithSparePolygon);
 
          if (expectedIntersectionWithSparePolygon == null)
          {
-            assertTrue(actualIntersectionWithSparePolygon == null);
+            assertFalse(success);
          }
          else if (expectedIntersectionWithSparePolygon.length == 1)
          {
@@ -549,7 +549,8 @@ public class ConvexPolygonToolboxTest
 
          // computeIntersectionOfPolygons
          ConvexPolygon2D polygonIntersection = new ConvexPolygon2D();
-         boolean success = toolbox.computeIntersectionOfPolygons(polygonWithTwoPoints, sparePolygon, polygonIntersection);
+         success = toolbox.computeIntersectionOfPolygons(polygonWithTwoPoints, sparePolygon, polygonIntersection);
+         
          if (!success)
             assertTrue(sparePolygon.intersectionWith(lineSegmentThatDefinesThePolygon) == null);
          else if (polygonIntersection.getNumberOfVertices() == 1)
