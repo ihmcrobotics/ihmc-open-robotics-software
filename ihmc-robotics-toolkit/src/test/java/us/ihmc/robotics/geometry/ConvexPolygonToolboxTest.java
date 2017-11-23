@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.robotics.geometry.ConvexPolygonToolbox.VerticesIndices;
@@ -342,6 +343,27 @@ public class ConvexPolygonToolboxTest
          assertTrue(verticesIndices[0][1] == verticesIndices1.getIndex(1));
          assertTrue(verticesIndices[1][0] == verticesIndices2.getIndex(0));
          assertTrue(verticesIndices[1][1] == verticesIndices2.getIndex(1));
+      }
+   }
+
+   @Test(timeout = 30000)
+   public void testVerticesIndices()
+   {
+      ConvexPolygonToolbox toolbox = new ConvexPolygonToolbox();
+
+      VerticesIndices verticesIndices = toolbox.createVerticesIndices();
+      Random random = new Random(234234L);
+
+      for (int i = 0; i < 100; i++)
+      {
+         int first = RandomNumbers.nextInt(random, 0, 6);
+         int second = RandomNumbers.nextInt(random, 0, 6);
+
+         verticesIndices.setIndex(0, first);
+         verticesIndices.setIndex(1, second);
+
+         assertTrue(verticesIndices.getIndex(0) == first);
+         assertTrue(verticesIndices.getIndex(1) == second);
       }
    }
 
