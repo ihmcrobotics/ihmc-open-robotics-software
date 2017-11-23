@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
 import java.util.ArrayList;
@@ -655,7 +656,7 @@ public class ConvexPolygonToolbox
       return true;
    }
 
-   private final RecyclingArrayList<StartAndEndIndices> crossingIndices = new RecyclingArrayList<>(initialCapacity, StartAndEndIndices.class);
+   private final RecyclingArrayList<StartAndEndIndices> crossingIndices = new RecyclingArrayList<>(initialCapacity, new StartAndEndIndicesBuilder());
 
    private boolean buildCommonPolygonFromBridges(RecyclingArrayList<MutableInt> bridgeIndicesP, RecyclingArrayList<MutableInt> bridgeIndicesQ,
          RecyclingArrayList<MutableBoolean> bridgeWasOnLeft, ConvexPolygon2D polygonP, ConvexPolygon2D polygonQ, ConvexPolygon2D intersectingPolygonToPack)
@@ -859,6 +860,14 @@ public class ConvexPolygonToolbox
    }
 
 
+   public class StartAndEndIndicesBuilder extends GenericTypeBuilder<StartAndEndIndices>
+   {
+      @Override
+      public StartAndEndIndices newInstance()
+      {
+         return new StartAndEndIndices();
+      }
+   }
 
 
 
