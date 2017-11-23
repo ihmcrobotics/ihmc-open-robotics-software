@@ -5,6 +5,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.robotics.geometry.ConvexPolygonToolbox.VerticesIndices;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
@@ -244,6 +245,183 @@ public class ConvexPolygonToolboxTest
                expectedPolygon.epsilonEquals(actualPolygon.getConvexPolygon2d(), epsilon));
       }
    }
+
+   @Test(timeout = 30000)
+   public void testCombinedDisjointPolygons()
+   {
+      Random random = new Random(234234L);
+      ConvexPolygonToolbox toolbox = new ConvexPolygonToolbox();
+
+      for (int i = 0; i < 100; i++)
+      {
+         List<Point2D> pointList = EuclidGeometryRandomTools.generateRandomPointCloud2D(random, 0.0, 1.0, 100);
+
+         Point2D offset1 = new Point2D(-1.0, 0.0);
+         Point2D offset2 = new Point2D(1.0, 0.0);
+
+         ConvexPolygon2D polygon1 = new ConvexPolygon2D();
+         ConvexPolygon2D polygon2 = new ConvexPolygon2D();
+
+         for (int index = 0; index < pointList.size(); index++)
+         {
+            Point2D vertex1 = new Point2D();
+            vertex1.add(pointList.get(index), offset1);
+            polygon1.addVertex(vertex1);
+
+            Point2D vertex2 = new Point2D();
+            vertex2.add(pointList.get(index), offset2);
+            polygon2.addVertex(vertex2);
+         }
+
+         polygon1.update();
+         polygon2.update();
+
+         ConvexPolygon2D originalCombinedPolygon = new ConvexPolygon2D();
+         LineSegment2D originalConnectingEdge1 = new LineSegment2D();
+         LineSegment2D originalConnectingEdge2 = new LineSegment2D();
+
+         boolean success = ConvexPolygonTools.combineDisjointPolygons(polygon1, polygon2, originalCombinedPolygon, originalConnectingEdge1, originalConnectingEdge2);
+         assertTrue(success);
+
+         ConvexPolygon2D newCombinedPolygon = new ConvexPolygon2D();
+         LineSegment2D newConnectingEdge1 = new LineSegment2D();
+         LineSegment2D newConnectingEdge2 = new LineSegment2D();
+         toolbox.combineDisjointPolygons(polygon1, polygon2, newCombinedPolygon, newConnectingEdge1, newConnectingEdge2);
+
+         assertTrue(success);
+         assertTrue("Iteration: " + i + ", expected\n" + originalCombinedPolygon + "\nactual\n" + newCombinedPolygon,
+               originalCombinedPolygon.epsilonEquals(newCombinedPolygon, epsilon));
+         assertTrue("Iteration: " + i + ", expected\n" + originalConnectingEdge1 + "\nactual\n" + newConnectingEdge1,
+               originalConnectingEdge1.epsilonEquals(newConnectingEdge1, epsilon));
+         assertTrue("Iteration: " + i + ", expected\n" + originalConnectingEdge2 + "\nactual\n" + newConnectingEdge2,
+               originalConnectingEdge2.epsilonEquals(newConnectingEdge2, epsilon));
+      }
+   }
+
+   @Test(timeout = 30000)
+   public void testFindConnectingEdgesVerticesIndexes()
+   {
+      Random random = new Random(234234L);
+      ConvexPolygonToolbox toolbox = new ConvexPolygonToolbox();
+
+      for (int i = 0; i < 100; i++)
+      {
+         List<Point2D> pointList = EuclidGeometryRandomTools.generateRandomPointCloud2D(random, 0.0, 1.0, 100);
+
+         Point2D offset1 = new Point2D(-1.0, 0.0);
+         Point2D offset2 = new Point2D(1.0, 0.0);
+
+         ConvexPolygon2D polygon1 = new ConvexPolygon2D();
+         ConvexPolygon2D polygon2 = new ConvexPolygon2D();
+
+         for (int index = 0; index < pointList.size(); index++)
+         {
+            Point2D vertex1 = new Point2D();
+            vertex1.add(pointList.get(index), offset1);
+            polygon1.addVertex(vertex1);
+
+            Point2D vertex2 = new Point2D();
+            vertex2.add(pointList.get(index), offset2);
+            polygon2.addVertex(vertex2);
+         }
+
+         polygon1.update();
+         polygon2.update();
+
+         int[][] verticesIndices = new int[2][2];
+         boolean success = ConvexPolygonTools.findConnectingEdgesVerticesIndexes(polygon1, polygon2, verticesIndices);
+         assertTrue(success);
+
+         VerticesIndices verticesIndices1 = toolbox.createVerticesIndices();
+         VerticesIndices verticesIndices2 = toolbox.createVerticesIndices();
+
+         success = toolbox.findConnectingEdgesVerticesIndexes(polygon1, polygon2, verticesIndices1, verticesIndices2);
+
+         assertTrue(success);
+         assertTrue(verticesIndices[0][0] == verticesIndices1.getIndex(0));
+         assertTrue(verticesIndices[0][1] == verticesIndices1.getIndex(1));
+         assertTrue(verticesIndices[1][0] == verticesIndices2.getIndex(0));
+         assertTrue(verticesIndices[1][1] == verticesIndices2.getIndex(1));
+      }
+   }
+
+   @Test(timeout = 30000)
+   public void testGetConnectingEdges()
+   {
+      Random random = new Random(234234L);
+      ConvexPolygonToolbox toolbox = new ConvexPolygonToolbox();
+
+      for (int i = 0; i < 100; i++)
+      {
+         List<Point2D> pointList = EuclidGeometryRandomTools.generateRandomPointCloud2D(random, 0.0, 1.0, 100);
+
+         Point2D offset1 = new Point2D(-1.0, 0.0);
+         Point2D offset2 = new Point2D(1.0, 0.0);
+
+         ConvexPolygon2D polygon1 = new ConvexPolygon2D();
+         ConvexPolygon2D polygon2 = new ConvexPolygon2D();
+
+         for (int index = 0; index < pointList.size(); index++)
+         {
+            Point2D vertex1 = new Point2D();
+            vertex1.add(pointList.get(index), offset1);
+            polygon1.addVertex(vertex1);
+
+            Point2D vertex2 = new Point2D();
+            vertex2.add(pointList.get(index), offset2);
+            polygon2.addVertex(vertex2);
+         }
+
+         polygon1.update();
+         polygon2.update();
+
+         ConvexPolygon2D originalCombinedPolygon = new ConvexPolygon2D();
+         LineSegment2D originalConnectingEdge1 = new LineSegment2D();
+         LineSegment2D originalConnectingEdge2 = new LineSegment2D();
+
+         ConvexPolygon2D newCombinedPolygon = new ConvexPolygon2D();
+         LineSegment2D newConnectingEdge1 = new LineSegment2D();
+         LineSegment2D newConnectingEdge2 = new LineSegment2D();
+
+         int[][] verticesIndices = new int[2][2];
+         boolean success = ConvexPolygonTools.findConnectingEdgesVerticesIndexes(polygon1, polygon2, verticesIndices);
+         assertTrue(success);
+
+         VerticesIndices verticesIndices1 = toolbox.createVerticesIndices();
+         VerticesIndices verticesIndices2 = toolbox.createVerticesIndices();
+
+         success = toolbox.findConnectingEdgesVerticesIndexes(polygon1, polygon2, verticesIndices1, verticesIndices2);
+         assertTrue(success);
+
+         originalCombinedPolygon.clear();
+         polygon1.getVerticesInClockwiseOrder(verticesIndices[0][1], verticesIndices[0][0], originalCombinedPolygon);
+         polygon2.getVerticesInClockwiseOrder(verticesIndices[1][0], verticesIndices[1][1], originalCombinedPolygon);
+         originalCombinedPolygon.update();
+
+         newCombinedPolygon.clear();
+         polygon1.getVerticesInClockwiseOrder(verticesIndices[0][1], verticesIndices[0][0], newCombinedPolygon);
+         polygon2.getVerticesInClockwiseOrder(verticesIndices[1][0], verticesIndices[1][1], newCombinedPolygon);
+         newCombinedPolygon.update();
+
+         ConvexPolygonTools.getConnectingEdges(polygon1, polygon2, originalConnectingEdge1, originalConnectingEdge1, verticesIndices);
+
+         toolbox.getConnectingEdges(polygon1, polygon2, newConnectingEdge1, newConnectingEdge2, verticesIndices1, verticesIndices2);
+
+
+         toolbox.combineDisjointPolygons(polygon1, polygon2, newCombinedPolygon, newConnectingEdge1, newConnectingEdge2);
+
+         assertTrue(success);
+         assertTrue("Iteration: " + i + ", expected\n" + originalCombinedPolygon + "\nactual\n" + newCombinedPolygon,
+               originalCombinedPolygon.epsilonEquals(newCombinedPolygon, epsilon));
+         assertTrue("Iteration: " + i + ", expected\n" + originalConnectingEdge1 + "\nactual\n" + newConnectingEdge1,
+               originalConnectingEdge1.epsilonEquals(newConnectingEdge1, epsilon));
+         assertTrue("Iteration: " + i + ", expected\n" + originalConnectingEdge2 + "\nactual\n" + newConnectingEdge2,
+               originalConnectingEdge2.epsilonEquals(newConnectingEdge2, epsilon));
+      }
+
+
+   }
+
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
