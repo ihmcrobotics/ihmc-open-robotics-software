@@ -41,7 +41,7 @@ public class ConvexPolygonToolboxTest
       FrameConvexPolygon2d polygon1 = new FrameConvexPolygon2d(points1);
       FrameConvexPolygon2d polygon2 = new FrameConvexPolygon2d(points2);
 
-      FrameConvexPolygon2dAndConnectingEdges frameConvexPolygon2dAndConnectingEdges = null;
+      FrameConvexPolygon2dAndConnectingEdges frameConvexPolygon2dAndConnectingEdges = new FrameConvexPolygon2dAndConnectingEdges();
 
       ArrayList<FramePoint2D> pointsThatShouldBeInCombinedPolygon = new ArrayList<FramePoint2D>();
       int numberOfPointsInCombinedPolygon = 10000;
@@ -65,10 +65,13 @@ public class ConvexPolygonToolboxTest
       int numTests = 1000;
 
       long startTime = System.currentTimeMillis();
+      boolean success = true;
       for (int i = 0; i < numTests; i++)
       {
-         frameConvexPolygon2dAndConnectingEdges = toolbox.combineDisjointPolygons(polygon1, polygon2);
+         success = toolbox.combineDisjointPolygons(polygon1, polygon2, frameConvexPolygon2dAndConnectingEdges);
       }
+
+      assertTrue(success);
 
       long endTime = System.currentTimeMillis();
       double timePer = (endTime - startTime) / ((double) numTests);
@@ -227,9 +230,12 @@ public class ConvexPolygonToolboxTest
 
          expectedPolygon.update();
 
-         ConvexPolygon2D actualPolygon = toolbox.combineDisjointPolygons(polygon1, polygon2).getConvexPolygon2d();
+         ConvexPolygon2dAndConnectingEdges actualPolygon = new ConvexPolygon2dAndConnectingEdges();
+         boolean success = toolbox.combineDisjointPolygons(polygon1, polygon2, actualPolygon);
 
-         assertTrue("Iteration: " + i + ", expected\n" + expectedPolygon + "\nactual\n" + actualPolygon, expectedPolygon.epsilonEquals(actualPolygon, epsilon));
+         assertTrue(success);
+         assertTrue("Iteration: " + i + ", expected\n" + expectedPolygon + "\nactual\n" + actualPolygon.getConvexPolygon2d(),
+               expectedPolygon.epsilonEquals(actualPolygon.getConvexPolygon2d(), epsilon));
       }
    }
 

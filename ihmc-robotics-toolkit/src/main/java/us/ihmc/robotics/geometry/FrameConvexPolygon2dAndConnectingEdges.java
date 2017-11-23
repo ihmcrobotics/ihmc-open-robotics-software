@@ -10,6 +10,16 @@ public class FrameConvexPolygon2dAndConnectingEdges
    private final FrameConvexPolygon2d combinedPolygon;
    private final FrameLineSegment2d connectingEdge1, connectingEdge2;
 
+   public FrameConvexPolygon2dAndConnectingEdges()
+   {
+      this.originalPolygon1 = new FrameConvexPolygon2d();
+      this.originalPolygon2 = new FrameConvexPolygon2d();
+
+      this.combinedPolygon = new FrameConvexPolygon2d();
+      this.connectingEdge1 = new FrameLineSegment2d();
+      this.connectingEdge2 = new FrameLineSegment2d();
+   }
+
    public FrameConvexPolygon2dAndConnectingEdges(FrameConvexPolygon2d originalPolygon1, FrameConvexPolygon2d originalPolygon2, FrameConvexPolygon2d polygon, FrameLineSegment2d connectingEdge1, FrameLineSegment2d connectingEdge2)
    {
       this.originalPolygon1 = originalPolygon1;
