@@ -183,7 +183,7 @@ public class ConvexPolygonToolbox
    }
 
 
-   private static void getConnectingEdges(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, LineSegment2D connectingEdge1ToPack,
+   static void getConnectingEdges(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, LineSegment2D connectingEdge1ToPack,
                                           LineSegment2D connectingEdge2ToPack, VerticesIndices polygon1VerticesIndices,
                                           VerticesIndices polygon2VerticesIndices)
    {
@@ -792,6 +792,10 @@ public class ConvexPolygonToolbox
       }
    }
 
+   public VerticesIndices createVerticesIndices()
+   {
+      return new VerticesIndices();
+   }
 
 
    private class StartAndEndIndices
@@ -842,38 +846,42 @@ public class ConvexPolygonToolbox
       }
    }
 
-   private class VerticesIndices
+   class VerticesIndices
    {
+      public VerticesIndices()
+      {
+      }
+
       private final RecyclingArrayList<MutableInt> connectingEdgeIndices = new RecyclingArrayList<MutableInt>(20, MutableInt.class);
 
-      private void clear()
+      public void clear()
       {
          connectingEdgeIndices.clear();
       }
 
-      private int size()
+      public int size()
       {
          return connectingEdgeIndices.size();
       }
 
-      private void setNumberOfIndices(int numberOfIndices)
+      public void setNumberOfIndices(int numberOfIndices)
       {
          clear();
          for (int i = 0; i < numberOfIndices; i++)
             connectingEdgeIndices.add();
       }
 
-      private void addIndex(int index)
+      public void addIndex(int index)
       {
          connectingEdgeIndices.add().setValue(index);
       }
 
-      private void setIndex(int number, int index)
+      public void setIndex(int number, int index)
       {
          connectingEdgeIndices.get(number).setValue(index);
       }
 
-      private int getIndex(int number)
+      public int getIndex(int number)
       {
          return connectingEdgeIndices.get(number).getValue();
       }
