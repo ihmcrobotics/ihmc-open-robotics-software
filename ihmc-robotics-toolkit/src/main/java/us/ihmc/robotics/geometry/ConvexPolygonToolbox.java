@@ -145,8 +145,8 @@ public class ConvexPolygonToolbox
 
       polygon1VerticesIndicesToPack.setIndex(0, L1);
       polygon1VerticesIndicesToPack.setIndex(1, R1);
-      polygon2VerticesIndicesToPack.setIndex(0, L2);
-      polygon2VerticesIndicesToPack.setIndex(1, R2);
+      polygon2VerticesIndicesToPack.setIndex(0, R2);
+      polygon2VerticesIndicesToPack.setIndex(1, L2);
       return true;
    }
 
