@@ -249,7 +249,7 @@ public class PlanarRegionConstraintProvider
          planeReferenceFrame.update();
 
          footstep.getPosition2d(tempPoint);
-         tempPoint.changeFrame(planeReferenceFrame);
+         tempPoint.changeFrameAndProjectToXYPlane(planeReferenceFrame);
 
          if (planarRegion.isPointInside(tempPoint.getPoint()))
          {
