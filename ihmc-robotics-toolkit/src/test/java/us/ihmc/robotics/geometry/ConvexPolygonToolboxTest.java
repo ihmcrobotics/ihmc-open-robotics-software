@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -11,10 +10,10 @@ import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -199,6 +198,7 @@ public class ConvexPolygonToolboxTest
       ConvexPolygon2dTestHelpers.verifyPointsAreNotInside(polygon2, pointsThatShouldNotBeInOriginals, 0.0);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 3.0)
    @Test(timeout = 30000)
    public void testCombineDisjointPolygons2() throws Exception
    {
@@ -247,6 +247,7 @@ public class ConvexPolygonToolboxTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 3.0)
    @Test(timeout = 30000)
    public void testCombinedDisjointPolygons()
    {
@@ -299,6 +300,7 @@ public class ConvexPolygonToolboxTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 3.0)
    @Test(timeout = 30000)
    public void testFindConnectingEdgesVerticesIndexes()
    {
@@ -346,6 +348,7 @@ public class ConvexPolygonToolboxTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 3.0)
    @Test(timeout = 30000)
    public void testVerticesIndices()
    {
@@ -367,6 +370,7 @@ public class ConvexPolygonToolboxTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 3.0)
    @Test(timeout = 30000)
    public void testGetConnectingEdges()
    {
@@ -811,18 +815,76 @@ public class ConvexPolygonToolboxTest
       ConvexPolygon2D polygon3 = new ConvexPolygon2D(verticesArray3);
       ConvexPolygon2D polygon4 = new ConvexPolygon2D(verticesArray4);
 
-      ConvexPolygon2D noIntersect = new ConvexPolygon2D();
-      ConvexPolygon2D allIntersect = new ConvexPolygon2D();
-      ConvexPolygon2D someIntersect = new ConvexPolygon2D();
 
-      assertTrue(toolbox.computeIntersectionOfPolygons(polygon1, polygon2, allIntersect));
-      assertFalse("Should be false", toolbox.computeIntersectionOfPolygons(polygon1, polygon3, noIntersect));
-      assertTrue(toolbox.computeIntersectionOfPolygons(polygon1, polygon4, someIntersect));
-      //
-      //      System.out.println("No" + noIntersect);
-      //      System.out.println("Some" + someIntersect);
-      //      System.out.println("all" + allIntersect);
+      ConvexPolygon2D newAllIntersect = new ConvexPolygon2D();
+      ConvexPolygon2D newNoIntersect = new ConvexPolygon2D();
+      ConvexPolygon2D newSomeIntersect = new ConvexPolygon2D();
+
+      assertTrue(toolbox.computeIntersectionOfPolygons(polygon1, polygon2, newAllIntersect));
+      ConvexPolygon2D originalAllIntersect = ConvexPolygonTools.computeIntersectionOfPolygons(polygon1, polygon2);
+      assertFalse(originalAllIntersect == null);
+      assertTrue(originalAllIntersect.epsilonEquals(newAllIntersect, epsilon));
+
+
+      assertFalse("Should be false", toolbox.computeIntersectionOfPolygons(polygon1, polygon3, newNoIntersect));
+      ConvexPolygon2D originalNoIntersect = ConvexPolygonTools.computeIntersectionOfPolygons(polygon1, polygon3);
+      assertTrue(originalNoIntersect == null);
+
+
+      ConvexPolygon2D originalSomeIntersect = ConvexPolygonTools.computeIntersectionOfPolygons(polygon1, polygon4);
+      assertFalse(originalSomeIntersect == null);
+      assertTrue(toolbox.computeIntersectionOfPolygons(polygon1, polygon4, newSomeIntersect));
+      assertTrue(originalSomeIntersect.epsilonEquals(newSomeIntersect, epsilon));
    }
+
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testConstructPolygonForIntersection()
+   {
+      ConvexPolygonToolbox toolbox = new ConvexPolygonToolbox();
+
+      int[][][] crossingIndices = { { {1, 2}, {1, 0} }, { {2, 1}, {2, 3} } };
+
+      ConvexPolygonToolbox.StartAndEndIndicesBuilder builder = toolbox.createStartAndEndIndicesBuilder();
+      RecyclingArrayList<ConvexPolygonToolbox.StartAndEndIndices> newCrossingIndices = new RecyclingArrayList<>(builder);
+      ConvexPolygonToolbox.StartAndEndIndices indices = newCrossingIndices.add();
+      indices.setIndex1Start(crossingIndices[0][0][0]);
+      indices.setIndex1End(crossingIndices[0][0][1]);
+      indices.setIndex2Start(crossingIndices[0][1][0]);
+      indices.setIndex2End(crossingIndices[0][1][1]);
+
+      indices = newCrossingIndices.add();
+      indices.setIndex1Start(crossingIndices[1][0][0]);
+      indices.setIndex1End(crossingIndices[1][0][1]);
+      indices.setIndex2Start(crossingIndices[1][1][0]);
+      indices.setIndex2End(crossingIndices[1][1][1]);
+
+
+      ConvexPolygon2D polygonP = new ConvexPolygon2D();
+      polygonP.addVertex(-10.0, 10.0);
+      polygonP.addVertex(10.0, 10.0);
+      polygonP.addVertex(10.0, -10.0);
+      polygonP.addVertex(-10.0, -10.0);
+      polygonP.update();
+
+      ConvexPolygon2D polygonQ = new ConvexPolygon2D();
+      polygonQ.addVertex(-5.0, 10.0);
+      polygonQ.addVertex(15.0, 10.0);
+      polygonQ.addVertex(15.0, -10.0);
+      polygonQ.addVertex(-5.0, -10.0);
+      polygonQ.update();
+
+      ConvexPolygon2D originalIntersectionToPack = new ConvexPolygon2D();
+      ConvexPolygon2D newIntersectionToPack = new ConvexPolygon2D();
+
+      ConvexPolygonTools.constructPolygonForIntersection(crossingIndices, polygonP, polygonQ, originalIntersectionToPack);
+      toolbox.constructPolygonForIntersection(newCrossingIndices, polygonP, polygonQ, newIntersectionToPack);
+
+      assertTrue(originalIntersectionToPack.epsilonEquals(newIntersectionToPack, epsilon));
+   }
+
+
 
    private void waitForButtonOrPause(FrameGeometryTestFrame testFrame)
    {
@@ -1025,7 +1087,7 @@ public class ConvexPolygonToolboxTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.4)
+   @ContinuousIntegrationTest(estimatedDuration = 3.0)
    @Test(timeout = 30000)
    public void testPolygonIntersections()
    {

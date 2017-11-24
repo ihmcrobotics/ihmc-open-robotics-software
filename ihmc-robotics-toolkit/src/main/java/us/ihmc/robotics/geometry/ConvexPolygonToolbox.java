@@ -221,7 +221,7 @@ public class ConvexPolygonToolbox
    private final Vector2D vectorToNextPointOnPolygonP = new Vector2D();
    private final Vector2D vectorToNextPointOnPolygonQ = new Vector2D();
 
-   private static final int initialCapacity = 50;
+   private static final int initialCapacity = 10;
    private final RecyclingArrayList<MutableInt> bridgeIndicesP = new RecyclingArrayList<>(initialCapacity, MutableInt.class);
    private final RecyclingArrayList<MutableInt> bridgeIndicesQ = new RecyclingArrayList<>(initialCapacity, MutableInt.class);
    private final RecyclingArrayList<MutableBoolean> bridgeWasOnLeft = new RecyclingArrayList<>(initialCapacity, MutableBoolean.class);
@@ -555,8 +555,8 @@ public class ConvexPolygonToolbox
       return true;
    }
 
-   private static boolean constructPolygonForIntersection(RecyclingArrayList<StartAndEndIndices> crossingIndicesList, ConvexPolygon2D polygonP,
-                                                          ConvexPolygon2D polygonQ, ConvexPolygon2D intersectingPolygonToPack)
+   static boolean constructPolygonForIntersection(RecyclingArrayList<StartAndEndIndices> crossingIndicesList, ConvexPolygon2D polygonP,
+                                                  ConvexPolygon2D polygonQ, ConvexPolygon2D intersectingPolygonToPack)
    {
       StartAndEndIndices crossingIndices = crossingIndicesList.getFirst();
       int startIndexP1 = crossingIndices.getIndex1Start();
@@ -654,6 +654,8 @@ public class ConvexPolygonToolbox
    private boolean buildCommonPolygonFromBridges(RecyclingArrayList<MutableInt> bridgeIndicesP, RecyclingArrayList<MutableInt> bridgeIndicesQ,
          RecyclingArrayList<MutableBoolean> bridgeWasOnLeft, ConvexPolygon2D polygonP, ConvexPolygon2D polygonQ, ConvexPolygon2D intersectingPolygonToPack)
    {
+      crossingIndices.clear();
+
       for (int i = 0; i < bridgeIndicesP.size(); i++)
       {
          // find intersection for bridge
@@ -792,55 +794,60 @@ public class ConvexPolygonToolbox
       }
    }
 
-   public VerticesIndices createVerticesIndices()
+   VerticesIndices createVerticesIndices()
    {
       return new VerticesIndices();
    }
 
+   StartAndEndIndicesBuilder createStartAndEndIndicesBuilder()
+   {
+      return new StartAndEndIndicesBuilder();
+   }
 
-   private class StartAndEndIndices
+
+   class StartAndEndIndices
    {
       private int index1Start;
       private int index1End;
       private int index2Start;
       private int index2End;
 
-      private void setIndex1Start(int index1Start)
+      public void setIndex1Start(int index1Start)
       {
          this.index1Start = index1Start;
       }
 
-      private void setIndex2Start(int index2Start)
+      public void setIndex2Start(int index2Start)
       {
          this.index2Start = index2Start;
       }
 
-      private void setIndex1End(int index1End)
+      public void setIndex1End(int index1End)
       {
          this.index1End = index1End;
       }
 
-      private void setIndex2End(int index2End)
+      public void setIndex2End(int index2End)
       {
          this.index2End = index2End;
       }
 
-      private int getIndex1Start()
+      public int getIndex1Start()
       {
          return index1Start;
       }
 
-      private int getIndex1End()
+      public int getIndex1End()
       {
          return index1End;
       }
 
-      private int getIndex2Start()
+      public int getIndex2Start()
       {
          return index2Start;
       }
 
-      private int getIndex2End()
+      public int getIndex2End()
       {
          return index2End;
       }

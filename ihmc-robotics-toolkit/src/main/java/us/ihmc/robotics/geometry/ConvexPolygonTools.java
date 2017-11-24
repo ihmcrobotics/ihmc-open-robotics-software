@@ -554,8 +554,8 @@ public class ConvexPolygonTools
       return new int[][] {{indexPStart, indexPEnd}, {indexQStart, indexQEnd}};
    }
 
-   private static boolean constructPolygonForIntersection(ArrayList<Boolean> decrementP, int[][][] crossingIndices, ConvexPolygon2D polygonP,
-                                                          ConvexPolygon2D polygonQ, ConvexPolygon2D intersectingPolygonToPack)
+   static boolean constructPolygonForIntersection(int[][][] crossingIndices, ConvexPolygon2D polygonP, ConvexPolygon2D polygonQ,
+                                                          ConvexPolygon2D intersectingPolygonToPack)
    {
       int startIndexP1 = crossingIndices[0][0][0];
       int endIndexP1 = crossingIndices[0][0][1];
@@ -673,7 +673,7 @@ public class ConvexPolygonTools
          }
       }
 
-      boolean success = constructPolygonForIntersection(bridgeWasOnLeft, crossingIndices, polygonP, polygonQ, intersectingPolygonToPack);
+      boolean success = constructPolygonForIntersection(crossingIndices, polygonP, polygonQ, intersectingPolygonToPack);
       return success;
    }
 
