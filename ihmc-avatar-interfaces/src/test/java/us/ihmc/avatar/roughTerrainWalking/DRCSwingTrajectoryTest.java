@@ -342,7 +342,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
          {
             angle += Math.PI;
          }
-         double radius = referenceLength / 2.0;
+         double radius = referenceLength / 2.5;
          stepLocation.setX(radius * Math.cos(angle));
          stepLocation.setY(radius * Math.sin(angle));
          stepLocation.add(lastPosition);
