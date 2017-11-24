@@ -242,38 +242,4 @@ public class HighLevelHumanoidControllerManager implements RobotController
    {
       return getName();
    }
-
-   /**
-    * Warmup the walking behavior by running all states for a number of iterations.
-    * 
-    * Also warms up the controller core
-    * 
-    * @param iterations number of times to run a single state
-    * @param walkingBehavior 
-    */
-   public void warmup(int iterations, WalkingHighLevelHumanoidController walkingBehavior)
-   {
-      PrintTools.info(this, "Starting JIT warmup routine");
-      ArrayList<WalkingStateEnum> states = new ArrayList<>();
-      controllerCore.initialize();
-      walkingBehavior.doTransitionIntoAction();
-      
-      walkingBehavior.getOrderedWalkingStatesForWarmup(states);
-      for(WalkingStateEnum walkingState : states)
-      {
-         PrintTools.info(this, "Warming up " + walkingState);
-         for(int i = 0; i < iterations; i++)
-         {
-            walkingBehavior.warmupStateIteration(walkingState);
-            ControllerCoreCommand controllerCoreCommandList = walkingBehavior.getControllerCoreCommand();
-            controllerCore.submitControllerCoreCommand(controllerCoreCommandList);
-            controllerCore.compute();
-         }
-      }
-
-      walkingBehavior.doTransitionOutOfAction();
-      walkingBehavior.getControllerCoreCommand().clear();
-      PrintTools.info(this, "Finished JIT warmup routine");
-   }
-
 }
