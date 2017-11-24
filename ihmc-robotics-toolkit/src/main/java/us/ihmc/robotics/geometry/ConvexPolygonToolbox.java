@@ -226,6 +226,18 @@ public class ConvexPolygonToolbox
    private final RecyclingArrayList<MutableInt> bridgeIndicesQ = new RecyclingArrayList<>(initialCapacity, MutableInt.class);
    private final RecyclingArrayList<MutableBoolean> bridgeWasOnLeft = new RecyclingArrayList<>(initialCapacity, MutableBoolean.class);
 
+
+   private final ConvexPolygon2D intersectionToThrowAway = new ConvexPolygon2D();
+
+   //TODO do something smarter here
+   public double computeIntersectionAreaOfPolygons(ConvexPolygon2D polygonP, ConvexPolygon2D polygonQ)
+   {
+      if (computeIntersectionOfPolygons(polygonP, polygonQ, intersectionToThrowAway))
+         return intersectionToThrowAway.getArea();
+      else
+         return 0.0;
+   }
+
    /**
     * Computes the intersection of two convex polygons. For references see:
     * http://www.iro.umontreal.ca/~plante/compGeom/algorithm.html Returns null if the polygons do
