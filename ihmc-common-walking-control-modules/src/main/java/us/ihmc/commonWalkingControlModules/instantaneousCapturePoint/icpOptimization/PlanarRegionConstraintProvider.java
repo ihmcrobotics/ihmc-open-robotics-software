@@ -58,6 +58,8 @@ public class PlanarRegionConstraintProvider
    private final RigidBodyTransform planeTransformToWorld = new RigidBodyTransform();
    private final ReferenceFrame planeReferenceFrame;
 
+   private final ConvexPolygonToolbox convexPolygonToolbox = new ConvexPolygonToolbox();
+
    public PlanarRegionConstraintProvider(ICPControlPlane icpControlPlane, WalkingControllerParameters parameters, BipedSupportPolygons bipedSupportPolygons,
                                          SideDependentList<? extends ContactablePlaneBody> contactableFeet, String yoNamePrefix, boolean visualize,
                                          YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -233,7 +235,6 @@ public class PlanarRegionConstraintProvider
 
 
    private final ConvexPolygon2D tempProjectedPolygon = new ConvexPolygon2D();
-   private final ConvexPolygon2D tempIntersection = new ConvexPolygon2D();
 
    private final FramePoint2D tempPoint = new FramePoint2D(worldFrame);
 
@@ -262,7 +263,6 @@ public class PlanarRegionConstraintProvider
       }
    }
 
-   // FIXME makes garbage. It's also not quite working properly.
    /**
     * Returns whether or not the current planar region needs updating
     */
@@ -272,9 +272,11 @@ public class PlanarRegionConstraintProvider
       captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
       icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(activePlanarRegion, tempProjectedPolygon, distanceFromEdgeForSwitching);
-      ConvexPolygonTools.computeIntersectionOfPolygons(captureRegion.getConvexPolygon2d(), tempProjectedPolygon, tempIntersection);
 
-      if (tempIntersection.getArea() > minimumAreaForSearch)
+      //convexPolygonToolbox.computeIntersectionOfPolygons(captureRegion.getConvexPolygon2d(), tempProjectedPolygon, tempIntersection);
+      double intersectionArea = convexPolygonToolbox.computeIntersectionAreaOfPolygons(captureRegion.getConvexPolygon2d(), tempProjectedPolygon);
+
+      if (intersectionArea > minimumAreaForSearch)
       {
          yoActivePlanarRegion.setConvexPolygon2d(activePlanarRegion.getConvexHull());
 
@@ -286,7 +288,6 @@ public class PlanarRegionConstraintProvider
       return true;
    }
 
-   // FIXME this makes garbage
    /**
     * returns whether or not there is a planar region that intersects the capture region
     */
@@ -305,9 +306,9 @@ public class PlanarRegionConstraintProvider
 
          icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, tempProjectedPolygon, distanceFromEdgeForSwitching);
 
-         // FIXME this makes a lot of garbage
-         ConvexPolygonTools.computeIntersectionOfPolygons(captureRegion.getConvexPolygon2d(), tempProjectedPolygon, tempIntersection);
-         double intersectionArea = tempIntersection.getArea();
+         //convexPolygonToolbox.computeIntersectionOfPolygons(captureRegion.getConvexPolygon2d(), tempProjectedPolygon, tempIntersection);
+         //double intersectionArea = tempIntersection.getArea();
+         double intersectionArea = convexPolygonToolbox.computeIntersectionAreaOfPolygons(captureRegion.getConvexPolygon2d(), tempProjectedPolygon);
 
          if (intersectionArea > maxArea)
          {
