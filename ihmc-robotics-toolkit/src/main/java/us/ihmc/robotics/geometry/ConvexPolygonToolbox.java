@@ -460,8 +460,8 @@ public class ConvexPolygonToolbox
    private final LineSegment2D polygonWithTwoVerticesAsLineSegment = new LineSegment2D();
 
    private boolean computeIntersectionOfPolygonsIfOnePolygonHasExactlyTwoVerticesAndTheOtherHasAtLeastTwoVertices(ConvexPolygon2D polygonWithExactlyTwoVertices,
-                                                                                                                         ConvexPolygon2D polygonWithAtLeastTwoVertices,
-                                                                                                                         ConvexPolygon2D intersectingPolygon)
+                                                                                                                  ConvexPolygon2D polygonWithAtLeastTwoVertices,
+                                                                                                                  ConvexPolygon2D intersectingPolygon)
    {
       polygonWithTwoVerticesAsLineSegment.set(polygonWithExactlyTwoVertices.getVertex(0), polygonWithExactlyTwoVertices.getVertex(1));
       Point2D[] intersection = polygonWithAtLeastTwoVertices.intersectionWith(polygonWithTwoVerticesAsLineSegment);
@@ -855,10 +855,6 @@ public class ConvexPolygonToolbox
 
    class VerticesIndices
    {
-      public VerticesIndices()
-      {
-      }
-
       private final RecyclingArrayList<MutableInt> connectingEdgeIndices = new RecyclingArrayList<MutableInt>(20, MutableInt.class);
 
       public void clear()
@@ -891,32 +887,6 @@ public class ConvexPolygonToolbox
       public int getIndex(int number)
       {
          return connectingEdgeIndices.get(number).getValue();
-      }
-   }
-
-   private class TangentIndices
-   {
-      private int tangentStartIndex;
-      private int tangentEndIndex;
-
-      public void setTangentStartIndex(int tangentStartIndex)
-      {
-         this.tangentStartIndex = tangentStartIndex;
-      }
-
-      public void setTangentEndIndex(int tangentEndIndex)
-      {
-         this.tangentEndIndex = tangentEndIndex;
-      }
-
-      public int getTangentStartIndex()
-      {
-         return tangentStartIndex;
-      }
-
-      public int getTangentEndIndex()
-      {
-         return tangentEndIndex;
       }
    }
 }
