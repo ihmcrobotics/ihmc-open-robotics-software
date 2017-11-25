@@ -36,23 +36,14 @@ public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOve
       super.testNoPushTiltedBlocks();
    }
 
-   /*
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 70000)
-   public void testForwardPush() throws SimulationExceededMaximumTimeException
+   @Test(timeout = 180000)
+   public void testForwardPushFlatBlocks() throws SimulationExceededMaximumTimeException
    {
-      super.testForwardPush();
+      super.testForwardPushFlatBlocks();
    }
 
-   @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 70000)
-   public void testSidePush() throws SimulationExceededMaximumTimeException
-   {
-      super.testSidePush();
-   }
-   */
 
    @Override
    public DRCRobotModel getRobotModel()

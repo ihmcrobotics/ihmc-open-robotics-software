@@ -9,7 +9,6 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -27,14 +26,11 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.CinderBlockFieldPlanarRegionEnvironment;
-import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.PlanarRegionEnvironmentInterface;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import java.util.Vector;
 
 import static junit.framework.TestCase.assertTrue;
 
@@ -170,21 +166,40 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
-   /*
-   public void testForwardPush() throws SimulationExceededMaximumTimeException
+   public void testForwardPushFlatBlocks() throws SimulationExceededMaximumTimeException
    {
-      setupTest();
+      int numberOfSteps = setUpFlatBlockTest();
 
       double totalMass  = getRobotModel().createFullRobotModel().getTotalMass();
+
+      int stepsTaken = 0;
+      double simulationTime = (swingTime + transferTime) * 2.0;
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      stepsTaken = stepsTaken + 2;
+
+      // push on the third step
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
       double delay = 0.5 * swingTime;
       Vector3D firstForceDirection = new Vector3D(1.0, 0.0, 0.0);
-      double percentWeight = 0.5;
+      double percentWeight = 0.3;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
 
-      double simulationTime = (swingTime + transferTime) * 4 + 1.0;
+      simulationTime = (swingTime + transferTime);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      stepsTaken++;
+
+      // push on fourth step
+      StateTransitionCondition secondPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      delay = 0.5 * swingTime;
+      firstForceDirection = new Vector3D(1.0, 0.0, 0.0);
+      percentWeight = 0.3;
+      magnitude = percentWeight * totalMass * 9.81;
+      duration = 0.1;
+      pushRobotController.applyForceDelayed(secondPushCondition, delay, firstForceDirection, magnitude, duration);
+
+      simulationTime = (swingTime + transferTime) * (numberOfSteps - stepsTaken) + 1.0;
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
 
       Point3D center = new Point3D(1.05, 0.0, 1.0893768421917251);
@@ -193,6 +208,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
+   /*
    public void testSidePush() throws SimulationExceededMaximumTimeException
    {
       setupTest();
@@ -373,6 +389,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
    public void showMemoryUsageBeforeTest()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @After
