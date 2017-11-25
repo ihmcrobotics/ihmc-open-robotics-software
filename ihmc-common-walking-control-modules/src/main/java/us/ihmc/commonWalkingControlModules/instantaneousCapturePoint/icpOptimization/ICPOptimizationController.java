@@ -26,7 +26,7 @@ public interface ICPOptimizationController
 
    public int getNumberOfFootstepsToConsider();
    public void getDesiredCMP(FramePoint2D desiredCMP);
-   public void getFootstepSolution(int footstepIndex, FramePoint2D footstepSolutionToPack);
+   public void getFootstepSolution(int footstepIndex, Footstep footstepSolutionToPack);
    public boolean wasFootstepAdjusted();
    public boolean useAngularMomentum();
 

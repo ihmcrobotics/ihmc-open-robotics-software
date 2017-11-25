@@ -19,10 +19,12 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -90,7 +92,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    private final ArrayList<Footstep> upcomingFootsteps = new ArrayList<>();
    private final YoFramePoint upcomingFootstepLocation;
    private final YoFramePoint2d footstepLocationSubmitted;
-   private final YoFramePoint2d footstepSolution;
+   private final YoFramePose footstepSolution;
    private final YoFramePoint2d unclippedFootstepSolution;
 
    private final YoDouble forwardFootstepWeight = new YoDouble(yoNamePrefix + "ForwardFootstepWeight", registry);
@@ -147,6 +149,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    private boolean localUseStepAdjustment;
    private boolean localScaleUpcomingStepWeights;
 
+   private final FramePose tmpPose = new FramePose();
    private final FramePoint3D tempPoint3d = new FramePoint3D();
    private final FramePoint3D projectedTempPoint3d = new FramePoint3D();
    private final FramePoint2D tempPoint2d = new FramePoint2D();
@@ -217,7 +220,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
       upcomingFootstepLocation = new YoFramePoint(yoNamePrefix + "UpcomingFootstepLocation", worldFrame, registry);
       footstepLocationSubmitted = new YoFramePoint2d(yoNamePrefix + "FootstepLocationSubmitted", worldFrame, registry);
-      footstepSolution = new YoFramePoint2d(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
+      footstepSolution = new YoFramePose(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
       unclippedFootstepSolution = new YoFramePoint2d(yoNamePrefix + "UnclippedFootstepSolutionLocation", worldFrame, registry);
 
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
@@ -258,7 +261,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
 
       YoGraphicPosition predictedEndOfStateICP = new YoGraphicPosition(yoNamePrefix + "PredictedEndOfStateICP", this.predictedEndOfStateICP, 0.005, YoAppearance.MidnightBlue(),
                                                                        YoGraphicPosition.GraphicType.BALL);
-      YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix + "ClippedFootstepSolution", this.footstepSolution, 0.005,
+      YoGraphicPosition clippedFootstepSolution = new YoGraphicPosition(yoNamePrefix + "ClippedFootstepSolution", this.footstepSolution.getYoX(), this.footstepSolution.getYoY(), 0.005,
                                                                         YoAppearance.ForestGreen(), YoGraphicPosition.GraphicType.BALL);
       solutionHandler.setupVisualizers(artifactList);
 
@@ -352,9 +355,10 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
             {
                footstep.getPosition(tempPoint3d);
                footstep.getPosition2d(tempPoint2d);
+               footstep.getPose(tmpPose);
                upcomingFootstepLocation.set(tempPoint3d);
-               footstepSolution.set(tempPoint2d);
                unclippedFootstepSolution.set(tempPoint2d);
+               footstepSolution.set(tmpPose);
             }
          }
          else
@@ -487,12 +491,13 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
    }
 
    @Override
-   public void getFootstepSolution(int footstepIndex, FramePoint2D footstepSolutionToPack)
+   public void getFootstepSolution(int footstepIndex, Footstep footstepSolutionToPack)
    {
       if (footstepIndex > 0)
          throw new RuntimeException("This controller is not set up to handle more than one footstep.");
 
-      footstepSolution.getFrameTuple2d(footstepSolutionToPack);
+      footstepSolution.getFramePose(tmpPose);
+      footstepSolutionToPack.setPose(tmpPose);
    }
 
    @Override

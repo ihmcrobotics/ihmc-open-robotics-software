@@ -157,6 +157,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    {
       if (icpOptimizationController.getNumberOfFootstepsToConsider() > 0)
       {
+         icpOptimizationController.getFootstepSolution(0, footstepToPack);
+         /*
          if (useSimpleAdjustment)
          {
             footstepToPack.getPose(footstepPose);
@@ -173,6 +175,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
             footstepPose.setXYFromPosition2d(footstepPositionSolution);
             footstepToPack.setFromAnklePose(footstepPose, ankleToSole);
          }
+         */
       }
 
       return icpOptimizationController.wasFootstepAdjusted();
