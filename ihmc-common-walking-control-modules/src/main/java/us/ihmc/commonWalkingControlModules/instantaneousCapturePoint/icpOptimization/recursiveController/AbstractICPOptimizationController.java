@@ -21,6 +21,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -154,6 +155,7 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
    protected boolean localUseStepAdjustment;
    protected boolean localScaleUpcomingStepWeights;
 
+   protected final FramePose tempPose = new FramePose();
    protected final FrameVector2D tempVector2d = new FrameVector2D();
    protected final FramePoint2D tempPoint2d = new FramePoint2D();
 
@@ -846,9 +848,15 @@ public abstract class AbstractICPOptimizationController implements ICPOptimizati
       controllerFeedbackCMP.getFrameTuple2d(desiredCMPToPack);
    }
 
-   public void getFootstepSolution(int footstepIndex, FramePoint2D footstepSolutionToPack)
+   public void getFootstepSolution(int footstepIndex, Footstep footstepSolutionToPack)
    {
-      footstepSolutions.get(footstepIndex).getFrameTuple2d(footstepSolutionToPack);
+      RigidBodyTransform ankleToSole = transformsFromAnkleToSole.get(footstepSolutionToPack.getRobotSide());
+
+      footstepSolutionToPack.getAnklePose(tempPose, ankleToSole);
+      footstepSolutions.get(footstepIndex).getFrameTuple2d(tempPoint2d);
+      tempPose.setXYFromPosition2d(tempPoint2d);
+      footstepSolutionToPack.setFromAnklePose(tempPose, ankleToSole);
+
    }
 
    public boolean wasFootstepAdjusted()
