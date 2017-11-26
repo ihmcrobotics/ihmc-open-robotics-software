@@ -285,80 +285,77 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       double duration = 0.1;
       double delay = 0.5 * swingTime - duration;
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
-      double percentWeight = 0.5;
+      double percentWeight = 0.55;
       double magnitude = percentWeight * totalMass * 9.81;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, forceDirection, magnitude, duration);
 
-      simulationTime = (swingTime + transferTime) * 3;
+      simulationTime = (swingTime + transferTime) * 2;
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      stepsTaken += 2;
+
+      // push on the sixth step
+      firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      duration = 0.2;
+      delay = 0.5 * swingTime - 0.05 - duration;
+      forceDirection = new Vector3D(1.0, 0.0, 0.0);
+      percentWeight = 0.3;
+      magnitude = percentWeight * totalMass * 9.81;
+      pushRobotController.applyForceDelayed(firstPushCondition, delay, forceDirection, magnitude, duration);
+
+      simulationTime = (swingTime + transferTime);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
       stepsTaken++;
 
       // push on seventh step
       StateTransitionCondition secondPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
-      duration = 0.1;
-      delay = 0.5 * swingTime - duration;
-      forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      percentWeight = 0.6;
+      duration = 0.2;
+      delay = 0.5 * swingTime - 0.05 - duration;
+      forceDirection = new Vector3D(-0.2, 1.0, 0.0);
+      percentWeight = 0.3;
       magnitude = percentWeight * totalMass * 9.81;
       pushRobotController.applyForceDelayed(secondPushCondition, delay, forceDirection, magnitude, duration);
 
-      /*
+      simulationTime = (swingTime + transferTime);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      stepsTaken += 1;
+
+      // push on eighth step
+      StateTransitionCondition thirdPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      duration = 0.2;
+      delay = 0.5 * swingTime - 0.05 - duration;
+      forceDirection = new Vector3D(1.0, 0.0, 0.0);
+      percentWeight = 0.25;
+      magnitude = percentWeight * totalMass * 9.81;
+      pushRobotController.applyForceDelayed(thirdPushCondition, delay, forceDirection, magnitude, duration);
+
       simulationTime = (swingTime + transferTime) * 2.5;
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
 
       stepsTaken += 3;
 
-      // push on seventh step
-      StateTransitionCondition thirdPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
-      duration = 0.1;
-      delay = 0.5 * swingTime - duration;
-      firstForceDirection = new Vector3D(0.0, 1.0, 0.0);
-      percentWeight = 0.5;
-      magnitude = percentWeight * totalMass * 9.81;
-      pushRobotController.applyForceDelayed(thirdPushCondition, delay, firstForceDirection, magnitude, duration);
-
-      simulationTime = (swingTime + transferTime);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
-
-      stepsTaken++;
-
-      // push on eighth step
-      StateTransitionCondition fourthPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
-      duration = 0.1;
-      delay = 0.5 * swingTime - duration;
-      firstForceDirection = new Vector3D(1.0, 0.0, 0.0);
-      percentWeight = 0.4;
-      magnitude = percentWeight * totalMass * 9.81;
-      pushRobotController.applyForceDelayed(fourthPushCondition, delay, firstForceDirection, magnitude, duration);
-
-      simulationTime = (swingTime + transferTime);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
-
-      stepsTaken++;
-
-      // push on ninth step
-      StateTransitionCondition fifthPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
-      duration = 0.1;
-      delay = 0.5 * swingTime - duration;
-      firstForceDirection = new Vector3D(1.0, 0.0, 0.0);
-      percentWeight = 0.4;
-      magnitude = percentWeight * totalMass * 9.81;
-      pushRobotController.applyForceDelayed(fifthPushCondition, delay, firstForceDirection, magnitude, duration);
-
-      simulationTime = (swingTime + transferTime) * 2;
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
-
-      stepsTaken += 2;
-
       // push on eleventh step
-      StateTransitionCondition sixthPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
-      duration = 0.1;
-      delay = 0.5 * swingTime - duration;
-      firstForceDirection = new Vector3D(1.0, -1.0, 0.0);
-      percentWeight = 0.6;
+      StateTransitionCondition fourthPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
+      duration = 0.25;
+      delay = 0.5 * swingTime - 0.05 - duration;
+      forceDirection = new Vector3D(-1.0, 0.0, 0.0);
+      percentWeight = 0.3;
       magnitude = percentWeight * totalMass * 9.81;
-      pushRobotController.applyForceDelayed(sixthPushCondition, delay, firstForceDirection, magnitude, duration);
-      */
+      pushRobotController.applyForceDelayed(fourthPushCondition, delay, forceDirection, magnitude, duration);
+
+      simulationTime = (swingTime + transferTime) * 3;
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      stepsTaken += 3;
+
+      // push on fourteenth step
+      StateTransitionCondition fifthPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      duration = 0.2;
+      delay = Math.max(0.0, 0.5 * swingTime - 0.05 - duration);
+      forceDirection = new Vector3D(0.0, -1.0, 0.0);
+      percentWeight = 0.3;
+      magnitude = percentWeight * totalMass * 9.81;
+      pushRobotController.applyForceDelayed(fifthPushCondition, delay, forceDirection, magnitude, duration);
 
       simulationTime = (swingTime + transferTime) * (numberOfSteps - stepsTaken) + 1.0;
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
@@ -488,12 +485,16 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       location = new Point3D(4.98, -0.15, 0.21);
       orientation = new Quaternion();
       orientation.appendRollRotation(cinderBlockTiltRadians);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      footstep.setSwingHeight(0.18);
+      message.add(footstep);
 
       location = new Point3D(5.39, 0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendRollRotation(cinderBlockTiltRadians);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep.setSwingHeight(0.18);
+      message.add(footstep);
 
       location = new Point3D(5.39, -0.15, 0.2);
       orientation = new Quaternion();
@@ -511,12 +512,16 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       location = new Point3D(6.225, 0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendPitchRotation(cinderBlockTiltRadians);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep.setSwingHeight(0.18);
+      message.add(footstep);
 
       location = new Point3D(6.225, -0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendRollRotation(-cinderBlockTiltRadians);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      //footstep.setSwingHeight(0.25);
+      message.add(footstep);
 
       location = new Point3D(6.665, 0.15, 0.35);
       orientation = new Quaternion();
