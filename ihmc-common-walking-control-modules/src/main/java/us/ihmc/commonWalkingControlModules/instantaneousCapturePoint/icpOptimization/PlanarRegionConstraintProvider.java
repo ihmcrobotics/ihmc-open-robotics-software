@@ -92,7 +92,7 @@ public class PlanarRegionConstraintProvider
       {
          YoArtifactPolygon activePlanarRegionViz = new YoArtifactPolygon("ActivePlanarRegionViz", yoActivePlanarRegion, Color.RED, false, true);
          YoArtifactPolygon activePlanarRegionInControlPlaneViz = new YoArtifactPolygon("ActivePlanarRegionInControlPlaneViz", yoActivePlanarRegionInControlPlane, Color.RED, false);
-         YoArtifactPolygon shrunkPlanarViz = new YoArtifactPolygon("ShrunkActivePlanarRegionInControlPlaneViz", yoShrunkActivePlanarRegion, Color.PINK, false, true);
+         YoArtifactPolygon shrunkPlanarViz = new YoArtifactPolygon("ShrunkActivePlanarRegionInControlPlaneViz", yoShrunkActivePlanarRegion, Color.PINK, false);
 
          activePlanarRegionViz.setVisible(visualize);
          activePlanarRegionInControlPlaneViz.setVisible(visualize);
@@ -317,8 +317,6 @@ public class PlanarRegionConstraintProvider
             maxArea = intersectionArea;
             activePlanarRegion = planarRegion;
 
-            activePlanarRegionConvexHull.setIncludingFrame(planeReferenceFrame, activePlanarRegion.getConvexHull());
-            activePlanarRegionConvexHull.changeFrameAndProjectToXYPlane(worldFrame);
             icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(activePlanarRegion, tempProjectedPolygon);
             activePlanarRegionConvexHullInControlFrame.setAndUpdate(tempProjectedPolygon);
          }
@@ -329,6 +327,11 @@ public class PlanarRegionConstraintProvider
 
       if (activePlanarRegion != null)
       {
+         activePlanarRegion.getTransformToWorld(planeTransformToWorld);
+         planeReferenceFrame.update();
+         activePlanarRegionConvexHull.setIncludingFrame(planeReferenceFrame, activePlanarRegion.getConvexHull());
+         activePlanarRegionConvexHull.changeFrameAndProjectToXYPlane(worldFrame);
+
          yoActivePlanarRegion.setConvexPolygon2d(activePlanarRegionConvexHull.getConvexPolygon2d());
          yoActivePlanarRegionInControlPlane.setConvexPolygon2d(activePlanarRegionConvexHullInControlFrame);
       }
