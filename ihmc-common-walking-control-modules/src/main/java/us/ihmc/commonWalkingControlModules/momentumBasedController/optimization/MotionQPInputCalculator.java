@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -64,6 +65,8 @@ public class MotionQPInputCalculator
    private final DenseMatrix64F allTaskJacobian;
    private final DampedLeastSquaresNullspaceCalculator nullspaceCalculator;
 
+   private final ExecutionTimer nullspaceProjection = new ExecutionTimer("nullspaceProjection", registry);
+
    private final int numberOfDoFs;
 
    public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, CentroidalMomentumHandler centroidalMomentumHandler, JointIndexHandler jointIndexHandler,
@@ -81,7 +84,7 @@ public class MotionQPInputCalculator
          privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(oneDoFJoints, jointPrivilegedConfigurationParameters, registry);
          nullspaceProjectionAlpha = new YoDouble("nullspaceProjectionAlpha", registry);
          nullspaceProjectionAlpha.set(jointPrivilegedConfigurationParameters.getNullspaceProjectionAlpha());
-         nullspaceCalculator = new DampedLeastSquaresNullspaceCalculator(numberOfDoFs, nullspaceProjectionAlpha.getDoubleValue());
+         nullspaceCalculator = new DampedLeastSquaresNullspaceCalculator(numberOfDoFs, nullspaceProjectionAlpha.getDoubleValue(), registry);
       }
       else
       {
@@ -151,7 +154,11 @@ public class MotionQPInputCalculator
          if (success)
          {
             motionQPInputToPack.reshape(robotTaskSize);
+
+            nullspaceProjection.startMeasurement();
             nullspaceCalculator.projectOntoNullspace(tempTaskJacobian, allTaskJacobian);
+            nullspaceProjection.stopMeasurement();
+
             CommonOps.insert(tempTaskJacobian, motionQPInputToPack.taskJacobian, taskSize, 0);
             CommonOps.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), motionQPInputToPack.taskObjective, taskSize, 0);
             CommonOps.insert(privilegedConfigurationHandler.getWeights(), motionQPInputToPack.taskWeightMatrix, taskSize, taskSize);
