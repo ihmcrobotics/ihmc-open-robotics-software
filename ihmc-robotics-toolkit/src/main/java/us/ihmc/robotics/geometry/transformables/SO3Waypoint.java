@@ -144,6 +144,16 @@ public class SO3Waypoint implements GeometryObject<SO3Waypoint>, SO3WaypointInte
       return true;
    }
 
+   @Override
+   public boolean geometricallyEquals(SO3Waypoint other, double epsilon)
+   {
+      if (!orientation.geometricallyEquals(other.orientation, epsilon))
+         return false;
+      if (!angularVelocity.geometricallyEquals(other.angularVelocity, epsilon))
+         return false;
+      return true;
+   }
+
    public QuaternionReadOnly getOrientation()
    {
       return orientation;
