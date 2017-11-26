@@ -18,6 +18,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -30,10 +31,10 @@ import java.awt.*;
 public class PlanarRegionConstraintProvider
 {
    private static final double maxNormalAngleFromVertical = 0.3;
-   private static final double distanceFromEdgeForStepping = 0.06;
+   private static final double distanceFromEdgeForStepping = 0.04;
    private static final double distanceFromEdgeForSwitching = 0.03;
 
-   private static final double minimumAreaForSearch = 0.01;
+   private static final double minimumAreaForSearch = 0.005;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoFrameConvexPolygon2d yoActivePlanarRegion;
@@ -61,6 +62,10 @@ public class PlanarRegionConstraintProvider
    private final ReferenceFrame planeReferenceFrame;
 
    private final ConvexPolygonToolbox convexPolygonToolbox = new ConvexPolygonToolbox();
+
+   private final ConvexPolygon2D tempProjectedPolygon = new ConvexPolygon2D();
+
+   private final FramePoint2D tempPoint2D = new FramePoint2D();
 
    public PlanarRegionConstraintProvider(ICPControlPlane icpControlPlane, WalkingControllerParameters parameters, BipedSupportPolygons bipedSupportPolygons,
                                          SideDependentList<? extends ContactablePlaneBody> contactableFeet, String yoNamePrefix, boolean visualize,
@@ -236,9 +241,6 @@ public class PlanarRegionConstraintProvider
    }
 
 
-   private final ConvexPolygon2D tempProjectedPolygon = new ConvexPolygon2D();
-
-   private final FramePoint2D tempPoint = new FramePoint2D(worldFrame);
 
 
    public void findPlanarRegionAttachedToFootstep(Footstep footstep)
@@ -250,10 +252,10 @@ public class PlanarRegionConstraintProvider
          planarRegion.getTransformToWorld(planeTransformToWorld);
          planeReferenceFrame.update();
 
-         footstep.getPosition2d(tempPoint);
-         tempPoint.changeFrameAndProjectToXYPlane(planeReferenceFrame);
+         footstep.getPosition2d(tempPoint2D);
+         tempPoint2D.changeFrameAndProjectToXYPlane(planeReferenceFrame);
 
-         if (planarRegion.isPointInside(tempPoint.getPoint()))
+         if (planarRegion.isPointInside(tempPoint2D.getPoint()))
          {
             activePlanarRegion = planarRegion;
 
@@ -358,5 +360,28 @@ public class PlanarRegionConstraintProvider
       yoActivePlanarRegion.clearAndHide();
       yoShrunkActivePlanarRegion.clearAndHide();
       yoActivePlanarRegionInControlPlane.clearAndHide();
+   }
+
+   private final FramePose footstepPose = new FramePose();
+   private final FramePoint2D footstepXYPosition = new FramePoint2D();
+
+   public void snapFootPoseToActivePlanarRegion(YoFramePose footPoseToPack)
+   {
+      footPoseToPack.getFramePose(footstepPose);
+      footstepPose.getPosition2dIncludingFrame(footstepXYPosition);
+
+      // get the orientation of the foot
+      footstepPose.setToZero(planeReferenceFrame);
+
+      // get the height
+      footstepXYPosition.changeFrameAndProjectToXYPlane(worldFrame);
+      double zPosition = activePlanarRegion.getPlaneZGivenXY(footstepXYPosition.getX(), footstepXYPosition.getY());
+
+      // change the foot pose to be correct
+      footstepPose.changeFrame(worldFrame);
+      footstepPose.setXYFromPosition2d(footstepXYPosition);
+      footstepPose.setZ(zPosition);
+
+      footPoseToPack.set(footstepPose);
    }
 }
