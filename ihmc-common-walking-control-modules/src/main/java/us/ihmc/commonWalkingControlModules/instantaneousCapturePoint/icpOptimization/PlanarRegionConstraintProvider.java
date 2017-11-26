@@ -31,7 +31,7 @@ import java.awt.*;
 public class PlanarRegionConstraintProvider
 {
    private static final double maxNormalAngleFromVertical = 0.3;
-   private static final double distanceFromEdgeForStepping = 0.04;
+   private static final double distanceFromEdgeForStepping = 0.045;
    private static final double distanceFromEdgeForSwitching = 0.03;
 
    private static final double minimumAreaForSearch = 0.005;
