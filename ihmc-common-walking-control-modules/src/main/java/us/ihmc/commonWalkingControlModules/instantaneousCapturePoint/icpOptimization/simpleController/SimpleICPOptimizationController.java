@@ -712,8 +712,7 @@ public class SimpleICPOptimizationController implements ICPOptimizationControlle
          {
             solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootsteps.get(0), numberOfFootstepsToConsider,
                                                     planarRegionConstraintProvider.getActivePlanarRegion(), solver);
-            if (solutionHandler.wasFootstepAdjusted())
-               planarRegionConstraintProvider.snapFootPoseToActivePlanarRegion(footstepSolution);
+            solutionHandler.setFootstepWasAdjustedBySnapper(planarRegionConstraintProvider.snapFootPoseToActivePlanarRegion(footstepSolution));
          }
 
          if (isInDoubleSupport.getBooleanValue())

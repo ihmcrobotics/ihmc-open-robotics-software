@@ -365,7 +365,7 @@ public class PlanarRegionConstraintProvider
    private final FramePose footstepPose = new FramePose();
    private final FramePoint2D footstepXYPosition = new FramePoint2D();
 
-   public void snapFootPoseToActivePlanarRegion(YoFramePose footPoseToPack)
+   public boolean snapFootPoseToActivePlanarRegion(YoFramePose footPoseToPack)
    {
       footPoseToPack.getFramePose(footstepPose);
       footstepPose.getPosition2dIncludingFrame(footstepXYPosition);
@@ -382,6 +382,12 @@ public class PlanarRegionConstraintProvider
       footstepPose.setXYFromPosition2d(footstepXYPosition);
       footstepPose.setZ(zPosition);
 
+      boolean wasAdjusted = false;
+      if (footstepPose.getZ() != footPoseToPack.getZ())
+         wasAdjusted = true;
+
       footPoseToPack.set(footstepPose);
+
+      return wasAdjusted;
    }
 }

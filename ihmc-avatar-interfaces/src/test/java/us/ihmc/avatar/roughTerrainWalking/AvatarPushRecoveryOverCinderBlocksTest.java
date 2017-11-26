@@ -69,6 +69,21 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       return footsteps.size();
    }
 
+   public int setUpForwardFlatBlockTest() throws SimulationExceededMaximumTimeException
+   {
+      OffsetAndYawRobotInitialSetup startingLocation = new OffsetAndYawRobotInitialSetup();
+      PlanarRegionsListMessage planarRegionsListMessage = setUpTest(startingLocation);
+
+      FootstepDataListMessage footsteps = createFlatBlocksForwardFootstepDataListMessage(swingTime, transferTime);
+      footsteps.setOffsetFootstepsWithExecutionError(true);
+      drcSimulationTestHelper.send(footsteps);
+      drcSimulationTestHelper.send(planarRegionsListMessage);
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      return footsteps.size();
+   }
+
    public int setUpTiltedBlockTest() throws SimulationExceededMaximumTimeException
    {
       OffsetAndYawRobotInitialSetup startingLocation = new OffsetAndYawRobotInitialSetup(3.5, 0.0, 0.0);
@@ -82,6 +97,21 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
 
       return footsteps.size();
    }
+
+   public int setUpForwardTiltedBlockTest() throws SimulationExceededMaximumTimeException
+   {
+      OffsetAndYawRobotInitialSetup startingLocation = new OffsetAndYawRobotInitialSetup(3.5, 0.0, 0.0);
+      PlanarRegionsListMessage planarRegionsListMessage = setUpTest(startingLocation);
+
+      FootstepDataListMessage footsteps = createTiltedBlocksForwardFootstepDataListMessage(swingTime, transferTime);
+      drcSimulationTestHelper.send(footsteps);
+      drcSimulationTestHelper.send(planarRegionsListMessage);
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      return footsteps.size();
+   }
+
 
    public PlanarRegionsListMessage setUpTest(OffsetAndYawRobotInitialSetup startingLocation) throws SimulationExceededMaximumTimeException
    {
@@ -158,9 +188,35 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
+   public void testNoPushForwardWalkOverFlatBlocks() throws SimulationExceededMaximumTimeException
+   {
+      int numberOfSteps = setUpForwardFlatBlockTest();
+
+      double simulationTime = (swingTime + transferTime) * numberOfSteps + 1.0;
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      Point3D center = new Point3D(3.1, 0.0, 1.0893768421917251);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+   }
+
    public void testNoPushTiltedBlocks() throws SimulationExceededMaximumTimeException
    {
       int numberOfSteps = setUpTiltedBlockTest();
+
+      double simulationTime = (swingTime + transferTime) * numberOfSteps + 1.0;
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      Point3D center = new Point3D(7.3, 0.0, 1.0893768421917251);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+   }
+
+   public void testNoPushForwardTiltedBlocks() throws SimulationExceededMaximumTimeException
+   {
+      int numberOfSteps = setUpForwardTiltedBlockTest();
 
       double simulationTime = (swingTime + transferTime) * numberOfSteps + 1.0;
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
@@ -450,6 +506,47 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       return message;
    }
 
+   private FootstepDataListMessage createFlatBlocksForwardFootstepDataListMessage(double swingTime, double transferTime)
+   {
+      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+
+      Point3D location = new Point3D(0.3, 0.15, 0.0);
+      Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
+      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+
+      location = new Point3D(0.4, -0.15, 0.0);
+      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+
+      location = new Point3D(0.7, 0.15, 0.08);
+      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+
+      location = new Point3D(1.1, -0.15, 0.08);
+      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+
+      location = new Point3D(1.5, 0.15, 0.0);
+      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+
+      location = new Point3D(1.9, -0.15, 0.16);
+      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+
+      location = new Point3D(2.3, 0.15, 0.08);
+      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep.setSwingHeight(0.18);
+      message.add(footstep);
+
+      location = new Point3D(2.7, -0.15, 0.16);
+      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+
+      location = new Point3D(3.1, 0.15, 0.0);
+      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+
+      location = new Point3D(3.1, -0.15, 0.0);
+      footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      message.add(footstep);
+
+      return message;
+   }
+
    private FootstepDataListMessage createTiltedBlocksFootstepDataListMessage(double swingTime, double transferTime)
    {
       FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
@@ -553,6 +650,72 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       return message;
    }
 
+   private FootstepDataListMessage createTiltedBlocksForwardFootstepDataListMessage(double swingTime, double transferTime)
+   {
+      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      Point3D location = new Point3D(3.7, 0.15, 0.0);
+      Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
+      double swingHeight = 0.2;
+
+      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+
+      location = new Point3D(3.7, -0.15, 0.0);
+      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+
+      location = new Point3D(4.1, 0.15, 0.2);
+      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep.setSwingHeight(swingHeight);
+      message.add(footstep);
+
+      location = new Point3D(4.54, -0.15, 0.2);
+      footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      footstep.setSwingHeight(swingHeight);
+      message.add(footstep);
+
+      location = new Point3D(4.98, 0.15, 0.21);
+      footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep.setSwingHeight(swingHeight);
+      message.add(footstep);
+
+      location = new Point3D(5.39, -0.15, 0.2);
+      footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      footstep.setSwingHeight(swingHeight);
+      message.add(footstep);
+
+      location = new Point3D(5.8, 0.15, 0.3);
+      footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep.setSwingHeight(swingHeight);
+      message.add(footstep);
+
+      location = new Point3D(6.225, -0.15, 0.3);
+      footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      footstep.setSwingHeight(swingHeight);
+      message.add(footstep);
+
+      location = new Point3D(6.225, 0.15, 0.35);
+      footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep.setSwingHeight(swingHeight);
+      message.add(footstep);
+
+      location = new Point3D(6.665, -0.15, 0.35);
+      footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      footstep.setSwingHeight(swingHeight);
+      message.add(footstep);
+
+      location = new Point3D(7.08, 0.15, 0.35);
+      footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep.setSwingHeight(swingHeight);
+      message.add(footstep);
+
+      location = new Point3D(7.45, -0.15, 0.0);
+      orientation = new Quaternion();
+      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+
+      location = new Point3D(7.45, 0.15, 0.0);
+      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+
+      return message;
+   }
 
 
    @Before
