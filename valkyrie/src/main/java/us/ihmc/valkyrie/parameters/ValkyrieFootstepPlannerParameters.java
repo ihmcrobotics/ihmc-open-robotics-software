@@ -38,7 +38,7 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    @Override
    public double getMinimumStepWidth()
    {
-      return 0.15;
+      return 0.0;
    }
 
    @Override
@@ -51,5 +51,17 @@ public class ValkyrieFootstepPlannerParameters implements FootstepPlannerParamet
    public double getMaximumStepWidth()
    {
       return 0.3;
+   }
+
+   @Override
+   public double getMinXClearanceFromStance()
+   {
+      return 0.2;
+   }
+
+   @Override
+   public double getMinYClearanceFromStance()
+   {
+      return 0.15;
    }
 }
