@@ -35,6 +35,8 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    private final YoDouble bodyGroundClearance = new YoDouble("bodyGroundClearance", registry);
    private final YoBoolean returnBestEffortPlan = new YoBoolean("returnBestEffortPlan", registry);
    private final YoInteger minimumStepForBestEffortPlan = new YoInteger("minimumStepForBestEffortPlan", registry);
+   private final YoDouble minXClearanceFromStance = new YoDouble("minXClearanceFromStance", registry);
+   private final YoDouble minYClearanceFromStance = new YoDouble("minYClearanceFromStance", registry);
 
    public YoFootstepPlannerParameters(YoVariableRegistry parentRegistry, FootstepPlannerParameters defaults)
    {
@@ -70,6 +72,8 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
       bodyGroundClearance.set(defaults.getBodyGroundClearance());
       returnBestEffortPlan.set(defaults.getReturnBestEffortPlan());
       minimumStepForBestEffortPlan.set(defaults.getMinimumStepsForBestEffortPlan());
+      minXClearanceFromStance.set(defaults.getMinXClearanceFromStance());
+      minYClearanceFromStance.set(defaults.getMinYClearanceFromStance());
    }
 
    @Override
@@ -221,10 +225,22 @@ public class YoFootstepPlannerParameters implements FootstepPlannerParameters
    {
       return returnBestEffortPlan.getBooleanValue();
    }
-   
+
    @Override
    public int getMinimumStepsForBestEffortPlan()
    {
       return minimumStepForBestEffortPlan.getIntegerValue();
+   }
+
+   @Override
+   public double getMinXClearanceFromStance()
+   {
+      return minXClearanceFromStance.getDoubleValue();
+   }
+
+   @Override
+   public double getMinYClearanceFromStance()
+   {
+      return minYClearanceFromStance.getDoubleValue();
    }
 }
