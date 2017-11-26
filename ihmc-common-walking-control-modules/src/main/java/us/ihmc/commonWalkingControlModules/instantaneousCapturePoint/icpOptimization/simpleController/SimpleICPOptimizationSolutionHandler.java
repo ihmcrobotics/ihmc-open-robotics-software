@@ -297,6 +297,12 @@ public class SimpleICPOptimizationSolutionHandler
       return footstepWasAdjusted.getBooleanValue();
    }
 
+   public void setFootstepWasAdjustedBySnapper(boolean footstepWasAdjusted)
+   {
+      if (footstepWasAdjusted)
+         this.footstepWasAdjusted.set(footstepWasAdjusted);
+   }
+
    public FrameVector2D getFootstepAdjustment()
    {
       return footstepAdjustment.getFrameTuple2d();
