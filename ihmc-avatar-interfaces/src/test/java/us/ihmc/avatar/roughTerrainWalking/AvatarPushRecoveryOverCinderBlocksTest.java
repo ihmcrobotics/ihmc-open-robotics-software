@@ -297,7 +297,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       duration = 0.1;
       delay = 0.5 * swingTime - duration;
       firstForceDirection = new Vector3D(1.0, 0.0, 0.0);
-      percentWeight = 0.4;
+      percentWeight = 0.45;
       magnitude = percentWeight * totalMass * 9.81;
       pushRobotController.applyForceDelayed(fifthPushCondition, delay, firstForceDirection, magnitude, duration);
 
@@ -450,7 +450,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       duration = 0.2;
       delay = 0.5 * swingTime - 0.05 - duration;
       forceDirection = new Vector3D(-0.2, 1.0, 0.0);
-      percentWeight = 0.3;
+      percentWeight = 0.25;
       magnitude = percentWeight * totalMass * 9.81;
       pushRobotController.applyForceDelayed(secondPushCondition, delay, forceDirection, magnitude, duration);
 
