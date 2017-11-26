@@ -128,8 +128,12 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
 
       scs.addYoGraphic(pushRobotController.getForceVisualizer());
 
-      drcSimulationTestHelper.getSimulationConstructionSet().setCameraPosition(8.0, -8.0, 5.0);
-      drcSimulationTestHelper.getSimulationConstructionSet().setCameraFix(1.5, 0.0, 0.8);
+      Point3D cameraPosition = new Point3D(8.0, -8.0, 5.0);
+      Point3D cameraFix = new Point3D(1.5, 0.0, 0.8);
+      cameraPosition.add(startingLocation.getAdditionalOffset());
+      cameraFix.add(startingLocation.getAdditionalOffset());
+      drcSimulationTestHelper.getSimulationConstructionSet().setCameraPosition(cameraPosition);
+      drcSimulationTestHelper.getSimulationConstructionSet().setCameraFix(cameraFix);
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
 
@@ -265,6 +269,106 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
+   public void testPushOverTiltedBlocks() throws SimulationExceededMaximumTimeException
+   {
+      int numberOfSteps = setUpTiltedBlockTest();
+
+      double totalMass  = getRobotModel().createFullRobotModel().getTotalMass();
+
+      int stepsTaken = 0;
+      double simulationTime = (swingTime + transferTime) * 3.0;
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      stepsTaken += 3;
+
+      // push on the fourth step
+      StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double duration = 0.1;
+      double delay = 0.5 * swingTime - duration;
+      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
+      double percentWeight = 0.5;
+      double magnitude = percentWeight * totalMass * 9.81;
+      pushRobotController.applyForceDelayed(firstPushCondition, delay, forceDirection, magnitude, duration);
+
+      simulationTime = (swingTime + transferTime) * 3;
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      stepsTaken++;
+
+      // push on seventh step
+      StateTransitionCondition secondPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
+      duration = 0.1;
+      delay = 0.5 * swingTime - duration;
+      forceDirection = new Vector3D(0.0, 1.0, 0.0);
+      percentWeight = 0.6;
+      magnitude = percentWeight * totalMass * 9.81;
+      pushRobotController.applyForceDelayed(secondPushCondition, delay, forceDirection, magnitude, duration);
+
+      /*
+      simulationTime = (swingTime + transferTime) * 2.5;
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      stepsTaken += 3;
+
+      // push on seventh step
+      StateTransitionCondition thirdPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
+      duration = 0.1;
+      delay = 0.5 * swingTime - duration;
+      firstForceDirection = new Vector3D(0.0, 1.0, 0.0);
+      percentWeight = 0.5;
+      magnitude = percentWeight * totalMass * 9.81;
+      pushRobotController.applyForceDelayed(thirdPushCondition, delay, firstForceDirection, magnitude, duration);
+
+      simulationTime = (swingTime + transferTime);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      stepsTaken++;
+
+      // push on eighth step
+      StateTransitionCondition fourthPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      duration = 0.1;
+      delay = 0.5 * swingTime - duration;
+      firstForceDirection = new Vector3D(1.0, 0.0, 0.0);
+      percentWeight = 0.4;
+      magnitude = percentWeight * totalMass * 9.81;
+      pushRobotController.applyForceDelayed(fourthPushCondition, delay, firstForceDirection, magnitude, duration);
+
+      simulationTime = (swingTime + transferTime);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      stepsTaken++;
+
+      // push on ninth step
+      StateTransitionCondition fifthPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
+      duration = 0.1;
+      delay = 0.5 * swingTime - duration;
+      firstForceDirection = new Vector3D(1.0, 0.0, 0.0);
+      percentWeight = 0.4;
+      magnitude = percentWeight * totalMass * 9.81;
+      pushRobotController.applyForceDelayed(fifthPushCondition, delay, firstForceDirection, magnitude, duration);
+
+      simulationTime = (swingTime + transferTime) * 2;
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      stepsTaken += 2;
+
+      // push on eleventh step
+      StateTransitionCondition sixthPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      duration = 0.1;
+      delay = 0.5 * swingTime - duration;
+      firstForceDirection = new Vector3D(1.0, -1.0, 0.0);
+      percentWeight = 0.6;
+      magnitude = percentWeight * totalMass * 9.81;
+      pushRobotController.applyForceDelayed(sixthPushCondition, delay, firstForceDirection, magnitude, duration);
+      */
+
+      simulationTime = (swingTime + transferTime) * (numberOfSteps - stepsTaken) + 1.0;
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      Point3D center = new Point3D(7.3, 0.0, 1.0893768421917251);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+   }
+
    /*
    public void testSidePush() throws SimulationExceededMaximumTimeException
    {
@@ -368,77 +472,77 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       location = new Point3D(4.1, -0.15, 0.2);
       message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
-      location = new Point3D(4.5, 0.15, 0.2);
+      location = new Point3D(4.54, 0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendPitchRotation(cinderBlockTiltRadians);
       message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
 
-      location = new Point3D(4.5, -0.15, 0.2);
+      location = new Point3D(4.54, -0.15, 0.2);
       message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
-      location = new Point3D(4.9, 0.15, 0.2);
+      location = new Point3D(4.98, 0.15, 0.21);
       orientation = new Quaternion();
       orientation.appendRollRotation(-cinderBlockTiltRadians);
       message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
 
-      location = new Point3D(4.9, -0.15, 0.2);
+      location = new Point3D(4.98, -0.15, 0.21);
       orientation = new Quaternion();
       orientation.appendRollRotation(cinderBlockTiltRadians);
       message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
-      location = new Point3D(5.3, 0.15, 0.2);
+      location = new Point3D(5.39, 0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendRollRotation(cinderBlockTiltRadians);
       message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
 
-      location = new Point3D(5.3, -0.15, 0.2);
+      location = new Point3D(5.39, -0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendRollRotation(-cinderBlockTiltRadians);
       message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
-      location = new Point3D(5.7, 0.15, 0.3);
+      location = new Point3D(5.8, 0.15, 0.3);
       orientation = new Quaternion();
       message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
 
-      location = new Point3D(5.7, -0.15, 0.3);
+      location = new Point3D(5.8, -0.15, 0.3);
       orientation = new Quaternion();
       message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
-      location = new Point3D(6.1, 0.15, 0.2);
+      location = new Point3D(6.225, 0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendPitchRotation(cinderBlockTiltRadians);
       message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
 
-      location = new Point3D(6.1, -0.15, 0.2);
+      location = new Point3D(6.225, -0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendRollRotation(-cinderBlockTiltRadians);
       message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
-      location = new Point3D(6.5, 0.15, 0.35);
+      location = new Point3D(6.665, 0.15, 0.35);
       orientation = new Quaternion();
       orientation.appendRollRotation(cinderBlockTiltRadians);
       message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
 
-      location = new Point3D(6.5, -0.15, 0.35);
+      location = new Point3D(6.665, -0.15, 0.35);
       orientation = new Quaternion();
       orientation.appendPitchRotation(cinderBlockTiltRadians);
       message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
-      location = new Point3D(6.9, 0.15, 0.2);
+      location = new Point3D(7.08, 0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendPitchRotation(-cinderBlockTiltRadians);
       message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
 
-      location = new Point3D(6.9, -0.15, 0.2);
+      location = new Point3D(7.08, -0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendRollRotation(cinderBlockTiltRadians);
       message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
-      location = new Point3D(7.3, 0.15, 0.0);
+      location = new Point3D(7.45, 0.15, 0.0);
       orientation = new Quaternion();
       message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
 
-      location = new Point3D(7.3, -0.15, 0.0);
+      location = new Point3D(7.45, -0.15, 0.0);
       message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       return message;

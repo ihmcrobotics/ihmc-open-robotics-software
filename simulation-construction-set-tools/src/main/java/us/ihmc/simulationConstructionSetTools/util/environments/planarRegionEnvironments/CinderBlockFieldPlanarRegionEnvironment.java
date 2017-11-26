@@ -73,68 +73,67 @@ public class CinderBlockFieldPlanarRegionEnvironment extends PlanarRegionEnviron
       generator.addCubeReferencedAtBottomMiddle(gapBetweenCinderBlockSets, 4.0 * cinderBlockLength, 0.01);
       generator.identity();
 
-      xPosition += 0.5 * (gapBetweenCinderBlockSets + cinderBlockLength);
+      xPosition += 0.5 * (gapBetweenCinderBlockSets + cinderBlockLength) + 0.04;
 
 
 
 
-      setUpRampBlock(generator, xPosition, -0.6, 0.0, BlockOrientation.NORTH);
-      setUpRampBlock(generator, xPosition, -0.2, 0.0, BlockOrientation.NORTH);
-      setUpRampBlock(generator, xPosition, 0.2, 0.0, BlockOrientation.NORTH);
-      setUpRampBlock(generator, xPosition, 0.6, 0.0, BlockOrientation.NORTH);
-
-      xPosition += cinderBlockLength;
-
-      setUpRampBlock(generator, xPosition, -0.6, 0.0, BlockOrientation.SOUTH);
-      setUpRampBlock(generator, xPosition, -0.2, 0.0, BlockOrientation.SOUTH);
-      setUpRampBlock(generator, xPosition, 0.2, 0.0, BlockOrientation.SOUTH);
-      setUpRampBlock(generator, xPosition, 0.6, 0.0, BlockOrientation.SOUTH);
+      setUpRampBlock(generator, 4.14, -0.6, 0.0, BlockOrientation.NORTH);
+      setUpRampBlock(generator, 4.14, -0.2, 0.0, BlockOrientation.NORTH);
+      setUpRampBlock(generator, 4.14, 0.2, 0.0, BlockOrientation.NORTH);
+      setUpRampBlock(generator, 4.14, 0.6, 0.0, BlockOrientation.NORTH);
 
       xPosition += cinderBlockLength;
 
-      setUpRampBlock(generator, xPosition, -0.6, 0.0, BlockOrientation.EAST);
-      setUpRampBlock(generator, xPosition, -0.2, 0.0, BlockOrientation.WEST);
-      setUpRampBlock(generator, xPosition, 0.2, 0.0, BlockOrientation.EAST);
-      setUpRampBlock(generator, xPosition, 0.6, 0.0, BlockOrientation.WEST);
+      setUpRampBlock(generator, 4.54, -0.6, 0.0, BlockOrientation.SOUTH);
+      setUpRampBlock(generator, 4.54, -0.2, 0.0, BlockOrientation.SOUTH);
+      setUpRampBlock(generator, 4.54, 0.2, 0.0, BlockOrientation.SOUTH);
+      setUpRampBlock(generator, 4.54, 0.6, 0.0, BlockOrientation.SOUTH);
 
-      xPosition += cinderBlockLength;
+      xPosition += cinderBlockLength + 0.04;
 
-      setUpRampBlock(generator, xPosition, -0.6, 0.0, BlockOrientation.WEST);
-      setUpRampBlock(generator, xPosition, -0.2, 0.0, BlockOrientation.EAST);
-      setUpRampBlock(generator, xPosition, 0.2, 0.0, BlockOrientation.WEST);
-      setUpRampBlock(generator, xPosition, 0.6, 0.0, BlockOrientation.EAST);
+      setUpRampBlock(generator, 4.98, -0.665, 0.0, BlockOrientation.EAST);
+      setUpRampBlock(generator, 4.98, -0.195, 0.0, BlockOrientation.WEST);
+      setUpRampBlock(generator, 4.98, 0.195, 0.0, BlockOrientation.EAST);
+      setUpRampBlock(generator, 4.98, 0.665, 0.0, BlockOrientation.WEST);
+
+      xPosition += cinderBlockLength + 0.01;
+
+      setUpRampBlock(generator, 5.39, -0.635, 0.0, BlockOrientation.WEST);
+      setUpRampBlock(generator, 5.39, -0.235, 0.0, BlockOrientation.EAST);
+      setUpRampBlock(generator, 5.39, 0.235, 0.0, BlockOrientation.WEST);
+      setUpRampBlock(generator, 5.39, 0.635, 0.0, BlockOrientation.EAST);
 
 
+      xPosition += cinderBlockLength + 0.01;
 
-      xPosition += cinderBlockLength;
+      setUpFlatBlock(generator, 5.8, -0.6, cinderBlockHeight);
+      setUpFlatBlock(generator, 5.8, -0.2, cinderBlockHeight);
+      setUpFlatBlock(generator, 5.8, 0.2, cinderBlockHeight);
+      setUpFlatBlock(generator, 5.8, 0.6, cinderBlockHeight);
 
-      setUpFlatBlock(generator, xPosition, -0.6, cinderBlockHeight);
-      setUpFlatBlock(generator, xPosition, -0.2, cinderBlockHeight);
-      setUpFlatBlock(generator, xPosition, 0.2, cinderBlockHeight);
-      setUpFlatBlock(generator, xPosition, 0.6, cinderBlockHeight);
+      xPosition += cinderBlockLength + 0.025;
 
-      xPosition += cinderBlockLength;
+      setUpRampBlock(generator, 6.225 + 0.02, -0.6 - 0.04, 0.0, BlockOrientation.NORTH);
+      setUpRampBlock(generator, 6.225, -0.2 - 0.04, 0.0, BlockOrientation.EAST);
+      setUpRampBlock(generator, 6.225 - 0.01, 0.2, 0.0, BlockOrientation.SOUTH);
+      setUpRampBlock(generator, 6.225, 0.6 + 0.04, 0.0, BlockOrientation.WEST);
 
-      setUpRampBlock(generator, xPosition, -0.6, 0.0, BlockOrientation.NORTH);
-      setUpRampBlock(generator, xPosition, -0.2, 0.0, BlockOrientation.EAST);
-      setUpRampBlock(generator, xPosition, 0.2, 0.0, BlockOrientation.SOUTH);
-      setUpRampBlock(generator, xPosition, 0.6, 0.0, BlockOrientation.WEST);
+      xPosition += cinderBlockLength + 0.04;
 
-      xPosition += cinderBlockLength;
+      setUpRampBlock(generator, 6.665 - 0.015, -0.64, cinderBlockHeight, BlockOrientation.EAST);
+      setUpRampBlock(generator, 6.665 - 0.03, -0.2, cinderBlockHeight, BlockOrientation.SOUTH);
+      setUpRampBlock(generator, 6.665 - 0.015, 0.24, cinderBlockHeight, BlockOrientation.WEST);
+      setUpRampBlock(generator, 6.665, 0.64, cinderBlockHeight, BlockOrientation.NORTH);
 
-      setUpRampBlock(generator, xPosition, -0.6, cinderBlockHeight, BlockOrientation.EAST);
-      setUpRampBlock(generator, xPosition, -0.2, cinderBlockHeight, BlockOrientation.SOUTH);
-      setUpRampBlock(generator, xPosition, 0.2, cinderBlockHeight, BlockOrientation.WEST);
-      setUpRampBlock(generator, xPosition, 0.6, cinderBlockHeight, BlockOrientation.NORTH);
+      xPosition += cinderBlockLength + 0.015;
 
-      xPosition += cinderBlockLength;
+      setUpRampBlock(generator, 7.08 -0.015, -0.6 - 0.04, 0.0, BlockOrientation.SOUTH);
+      setUpRampBlock(generator, 7.08, -0.2, 0.0, BlockOrientation.WEST);
+      setUpRampBlock(generator, 7.08 + 0.015, 0.2, 0.0, BlockOrientation.NORTH);
+      setUpRampBlock(generator, 7.08, 0.6, 0.0, BlockOrientation.EAST);
 
-      setUpRampBlock(generator, xPosition, -0.6, 0.0, BlockOrientation.SOUTH);
-      setUpRampBlock(generator, xPosition, -0.2, 0.0, BlockOrientation.WEST);
-      setUpRampBlock(generator, xPosition, 0.2, 0.0, BlockOrientation.NORTH);
-      setUpRampBlock(generator, xPosition, 0.6, 0.0, BlockOrientation.EAST);
-
-      xPosition += 0.75 + 0.5 * cinderBlockLength;
+      xPosition += 0.75 + 0.5 * cinderBlockLength + 0.02;
       generator.translate(xPosition, 0.0, -0.01);
       generator.addCubeReferencedAtBottomMiddle(1.5, 4.0 * cinderBlockLength, 0.01);
       generator.identity();
