@@ -85,6 +85,12 @@ public class OneDoFWaypoint implements GeometryObject<OneDoFWaypoint>, OneDoFWay
    }
 
    @Override
+   public boolean geometricallyEquals(OneDoFWaypoint other, double epsilon)
+   {
+      return epsilonEquals(other, epsilon);
+   }
+
+   @Override
    public String toString()
    {
       NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
