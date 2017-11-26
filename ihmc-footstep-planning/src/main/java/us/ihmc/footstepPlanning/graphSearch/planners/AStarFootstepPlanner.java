@@ -205,9 +205,9 @@ public class AStarFootstepPlanner implements FootstepPlanner
       NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
 
-      boolean validStartNode = nodeChecker.isNodeValid(startNode, null);
-      if (!validStartNode)
-         throw new RuntimeException("Start node isn't valid");
+//      boolean validStartNode = nodeChecker.isNodeValid(startNode, null);
+//      if (!validStartNode)
+//         throw new RuntimeException("Start node isn't valid");
 
       validGoalNode.set(true);
       for (RobotSide robotSide : RobotSide.values)
