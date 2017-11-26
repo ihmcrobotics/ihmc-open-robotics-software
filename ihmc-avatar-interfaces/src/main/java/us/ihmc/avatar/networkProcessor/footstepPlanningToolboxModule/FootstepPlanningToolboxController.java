@@ -123,6 +123,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
                      new VisibilityGraphWithAStarPlanner(footstepPlanningParameters, contactPointsInSoleFrame, graphicsListRegistry, parentRegistry));
       activePlanner.set(FootstepPlanningRequestPacket.FootstepPlannerType.PLANAR_REGION_BIPEDAL);
 
+      graphicsListRegistry.registerYoGraphic("footstepPlanningToolbox", yoGraphicPlanarRegionsList);
       usePlanarRegions.set(true);
       isDone.set(true);
       planId.set(FootstepPlanningRequestPacket.NO_PLAN_ID);
@@ -176,9 +177,9 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
       FootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
 
-      yoGraphicPlanarRegionsList.clear();
       if (usePlanarRegions.getBooleanValue())
       {
+         yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
          if (!requestAndWaitForPlanarRegions(planner))
             return;
       }
@@ -186,6 +187,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       {
          planner.setPlanarRegions(null);
          planarRegionsList = Optional.empty();
+         yoGraphicPlanarRegionsList.clear();
       }
 
       sendMessageToUI("Starting To Plan: " + plannerCount + ", " + activePlanner.getEnumValue().toString());
