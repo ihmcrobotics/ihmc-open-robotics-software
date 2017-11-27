@@ -385,7 +385,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
                   interpolatedPoseOneSecondEarlierFramePointToPack.getZ() - interpolatedPoseFramePointToPack.getZ());
 
            FrameOrientation rotationDisplacement = new FrameOrientation();
-            rotationDisplacement.setOrientationFromOneToTwo(interpolatedPoseOneSecondEarlierOrientationToPack, interpolatedPoseOrientationToPack);
+            rotationDisplacement.difference(interpolatedPoseOrientationToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
             AxisAngle rotationDisplacementAngle = new AxisAngle();
             rotationDisplacement.getAxisAngle(rotationDisplacementAngle);
 
@@ -469,7 +469,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
                   interpolatedPoseOneSecondEarlierFramePointToPack.getZ() - interpolatedPoseFramePointToPack.getZ());
 
            FrameOrientation rotationDisplacement = new FrameOrientation();
-            rotationDisplacement.setOrientationFromOneToTwo(interpolatedPoseOneSecondEarlierOrientationToPack, interpolatedPoseOrientationToPack);
+            rotationDisplacement.difference(interpolatedPoseOrientationToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
             AxisAngle rotationDisplacementAngle = new AxisAngle();
             rotationDisplacement.getAxisAngle(rotationDisplacementAngle);
 
@@ -554,7 +554,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
                   interpolatedPoseOneSecondEarlierFramePointToPack.getZ() - interpolatedPoseFramePointToPack.getZ());
 
            FrameOrientation rotationDisplacement = new FrameOrientation();
-            rotationDisplacement.setOrientationFromOneToTwo(interpolatedPoseOneSecondEarlierOrientationToPack, interpolatedPoseOrientationToPack);
+            rotationDisplacement.difference(interpolatedPoseOrientationToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
             AxisAngle rotationDisplacementAngle = new AxisAngle();
             rotationDisplacement.getAxisAngle(rotationDisplacementAngle);
 
@@ -618,7 +618,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
                   interpolatedPoseOneSecondEarlierFramePointToPack.getZ() - interpolatedPoseFramePointToPack.getZ());
 
             FrameOrientation rotationDisplacement = new FrameOrientation();
-            rotationDisplacement.setOrientationFromOneToTwo(interpolatedPoseOneSecondEarlierOrientationToPack, interpolatedPoseOrientationToPack);
+            rotationDisplacement.difference(interpolatedPoseOrientationToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
             AxisAngle rotationDisplacementAngle = new AxisAngle();
             rotationDisplacement.getAxisAngle(rotationDisplacementAngle);
 

@@ -380,7 +380,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       
       startOffsetTransform_Rotation.setRotationAndZeroTranslation(updatedStartOffset_Rotation_quat);
       
-      offsetBetweenStartAndGoal_Rotation.setOrientationFromOneToTwo(updatedGoalOffset_Rotation, updatedStartOffset_Rotation);
+      offsetBetweenStartAndGoal_Rotation.difference(updatedStartOffset_Rotation, updatedGoalOffset_Rotation);
       offsetBetweenStartAndGoal_Rotation.getYawPitchRoll(temporaryYawPitchRoll);
       goalYawRaw.set(temporaryYawPitchRoll[0]);
       goalYawWithDeadZone.update();
@@ -402,7 +402,7 @@ public class ClippedSpeedOffsetErrorInterpolator
    private void updateMaxRotationAlphaVariationSpeed()
    {
       //Rotation
-      rotationToTravel.setOrientationFromOneToTwo(updatedStartOffset_Rotation, updatedGoalOffsetWithDeadZone_Rotation);
+      rotationToTravel.difference(updatedGoalOffsetWithDeadZone_Rotation, updatedStartOffset_Rotation);
       rotationToTravel.getAxisAngle(axisAngletoTravel);
       angleToTravel.set(axisAngletoTravel.getAngle());
       rotationalSpeedForGivenAngleToTravel.set(angleToTravel.getDoubleValue() / dt.getDoubleValue());

@@ -280,7 +280,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       positionError.set(handEndEffectorPositionFK.distance(handEndEffectorPositionIK));
 
       FrameOrientation errorOrientation = new FrameOrientation();
-      errorOrientation.setOrientationFromOneToTwo(handEndEffectorOrientationFK, handEndEffectorOrientationIK);
+      errorOrientation.difference(handEndEffectorOrientationIK, handEndEffectorOrientationFK);
 
       AxisAngle axisAngle = new AxisAngle();
       errorOrientation.getAxisAngle(axisAngle);
