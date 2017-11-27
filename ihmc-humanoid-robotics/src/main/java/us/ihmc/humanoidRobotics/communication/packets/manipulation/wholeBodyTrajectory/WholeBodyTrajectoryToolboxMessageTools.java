@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
-import java.util.List;
-
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -66,22 +64,6 @@ public class WholeBodyTrajectoryToolboxMessageTools
       }
 
       return new WaypointBasedTrajectoryMessage(endEffector, waypointTimes, waypoints, selectionMatrix);
-   }
-
-   public static double[] createDefaultExplorationUpperLimitArray(List<ConfigurationSpaceName> configurationSpaceNames)
-   {
-      double[] upperLimit = new double[configurationSpaceNames.size()];
-      for (int i = 0; i < configurationSpaceNames.size(); i++)
-         upperLimit[i] = configurationSpaceNames.get(i).getDefaultExplorationUpperLimit();
-      return upperLimit;
-   }
-
-   public static double[] createDefaultExplorationLowerLimitArray(List<ConfigurationSpaceName> degreesOfFreedomToExplore)
-   {
-      double[] lowerLimit = new double[degreesOfFreedomToExplore.size()];
-      for (int i = 0; i < degreesOfFreedomToExplore.size(); i++)
-         lowerLimit[i] = degreesOfFreedomToExplore.get(i).getDefaultExplorationLowerLimit();
-      return lowerLimit;
    }
 
    public static double[] createDefaultExplorationUpperLimitArray(ConfigurationSpaceName... configurationSpaceNames)
