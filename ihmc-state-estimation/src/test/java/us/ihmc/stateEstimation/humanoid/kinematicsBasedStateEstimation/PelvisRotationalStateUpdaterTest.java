@@ -144,7 +144,7 @@ public class PelvisRotationalStateUpdaterTest
       rootJoint.getRotation(rotationEstimated);
       rootJoint.getJointTwist(twistEstimated);
       
-      EuclidCoreTestTools.assertQuaternionEqualsUsingDifference(rotationExpected, rotationEstimated, EPS);
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(rotationExpected, rotationEstimated, EPS);
       EuclidCoreTestTools.assertTuple3DEquals(twistExpected.getAngularPartCopy(), twistEstimated.getAngularPartCopy(), EPS);
       
       for (int i = 0; i < 1000; i++)
@@ -165,7 +165,7 @@ public class PelvisRotationalStateUpdaterTest
          rootJoint.getRotation(rotationEstimated);
          rootJoint.getJointTwist(twistEstimated);
          
-         EuclidCoreTestTools.assertQuaternionEqualsUsingDifference(rotationExpected, rotationEstimated, EPS);
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(rotationExpected, rotationEstimated, EPS);
          EuclidCoreTestTools.assertTuple3DEquals(twistExpected.getAngularPartCopy(), twistEstimated.getAngularPartCopy(), EPS);
       }
    }
