@@ -41,6 +41,11 @@ public class SpatialNodeTree
       return currentCandidate;
    }
 
+   public double getDistance(SpatialNode nodeOne, SpatialNode nodeTwo)
+   {
+      return nodeOne.computeDistance(timeWeight, positionWeight, orientationWeight, nodeTwo);
+   }
+
    public void findNearestValidNodeToCandidate(boolean includeTimeComparison)
    {
       double distanceToNearestNode = Double.POSITIVE_INFINITY;
