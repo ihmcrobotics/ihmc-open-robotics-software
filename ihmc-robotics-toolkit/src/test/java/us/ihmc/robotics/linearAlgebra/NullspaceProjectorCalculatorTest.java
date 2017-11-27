@@ -101,13 +101,17 @@ public abstract class NullspaceProjectorCalculatorTest
       jacobian.set(1, 2, 9.0);
       jacobian.set(1, 3, 11.0);
 
-      vectorToProject = new DenseMatrix64F(1, 4);
-      vectorToProject.set(0, 0, 3.5);
-      vectorToProject.set(0, 1, 4.5);
-      vectorToProject.set(0, 2, 5.5);
-      vectorToProject.set(0, 3, 6.5);
+      DenseMatrix64F matrixToProject = new DenseMatrix64F(2, 4);
+      matrixToProject.set(0, 0, 3.5);
+      matrixToProject.set(0, 1, 4.5);
+      matrixToProject.set(0, 2, 5.5);
+      matrixToProject.set(0, 3, 6.5);
+      matrixToProject.set(1, 0, 7.5);
+      matrixToProject.set(1, 1, 8.5);
+      matrixToProject.set(1, 2, 9.5);
+      matrixToProject.set(1, 3, 10.5);
 
-      projectedVector = new DenseMatrix64F(1, 4);
+      projectedVector = new DenseMatrix64F(2, 4);
 
       nullspaceProjectorCalculator.projectOntoNullspace(vectorToProject, jacobian, projectedVector);
 
@@ -116,5 +120,9 @@ public abstract class NullspaceProjectorCalculatorTest
       assertEquals(1.62918, projectedVector.get(0, 2), 1e-4);
       assertEquals(-1.35993, projectedVector.get(0, 3), 1e-4);
 
+      assertEquals(1.37192, projectedVector.get(1, 0), 1e-4);
+      assertEquals(6.39598, projectedVector.get(1, 1), 1e-4);
+      assertEquals(2.52277, projectedVector.get(1, 2), 1e-4);
+      assertEquals(-2.93712, projectedVector.get(1, 3), 1e-4);
    }
 }

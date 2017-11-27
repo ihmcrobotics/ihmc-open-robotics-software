@@ -8,7 +8,7 @@ import org.ejml.ops.SingularOps;
 
 import us.ihmc.commons.MathTools;
 
-public class SVDNullspaceCalculator
+public class SVDNullspaceCalculator implements NullspaceProjectorCalculator
 {
    private final ConfigurableSolvePseudoInverseSVD iMinusNNTSolver;
 
@@ -21,6 +21,9 @@ public class SVDNullspaceCalculator
    
    private final DenseMatrix64F x;
 
+   private final DenseMatrix64F nullspaceProjector;
+   private final DenseMatrix64F tempMatrixForProjectionInPlace;
+
    private final boolean makeLargestComponentPositive;
 
    public SVDNullspaceCalculator(int matrixSize, boolean makeLargestComponentPositive)
@@ -31,12 +34,38 @@ public class SVDNullspaceCalculator
       double singularValueLimit = 0.5; // because the singular values of I - N * N^T will be either 0 or 1.
       iMinusNNTSolver = new ConfigurableSolvePseudoInverseSVD(matrixSize, matrixSize, singularValueLimit);
 
+      nullspaceProjector = new DenseMatrix64F(matrixSize, matrixSize);
+      tempMatrixForProjectionInPlace = new DenseMatrix64F(matrixSize, matrixSize);
+
       svd = DecompositionFactory.svd(matrixSize, matrixSize, false, true, false);
       sigma = new DenseMatrix64F(matrixSize, matrixSize);
       v = new DenseMatrix64F(matrixSize, matrixSize);
       nullspace = new DenseMatrix64F(matrixSize, matrixSize);    // oversized, using reshape later
       x = new DenseMatrix64F(matrixSize, matrixSize);// oversized, using reshape later
       this.makeLargestComponentPositive = makeLargestComponentPositive;
+   }
+
+   @Override
+   public void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf)
+   {
+      tempMatrixForProjectionInPlace.set(matrixToProjectOntoNullspace);
+      projectOntoNullspace(tempMatrixForProjectionInPlace, matrixToComputeNullspaceOf, matrixToProjectOntoNullspace);
+   }
+
+   public void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F projectedMatrixToPack)
+   {
+      computeNullspaceProjector(matrixToComputeNullspaceOf, nullspaceProjector);
+      CommonOps.mult(matrixToProjectOntoNullspace, nullspaceProjector, projectedMatrixToPack);
+   }
+
+   @Override
+   public void computeNullspaceProjector(DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F nullspaceProjectorToPack)
+   {
+      int nullity = matrixToComputeNullspaceOf.getNumCols() - matrixToComputeNullspaceOf.getNumRows();
+      setMatrix(matrixToComputeNullspaceOf, nullity);
+
+      nullspaceProjectorToPack.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols());
+      CommonOps.multOuter(nullspace, nullspaceProjectorToPack);
    }
 
    public void setMatrix(DenseMatrix64F matrix, int nullity)
@@ -79,12 +108,12 @@ public class SVDNullspaceCalculator
 
    private void computeNullspace(DenseMatrix64F nullspace, DenseMatrix64F A, int nullity)
    {
-      nullspace.reshape(nullspace.getNumRows(), nullity);
+      nullspace.reshape(A.getNumCols(), nullity);
       svd.decompose(A);
 
       sigma.reshape(A.getNumCols(), A.getNumRows());
       svd.getW(sigma);
-      v.reshape(A.getNumRows(), A.getNumRows());
+      v.reshape(A.getNumCols(), A.getNumCols());
       boolean transposed = false;
       svd.getV(v, transposed);
 

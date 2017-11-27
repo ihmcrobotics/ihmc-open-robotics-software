@@ -17,8 +17,14 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
  * @author twan
  * Date: 4/11/13
  */
-public class SVDNullspaceCalculatorTest
+public class SVDNullspaceCalculatorTest extends NullspaceProjectorCalculatorTest
 {
+   @Override
+   public NullspaceProjectorCalculator getNullspaceProjectorCalculator()
+   {
+      return new SVDNullspaceCalculator(10, true);
+   }
+
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRemoveNullspaceComponent()
