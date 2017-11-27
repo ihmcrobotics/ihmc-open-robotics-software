@@ -140,7 +140,7 @@ public class OrientationInterpolationTrajectoryGeneratorTest
    public void testPackAngularData()
    {
       FrameOrientation orientationToPack = new FrameOrientation(referenceFrame);
-      orientationToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
+      orientationToPack.setYawPitchRollIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       generator = new OrientationInterpolationTrajectoryGenerator(namePrefix, referenceFrame, trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, parentRegistry);
       generator.getOrientation(orientationToPack);

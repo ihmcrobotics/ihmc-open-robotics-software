@@ -131,7 +131,7 @@ public class ConstantOrientationTrajectoryGeneratorTest
    public void testPackAngularData()
    {
       FrameOrientation orientationToPack = new FrameOrientation(referenceFrame);
-      orientationToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
+      orientationToPack.setYawPitchRollIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       generator = new ConstantOrientationTrajectoryGenerator(namePrefix, referenceFrame, orientationProvider, finalTime, parentRegistry);
       generator.getOrientation(orientationToPack);
