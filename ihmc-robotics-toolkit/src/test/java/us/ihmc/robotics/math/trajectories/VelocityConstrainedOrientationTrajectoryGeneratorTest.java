@@ -50,9 +50,9 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       for (int i = 0; i < 5; i++)
       {
          FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-         FrameVector3D initialAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameVector3D initialAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
          FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-         FrameVector3D finalAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameVector3D finalAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
 
          traj.setInitialConditions(initialOrientation, initialAngularVelocity);
          traj.setFinalConditions(finalOrientation, finalAngularVelocity);
@@ -97,9 +97,9 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       for (int i = 0; i < 10000; i++)
       {
          FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-         FrameVector3D initialAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameVector3D initialAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
          FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-         FrameVector3D finalAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameVector3D finalAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
 
          FrameVector3D zeroAngularAcceleration = new FrameVector3D();
 
@@ -164,9 +164,9 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       for (int i = 0; i < 100; i++)
       {
          FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-         FrameVector3D initialAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame);
+         FrameVector3D initialAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, worldFrame);
          FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-         FrameVector3D finalAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame);
+         FrameVector3D finalAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, worldFrame);
 
          traj.setInitialConditions(initialOrientation, initialAngularVelocity);
          traj.setFinalConditions(finalOrientation, finalAngularVelocity);
@@ -266,9 +266,9 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
       for (int i = 0; i < 1000; i++)
       {
          FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-         FrameVector3D initialAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameVector3D initialAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
          FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
-         FrameVector3D finalAngularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         FrameVector3D finalAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, worldFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
 
          traj.setInitialConditions(initialOrientation, initialAngularVelocity);
          traj.setFinalConditions(finalOrientation, finalAngularVelocity);

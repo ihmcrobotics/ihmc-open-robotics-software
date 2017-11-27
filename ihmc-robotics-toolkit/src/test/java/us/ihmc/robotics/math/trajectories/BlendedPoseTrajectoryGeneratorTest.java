@@ -69,12 +69,12 @@ public class BlendedPoseTrajectoryGeneratorTest
       public PoseTrajectoryState(Random random, double time, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
       {
          this.time = time;
-         this.position = EuclidFrameRandomTools.generateRandomFramePoint3D(random, expressedInFrame, 1.0, 1.0, 1.0);
+         this.position = EuclidFrameRandomTools.nextFramePoint3D(random, expressedInFrame, 1.0, 1.0, 1.0);
          this.orientation = EuclidFrameRandomTools.nextFrameQuaternion(random, expressedInFrame);
-         this.linearVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, expressedInFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
-         this.angularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, expressedInFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
-         this.linearAcceleration = EuclidFrameRandomTools.generateRandomFrameVector3D(random, expressedInFrame, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
-         this.angularAcceleration = EuclidFrameRandomTools.generateRandomFrameVector3D(random, expressedInFrame, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
+         this.linearVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, expressedInFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         this.angularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, expressedInFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         this.linearAcceleration = EuclidFrameRandomTools.nextFrameVector3D(random, expressedInFrame, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
+         this.angularAcceleration = EuclidFrameRandomTools.nextFrameVector3D(random, expressedInFrame, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
          this.bodyFrame = bodyFrame;
          this.baseFrame = baseFrame;
          this.expressedInFrame = expressedInFrame;
