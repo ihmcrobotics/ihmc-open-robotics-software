@@ -17,8 +17,18 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
  * @author twan
  * Date: 4/11/13
  */
-public class NullspaceCalculatorTest
+public class SVDNullspaceCalculatorTest extends NullspaceProjectorCalculatorTest
 {
+   @Override
+   public NullspaceProjectorCalculator getNullspaceProjectorCalculator()
+   {
+      int matrixSize = 10;
+      boolean makeLargestComponentPositive = true;
+      SVDNullspaceCalculator nullspaceCalculator = new SVDNullspaceCalculator(matrixSize, makeLargestComponentPositive);
+
+      return nullspaceCalculator;
+   }
+
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
@@ -26,7 +36,7 @@ public class NullspaceCalculatorTest
    {
       int matrixSize = 10;
       boolean makeLargestComponentPositive = true;
-      NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(matrixSize, makeLargestComponentPositive);
+      SVDNullspaceCalculator nullspaceCalculator = new SVDNullspaceCalculator(matrixSize, makeLargestComponentPositive);
 
       Random random = new Random();
       double[] singularValues = RandomNumbers.nextDoubleArray(random, matrixSize, 1.0, 2.0);
@@ -48,7 +58,7 @@ public class NullspaceCalculatorTest
    {
       int matrixSize = 6;
       boolean makeLargestComponentPositive = true;
-      NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(matrixSize, makeLargestComponentPositive);
+      SVDNullspaceCalculator nullspaceCalculator = new SVDNullspaceCalculator(matrixSize, makeLargestComponentPositive);
 
       Random random = new Random();
       double[] singularValues = RandomNumbers.nextDoubleArray(random, matrixSize, 1.0, 2.0);
@@ -79,7 +89,7 @@ public class NullspaceCalculatorTest
       DenseMatrix64F matrix = DenseMatrix64F.wrap(6, 6, array);
       int matrixSize = matrix.getNumCols();
       boolean makeLargestComponentPositive = true;
-      NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(matrixSize, makeLargestComponentPositive);
+      SVDNullspaceCalculator nullspaceCalculator = new SVDNullspaceCalculator(matrixSize, makeLargestComponentPositive);
       nullspaceCalculator.setMatrix(matrix, 1);
       DenseMatrix64F nullspace = nullspaceCalculator.getNullspace();
 
@@ -97,7 +107,7 @@ public class NullspaceCalculatorTest
    {
       int matrixSize = 10;
       boolean makeLargestComponentPositive = true;
-      NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(matrixSize, makeLargestComponentPositive);
+      SVDNullspaceCalculator nullspaceCalculator = new SVDNullspaceCalculator(matrixSize, makeLargestComponentPositive);
 
       Random random = new Random();
       double[] singularValues = RandomNumbers.nextDoubleArray(random, matrixSize, 1.0, 2.0);
