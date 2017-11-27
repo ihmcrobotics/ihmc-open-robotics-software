@@ -10,7 +10,8 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -61,7 +62,7 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
     * @param desiredPosition desired hand position expressed in world frame.
     * @param desiredOrientation desired hand orientation expressed in world frame.
     */
-   public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, long trajectoryReferenceFrameId)
+   public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameId)
    {
       super(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrameId);
       this.robotSide = robotSide;
@@ -75,7 +76,7 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
     * @param desiredPosition desired hand position expressed in world frame.
     * @param desiredOrientation desired hand orientation expressed in world frame.
     */
-   public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, ReferenceFrame trajectoryReferenceFrame)
+   public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryReferenceFrame)
    {
       super(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame);
       this.robotSide = robotSide;
@@ -84,7 +85,7 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    /**
     * Use this constructor to build a message with more than one trajectory point.
     * By default this constructor sets the trajectory frame to {@link CommonReferenceFrameIds#CHEST_FRAME} and the data frame to World
-    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Point3D, Quaternion, Vector3D, Vector3D)} for each trajectory point afterwards.
+    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Point3D, QuaternionReadOnly, Vector3D, Vector3D)} for each trajectory point afterwards.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param robotSide is used to define which hand is performing the trajectory.
     * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
