@@ -89,8 +89,6 @@ public class PelvisOffsetTrajectoryWhileWalking
 
       nextSoleFrame = new ReferenceFrame("nextSoleFrame", worldFrame)
       {
-         private static final long serialVersionUID = 8082360349132384241L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
