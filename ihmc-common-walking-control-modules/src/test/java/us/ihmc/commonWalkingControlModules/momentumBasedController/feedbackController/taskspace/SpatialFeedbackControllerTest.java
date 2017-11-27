@@ -59,7 +59,7 @@ public final class SpatialFeedbackControllerTest
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBody elevator = randomFloatingChain.getElevator();
       RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
-      FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.generateRandomFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
+      FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.nextFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
 
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);
@@ -165,7 +165,7 @@ public final class SpatialFeedbackControllerTest
       List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
       RigidBody elevator = randomFloatingChain.getElevator();
       RigidBody endEffector = joints.get(joints.size() - 1).getSuccessor();
-      FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.generateRandomFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
+      FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.nextFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
 
       ScrewTestTools.setRandomPositions(joints, random);
       ScrewTestTools.setRandomVelocities(joints, random);

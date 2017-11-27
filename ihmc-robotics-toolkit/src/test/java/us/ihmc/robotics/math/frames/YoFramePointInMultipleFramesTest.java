@@ -158,7 +158,7 @@ public class YoFramePointInMultipleFramesTest
       YoFramePointInMultipleFrames yoFramePointInMultipleFrames = new YoFramePointInMultipleFrames("blop", registry, new ReferenceFrame[]{worldFrame, frameA});
       yoFramePointInMultipleFrames.switchCurrentReferenceFrame(worldFrame);
       
-      FramePoint3D framePoint = EuclidFrameRandomTools.generateRandomFramePoint3D(random, frameA, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
+      FramePoint3D framePoint = EuclidFrameRandomTools.nextFramePoint3D(random, frameA, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
       
       yoFramePointInMultipleFrames.setIncludingFrame(framePoint);
       assertTrue(framePoint.epsilonEquals(yoFramePointInMultipleFrames.getFrameTuple(), 1e-10));

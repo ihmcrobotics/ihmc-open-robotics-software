@@ -27,9 +27,9 @@ public class CaptureRegionMathToolsTest
       RotationMatrix rotationMatrix = new RotationMatrix();
       
       double radius = RandomNumbers.nextDouble(random, 0.1, 10.0);
-      FramePoint2D center = EuclidFrameRandomTools.generateRandomFramePoint2D(random, worldFrame, -10.0, 10.0, -10.0, 10.0);
+      FramePoint2D center = EuclidFrameRandomTools.nextFramePoint2D(random, worldFrame, -10.0, 10.0, -10.0, 10.0);
       
-      FrameVector2D directionToExpectedPoint = EuclidFrameRandomTools.generateRandomFrameVector2D(random, worldFrame);
+      FrameVector2D directionToExpectedPoint = EuclidFrameRandomTools.nextFrameVector2D(random, worldFrame);
       directionToExpectedPoint.normalize();
       FramePoint2D expectedPoint = new FramePoint2D();
       expectedPoint.scaleAdd(radius, directionToExpectedPoint, center);

@@ -230,7 +230,7 @@ public class SimpleSO3TrajectoryPointTest
 
       for (int i = 0; i < 10000; i++)
       {
-         expectedFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomFrame" + i, random, random.nextBoolean() ? worldFrame : expectedFrame);
+         expectedFrame = EuclidFrameRandomTools.nextReferenceFrame("randomFrame" + i, random, random.nextBoolean() ? worldFrame : expectedFrame);
 
          expectedOrientation.applyTransform(worldFrame.getTransformToDesiredFrame(expectedFrame));
          expectedAngularVelocity.applyTransform(worldFrame.getTransformToDesiredFrame(expectedFrame));

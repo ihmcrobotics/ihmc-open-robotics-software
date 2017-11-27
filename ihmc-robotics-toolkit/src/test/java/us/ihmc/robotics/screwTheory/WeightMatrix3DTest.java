@@ -67,7 +67,7 @@ public class WeightMatrix3DTest
          assertTrue(Double.isNaN(weightMatrix3D.getYAxisWeight()));
          assertTrue(Double.isNaN(weightMatrix3D.getZAxisWeight()));
 
-         ReferenceFrame randomFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("blop" + i, random, ReferenceFrame.getWorldFrame());
+         ReferenceFrame randomFrame = EuclidFrameRandomTools.nextReferenceFrame("blop" + i, random, ReferenceFrame.getWorldFrame());
          weightMatrix3D.setWeightFrame(randomFrame);
          assertTrue(randomFrame == weightMatrix3D.getWeightFrame());
 
@@ -98,7 +98,7 @@ public class WeightMatrix3DTest
       referenceFrames.add(null);
       referenceFrames.add(ReferenceFrame.getWorldFrame());
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
-      referenceFrames.add(EuclidFrameRandomTools.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
+      referenceFrames.add(EuclidFrameRandomTools.nextReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -132,7 +132,7 @@ public class WeightMatrix3DTest
              DenseMatrix64F expectedSubspaceVector = new DenseMatrix64F(3, 1);
              DenseMatrix64F actualSubspaceVector = new DenseMatrix64F(3, 1);
 
-             FrameVector3D randomVector = EuclidFrameRandomTools.generateRandomFrameVector3D(random, destinationFrame);
+             FrameVector3D randomVector = EuclidFrameRandomTools.nextFrameVector3D(random, destinationFrame);
              DenseMatrix64F originalVector = new DenseMatrix64F(3, 1);
              randomVector.get(originalVector);
              weightMatrix3D.getFullWeightMatrixInFrame(destinationFrame, expectedWeightMatrix);
@@ -175,7 +175,7 @@ public class WeightMatrix3DTest
       referenceFrames.add(null);
       referenceFrames.add(ReferenceFrame.getWorldFrame());
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
-      referenceFrames.add(EuclidFrameRandomTools.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
+      referenceFrames.add(EuclidFrameRandomTools.nextReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
       referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
 
       for (int i = 0; i < ITERATIONS; i++)

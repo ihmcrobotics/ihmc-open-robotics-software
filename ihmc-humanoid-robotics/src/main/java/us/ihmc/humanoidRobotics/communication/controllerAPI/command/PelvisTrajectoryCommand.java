@@ -18,8 +18,8 @@ public class PelvisTrajectoryCommand extends SE3TrajectoryControllerCommand<Pelv
 
    public PelvisTrajectoryCommand(Random random)
    {
-      super(EuclidFrameRandomTools.generateRandomReferenceFrame("dataFrame", random, ReferenceFrame.getWorldFrame()),
-            EuclidFrameRandomTools.generateRandomReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame()));
+      super(EuclidFrameRandomTools.nextReferenceFrame("dataFrame", random, ReferenceFrame.getWorldFrame()),
+            EuclidFrameRandomTools.nextReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame()));
    }
 
    @Override
