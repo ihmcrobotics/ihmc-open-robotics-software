@@ -30,7 +30,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameA", worldFrame,
-         EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+         EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
    private static final double EPSILON = 1e-10;
 

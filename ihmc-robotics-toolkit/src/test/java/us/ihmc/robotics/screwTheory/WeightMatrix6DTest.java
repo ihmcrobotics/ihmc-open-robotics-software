@@ -172,7 +172,7 @@ public class WeightMatrix6DTest
       WeightMatrix3D angularPart3D = new WeightMatrix3D();
       WeightMatrix3D linearPart3D = new WeightMatrix3D();
 
-      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);
@@ -266,7 +266,7 @@ public class WeightMatrix6DTest
       Random random = new Random(456465L);
       WeightMatrix6D weightMatrix6D = new WeightMatrix6D();
 
-      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);

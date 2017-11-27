@@ -116,7 +116,7 @@ public class YoFrameQuaternionTest
    public void testReferenceFramesMismatching()
    {
       Random random = new Random(1984L);
-      ReferenceFrame testFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("chou", worldFrame, EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      ReferenceFrame testFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("chou", worldFrame, EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
       YoFrameQuaternion yoFrameQuaternion = new YoFrameQuaternion("test", worldFrame, registry);

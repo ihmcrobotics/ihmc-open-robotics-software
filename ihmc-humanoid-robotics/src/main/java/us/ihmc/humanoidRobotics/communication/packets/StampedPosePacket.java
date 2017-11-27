@@ -49,6 +49,6 @@ public class StampedPosePacket extends Packet<StampedPosePacket>
 
    public StampedPosePacket(Random random)
    {
-      this("/pelvis", new TimeStampedTransform3D(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random), random.nextLong()), 1.0);
+      this("/pelvis", new TimeStampedTransform3D(EuclidCoreRandomTools.nextRigidBodyTransform(random), random.nextLong()), 1.0);
    }
 }

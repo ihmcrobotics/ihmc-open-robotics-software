@@ -342,7 +342,7 @@ public class TwistCalculatorTest
 
             assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
 
-            Point3D bodyFixedPoint = EuclidCoreRandomTools.generateRandomPoint3D(random, 10.0);
+            Point3D bodyFixedPoint = EuclidCoreRandomTools.nextPoint3D(random, 10.0);
             FramePoint3D frameBodyFixedPoint = new FramePoint3D(bodyFrame, bodyFixedPoint);
             FrameVector3D actualLinearVelocity = new FrameVector3D();
             twistCalculator.getLinearVelocityOfBodyFixedPoint(body, frameBodyFixedPoint, actualLinearVelocity);
@@ -432,7 +432,7 @@ public class TwistCalculatorTest
 
                assertTwistEquals(expectedRelativeTwist, actualRelativeTwist, 1.0e-5);
 
-               Point3D bodyFixedPoint = EuclidCoreRandomTools.generateRandomPoint3D(random, 10.0);
+               Point3D bodyFixedPoint = EuclidCoreRandomTools.nextPoint3D(random, 10.0);
                FramePoint3D frameBodyFixedPoint = new FramePoint3D(bodyFrame, bodyFixedPoint);
                FrameVector3D actualLinearVelocity = new FrameVector3D();
                twistCalculator.getLinearVelocityOfBodyFixedPoint(base, body, frameBodyFixedPoint, actualLinearVelocity);

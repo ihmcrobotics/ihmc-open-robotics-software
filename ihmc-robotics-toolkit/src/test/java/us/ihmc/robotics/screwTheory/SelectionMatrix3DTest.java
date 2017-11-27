@@ -96,7 +96,7 @@ public class SelectionMatrix3DTest
       SelectionMatrix3D selectionMatrix3D = new SelectionMatrix3D();
       FrameMatrix3D frameMatrix3D = new FrameMatrix3D();
 
-      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);
@@ -150,7 +150,7 @@ public class SelectionMatrix3DTest
       SelectionMatrix3D selectionMatrix3D = new SelectionMatrix3D();
       FrameMatrix3D frameMatrix3D = new FrameMatrix3D();
 
-      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);
@@ -223,7 +223,7 @@ public class SelectionMatrix3DTest
       Random random = new Random(456465L);
       SelectionMatrix3D selectionMatrix3D = new SelectionMatrix3D();
 
-      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);

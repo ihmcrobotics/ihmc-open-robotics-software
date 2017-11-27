@@ -218,8 +218,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 1);
 
          handTrajectoryMessage.setUseCustomControlFrame(true);
-         Point3D framePosition = EuclidCoreRandomTools.generateRandomPoint3D(random, -0.1, 0.1);
-         Quaternion frameOrientation = EuclidCoreRandomTools.generateRandomQuaternion(random, Math.toRadians(20.0));
+         Point3D framePosition = EuclidCoreRandomTools.nextPoint3D(random, -0.1, 0.1);
+         Quaternion frameOrientation = EuclidCoreRandomTools.nextQuaternion(random, Math.toRadians(20.0));
          handTrajectoryMessage.setControlFramePosition(framePosition);
          handTrajectoryMessage.setControlFrameOrientation(frameOrientation);
 

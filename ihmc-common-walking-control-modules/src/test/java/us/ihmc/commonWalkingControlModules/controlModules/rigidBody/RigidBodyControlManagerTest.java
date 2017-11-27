@@ -136,10 +136,10 @@ public class RigidBodyControlManagerTest
       manager.compute();
 
       double trajectoryTime = 1.0;
-      Point3D position = EuclidCoreRandomTools.generateRandomPoint3D(random);
-      Quaternion orientation = EuclidCoreRandomTools.generateRandomQuaternion(random);
-      Vector3D linearVelocity = EuclidCoreRandomTools.generateRandomVector3D(random);
-      Vector3D angularVelocity = EuclidCoreRandomTools.generateRandomVector3D(random);
+      Point3D position = EuclidCoreRandomTools.nextPoint3D(random);
+      Quaternion orientation = EuclidCoreRandomTools.nextQuaternion(random);
+      Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random);
+      Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
       SE3Message message = new SE3Message(1, worldFrame);
       message.setTrajectoryPoint(0, trajectoryTime, position, orientation, linearVelocity, angularVelocity, worldFrame);
@@ -273,7 +273,7 @@ public class RigidBodyControlManagerTest
 
       double trajectoryTime = 1.0;
 
-      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);
@@ -285,10 +285,10 @@ public class RigidBodyControlManagerTest
       ReferenceFrameHashCodeResolver resolver = new ReferenceFrameHashCodeResolver(referenceFrames);
       for (int i = 0; i < 50; i++)
       {
-         Point3D position = EuclidCoreRandomTools.generateRandomPoint3D(random);
-         Quaternion orientation = EuclidCoreRandomTools.generateRandomQuaternion(random);
-         Vector3D linearVelocity = EuclidCoreRandomTools.generateRandomVector3D(random);
-         Vector3D angularVelocity = EuclidCoreRandomTools.generateRandomVector3D(random);
+         Point3D position = EuclidCoreRandomTools.nextPoint3D(random);
+         Quaternion orientation = EuclidCoreRandomTools.nextQuaternion(random);
+         Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random);
+         Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
          SE3Message message = new SE3Message(1, worldFrame);
          message.setTrajectoryPoint(0, trajectoryTime, position, orientation, linearVelocity, angularVelocity, worldFrame);
@@ -392,13 +392,13 @@ public class RigidBodyControlManagerTest
       manager.compute();
 
       double trajectoryTime = 1.0;
-      Point3D position = EuclidCoreRandomTools.generateRandomPoint3D(random);
-      Quaternion orientation = EuclidCoreRandomTools.generateRandomQuaternion(random);
-      Vector3D linearVelocity = EuclidCoreRandomTools.generateRandomVector3D(random);
-      Vector3D angularVelocity = EuclidCoreRandomTools.generateRandomVector3D(random);
+      Point3D position = EuclidCoreRandomTools.nextPoint3D(random);
+      Quaternion orientation = EuclidCoreRandomTools.nextQuaternion(random);
+      Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random);
+      Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
-      Point3D controlFramePosition = EuclidCoreRandomTools.generateRandomPoint3D(random);
-      Quaternion controlFrameOrientation = EuclidCoreRandomTools.generateRandomQuaternion(random);
+      Point3D controlFramePosition = EuclidCoreRandomTools.nextPoint3D(random);
+      Quaternion controlFrameOrientation = EuclidCoreRandomTools.nextQuaternion(random);
 
       SE3Message message = new SE3Message(1, worldFrame);
       message.setControlFramePosition(controlFramePosition);

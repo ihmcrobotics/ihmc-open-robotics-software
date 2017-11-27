@@ -132,8 +132,8 @@ public class ExpandingPolytopeAlgorithmTest
          rotateObject(cubeTwo, RandomNumbers.nextDouble(random, Math.PI), RandomNumbers.nextDouble(random, Math.PI),
                RandomNumbers.nextDouble(random, Math.PI));
 
-         translateObject(cubeOne, EuclidCoreRandomTools.generateRandomVector3D(random, new Vector3D(5.0, -7.0, 10.0), new Vector3D(7.0, -5.0, 12.0)));
-         translateObject(cubeTwo, EuclidCoreRandomTools.generateRandomVector3D(random, new Vector3D(5.0, -7.0, 10.0), new Vector3D(7.0, -5.0, 12.0)));
+         translateObject(cubeOne, EuclidCoreRandomTools.nextVector3D(random, new Vector3D(5.0, -7.0, 10.0), new Vector3D(7.0, -5.0, 12.0)));
+         translateObject(cubeTwo, EuclidCoreRandomTools.nextVector3D(random, new Vector3D(5.0, -7.0, 10.0), new Vector3D(7.0, -5.0, 12.0)));
 
          Point3D closestPointOnA = new Point3D();
          Point3D closestPointOnB = new Point3D();
@@ -202,8 +202,8 @@ public class ExpandingPolytopeAlgorithmTest
          rotateObject(polytopeTwo, RandomNumbers.nextDouble(random, Math.PI), RandomNumbers.nextDouble(random, Math.PI),
                RandomNumbers.nextDouble(random, Math.PI));
 
-         translateObject(polytopeOne, EuclidCoreRandomTools.generateRandomVector3D(random, new Vector3D(4.5, -10.0, 8.5), new Vector3D(6.5, -7.0, 11.5)));
-         translateObject(polytopeTwo, EuclidCoreRandomTools.generateRandomVector3D(random, new Vector3D(4.5, -10.0, 8.5), new Vector3D(6.5, -7.0, 11.5)));
+         translateObject(polytopeOne, EuclidCoreRandomTools.nextVector3D(random, new Vector3D(4.5, -10.0, 8.5), new Vector3D(6.5, -7.0, 11.5)));
+         translateObject(polytopeTwo, EuclidCoreRandomTools.nextVector3D(random, new Vector3D(4.5, -10.0, 8.5), new Vector3D(6.5, -7.0, 11.5)));
 
          Point3D closestPointOnA = new Point3D();
          Point3D closestPointOnB = new Point3D();
@@ -299,8 +299,8 @@ public class ExpandingPolytopeAlgorithmTest
          rotateObject(cylinderTwo, RandomNumbers.nextDouble(random, Math.PI), RandomNumbers.nextDouble(random, Math.PI),
                RandomNumbers.nextDouble(random, Math.PI));
 
-         translateObject(polytopeOne, EuclidCoreRandomTools.generateRandomVector3D(random, new Vector3D(4.5, -10.0, 8.5), new Vector3D(6.5, -7.0, 11.5)));
-         translateObject(cylinderTwo, EuclidCoreRandomTools.generateRandomVector3D(random, new Vector3D(4.5, -10.0, 8.5), new Vector3D(6.5, -7.0, 11.5)));
+         translateObject(polytopeOne, EuclidCoreRandomTools.nextVector3D(random, new Vector3D(4.5, -10.0, 8.5), new Vector3D(6.5, -7.0, 11.5)));
+         translateObject(cylinderTwo, EuclidCoreRandomTools.nextVector3D(random, new Vector3D(4.5, -10.0, 8.5), new Vector3D(6.5, -7.0, 11.5)));
 
          Point3D closestPointOnA = new Point3D();
          Point3D closestPointOnB = new Point3D();

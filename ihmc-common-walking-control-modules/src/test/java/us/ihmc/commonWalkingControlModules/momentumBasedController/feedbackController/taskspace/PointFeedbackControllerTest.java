@@ -322,9 +322,9 @@ public final class PointFeedbackControllerTest
          spatialFeedbackControlCommand.setPositionGains(positionGains);
 
          FramePoint3D bodyFixedPointToControl = EuclidFrameRandomTools.generateRandomFramePoint3D(random, endEffector.getBodyFixedFrame(), 1.0, 1.0, 1.0);
-         FramePoint3D desiredPosition = new FramePoint3D(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
-         FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
-         FrameVector3D feedForwardLinearAcceleration = new FrameVector3D(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
+         FramePoint3D desiredPosition = new FramePoint3D(worldFrame, EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+         FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame, EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+         FrameVector3D feedForwardLinearAcceleration = new FrameVector3D(worldFrame, EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
 
          pointFeedbackControlCommand.setBodyFixedPointToControl(bodyFixedPointToControl);
          spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
