@@ -22,7 +22,7 @@ public class HumanoidKinematicsSolver
    private static final int DEFAULT_MAX_NUMBER_OF_ITERATIONS = 100;
    private static final double DEFAULT_QUALITY_THRESHOLD = 0.005;
    private static final double DEFAULT_STABILITY_THRESHOLD = 0.00001;
-   private static final double DEFAULT_MIN_PROGRESSION = 0.005;
+   private static final double DEFAULT_MIN_PROGRESSION = 0.002;
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -127,10 +127,11 @@ public class HumanoidKinematicsSolver
             boolean isSolutionQualityHigh = solutionQuality.getDoubleValue() < solutionQualityThreshold.getDoubleValue();
             isSolutionGood = isSolutionStable && isSolutionQualityHigh;
 
-            if (!isSolutionGood)
-               isSolverStuck = (deltaSolutionQuality / solutionQuality.getDoubleValue()) < solutionMinimumProgression.getDoubleValue();
-            else
-               isSolverStuck = false;
+               if (!isSolutionQualityHigh)
+                  isSolverStuck = (deltaSolutionQuality / solutionQuality.getDoubleValue()) < solutionMinimumProgression.getDoubleValue();
+               else
+                  isSolverStuck = false;   
+            
          }
 
          solutionQualityPrevious = solutionQuality.getDoubleValue();
