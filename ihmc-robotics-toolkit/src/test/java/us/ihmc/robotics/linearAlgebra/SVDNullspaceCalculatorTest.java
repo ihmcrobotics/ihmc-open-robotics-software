@@ -17,19 +17,8 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
  * @author twan
  * Date: 4/11/13
  */
-public class SVDNullspaceCalculatorTest extends NullspaceProjectorCalculatorTest
+public class SVDNullspaceCalculatorTest
 {
-   @Override
-   public NullspaceProjectorCalculator getNullspaceProjectorCalculator()
-   {
-      int matrixSize = 10;
-      boolean makeLargestComponentPositive = true;
-      SVDNullspaceCalculator nullspaceCalculator = new SVDNullspaceCalculator(matrixSize, makeLargestComponentPositive);
-
-      return nullspaceCalculator;
-   }
-
-
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRemoveNullspaceComponent()
