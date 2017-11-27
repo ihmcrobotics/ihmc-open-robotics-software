@@ -48,7 +48,7 @@ public class FootstepDataTansformerTest
       {
          originalFootstepData = getTestFootstepData();
          transform3D = new RigidBodyTransform();
-         transform3D = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         transform3D = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
          transformedFootstepData = originalFootstepData.transform(transform3D);
 

@@ -161,7 +161,7 @@ public class SelectionMatrix6DTest
       SelectionMatrix3D angularPart3D = new SelectionMatrix3D();
       SelectionMatrix3D linearPart3D = new SelectionMatrix3D();
 
-      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);
@@ -255,7 +255,7 @@ public class SelectionMatrix6DTest
       Random random = new Random(456465L);
       SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
 
-      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);

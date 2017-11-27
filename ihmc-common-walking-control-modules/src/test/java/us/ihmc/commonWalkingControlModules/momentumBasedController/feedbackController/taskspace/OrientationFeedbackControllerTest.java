@@ -98,9 +98,9 @@ public class OrientationFeedbackControllerTest
          orientationFeedbackControlCommand.setGains(orientationGains);
          spatialFeedbackControlCommand.setOrientationGains(orientationGains);
 
-         FrameQuaternion desiredOrientation = new FrameQuaternion(worldFrame, EuclidCoreRandomTools.generateRandomQuaternion(random));
-         FrameVector3D desiredAngularVelocity = new FrameVector3D(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
-         FrameVector3D feedForwardAngularAcceleration = new FrameVector3D(worldFrame, EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
+         FrameQuaternion desiredOrientation = new FrameQuaternion(worldFrame, EuclidCoreRandomTools.nextQuaternion(random));
+         FrameVector3D desiredAngularVelocity = new FrameVector3D(worldFrame, EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+         FrameVector3D feedForwardAngularAcceleration = new FrameVector3D(worldFrame, EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
 
          orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
          spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);

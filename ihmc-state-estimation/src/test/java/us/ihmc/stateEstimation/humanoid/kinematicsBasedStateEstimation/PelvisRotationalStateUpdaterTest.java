@@ -247,7 +247,7 @@ public class PelvisRotationalStateUpdaterTest
    {
       int indexOfIMUParentJoint = RandomNumbers.nextInt(random, 0, joints.size() - 1);
       RigidBody rigidBody = joints.get(indexOfIMUParentJoint).getSuccessor();
-      RigidBodyTransform transformFromIMUToJoint = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform transformFromIMUToJoint = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       IMUDefinition imuDefinition = new IMUDefinition("IMU" + suffix, rigidBody, transformFromIMUToJoint);
       return imuDefinition;
    }

@@ -328,7 +328,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       RigidBodyTransform[] targets = new RigidBodyTransform[numOfTargets];
       for (int i = 0; i < 10; i++)
       {
-         targets[i] = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         targets[i] = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       }
       return targets;
    }
