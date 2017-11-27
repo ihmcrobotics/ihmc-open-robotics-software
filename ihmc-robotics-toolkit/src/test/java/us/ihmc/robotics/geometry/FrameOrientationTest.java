@@ -60,9 +60,9 @@ public class FrameOrientationTest
       test.getTransform3D(testT);
 
       assertEquals(originalT, testT);
-      assertEquals(original.getYawPitchRoll()[0], test.getYawPitchRoll()[0], epsilon);
-      assertEquals(original.getYawPitchRoll()[1], test.getYawPitchRoll()[1], epsilon);
-      assertEquals(original.getYawPitchRoll()[2], test.getYawPitchRoll()[2], epsilon);
+      assertEquals(original.getYaw(), test.getYaw(), epsilon);
+      assertEquals(original.getPitch(), test.getPitch(), epsilon);
+      assertEquals(original.getRoll(), test.getRoll(), epsilon);
       assertEquals(original.getReferenceFrame(), testFrame);
       assertEquals(original.getReferenceFrame(), test.getReferenceFrame());
    }

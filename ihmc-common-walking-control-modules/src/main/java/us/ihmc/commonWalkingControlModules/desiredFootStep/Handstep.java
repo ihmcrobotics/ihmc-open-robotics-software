@@ -249,7 +249,8 @@ public class Handstep
       FrameOrientation frameOrientation = new FrameOrientation(poseReferenceFrame);
       frameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
-      double[] ypr = frameOrientation.getYawPitchRoll();
+      double[] ypr = new double[3];
+      frameOrientation.getYawPitchRoll(ypr);
       String yawPitchRoll = "YawPitchRoll = " + Arrays.toString(ypr);
 
       return "id: " + id + " - pose: " + poseReferenceFrame + "\n\tYawPitchRoll= {" + yawPitchRoll + "}";

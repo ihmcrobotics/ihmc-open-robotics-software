@@ -83,7 +83,8 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
       this.yoFramePoint.set(translationToWorld);
       FrameOrientation orientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), transformToWorld);
 
-      double[] yawPitchRoll = orientation.getYawPitchRoll();
+      double[] yawPitchRoll = new double[3];
+      orientation.getYawPitchRoll(yawPitchRoll);
       yoFrameOrientation.setYawPitchRoll(yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2]);
    }
 

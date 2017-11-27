@@ -210,13 +210,6 @@ public class FrameOrientation extends FrameGeometryObject<FrameOrientation, Quat
       quaternion.getYawPitchRoll(yawPitchRollToPack);
    }
 
-   public double[] getYawPitchRoll()
-   {
-      double[] yawPitchRollToReturn = new double[3];
-      getYawPitchRoll(yawPitchRollToReturn);
-      return yawPitchRollToReturn;
-   }
-
    public double getYaw()
    {
       return quaternion.getYaw();
@@ -496,7 +489,8 @@ public class FrameOrientation extends FrameGeometryObject<FrameOrientation, Quat
 
    public String toStringAsYawPitchRoll()
    {
-      double[] yawPitchRoll = getYawPitchRoll();
+      double[] yawPitchRoll = new double[3];
+      getYawPitchRoll(yawPitchRoll);
 
       return "yaw-pitch-roll: (" + yawPitchRoll[0] + ", " + yawPitchRoll[1] + ", " + yawPitchRoll[2] + ")-" + referenceFrame.getName();
    }

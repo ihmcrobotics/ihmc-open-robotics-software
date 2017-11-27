@@ -2220,7 +2220,8 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       if (mirrorOrientationForRightSide)
       {
-         double[] yawPitchRoll = temporaryDesiredUpperArmOrientation.getYawPitchRoll();
+         double[] yawPitchRoll = new double[3];
+         temporaryDesiredUpperArmOrientation.getYawPitchRoll(yawPitchRoll);
          yawPitchRoll[0] = robotSide.negateIfRightSide(yawPitchRoll[0]);
          yawPitchRoll[2] = robotSide.negateIfRightSide(yawPitchRoll[2]);
          temporaryDesiredUpperArmOrientation.setYawPitchRoll(yawPitchRoll);
