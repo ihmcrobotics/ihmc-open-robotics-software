@@ -146,7 +146,7 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
    {
       FrameOrientation toOrientation = toPose.getFrameOrientationCopy();
       FrameOrientation fromOrientation = fromPose.getFrameOrientationCopy();
-      frameOrientationToPack.getFrameOrientation().setOrientationFromOneToTwo(fromOrientation, toOrientation);
+      frameOrientationToPack.getFrameOrientation().difference(toOrientation, fromOrientation);
    }
 
    private void setVectorFromPoseToPose(YoFrameVector frameVectorToPack, FramePose fromPose, FramePose toPose)
