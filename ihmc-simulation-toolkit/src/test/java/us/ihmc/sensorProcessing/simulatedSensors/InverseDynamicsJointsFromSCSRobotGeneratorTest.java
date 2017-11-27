@@ -461,10 +461,9 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          
          transformToWorld.invert();
          orientation.applyTransform(transformToWorld);
-         double[] yawPitchRoll = orientation.getYawPitchRoll();
-         assertEquals(0.0, yawPitchRoll[0], 1e-7);
-         assertEquals(0.0, yawPitchRoll[1], 1e-7);
-         assertEquals(0.0, yawPitchRoll[2], 1e-7);
+         assertEquals(0.0, orientation.getYaw(), 1e-7);
+         assertEquals(0.0, orientation.getPitch(), 1e-7);
+         assertEquals(0.0, orientation.getRoll(), 1e-7);
       }
    }
 

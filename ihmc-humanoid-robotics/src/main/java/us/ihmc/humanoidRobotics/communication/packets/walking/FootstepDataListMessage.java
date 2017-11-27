@@ -217,7 +217,7 @@ public class FootstepDataListMessage extends QueueableMessage<FootstepDataListMe
          Quaternion quat4d = this.get(0).getOrientation();
 
          FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), quat4d);
-         startingFootstep = startingFootstep + ", ypr= " + Arrays.toString(frameOrientation.getYawPitchRoll());
+         startingFootstep = startingFootstep + ", yaw= " + frameOrientation.getYaw() + ", pitch= " + frameOrientation.getPitch() + ", roll= " + frameOrientation.getRoll();
       }
 
       if (this.size() == 1)

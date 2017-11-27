@@ -118,7 +118,8 @@ public class HandstepPacket extends Packet<HandstepPacket> implements Transforma
       String ret = "";
 
       FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation);
-      double[] ypr = frameOrientation.getYawPitchRoll();
+      double[] ypr = new double[3];
+      frameOrientation.getYawPitchRoll(ypr);
       ret = location.toString();
       ret += ", YawPitchRoll = " + Arrays.toString(ypr) + "\n";
 

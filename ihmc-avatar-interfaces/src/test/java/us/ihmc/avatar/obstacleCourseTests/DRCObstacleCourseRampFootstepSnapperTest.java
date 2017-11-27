@@ -125,7 +125,8 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          FootstepDataMessage footstepData = corruptedFootstepDataList.getDataList().get(i);
          footstepData.location.setZ(footstepData.location.getZ() + 1.0);
          tempFrameOrientation.set(footstepData.getOrientation());
-         double[] yawPitchRoll = tempFrameOrientation.getYawPitchRoll();
+         double[] yawPitchRoll = new double[3];
+         tempFrameOrientation.getYawPitchRoll(yawPitchRoll);
          yawPitchRoll[1] = RandomNumbers.nextDouble(random, Math.PI / 4.0);
          yawPitchRoll[2] = RandomNumbers.nextDouble(random, Math.PI / 4.0);
          tempFrameOrientation.setYawPitchRoll(yawPitchRoll);

@@ -143,8 +143,10 @@ public class FootstepDataTansformerTest
       if (frameOrientation1.getReferenceFrame() != frameOrientation2.getReferenceFrame())
          return false;
 
-      double[] rpyThis = frameOrientation1.getYawPitchRoll();
-      double[] rpyThat = frameOrientation2.getYawPitchRoll();
+      double[] rpyThis = new double[3];
+      frameOrientation1.getYawPitchRoll(rpyThis);
+      double[] rpyThat = new double[3];
+      frameOrientation2.getYawPitchRoll(rpyThat);
 
       for (int i = 0; i < rpyThat.length; i++)
       {

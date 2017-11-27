@@ -82,7 +82,8 @@ public class ThorInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRo
       robot.setPositionInWorld(positionInWorld);
       
       FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), rotation);
-      double[] yawPitchRoll = frameOrientation.getYawPitchRoll();
+      double[] yawPitchRoll = new double[3];
+      frameOrientation.getYawPitchRoll(yawPitchRoll);
       yawPitchRoll[0] = initialYaw;
       frameOrientation.setYawPitchRoll(yawPitchRoll);
       
