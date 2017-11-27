@@ -176,10 +176,10 @@ public class FrameOrientation extends FrameGeometryObject<FrameOrientation, Quat
 
    public void setIncludingFrame(ReferenceFrame referenceFrame, double[] yawPitchRoll)
    {
-      setIncludingFrame(referenceFrame, yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2]);
+      setYawPitchRollIncludingFrame(referenceFrame, yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2]);
    }
 
-   public void setIncludingFrame(ReferenceFrame referenceFrame, double yaw, double pitch, double roll)
+   public void setYawPitchRollIncludingFrame(ReferenceFrame referenceFrame, double yaw, double pitch, double roll)
    {
       this.referenceFrame = referenceFrame;
       setYawPitchRoll(yaw, pitch, roll);

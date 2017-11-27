@@ -321,7 +321,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       double yawSupportFoot = tempOrientation.getYaw();
 
       double finalDesiredPelvisYawAngle = AngleTools.computeAngleAverage(yawOtherFoot, yawSupportFoot);
-      finalPelvisOrientation.setIncludingFrame(worldFrame, finalDesiredPelvisYawAngle, 0.0, 0.0);
+      finalPelvisOrientation.setYawPitchRollIncludingFrame(worldFrame, finalDesiredPelvisYawAngle, 0.0, 0.0);
 
       initialize(supportAnkleZUpFrame);
    }
@@ -360,7 +360,7 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
       double yawSupportFoot = tempOrientation.getYaw();
 
       double finalDesiredPelvisYawAngle = AngleTools.computeAngleAverage(yawFootstep, yawSupportFoot);
-      finalPelvisOrientation.setIncludingFrame(worldFrame, finalDesiredPelvisYawAngle, 0.0, 0.0);
+      finalPelvisOrientation.setYawPitchRollIncludingFrame(worldFrame, finalDesiredPelvisYawAngle, 0.0, 0.0);
 
       initializeTrajectoryFrame(worldFrame);
    }

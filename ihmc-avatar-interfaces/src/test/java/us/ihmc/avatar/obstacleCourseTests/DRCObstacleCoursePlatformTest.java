@@ -406,7 +406,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
 	   FrameOrientation desiredChestFrameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
 	   double leanAngle = 30.0;
-	   desiredChestFrameOrientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), -2.36, Math.toRadians(leanAngle), Math.toRadians(0.0));
+	   desiredChestFrameOrientation.setYawPitchRollIncludingFrame(ReferenceFrame.getWorldFrame(), -2.36, Math.toRadians(leanAngle), Math.toRadians(0.0));
       Quaternion desiredChestQuat = new Quaternion();
       desiredChestFrameOrientation.getQuaternion(desiredChestQuat);
 
