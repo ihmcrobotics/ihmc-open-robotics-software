@@ -73,9 +73,11 @@ public class SpatialNodeTree
       currentCandidateParent = nearestNode;
    }
 
-   public void limitCandidateDistanceFromParent()
+   public void limitCandidateDistanceFromParent(double trajectoryTime)
    {
       currentCandidate = currentCandidateParent.createNodeWithinMaxDistance(maxTimeInterval, maxPositionDistance, maxOrientationDistance, randomNode);
+      if (currentCandidate.getTime() > trajectoryTime)
+         currentCandidate.setTime(trajectoryTime);
       currentCandidate.setParent(currentCandidateParent);
    }
 

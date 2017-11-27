@@ -10,7 +10,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsSolver;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -364,25 +363,16 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       currentExpansionSize.increment();
 
       SpatialNode randomNode;
-      // TODO : near the time terminal condition, set small window.
-      if (tree.getMostAdvancedTime() + tree.dismissableTimeStep >= toolboxData.getTrajectoryTime())
-      {
-         randomNode = new SpatialNode(tree.getLastNodeAdded());
-         randomNode.setTime(toolboxData.getTrajectoryTime());
-      }
-      else
-      {
-         SpatialData randomData = toolboxData.createRandomSpatialData();
-         double nextDouble = WholeBodyTrajectoryToolboxSettings.randomManager.nextDouble();
-         double randomTime = nextDouble * (1.0 + WholeBodyTrajectoryToolboxSettings.timeCoefficient * tree.getMostAdvancedTime());
-         randomTime = MathTools.clamp(randomTime, 0.0, toolboxData.getTrajectoryTime());
 
-         randomNode = new SpatialNode(randomTime, randomData);
-      }
+      SpatialData randomData = toolboxData.createRandomSpatialData();
+      double nextDouble = WholeBodyTrajectoryToolboxSettings.randomManager.nextDouble();
+      double randomTime = nextDouble * (1.0 + WholeBodyTrajectoryToolboxSettings.timeCoefficient * tree.getMostAdvancedTime());
+
+      randomNode = new SpatialNode(randomTime, randomData);
 
       tree.setRandomNode(randomNode);
       tree.findNearestValidNodeToCandidate(true);
-      tree.limitCandidateDistanceFromParent();
+      tree.limitCandidateDistanceFromParent(toolboxData.getTrajectoryTime());
 
       SpatialNode candidate = tree.getCandidate();
       updateValidity(candidate);

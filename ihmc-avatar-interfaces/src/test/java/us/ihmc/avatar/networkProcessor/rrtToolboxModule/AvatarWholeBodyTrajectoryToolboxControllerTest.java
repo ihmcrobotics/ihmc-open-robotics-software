@@ -209,15 +209,13 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(new Point3D(0.55, 0.4, 1.1), new Point3D(0.55, -0.4, 1.1));
       Quaternion circleOrientation = new Quaternion();
       circleOrientation.appendYawRotation(Math.PI * 0.0);
-      circleOrientation.appendPitchRotation(Math.PI * 0.5);
       Quaternion handOrientation = new Quaternion(circleOrientation);
-      handOrientation.appendPitchRotation(-0.5 * Math.PI);
 
       double trajectoryTime = 5.0;
       FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
-      configuration.setMaximumExpansionSize(500);
+      configuration.setMaximumExpansionSize(700);
 
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
       List<RigidBodyExplorationConfigurationMessage> rigidBodyConfigurations = new ArrayList<>();
@@ -279,14 +277,13 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(new Point3D(0.55, 0.4, 1.1), new Point3D(0.55, -0.4, 1.1));
       Quaternion circleOrientation = new Quaternion();
       circleOrientation.appendYawRotation(Math.PI * 0.1);
-      circleOrientation.appendPitchRotation(Math.PI * 0.5);
       Quaternion handOrientation = new Quaternion(circleOrientation);
-      handOrientation.appendPitchRotation(-0.5 * Math.PI);
 
       double trajectoryTime = 5.0;
       FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
+      configuration.setMaximumExpansionSize(700);
 
       List<WaypointBasedTrajectoryMessage> handTrajectories = new ArrayList<>();
       List<RigidBodyExplorationConfigurationMessage> rigidBodyConfigurations = new ArrayList<>();
@@ -435,9 +432,9 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                                                  Quaternion circleRotation, QuaternionReadOnly constantOrientation, boolean ccw, double phase)
    {
       double theta = (ccw ? -time : time) / trajectoryTime * 2.0 * Math.PI + phase;
-      double x = circleRadius * Math.cos(theta);
-      double y = circleRadius * Math.sin(theta);
-      Point3D point = new Point3D(x, y, 0.0);
+      double z = circleRadius * Math.sin(theta);
+      double y = circleRadius * Math.cos(theta);
+      Point3D point = new Point3D(0.0, y, z);
       circleRotation.transform(point);
       point.add(circleCenter);
 
