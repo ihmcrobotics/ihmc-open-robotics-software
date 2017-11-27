@@ -44,7 +44,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class WholeBodyTrajectoryToolboxController extends ToolboxController
 {
    private static final boolean VERBOSE = true;
-   private static final int DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION = 20;
+   private static final int DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION = 10;
    private static final int DEFAULT_MAXIMUM_NUMBER_OF_ITERATIONS = 1500;
    private static final int DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE = 1000;
    private static final int DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE = 200;
@@ -222,18 +222,22 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    /**
     * state == GENERATE_MOTION
     */
-   private int currentNode = 0;
+   private int currentUpdateNode = 0;
 
    private void generateMotion()
    {
-      visualizedNode = path.get(currentNode);
-      updateValidity(path.get(currentNode));
-      currentNode++;
+      visualizedNode = path.get(currentUpdateNode);
+      updateValidity(path.get(currentUpdateNode));
+
+      if (VERBOSE)
+         PrintTools.info("final result " + currentUpdateNode + " " + path.get(currentUpdateNode).isValid());
+
+      currentUpdateNode++;
 
       /*
        * terminate generateMotion.
        */
-      if (currentNode == path.size())
+      if (currentUpdateNode == path.size())
       {
          long endTime = System.nanoTime();
          motionGenerationComputationTime.set(Conversions.nanosecondsToSeconds(endTime - motionGenerationStartTime));
@@ -295,6 +299,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       path.add(new SpatialNode(revertedPath.get(revertedPathSize - 1)));
 
       // filtering out too short time gap node.
+      // TODO : for changed parent after filtering, few nodes are changed into invalid nodes.
       int currentIndex = 0;
       for (int j = 0; j < revertedPathSize - 2; j++)
       {
@@ -373,7 +378,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       SpatialNode candidate = tree.getCandidate();
       updateValidity(candidate);
-      
+
       /*
        * visualize
        */
@@ -702,33 +707,30 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    /**
     * oneTime shortcut : try to make a shortcut from index to index+2
     */
-   private void updateShortcutPath(List<SpatialNode> path, int index)
+   private boolean updateShortcutPath(List<SpatialNode> path, int index)
    {
       // check out when index is over the size.
       if (index > path.size() - 3)
       {
-         return;
+         return false;
       }
 
-      SpatialNode nodeFrom = new SpatialNode(path.get(index));
-      SpatialNode nodeGoal = new SpatialNode(path.get(index + 2));
+      SpatialNode nodeDummy = new SpatialNode(path.get(index + 1));
 
-      SpatialNode nodeShortcut = path.get(index + 1);
-      SpatialNode nodeDummy = new SpatialNode(nodeShortcut);
-
-      nodeDummy.interpolate(nodeFrom, nodeGoal, 0.5);
-
-      if (nodeDummy.getParent() == null)
-      {
-         if (VERBOSE)
-            PrintTools.info("no parent!");
-      }
+      nodeDummy.setParent(path.get(index));
+      nodeDummy.interpolate(path.get(index), path.get(index + 2), 0.5);
 
       updateValidity(nodeDummy);
 
       if (nodeDummy.isValid())
       {
-         nodeShortcut.setSpatialsAndConfiguration(nodeDummy);
+         path.get(index + 1).interpolate(path.get(index), path.get(index + 2), 0.5);
+
+         return true;
+      }
+      else
+      {
+         return false;
       }
    }
 
@@ -736,7 +738,11 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    {
       for (int i = 0; i < path.size(); i++)
       {
-         updateShortcutPath(path, i);
+         if (updateShortcutPath(path, i))
+            ;
+         {
+            ;
+         }
       }
    }
 
