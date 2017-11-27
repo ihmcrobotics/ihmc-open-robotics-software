@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
@@ -41,7 +42,7 @@ public class EndToEndTestTools
       assertCurrentDesiredsMatch(bodyName, waypoint.orientation, waypoint.angularVelocity, scs, epsilon);
    }
 
-   public static void assertCurrentDesiredsMatch(String bodyName, Quaternion expectedOrientation, Vector3D expectedAngularVelocity, SimulationConstructionSet scs, double epsilon)
+   public static void assertCurrentDesiredsMatch(String bodyName, QuaternionReadOnly expectedOrientation, Vector3D expectedAngularVelocity, SimulationConstructionSet scs, double epsilon)
    {
       Quaternion desiredOrientation = EndToEndTestTools.findControllerDesiredOrientation(bodyName, scs);
       Vector3D desiredAngularVelocity = EndToEndTestTools.findControllerDesiredAngularVelocity(bodyName, scs);

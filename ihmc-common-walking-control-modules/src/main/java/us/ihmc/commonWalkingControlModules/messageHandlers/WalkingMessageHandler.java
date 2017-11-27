@@ -11,6 +11,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -33,7 +34,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerF
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -387,7 +387,7 @@ public class WalkingMessageHandler
       }
 
       FramePoint3D adjustedPosition = requestedFootstepAdjustment.getPosition();
-      FrameOrientation adjustedOrientation = requestedFootstepAdjustment.getOrientation();
+      FrameQuaternion adjustedOrientation = requestedFootstepAdjustment.getOrientation();
       footstepToAdjust.setPose(adjustedPosition, adjustedOrientation);
 
       if (!requestedFootstepAdjustment.getPredictedContactPoints().isEmpty())

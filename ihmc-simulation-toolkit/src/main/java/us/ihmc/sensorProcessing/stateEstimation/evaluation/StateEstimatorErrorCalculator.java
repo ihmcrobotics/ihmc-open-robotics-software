@@ -2,6 +2,7 @@ package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -10,7 +11,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -59,14 +59,13 @@ public class StateEstimatorErrorCalculator
       parentRegistry.addChild(registry);
    }
 
-   private final FrameOrientation estimatedOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   private final FrameQuaternion estimatedOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
    
    private void computeOrientationError()
    {
       orientationEstimator.getEstimatedOrientation(estimatedOrientation);
      
-      Quaternion estimatedOrientationQuat4d = new Quaternion();
-      estimatedOrientation.getQuaternion(estimatedOrientationQuat4d);
+      Quaternion estimatedOrientationQuat4d = new Quaternion(estimatedOrientation);
 
       Quaternion actualOrientation = new Quaternion();
       estimationJoint.getRotationToWorld(actualOrientation);

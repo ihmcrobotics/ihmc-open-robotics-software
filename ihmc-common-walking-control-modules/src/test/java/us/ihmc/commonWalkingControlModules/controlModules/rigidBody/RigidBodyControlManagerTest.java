@@ -27,6 +27,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -41,7 +42,6 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -178,13 +178,13 @@ public class RigidBodyControlManagerTest
       FramePoint3D desiredPosition = new FramePoint3D();
       FrameVector3D desiredLinearVelocity = new FrameVector3D();
       FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
-      FrameOrientation desiredOrientation = new FrameOrientation();
+      FrameQuaternion desiredOrientation = new FrameQuaternion();
       FrameVector3D desiredAngularVelocity = new FrameVector3D();
       FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
 
       ReferenceFrame bodyFrame = bodyToControl.getBodyFixedFrame();
       FramePoint3D initialPosition = new FramePoint3D(bodyFrame);
-      FrameOrientation initialOrientation = new FrameOrientation(bodyFrame);
+      FrameQuaternion initialOrientation = new FrameQuaternion(bodyFrame);
       initialPosition.changeFrame(worldFrame);
       initialOrientation.changeFrame(worldFrame);
 
@@ -335,7 +335,7 @@ public class RigidBodyControlManagerTest
 
          ReferenceFrame bodyFrame = bodyToControl.getBodyFixedFrame();
          FramePoint3D initialPosition = new FramePoint3D(bodyFrame);
-         FrameOrientation initialOrientation = new FrameOrientation(bodyFrame);
+         FrameQuaternion initialOrientation = new FrameQuaternion(bodyFrame);
          initialPosition.changeFrame(worldFrame);
          initialOrientation.changeFrame(worldFrame);
 
@@ -416,17 +416,17 @@ public class RigidBodyControlManagerTest
       FramePoint3D desiredPosition = new FramePoint3D();
       FrameVector3D desiredLinearVelocity = new FrameVector3D();
       FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
-      FrameOrientation desiredOrientation = new FrameOrientation();
+      FrameQuaternion desiredOrientation = new FrameQuaternion();
       FrameVector3D desiredAngularVelocity = new FrameVector3D();
       FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
-      FrameOrientation actualControlFrameOrientation = new FrameOrientation();
+      FrameQuaternion actualControlFrameOrientation = new FrameQuaternion();
       FramePoint3D actualControlFramePosition = new FramePoint3D();
 
       ReferenceFrame bodyFrame = bodyToControl.getBodyFixedFrame();
       PoseReferenceFrame controlFrame = new PoseReferenceFrame("TestControlFrame", bodyFrame);
       controlFrame.setPoseAndUpdate(controlFramePosition, controlFrameOrientation);
       FramePoint3D initialPosition = new FramePoint3D(controlFrame);
-      FrameOrientation initialOrientation = new FrameOrientation(controlFrame);
+      FrameQuaternion initialOrientation = new FrameQuaternion(controlFrame);
       initialPosition.changeFrame(worldFrame);
       initialOrientation.changeFrame(worldFrame);
 

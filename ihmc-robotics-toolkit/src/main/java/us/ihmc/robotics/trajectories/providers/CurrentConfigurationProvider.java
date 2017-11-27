@@ -1,8 +1,8 @@
 package us.ihmc.robotics.trajectories.providers;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 
 public class CurrentConfigurationProvider implements SE3ConfigurationProvider
@@ -21,7 +21,7 @@ public class CurrentConfigurationProvider implements SE3ConfigurationProvider
    }
 
    @Override
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientationToPack.setToZero(endEffectorFrame);
    }

@@ -2,6 +2,7 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -10,7 +11,6 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -32,7 +32,7 @@ public class AxisAngleOrientationController
    private final FrameVector3D derivativeTerm;
    private final FrameVector3D integralTerm;
 
-   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameQuaternion desiredOrientation = new FrameQuaternion();
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardAngularAction = new FrameVector3D();
    private final FrameVector3D angularActionFromOrientationController = new FrameVector3D();
@@ -89,7 +89,7 @@ public class AxisAngleOrientationController
       rotationErrorCumulated.setToZero();
    }
 
-   public void compute(FrameVector3D output, FrameOrientation desiredOrientation, FrameVector3D desiredAngularVelocity, FrameVector3D currentAngularVelocity,
+   public void compute(FrameVector3D output, FrameQuaternion desiredOrientation, FrameVector3D desiredAngularVelocity, FrameVector3D currentAngularVelocity,
          FrameVector3D feedForward)
    {
       computeProportionalTerm(desiredOrientation);
@@ -154,10 +154,10 @@ public class AxisAngleOrientationController
       currentTwist.getExpressedInFrame().checkReferenceFrameMatch(bodyFrame);
    }
 
-   private void computeProportionalTerm(FrameOrientation desiredOrientation)
+   private void computeProportionalTerm(FrameQuaternion desiredOrientation)
    {
       desiredOrientation.changeFrame(bodyFrame);
-      desiredOrientation.getQuaternion(errorQuaternion);
+      errorQuaternion.set(desiredOrientation);
       errorAngleAxis.set(errorQuaternion);
       errorAngleAxis.setAngle(AngleTools.trimAngleMinusPiToPi(errorAngleAxis.getAngle()));
 

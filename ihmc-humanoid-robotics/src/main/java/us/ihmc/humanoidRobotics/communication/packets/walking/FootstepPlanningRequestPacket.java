@@ -2,10 +2,10 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -57,7 +57,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       initialFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
       stanceFootPositionInWorld = new Point3D32(initialFramePoint.getPoint());
 
-      FrameOrientation initialFrameOrientation = initialStanceFootPose.getFrameOrientationCopy();
+      FrameQuaternion initialFrameOrientation = initialStanceFootPose.getFrameOrientationCopy();
       initialFrameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       stanceFootOrientationInWorld = new Quaternion32(initialFrameOrientation.getQuaternion());
 
@@ -65,7 +65,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       goalFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
       goalPositionInWorld = new Point3D32(goalFramePoint.getPoint());
 
-      FrameOrientation goalFrameOrientation = goalPose.getFrameOrientationCopy();
+      FrameQuaternion goalFrameOrientation = goalPose.getFrameOrientationCopy();
       goalFrameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       goalOrientationInWorld = new Quaternion32(goalFrameOrientation.getQuaternion());
 
