@@ -32,8 +32,8 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
       this.rigidBodyNameBasedashCode = rigidBody.getNameBasedHashCode();      
       for(int i=0;i<configurationSpaces.length;i++)
          this.degreesOfFreedomToExplore.add(configurationSpaces[i]);            
-      this.explorationRangeLowerLimits.addAll(WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationLowerLimitArray(degreesOfFreedomToExplore));
-      this.explorationRangeUpperLimits.addAll(WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationUpperLimitArray(degreesOfFreedomToExplore));
+      this.explorationRangeLowerLimits.addAll(WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationLowerLimitArray(configurationSpaces));
+      this.explorationRangeUpperLimits.addAll(WholeBodyTrajectoryToolboxMessageTools.createDefaultExplorationUpperLimitArray(configurationSpaces));
    }
 
    @Override
