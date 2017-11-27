@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
 import us.ihmc.euclid.Axis;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -19,7 +19,7 @@ public class SpringPinJoint extends PinJoint
    private final YoDouble kp;
    private final YoDouble kd;
    
-   public SpringPinJoint(String jname, Vector3D offset, Robot rob, Vector3D u_hat)
+   public SpringPinJoint(String jname, Vector3DReadOnly offset, Robot rob, Vector3DReadOnly u_hat)
    {
       super(jname, offset, rob, u_hat);
       kp = new YoDouble(jname + "_kp", registry);
@@ -29,7 +29,7 @@ public class SpringPinJoint extends PinJoint
 //      setChangeListeners();
    }
 
-   public SpringPinJoint(String jname, Vector3D offset, Robot rob, Axis jaxis)
+   public SpringPinJoint(String jname, Vector3DReadOnly offset, Robot rob, Axis jaxis)
    {
       super(jname, offset, rob, jaxis);
       kp = new YoDouble(jname + "_kp", registry);
