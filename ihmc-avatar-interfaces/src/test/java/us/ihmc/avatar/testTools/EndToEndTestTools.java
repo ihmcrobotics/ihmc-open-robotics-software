@@ -46,7 +46,7 @@ public class EndToEndTestTools
    {
       Quaternion desiredOrientation = EndToEndTestTools.findControllerDesiredOrientation(bodyName, scs);
       Vector3D desiredAngularVelocity = EndToEndTestTools.findControllerDesiredAngularVelocity(bodyName, scs);
-      EuclidCoreTestTools.assertQuaternionEqualsSmart("Orientation", expectedOrientation, desiredOrientation, epsilon, FORMAT);
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation", expectedOrientation, desiredOrientation, epsilon, FORMAT);
       EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", expectedAngularVelocity, desiredAngularVelocity, epsilon, FORMAT);
    }
 
@@ -55,7 +55,7 @@ public class EndToEndTestTools
       assertTrue("Index too high: " + index, index < RigidBodyTaskspaceControlState.maxPointsInGenerator);
       SimpleSO3TrajectoryPoint actualWaypoint = findOrientationTrajectoryPoint(bodyName, index, scs);
       assertEquals("Time", waypoint.getTime(), actualWaypoint.getTime(), epsilon);
-      EuclidCoreTestTools.assertQuaternionEqualsSmart("Orientation", waypoint.orientation, actualWaypoint.getOrientationCopy(), epsilon, FORMAT);
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Orientation", waypoint.orientation, actualWaypoint.getOrientationCopy(), epsilon, FORMAT);
       EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", waypoint.angularVelocity, actualWaypoint.getAngularVelocityCopy(), epsilon, FORMAT);
    }
 

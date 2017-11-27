@@ -140,7 +140,7 @@ public class FrameBox3dTest
 
       expectedBoxPose.checkReferenceFrameMatch(actualBoxPose);
       EuclidCoreTestTools.assertTuple3DEquals(expectedBoxPose.getPosition(), actualBoxPose.getPosition(), epsilon);
-      EuclidCoreTestTools.assertQuaternionEqualsSmart(expectedBoxPose.getOrientation(), actualBoxPose.getOrientation(), epsilon);
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(expectedBoxPose.getOrientation(), actualBoxPose.getOrientation(), epsilon);
 
       for (int i = 0; i < 100; i++)
       {
@@ -154,7 +154,7 @@ public class FrameBox3dTest
          assertTrue(expectedBox.epsilonEquals(frameBox.getBox3d(), epsilon));
          expectedBoxPose.checkReferenceFrameMatch(actualBoxPose);
          EuclidCoreTestTools.assertTuple3DEquals(expectedBoxPose.getPosition(), actualBoxPose.getPosition(), epsilon);
-         EuclidCoreTestTools.assertQuaternionEqualsSmart(expectedBoxPose.getOrientation(), actualBoxPose.getOrientation(), epsilon);
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(expectedBoxPose.getOrientation(), actualBoxPose.getOrientation(), epsilon);
       }
    }
 

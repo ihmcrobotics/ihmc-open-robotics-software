@@ -162,8 +162,8 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       double angleEpsilon = Math.toRadians(1.0);
 
-      EuclidCoreTestTools.assertQuaternionEqualsUsingDifference(initialChestOrientation.getQuaternion(), controllerDesiredChestOrientation, angleEpsilon);
-      EuclidCoreTestTools.assertQuaternionEqualsUsingDifference(initialPelvisOrientation.getQuaternion(), controllerDesiredPelvisOrientation, angleEpsilon);
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(initialChestOrientation.getQuaternion(), controllerDesiredChestOrientation, angleEpsilon);
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(initialPelvisOrientation.getQuaternion(), controllerDesiredPelvisOrientation, angleEpsilon);
 
       String handName = fullRobotModel.getHand(robotSide).getName();
       Point3D controllerDesiredHandPosition = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(handName, scs);
