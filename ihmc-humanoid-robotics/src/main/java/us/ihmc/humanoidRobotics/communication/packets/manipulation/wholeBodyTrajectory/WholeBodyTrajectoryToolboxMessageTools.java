@@ -48,8 +48,7 @@ public class WholeBodyTrajectoryToolboxMessageTools
    }
 
    public static WaypointBasedTrajectoryMessage createTrajectoryMessage(RigidBody endEffector, double t0, double tf, double timeResolution,
-                                                                        FunctionTrajectory trajectoryToDiscretize,
-                                                                        SelectionMatrix6D selectionMatrix)
+                                                                        FunctionTrajectory trajectoryToDiscretize, SelectionMatrix6D selectionMatrix)
    {
       int numberOfWaypoints = (int) Math.round((tf - t0) / timeResolution) + 1;
       // Adjust the timeResolution using the numberOfWaypoints:

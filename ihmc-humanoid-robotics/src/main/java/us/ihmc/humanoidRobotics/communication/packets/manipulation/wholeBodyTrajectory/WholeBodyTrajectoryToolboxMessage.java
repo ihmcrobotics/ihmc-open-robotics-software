@@ -18,16 +18,10 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public WholeBodyTrajectoryToolboxMessage(List<WaypointBasedTrajectoryMessage> endEffectorTrajectories)
+   public WholeBodyTrajectoryToolboxMessage(List<WaypointBasedTrajectoryMessage> endEffectorTrajectories,
+                                            List<RigidBodyExplorationConfigurationMessage> explorationConfigurations)
    {
-      this(null, endEffectorTrajectories, null);
-   }
-
-   public WholeBodyTrajectoryToolboxMessage(WholeBodyTrajectoryToolboxConfigurationMessage configuration,
-                                            List<WaypointBasedTrajectoryMessage> endEffectorTrajectories)
-   {
-      this(configuration, endEffectorTrajectories, null);
-      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
+      this(null, endEffectorTrajectories, explorationConfigurations);
    }
 
    public WholeBodyTrajectoryToolboxMessage(WholeBodyTrajectoryToolboxConfigurationMessage configuration,
