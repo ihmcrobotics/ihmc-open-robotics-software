@@ -8,7 +8,7 @@ import org.ejml.ops.SingularOps;
 
 import us.ihmc.commons.MathTools;
 
-public class NullspaceCalculator
+public class SVDNullspaceCalculator implements NullspaceProjectorCalculator
 {
    private final ConfigurableSolvePseudoInverseSVD iMinusNNTSolver;
 
@@ -23,9 +23,15 @@ public class NullspaceCalculator
 
    private final boolean makeLargestComponentPositive;
 
-   public NullspaceCalculator(int matrixSize, boolean makeLargestComponentPositive)
+   private final DenseMatrix64F tempMatrixForProjectionInPlace;
+   private final DenseMatrix64F nullspaceProjector;
+
+   public SVDNullspaceCalculator(int matrixSize, boolean makeLargestComponentPositive)
    {
       MathTools.checkIntervalContains(matrixSize, 1, Integer.MAX_VALUE);
+
+      nullspaceProjector = new DenseMatrix64F(matrixSize, matrixSize);
+      tempMatrixForProjectionInPlace = new DenseMatrix64F(matrixSize, matrixSize);
 
       iMinusNNT = new DenseMatrix64F(matrixSize, matrixSize);
       double singularValueLimit = 0.5; // because the singular values of I - N * N^T will be either 0 or 1.
@@ -37,6 +43,40 @@ public class NullspaceCalculator
       nullspace = new DenseMatrix64F(matrixSize, matrixSize);    // oversized, using reshape later
       x = new DenseMatrix64F(matrixSize, matrixSize);// oversized, using reshape later
       this.makeLargestComponentPositive = makeLargestComponentPositive;
+   }
+
+   @Override
+   public void computeNullspaceProjector(DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F nullspaceProjectorToPack)
+   {
+      setMatrix(matrixToComputeNullspaceOf, 1);
+
+      iMinusNNT.reshape(nullspace.getNumRows(), nullspace.getNumRows());
+      CommonOps.multOuter(nullspace, iMinusNNT);
+      CommonOps.scale(-1.0, iMinusNNT);
+      MatrixTools.addDiagonal(iMinusNNT, 1.0);
+
+      /*
+       *  the following is OK because singular values should be either 0 or 1 anyway, since columns of nullspace are orthonormal;
+       *  fixes numerical issues. not thread safe however:
+       */
+      iMinusNNTSolver.setA(iMinusNNT);
+      this.x.set(x);
+      iMinusNNTSolver.invert(nullspaceProjectorToPack);
+   }
+
+   @Override
+   public void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf)
+   {
+      tempMatrixForProjectionInPlace.set(matrixToProjectOntoNullspace);
+      projectOntoNullspace(tempMatrixForProjectionInPlace, matrixToComputeNullspaceOf, matrixToProjectOntoNullspace);
+   }
+
+   @Override
+   public void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F projectedMatrixToPack)
+   {
+      computeNullspaceProjector(matrixToComputeNullspaceOf, nullspaceProjector);
+      projectedMatrixToPack.reshape(matrixToProjectOntoNullspace.getNumRows(), matrixToProjectOntoNullspace.getNumCols());
+      CommonOps.mult(matrixToProjectOntoNullspace, nullspaceProjector, projectedMatrixToPack);
    }
 
    public void setMatrix(DenseMatrix64F matrix, int nullity)
@@ -77,9 +117,9 @@ public class NullspaceCalculator
       return nullspace;
    }
 
-   private void computeNullspace(DenseMatrix64F nullspace, DenseMatrix64F A, int nullity)
+   private void computeNullspace(DenseMatrix64F nullspaceToPack, DenseMatrix64F A, int nullity)
    {
-      nullspace.reshape(nullspace.getNumRows(), nullity);
+      nullspaceToPack.reshape(nullspaceToPack.getNumRows(), nullity);
       svd.decompose(A);
 
       sigma.reshape(A.getNumCols(), A.getNumRows());
@@ -89,11 +129,11 @@ public class NullspaceCalculator
       svd.getV(v, transposed);
 
       SingularOps.descendingOrder(null, false, sigma, v, transposed);
-      CommonOps.extract(v, 0, v.getNumRows(), v.getNumCols() - nullity, v.getNumCols(), nullspace, 0, 0);
+      CommonOps.extract(v, 0, v.getNumRows(), v.getNumCols() - nullity, v.getNumCols(), nullspaceToPack, 0, 0);
       
       if (makeLargestComponentPositive)
       {
-         makeLargestComponentInEachRowPositive(nullspace);
+         makeLargestComponentInEachRowPositive(nullspaceToPack);
       }
    }
 
