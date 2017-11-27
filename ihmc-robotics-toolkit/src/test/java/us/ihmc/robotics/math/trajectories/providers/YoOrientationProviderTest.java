@@ -7,9 +7,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 
 
@@ -21,7 +21,7 @@ public class YoOrientationProviderTest
    private ReferenceFrame referenceFrame;
    private YoVariableRegistry registry; 
    private YoFrameOrientation yoFrameOrientation;
-   public FrameOrientation frameOrientationToPack;
+   public FrameQuaternion frameOrientationToPack;
    
    @Before
    public void setUp()
@@ -29,7 +29,7 @@ public class YoOrientationProviderTest
       referenceFrame =ReferenceFrame.constructARootFrame("rootFrame");
       registry = new YoVariableRegistry("yoVariableRegistry");
       yoFrameOrientation = new YoFrameOrientation(namePrefix, referenceFrame, registry);
-      frameOrientationToPack = new FrameOrientation();
+      frameOrientationToPack = new FrameQuaternion();
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

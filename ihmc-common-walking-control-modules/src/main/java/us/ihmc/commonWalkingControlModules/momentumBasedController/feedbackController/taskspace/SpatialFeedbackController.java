@@ -20,11 +20,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.filters.RateLimitedYoSpatialVector;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
@@ -75,11 +75,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final YoFrameVector yoCurrentRotationVector;
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
-   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameQuaternion desiredOrientation = new FrameQuaternion();
    private final FramePose currentPose = new FramePose();
    private final FramePose desiredPose = new FramePose();
 
-   private final FrameOrientation errorOrientationCumulated = new FrameOrientation();
+   private final FrameQuaternion errorOrientationCumulated = new FrameQuaternion();
 
    private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
@@ -531,9 +531,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          yoErrorOrientationCumulated.getFrameOrientationIncludingFrame(errorOrientationCumulated);
          errorOrientationCumulated.multiply(yoErrorOrientation.getFrameOrientation());
          yoErrorOrientationCumulated.set(errorOrientationCumulated);
-         errorOrientationCumulated.normalizeAndLimitToPiMinusPi();
+         errorOrientationCumulated.normalizeAndLimitToPi();
 
-         errorOrientationCumulated.getRotationVectorIncludingFrame(angularFeedbackTermToPack);
+         errorOrientationCumulated.get(angularFeedbackTermToPack);
          angularFeedbackTermToPack.scale(dt);
          selectionMatrix.applyAngularSelection(angularFeedbackTermToPack);
          angularFeedbackTermToPack.clipToMaxLength(maximumAngularIntegralError);

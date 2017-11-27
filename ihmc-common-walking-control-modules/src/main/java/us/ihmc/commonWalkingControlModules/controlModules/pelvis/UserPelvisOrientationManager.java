@@ -7,13 +7,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -28,7 +28,7 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
    private final ReferenceFrame baseFrame;
 
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
-   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameQuaternion desiredOrientation = new FrameQuaternion();
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
    private final FrameVector3D feedForwardAngularAcceleration = new FrameVector3D();
 
@@ -68,7 +68,7 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
       taskspaceControlState.doAction();
    }
 
-   public boolean handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command, FrameOrientation initialOrientation)
+   public boolean handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command, FrameQuaternion initialOrientation)
    {
       tempPose.setToNaN(initialOrientation.getReferenceFrame());
       tempPose.setOrientation(initialOrientation);
@@ -87,7 +87,7 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
    }
 
    @Override
-   public void getCurrentDesiredOrientation(FrameOrientation desiredOrientation)
+   public void getCurrentDesiredOrientation(FrameQuaternion desiredOrientation)
    {
       taskspaceControlState.getDesiredPose(tempPose);
       tempPose.getOrientationIncludingFrame(desiredOrientation);

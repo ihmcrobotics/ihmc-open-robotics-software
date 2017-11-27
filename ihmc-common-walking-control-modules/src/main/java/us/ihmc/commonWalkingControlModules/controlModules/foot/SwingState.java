@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerato
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -23,7 +24,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -80,15 +80,15 @@ public class SwingState extends AbstractUnconstrainedState
    private final FramePose initialPose = new FramePose();
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector3D initialLinearVelocity = new FrameVector3D();
-   private final FrameOrientation initialOrientation = new FrameOrientation();
+   private final FrameQuaternion initialOrientation = new FrameQuaternion();
    private final FrameVector3D initialAngularVelocity = new FrameVector3D();
    private final FramePoint3D finalPosition = new FramePoint3D();
    private final FrameVector3D finalLinearVelocity = new FrameVector3D();
-   private final FrameOrientation finalOrientation = new FrameOrientation();
+   private final FrameQuaternion finalOrientation = new FrameQuaternion();
    private final FrameVector3D finalAngularVelocity = new FrameVector3D();
    private final FramePoint3D stanceFootPosition = new FramePoint3D();
 
-   private final FrameOrientation tmpOrientation = new FrameOrientation();
+   private final FrameQuaternion tmpOrientation = new FrameQuaternion();
    private final FrameVector3D tmpVector = new FrameVector3D();
 
    private final RecyclingArrayList<FramePoint3D> positionWaypointsForSole;
@@ -412,7 +412,7 @@ public class SwingState extends AbstractUnconstrainedState
       blendedSwingTrajectory.initialize();
    }
 
-   private void modifyFinalOrientationForTouchdown(FrameOrientation finalOrientationToPack)
+   private void modifyFinalOrientationForTouchdown(FrameQuaternion finalOrientationToPack)
    {
       finalPosition.changeFrame(oppositeSoleZUpFrame);
       stanceFootPosition.changeFrame(oppositeSoleZUpFrame);
@@ -574,7 +574,7 @@ public class SwingState extends AbstractUnconstrainedState
       desiredPose.setToZero(desiredControlFrame);
       desiredPose.changeFrame(worldFrame);
       desiredPose.getPosition(desiredPosition.getPoint());
-      desiredPose.getOrientation(desiredOrientation.getQuaternion());
+      desiredPose.getOrientation(desiredOrientation);
 
       // change twist
       desiredLinearVelocity.changeFrame(desiredSoleFrame);

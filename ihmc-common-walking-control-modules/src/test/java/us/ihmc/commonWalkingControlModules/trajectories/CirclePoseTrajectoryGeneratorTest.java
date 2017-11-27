@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -9,14 +12,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FrameOrientationTest;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
@@ -45,7 +45,7 @@ public class CirclePoseTrajectoryGeneratorTest
       registry = new YoVariableRegistry("reg");
 
       FramePose initialPose = FramePose.generateRandomFramePose(random, worldFrame, 1.0, 1.0, 1.0);
-      FrameOrientation initialOrientation = new FrameOrientation();
+      FrameQuaternion initialOrientation = new FrameQuaternion();
       initialPose.getOrientationIncludingFrame(initialOrientation);
       initialOrientationProvider = new ConstantOrientationProvider(initialOrientation);
 
@@ -149,7 +149,7 @@ public class CirclePoseTrajectoryGeneratorTest
    @Test(timeout = 30000)
    public void testGet_FrameOrientation()
    {
-      FrameOrientation orientationToPack = new FrameOrientation();
+      FrameQuaternion orientationToPack = new FrameQuaternion();
 
       trajectoryGenerator.getOrientation(orientationToPack);
 
@@ -307,15 +307,15 @@ public class CirclePoseTrajectoryGeneratorTest
    private void checkOrientationAtVariousPoints(CirclePoseTrajectoryGenerator trajectoryGenerator, OrientationProvider initialOrientationProvider, double tMax,
          ReferenceFrame frame)
    {
-      FrameOrientation orientation = new FrameOrientation(frame);
+      FrameQuaternion orientation = new FrameQuaternion(frame);
 
       trajectoryGenerator.compute(0.0);
       trajectoryGenerator.getOrientation(orientation);
 
-      FrameOrientation initialOrientation = new FrameOrientation(frame);
+      FrameQuaternion initialOrientation = new FrameQuaternion(frame);
       initialOrientationProvider.getOrientation(initialOrientation);
 
-      FrameOrientationTest.assertFrameOrientationEquals(initialOrientation, orientation, 1e-12);
+      EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(initialOrientation, orientation, 1e-12);
 
       FramePoint3D initialPosition = new FramePoint3D(frame);
       trajectoryGenerator.getPosition(initialPosition);
@@ -334,12 +334,11 @@ public class CirclePoseTrajectoryGeneratorTest
          trajectoryGenerator.getPosition(newPosition);
          trajectoryGenerator.getOrientation(orientation);
 
-         AxisAngle difference = FrameOrientationTest.computeDifferenceAxisAngle(initialOrientation, orientation);
-         RotationMatrix rotationMatrix = new RotationMatrix();
-         rotationMatrix.set(difference);
+         FrameQuaternion difference = new FrameQuaternion(initialOrientation.getReferenceFrame());
+         difference.difference(initialOrientation, orientation);
 
          FramePoint3D rotatedInitialPosition = new FramePoint3D(initialPosition);
-         rotationMatrix.transform(rotatedInitialPosition.getPoint());
+         difference.transform(rotatedInitialPosition.getPoint());
          //         JUnitTools.assertFramePointEquals(newPosition, rotatedInitialPosition, 1e-9);
       }
    }
