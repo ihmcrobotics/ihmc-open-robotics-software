@@ -44,7 +44,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class WholeBodyTrajectoryToolboxController extends ToolboxController
 {
    private static final boolean VERBOSE = true;
-   private static final int DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION = 10;
+   private static final int DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION = 20;
    private static final int DEFAULT_MAXIMUM_NUMBER_OF_ITERATIONS = 1500;
    private static final int DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE = 1000;
    private static final int DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE = 200;
@@ -325,7 +325,15 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       // smoothing over one mile stone node.
       for (int i = 0; i < numberOfIterationForShortcutOptimization.getIntegerValue(); i++)
-         updateShortcutPath(path);
+      {
+         if (updateShortcutPath(path) < 0.001)
+         {
+            if (VERBOSE)
+               PrintTools.info("shortcut is early terminal " + i);
+            break;
+         }
+
+      }
 
       // plotting final result.
       for (int i = 0; i < path.size(); i++)
@@ -734,16 +742,34 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       }
    }
 
-   private void updateShortcutPath(List<SpatialNode> path)
+   /**
+    * return distance of the paths before and after shortcut.
+    */
+   private double updateShortcutPath(List<SpatialNode> path)
    {
+      ArrayList<SpatialNode> pathBeforeShortcut = new ArrayList<SpatialNode>();
+
+      for (int i = 0; i < path.size(); i++)
+      {
+         pathBeforeShortcut.add(new SpatialNode(path.get(i)));
+      }
+
       for (int i = 0; i < path.size(); i++)
       {
          if (updateShortcutPath(path, i))
             ;
-         {
-            ;
-         }
       }
+
+      double distance = 0.0;
+      for (int i = 0; i < path.size(); i++)
+      {
+         double positionDistance = tree.getPositionWeight() * pathBeforeShortcut.get(i).getPositionDistance(path.get(i));
+         double orientationDistance = tree.getOrientationWeight() * pathBeforeShortcut.get(i).getOrientationDistance(path.get(i));
+
+         distance = distance + positionDistance + orientationDistance;
+      }
+
+      return distance / path.size();
    }
 
    private double computeArmJointsLimitScore(FullHumanoidRobotModel fullRobotModel)
