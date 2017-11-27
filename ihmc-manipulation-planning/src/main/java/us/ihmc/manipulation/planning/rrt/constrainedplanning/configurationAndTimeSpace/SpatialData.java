@@ -87,11 +87,17 @@ public class SpatialData
 
       for (int i = 0; i < rigidBodySpatials.size(); i++)
       {
-         double orientationDistance = rigidBodySpatials.get(i).getOrientationDistance(other.getRigidBodySpatials().get(i));
+         double orientationDistance;
+
+         if (rigidBodySpatials.get(i).getOrientation().equals(other.getRigidBodySpatials().get(i).getOrientation()))
+            orientationDistance = 0.0;
+         else
+            orientationDistance = rigidBodySpatials.get(i).getOrientationDistance(other.getRigidBodySpatials().get(i));
+
          orientationDistance = AngleTools.trimAngleMinusPiToPi(orientationDistance);
          orientationDistance = Math.abs(orientationDistance);
 
-         distance = orientationDistance + rigidBodySpatials.get(i).getOrientationDistance(other.getRigidBodySpatials().get(i));
+         distance = distance + orientationDistance;
       }
 
       return distance;
