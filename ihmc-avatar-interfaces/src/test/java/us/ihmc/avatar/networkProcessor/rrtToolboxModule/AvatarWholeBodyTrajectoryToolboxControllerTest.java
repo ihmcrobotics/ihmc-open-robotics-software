@@ -274,19 +274,11 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       rigidBodyConfigurations.add(pelvisConfigurationMessage);
       rigidBodyConfigurations.add(chestConfigurationMessage);
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage(configuration, handTrajectories, rigidBodyConfigurations);
-      commandInputManager.submitMessage(message);
-
-      System.out.println("submit done");
-      int maxNumberOfIterations = 10000;
-      WholeBodyTrajectoryToolboxOutputStatus solution = runToolboxController(maxNumberOfIterations);
-
-      if (numberOfIterations.getIntegerValue() < maxNumberOfIterations - 1)
-         assertNotNull("The toolbox is done but did not report a solution.", solution);
-      else
-         fail("The toolbox has run for " + maxNumberOfIterations + " without converging nor aborting.");
-
-      if (visualize)
-         visualizeSolution(solution, 0.1 * timeResolution);
+      
+      
+      runTest(message, 100000);
+      
+      
    }
 
    @Test
