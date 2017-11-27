@@ -303,7 +303,7 @@ public class MatrixToolsTest
       {
          int numRows = RandomNumbers.nextInt(random, 3, 100);
          DenseMatrix64F matrixToTest = RandomMatrices.createRandom(numRows, 1, 1.0, 100.0, random);
-         FramePoint3D framePointToInsert = EuclidFrameRandomTools.generateRandomFramePoint3D(random, ReferenceFrame.getWorldFrame(), 100.0, 100.0, 100.0);
+         FramePoint3D framePointToInsert = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame(), 100.0, 100.0, 100.0);
          int startRowToInsertFrameTuple = RandomNumbers.nextInt(random, 0, numRows - 3);
          MatrixTools.insertFrameTupleIntoEJMLVector(framePointToInsert, matrixToTest, startRowToInsertFrameTuple);
 

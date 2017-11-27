@@ -3,6 +3,7 @@ package us.ihmc.graphicsDescription.yoGraphics;
 import java.awt.Color;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -14,7 +15,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -125,7 +125,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
    }
 
    private final Vector3D translationToWorld = new Vector3D();
-   private final FrameOrientation orientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   private final FrameQuaternion orientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
 
    public void setTransformToWorld(RigidBodyTransform transformToWorld)
    {
@@ -135,7 +135,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
       y.set(translationToWorld.getY());
       z.set(translationToWorld.getZ());
 
-      orientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), transformToWorld);
+      orientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), transformToWorld.getRotationMatrix());
       setOrientation(orientation);
    }
 
@@ -172,7 +172,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
       z.set(position.getZ());
    }
 
-   public void setOrientation(FrameOrientation orientation)
+   public void setOrientation(FrameQuaternion orientation)
    {
       orientation.getYawPitchRoll(tempYawPitchRoll);
       setYawPitchRoll(tempYawPitchRoll);

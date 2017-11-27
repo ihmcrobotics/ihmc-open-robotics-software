@@ -44,7 +44,7 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
       Random random = new Random(1982L);
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator);
 
-      sixDoFJoint.setPositionAndRotation(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      sixDoFJoint.setPositionAndRotation(EuclidCoreRandomTools.nextRigidBodyTransform(random));
       Twist sixDoFJointTwist = new Twist();
       sixDoFJoint.getJointTwist(sixDoFJointTwist);
       sixDoFJointTwist.setLinearPart(RandomGeometry.nextVector3D(random));
@@ -73,15 +73,15 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
       random = new Random(1982L);
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator);
 
-      sixDoFJoint.setPositionAndRotation(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      sixDoFJoint.setPositionAndRotation(EuclidCoreRandomTools.nextRigidBodyTransform(random));
       Twist sixDoFJointTwist = new Twist();
       sixDoFJoint.getJointTwist(sixDoFJointTwist);
-      sixDoFJointTwist.setLinearPart(EuclidCoreRandomTools.generateRandomVector3D(random));
-      sixDoFJointTwist.setAngularPart(EuclidCoreRandomTools.generateRandomVector3D(random));
+      sixDoFJointTwist.setLinearPart(EuclidCoreRandomTools.nextVector3D(random));
+      sixDoFJointTwist.setAngularPart(EuclidCoreRandomTools.nextVector3D(random));
       sixDoFJoint.setJointTwist(sixDoFJointTwist);
 
-      RigidBody floating = ScrewTools.addRigidBody("floating", sixDoFJoint, EuclidCoreRandomTools.generateRandomDiagonalMatrix3D(random), random.nextDouble(),
-                                                   EuclidCoreRandomTools.generateRandomVector3D(random));
+      RigidBody floating = ScrewTools.addRigidBody("floating", sixDoFJoint, EuclidCoreRandomTools.nextDiagonalMatrix3D(random), random.nextDouble(),
+                                                   EuclidCoreRandomTools.nextVector3D(random));
 
       random = new Random(1986L);
       setUpRandomTree(floating);

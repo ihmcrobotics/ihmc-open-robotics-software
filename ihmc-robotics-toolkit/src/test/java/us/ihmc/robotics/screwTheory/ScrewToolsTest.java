@@ -163,7 +163,7 @@ public class ScrewToolsTest
    {
       String jointName = "joint";
       RigidBody parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
-      RigidBodyTransform transformToParent = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform transformToParent = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
       RevoluteJoint joint = ScrewTools.addRevoluteJoint(jointName, parentBody, transformToParent, jointAxis);
@@ -194,7 +194,7 @@ public class ScrewToolsTest
    {
       String jointName = "joint";
       RigidBody parentBody = new RigidBody("body", ReferenceFrame.getWorldFrame());
-      RigidBodyTransform transformToParent = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform transformToParent = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       Vector3D jointAxis = RandomGeometry.nextVector3D(random, 5.0);
 
       PrismaticJoint joint = ScrewTools.addPrismaticJoint(jointName, parentBody, transformToParent, jointAxis);
@@ -900,7 +900,7 @@ public class ScrewToolsTest
       RigidBody rigidBody2 = jointsArray[0].getSuccessor(); //rootBody
       RigidBody rigidBody3 = jointsArray[4].getSuccessor(); //testBody3
 
-      ReferenceFrame frame1 = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frame1", theFrame, EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      ReferenceFrame frame1 = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frame1", theFrame, EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
       Wrench externalWrench1 = new Wrench(rigidBody1.getBodyFixedFrame(), theFrame, RandomNumbers.nextDoubleArray(random, 6, 100.0));
       Wrench externalWrench2 = new Wrench(rigidBody3.getBodyFixedFrame(), theFrame, RandomNumbers.nextDoubleArray(random, 6, 100.0));

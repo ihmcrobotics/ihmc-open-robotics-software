@@ -8,10 +8,10 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
@@ -30,7 +30,7 @@ public class BlendedPoseTrajectoryGeneratorTest
             .epsilonEquals(poseB.getPosition(), epsilon);
    }
 
-   private boolean geometricEquals(FrameOrientation orientationA, FrameOrientation orientationB, double epsilon)
+   private boolean geometricEquals(FrameQuaternion orientationA, FrameQuaternion orientationB, double epsilon)
    {
       return RotationTools.quaternionEpsilonEquals(orientationA.getQuaternion(), orientationB.getQuaternion(), epsilon);
    }
@@ -39,7 +39,7 @@ public class BlendedPoseTrajectoryGeneratorTest
    {
       public final double time;
       public final FramePoint3D position;
-      public final FrameOrientation orientation;
+      public final FrameQuaternion orientation;
       public final FrameVector3D linearVelocity;
       public final FrameVector3D angularVelocity;
       public final FrameVector3D linearAcceleration;
@@ -52,7 +52,7 @@ public class BlendedPoseTrajectoryGeneratorTest
             ReferenceFrame expressedInFrame)
       {
          this.position = new FramePoint3D(expressedInFrame);
-         this.orientation = new FrameOrientation(expressedInFrame);
+         this.orientation = new FrameQuaternion(expressedInFrame);
          this.linearVelocity = new FrameVector3D(expressedInFrame);
          this.angularVelocity = new FrameVector3D(expressedInFrame);
          this.linearAcceleration = new FrameVector3D(expressedInFrame);
@@ -69,12 +69,12 @@ public class BlendedPoseTrajectoryGeneratorTest
       public PoseTrajectoryState(Random random, double time, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
       {
          this.time = time;
-         this.position = EuclidFrameRandomTools.generateRandomFramePoint3D(random, expressedInFrame, 1.0, 1.0, 1.0);
-         this.orientation = FrameOrientation.generateRandomFrameOrientation(random, expressedInFrame);
-         this.linearVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, expressedInFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
-         this.angularVelocity = EuclidFrameRandomTools.generateRandomFrameVector3D(random, expressedInFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
-         this.linearAcceleration = EuclidFrameRandomTools.generateRandomFrameVector3D(random, expressedInFrame, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
-         this.angularAcceleration = EuclidFrameRandomTools.generateRandomFrameVector3D(random, expressedInFrame, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
+         this.position = EuclidFrameRandomTools.nextFramePoint3D(random, expressedInFrame, 1.0, 1.0, 1.0);
+         this.orientation = EuclidFrameRandomTools.nextFrameQuaternion(random, expressedInFrame);
+         this.linearVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, expressedInFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         this.angularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, expressedInFrame, -10.0, 10.0, -10.0, 10.0, -10.0, 10.0);
+         this.linearAcceleration = EuclidFrameRandomTools.nextFrameVector3D(random, expressedInFrame, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
+         this.angularAcceleration = EuclidFrameRandomTools.nextFrameVector3D(random, expressedInFrame, -100.0, 100.0, -100.0, 100.0, -100.0, 100.0);
          this.bodyFrame = bodyFrame;
          this.baseFrame = baseFrame;
          this.expressedInFrame = expressedInFrame;

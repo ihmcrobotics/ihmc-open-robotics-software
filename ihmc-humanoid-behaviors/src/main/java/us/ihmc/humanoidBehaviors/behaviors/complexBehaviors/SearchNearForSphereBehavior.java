@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -22,7 +23,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMess
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 
 public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNearState>
 {
@@ -79,10 +79,9 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
             HeadTrajectoryMessage message = new HeadTrajectoryMessage(1, desiredHeadQuat, ReferenceFrame.getWorldFrame(), chestCoMFrame);
             atlasPrimitiveActions.headTrajectoryBehavior.setInput(message);
             //MATH
-            FrameOrientation desiredChestOrientation = new FrameOrientation(referenceFrames.getPelvisZUpFrame(), Math.toRadians(30), Math.toRadians(20), 0);
+            FrameQuaternion desiredChestOrientation = new FrameQuaternion(referenceFrames.getPelvisZUpFrame(), Math.toRadians(30), Math.toRadians(20), 0);
             desiredChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-            Quaternion chestOrientation = new Quaternion();
-            desiredChestOrientation.getQuaternion(chestOrientation);
+            Quaternion chestOrientation = new Quaternion(desiredChestOrientation);
             //MESSAGE
             ChestTrajectoryMessage chestOrientationPacket = new ChestTrajectoryMessage(4.0, chestOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
             atlasPrimitiveActions.chestTrajectoryBehavior.setInput(chestOrientationPacket);

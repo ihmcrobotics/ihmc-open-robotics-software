@@ -11,6 +11,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -25,7 +26,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -1028,7 +1028,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    {
       RobotSide robotSide = footstep.getRobotSide();
       FramePoint3D position = new FramePoint3D();
-      FrameOrientation orientation = new FrameOrientation();
+      FrameQuaternion orientation = new FrameQuaternion();
       footstep.getPose(position, orientation);
       position.changeFrame(worldFrame);
       orientation.changeFrame(worldFrame);

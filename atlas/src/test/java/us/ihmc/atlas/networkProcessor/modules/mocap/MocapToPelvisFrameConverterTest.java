@@ -74,8 +74,8 @@ public class MocapToPelvisFrameConverterTest
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      ReferenceFrame initialPelvisFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("initialPelvisFrame", random, ReferenceFrame.getWorldFrame());
-      ReferenceFrame mocapFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("mocapFrame", random, ReferenceFrame.getWorldFrame());
+      ReferenceFrame initialPelvisFrame = EuclidFrameRandomTools.nextReferenceFrame("initialPelvisFrame", random, ReferenceFrame.getWorldFrame());
+      ReferenceFrame mocapFrame = EuclidFrameRandomTools.nextReferenceFrame("mocapFrame", random, ReferenceFrame.getWorldFrame());
       MocapRigidBody mocapRigidBody = createMocapRigidBody(initialPelvisFrame, mocapFrame);
 
       MocapToPelvisFrameConverter frameConverter = new MocapToPelvisFrameConverter();
@@ -83,7 +83,7 @@ public class MocapToPelvisFrameConverterTest
 
       for (int i = 0; i < 20; i++)
       {
-         ReferenceFrame randomPelvisFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("randomPelvisFrame" + i, random, ReferenceFrame.getWorldFrame());
+         ReferenceFrame randomPelvisFrame = EuclidFrameRandomTools.nextReferenceFrame("randomPelvisFrame" + i, random, ReferenceFrame.getWorldFrame());
          MocapRigidBody randomMocapRigidBody = createMocapRigidBody(randomPelvisFrame, mocapFrame);
          RigidBodyTransform computedPelvisToWorldTransform = new RigidBodyTransform();
          frameConverter.computePelvisToWorldTransform(randomMocapRigidBody, computedPelvisToWorldTransform);
