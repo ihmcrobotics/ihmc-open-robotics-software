@@ -7,8 +7,8 @@ import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
@@ -45,7 +45,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
                RandomGeometry.nextVector3D(random));
       }
 
-      trajectoryFrame = EuclidFrameRandomTools.generateRandomReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame());
+      trajectoryFrame = EuclidFrameRandomTools.nextReferenceFrame("trajectoryFrame", random, ReferenceFrame.getWorldFrame());
       controlFramePoseInBodyFrame.set(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
       useCustomControlFrame = random.nextBoolean();
    }
@@ -183,7 +183,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
     * Convenience method for accessing {@link #trajectoryPointList}. To get the list use
     * {@link #getTrajectoryPointList()}.
     */
-   public void addTrajectoryPoint(double time, Quaternion orientation, Vector3D angularVelocity)
+   public void addTrajectoryPoint(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
    {
       trajectoryPointList.addTrajectoryPoint(time, orientation, angularVelocity);
    }
