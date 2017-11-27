@@ -59,24 +59,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
 
       initializeYoVariables(jname, registry);
 
-      this.physics.u_i = new Vector3D();
-
-      if (jaxis == Axis.X)
-      {
-         physics.u_i.setX(1.0);
-      }
-      else if (jaxis == Axis.Y)
-      {
-         physics.u_i.setY(1.0);
-      }
-      else if (jaxis == Axis.Z)
-      {
-         physics.u_i.setZ(1.0);
-      }
-      else
-      {
-         throw new RuntimeException("Undefined jaxis value!");
-      }
+      this.physics.u_i = new Vector3D(jaxis);
 
       this.setPinTransform3D(this.jointTransform3D, physics.u_i);
    }
