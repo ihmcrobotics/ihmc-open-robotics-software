@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,7 +22,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -76,9 +76,9 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final RigidBodyTransform contactToJointTransform = new RigidBodyTransform();
 
    private final FramePoint3D desiredContactPosition = new FramePoint3D(worldFrame);
-   private final FrameOrientation desiredContactOrientation = new FrameOrientation(worldFrame);
+   private final FrameQuaternion desiredContactOrientation = new FrameQuaternion(worldFrame);
    private final FramePoint3D currentContactPosition = new FramePoint3D(worldFrame);
-   private final FrameOrientation currentContactOrientation = new FrameOrientation(worldFrame);
+   private final FrameQuaternion currentContactOrientation = new FrameQuaternion(worldFrame);
 
    private final YoBoolean hybridModeActive;
    private final RigidBodyJointControlHelper jointControlHelper;

@@ -15,7 +15,7 @@ public class FilteredPointCloudPacket extends AbstractPointCloudPacket
    public FilteredPointCloudPacket(Random random)
    {
 	   super(random);
-	   transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+	   transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
    }
    
    public FilteredPointCloudPacket()

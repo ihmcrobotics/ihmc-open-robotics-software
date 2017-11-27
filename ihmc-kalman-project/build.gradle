@@ -22,7 +22,7 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.6'
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
    compile group: 'org.ejml', name: 'core', version: '0.30'
    compile group: 'org.ejml', name: 'simple', version: '0.30'
    compile group: 'org.ejml', name: 'dense64', version: '0.30'

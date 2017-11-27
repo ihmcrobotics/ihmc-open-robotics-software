@@ -32,8 +32,8 @@ public class AbstractLoadBearingMessage <T extends AbstractLoadBearingMessage<T>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       load = random.nextBoolean();
       coefficientOfFriction = random.nextDouble();
-      bodyFrameToContactFrame = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-      contactNormalInWorldFrame = EuclidCoreRandomTools.generateRandomVector3D(random);
+      bodyFrameToContactFrame = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+      contactNormalInWorldFrame = EuclidCoreRandomTools.nextVector3D(random);
    }
 
    public void setLoad(boolean load)

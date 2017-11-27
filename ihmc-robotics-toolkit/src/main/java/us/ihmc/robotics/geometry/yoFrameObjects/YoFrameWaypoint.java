@@ -229,4 +229,12 @@ public abstract class YoFrameWaypoint<Y extends YoFrameWaypoint<Y, F, S>, F exte
       other.putYoValuesIntoFrameWaypoint();
       return frameWaypoint.epsilonEquals(other.frameWaypoint, epsilon);
    }
+
+   @Override
+   public boolean geometricallyEquals(Y other, double epsilon)
+   {
+      putYoValuesIntoFrameWaypoint();
+      other.putYoValuesIntoFrameWaypoint();
+      return frameWaypoint.geometricallyEquals(other.frameWaypoint, epsilon);
+   }
 }

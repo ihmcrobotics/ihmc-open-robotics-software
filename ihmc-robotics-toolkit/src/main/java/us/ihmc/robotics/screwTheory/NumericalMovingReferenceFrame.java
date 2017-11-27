@@ -21,7 +21,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
  */
 public class NumericalMovingReferenceFrame extends MovingReferenceFrame
 {
-   private static final long serialVersionUID = 1792258730231152017L;
 
    private final ReferenceFrame originalFrame;
 
