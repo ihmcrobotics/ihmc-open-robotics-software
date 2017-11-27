@@ -16,7 +16,6 @@ import us.ihmc.robotics.geometry.FramePose2d;
 
 public class PoseReferenceFrame extends ReferenceFrame
 {
-   private static final long serialVersionUID = 1559362743221742457L;
    private final FramePose originPose;
 
    public PoseReferenceFrame(String frameName, ReferenceFrame parentFrame)

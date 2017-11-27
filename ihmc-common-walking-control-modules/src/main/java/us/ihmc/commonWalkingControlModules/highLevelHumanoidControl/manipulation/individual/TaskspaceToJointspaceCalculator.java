@@ -253,8 +253,6 @@ public class TaskspaceToJointspaceCalculator
    {
       ReferenceFrame localControlFrame = new ReferenceFrame("controlFrame", localEndEffectorFrame)
       {
-         private static final long serialVersionUID = -7254192469546194133L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {

@@ -103,8 +103,6 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
       desiredPelvisFrame = new ReferenceFrame("desiredPelvisFrame", worldFrame)
       {
-         private static final long serialVersionUID = -1472151257649344278L;
-
          private final Quaternion rotationToParent = new Quaternion();
 
          @Override
@@ -120,8 +118,6 @@ public class ControllerPelvisOrientationManager extends PelvisOrientationControl
 
       nextSoleFrame = new ReferenceFrame("nextSoleFrame", worldFrame)
       {
-         private static final long serialVersionUID = 598275984762095769L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {

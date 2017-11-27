@@ -162,8 +162,6 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
       steeringWheelFrame = new ReferenceFrame("SteeringWheelFrame", trajectoryFrame)
       {
-         private static final long serialVersionUID = 9102217353690768074L;
-
          private final Vector3D localTranslation = new Vector3D();
 
          private final Vector3D localXAxis = new Vector3D();

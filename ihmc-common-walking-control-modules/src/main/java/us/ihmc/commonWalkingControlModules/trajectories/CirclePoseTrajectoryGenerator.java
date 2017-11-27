@@ -170,8 +170,6 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
       circleFrame = new ReferenceFrame("CircleFrame", trajectoryFrame)
       {
-         private static final long serialVersionUID = 9102217353690768074L;
-
          private final Vector3D localTranslation = new Vector3D();
          private final Vector3D localRotationAxis = new Vector3D();
          private final AxisAngle localAxisAngle = new AxisAngle();

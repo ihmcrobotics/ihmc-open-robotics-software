@@ -16,8 +16,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
  */
 public abstract class MovingReferenceFrame extends ReferenceFrame
 {
-   private static final long serialVersionUID = 8822523097080864423L;
-
    /**
     * Dirty bit used to mark {@link #twistOfFrame} as out-of-date or up-to-date and allow to save
     * some computation. The twist is marked as out-of-date upon calling {@link #update()}.
@@ -70,8 +68,6 @@ public abstract class MovingReferenceFrame extends ReferenceFrame
       boolean isFixedInParent = true;
       MovingReferenceFrame newFrame = new MovingReferenceFrame(frameName, parentFrame, transformToParent, isZUpFrame, isFixedInParent)
       {
-         private static final long serialVersionUID = 1036812472469332287L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {

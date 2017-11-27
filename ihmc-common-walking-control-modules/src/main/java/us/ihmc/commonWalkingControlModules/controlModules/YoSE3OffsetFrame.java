@@ -15,7 +15,6 @@ import us.ihmc.robotics.screwTheory.Twist;
 
 public class YoSE3OffsetFrame extends MovingReferenceFrame
 {
-   private static final long serialVersionUID = 2800529580025439076L;
    private final Vector3D tempVector = new Vector3D();
    private final Quaternion tempQuaternion = new Quaternion();
    private final YoFrameVector translationToParent;
