@@ -326,7 +326,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       // smoothing over one mile stone node.
       for (int i = 0; i < numberOfIterationForShortcutOptimization.getIntegerValue(); i++)
       {
-         if (updateShortcutPath(path) < 0.001)
+         if (updateShortcutPath(path) < 0.0005)
          {
             if (VERBOSE)
                PrintTools.info("shortcut is early terminal " + i);

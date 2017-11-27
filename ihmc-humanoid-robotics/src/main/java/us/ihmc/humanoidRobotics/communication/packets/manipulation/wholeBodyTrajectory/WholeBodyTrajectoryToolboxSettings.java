@@ -2,11 +2,13 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 
 import java.util.Random;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class WholeBodyTrajectoryToolboxSettings
@@ -64,24 +66,66 @@ public class WholeBodyTrajectoryToolboxSettings
    /**
     * This is for Atlas with RobotiQ hand. Control frame to original frame.
     */
-   public static Pose3D getAtlasRobotiQHandControlFrame(RobotSide robotSide)
+   public static SideDependentList<Pose3D> getAtlasRobotiQHandControlFrames()
    {
+      SideDependentList<Pose3D> frames = new SideDependentList<>();
+
       Point3D position;
-      Quaternion orientation = new Quaternion();
-      if (robotSide == RobotSide.LEFT)
+      Quaternion orientation;
+
+      for (RobotSide robotSide : RobotSide.values)
       {
-         position = new Point3D(0.0, 0.2, 0.0);
-         orientation.appendYawRotation(0.5 * Math.PI);
-         orientation.appendRollRotation(-0.5 * Math.PI);
+         if (robotSide == RobotSide.LEFT)
+         {
+            position = new Point3D(0.0, 0.2, 0.0);
+            orientation = new Quaternion();
+            orientation.appendYawRotation(0.5 * Math.PI);
+            orientation.appendRollRotation(-0.5 * Math.PI);
+         }
+         else
+         {
+            position = new Point3D(0.0, -0.2, 0.0);
+            orientation = new Quaternion();
+            orientation.appendYawRotation(-0.5 * Math.PI);
+            orientation.appendRollRotation(0.5 * Math.PI);
+         }
+
+         PrintTools.info("" + robotSide + " " + new Pose3D(position, orientation));
+         frames.put(robotSide, new Pose3D(position, orientation));
       }
 
-      else
+      return frames;
+   }
+
+   /**
+    * This is for Atlas with RobotiQ hand. Control frame to original frame.
+    */
+   public static SideDependentList<Pose3D> getValkyrieHandControlFrames()
+   {
+      SideDependentList<Pose3D> frames = new SideDependentList<>();
+
+      Point3D position;
+      Quaternion orientation;
+
+      for (RobotSide robotSide : RobotSide.values)
       {
-         position = new Point3D(0.0, -0.2, 0.0);
-         orientation.appendYawRotation(-0.5 * Math.PI);
-         orientation.appendRollRotation(0.5 * Math.PI);
+         if (robotSide == RobotSide.LEFT)
+         {
+            position = new Point3D(0.0, 0.12, 0.0);
+            orientation = new Quaternion();
+            orientation.appendYawRotation(0.5 * Math.PI);
+         }
+         else
+         {
+            position = new Point3D(0.0, -0.12, 0.0);
+            orientation = new Quaternion();
+            orientation.appendYawRotation(-0.5 * Math.PI);
+         }
+
+         PrintTools.info("" + robotSide + " " + new Pose3D(position, orientation));
+         frames.put(robotSide, new Pose3D(position, orientation));
       }
 
-      return new Pose3D(position, orientation);
+      return frames;
    }
 }
