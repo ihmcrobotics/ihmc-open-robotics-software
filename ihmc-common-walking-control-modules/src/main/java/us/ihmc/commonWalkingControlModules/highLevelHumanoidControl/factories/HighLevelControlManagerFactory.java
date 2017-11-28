@@ -19,7 +19,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientati
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -60,6 +60,7 @@ public class HighLevelControlManagerFactory
    private final Map<String, YoPIDGains> jointGainMap = new HashMap<>();
    private final Map<String, YoPID3DGains> taskspaceOrientationGainMap = new HashMap<>();
    private final Map<String, YoPID3DGains> taskspacePositionGainMap = new HashMap<>();
+   private final Map<String, JointAccelerationIntegrationParametersReadOnly> accelerationIntegrationParameters = new HashMap<>();
 
    public HighLevelControlManagerFactory(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
    {
@@ -81,6 +82,8 @@ public class HighLevelControlManagerFactory
       ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, registry);
       ParameterTools.extractGainMap("Orientation", walkingControllerParameters.getTaskspaceOrientationControlGains(), taskspaceOrientationGainMap, registry);
       ParameterTools.extractGainMap("Position", walkingControllerParameters.getTaskspacePositionControlGains(), taskspacePositionGainMap, registry);
+      ParameterTools.extractAccelerationIntegrationParameterMap(walkingControllerParameters.getJointAccelerationIntegrationParameters(),
+                                                                accelerationIntegrationParameters, registry);
    }
 
    public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
@@ -158,7 +161,6 @@ public class HighLevelControlManagerFactory
       TObjectDoubleHashMap<String> homeConfiguration = walkingControllerParameters.getOrCreateJointHomeConfiguration();
       Pose3D homePose = walkingControllerParameters.getOrCreateBodyHomeConfiguration().get(bodyName);
       List<String> positionControlledJoints = walkingControllerParameters.getOrCreatePositionControlledJoints();
-      Map<String, JointAccelerationIntegrationSettings> integrationSettings = walkingControllerParameters.getOrCreateIntegrationSettings();
       RigidBody elevator = controllerToolbox.getFullRobotModel().getElevator();
       YoDouble yoTime = controllerToolbox.getYoTime();
 
@@ -167,7 +169,8 @@ public class HighLevelControlManagerFactory
       RigidBodyControlMode defaultControlModeForRigidBody = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, homePose, positionControlledJoints,
-            integrationSettings, trajectoryFrames, controlFrame, baseFrame, contactableBody, yoTime, graphicsListRegistry, registry);
+                                                                    accelerationIntegrationParameters, trajectoryFrames, controlFrame, baseFrame,
+                                                                    contactableBody, yoTime, graphicsListRegistry, registry);
       manager.setGains(jointGainMap, taskspaceOrientationGains, taskspacePositionGains);
       manager.setWeights(jointspaceWeights, taskspaceAngularWeight, taskspaceLinearWeight, userModeWeights);
       manager.setDefaultControlMode(defaultControlModeForRigidBody);
@@ -322,5 +325,10 @@ public class HighLevelControlManagerFactory
       }
 
       return ret;
+   }
+
+   public Map<String, JointAccelerationIntegrationParametersReadOnly> getAccelerationIntegrationParameters()
+   {
+      return accelerationIntegrationParameters;
    }
 }
