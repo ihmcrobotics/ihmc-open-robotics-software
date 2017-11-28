@@ -100,42 +100,46 @@ public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator
    {
       int nullity = matrixToComputeNullspaceOf.getNumCols() - matrixToComputeNullspaceOf.getNumRows();
 
-      computeDefinedPortion(Q, matrixToComputeNullspaceOf, nullity);
+      computeNullspace(nullspace, Q, matrixToComputeNullspaceOf, nullity);
 
       nullspaceProjectorToPack.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols());
       if (alpha == 0.0)
       {
          nullspaceProjectorToPack.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols());
-         CommonOps.multOuter(Q, nullspaceProjectorToPack);
+         CommonOps.multOuter(nullspace, nullspaceProjectorToPack);
       }
       else
       {
          computeDampedSigmaOperator(sigmaDampedSigma, sigma, alpha);
          tempMatrix.reshape(v.getNumRows(), sigmaDampedSigma.getNumCols());
 
-         DiagonalMatrixTools.postMult(Q, sigmaDampedSigma, tempMatrix);
-         CommonOps.multTransB(tempMatrix, Q, nullspaceProjectorToPack);
+         if (nullspace.getNumCols() > 0)
+         {
+            /*
+            DiagonalMatrixTools.postMult(nullspace, sigmaDampedSigma, tempMatrix);
+            CommonOps.multTransB(tempMatrix, nullspace, nullspaceProjectorToPack);
+            */
+
+            DiagonalMatrixTools.postMult(Q, sigmaDampedSigma, tempMatrix);
+            CommonOps.multTransB(tempMatrix, Q, nullspaceProjectorToPack);
+
+            CommonOps.scale(-1.0, nullspaceProjectorToPack);
+            MatrixTools.addDiagonal(nullspaceProjectorToPack, 1.0);
+         }
+         else
+         {
+            DiagonalMatrixTools.postMult(Q, sigmaDampedSigma, tempMatrix);
+            CommonOps.multTransB(tempMatrix, Q, nullspaceProjectorToPack);
+
+            CommonOps.scale(-1.0, nullspaceProjectorToPack);
+            MatrixTools.addDiagonal(nullspaceProjectorToPack, 1.0);
+         }
+
       }
 
-      CommonOps.scale(-1.0, nullspaceProjectorToPack);
-      MatrixTools.addDiagonal(nullspaceProjectorToPack, 1.0);
    }
 
-   private void computeDefinedPortion(DenseMatrix64F QToPack, DenseMatrix64F matrixToComputeNullspaceOf, int nullity)
-   {
-      decomposer.decompose(matrixToComputeNullspaceOf);
-
-      sigma.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumRows());
-      decomposer.getW(sigma);
-
-      v.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols());
-      QToPack.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols() - nullity);
-
-      decomposer.getV(v, false);
-      CommonOps.extract(v, 0, v.getNumRows(), 0, v.getNumCols() - nullity, QToPack, 0, 0);
-   }
-
-   private void computeNullspace(DenseMatrix64F nullspaceToPack, DenseMatrix64F matrixToComputeNullspaceOf, int nullity)
+   private void computeNullspace(DenseMatrix64F nullspaceToPack, DenseMatrix64F QToPack, DenseMatrix64F matrixToComputeNullspaceOf, int nullity)
    {
       nullspaceToPack.reshape(matrixToComputeNullspaceOf.getNumCols(), nullity);
       decomposer.decompose(matrixToComputeNullspaceOf);
@@ -144,17 +148,18 @@ public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator
       decomposer.getW(sigma);
 
       v.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols());
-      Q.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols() - nullity);
+      QToPack.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols() - nullity);
       boolean transposed = false;
       decomposer.getV(v, transposed);
 
-      CommonOps.extract(v, 0, v.getNumRows(), 0, v.getNumCols() - nullity, Q, 0, 0);
+      CommonOps.extract(v, 0, v.getNumRows(), 0, v.getNumCols() - nullity, QToPack, 0, 0);
       CommonOps.extract(v, 0, v.getNumRows(), v.getNumCols() - nullity, v.getNumCols(), nullspaceToPack, 0, 0);
    }
 
    private void computeDampedSigmaOperator(DenseMatrix64F dampedSigmaToPack, DenseMatrix64F sigma, double alpha)
    {
       dampedSigmaToPack.reshape(sigma.getNumRows(), sigma.getNumRows());
+      dampedSigmaToPack.zero();
 
       for (int i = 0; i < sigma.getNumRows(); i++)
       {
