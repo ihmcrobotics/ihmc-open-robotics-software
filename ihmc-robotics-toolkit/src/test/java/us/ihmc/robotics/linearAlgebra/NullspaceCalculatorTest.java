@@ -23,12 +23,10 @@ public abstract class NullspaceCalculatorTest
       jacobian.set(1, 1, 9.0);
 
       DenseMatrix64F nullspaceProjector = new DenseMatrix64F(2, 2);
-      /*
       nullspaceCalculator.computeNullspaceProjector(jacobian, nullspaceProjector);
 
       for (int i = 0; i < nullspaceProjector.getNumElements(); i++)
          assertEquals(nullspaceProjector.get(i), 0.0, 1e-7);
-         */
 
 
       jacobian = new DenseMatrix64F(2, 4);

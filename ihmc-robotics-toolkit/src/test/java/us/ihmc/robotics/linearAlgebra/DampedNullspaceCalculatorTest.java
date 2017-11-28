@@ -38,6 +38,46 @@ public abstract class DampedNullspaceCalculatorTest extends NullspaceCalculatorT
          assertEquals(nullspaceProjectorExpected.get(i), nullspaceProjector.get(i), 1e-7);
 
 
+      jacobian = new DenseMatrix64F(3, 4);
+      jacobian.set(0, 0, 1.0);
+      jacobian.set(0, 1, 3.0);
+      jacobian.set(0, 3, 7.0);
+      jacobian.set(1, 0, 7.0);
+      jacobian.set(1, 2, 9.0);
+      jacobian.set(1, 3, 11.0);
+      jacobian.set(2, 1, 13.0);
+      jacobian.set(2, 2, 15.0);
+      jacobian.set(2, 3, 17.0);
+
+      nullspaceProjector = new DenseMatrix64F(4, 4);
+      nullspaceCalculator.computeNullspaceProjector(jacobian, nullspaceProjector);
+
+      nullspaceProjectorExpected = new DenseMatrix64F(4, 4);
+
+      nullspaceProjectorExpected.set(0, 0, 0.501058);
+      nullspaceProjectorExpected.set(0, 1, 0.423592);
+      nullspaceProjectorExpected.set(0, 2,-0.0802936);
+      nullspaceProjectorExpected.set(0, 3,-0.253097);
+
+      nullspaceProjectorExpected.set(1, 0, 0.423592);
+      nullspaceProjectorExpected.set(1, 1, 0.35831);
+      nullspaceProjectorExpected.set(1, 2,-0.0679324);
+      nullspaceProjectorExpected.set(1, 3,-0.214036);
+
+      nullspaceProjectorExpected.set(2, 0,-0.0802936);
+      nullspaceProjectorExpected.set(2, 1,-0.0679324);
+      nullspaceProjectorExpected.set(2, 2, 0.0131833);
+      nullspaceProjectorExpected.set(2, 3, 0.0403421);
+
+      nullspaceProjectorExpected.set(3, 0,-0.253097);
+      nullspaceProjectorExpected.set(3, 1,-0.214036);
+      nullspaceProjectorExpected.set(3, 2, 0.0403421);
+      nullspaceProjectorExpected.set(3, 3, 0.128071);
+
+      for (int i = 0; i < nullspaceProjectorExpected.getNumElements(); i++)
+         assertEquals(nullspaceProjectorExpected.get(i), nullspaceProjector.get(i), 1e-5);
+
+
       jacobian = new DenseMatrix64F(2, 4);
       jacobian.set(0, 0, 1.0);
       jacobian.set(0, 1, 3.0);
