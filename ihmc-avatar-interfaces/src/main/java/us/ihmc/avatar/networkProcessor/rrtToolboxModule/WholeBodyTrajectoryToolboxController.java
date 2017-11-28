@@ -47,6 +47,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    private static final int DEFAULT_MAXIMUM_NUMBER_OF_ITERATIONS = 1500;
    private static final int DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE = 1000;
    private static final int DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE = 200;
+   private static final int TERMINAL_CONDITION_NUMBER_OF_VALID_INITIAL_GUESSES = 20;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final Random randomManager = new Random(1);
@@ -60,6 +62,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     */
    private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterations", registry);
    private final YoInteger currentNumberOfIterations = new YoInteger("currentNumberOfIterations", registry);
+   private final YoInteger terminalConditionNumberOfValidInitialGuesses = new YoInteger("terminalConditionNumberOfValidInitialGuesses", registry);
 
    // check the tree reaching the normalized time from 0.0 to 1.0.
    private final YoDouble currentTrajectoryTime = new YoDouble("currentNormalizedTime", registry);
@@ -164,6 +167,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       numberOfIterationForShortcutOptimization.set(DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION);
       maximumNumberOfIterations.set(DEFAULT_MAXIMUM_NUMBER_OF_ITERATIONS);
+      terminalConditionNumberOfValidInitialGuesses.set(TERMINAL_CONDITION_NUMBER_OF_VALID_INITIAL_GUESSES);
 
       humanoidKinematicsSolver = new HumanoidKinematicsSolver(drcRobotModel, yoGraphicsListRegistry, registry);
 
@@ -384,7 +388,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          if (tree.getMostAdvancedTime() >= toolboxData.getTrajectoryTime())
          {
             if (VERBOSE)
-               PrintTools.info("Successfully finished tree expansion.");
+               PrintTools.info("Successfully finished tree expansion. "+currentExpansionSize.getIntegerValue());
             currentExpansionSize.set(maximumExpansionSize.getIntegerValue()); // for terminate
          }
       }
@@ -453,7 +457,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
        */
       currentNumberOfInitialGuesses.increment();
 
-      if (currentNumberOfInitialGuesses.getIntegerValue() >= desiredNumberOfInitialGuesses.getIntegerValue())
+      if (currentNumberOfInitialGuesses.getIntegerValue() >= desiredNumberOfInitialGuesses.getIntegerValue()
+            || currentNumberOfValidInitialGuesses.getIntegerValue() >= terminalConditionNumberOfValidInitialGuesses.getIntegerValue())
       {
          if (rootNode == null || !rootNode.isValid())
          {
@@ -464,7 +469,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          else
          {
             if (VERBOSE)
-               PrintTools.info("Successfully finished initial guess stage.");
+               PrintTools.info("Successfully finished initial guess stage. "+currentNumberOfInitialGuesses.getIntegerValue());
             state.set(CWBToolboxState.EXPAND_TREE);
 
             tree = new SpatialNodeTree(rootNode);
