@@ -133,7 +133,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
          traj.compute(trajectoryTime - dt);
          traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
-         assertTrue(finalOrientation.epsilonEquals(currentOrientation.getGeometryObject(), epsilon));
+         assertTrue(finalOrientation.geometricallyEquals(currentOrientation, epsilon));
          assertTrue(finalAngularVelocity.epsilonEquals(currentAngularVelocity, epsilon));
          boolean goodFinalAngularAcceleration = zeroAngularAcceleration.epsilonEquals(currentAngularAcceleration, accelerationEpsilon);
          if (DEBUG && !goodFinalAngularAcceleration)
