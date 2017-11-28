@@ -25,6 +25,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
@@ -33,7 +34,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.math.trajectories.TrajectoryMathTools;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
@@ -78,7 +78,7 @@ public class FootstepAngularMomentumPredictorTest
    private final YoDouble omega = new YoDouble("AngularMomentumTestOmega", testRegistry); // Taking the for Atlas
    private final FramePoint3D currentLocation = new FramePoint3D();
    private final FrameVector3D walkingDirectionUnitVector = new FrameVector3D();
-   private final FrameOrientation robotOrientation = new FrameOrientation();
+   private final FrameQuaternion robotOrientation = new FrameQuaternion();
    private final QuaternionBasedTransform rightTransform = new QuaternionBasedTransform(new Quaternion(0.0, 0.0, Math.sin(-Math.PI / 4.0),
                                                                                                        Math.cos(-Math.PI / 4.0)),
                                                                                         new FramePoint3D());
@@ -87,6 +87,7 @@ public class FootstepAngularMomentumPredictorTest
                                                                                        new FrameVector3D());
    private final List<YoDouble> swingDurations = new ArrayList<YoDouble>();
    private final List<YoDouble> transferDurations = new ArrayList<YoDouble>();
+   private final List<YoDouble> touchdownDurations = new ArrayList<YoDouble>();
    private final List<YoDouble> swingSplitFractions = new ArrayList<YoDouble>();
    private final List<YoDouble> transferSplitFractions = new ArrayList<YoDouble>();
    private final List<YoDouble> swingShiftFractions = new ArrayList<YoDouble>();
@@ -156,6 +157,9 @@ public class FootstepAngularMomentumPredictorTest
          tempYoDouble = new YoDouble(testName + "Step" + i + "TransferDuration", testRegistry);
          tempYoDouble.set(transferTime);
          transferDurations.add(tempYoDouble);
+         tempYoDouble = new YoDouble(testName + "Step" + i + "touchdownDuration", testRegistry);
+         tempYoDouble.set(0.0);
+         touchdownDurations.add(tempYoDouble);
          tempYoDouble = new YoDouble(testName + "Step" + i + "SwingSplitFraction", testRegistry);
          tempYoDouble.set(testParameters.getSwingSplitFraction());
          swingSplitFractions.add(tempYoDouble);
@@ -183,7 +187,7 @@ public class FootstepAngularMomentumPredictorTest
       bipedSupportPolygons.updateUsingContactStates(contactStates);
       copTrajectoryGenerator = new ReferenceCoPTrajectoryGenerator(testName + "CoPGenerator",
                                                                    testParameters.getNumberOfFootstepsToConsider(), bipedSupportPolygons, contactableFeet,
-                                                                   numberOfFootstepsToConsider, swingDurations, transferDurations, swingSplitFractions,
+                                                                   numberOfFootstepsToConsider, swingDurations, transferDurations, touchdownDurations, swingSplitFractions,
                                                                    swingShiftFractions, transferSplitFractions, testRegistry);
       icpTrajectoryGenerator = new ReferenceICPTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, false, testRegistry);
       comTrajectoryGenerator = new ReferenceCoMTrajectoryGenerator(testName, omega, numberOfFootstepsToConsider, isInitialTransfer, isDoubleSupport,

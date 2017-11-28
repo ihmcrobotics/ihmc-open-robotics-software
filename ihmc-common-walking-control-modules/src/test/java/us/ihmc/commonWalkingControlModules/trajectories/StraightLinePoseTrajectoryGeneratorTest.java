@@ -9,12 +9,12 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.StraightLinePositionTrajectoryGenerator;
@@ -31,7 +31,7 @@ public class StraightLinePoseTrajectoryGeneratorTest
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameA", worldFrame,
-         EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+         EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
    private static final double EPSILON = 1.0e-10;
 
@@ -92,14 +92,14 @@ public class StraightLinePoseTrajectoryGeneratorTest
       StraightLinePoseTrajectoryGenerator trajToTest = new StraightLinePoseTrajectoryGenerator("blop", worldFrame, registry);
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
-      FramePoint3D initialPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
+      FramePoint3D initialPosition = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
       PositionProvider initialPositionProvider = new ConstantPositionProvider(initialPosition);
-      FramePoint3D finalPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
+      FramePoint3D finalPosition = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
       PositionProvider finalPositionProvider = new ConstantPositionProvider(finalPosition);
 
-      FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
+      FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
       OrientationProvider initialOrientationProvider = new ConstantOrientationProvider(initialOrientation);
-      FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
+      FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
       OrientationProvider finalOrientationProvider = new ConstantOrientationProvider(finalOrientation);
 
       StraightLinePositionTrajectoryGenerator originalPosition = new StraightLinePositionTrajectoryGenerator("position", worldFrame, trajectoryTimeProvider,
@@ -119,14 +119,14 @@ public class StraightLinePoseTrajectoryGeneratorTest
       FramePoint3D position1 = new FramePoint3D();
       FrameVector3D velocity1 = new FrameVector3D();
       FrameVector3D acceleration1 = new FrameVector3D();
-      FrameOrientation orientation1 = new FrameOrientation();
+      FrameQuaternion orientation1 = new FrameQuaternion();
       FrameVector3D angularVelocity1 = new FrameVector3D();
       FrameVector3D angularAcceleration1 = new FrameVector3D();
 
       FramePoint3D position2 = new FramePoint3D();
       FrameVector3D velocity2 = new FrameVector3D();
       FrameVector3D acceleration2 = new FrameVector3D();
-      FrameOrientation orientation2 = new FrameOrientation();
+      FrameQuaternion orientation2 = new FrameQuaternion();
       FrameVector3D angularVelocity2 = new FrameVector3D();
       FrameVector3D angularAcceleration2 = new FrameVector3D();
 
@@ -159,11 +159,11 @@ public class StraightLinePoseTrajectoryGeneratorTest
       StraightLinePoseTrajectoryGenerator trajToTest = new StraightLinePoseTrajectoryGenerator("blop", worldFrame, registry);
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
-      FramePoint3D initialPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
-      FramePoint3D finalPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
+      FramePoint3D initialPosition = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
+      FramePoint3D finalPosition = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
 
-      FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-      FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
+      FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
+      FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
 
       trajToTest.setInitialPose(initialPosition, initialOrientation);
       trajToTest.setFinalPose(new FramePose(finalPosition, finalOrientation));
@@ -175,14 +175,14 @@ public class StraightLinePoseTrajectoryGeneratorTest
       FramePoint3D position1 = new FramePoint3D(initialPosition);
       FrameVector3D velocity1 = new FrameVector3D(worldFrame);
       FrameVector3D acceleration1 = new FrameVector3D(worldFrame);
-      FrameOrientation orientation1 = new FrameOrientation(initialOrientation);
+      FrameQuaternion orientation1 = new FrameQuaternion(initialOrientation);
       FrameVector3D angularVelocity1 = new FrameVector3D(worldFrame);
       FrameVector3D angularAcceleration1 = new FrameVector3D(worldFrame);
 
       FramePoint3D position2 = new FramePoint3D();
       FrameVector3D velocity2 = new FrameVector3D();
       FrameVector3D acceleration2 = new FrameVector3D();
-      FrameOrientation orientation2 = new FrameOrientation();
+      FrameQuaternion orientation2 = new FrameQuaternion();
       FrameVector3D angularVelocity2 = new FrameVector3D();
       FrameVector3D angularAcceleration2 = new FrameVector3D();
 
@@ -205,11 +205,11 @@ public class StraightLinePoseTrajectoryGeneratorTest
       StraightLinePoseTrajectoryGenerator trajToTest = new StraightLinePoseTrajectoryGenerator("blop", worldFrame, registry);
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
-      FramePoint3D initialPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
-      FramePoint3D finalPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
+      FramePoint3D initialPosition = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
+      FramePoint3D finalPosition = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
 
-      FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-      FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
+      FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
+      FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
 
       trajToTest.setInitialPose(initialPosition, initialOrientation);
       trajToTest.setFinalPose(new FramePose(finalPosition, finalOrientation));
@@ -221,14 +221,14 @@ public class StraightLinePoseTrajectoryGeneratorTest
       FramePoint3D position1 = new FramePoint3D(finalPosition);
       FrameVector3D velocity1 = new FrameVector3D(worldFrame);
       FrameVector3D acceleration1 = new FrameVector3D(worldFrame);
-      FrameOrientation orientation1 = new FrameOrientation(finalOrientation);
+      FrameQuaternion orientation1 = new FrameQuaternion(finalOrientation);
       FrameVector3D angularVelocity1 = new FrameVector3D(worldFrame);
       FrameVector3D angularAcceleration1 = new FrameVector3D(worldFrame);
 
       FramePoint3D position2 = new FramePoint3D();
       FrameVector3D velocity2 = new FrameVector3D();
       FrameVector3D acceleration2 = new FrameVector3D();
-      FrameOrientation orientation2 = new FrameOrientation();
+      FrameQuaternion orientation2 = new FrameQuaternion();
       FrameVector3D angularVelocity2 = new FrameVector3D();
       FrameVector3D angularAcceleration2 = new FrameVector3D();
 
@@ -251,14 +251,14 @@ public class StraightLinePoseTrajectoryGeneratorTest
       StraightLinePoseTrajectoryGenerator trajToTest = new StraightLinePoseTrajectoryGenerator("blop", true, worldFrame, registry);
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
-      FramePoint3D initialPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
+      FramePoint3D initialPosition = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
       PositionProvider initialPositionProvider = new ConstantPositionProvider(initialPosition);
-      FramePoint3D finalPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
+      FramePoint3D finalPosition = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
       PositionProvider finalPositionProvider = new ConstantPositionProvider(finalPosition);
 
-      FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
+      FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
       OrientationProvider initialOrientationProvider = new ConstantOrientationProvider(initialOrientation);
-      FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
+      FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
       OrientationProvider finalOrientationProvider = new ConstantOrientationProvider(finalOrientation);
 
       StraightLinePositionTrajectoryGenerator originalPosition = new StraightLinePositionTrajectoryGenerator("position1", worldFrame, trajectoryTimeProvider,
@@ -278,14 +278,14 @@ public class StraightLinePoseTrajectoryGeneratorTest
       FramePoint3D position1 = new FramePoint3D();
       FrameVector3D velocity1 = new FrameVector3D();
       FrameVector3D acceleration1 = new FrameVector3D();
-      FrameOrientation orientation1 = new FrameOrientation();
+      FrameQuaternion orientation1 = new FrameQuaternion();
       FrameVector3D angularVelocity1 = new FrameVector3D();
       FrameVector3D angularAcceleration1 = new FrameVector3D();
 
       FramePoint3D position2 = new FramePoint3D();
       FrameVector3D velocity2 = new FrameVector3D();
       FrameVector3D acceleration2 = new FrameVector3D();
-      FrameOrientation orientation2 = new FrameOrientation();
+      FrameQuaternion orientation2 = new FrameQuaternion();
       FrameVector3D angularVelocity2 = new FrameVector3D();
       FrameVector3D angularAcceleration2 = new FrameVector3D();
 
@@ -310,14 +310,14 @@ public class StraightLinePoseTrajectoryGeneratorTest
       }
 
       // Do the same in another frame
-      initialPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, frameA, 100.0, 100.0, 100.0);
+      initialPosition = EuclidFrameRandomTools.nextFramePoint3D(random, frameA, 100.0, 100.0, 100.0);
       initialPositionProvider = new ConstantPositionProvider(initialPosition);
-      finalPosition = EuclidFrameRandomTools.generateRandomFramePoint3D(random, frameA, 100.0, 100.0, 100.0);
+      finalPosition = EuclidFrameRandomTools.nextFramePoint3D(random, frameA, 100.0, 100.0, 100.0);
       finalPositionProvider = new ConstantPositionProvider(finalPosition);
 
-      initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, frameA);
+      initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, frameA);
       initialOrientationProvider = new ConstantOrientationProvider(initialOrientation);
-      finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, frameA);
+      finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, frameA);
       finalOrientationProvider = new ConstantOrientationProvider(finalOrientation);
 
       originalPosition = new StraightLinePositionTrajectoryGenerator("position2", frameA, trajectoryTimeProvider, initialPositionProvider,

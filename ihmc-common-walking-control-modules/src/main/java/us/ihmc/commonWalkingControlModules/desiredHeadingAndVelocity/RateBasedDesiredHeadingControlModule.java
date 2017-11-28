@@ -101,8 +101,6 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
 
    public static class DesiredHeadingFrame extends ReferenceFrame
    {
-      private static final long serialVersionUID = 4657294310129415811L;
-
       public DesiredHeadingFrame()
       {
          super("DesiredHeadingFrame", ReferenceFrame.getWorldFrame(), false, true);

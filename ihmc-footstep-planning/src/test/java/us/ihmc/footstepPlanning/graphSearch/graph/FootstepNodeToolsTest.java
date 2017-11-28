@@ -73,13 +73,13 @@ public class FootstepNodeToolsTest
 
       for (int i = 0; i < numTests; i++)
       {
-         double x = EuclidCoreRandomTools.generateRandomDouble(random, 1.0);
-         double y = EuclidCoreRandomTools.generateRandomDouble(random, 1.0);
-         double yaw = EuclidCoreRandomTools.generateRandomDouble(random, 4.0);
+         double x = EuclidCoreRandomTools.nextDouble(random, 1.0);
+         double y = EuclidCoreRandomTools.nextDouble(random, 1.0);
+         double yaw = EuclidCoreRandomTools.nextDouble(random, 4.0);
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
 
          FootstepNode node = new FootstepNode(x, y, yaw, robotSide);
-         RigidBodyTransform snapTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         RigidBodyTransform snapTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
          RigidBodyTransform snappedNodeTransform = new RigidBodyTransform();
          FootstepNodeTools.getSnappedNodeTransform(node, snapTransform, snappedNodeTransform);
 

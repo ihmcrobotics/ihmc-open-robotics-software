@@ -11,6 +11,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -33,7 +34,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerF
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -72,6 +72,7 @@ public class WalkingMessageHandler
    private final YoDouble defaultTransferTime = new YoDouble("defaultTransferTime", registry);
    private final YoDouble finalTransferTime = new YoDouble("finalTransferTime", registry);
    private final YoDouble defaultSwingTime = new YoDouble("defaultSwingTime", registry);
+   private final YoDouble defaultTouchdownTime = new YoDouble("defaultTouchdownTime", registry);
    private final YoDouble defaultInitialTransferTime = new YoDouble("defaultInitialTransferTime", registry);
 
    private final YoDouble defaultFinalTransferTime = new YoDouble("defaultFinalTransferTime", registry);
@@ -97,13 +98,13 @@ public class WalkingMessageHandler
    private final YoBoolean offsettingPlanWithFootstepError = new YoBoolean("offsettingPlanWithFootstepError", registry);
    private final FrameVector3D planOffsetInWorld = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
-   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime, double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, defaultFinalTransferTime, contactableFeet, statusOutputManager, null, yoGraphicsListRegistry, parentRegistry);
+      this(defaultTransferTime, defaultSwingTime, defaultTouchdownTime, defaultInitialTransferTime, defaultFinalTransferTime, contactableFeet, statusOutputManager, null, yoGraphicsListRegistry, parentRegistry);
    }
 
-   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultTouchdownTime, double defaultInitialTransferTime, double defaultFinalTransferTime, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          StatusMessageOutputManager statusOutputManager, YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
@@ -116,6 +117,7 @@ public class WalkingMessageHandler
 
       this.defaultTransferTime.set(defaultTransferTime);
       this.defaultSwingTime.set(defaultSwingTime);
+      this.defaultTouchdownTime.set(defaultTouchdownTime);
       this.defaultInitialTransferTime.set(defaultInitialTransferTime);
       this.defaultFinalTransferTime.set(defaultFinalTransferTime);
       this.finalTransferTime.set(defaultFinalTransferTime);
@@ -357,13 +359,13 @@ public class WalkingMessageHandler
     * @param newSwingDuration is the new swing duration for the adjusted timing
     * @param newTransferDuration is the new transfer duration for the adjusted timing.
     */
-   public void adjustTimings(int stepIndex, double newSwingDuration, double newTransferDuration)
+   public void adjustTimings(int stepIndex, double newSwingDuration, double newTouchdownDuration, double newTransferDuration)
    {
       if (upcomingFootstepTimings.size() <= stepIndex)
       {
          throw new RuntimeException("Can not adjust timing of upciming step " + stepIndex + ", only have " + upcomingFootstepTimings.size() + " upcoming steps.");
       }
-      upcomingFootstepTimings.get(stepIndex).setTimings(newSwingDuration, newTransferDuration);
+      upcomingFootstepTimings.get(stepIndex).setTimings(newSwingDuration, newTouchdownDuration, newTransferDuration);
    }
 
    public FootTrajectoryCommand pollFootTrajectoryForFlamingoStance(RobotSide swingSide)
@@ -385,7 +387,7 @@ public class WalkingMessageHandler
       }
 
       FramePoint3D adjustedPosition = requestedFootstepAdjustment.getPosition();
-      FrameOrientation adjustedOrientation = requestedFootstepAdjustment.getOrientation();
+      FrameQuaternion adjustedOrientation = requestedFootstepAdjustment.getOrientation();
       footstepToAdjust.setPose(adjustedPosition, adjustedOrientation);
 
       if (!requestedFootstepAdjustment.getPredictedContactPoints().isEmpty())
@@ -421,6 +423,16 @@ public class WalkingMessageHandler
          requestedFootstepAdjustment.clear();
       }
       return hasNewFootstepAdjustment.getBooleanValue();
+   }
+   
+   public boolean isNextFootstepUsingAbsoluteTiming()
+   {
+      if (!hasUpcomingFootsteps())
+      {
+         return false;
+      }
+
+      return upcomingFootstepTimings.get(0).hasAbsoluteTime();
    }
 
    public boolean isNextFootstepFor(RobotSide swingSide)
@@ -586,12 +598,24 @@ public class WalkingMessageHandler
    {
       return defaultSwingTime.getDoubleValue();
    }
-
+   
    public double getNextSwingTime()
    {
       if (upcomingFootstepTimings.isEmpty())
          return getDefaultSwingTime();
       return upcomingFootstepTimings.get(0).getSwingTime();
+   }
+   
+   public double getDefaultTouchdownTime()
+   {
+      return defaultTouchdownTime.getDoubleValue();
+   }
+   
+   public double getNextTouchdownDuration()
+   {
+      if (upcomingFootstepTimings.isEmpty())
+         return getDefaultTouchdownTime();
+      return upcomingFootstepTimings.get(0).getTouchdownDuration();
    }
 
    public double getInitialTransferTime()
@@ -713,8 +737,14 @@ public class WalkingMessageHandler
          else
             transferDuration = defaultTransferTime.getDoubleValue();
       }
+      
+      double touchdownDuration = footstep.getTouchdownDuration();
+      if(Double.isNaN(touchdownDuration) || touchdownDuration < 0.0)
+      {
+         touchdownDuration = defaultTouchdownTime.getDoubleValue();
+      }
 
-      timingToSet.setTimings(swingDuration, transferDuration);
+      timingToSet.setTimings(swingDuration, touchdownDuration, transferDuration);
 
       switch (executionTiming)
       {
@@ -753,7 +783,8 @@ public class WalkingMessageHandler
 
       double lastSwingStart = firstTiming.getSwingStartTime();
       double lastSwingTime = firstTiming.getSwingTime();
-      firstTiming.setTimings(lastSwingTime, lastSwingStart);
+      double touchdownDuration = firstTiming.getTouchdownDuration();
+      firstTiming.setTimings(lastSwingTime, touchdownDuration, lastSwingStart);
 
       for (int footstepIdx = 1; footstepIdx < upcomingFootstepTimings.size(); footstepIdx++)
       {
@@ -761,7 +792,8 @@ public class WalkingMessageHandler
          double swingStart = timing.getSwingStartTime();
          double swingTime = timing.getSwingTime();
          double transferTime = swingStart - (lastSwingStart + lastSwingTime);
-         timing.setTimings(swingTime, transferTime);
+         touchdownDuration = timing.getTouchdownDuration();
+         timing.setTimings(swingTime, touchdownDuration, transferTime);
 
          lastSwingStart = swingStart;
          lastSwingTime = swingTime;

@@ -2,11 +2,11 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 
@@ -59,11 +59,11 @@ public class FiniteDifferenceAngularVelocityYoFrameVector extends YoFrameVector
       update(currentOrientationMatrix);
    }
 
-   public void update(FrameOrientation currentOrientation)
+   public void update(FrameQuaternion currentOrientation)
    {
       checkReferenceFrameMatch(currentOrientation);
 
-      currentOrientation.getMatrix3d(currentOrientationMatrix);
+      currentOrientationMatrix.set(currentOrientation);
       update(currentOrientationMatrix);
    }
 

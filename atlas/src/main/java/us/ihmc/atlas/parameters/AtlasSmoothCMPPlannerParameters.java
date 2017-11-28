@@ -1,5 +1,6 @@
 package us.ihmc.atlas.parameters;
 
+import us.ihmc.commonWalkingControlModules.configurations.AngularMomentumEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commonWalkingControlModules.configurations.CoPSupportPolygonNames;
 import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
@@ -84,22 +85,41 @@ public class AtlasSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
    {
       return atlasPhysicalProperties.getFootLengthForControl();
    }
-   
+
    @Override
    public double getTransferSplitFraction()
    {
       return 0.5;
    }
-   
+
    @Override
    public double getSwingSplitFraction()
    {
       return 0.5;
    }
-   
+
    @Override
    public double getSwingDurationShiftFraction()
    {
       return 0.8;
+   }
+
+   @Override
+   public AngularMomentumEstimationParameters getAngularMomentumEstimationParameters()
+   {
+      return new AngularMomentumEstimationParameters()
+      {
+         @Override
+         public double getPercentageSwingLegMass()
+         {
+            return 0.02;
+         }
+
+         @Override
+         public double getPercentageSupportLegMass()
+         {
+            return 0.02;
+         }
+      };
    }
 }

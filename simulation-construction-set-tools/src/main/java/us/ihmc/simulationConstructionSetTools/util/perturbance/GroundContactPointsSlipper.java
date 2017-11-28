@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -11,7 +12,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotController.RobotController;
@@ -158,9 +158,9 @@ public class GroundContactPointsSlipper implements RobotController
    
    private void applyRotationalSlip(double percentOfDelta)
    {
-      FrameOrientation identity = new FrameOrientation(ReferenceFrame.getWorldFrame());
-      FrameOrientation desired = slipRotation.getFrameOrientationCopy();
-      FrameOrientation delta = new FrameOrientation();
+      FrameQuaternion identity = new FrameQuaternion(ReferenceFrame.getWorldFrame());
+      FrameQuaternion desired = slipRotation.getFrameOrientationCopy();
+      FrameQuaternion delta = new FrameQuaternion();
 
       delta.interpolate(identity, desired, percentOfDelta);
       
@@ -168,7 +168,7 @@ public class GroundContactPointsSlipper implements RobotController
       slipRotation.set(desired);
 
       Point3D touchdownCoM = computeTouchdownCoM();
-      RotationMatrix deltaRotation = delta.getMatrix3dCopy();
+      RotationMatrix deltaRotation = new RotationMatrix(delta);
 
       Point3D touchdownLocation = new Point3D();
 

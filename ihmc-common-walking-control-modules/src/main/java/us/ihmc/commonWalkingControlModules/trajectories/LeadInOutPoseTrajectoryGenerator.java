@@ -3,12 +3,12 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import static us.ihmc.commonWalkingControlModules.trajectories.LeadInOutPositionTrajectoryGenerator.defaultClearanceTimeInPercentOfTrajectoryTime;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
@@ -23,7 +23,7 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final YoDouble leaveTime;
 
    private final FramePoint3D tempPosition = new FramePoint3D();
-   private final FrameOrientation tempOrientation = new FrameOrientation();
+   private final FrameQuaternion tempOrientation = new FrameQuaternion();
 
    public LeadInOutPoseTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
@@ -144,7 +144,7 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       positionTrajectoryGenerator.getAcceleration(accelerationToPack);
    }
 
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientationTrajectoryGenerator.getOrientation(orientationToPack);
    }
@@ -166,7 +166,7 @@ public class LeadInOutPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       getAcceleration(accelerationToPack);
    }
 
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
+   public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

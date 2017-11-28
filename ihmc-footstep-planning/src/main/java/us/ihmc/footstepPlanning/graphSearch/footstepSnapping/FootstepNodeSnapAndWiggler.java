@@ -1,10 +1,14 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.graphSearch.*;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
@@ -14,9 +18,6 @@ import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {
@@ -46,6 +47,9 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
          return FootstepNodeSnapData.emptyData();
 
       ConvexPolygon2D footholdPolygonInLocalFrame = FootstepNodeSnappingTools.getConvexHullOfPolygonIntersections(planarRegionToPack, footPolygon, snapTransform);
+      if (footholdPolygonInLocalFrame.isEmpty())
+         return FootstepNodeSnapData.emptyData();
+
       RigidBodyTransform wiggleTransformLocalToLocal = getWiggleTransformInPlanarRegionFrame(footholdPolygonInLocalFrame);
       
       if (wiggleTransformLocalToLocal == null)
@@ -76,7 +80,10 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
                                                 planarRegionsIntersectingSnappedAndWiggledPolygon))
          return FootstepNodeSnapData.emptyData();
 
-      return new FootstepNodeSnapData(snapAndWiggleTransform, new ConvexPolygon2D());
+      ConvexPolygon2D wiggledFootholdPolygonInLocalFrame = FootstepNodeSnappingTools.getConvexHullOfPolygonIntersections(planarRegionToPack, footPolygon, snapAndWiggleTransform);
+      FootstepNodeSnappingTools.changeFromPlanarRegionToSoleFrame(planarRegionToPack, footstepNode, snapAndWiggleTransform, wiggledFootholdPolygonInLocalFrame);
+
+      return new FootstepNodeSnapData(snapAndWiggleTransform, wiggledFootholdPolygonInLocalFrame);
    }
 
    private RigidBodyTransform getWiggleTransformInPlanarRegionFrame(ConvexPolygon2D footholdPolygon)

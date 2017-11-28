@@ -29,7 +29,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 public class PlanarRegion
 {
    public static final int NO_REGION_ID = -1;
-   public static final double DEFAULT_BOUNDING_BOX_EPSILON = 1e-15;
+   public static final double DEFAULT_BOUNDING_BOX_EPSILON = 0.0;
 
    private int regionId = NO_REGION_ID;
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
@@ -177,7 +177,7 @@ public class PlanarRegion
    public boolean isPolygonIntersecting(ConvexPolygon2D convexPolygon2d)
    {
       BoundingBox2D polygonBoundingBox = convexPolygon2d.getBoundingBox();
-      if (!boundingBox3dInWorld.intersectsEpsilonInXYPlane(polygonBoundingBox, boundingBoxEpsilon))
+      if (!boundingBox3dInWorld.intersectsInclusiveInXYPlane(polygonBoundingBox))
          return false;
 
       // Instead of projecting all the polygons of this region onto the world XY-plane,
@@ -778,6 +778,12 @@ public class PlanarRegion
             this.boundingBox3dInWorld.updateToIncludePoint(tempPointForConvexPolygonProjection);
          }
       }
+
+      Point3DReadOnly minPoint = boundingBox3dInWorld.getMinPoint();
+      Point3DReadOnly maxPoint = boundingBox3dInWorld.getMaxPoint();
+
+      this.boundingBox3dInWorld.setMin(minPoint.getX() - boundingBoxEpsilon, minPoint.getY() - boundingBoxEpsilon, minPoint.getZ() - boundingBoxEpsilon);
+      this.boundingBox3dInWorld.setMax(maxPoint.getX() + boundingBoxEpsilon, maxPoint.getY() + boundingBoxEpsilon, maxPoint.getZ() + boundingBoxEpsilon);
    }
 
    private void updateConvexHull()

@@ -109,4 +109,12 @@ public abstract class YoFrameTrajectoryPoint<Y extends YoFrameTrajectoryPoint<Y,
          return false;
       return super.epsilonEquals(other, epsilon);
    }
+
+   @Override
+   public boolean geometricallyEquals(Y other, double epsilon)
+   {
+      if (!MathTools.epsilonEquals(getTime(), other.getTime(), epsilon))
+         return false;
+      return super.geometricallyEquals(other, epsilon);
+   }
 }

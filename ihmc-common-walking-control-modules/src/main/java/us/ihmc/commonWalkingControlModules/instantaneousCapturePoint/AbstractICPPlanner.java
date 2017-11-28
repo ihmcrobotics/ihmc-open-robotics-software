@@ -143,6 +143,7 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    protected final YoEnum<RobotSide> supportSide = new YoEnum<>(namePrefix + "SupportSide", registry, RobotSide.class, true);
 
    protected final List<YoDouble> swingDurations = new ArrayList<>();
+   protected final List<YoDouble> touchdownDurations = new ArrayList<>();
    protected final List<YoDouble> transferDurations = new ArrayList<>();
    protected final YoDouble defaultFinalTransferDuration = new YoDouble(namePrefix + "DefaultFinalTransferDuration", registry);
    protected final YoDouble finalTransferDuration = new YoDouble(namePrefix + "FinalTransferDuration", registry);
@@ -191,6 +192,9 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
          YoDouble swingDuration = new YoDouble(namePrefix + "SwingDuration" + i, registry);
          swingDuration.setToNaN();
          swingDurations.add(swingDuration);
+         YoDouble touchdownDuration = new YoDouble(namePrefix + "TouchdownDuration" + i, registry);
+         touchdownDuration.setToNaN();
+         touchdownDurations.add(touchdownDuration);
          YoDouble transferDuration = new YoDouble(namePrefix + "TransferDuration" + i, registry);
          transferDuration.setToNaN();
          transferDurations.add(transferDuration);
@@ -592,6 +596,19 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    public void setSwingDuration(int stepNumber, double duration)
    {
       swingDurations.get(stepNumber).set(duration);
+   }
+
+   @Override
+   /** {@inheritDoc} */
+   public void setTouchdownDuration(int stepNumber, double duration)
+   {
+      touchdownDurations.get(stepNumber).set(duration);
+   }
+   
+    @Override
+   public double getTouchdownDuration(int stepNumber)
+   {
+       return touchdownDurations.get(stepNumber).getDoubleValue();
    }
 
    @Override
