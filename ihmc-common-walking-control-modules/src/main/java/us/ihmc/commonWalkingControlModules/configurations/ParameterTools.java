@@ -7,7 +7,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.parameters.YoJointAccelerationIntegrationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.TunableJointAccelerationIntegrationParameters;
 import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
@@ -44,7 +44,7 @@ public class ParameterTools
       {
          String name = parameterTripple.getLeft();
          JointAccelerationIntegrationParametersReadOnly defaultParameters = parameterTripple.getMiddle();
-         YoJointAccelerationIntegrationParameters yoParameters = new YoJointAccelerationIntegrationParameters(name, registry, defaultParameters);
+         TunableJointAccelerationIntegrationParameters yoParameters = new TunableJointAccelerationIntegrationParameters(name, registry, defaultParameters);
 
          for (String jointName : parameterTripple.getRight())
          {

@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  * defines the parameters created by this class the default values will be overwritten.
  * </p>
  */
-public class YoJointAccelerationIntegrationParameters implements JointAccelerationIntegrationParametersReadOnly
+public class TunableJointAccelerationIntegrationParameters implements JointAccelerationIntegrationParametersReadOnly
 {
    private static final double SUGGESTED_MAXIMUM_POSITION_ERROR = 2.0 * Math.PI;
    private static final double SUGGESTED_MAXIMUM_VELOCITY = SUGGESTED_MAXIMUM_POSITION_ERROR / 0.1;
@@ -31,7 +31,7 @@ public class YoJointAccelerationIntegrationParameters implements JointAccelerati
     * @param namePrefix the {@code String} to be prepended to each {@code YoVariable} of this class.
     * @param registry the registry to which the {@code YoVariable}s of this class are registered to.
     */
-   public YoJointAccelerationIntegrationParameters(String namePrefix, YoVariableRegistry registry)
+   public TunableJointAccelerationIntegrationParameters(String namePrefix, YoVariableRegistry registry)
    {
       alphaPosition = new DoubleParameter(namePrefix + "AlphaPosition", registry, JointAccelerationIntegrationCalculator.DEFAULT_ALPHA_POSITION, 0.0, 1.0);
       alphaVelocity = new DoubleParameter(namePrefix + "AlphaVelocity", registry, JointAccelerationIntegrationCalculator.DEFAULT_ALPHA_VELOCITY, 0.0, 1.0);
@@ -49,7 +49,7 @@ public class YoJointAccelerationIntegrationParameters implements JointAccelerati
     * @param registry the registry to which the {@code YoVariable}s of this class are registered to.
     * @param defaults the default values to be used if the parameters can not be loaded from file.
     */
-   public YoJointAccelerationIntegrationParameters(String namePrefix, YoVariableRegistry registry, JointAccelerationIntegrationParametersReadOnly defaults)
+   public TunableJointAccelerationIntegrationParameters(String namePrefix, YoVariableRegistry registry, JointAccelerationIntegrationParametersReadOnly defaults)
    {
       alphaPosition = new DoubleParameter(namePrefix + "AlphaPosition", registry, defaults.getAlphaPosition(), 0.0, 1.0);
       alphaVelocity = new DoubleParameter(namePrefix + "AlphaVelocity", registry, defaults.getAlphaVelocity(), 0.0, 1.0);
@@ -70,7 +70,7 @@ public class YoJointAccelerationIntegrationParameters implements JointAccelerati
     * @param maxVelocity the maximum default desired velocity, see {@link #getMaxVelocity()}.
     * @param registry the registry to which the {@code YoVariable}s of this class are registered to.
     */
-   public YoJointAccelerationIntegrationParameters(String namePrefix, double alphaPosition, double alphaVelocity, double maxPositionError, double maxVelocity,
+   public TunableJointAccelerationIntegrationParameters(String namePrefix, double alphaPosition, double alphaVelocity, double maxPositionError, double maxVelocity,
                                                    YoVariableRegistry registry)
    {
       this.alphaPosition = new DoubleParameter(namePrefix + "AlphaPosition", registry, alphaPosition, 0.0, 1.0);
