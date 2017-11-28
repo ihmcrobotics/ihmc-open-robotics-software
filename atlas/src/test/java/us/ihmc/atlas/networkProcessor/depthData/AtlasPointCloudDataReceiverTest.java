@@ -20,7 +20,7 @@ public class AtlasPointCloudDataReceiverTest extends HumanoidPointCloudDataRecei
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 28.6)
-   @Test
+   @Test(timeout = 30000)
    public void testIsReceivingScansAnd95PercentOfPointsAreCorrect() throws SimulationExceededMaximumTimeException
    {
       super.testIsReceivingScansAnd95PercentOfPointsAreCorrect();

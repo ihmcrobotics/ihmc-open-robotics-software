@@ -27,9 +27,9 @@ public class FrameMatrix3DTest
    private static final Random random = new Random(21651651L);
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final ReferenceFrame aFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("aFrame", worldFrame,
-                                                                                                             EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+                                                                                                             EuclidCoreRandomTools.nextRigidBodyTransform(random));
    private static final ReferenceFrame bFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("bFrame", worldFrame,
-                                                                                                             EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+                                                                                                             EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
@@ -342,7 +342,7 @@ public class FrameMatrix3DTest
          Matrix3D matrixTransformed = new Matrix3D();
 
          ReferenceFrame randomFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("randomFrame" + i, ReferenceFrame.getWorldFrame(),
-                                                                                                   EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+                                                                                                   EuclidCoreRandomTools.nextRigidBodyTransform(random));
          FrameMatrix3D frameMatrix3D = new FrameMatrix3D(randomFrame, matrixOriginal);
          frameMatrix3D.changeFrame(bFrame);
 
@@ -375,8 +375,8 @@ public class FrameMatrix3DTest
 
       for (int i = 0; i < 1000; i++)
       {
-         randomFrameA.setPoseAndUpdate(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
-         randomFrameB.setPoseAndUpdate(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+         randomFrameA.setPoseAndUpdate(EuclidCoreRandomTools.nextRigidBodyTransform(random));
+         randomFrameB.setPoseAndUpdate(EuclidCoreRandomTools.nextRigidBodyTransform(random));
          originalVector.setIncludingFrame(randomFrameA, RandomGeometry.nextVector3D(random, 1.0));
          transformationMatrixToBeTested.setIncludingFrame(randomFrameA, RandomGeometry.nextMatrix3D(random, 1.0));
 

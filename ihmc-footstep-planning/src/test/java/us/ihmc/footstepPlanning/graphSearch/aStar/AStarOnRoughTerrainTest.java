@@ -10,7 +10,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.SimpleSideBasedExpansion;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.roughTerrainPlanning.FootstepPlannerOnRoughTerrainTest;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
@@ -41,6 +41,13 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
       super.testWalkingAroundHole();
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
+   public void testWithWall()
+   {
+      super.testWithWall(true);
+   }
+
    @Override
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
@@ -64,14 +71,29 @@ public class AStarOnRoughTerrainTest extends FootstepPlannerOnRoughTerrainTest
       super.testStepUpsAndDownsScoringDifficult(false);
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
+   public void testSteppingStones()
+   {
+      super.testSteppingStones(!visualizePlanner);
+   }
+
+   @Override
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
+   public void testOverCinderBlockField()
+   {
+      super.testOverCinderBlockField(!visualizePlanner);
+   }
+
    @Before
    public void createPlanner()
    {
       if (visualizePlanner)
          visualization = new FootstepNodeVisualization(1000, 1.0, null);
       SideDependentList<ConvexPolygon2D> footPolygons = PlanningTestTools.createDefaultFootPolygons();
-      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
-      planner = AStarFootstepPlanner.createRoughTerrainPlanner(visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(getParameters());
+      planner = AStarFootstepPlanner.createRoughTerrainPlanner(getParameters(), visualization, footPolygons, expansion, new YoVariableRegistry("TestRegistry"));
    }
 
    @After

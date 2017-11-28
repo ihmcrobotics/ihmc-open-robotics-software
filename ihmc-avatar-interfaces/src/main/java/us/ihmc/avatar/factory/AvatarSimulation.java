@@ -33,7 +33,6 @@ public class AvatarSimulation
 
    public void start()
    {
-      System.out.println(humanoidFloatingRootJointRobot.getRobotsYoVariableRegistry().getAllVariables().size());
       if (yoVariableServer != null)
       {
          yoVariableServer.start();

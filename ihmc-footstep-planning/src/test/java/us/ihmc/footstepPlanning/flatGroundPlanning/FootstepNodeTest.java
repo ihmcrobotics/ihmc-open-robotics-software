@@ -10,8 +10,8 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerNodeUtils;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Random;
@@ -33,9 +33,9 @@ public class FootstepNodeTest
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
 
          // test for exact same transform
-         double x = EuclidCoreRandomTools.generateRandomDouble(random, 1.0);
-         double y = EuclidCoreRandomTools.generateRandomDouble(random, 1.0);
-         double yaw = EuclidCoreRandomTools.generateRandomDouble(random, 1.0);
+         double x = EuclidCoreRandomTools.nextDouble(random, 1.0);
+         double y = EuclidCoreRandomTools.nextDouble(random, 1.0);
+         double yaw = EuclidCoreRandomTools.nextDouble(random, 1.0);
 
          nodeA = new FootstepNode(x, y, yaw, robotSide);
          nodeB = new FootstepNode(x, y, yaw, robotSide);
@@ -55,7 +55,7 @@ public class FootstepNodeTest
       FootstepNode node = new FootstepNode(soleTranslation.getX(), soleTranslation.getY(), yaw, RobotSide.LEFT);
 
       Vector2D shiftVector = new Vector2D(1.0, 2.0);
-      RigidBodyTransform shiftedSoleTransform = BipedalFootstepPlannerNodeUtils.shiftInSoleFrame(shiftVector, soleTransform);
+      RigidBodyTransform shiftedSoleTransform = FootstepNodeTools.shiftInSoleFrame(shiftVector, soleTransform);
       EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.0, 2.0, 0.0), shiftedSoleTransform.getTranslationVector(), 1e-7);
       assertTrue(MathTools.epsilonEquals(node.getYaw(), yaw, 1e-7));
 
@@ -66,7 +66,7 @@ public class FootstepNodeTest
       node = new FootstepNode(soleTranslation.getX(), soleTranslation.getY(), yaw, RobotSide.LEFT);
 
       shiftVector = new Vector2D(1.0, 2.0);
-      shiftedSoleTransform = BipedalFootstepPlannerNodeUtils.shiftInSoleFrame(shiftVector, soleTransform);
+      shiftedSoleTransform = FootstepNodeTools.shiftInSoleFrame(shiftVector, soleTransform);
 
       EuclidCoreTestTools.assertTuple3DEquals(new Point3D(-2.0, 1.0, 0.0), shiftedSoleTransform.getTranslationVector(), 1e-7);
       assertTrue(MathTools.epsilonEquals(node.getYaw(), yaw, 1e-7));

@@ -6,7 +6,7 @@ import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SingularOps;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public class NullspaceCalculator
 {

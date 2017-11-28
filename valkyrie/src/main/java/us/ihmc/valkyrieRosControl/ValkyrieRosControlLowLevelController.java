@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -23,21 +24,25 @@ import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatus
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.packets.valkyrie.ValkyrieLowLevelControlModeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.taskExecutor.Task;
 import us.ihmc.tools.taskExecutor.TaskExecutor;
+import us.ihmc.valkyrie.fingers.ValkyrieFingerController;
+import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
 import us.ihmc.valkyrieRosControl.dataHolders.YoPositionJointHandleHolder;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimator;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class ValkyrieRosControlLowLevelController
 {
@@ -72,8 +77,8 @@ public class ValkyrieRosControlLowLevelController
    private final YoEnum<ValkyrieLowLevelControlModeMessage.ControlMode> requestedLowLevelControlMode = new YoEnum<>("requestedLowLevelControlMode", registry, ValkyrieLowLevelControlModeMessage.ControlMode.class, true);
    private final AtomicReference<ValkyrieLowLevelControlModeMessage.ControlMode> requestedLowLevelControlModeAtomic = new AtomicReference<>(null);
 
-   private final ValkyrieTorqueHysteresisCompensator torqueHysteresisCompensator;
    private final ValkyrieAccelerationIntegration accelerationIntegration;
+   private final ValkyrieFingerController fingerController;
 
    private CommandInputManager commandInputManager;
    private final AtomicReference<HighLevelState> currentHighLevelState = new AtomicReference<HighLevelState>(null);
@@ -90,7 +95,7 @@ public class ValkyrieRosControlLowLevelController
 
    @SuppressWarnings("unchecked")
    public ValkyrieRosControlLowLevelController(TimestampProvider timestampProvider, final double updateDT, List<YoEffortJointHandleHolder> yoEffortJointHandleHolders,
-         List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, YoVariableRegistry parentRegistry)
+         List<YoPositionJointHandleHolder> yoPositionJointHandleHolders, ValkyrieJointMap jointMap, YoVariableRegistry parentRegistry)
    {
       this.timestampProvider = timestampProvider;
 
@@ -105,8 +110,12 @@ public class ValkyrieRosControlLowLevelController
       standPrepStartTime.set(Double.NaN);
       calibrationStartTime.set(Double.NaN);
       
-      torqueHysteresisCompensator = new ValkyrieTorqueHysteresisCompensator(yoEffortJointHandleHolders, yoTime, registry);
-      accelerationIntegration = new ValkyrieAccelerationIntegration(yoEffortJointHandleHolders, updateDT, registry);
+      fingerController = new ValkyrieFingerController(yoTime, updateDT, yoEffortJointHandleHolders, registry);
+
+      // Remove the finger joints to let the finger controller be the only controlling them
+      yoEffortJointHandleHolders = yoEffortJointHandleHolders.stream().filter(h -> !isFingerJoint(h)).collect(Collectors.toList());
+      
+      accelerationIntegration = new ValkyrieAccelerationIntegration(jointMap, yoEffortJointHandleHolders, updateDT, registry);
 
       requestedLowLevelControlMode.addVariableChangedListener(new VariableChangedListener()
       {
@@ -351,12 +360,12 @@ public class ValkyrieRosControlLowLevelController
             break;
          }
 
-         torqueHysteresisCompensator.compute();
          if (ValkyrieRosControlController.INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
             accelerationIntegration.compute();
          break;
       }
 
+      fingerController.doControl();
       updateCommandCalculators();
    }
 
@@ -465,6 +474,7 @@ public class ValkyrieRosControlLowLevelController
 
    public void setupLowLevelControlWithPacketCommunicator(PacketCommunicator packetCommunicator)
    {
+      fingerController.setupCommunication(packetCommunicator);
       packetCommunicator.attachListener(ValkyrieLowLevelControlModeMessage.class, new PacketConsumer<ValkyrieLowLevelControlModeMessage>()
       {
          @Override
@@ -474,5 +484,21 @@ public class ValkyrieRosControlLowLevelController
                requestedLowLevelControlModeAtomic.set(packet.getRequestedControlMode());
          }
       });
+   }
+
+   /**
+    * Very inefficient way of checking if a joint is a finger joint that should be used only at construction time.
+    */
+   private static boolean isFingerJoint(YoEffortJointHandleHolder handle)
+   {
+      for (ValkyrieHandJointName valkyrieHandJointName : ValkyrieHandJointName.values)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (handle.getName().equals(valkyrieHandJointName.getJointName(robotSide)))
+               return true;
+         }
+      }
+      return false;
    }
 }

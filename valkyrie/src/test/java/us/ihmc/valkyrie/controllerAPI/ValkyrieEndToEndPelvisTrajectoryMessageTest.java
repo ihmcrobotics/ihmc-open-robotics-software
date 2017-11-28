@@ -26,56 +26,56 @@ public class ValkyrieEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisT
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 18.0)
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 54.8)
+   @Test(timeout = 160000)
    public void testHeightModeSwitchWhileWalking() throws Exception
    {
       super.testHeightModeSwitchWhileWalking();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 18.0)
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 59.9)
+   @Test(timeout = 160000)
    public void testHeightUsingMultipleWaypoints() throws Exception
    {
       super.testHeightUsingMultipleWaypoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 18.0)
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 63.1)
+   @Test(timeout = 160000)
    public void testHeightUsingMultipleWaypointsWhileWalking() throws Exception
    {
       super.testHeightUsingMultipleWaypointsWhileWalking();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 18.0)
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 18.7)
+   @Test(timeout = 160000)
    public void testMultipleWaypoints() throws Exception
    {
       super.testMultipleWaypoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 24.6)
+   @Test(timeout = 160000)
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 64.7)
+   @Test(timeout = 160000)
    public void testSingleWaypointAndWalk() throws Exception
    {
       super.testSingleWaypointAndWalk();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 24.6)
+   @Test(timeout = 160000)
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();

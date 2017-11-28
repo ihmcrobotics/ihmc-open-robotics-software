@@ -5,14 +5,14 @@ import java.util.List;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
@@ -309,7 +309,7 @@ public class Footstep implements Settable<Footstep>
       this.footstepPose.setIncludingFrame(footstepPose);
    }
 
-   public void setPose(FramePoint3D position, FrameOrientation orientation)
+   public void setPose(FramePoint3D position, FrameQuaternion orientation)
    {
       footstepPose.setPoseIncludingFrame(position, orientation);
    }
@@ -346,7 +346,7 @@ public class Footstep implements Settable<Footstep>
       poseToPack.setIncludingFrame(footstepPose);
    }
 
-   public void getPose(FramePoint3D positionToPack, FrameOrientation orientationToPack)
+   public void getPose(FramePoint3D positionToPack, FrameQuaternion orientationToPack)
    {
       footstepPose.getPoseIncludingFrame(positionToPack, orientationToPack);
    }
@@ -361,7 +361,7 @@ public class Footstep implements Settable<Footstep>
       footstepPose.getPosition2dIncludingFrame(positionToPack);
    }
 
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       footstepPose.getOrientationIncludingFrame(orientationToPack);
    }
@@ -463,7 +463,7 @@ public class Footstep implements Settable<Footstep>
       position2dToPack.setIncludingFrame(footstepPose.getReferenceFrame(), x, y);
    }
 
-   public void getAnkleOrientation(FrameOrientation orientationToPack, RigidBodyTransform transformFromAnkleToSole)
+   public void getAnkleOrientation(FrameQuaternion orientationToPack, RigidBodyTransform transformFromAnkleToSole)
    {
       tempTransform.setRotation(footstepPose.getOrientation());
       tempTransform.setTranslation(footstepPose.getPosition());

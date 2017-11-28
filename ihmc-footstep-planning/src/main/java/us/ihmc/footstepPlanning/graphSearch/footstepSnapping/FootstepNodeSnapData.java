@@ -8,6 +8,11 @@ public class FootstepNodeSnapData
    private final RigidBodyTransform snapTransform;
    private final ConvexPolygon2D croppedFoothold;
 
+   public FootstepNodeSnapData(RigidBodyTransform snapTransform)
+   {
+      this(snapTransform, new ConvexPolygon2D());
+   }
+
    public FootstepNodeSnapData(RigidBodyTransform snapTransform, ConvexPolygon2D croppedFoothold)
    {
       this.snapTransform = snapTransform;
@@ -25,8 +30,12 @@ public class FootstepNodeSnapData
    }
 
    private static final FootstepNodeSnapData EMPTY_SNAP_DATA;
+   private static final FootstepNodeSnapData IDENTITY_SNAP_DATA;
+
    static
    {
+      IDENTITY_SNAP_DATA = new FootstepNodeSnapData(new RigidBodyTransform(), new ConvexPolygon2D());
+
       RigidBodyTransform snapTransform = new RigidBodyTransform();
       ConvexPolygon2D croppedFoothold = new ConvexPolygon2D();
 
@@ -39,5 +48,10 @@ public class FootstepNodeSnapData
    public static FootstepNodeSnapData emptyData()
    {
       return EMPTY_SNAP_DATA;
+   }
+
+   public static FootstepNodeSnapData identityData()
+   {
+      return IDENTITY_SNAP_DATA;
    }
 }

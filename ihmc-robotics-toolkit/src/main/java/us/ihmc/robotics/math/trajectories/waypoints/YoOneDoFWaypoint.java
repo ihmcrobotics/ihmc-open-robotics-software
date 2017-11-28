@@ -6,7 +6,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.interfaces.OneDoFWaypointInterface;
@@ -115,6 +115,12 @@ public class YoOneDoFWaypoint implements OneDoFWaypointInterface<YoOneDoFWaypoin
       if (!MathTools.epsilonEquals(getVelocity(), other.getVelocity(), epsilon))
          return false;
       return true;
+   }
+
+   @Override
+   public boolean geometricallyEquals(YoOneDoFWaypoint other, double epsilon)
+   {
+      return epsilonEquals(other, epsilon);
    }
 
    @Override

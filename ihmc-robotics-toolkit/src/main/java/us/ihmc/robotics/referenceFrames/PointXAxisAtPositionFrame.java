@@ -8,7 +8,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class PointXAxisAtPositionFrame extends ReferenceFrame
 {
-   private static final long serialVersionUID = -3583775854419464525L;
    private final FramePoint3D positionToPointAt;
    private final Vector3D xAxis = new Vector3D();
    private final Vector3D yAxis = new Vector3D();

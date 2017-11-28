@@ -17,6 +17,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -32,7 +33,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -45,7 +45,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -53,7 +53,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    private static final double DESIRED_QUAT_EPSILON = 0.01;
    private static final double MAX_SPEED_FOR_CONTINOUS = 10.0;
 
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private final Random random = new Random(1991L);
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -383,10 +383,9 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       OneDoFJoint[] spineClone = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
       ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
       RigidBody chestClone = spineClone[spineClone.length - 1].getSuccessor();
-      FrameOrientation desiredRandomChestOrientation = new FrameOrientation(chestClone.getBodyFixedFrame());
+      FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      Quaternion desiredOrientation = new Quaternion();
-      desiredRandomChestOrientation.getQuaternion(desiredOrientation);
+      Quaternion desiredOrientation = new Quaternion(desiredRandomChestOrientation);
       return new ChestTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
    }
 
@@ -621,7 +620,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
             for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
                jointPositions.set(jointIdx, jointDesiredsMap.get(spineJoints[jointIdx]).getDoubleValue());
             ScrewTools.setJointPositions(spineJointClones, jointPositions);
-            FrameOrientation chestOrientation = new FrameOrientation(chestClone.getBodyFixedFrame());
+            FrameQuaternion chestOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());
             chestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
             currentDesiredOrientation.set(chestOrientation);
          }

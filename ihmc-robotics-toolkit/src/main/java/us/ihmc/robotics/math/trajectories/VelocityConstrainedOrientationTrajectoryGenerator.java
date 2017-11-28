@@ -1,15 +1,15 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
@@ -166,9 +166,9 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       trajectoryTime.set(duration);
    }
 
-   private final FrameOrientation tempOrientation = new FrameOrientation();
+   private final FrameQuaternion tempOrientation = new FrameQuaternion();
 
-   public void setInitialOrientation(FrameOrientation initialOrientation)
+   public void setInitialOrientation(FrameQuaternion initialOrientation)
    {
       tempOrientation.setIncludingFrame(initialOrientation);
       tempOrientation.changeFrame(trajectoryFrame);
@@ -182,7 +182,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       this.initialOrientation.set(tempOrientation);
    }
 
-   public void setFinalOrientation(FrameOrientation finalOrientation)
+   public void setFinalOrientation(FrameQuaternion finalOrientation)
    {
       tempOrientation.setIncludingFrame(finalOrientation);
       tempOrientation.changeFrame(trajectoryFrame);
@@ -233,7 +233,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       finalAngularVelocity.setToZero();
    }
 
-   public void setInitialConditions(FrameOrientation initialOrientation, FrameVector3D initialAngularVelocity)
+   public void setInitialConditions(FrameQuaternion initialOrientation, FrameVector3D initialAngularVelocity)
    {
       setInitialOrientation(initialOrientation);
       setInitialAngularVelocity(initialAngularVelocity);
@@ -245,7 +245,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       setInitialAngularVelocity(initialAngularVelocity);
    }
 
-   public void setFinalConditions(FrameOrientation finalOrientation, FrameVector3D finalAngularVelocity)
+   public void setFinalConditions(FrameQuaternion finalOrientation, FrameVector3D finalAngularVelocity)
    {
       setFinalOrientation(finalOrientation);
       setFinalAngularVelocity(finalAngularVelocity);
@@ -399,12 +399,12 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       RotationTools.integrateAngularVelocity(tempAngularVelocityForDrift, time, driftToPack);
    }
 
-   public void getInitialOrientationDrifted(FrameOrientation initialOrientationDriftedToPack)
+   public void getInitialOrientationDrifted(FrameQuaternion initialOrientationDriftedToPack)
    {
       initialOrientationDrifted.getFrameOrientationIncludingFrame(initialOrientationDriftedToPack);
    }
 
-   public void getFinalOrientationDrifted(FrameOrientation finalOrientationDriftedToPack)
+   public void getFinalOrientationDrifted(FrameQuaternion finalOrientationDriftedToPack)
    {
       finalOrientationDrifted.getFrameOrientationIncludingFrame(finalOrientationDriftedToPack);
    }
@@ -416,7 +416,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
    }
 
    @Override
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       currentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
@@ -434,7 +434,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
    }
 
    @Override
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
+   public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

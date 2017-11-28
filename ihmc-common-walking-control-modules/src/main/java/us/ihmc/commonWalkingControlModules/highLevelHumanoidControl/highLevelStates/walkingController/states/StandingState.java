@@ -7,19 +7,20 @@ import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectio
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PrepareForLocomotionCommand;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class StandingState extends WalkingState
 {
@@ -80,11 +81,13 @@ public class StandingState extends WalkingState
    public void doAction()
    {
       comHeightManager.setSupportLeg(RobotSide.LEFT);
+      consumePrepareForLocomotion();
    }
 
    @Override
    public void doTransitionIntoAction()
    {
+      consumePrepareForLocomotion();
       commandInputManager.flushAllCommands();
 
       balanceManager.clearICPPlan();
@@ -140,6 +143,16 @@ public class StandingState extends WalkingState
    public boolean isStateSafeToConsumeManipulationCommands()
    {
       return true;
+   }
+
+   private void consumePrepareForLocomotion()
+   {
+      if (commandInputManager.isNewCommandAvailable(PrepareForLocomotionCommand.class))
+      {
+         PrepareForLocomotionCommand command = commandInputManager.pollNewestCommand(PrepareForLocomotionCommand.class);
+         doPrepareManipulationForLocomotion.set(command.isPrepareManipulation());
+         doPreparePelvisForLocomotion.set(command.isPreparePelvis());
+      }
    }
 
    @Override

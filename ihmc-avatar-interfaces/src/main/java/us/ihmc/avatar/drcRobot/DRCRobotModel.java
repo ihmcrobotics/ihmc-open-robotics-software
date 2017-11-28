@@ -9,6 +9,7 @@ import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -76,7 +77,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    {
       return null;
    }
-   
+
    /**
     * Override this method to create a custom output writer to be used with this robot.
     * <p>
@@ -98,8 +99,13 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    {
       return null;
    }
-   
+
    public default PlanarRegionFootstepPlanningParameters getPlanarRegionFootstepPlannerParameters()
+   {
+      return null;
+   }
+
+   public default FootstepPlannerParameters getFootstepPlannerParameters()
    {
       return null;
    }

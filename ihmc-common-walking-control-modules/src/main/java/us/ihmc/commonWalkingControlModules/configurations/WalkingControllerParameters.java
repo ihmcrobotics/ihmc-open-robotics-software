@@ -333,7 +333,10 @@ public abstract class WalkingControllerParameters
     * @return whether the manipulation control should get prepared
     *  for walking.
     */
-   public abstract boolean doPrepareManipulationForLocomotion();
+   public boolean doPrepareManipulationForLocomotion()
+   {
+      return true;
+   }
 
    /**
     * Specifies if the pelvis orientation controller should
@@ -372,6 +375,16 @@ public abstract class WalkingControllerParameters
     * swing foot to the next foothold.
     */
    public abstract double getDefaultSwingTime();
+   
+
+   /**
+    * The touchdown state triggers after the swing phase. It attempts to soften the touchdown by ramping the rho weights. Setting this to zero will disable the touchdown state 
+    * @return
+    */
+   public double getDefaultTouchdownTime()
+   {
+      return 0.0;
+   }
 
    /**
     * This is the default transfer time used in the walking controller to shift the weight back to the center of the feet

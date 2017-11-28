@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -28,7 +29,6 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -94,8 +94,11 @@ public class KinematicsToolboxHelper
    {
       RootJointDesiredConfigurationDataReadOnly outputForRootJoint = controllerCoreOutput.getRootJointDesiredConfigurationData();
 
-      rootJoint.setConfiguration(outputForRootJoint.getDesiredConfiguration(), 0);
-      rootJoint.setVelocity(outputForRootJoint.getDesiredVelocity(), 0);
+      if (rootJoint != null)
+      {
+         rootJoint.setConfiguration(outputForRootJoint.getDesiredConfiguration(), 0);
+         rootJoint.setVelocity(outputForRootJoint.getDesiredVelocity(), 0);
+      }
 
       LowLevelOneDoFJointDesiredDataHolderReadOnly output = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
       for (OneDoFJoint joint : oneDoFJoints)
@@ -110,7 +113,10 @@ public class KinematicsToolboxHelper
          }
       }
 
-      rootJoint.getPredecessor().updateFramesRecursively();
+      if (rootJoint != null)
+         rootJoint.getPredecessor().updateFramesRecursively();
+      else
+         oneDoFJoints[0].getPredecessor().updateFramesRecursively();
    }
 
    /**
@@ -136,13 +142,16 @@ public class KinematicsToolboxHelper
          oneDoFJoints[i].setQd(0.0);
       }
 
-      Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
-      desiredRootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
-      Quaternion32 orientation = robotConfigurationData.getPelvisOrientation();
-      desiredRootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
-      desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
-
-      desiredRootJoint.getPredecessor().updateFramesRecursively();
+      if (desiredRootJoint != null)
+      {
+         Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
+         desiredRootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
+         Quaternion32 orientation = robotConfigurationData.getPelvisOrientation();
+         desiredRootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
+         desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
+         
+         desiredRootJoint.getPredecessor().updateFramesRecursively();
+      }
    }
 
    /**
@@ -292,7 +301,7 @@ public class KinematicsToolboxHelper
       currentPosition.changeFrame(worldFrame);
       controlFrame.setPositionAndUpdate(currentPosition);
 
-      FrameOrientation currentOrientation = new FrameOrientation();
+      FrameQuaternion currentOrientation = new FrameQuaternion();
       feedbackControllerDataHolder.getOrientationData(endEffector, currentOrientation, Type.CURRENT);
       currentOrientation.changeFrame(worldFrame);
       controlFrame.setOrientationAndUpdate(currentOrientation);

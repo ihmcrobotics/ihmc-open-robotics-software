@@ -188,7 +188,7 @@ public class LogCompressorUI extends JFrame
          return;
       }
 
-      if (targetFile.equals(""))
+      if (targetFile.getName().equals(""))
       {
          JOptionPane.showMessageDialog(this, "No target directory entered", "Invalid target", JOptionPane.ERROR_MESSAGE);
          return;
@@ -258,7 +258,7 @@ public class LogCompressorUI extends JFrame
          return;
       }
       
-      if (targetFile.equals(""))
+      if (targetFile.getName().equals(""))
       {
          JOptionPane.showMessageDialog(this, "No target directory entered", "Invalid target", JOptionPane.ERROR_MESSAGE);
          return;

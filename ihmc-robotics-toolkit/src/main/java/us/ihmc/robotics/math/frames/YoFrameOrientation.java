@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.frames;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.rotationConversion.QuaternionConversion;
@@ -11,7 +12,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -23,7 +23,7 @@ public class YoFrameOrientation implements ReferenceFrameHolder, Clearable
    private final YoDouble yaw, pitch, roll; // This is where the data is stored. All operations must act on these numbers.
    private final ReferenceFrame referenceFrame;
    private final double[] tempYawPitchRoll = new double[3];
-   private final FrameOrientation tempFrameOrientation = new FrameOrientation();
+   private final FrameQuaternion tempFrameOrientation = new FrameQuaternion();
 
    public YoFrameOrientation(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
@@ -112,16 +112,16 @@ public class YoFrameOrientation implements ReferenceFrameHolder, Clearable
 
    public void set(RigidBodyTransform transform3D)
    {
-      tempFrameOrientation.setIncludingFrame(getReferenceFrame(), transform3D);
+      tempFrameOrientation.setIncludingFrame(getReferenceFrame(), transform3D.getRotationMatrix());
       set(tempFrameOrientation);
    }
 
-   public void set(FrameOrientation orientation)
+   public void set(FrameQuaternion orientation)
    {
       set(orientation, true);
    }
 
-   public void set(FrameOrientation orientation, boolean notifyListeners)
+   public void set(FrameQuaternion orientation, boolean notifyListeners)
    {
       orientation.checkReferenceFrameMatch(getReferenceFrame());
       orientation.getYawPitchRoll(tempYawPitchRoll);
@@ -145,12 +145,12 @@ public class YoFrameOrientation implements ReferenceFrameHolder, Clearable
       set(tempFrameOrientation);
    }
 
-   public void setAndMatchFrame(FrameOrientation orientation)
+   public void setAndMatchFrame(FrameQuaternion orientation)
    {
       setAndMatchFrame(orientation, true);
    }
 
-   public void setAndMatchFrame(FrameOrientation orientation, boolean notifyListeners)
+   public void setAndMatchFrame(FrameQuaternion orientation, boolean notifyListeners)
    {
       tempFrameOrientation.setIncludingFrame(orientation);
       tempFrameOrientation.changeFrame(getReferenceFrame());
@@ -287,19 +287,19 @@ public class YoFrameOrientation implements ReferenceFrameHolder, Clearable
       RotationMatrixConversion.convertYawPitchRollToMatrix(yaw.getDoubleValue(), pitch.getDoubleValue(), roll.getDoubleValue(), rotationMatrixToPack);
    }
 
-   public void getFrameOrientationIncludingFrame(FrameOrientation orientationToPack)
+   public void getFrameOrientationIncludingFrame(FrameQuaternion orientationToPack)
    {
       orientationToPack.setToZero(getReferenceFrame());
       orientationToPack.setYawPitchRoll(yaw.getDoubleValue(), pitch.getDoubleValue(), roll.getDoubleValue());
    }
 
-   public FrameOrientation getFrameOrientationCopy()
+   public FrameQuaternion getFrameOrientationCopy()
    {
-      FrameOrientation orientation = new FrameOrientation(getReferenceFrame(), yaw.getDoubleValue(), pitch.getDoubleValue(), roll.getDoubleValue());
+      FrameQuaternion orientation = new FrameQuaternion(getReferenceFrame(), yaw.getDoubleValue(), pitch.getDoubleValue(), roll.getDoubleValue());
       return orientation;
    }
    
-   public FrameOrientation getFrameOrientation()
+   public FrameQuaternion getFrameOrientation()
    {
       putYoValuesIntoFrameOrientation();
       return tempFrameOrientation;

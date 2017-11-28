@@ -59,7 +59,7 @@ public class DRCNetworkProcessor
       tryToStartModule(() -> addTextToSpeechEngine(params));
       tryToStartModule(() -> setupRobotEnvironmentAwarenessModule(params));
       tryToStartModule(() -> setupHeightQuadTreeToolboxModule(robotModel, params));
-      tryToStartModule(() -> setupLidarScanLogger());
+      tryToStartModule(() -> setupLidarScanLogger(params));
       tryToStartModule(() -> setupRemoteObjectDetectionFeedbackEndpoint(params));
    }
 
@@ -398,14 +398,17 @@ public class DRCNetworkProcessor
       }
    }
 
-   private void setupLidarScanLogger() throws IOException
+   private void setupLidarScanLogger(DRCNetworkModuleParameters params) throws IOException
    {
-      PacketCommunicator lidarScanLoggerCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.LIDAR_SCAN_LOGGER_PORT, NET_CLASS_LIST);
-      packetRouter.attachPacketCommunicator(PacketDestination.LIDAR_SCAN_LOGGER, lidarScanLoggerCommunicator);
-      lidarScanLoggerCommunicator.connect();
+      if(params.isLidarScanLoggerEnabled())
+      {
+         PacketCommunicator lidarScanLoggerCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.LIDAR_SCAN_LOGGER_PORT, NET_CLASS_LIST);
+         packetRouter.attachPacketCommunicator(PacketDestination.LIDAR_SCAN_LOGGER, lidarScanLoggerCommunicator);
+         lidarScanLoggerCommunicator.connect();
 
-      String methodName = "setupLidarScanLogger";
-      printModuleConnectedDebugStatement(PacketDestination.LIDAR_SCAN_LOGGER, methodName);
+         String methodName = "setupLidarScanLogger";
+         printModuleConnectedDebugStatement(PacketDestination.LIDAR_SCAN_LOGGER, methodName);
+      }
    }
 
    protected void connect(PacketCommunicator communicator)

@@ -5,6 +5,7 @@ import static us.ihmc.robotics.geometry.AngleTools.*;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -16,13 +17,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -67,9 +67,9 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final FramePoint3D currentPosition = new FramePoint3D();
    private final FramePoint3D finalPosition = new FramePoint3D();
 
-   private final FrameOrientation initialOrientation = new FrameOrientation();
-   private final FrameOrientation finalOrientation = new FrameOrientation();
-   private final FrameOrientation currentOrientation = new FrameOrientation();
+   private final FrameQuaternion initialOrientation = new FrameQuaternion();
+   private final FrameQuaternion finalOrientation = new FrameQuaternion();
+   private final FrameQuaternion currentOrientation = new FrameQuaternion();
 
    private final FrameVector3D currentVelocity = new FrameVector3D();
    private final FrameVector3D currentAcceleration = new FrameVector3D();
@@ -170,8 +170,6 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
       circleFrame = new ReferenceFrame("CircleFrame", trajectoryFrame)
       {
-         private static final long serialVersionUID = 9102217353690768074L;
-
          private final Vector3D localTranslation = new Vector3D();
          private final Vector3D localRotationAxis = new Vector3D();
          private final AxisAngle localAxisAngle = new AxisAngle();
@@ -487,7 +485,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    private final RigidBodyTransform axisRotationTransform = new RigidBodyTransform();
 
-   private void rotateInitialOrientation(FrameOrientation orientationToPack, double angleFromInitialOrientation)
+   private void rotateInitialOrientation(FrameQuaternion orientationToPack, double angleFromInitialOrientation)
    {
       initialOrientation.changeFrame(circleFrame);
       orientationToPack.setIncludingFrame(initialOrientation);
@@ -555,7 +553,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       yoCurrentAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       yoCurrentOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
@@ -585,7 +583,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       getAcceleration(accelerationToPack);
    }
 
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
+   public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

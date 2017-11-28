@@ -29,7 +29,7 @@ public class AtlasIHMCROSAPIPacketTest extends IHMCROSAPIPacketTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 8.7)
-   @Test
+   @Test(timeout = 420000)
    public void testFuzzyPacketsUsingRos()
    {
       super.testFuzzyPacketsUsingRos();
@@ -37,7 +37,7 @@ public class AtlasIHMCROSAPIPacketTest extends IHMCROSAPIPacketTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 2.7)
-   @Test
+   @Test(timeout = 420000)
    public void testFuzzyPacketsWithoutRos()
    {
       super.testFuzzyPacketsWithoutRos();

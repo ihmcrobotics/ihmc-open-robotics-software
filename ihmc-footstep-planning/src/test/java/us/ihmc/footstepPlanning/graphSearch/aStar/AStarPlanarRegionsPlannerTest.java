@@ -13,25 +13,25 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraph;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.heuristics.EuclideanDistanceHeuristics;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SimpleNodeChecker;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.SimpleGridResolutionBasedExpansion;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.SimpleSideBasedExpansion;
 import us.ihmc.footstepPlanning.graphSearch.planners.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.EuclideanBasedCost;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.EuclideanDistanceHeuristics;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.SimpleGridResolutionBasedExpansion;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.SimpleNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.SimpleSideBasedExpansion;
-import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.FramePose;
@@ -39,10 +39,9 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -109,8 +108,8 @@ public class AStarPlanarRegionsPlannerTest
    @Test(timeout = 3000)
    public void testFootstepNode()
    {
-      double gridX = FootstepNode.gridSizeX;
-      double gridY = FootstepNode.gridSizeY;
+      double gridX = FootstepNode.gridSizeXY;
+      double gridY = FootstepNode.gridSizeXY;
       FootstepNode node;
 
       node = new FootstepNode(gridX * 0.3, 0.0);
@@ -143,7 +142,8 @@ public class AStarPlanarRegionsPlannerTest
 
       FootstepNode node = new FootstepNode(0.0, 0.0, Math.PI, RobotSide.RIGHT);
 
-      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
+      FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters();
+      SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion(parameters);
       HashSet<FootstepNode> neighbors = expansion.expandNode(node);
 
       YoVariableRegistry registry = new YoVariableRegistry("Test");
@@ -197,19 +197,25 @@ public class AStarPlanarRegionsPlannerTest
       FramePose startPose = new FramePose();
       RobotSide startSide = RobotSide.LEFT;
 
-      SideDependentList<ConvexPolygon2D> footPolygons = PlanningTestTools.createDefaultFootPolygons();
-
       // create planner
       YoVariableRegistry registry = new YoVariableRegistry("TestRegistry");
+      FootstepPlannerParameters parameters = new DefaultFootstepPlanningParameters()
+      {
+         @Override
+         public double getCostPerStep()
+         {
+            return 0.0;
+         }
+      };
       FootstepNodeChecker nodeChecker = new SimpleNodeChecker();
       EuclideanDistanceHeuristics heuristics = new EuclideanDistanceHeuristics(registry);
       SimpleGridResolutionBasedExpansion expansion = new SimpleGridResolutionBasedExpansion();
-      EuclideanBasedCost stepCostCalculator = new EuclideanBasedCost(registry);
+      EuclideanBasedCost stepCostCalculator = new EuclideanBasedCost(parameters);
       FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
       FootstepNodeVisualization viz = null;
       if (visualize)
          viz = new FootstepNodeVisualization(1000, 0.04, planarRegionsList);
-      AStarFootstepPlanner planner = new AStarFootstepPlanner(nodeChecker, heuristics, expansion, stepCostCalculator, snapper, viz, registry);
+      AStarFootstepPlanner planner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, snapper, viz, registry);
 
       // plan
       planner.setPlanarRegions(planarRegionsList);
@@ -224,8 +230,8 @@ public class AStarPlanarRegionsPlannerTest
          FramePose achievedGoalPose = new FramePose();
          lastStep.getSoleFramePose(achievedGoalPose);
 
-         goalPose.setY(-AStarFootstepPlanner.DEFAULT_STEP_WIDTH / 2.0);
-         assertTrue(goalPose.epsilonEquals(achievedGoalPose, FootstepNode.gridSizeX));
+         goalPose.setY(-parameters.getIdealFootstepWidth() / 2.0);
+         assertTrue(goalPose.epsilonEquals(achievedGoalPose, FootstepNode.gridSizeXY));
 
          planner.setWeight(5.0);
          assertEquals(FootstepPlanningResult.SUB_OPTIMAL_SOLUTION, planner.plan());

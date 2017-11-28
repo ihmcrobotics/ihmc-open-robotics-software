@@ -2,8 +2,10 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameTuple2D;
+import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 
 public class ContactPoint implements ContactPointInterface
 {
@@ -30,7 +32,7 @@ public class ContactPoint implements ContactPointInterface
    }
 
    @Override
-   public void setPosition(FramePoint3D position)
+   public void setPosition(FrameTuple3D<?, ?> position)
    {
       this.position.set(position);
    }
@@ -54,19 +56,19 @@ public class ContactPoint implements ContactPointInterface
    }
 
    @Override
-   public void getPosition2d(FramePoint2D framePoint2dToPack)
+   public void getPosition2d(FrameTuple2D<?, ?> framePoint2dToPack)
    {
       framePoint2dToPack.setIncludingFrame(getReferenceFrame(), position.getX(), position.getY());
    }
 
    @Override
-   public void getPosition2d(Point2D position2d)
+   public void getPosition2d(Tuple2DBasics position2d)
    {
       position2d.set(position);
    }
 
    @Override
-   public void setPosition2d(FramePoint2D position2d)
+   public void setPosition2d(FrameTuple2D<?, ?> position2d)
    {
       position.set(position2d, 0.0);
    }

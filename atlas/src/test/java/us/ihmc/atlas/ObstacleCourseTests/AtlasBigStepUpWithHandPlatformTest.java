@@ -38,7 +38,7 @@ public class AtlasBigStepUpWithHandPlatformTest extends DRCBigStepUpWithHandPlat
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 26.8)
-   @Test
+   @Test(timeout = 30000)
    public void testBigStepUpWithHandPlatform() throws SimulationExceededMaximumTimeException
    {
       super.testBigStepUpWithHandPlatform();

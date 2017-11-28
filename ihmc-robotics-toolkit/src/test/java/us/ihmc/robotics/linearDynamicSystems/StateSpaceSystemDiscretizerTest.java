@@ -26,7 +26,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.testing.JUnitTools;
 
 public class StateSpaceSystemDiscretizerTest

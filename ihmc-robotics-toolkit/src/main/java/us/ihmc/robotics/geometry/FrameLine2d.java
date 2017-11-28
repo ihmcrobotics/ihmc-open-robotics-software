@@ -140,18 +140,18 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    {
       this.line.rotate(radians);
    }
-   
+
    public void setPoint(FramePoint2D framePoint2d)
    {
       checkReferenceFrameMatch(framePoint2d);
-      
+
       line.setPoint(framePoint2d.getPoint());
    }
-   
+
    public void setVector(FrameVector2D frameVector2d)
    {
       checkReferenceFrameMatch(frameVector2d);
-      
+
       line.setDirection(frameVector2d);
    }
 
@@ -165,14 +165,14 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
    {
       checkReferenceFrameMatch(startPoint);
       checkReferenceFrameMatch(endPoint);
-      
+
       double x = startPoint.getX();
       double y = startPoint.getY();
       double dx = endPoint.getX() - x;
       double dy = endPoint.getY() - y;
       line.set(x, y, dx, dy);
    }
-   
+
    public void set(FramePoint2D endpoint0, FramePoint2D endpoint1)
    {
       checkReferenceFrameMatch(endpoint0);
@@ -311,11 +311,10 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
       return new FrameLine2d(newFrame, this.line.applyTransformAndProjectToXYPlaneCopy(transform));
    }
 
-   public void orthogonalProjection(FramePoint2D point)
+   public boolean orthogonalProjection(FramePoint2D point)
    {
       checkReferenceFrameMatch(point);
-      Point2D projected = line.orthogonalProjectionCopy(point.getPoint());
-      point.set(projected.getX(), projected.getY());
+      return line.orthogonalProjection(point);
    }
 
    public FramePoint2D orthogonalProjectionCopy(FramePoint2D point)
@@ -325,12 +324,12 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
 
       return new FramePoint2D(point.getReferenceFrame(), projected);
    }
-   
+
    public void getIntersectionWithLine(FrameLine2d line, FramePoint2D intersectionToPack)
    {
       checkReferenceFrameMatch(line);
       checkReferenceFrameMatch(intersectionToPack);
-      
+
       this.line.intersectionWith(line.getLine2d(), intersectionToPack);
    }
 
@@ -405,12 +404,12 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
 
       return line.isPointOnSideOfLine(point, side == RobotSide.LEFT);
    }
-   
+
    public boolean isPointInFrontOfLine(FrameVector2D frontDirection, FramePoint2D framePoint)
    {
       checkReferenceFrameMatch(frontDirection);
       checkReferenceFrameMatch(framePoint);
-      
+
       return line.isPointInFrontOfLine(frontDirection, framePoint);
    }
 
@@ -448,8 +447,8 @@ public class FrameLine2d extends FrameGeometryObject<FrameLine2d, Line2D>
 
    public static FrameLine2d generateRandomFrameLine2d(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin, double yMax)
    {
-      FramePoint2D randomPoint = EuclidFrameRandomTools.generateRandomFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
-      FrameVector2D randomVector = EuclidFrameRandomTools.generateRandomFrameVector2D(random, zUpFrame);
+      FramePoint2D randomPoint = EuclidFrameRandomTools.nextFramePoint2D(random, zUpFrame, xMin, xMax, yMin, yMax);
+      FrameVector2D randomVector = EuclidFrameRandomTools.nextFrameVector2D(random, zUpFrame);
 
       return new FrameLine2d(randomPoint, randomVector);
    }

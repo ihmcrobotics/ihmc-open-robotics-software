@@ -1,12 +1,14 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
+import java.util.Random;
+
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepNode
 {
-   public static final double gridSizeX = 0.05;
-   public static final double gridSizeY = 0.05;
+   public static final double gridSizeXY = 0.05;
    public static final double gridSizeYaw = Math.PI / 18.0;
 
    private final int xIndex;
@@ -21,20 +23,20 @@ public class FootstepNode
 
    public FootstepNode(double x, double y, double yaw, RobotSide robotSide)
    {
-      xIndex = (int) Math.round(x / gridSizeX);
-      yIndex = (int) Math.round(y / gridSizeY);
+      xIndex = (int) Math.round(x / gridSizeXY);
+      yIndex = (int) Math.round(y / gridSizeXY);
       yawIndex = (int) Math.round(AngleTools.trimAngleMinusPiToPi(yaw) / gridSizeYaw);
       this.robotSide = robotSide;
    }
 
    public double getX()
    {
-      return gridSizeX * xIndex;
+      return gridSizeXY * xIndex;
    }
 
    public double getY()
    {
-      return gridSizeY * yIndex;
+      return gridSizeXY * yIndex;
    }
 
    public double getYaw()
@@ -52,6 +54,12 @@ public class FootstepNode
       double dx = getX() - other.getX();
       double dy = getY() - other.getY();
       return Math.sqrt(dx * dx + dy * dy);
+   }
+
+   public static FootstepNode generateRandomFootstepNode(Random random, double minMaxXY)
+   {
+      return new FootstepNode(EuclidCoreRandomTools.nextDouble(random, minMaxXY), EuclidCoreRandomTools.nextDouble(random, minMaxXY),
+                              EuclidCoreRandomTools.nextDouble(random, Math.PI), RobotSide.generateRandomRobotSide(random));
    }
 
    @Override
@@ -90,7 +98,7 @@ public class FootstepNode
    @Override
    public String toString()
    {
-      return "Node: x=" + getX() + ", y=" + getY();
+      return "Node: x=" + getX() + ", y=" + getY() + ", yaw=" + getYaw() + ", side=" + robotSide.getLowerCaseName();
    }
 
 }

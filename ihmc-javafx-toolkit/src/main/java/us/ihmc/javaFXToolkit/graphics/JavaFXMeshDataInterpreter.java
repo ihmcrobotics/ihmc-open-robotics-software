@@ -10,6 +10,7 @@ import gnu.trove.list.array.TIntArrayList;
 import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 import javafx.scene.shape.VertexFormat;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -127,9 +128,19 @@ public class JavaFXMeshDataInterpreter
       int index = 0;
       for (Tuple3DBasics tuple : tuple3fs)
       {
-         array[index++] = tuple.getX32();
-         array[index++] = tuple.getY32();
-         array[index++] = tuple.getZ32();
+         if(tuple == null)
+         {
+            PrintTools.error("Got Null, Something is funny here");
+            array[index++] = Float.NaN;
+            array[index++] = Float.NaN;
+            array[index++] = Float.NaN;
+         }
+         else
+         {
+            array[index++] = tuple.getX32();
+            array[index++] = tuple.getY32();
+            array[index++] = tuple.getZ32();
+         }
       }
       return array;
    }
@@ -140,8 +151,17 @@ public class JavaFXMeshDataInterpreter
       int index = 0;
       for (Tuple2DBasics tuple : tuple2fs)
       {
-         array[index++] = tuple.getX32();
-         array[index++] = tuple.getY32();
+         if(tuple == null)
+         {
+            PrintTools.error("Got Null, Something is funny here");
+            array[index++] = Float.NaN;
+            array[index++] = Float.NaN;
+         }
+         else
+         {
+            array[index++] = tuple.getX32();
+            array[index++] = tuple.getY32();
+         }
       }
       return array;
    }

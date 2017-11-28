@@ -12,10 +12,15 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -27,31 +32,26 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class AvatarICPOptimizationPushRecoveryTest
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private static final String script = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScript.xml";
-   private static final String yawScript = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScript.xml";
-   private static final String slowStepScript = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScriptSlow.xml";
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static double simulationTime = 10.0;
 
    private PushRobotController pushRobotController;
 
-   private double swingTime, transferTime, initialTransferTime;
+   private double swingTime, transferTime;
    private double totalMass;
 
    private SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
-
    private SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
-
-   private Exception caughtException;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -84,21 +84,24 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
    protected abstract DRCRobotModel getRobotModel();
 
-   public void testPushICPOptimizationNoPush() throws SimulationExceededMaximumTimeException
+   protected abstract double getSizeScale();
+
+   protected double getForcePointOffsetZInChestFrame()
    {
-      setupTest(getScript());
-
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      return 0.3;
    }
 
-   public void testPushICPOptimizationOutwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationNoPush() throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScript());
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      //setupTest(getScript());
+      setupAndRunTest(createForwardWalkingFootstepMessage());
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+   }
+
+   public void testPushICPOptimizationOutwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
+   {
+      setupAndRunTest(createForwardWalkingFootstepMessage());
 
       // push timing:
       StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
@@ -106,20 +109,15 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double percentWeight = 0.3;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationOutwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationOutwardPushInSlowSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
-      setupTest(getSlowstepScript());
+      setupAndRunTest(createSlowForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:t
@@ -128,20 +126,16 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double percentWeight = 0.11;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationDiagonalOutwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScript());
+      setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -150,24 +144,21 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(2.0, -1.0, 0.0);
-      double percentWeight = 0.20;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.appendYawRotation(0.5);
       ReferenceFrame referenceFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("yawing", ReferenceFrame.getWorldFrame(), transform);
 
-      setupTest(getYawscript(), referenceFrame);
+      //setupTest(getYawscript(), referenceFrame);
+      setupAndRunTest(createYawingForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push parameters:
@@ -177,7 +168,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       Vector3D firstForceDirection = new Vector3D(0.0, -1.0, 0.0);
       Vector3D secondForceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double percentWeight = 0.13;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
@@ -209,15 +199,13 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       pushRobotController.applyForceDelayed(secondPushCondition, delay, secondForceDirection, magnitude, duration);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-      boolean noExceptions = caughtException == null;
 
       assertTrue(success);
-      assertTrue(noExceptions);
    }
 
-   public void testPushICPOptimizationRandomPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationRandomPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScript());
+      setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -230,20 +218,15 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(xDirection, yDirection, 0.0);
-      double percentWeight = 0.18;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationLongForwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationLongForwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScript());
+      setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -252,20 +235,15 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
-      double percentWeight = 0.07;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.7 * swingTime;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationLongBackwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationLongBackwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScript());
+      setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -274,20 +252,16 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(-1.0, 0.0, 0.0);
-      double percentWeight = 0.15;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.8 * swingTime;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationLongInwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationLongInwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScript());
+      setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -296,20 +270,15 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double percentWeight = 0.05;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.8 * swingTime;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationOutwardPushInTransfer() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationOutwardPushInTransfer(double percentWeight) throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScript());
+      setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -318,7 +287,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double percentWeight = 0.12;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
 
@@ -328,16 +296,12 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationInwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationInwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScript());
+      setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -346,20 +310,15 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double percentWeight = 0.18;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationForwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationForwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScript());
+      setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -368,20 +327,15 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
-      double percentWeight = 0.29;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationForwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationForwardPushInSlowSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
-      setupTest(getSlowstepScript());
+      setupAndRunTest(createSlowForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -390,20 +344,15 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
-      double percentWeight = 0.23;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationBackwardPushInSwing() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationBackwardPushInSwing(double percentWeight) throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScript());
+      setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -412,20 +361,15 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(-1.0, 0.0, 0.0);
-      double percentWeight = 0.3;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
-      boolean noExceptions = caughtException == null;
-
-      assertTrue(success);
-      assertTrue(noExceptions);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
    }
 
-   public void testPushICPOptimizationOutwardPushOnEachStep() throws SimulationExceededMaximumTimeException
+   public void testPushICPOptimizationOutwardPushOnEachStep(double percentWeight) throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScript());
+      setupAndRunTest(createForwardWalkingFootstepMessage());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push timing:
@@ -437,7 +381,6 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       // push parameters:
       Vector3D firstForceDirection = new Vector3D(0.0, -1.0, 0.0);
       Vector3D secondForceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double percentWeight = 0.12;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
@@ -469,18 +412,12 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       pushRobotController.applyForceDelayed(secondPushCondition, delay, secondForceDirection, magnitude, duration);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-      boolean noExceptions = caughtException == null;
 
       assertTrue(success);
-      assertTrue(noExceptions);
    }
 
-   private void setupTest(String scriptName) throws SimulationExceededMaximumTimeException
-   {
-      this.setupTest(scriptName, ReferenceFrame.getWorldFrame());
-   }
 
-   private void setupTest(String scriptName, ReferenceFrame yawReferenceFrame) throws SimulationExceededMaximumTimeException
+   private void setupAndRunTest(FootstepDataListMessage message) throws SimulationExceededMaximumTimeException
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
@@ -488,26 +425,14 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       totalMass = fullRobotModel.getTotalMass();
-      //      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
+
       double z = getForcePointOffsetZInChestFrame();
       pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel.getChest().getParentJoint().getName(),
                                                     new Vector3D(0, 0, z));
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       scs.addYoGraphic(pushRobotController.getForceVisualizer());
 
-      if (scriptName != null && !scriptName.isEmpty())
-      {
-         drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.001);
-         InputStream scriptInputStream = getClass().getClassLoader().getResourceAsStream(scriptName);
-         if (yawReferenceFrame != null)
-         {
-            drcSimulationTestHelper.loadScriptFile(scriptInputStream, yawReferenceFrame);
-         }
-         else
-         {
-            drcSimulationTestHelper.loadScriptFile(scriptInputStream, ReferenceFrame.getWorldFrame());
-         }
-      }
+      drcSimulationTestHelper.send(message);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -522,15 +447,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       }
 
       setupCamera(scs);
-      swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
-      transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
-      initialTransferTime = getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime();
       ThreadTools.sleep(1000);
-   }
-
-   protected double getForcePointOffsetZInChestFrame()
-   {
-      return 0.3;
    }
 
    private void setupCamera(SimulationConstructionSet scs)
@@ -540,19 +457,146 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
-   public String getScript()
+   protected FootstepDataListMessage createForwardWalkingFootstepMessage()
    {
-      return script;
+      double scale = getSizeScale();
+
+      FramePoint3D step1Location = new FramePoint3D(worldFrame, 0.5, -0.125, 0.0);
+      FramePoint3D step2Location = new FramePoint3D(worldFrame, 1.0,  0.125, 0.0);
+      FramePoint3D step3Location = new FramePoint3D(worldFrame, 1.5, -0.125, 0.0);
+      FramePoint3D step4Location = new FramePoint3D(worldFrame, 2.0,  0.125, 0.0);
+      FramePoint3D step5Location = new FramePoint3D(worldFrame, 2.5, -0.125, 0.0);
+      FramePoint3D step6Location = new FramePoint3D(worldFrame, 3.0,  0.125, 0.0);
+
+      step1Location.scale(scale);
+      step2Location.scale(scale);
+      step3Location.scale(scale);
+      step4Location.scale(scale);
+      step5Location.scale(scale);
+      step6Location.scale(scale);
+
+      FootstepDataMessage message1 = createFootstepDataMessage(RobotSide.RIGHT, step1Location);
+      FootstepDataMessage message2 = createFootstepDataMessage(RobotSide.LEFT, step2Location);
+      FootstepDataMessage message3 = createFootstepDataMessage(RobotSide.RIGHT, step3Location);
+      FootstepDataMessage message4 = createFootstepDataMessage(RobotSide.LEFT, step4Location);
+      FootstepDataMessage message5 = createFootstepDataMessage(RobotSide.RIGHT, step5Location);
+      FootstepDataMessage message6 = createFootstepDataMessage(RobotSide.LEFT, step6Location);
+
+      swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
+      transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+
+      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      message.add(message1);
+      message.add(message2);
+      message.add(message3);
+      message.add(message4);
+      message.add(message5);
+      message.add(message6);
+
+      return message;
    }
 
-   public String getYawscript()
+   protected FootstepDataListMessage createSlowForwardWalkingFootstepMessage()
    {
-      return yawScript;
+      double scale = getSizeScale();
+
+      FramePoint3D step1Location = new FramePoint3D(worldFrame, 0.3, -0.125, 0.0);
+      FramePoint3D step2Location = new FramePoint3D(worldFrame, 0.6,  0.125, 0.0);
+      FramePoint3D step3Location = new FramePoint3D(worldFrame, 0.9, -0.125, 0.0);
+      FramePoint3D step4Location = new FramePoint3D(worldFrame, 1.2,  0.125, 0.0);
+      FramePoint3D step5Location = new FramePoint3D(worldFrame, 1.5, -0.125, 0.0);
+      FramePoint3D step6Location = new FramePoint3D(worldFrame, 1.8,  0.125, 0.0);
+
+      step1Location.scale(scale);
+      step2Location.scale(scale);
+      step3Location.scale(scale);
+      step4Location.scale(scale);
+      step5Location.scale(scale);
+      step6Location.scale(scale);
+
+      FootstepDataMessage message1 = createFootstepDataMessage(RobotSide.RIGHT, step1Location);
+      FootstepDataMessage message2 = createFootstepDataMessage(RobotSide.LEFT, step2Location);
+      FootstepDataMessage message3 = createFootstepDataMessage(RobotSide.RIGHT, step3Location);
+      FootstepDataMessage message4 = createFootstepDataMessage(RobotSide.LEFT, step4Location);
+      FootstepDataMessage message5 = createFootstepDataMessage(RobotSide.RIGHT, step5Location);
+      FootstepDataMessage message6 = createFootstepDataMessage(RobotSide.LEFT, step6Location);
+
+      swingTime = 1.2;
+      transferTime = 0.8;
+      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      message.add(message1);
+      message.add(message2);
+      message.add(message3);
+      message.add(message4);
+      message.add(message5);
+      message.add(message6);
+
+      return message;
    }
 
-   public String getSlowstepScript()
+   protected FootstepDataListMessage createYawingForwardWalkingFootstepMessage()
    {
-      return slowStepScript;
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.appendYawRotation(0.5);
+      ReferenceFrame referenceFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("yawing", ReferenceFrame.getWorldFrame(), transform);
+
+      double scale = getSizeScale();
+
+      FramePoint3D step1Location = new FramePoint3D(referenceFrame, 0.5, -0.125, 0.0);
+      FramePoint3D step2Location = new FramePoint3D(referenceFrame, 1.0,  0.125, 0.0);
+      FramePoint3D step3Location = new FramePoint3D(referenceFrame, 1.5, -0.125, 0.0);
+      FramePoint3D step4Location = new FramePoint3D(referenceFrame, 2.0,  0.125, 0.0);
+      FramePoint3D step5Location = new FramePoint3D(referenceFrame, 2.5, -0.125, 0.0);
+      FramePoint3D step6Location = new FramePoint3D(referenceFrame, 3.0,  0.125, 0.0);
+
+      FrameQuaternion orientation = new FrameQuaternion(referenceFrame);
+
+      step1Location.scale(scale);
+      step2Location.scale(scale);
+      step3Location.scale(scale);
+      step4Location.scale(scale);
+      step5Location.scale(scale);
+      step6Location.scale(scale);
+
+      FootstepDataMessage message1 = createFootstepDataMessage(RobotSide.RIGHT, step1Location, orientation);
+      FootstepDataMessage message2 = createFootstepDataMessage(RobotSide.LEFT, step2Location, orientation);
+      FootstepDataMessage message3 = createFootstepDataMessage(RobotSide.RIGHT, step3Location, orientation);
+      FootstepDataMessage message4 = createFootstepDataMessage(RobotSide.LEFT, step4Location, orientation);
+      FootstepDataMessage message5 = createFootstepDataMessage(RobotSide.RIGHT, step5Location, orientation);
+      FootstepDataMessage message6 = createFootstepDataMessage(RobotSide.LEFT, step6Location, orientation);
+
+      swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
+      transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
+
+      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      message.add(message1);
+      message.add(message2);
+      message.add(message3);
+      message.add(message4);
+      message.add(message5);
+      message.add(message6);
+
+      return message;
+   }
+
+   private FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, FramePoint3D placeToStep)
+   {
+      return createFootstepDataMessage(robotSide, placeToStep, new FrameQuaternion());
+   }
+
+   private FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, FramePoint3D placeToStep, FrameQuaternion orientation)
+   {
+      FootstepDataMessage footstepData = new FootstepDataMessage();
+
+      FramePoint3D placeToStepInWorld = new FramePoint3D(placeToStep);
+      placeToStepInWorld.changeFrame(worldFrame);
+      orientation.changeFrame(worldFrame);
+
+      footstepData.setLocation(placeToStepInWorld);
+      footstepData.setOrientation(orientation.getQuaternion());
+      footstepData.setRobotSide(robotSide);
+
+      return footstepData;
    }
 
    private class SingleSupportStartCondition implements StateTransitionCondition

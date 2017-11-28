@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -13,6 +10,9 @@ import us.ihmc.robotics.math.trajectories.YoSpline3D;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SoftTouchdownPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
@@ -39,7 +39,6 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    private final FrameVector3D pdd0;
    
    private final double tf = Double.POSITIVE_INFINITY;
-   private double t0;
    
    private final YoBoolean replanningTrajectory;
 
@@ -58,7 +57,6 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       p0 = new FramePoint3D();
       pd0 = new FrameVector3D();
       pdd0 = new FrameVector3D();
-      t0 = 0.0;
       
       this.replanningTrajectory = new YoBoolean(namePrefix + "ReplanningTrajectory", parentRegistry);
       this.replanningTrajectory.set(false);
@@ -79,10 +77,67 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       trajectory = new YoSpline3D(3, 3, referenceFrame, registry, namePrefix + "Trajectory");
    }
 
+   public SoftTouchdownPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   {
+      registry = new YoVariableRegistry(namePrefix + namePostFix);
+      parentRegistry.addChild(registry);
+      
+      desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", referenceFrame, registry);
+      desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", referenceFrame, registry);
+      desiredAcceleration = new YoFrameVector(namePrefix + "DesiredAcceleration", referenceFrame, registry);
+      
+      p0 = new FramePoint3D();
+      pd0 = new FrameVector3D();
+      pdd0 = new FrameVector3D();
+      
+      this.replanningTrajectory = new YoBoolean(namePrefix + "ReplanningTrajectory", parentRegistry);
+      this.replanningTrajectory.set(false);
+      
+      this.referenceFrame = referenceFrame;
+      
+      initialPositionSource = null;
+      velocitySource = null;
+      accelerationSource = null;
+      this.startTimeProvider = null;
+      
+      startTime = new YoDouble(namePrefix + "startTime", registry);
+
+      timeIntoTouchdown = new YoDouble(namePrefix + "timeIntoTouchdown", registry);
+      trajectory = new YoSpline3D(3, 3, referenceFrame, registry, namePrefix + "Trajectory");
+   }
+
    @Override
    public void initialize()
    {
-	  setInitialTimePositionsAndVelocities();
+	  double t0 = startTimeProvider.getValue();
+     startTime.set(startTimeProvider.getValue());
+     timeIntoTouchdown.set(0.0);
+        
+     initialPositionSource.getPosition(p0);
+     p0.changeFrame(referenceFrame);
+     
+     velocitySource.get(pd0);
+     pd0.changeFrame(referenceFrame);
+
+     accelerationSource.get(pdd0);
+     pdd0.changeFrame(referenceFrame);
+     
+      trajectory.setQuadraticUsingInitialVelocityAndAcceleration(t0, tf, p0, pd0, pdd0);
+   }
+
+   public void initialize(double t0, FramePoint3D initialPosition, FrameVector3D initalVelocity, FrameVector3D initialAcceleration)
+   {
+      startTime.set(t0);
+      timeIntoTouchdown.set(0.0);
+      
+      p0.setIncludingFrame(initialPosition);
+      p0.changeFrame(referenceFrame);
+      
+      pd0.setIncludingFrame(initalVelocity);
+      pd0.changeFrame(referenceFrame);
+      
+      pdd0.setIncludingFrame(initialAcceleration);
+      pdd0.changeFrame(referenceFrame);
       
       trajectory.setQuadraticUsingInitialVelocityAndAcceleration(t0, tf, p0, pd0, pdd0);
    }
@@ -98,22 +153,6 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       desiredAcceleration.set(trajectory.getAcceleration());
    }
    
-   public void setInitialTimePositionsAndVelocities()
-   {
-	   t0 = startTimeProvider.getValue();
-	   startTime.set(startTimeProvider.getValue());
-	   timeIntoTouchdown.set(0.0);
-	      
-	   initialPositionSource.getPosition(p0);
-	   p0.changeFrame(referenceFrame);
-	   
-	   velocitySource.get(pd0);
-	   pd0.changeFrame(referenceFrame);
-
-	   accelerationSource.get(pdd0);
-	   pdd0.changeFrame(referenceFrame);
-   }
-
    @Override
    public boolean isDone()
    {

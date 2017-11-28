@@ -14,10 +14,10 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.robotics.dataStructures.MutableColor;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, GraphicsUpdatable
 {
@@ -236,7 +236,15 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
    public Artifact createArtifact()
    {
       MutableColor color3f = appearance.getColor();
-      return new YoArtifactLineSegment2d(getName(), new YoFrameLineSegment2d(baseX, baseY, x, y, ReferenceFrame.getWorldFrame()), color3f.get());
+      YoDouble endPointX = new YoDouble(getName() + "ArtifactEndPointX", baseX.getYoVariableRegistry());
+      YoDouble endPointY = new YoDouble(getName() + "ArtifactEndPointY", baseY.getYoVariableRegistry());
+
+      baseX.addVariableChangedListener(v -> endPointX.set(baseX.getDoubleValue() + x.getDoubleValue()));
+      baseY.addVariableChangedListener(v -> endPointY.set(baseY.getDoubleValue() + y.getDoubleValue()));
+      x.addVariableChangedListener(v -> endPointX.set(baseX.getDoubleValue() + x.getDoubleValue()));
+      y.addVariableChangedListener(v -> endPointY.set(baseY.getDoubleValue() + y.getDoubleValue()));
+
+      return new YoArtifactLineSegment2d(getName(), new YoFrameLineSegment2d(baseX, baseY, endPointX, endPointY, ReferenceFrame.getWorldFrame()), color3f.get());
    }
 
    @Override

@@ -22,7 +22,7 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -156,12 +156,12 @@ public class AtlasNoSimPacketBlaster implements Runnable
       HandSensorData robotiqHandSensorData = new RobotiqHandSensorData();
       
       HandJointAnglePacket leftHandJointAnglePacket = new HandJointAnglePacket();
-      double[][] leftFingerJointAngles = robotiqHandSensorData.getFingerJointAngles(RobotSide.LEFT);
-      leftHandJointAnglePacket.setAll(RobotSide.LEFT, true, true, leftFingerJointAngles[0], leftFingerJointAngles[1], leftFingerJointAngles[2]);
+      double[] leftFingerJointAngles = robotiqHandSensorData.getFingerJointAngles(RobotSide.LEFT);
+      leftHandJointAnglePacket.setAll(RobotSide.LEFT, true, true, leftFingerJointAngles);
       
       HandJointAnglePacket rightHandJointAnglePacket = new HandJointAnglePacket();
-      double[][] rightFingerJointAngles = robotiqHandSensorData.getFingerJointAngles(RobotSide.RIGHT);
-      rightHandJointAnglePacket.setAll(RobotSide.RIGHT, true, true, rightFingerJointAngles[0], rightFingerJointAngles[1], rightFingerJointAngles[2]);
+      double[] rightFingerJointAngles = robotiqHandSensorData.getFingerJointAngles(RobotSide.RIGHT);
+      rightHandJointAnglePacket.setAll(RobotSide.RIGHT, true, true, rightFingerJointAngles);
       
       packetCommunicator.send(rightHandJointAnglePacket);
       packetCommunicator.send(leftHandJointAnglePacket);

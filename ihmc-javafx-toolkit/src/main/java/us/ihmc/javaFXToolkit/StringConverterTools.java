@@ -19,6 +19,13 @@ public abstract class StringConverterTools
    {
       return rounding(100.0, 0);
    }
+   /**
+    * @return a StringConverter that converts values expressed in meters to be displayed in centimeters.
+    */
+   public static StringConverter<Double> metersToRoundedMillimeters()
+   {
+      return rounding(1000.0, 0);
+   }
 
    /**
     * @return a StringConverter that converts values expressed in radians to be displayed in degrees.

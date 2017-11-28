@@ -11,6 +11,7 @@ import org.junit.Before;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -26,13 +27,14 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper simulationTestHelper;
+
+   public abstract double getStepHeightOffset();
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -63,7 +65,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
-      FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockFieldEnvironment.getCinderBlockPoses());
+      FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockFieldEnvironment.getCinderBlockPoses(), getStepHeightOffset());
 
       simulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       simulationTestHelper.setTestEnvironment(cinderBlockFieldEnvironment);
@@ -93,7 +95,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
 
    public abstract double getPelvisOffsetHeight();
 
-   private static FootstepDataListMessage generateFootstepsForCinderBlockField(List<List<FramePose>> cinderBlockPoses)
+   private static FootstepDataListMessage generateFootstepsForCinderBlockField(List<List<FramePose>> cinderBlockPoses, double zOffset)
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
@@ -111,7 +113,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
             Point3D location = new Point3D();
             Quaternion orientation = new Quaternion();
             cinderBlockPose.getPose(location, orientation);
-            location.setZ(location.getZ() + 0.02);
+            location.setZ(location.getZ() + zOffset);
             FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
             footsteps.add(footstep);
          }

@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 
 public abstract class FootstepCounter
 {

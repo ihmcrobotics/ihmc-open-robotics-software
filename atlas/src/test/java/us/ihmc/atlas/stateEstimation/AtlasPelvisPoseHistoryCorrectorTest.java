@@ -32,7 +32,7 @@ public class AtlasPelvisPoseHistoryCorrectorTest extends PelvisPoseHistoryCorrec
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 7.7)
-   @Test
+   @Test(timeout = 30000)
    public void testBigYawInDoubleSupport() throws SimulationExceededMaximumTimeException
    {
       super.testBigYawInDoubleSupport();
@@ -40,7 +40,7 @@ public class AtlasPelvisPoseHistoryCorrectorTest extends PelvisPoseHistoryCorrec
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 9.4)
-   @Test
+   @Test(timeout = 30000)
    public void testBigYawInSingleSupport() throws SimulationExceededMaximumTimeException
    {
       super.testBigYawInSingleSupport();
@@ -48,7 +48,7 @@ public class AtlasPelvisPoseHistoryCorrectorTest extends PelvisPoseHistoryCorrec
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 8.1)
-   @Test
+   @Test(timeout = 30000)
    public void testLocalizationOffsetOutsideOfFootInSingleSupport() throws SimulationExceededMaximumTimeException
    {
       super.testLocalizationOffsetOutsideOfFootInSingleSupport();
@@ -56,7 +56,7 @@ public class AtlasPelvisPoseHistoryCorrectorTest extends PelvisPoseHistoryCorrec
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 7.8)
-   @Test
+   @Test(timeout = 30000)
    public void testPelvisCorrectionControllerOutOfTheLoop() throws SimulationExceededMaximumTimeException
    {
       super.testPelvisCorrectionControllerOutOfTheLoop();
@@ -64,7 +64,7 @@ public class AtlasPelvisPoseHistoryCorrectorTest extends PelvisPoseHistoryCorrec
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 12.1)
-   @Test
+   @Test(timeout = 30000)
    public void testPelvisCorrectionDuringSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
       super.testPelvisCorrectionDuringSimpleFlatGroundScriptWithOscillatingFeet();
@@ -72,7 +72,7 @@ public class AtlasPelvisPoseHistoryCorrectorTest extends PelvisPoseHistoryCorrec
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 5.0)
-   @Test
+   @Test(timeout = 30000)
    public void testWalkingDuringBigPelvisCorrection() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       super.testWalkingDuringBigPelvisCorrection();

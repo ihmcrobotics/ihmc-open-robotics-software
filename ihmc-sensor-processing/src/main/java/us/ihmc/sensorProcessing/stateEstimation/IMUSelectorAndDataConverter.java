@@ -7,6 +7,7 @@ import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -14,7 +15,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameQuaternionControlFlowOutputPort;
@@ -29,7 +29,7 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
    private final ControlFlowInputPort<Vector3D> angularVelocityInputPort;
    private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
 
-   private final ControlFlowOutputPort<FrameOrientation> orientationOutputPort;
+   private final ControlFlowOutputPort<FrameQuaternion> orientationOutputPort;
    private final ControlFlowOutputPort<FrameVector3D> angularVelocityOutputPort;
    private final ControlFlowOutputPort<FullInverseDynamicsStructure> inverseDynamicsStructureOutputPort;
 
@@ -115,7 +115,7 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       convertAngularVelocityAndSetOnOutputPort();   
    }
 
-   private final FrameOrientation tempOrientationEstimationFrame = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   private final FrameQuaternion tempOrientationEstimationFrame = new FrameQuaternion(ReferenceFrame.getWorldFrame());
 
    private final FrameVector3D tempAngularVelocityMeasurementLink = new FrameVector3D();
    private final FrameVector3D tempAngularVelocityEstimationLink = new FrameVector3D();
@@ -174,7 +174,7 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
    {
    }
 
-   public ControlFlowOutputPort<FrameOrientation> getOrientationOutputPort()
+   public ControlFlowOutputPort<FrameQuaternion> getOrientationOutputPort()
    {
       return orientationOutputPort;
    }
@@ -200,7 +200,7 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       waitUntilComputationIsDone();
    }
 
-   public void initializeOrientionToActual(FrameOrientation actualOrientation)
+   public void initializeOrientionToActual(FrameQuaternion actualOrientation)
    {
       orientationOutputPort.setData(actualOrientation);
    }

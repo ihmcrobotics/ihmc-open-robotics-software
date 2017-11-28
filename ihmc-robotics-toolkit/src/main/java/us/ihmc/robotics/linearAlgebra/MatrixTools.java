@@ -17,6 +17,7 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -28,8 +29,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameTuple;
 
@@ -807,7 +807,7 @@ public class MatrixTools
       yoFrameQuaternion.set(x, y, z, w);
    }
 
-   public static void extractFrameOrientationFromEJMLVector(FrameOrientation frameOrientation, DenseMatrix64F matrix, int rowStart)
+   public static void extractFrameOrientationFromEJMLVector(FrameQuaternion frameOrientation, DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
       double x = matrix.get(index++, 0);
@@ -847,13 +847,13 @@ public class MatrixTools
       matrix.set(index++, 0, yoFrameQuaternion.getQs());
    }
 
-   public static void insertFrameOrientationIntoEJMLVector(FrameOrientation frameOrientation, DenseMatrix64F matrix, int rowStart)
+   public static void insertFrameOrientationIntoEJMLVector(FrameQuaternion frameOrientation, DenseMatrix64F matrix, int rowStart)
    {
       int index = rowStart;
-      matrix.set(index++, 0, frameOrientation.getQx());
-      matrix.set(index++, 0, frameOrientation.getQy());
-      matrix.set(index++, 0, frameOrientation.getQz());
-      matrix.set(index++, 0, frameOrientation.getQs());
+      matrix.set(index++, 0, frameOrientation.getX());
+      matrix.set(index++, 0, frameOrientation.getY());
+      matrix.set(index++, 0, frameOrientation.getZ());
+      matrix.set(index++, 0, frameOrientation.getS());
    }
 
    public static <T> int computeIndicesIntoVector(List<T> keys, Map<T, Integer> indices, Map<T, Integer> sizes)
@@ -999,6 +999,13 @@ public class MatrixTools
       vector.setS(matrix.get(3, 0) * x + matrix.get(3, 1) * y + matrix.get(3, 2) * z + matrix.get(3, 3) * s);
    }
 
+
+   /**
+    * Removes a row of the given matrix, indicated by {@code indexOfRowToRemove}.
+    *
+    * @param matrixToRemoveRowTo the matrix from which the row is to be removed. Modified.
+    * @param indexOfRowToRemove the column index to remove.
+    */
    public static void removeRow(DenseMatrix64F matrixToRemoveRowTo, int indexOfRowToRemove)
    {
       if (indexOfRowToRemove >= matrixToRemoveRowTo.getNumRows())
@@ -1018,6 +1025,29 @@ public class MatrixTools
       }
 
       matrixToRemoveRowTo.reshape(matrixToRemoveRowTo.getNumRows() - 1, matrixToRemoveRowTo.getNumCols(), true);
+   }
+
+   /**
+    * Removes a column of the given matrix, indicated by {@code indexOfColumnToRemove}.
+    *
+    * @param matrixToRemoveColumnTo the matrix from which the column is to be removed. Modified.
+    * @param indexOfColumnToRemove the column index to remove.
+    */
+   public static void removeColumn(DenseMatrix64F matrixToRemoveColumnTo, int indexOfColumnToRemove)
+   {
+      if (indexOfColumnToRemove >= matrixToRemoveColumnTo.getNumCols())
+         throw new RuntimeException("The index indexOfColumnToRemove was expected to be in [0, " + (matrixToRemoveColumnTo.getNumCols() - 1) + "], but was: " + indexOfColumnToRemove);
+
+      int rowIndex = 1;
+      for (int index = indexOfColumnToRemove + 1; index < matrixToRemoveColumnTo.getNumElements(); index++)
+      {
+         if (index == rowIndex * matrixToRemoveColumnTo.getNumCols() + indexOfColumnToRemove)
+            rowIndex++;
+         else
+            matrixToRemoveColumnTo.set(index - rowIndex, matrixToRemoveColumnTo.get(index));
+      }
+
+      matrixToRemoveColumnTo.reshape(matrixToRemoveColumnTo.getNumRows(), matrixToRemoveColumnTo.getNumCols() - 1, true);
    }
 
    /**

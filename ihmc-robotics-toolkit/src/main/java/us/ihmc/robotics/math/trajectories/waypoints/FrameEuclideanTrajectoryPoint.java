@@ -6,6 +6,8 @@ import java.text.NumberFormat;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -34,7 +36,7 @@ public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuc
       setToZero(referenceFrame);
    }
 
-   public FrameEuclideanTrajectoryPoint(double time, FramePoint3D position, FrameVector3D linearVelocity)
+   public FrameEuclideanTrajectoryPoint(double time, FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
    {
       this();
       setIncludingFrame(time, position, linearVelocity);
@@ -58,10 +60,10 @@ public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuc
       geometryObject.setPosition(position);
    }
 
-   public void setPosition(FramePoint3D position)
+   public void setPosition(FramePoint3DReadOnly position)
    {
       checkReferenceFrameMatch(position);
-      geometryObject.setPosition(position.getPoint());
+      geometryObject.setPosition(position);
    }
 
    @Override
@@ -70,10 +72,10 @@ public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuc
       geometryObject.setLinearVelocity(linearVelocity);
    }
 
-   public void setLinearVelocity(FrameVector3D linearVelocity)
+   public void setLinearVelocity(FrameVector3DReadOnly linearVelocity)
    {
       checkReferenceFrameMatch(linearVelocity);
-      geometryObject.setLinearVelocity(linearVelocity.getVector());
+      geometryObject.setLinearVelocity(linearVelocity);
    }
 
    public void set(double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
@@ -87,18 +89,18 @@ public class FrameEuclideanTrajectoryPoint extends FrameTrajectoryPoint<FrameEuc
       geometryObject.set(time, position, linearVelocity);
    }
 
-   public void set(double time, FramePoint3D position, FrameVector3D linearVelocity)
+   public void set(double time, FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
    {
       checkReferenceFrameMatch(position);
       checkReferenceFrameMatch(linearVelocity);
-      geometryObject.set(time, position.getPoint(), linearVelocity.getVector());
+      geometryObject.set(time, position, linearVelocity);
    }
 
-   public void setIncludingFrame(double time, FramePoint3D position, FrameVector3D linearVelocity)
+   public void setIncludingFrame(double time, FramePoint3DReadOnly position, FrameVector3DReadOnly linearVelocity)
    {
       position.checkReferenceFrameMatch(linearVelocity);
       setToZero(position.getReferenceFrame());
-      geometryObject.set(time, position.getPoint(), linearVelocity.getVector());
+      geometryObject.set(time, position, linearVelocity);
    }
 
    public void set(double time, EuclideanWaypointInterface<?> euclideanWaypoint)

@@ -3,8 +3,8 @@ package us.ihmc.footstepPlanning.graphSearch.nodeExpansion;
 import java.util.HashSet;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -12,17 +12,23 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class SimpleSideBasedExpansion implements FootstepNodeExpansion
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private final FootstepPlannerParameters parameters;
 
-   private static final double maxYaw = Math.PI / 8.0;
-   private static final double defaultStepWidth = 0.25;
+   public SimpleSideBasedExpansion(FootstepPlannerParameters parameters)
+   {
+      this.parameters = parameters;
+   }
 
-   private double[] stepLengths = new double[] {0.0, FootstepNode.gridSizeX, 0.1, 0.2, 0.4};
-   private double[] stepWidths = new double[] {0.15, defaultStepWidth - FootstepNode.gridSizeY, defaultStepWidth + FootstepNode.gridSizeY};
-   private double[] stepYaws = new double[] {0.0, FootstepNode.gridSizeYaw, maxYaw};
-   
    @Override
    public HashSet<FootstepNode> expandNode(FootstepNode node)
    {
+      double maxYaw = parameters.getMaximumStepYaw();
+      double defaultStepWidth = parameters.getIdealFootstepWidth();
+      double defaultStepLength = parameters.getIdealFootstepLength();
+      double[] stepLengths = new double[] {parameters.getMinimumStepLength(), defaultStepLength - FootstepNode.gridSizeXY, defaultStepLength, defaultStepLength + FootstepNode.gridSizeXY, parameters.getMaximumStepReach()};
+      double[] stepWidths = new double[] {parameters.getMinimumStepWidth(), defaultStepWidth - FootstepNode.gridSizeXY, defaultStepWidth, defaultStepWidth + FootstepNode.gridSizeXY, parameters.getMaximumStepWidth()};
+      double[] stepYaws = new double[] {parameters.getMinimumStepYaw(), FootstepNode.gridSizeYaw, maxYaw};
+
       HashSet<FootstepNode> neighbors = new HashSet<>();
 
       FramePose stanceFootPose = new FramePose(worldFrame);
@@ -47,12 +53,6 @@ public class SimpleSideBasedExpansion implements FootstepNodeExpansion
             forwardStep.setY(ySign * defaultStepWidth);
             forwardStep.changeFrame(worldFrame);
             neighbors.add(new FootstepNode(forwardStep.getX(), forwardStep.getY(), node.getYaw() + ySign * yaw, stepSide));
-
-            FramePose backwardStep = new FramePose(stanceFrame);
-            backwardStep.setX(-stepLength);
-            backwardStep.setY(ySign * defaultStepWidth);
-            backwardStep.changeFrame(worldFrame);
-            neighbors.add(new FootstepNode(backwardStep.getX(), backwardStep.getY(), node.getYaw() + ySign * yaw, stepSide));
          }
       }
 

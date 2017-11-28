@@ -2,8 +2,8 @@ package us.ihmc.robotics.math.trajectories.providers;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -20,7 +20,7 @@ public class YoSE3ConfigurationProvider implements SE3ConfigurationProvider
    private final YoFrameQuaternion orientation;
 
    private final FramePoint3D tempPoint = new FramePoint3D();
-   private final FrameOrientation tempOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   private final FrameQuaternion tempOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
 
    public YoSE3ConfigurationProvider(String name, ReferenceFrame frame, YoVariableRegistry registry)
    {
@@ -28,7 +28,7 @@ public class YoSE3ConfigurationProvider implements SE3ConfigurationProvider
       orientation = new YoFrameQuaternion(name, frame, registry);
    }
 
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientation.getFrameOrientationIncludingFrame(orientationToPack);
    }

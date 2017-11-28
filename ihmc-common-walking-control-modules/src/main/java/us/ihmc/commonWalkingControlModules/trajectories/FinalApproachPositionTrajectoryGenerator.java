@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -13,13 +14,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
@@ -51,7 +51,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
 
    /** The tangential plane is the frame in which the trajectory can be expressed in 2D. It is tangential to the final direction vector. */
    private final ReferenceFrame tangentialPlane;
-   private final FrameOrientation rotationPlane = new FrameOrientation();
+   private final FrameQuaternion rotationPlane = new FrameQuaternion();
    private final AxisAngle axisAngleToWorld = new AxisAngle();
 
    // For viz
@@ -94,14 +94,12 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
 
       tangentialPlane = new ReferenceFrame("tangentialPlane", ReferenceFrame.getWorldFrame())
       {
-         private static final long serialVersionUID = -6071552109268422430L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             transformToParent.setIdentity();
             rotationPlane.changeFrame(parentFrame);
-            rotationPlane.getTransform3D(transformToParent);
+            transformToParent.setRotation(rotationPlane);
          }
       };
 

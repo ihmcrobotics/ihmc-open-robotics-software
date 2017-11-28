@@ -1,6 +1,6 @@
 package us.ihmc.robotics.trajectories.providers;
 
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 
 /**
  * @author twan
@@ -8,14 +8,14 @@ import us.ihmc.robotics.geometry.FrameOrientation;
  */
 public class ConstantOrientationProvider implements OrientationProvider
 {
-   private final FrameOrientation orientation;
+   private final FrameQuaternion orientation;
 
-   public ConstantOrientationProvider(FrameOrientation orientation)
+   public ConstantOrientationProvider(FrameQuaternion orientation)
    {
-      this.orientation = new FrameOrientation(orientation);
+      this.orientation = new FrameQuaternion(orientation);
    }
 
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientationToPack.setIncludingFrame(orientation);
    }
