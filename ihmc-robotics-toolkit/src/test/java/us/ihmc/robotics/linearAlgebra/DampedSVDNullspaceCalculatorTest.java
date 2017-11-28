@@ -1,13 +1,11 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-public class DampedLeastSquaresNullspaceCalculatorTest extends DampedNullspaceCalculatorTest
+public class DampedSVDNullspaceCalculatorTest extends DampedNullspaceCalculatorTest
 {
    @Override
    public DampedNullspaceCalculator getDampedNullspaceProjectorCalculator()
    {
-      return new DampedLeastSquaresNullspaceCalculator(10, 0.0, new YoVariableRegistry(getClass().getSimpleName()));
+      return new DampedSVDNullspaceCalculator(10, 0.0);
    }
 
    @Override

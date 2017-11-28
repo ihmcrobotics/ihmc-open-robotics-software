@@ -1,6 +1,6 @@
 package us.ihmc.robotics.linearAlgebra;
 
-public interface DampedNullspaceCalculator extends NullspaceProjectorCalculator
+public interface DampedNullspaceCalculator extends NullspaceCalculator
 {
    public void setPseudoInverseAlpha(double alpha);
 }
