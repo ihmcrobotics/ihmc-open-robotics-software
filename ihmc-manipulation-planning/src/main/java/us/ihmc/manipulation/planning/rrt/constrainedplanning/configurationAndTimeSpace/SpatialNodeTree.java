@@ -19,9 +19,9 @@ public class SpatialNodeTree
    private double orientationWeight = 0.5;
 
    public double dismissableTimeStep = 0.05;
-   private double maxTimeInterval = 0.5;
-   private double maxPositionDistance = 0.01;
-   private double maxOrientationDistance = Math.toRadians(10);
+   private double maxTimeInterval = 0.1;
+   private double maxPositionDistance = 0.005;
+   private double maxOrientationDistance = Math.toRadians(5);
 
    private SpatialNode currentCandidate = null;
    private SpatialNode currentCandidateParent = null;

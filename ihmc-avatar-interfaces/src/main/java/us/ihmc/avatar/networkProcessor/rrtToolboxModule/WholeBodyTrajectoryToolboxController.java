@@ -44,7 +44,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 {
    private static final boolean VERBOSE = true;
    private static final int DEFAULT_NUMBER_OF_ITERATIONS_FOR_SHORTCUT_OPTIMIZATION = 20;
-   private static final int DEFAULT_MAXIMUM_NUMBER_OF_ITERATIONS = 1500;
+   private static final int DEFAULT_MAXIMUM_NUMBER_OF_ITERATIONS = 3000;
    private static final int DEFAULT_MAXIMUM_EXPANSION_SIZE_VALUE = 1000;
    private static final int DEFAULT_NUMBER_OF_INITIAL_GUESSES_VALUE = 200;
    private static final int TERMINAL_CONDITION_NUMBER_OF_VALID_INITIAL_GUESSES = 20;
