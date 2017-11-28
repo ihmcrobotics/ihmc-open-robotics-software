@@ -17,10 +17,10 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
  * @author twan
  * Date: 4/11/13
  */
-public class SVDNullspaceCalculatorTest extends NullspaceProjectorCalculatorTest
+public class SVDNullspaceCalculatorTest extends NullspaceCalculatorTest
 {
    @Override
-   public NullspaceProjectorCalculator getNullspaceProjectorCalculator()
+   public NullspaceCalculator getNullspaceProjectorCalculator()
    {
       return new SVDNullspaceCalculator(10, true);
    }

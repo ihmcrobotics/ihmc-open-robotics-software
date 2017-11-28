@@ -2,7 +2,7 @@ package us.ihmc.robotics.linearAlgebra;
 
 import org.ejml.data.DenseMatrix64F;
 
-public interface NullspaceProjectorCalculator
+public interface NullspaceCalculator
 {
    /**
     * Perform a projection in place

@@ -37,6 +37,8 @@ public class DampedLeastSquaresNullspaceCalculator implements DampedNullspaceCal
       nullspaceProjector = new DenseMatrix64F(matrixSize, matrixSize);
       tempMatrixForProjectionInPlace = new DenseMatrix64F(matrixSize, matrixSize);
 
+      this.alpha = alpha;
+
       dampedMatrix = new DenseMatrix64F(matrixSize, matrixSize);
       inverseMatrix = new DenseMatrix64F(matrixSize, matrixSize);
       this.linearSolver = LinearSolverFactory.linear(matrixSize);
@@ -54,7 +56,7 @@ public class DampedLeastSquaresNullspaceCalculator implements DampedNullspaceCal
    }
 
    /**
-    * Compute the nullspace of the given matrix as follows:
+    * Compute the nullspace projector of the given matrix as follows:
     * <p>
     * &Nu; = I - M<sup>+</sup>M
     * </p>
@@ -91,7 +93,7 @@ public class DampedLeastSquaresNullspaceCalculator implements DampedNullspaceCal
     * @param matrixToComputeNullspaceOf the matrix to compute the nullspace of for the projection. Not Modified.
     * @param nullspaceToPack matrix to store the resulting nullspace matrix. Modified.
     */
-   private void computeSquareNullspace(DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F nullspaceToPack)
+   private void computeSquareNullspaceProjector(DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F nullspaceToPack)
    {
       int nullspaceMatrixSize = matrixToComputeNullspaceOf.getNumCols();
 
@@ -142,7 +144,7 @@ public class DampedLeastSquaresNullspaceCalculator implements DampedNullspaceCal
    {
       nullspaceProjectorTimer.startMeasurement();
       if (matrixToComputeNullspaceOf.numCols == matrixToComputeNullspaceOf.numRows)
-         computeSquareNullspace(matrixToComputeNullspaceOf, nullspaceProjector);
+         computeSquareNullspaceProjector(matrixToComputeNullspaceOf, nullspaceProjector);
       else
          computeNullspaceProjector(matrixToComputeNullspaceOf, nullspaceProjector);
       nullspaceProjectorTimer.stopMeasurement();
