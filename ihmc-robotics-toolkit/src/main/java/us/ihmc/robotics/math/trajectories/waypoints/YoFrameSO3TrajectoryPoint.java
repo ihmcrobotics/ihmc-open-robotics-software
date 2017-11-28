@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -7,7 +8,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.geometry.yoFrameObjects.YoFrameSO3Waypoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -34,7 +34,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
       this.orientation.set(orientation);
    }
 
-   public void setOrientation(FrameOrientation orientation)
+   public void setOrientation(FrameQuaternion orientation)
    {
       this.orientation.set(orientation);
    }
@@ -63,7 +63,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
       this.angularVelocity.set(angularVelocity);
    }
 
-   public void set(double time, FrameOrientation orientation, FrameVector3D angularVelocity)
+   public void set(double time, FrameQuaternion orientation, FrameVector3D angularVelocity)
    {
       this.time.set(time);
       this.orientation.set(orientation);
@@ -129,7 +129,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
       angularVelocity.get(angularVelocityToPack);
    }
 
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientation.getFrameOrientation(orientationToPack);
    }
@@ -139,7 +139,7 @@ public class YoFrameSO3TrajectoryPoint extends YoFrameTrajectoryPoint<YoFrameSO3
       angularVelocity.getFrameTuple(angularVelocityToPack);
    }
 
-   public void getOrientationIncludingFrame(FrameOrientation orientationToPack)
+   public void getOrientationIncludingFrame(FrameQuaternion orientationToPack)
    {
       orientation.getFrameOrientationIncludingFrame(orientationToPack);
    }

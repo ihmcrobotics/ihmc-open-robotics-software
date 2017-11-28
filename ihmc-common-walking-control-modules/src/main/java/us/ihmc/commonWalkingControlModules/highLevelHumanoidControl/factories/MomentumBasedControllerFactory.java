@@ -335,9 +335,10 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
+      double defaultTouchdownTime = walkingControllerParameters.getDefaultTouchdownTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, defaultFinalTransferTime, feet, statusOutputManager, yoTime, yoGraphicsListRegistry, registry);
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultTouchdownTime, defaultInitialTransferTime, defaultFinalTransferTime, feet, statusOutputManager, yoTime, yoGraphicsListRegistry, registry);
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
@@ -569,15 +570,5 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
          throw new RuntimeException(HighLevelHumanoidControllerToolbox.class.getSimpleName() + " has not been created yet.");
 
       return controllerToolbox;
-   }
-
-   /**
-    * Warms up the walking controller by running it a number of iterations
-    * 
-    * @param iterations
-    */
-   public void warmupWalkingController(int iterations)
-   {
-      highLevelHumanoidControllerManager.warmup(iterations, walkingBehavior);
    }
 }

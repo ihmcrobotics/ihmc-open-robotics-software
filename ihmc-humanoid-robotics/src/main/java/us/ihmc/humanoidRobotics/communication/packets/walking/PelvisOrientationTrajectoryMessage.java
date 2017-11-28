@@ -8,6 +8,7 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
@@ -54,7 +55,7 @@ public class PelvisOrientationTrajectoryMessage extends AbstractSO3TrajectoryMes
     * @param trajectoryTime how long it takes to reach the desired pose.
     * @param desiredOrientation desired pelvis orientation expressed in world frame.
     */
-   public PelvisOrientationTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation)
+   public PelvisOrientationTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation)
    {
       super(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame());
    }
@@ -70,7 +71,7 @@ public class PelvisOrientationTrajectoryMessage extends AbstractSO3TrajectoryMes
       super(numberOfTrajectoryPoints);
    }
 
-   public PelvisOrientationTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, ReferenceFrame trajectoryFrame)
+   public PelvisOrientationTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
    {
       super(trajectoryTime, desiredOrientation, trajectoryFrame);
    }

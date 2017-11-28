@@ -4,6 +4,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.rotationConversion.AxisAngleConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -346,7 +347,7 @@ public class RotationTools
       }
    };
 
-   public static void integrateAngularVelocity(FrameVector3D angularVelocityToIntegrate, double integrationTime, FrameOrientation orientationResultToPack)
+   public static void integrateAngularVelocity(FrameVector3D angularVelocityToIntegrate, double integrationTime, FrameQuaternion orientationResultToPack)
    {
       AxisAngle axisAngleResult = axisAngleForIntegrator.get();
       integrateAngularVelocity(angularVelocityToIntegrate.getVector(), integrationTime, axisAngleResult);

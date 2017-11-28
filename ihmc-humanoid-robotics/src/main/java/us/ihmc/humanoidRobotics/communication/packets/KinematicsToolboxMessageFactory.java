@@ -4,11 +4,11 @@ import us.ihmc.communication.packets.KinematicsToolboxCenterOfMassMessage;
 import us.ihmc.communication.packets.KinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -64,7 +64,7 @@ public class KinematicsToolboxMessageFactory
    public static KinematicsToolboxRigidBodyMessage holdRigidBodyCurrentOrientation(RigidBody rigidBody)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage(rigidBody);
-      FrameOrientation currentOrientation = new FrameOrientation(rigidBody.getBodyFixedFrame());
+      FrameQuaternion currentOrientation = new FrameQuaternion(rigidBody.getBodyFixedFrame());
       currentOrientation.changeFrame(worldFrame);
 
       message.setDesiredOrientation(currentOrientation);

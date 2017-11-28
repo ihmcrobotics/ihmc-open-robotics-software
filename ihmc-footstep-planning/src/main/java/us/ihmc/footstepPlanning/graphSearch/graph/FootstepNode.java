@@ -58,8 +58,8 @@ public class FootstepNode
 
    public static FootstepNode generateRandomFootstepNode(Random random, double minMaxXY)
    {
-      return new FootstepNode(EuclidCoreRandomTools.generateRandomDouble(random, minMaxXY), EuclidCoreRandomTools.generateRandomDouble(random, minMaxXY),
-                              EuclidCoreRandomTools.generateRandomDouble(random, Math.PI), RobotSide.generateRandomRobotSide(random));
+      return new FootstepNode(EuclidCoreRandomTools.nextDouble(random, minMaxXY), EuclidCoreRandomTools.nextDouble(random, minMaxXY),
+                              EuclidCoreRandomTools.nextDouble(random, Math.PI), RobotSide.generateRandomRobotSide(random));
    }
 
    @Override

@@ -9,7 +9,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class MidFrameZUpFrame extends ReferenceFrame
 {
-   private static final long serialVersionUID = -2229169827166093475L;
    private final ReferenceFrame parentZUpFrame, frameOne, frameTwo;
 
    private final FramePoint3D originOneInParent;

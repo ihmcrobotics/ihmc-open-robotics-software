@@ -8,6 +8,7 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
 
 @RosMessagePacket(documentation =
@@ -46,7 +47,7 @@ public class HeadTrajectoryMessage extends AbstractSO3TrajectoryMessage<HeadTraj
       super(headTrajectoryMessage);
    }
 
-   public HeadTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame)
+   public HeadTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame)
    {
       this(trajectoryTime, desiredOrientation, trajectoryFrame);
       getFrameInformation().setDataReferenceFrame(dataFrame);
@@ -58,7 +59,7 @@ public class HeadTrajectoryMessage extends AbstractSO3TrajectoryMessage<HeadTraj
     * @param trajectoryTime how long it takes to reach the desired orientation.
     * @param desiredOrientation desired head orientation expressed in world frame.
     */
-   public HeadTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, ReferenceFrame trajectoryFrame)
+   public HeadTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
    {
       super(trajectoryTime, desiredOrientation, trajectoryFrame);
    }
@@ -69,7 +70,7 @@ public class HeadTrajectoryMessage extends AbstractSO3TrajectoryMessage<HeadTraj
     * @param trajectoryTime how long it takes to reach the desired orientation.
     * @param desiredOrientation desired head orientation expressed in world frame.
     */
-   public HeadTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, long trajectoryReferenceFrameId)
+   public HeadTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, long trajectoryReferenceFrameId)
    {
       super(trajectoryTime, desiredOrientation, trajectoryReferenceFrameId);
    }

@@ -203,9 +203,9 @@ public class PlanningTestTools
    public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose initialStanceFootPose, RobotSide initialStanceSide, FootstepPlannerGoal goal,
                                          PlanarRegionsList planarRegionsList, boolean assertPlannerReturnedResult)
    {
+      planner.setPlanarRegions(planarRegionsList);
       planner.setInitialStanceFoot(initialStanceFootPose, initialStanceSide);
       planner.setGoal(goal);
-      planner.setPlanarRegions(planarRegionsList);
 
       ExecutionTimer timer = new ExecutionTimer("Timer", 0.0, new YoVariableRegistry("Timer"));
       timer.startMeasurement();

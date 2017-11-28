@@ -95,6 +95,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    private final List<YoDouble> swingDurations;
    private final List<YoDouble> transferDurations;
+   private final List<YoDouble> touchdownDurations;
    private final List<YoDouble> swingSplitFractions;
    private final List<YoDouble> swingDurationShiftFractions;
    private final List<YoDouble> transferSplitFractions;
@@ -151,7 +152,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
     */
    public ReferenceCoPTrajectoryGenerator(String namePrefix, int maxNumberOfFootstepsToConsider, BipedSupportPolygons bipedSupportPolygons,
                                           SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoInteger numberFootstepsToConsider,
-                                          List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> swingSplitFractions,
+                                          List<YoDouble> swingDurations, List<YoDouble> transferDurations, List<YoDouble> touchdownDurations, List<YoDouble> swingSplitFractions,
                                           List<YoDouble> swingDurationShiftFractions, List<YoDouble> transferSplitFractions, YoVariableRegistry parentRegistry)
    {
       this.numberFootstepsToConsider = numberFootstepsToConsider;
@@ -171,6 +172,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
       this.swingDurations = swingDurations;
       this.transferDurations = transferDurations;
+      this.touchdownDurations = touchdownDurations;
       this.swingSplitFractions = swingSplitFractions;
       this.swingDurationShiftFractions = swingDurationShiftFractions;
       this.transferSplitFractions = transferSplitFractions;
@@ -904,8 +906,20 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private double getTransferSegmentTimes(int segmentIndex, int footstepIndex)
    {
       double transferTime = transferDurations.get(footstepIndex).getDoubleValue();
+      
+      if(footstepIndex > 0 && touchdownDurations.size() > 0)
+      {
+         int previousSwingTouchdownIndex = footstepIndex - 1;
+         double touchdownDuration = touchdownDurations.get(previousSwingTouchdownIndex).getDoubleValue();
+         if (Double.isFinite(touchdownDuration) && touchdownDuration > 0.0)
+         {
+            transferTime -= touchdownDuration;
+         }
+      }
+      
       if (transferTime <= 0.0 || !Double.isFinite(transferTime))
          transferTime = defaultTransferTime;
+      
       if (useTransferSplitFractionFor.get(footstepIndex) == UseSplitFractionFor.TIME)
       {
          switch (segmentIndex)
@@ -942,8 +956,17 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private double getSwingSegmentTimes(int segmentIndex, int footstepIndex)
    {
       double swingTime = swingDurations.get(footstepIndex).getDoubleValue();
+      double touchdownDuration = touchdownDurations.get(footstepIndex).getDoubleValue();
       if (swingTime <= 0.0 || !Double.isFinite(swingTime))
+      {
          swingTime = defaultSwingTime;
+      }
+      
+      if (Double.isFinite(touchdownDuration) && touchdownDuration > 0.0)
+      {
+         swingTime += touchdownDuration;
+      }
+      
       switch (segmentIndex)
       {
       case 0:
@@ -1244,7 +1267,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    private void setFootPolygonFromCurrentState(FrameConvexPolygon2d framePolygonToPack, RobotSide robotSide)
    {
-      if (!supportFootPolygonsInSoleZUpFrames.get(robotSide).isEmpty())
+      if (!supportFootPolygonsInSoleZUpFrames.get(robotSide).isEmpty() && ! (supportFootPolygonsInSoleZUpFrames.get(robotSide).getNumberOfVertices() < 3))
          framePolygonToPack.setIncludingFrame(supportFootPolygonsInSoleZUpFrames.get(robotSide));
       else
       {
@@ -1405,5 +1428,19 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          return 0.0;
       else
          return activeTrajectory.getNodeTimes()[activeTrajectory.getNumberOfSegments()];
+   }
+
+   public boolean getIsPlanAvailable()
+   {
+      return planIsAvailable.getBooleanValue();
+   }
+
+   public void getDoubleSupportPolygonCentroid(YoFramePoint copPositionToPack)
+   {
+      setFootPolygonFromCurrentState(supportFootPolygon, RobotSide.LEFT);
+      setFootPolygonFromCurrentState(swingFootInitialPolygon, RobotSide.RIGHT);
+      computeMidFeetPointWithChickenSupport(tempFramePoint1, supportFootPolygon, swingFootInitialPolygon);
+      tempFramePoint1.changeFrame(copPositionToPack.getReferenceFrame());
+      copPositionToPack.set(tempFramePoint1);
    }
 }

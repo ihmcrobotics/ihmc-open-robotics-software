@@ -768,7 +768,7 @@ public class PlanarRegionTest
 
                assertTrue(
                      "Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: "
-                           + boundingBox3dInWorld, boundingBox3dInWorld.isInsideEpsilon(vertex.getX(), vertex.getY(), planeZGivenXY, PlanarRegion.DEFAULT_BOUNDING_BOX_EPSILON));
+                           + boundingBox3dInWorld, boundingBox3dInWorld.isInsideEpsilon(vertex.getX(), vertex.getY(), planeZGivenXY, 1e-15));
             }
          }
       }

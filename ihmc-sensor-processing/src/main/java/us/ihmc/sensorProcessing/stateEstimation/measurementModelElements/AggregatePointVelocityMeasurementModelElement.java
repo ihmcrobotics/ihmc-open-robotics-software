@@ -11,10 +11,10 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.RigidBodyToIndexMap;
@@ -31,7 +31,7 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
    private final ControlFlowInputPort<List<PointVelocityDataObject>> inputPort;
    private final ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort;
    private final ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort;
-   private final ControlFlowOutputPort<FrameOrientation> orientationPort;
+   private final ControlFlowOutputPort<FrameQuaternion> orientationPort;
    private final ControlFlowOutputPort<FrameVector3D> angularVelocityPort;
 
    private final ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort;
@@ -52,7 +52,7 @@ public class AggregatePointVelocityMeasurementModelElement implements Measuremen
 
    public AggregatePointVelocityMeasurementModelElement(ControlFlowInputPort<List<PointVelocityDataObject>> inputPort,
            ControlFlowOutputPort<FramePoint3D> centerOfMassPositionPort, ControlFlowOutputPort<FrameVector3D> centerOfMassVelocityPort,
-           ControlFlowOutputPort<FrameOrientation> orientationPort, ControlFlowOutputPort<FrameVector3D> angularVelocityPort,
+           ControlFlowOutputPort<FrameQuaternion> orientationPort, ControlFlowOutputPort<FrameVector3D> angularVelocityPort,
            ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort, AfterJointReferenceFrameNameMap referenceFrameNameMap,
            RigidBodyToIndexMap rigidBodyToIndexMap, ReferenceFrame estimationFrame, boolean assumePerfectIMU)
    {

@@ -16,23 +16,23 @@ public class GdxCollisionDetectorTest extends SCSCollisionDetectorTest
    {
       return new GdxCollisionDetector(1000.0);
    }
-   
+
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void collisionMask_hit()
    {
       super.collisionMask_hit();
    }
-   
+
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
    public void testBoxBarelyCollisions()
    {
       super.testBoxBarelyCollisions();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
@@ -40,7 +40,7 @@ public class GdxCollisionDetectorTest extends SCSCollisionDetectorTest
    {
       super.testBoxCloseButNoCollisions();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)
@@ -48,7 +48,7 @@ public class GdxCollisionDetectorTest extends SCSCollisionDetectorTest
    {
       super.testSmallBox();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
@@ -56,7 +56,7 @@ public class GdxCollisionDetectorTest extends SCSCollisionDetectorTest
    {
       super.testUnitBox();
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 300000)

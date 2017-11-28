@@ -4,14 +4,11 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSimpleICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.AvatarICPOptimizationPushRecoveryTest;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -78,124 +75,110 @@ public class AtlasSimpleICPOptimizationPushRecoveryTest extends AvatarICPOptimiz
       return 1.0;
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationBackwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationOutwardPushInSwing();
+      super.testPushICPOptimizationBackwardPushInSwing(0.2);
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationDiagonalOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationDiagonalOutwardPushInSwing();
+      super.testPushICPOptimizationDiagonalOutwardPushInSwing(0.2);
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationDiagonalYawingOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationDiagonalYawingOutwardPushInSwing();
+      super.testPushICPOptimizationDiagonalYawingOutwardPushInSwing(0.13);
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationForwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationForwardPushInSlowSwing();
+      super.testPushICPOptimizationForwardPushInSlowSwing(0.2);
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationForwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationForwardPushInSwing();
+      super.testPushICPOptimizationForwardPushInSwing(0.29);
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationInwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationInwardPushInSwing();
+      super.testPushICPOptimizationInwardPushInSwing(0.17);
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationLongBackwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationLongBackwardPushInSwing();
+      super.testPushICPOptimizationLongBackwardPushInSwing(0.15);
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationLongForwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationLongForwardPushInSwing();
+      super.testPushICPOptimizationLongForwardPushInSwing(0.07);
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationLongInwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationLongInwardPushInSwing();
+      super.testPushICPOptimizationLongInwardPushInSwing(0.05);
    }
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationNoPush() throws SimulationExceededMaximumTimeException
    {
       super.testPushICPOptimizationNoPush();
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationOutwardPushInSlowSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationOutwardPushInSlowSwing();
+      super.testPushICPOptimizationOutwardPushInSlowSwing(0.11);
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationOutwardPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationOutwardPushInSwing();
+      super.testPushICPOptimizationOutwardPushInSwing(0.25);
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationOutwardPushInTransfer() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationOutwardPushInTransfer();
+      super.testPushICPOptimizationOutwardPushInTransfer(0.12);
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationOutwardPushOnEachStep() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationOutwardPushOnEachStep();
+      super.testPushICPOptimizationOutwardPushOnEachStep(0.12);
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 80000)
+   @Test(timeout = 150000)
    public void testPushICPOptimizationRandomPushInSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushICPOptimizationRandomPushInSwing();
+      super.testPushICPOptimizationRandomPushInSwing(0.18);
    }
 
    public static void main(String[] args)

@@ -9,7 +9,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class CenterOfMassReferenceFrame extends ReferenceFrame
 {
-   private static final long serialVersionUID = 97944957592733289L;
    private final CenterOfMassCalculator centerOfMassCalculator;
    private final FramePoint3D centerOfMass;
    private final Vector3D centerOfMassVector3d = new Vector3D();

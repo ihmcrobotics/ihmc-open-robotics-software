@@ -103,8 +103,6 @@ public class FiducialDetectorFromCameraImages
 
       cameraReferenceFrame = new ReferenceFrame(prefix + "CameraReferenceFrame", ReferenceFrame.getWorldFrame())
       {
-         private static final long serialVersionUID = 4455939689271999057L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
@@ -114,8 +112,6 @@ public class FiducialDetectorFromCameraImages
 
       detectorReferenceFrame = new ReferenceFrame(prefix + "DetectorReferenceFrame", cameraReferenceFrame)
       {
-         private static final long serialVersionUID = -6695542420802533867L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
@@ -125,8 +121,6 @@ public class FiducialDetectorFromCameraImages
 
       locatedFiducialReferenceFrame = new ReferenceFrame(prefix + "LocatedReferenceFrame", ReferenceFrame.getWorldFrame())
       {
-         private static final long serialVersionUID = 9164127391552081524L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {

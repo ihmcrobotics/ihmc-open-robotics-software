@@ -443,4 +443,9 @@ public class WholeBodyControlCoreToolbox
    {
       return optimizationSettings.getRhoSize();
    }
+
+   public boolean getDeactiveRhoWhenNotInContact()
+   {
+      return optimizationSettings.getDeactivateRhoWhenNotInContact();
+   }
 }

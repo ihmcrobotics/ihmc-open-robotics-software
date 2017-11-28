@@ -113,6 +113,7 @@ public class WrenchMatrixCalculator
          FrictionConeRotationCalculator frictionConeRotation = toolbox.getOptimizationSettings().getFrictionConeRotation();
          PlaneContactStateToWrenchMatrixHelper helper = new PlaneContactStateToWrenchMatrixHelper(contactablePlaneBody, centerOfMassFrame,
                maxNumberOfContactPoints, numberOfBasisVectorsPerContactPoint, frictionConeRotation, registry);
+         helper.setDeactivateRhoWhenNotInContact(toolbox.getDeactiveRhoWhenNotInContact());
          planeContactStateToWrenchMatrixHelpers.put(rigidBody, helper);
 
          basisVectorsOrigin.addAll(helper.getBasisVectorsOrigin());

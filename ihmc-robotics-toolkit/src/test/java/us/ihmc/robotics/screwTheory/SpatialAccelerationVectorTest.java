@@ -107,18 +107,18 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       for (int i = 0; i < 1000; i++)
       {
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-         ReferenceFrame baseFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("baseFrame", worldFrame, EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
-         ReferenceFrame bodyFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("bodyFrame", worldFrame, EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+         ReferenceFrame baseFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("baseFrame", worldFrame, EuclidCoreRandomTools.nextRigidBodyTransform(random));
+         ReferenceFrame bodyFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("bodyFrame", worldFrame, EuclidCoreRandomTools.nextRigidBodyTransform(random));
          
-         Vector3D linearAcceleration = EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0);
-         Vector3D angularAcceleration = EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0);
+         Vector3D linearAcceleration = EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0);
+         Vector3D angularAcceleration = EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0);
          SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector(bodyFrame, baseFrame, bodyFrame, linearAcceleration, angularAcceleration);
          
-         Vector3D linearVelocity = EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0);
-         Vector3D angularVelocity = EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0);
+         Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0);
+         Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0);
          Twist twist = new Twist(bodyFrame, baseFrame, bodyFrame, linearVelocity, angularVelocity);
          
-         FramePoint3D pointFixedInBodyFrame = new FramePoint3D(bodyFrame, EuclidCoreRandomTools.generateRandomPoint3D(random, 1.0));
+         FramePoint3D pointFixedInBodyFrame = new FramePoint3D(bodyFrame, EuclidCoreRandomTools.nextPoint3D(random, 1.0));
          FrameVector3D bodyFixedPointLinearAccelerationInBody = new FrameVector3D();
          FrameVector3D bodyFixedPointLinearAccelerationInBase = new FrameVector3D();
          

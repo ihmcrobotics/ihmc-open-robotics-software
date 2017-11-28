@@ -8,7 +8,6 @@ import us.ihmc.robotics.geometry.FramePose2d;
 
 public class Pose2dReferenceFrame extends ReferenceFrame
 {
-   private static final long serialVersionUID = 1559362743221742457L;
    private final FramePose2d originPose;
 
    public Pose2dReferenceFrame(String frameName, ReferenceFrame parentFrame)

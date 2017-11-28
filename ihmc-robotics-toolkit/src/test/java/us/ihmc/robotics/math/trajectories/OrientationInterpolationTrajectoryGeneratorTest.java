@@ -11,10 +11,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
@@ -23,7 +23,7 @@ import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 public class OrientationInterpolationTrajectoryGeneratorTest
 {
    private String namePrefix = "namePrefixTEST";
-   private FrameOrientation orientation;
+   private FrameQuaternion orientation;
    
    private ReferenceFrame referenceFrame;
    private DoubleProvider trajectoryTimeProvider;
@@ -41,7 +41,7 @@ public class OrientationInterpolationTrajectoryGeneratorTest
    public void setUp()
    {
       referenceFrame = ReferenceFrame.constructARootFrame("rootFrameTEST");
-      orientation = new FrameOrientation(referenceFrame);
+      orientation = new FrameQuaternion(referenceFrame);
       
       trajectoryTimeProvider = new SettableDoubleProvider(trajectoryTime);
       initialOrientationProvider = new ConstantOrientationProvider(orientation);
@@ -94,7 +94,7 @@ public class OrientationInterpolationTrajectoryGeneratorTest
    public void testGet()
    {
       generator = new OrientationInterpolationTrajectoryGenerator(namePrefix, referenceFrame, trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, parentRegistry);
-      FrameOrientation orientationToPack = new FrameOrientation();
+      FrameQuaternion orientationToPack = new FrameQuaternion();
 
       generator.getOrientation(orientationToPack);
       
@@ -139,8 +139,8 @@ public class OrientationInterpolationTrajectoryGeneratorTest
 	@Test(timeout = 30000)
    public void testPackAngularData()
    {
-      FrameOrientation orientationToPack = new FrameOrientation(referenceFrame);
-      orientationToPack.setIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
+      FrameQuaternion orientationToPack = new FrameQuaternion(referenceFrame);
+      orientationToPack.setYawPitchRollIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       generator = new OrientationInterpolationTrajectoryGenerator(namePrefix, referenceFrame, trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, parentRegistry);
       generator.getOrientation(orientationToPack);

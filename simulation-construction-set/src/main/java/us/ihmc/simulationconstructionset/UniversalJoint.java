@@ -3,6 +3,8 @@ package us.ihmc.simulationconstructionset;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class UniversalJoint extends PinJoint
@@ -13,7 +15,7 @@ public class UniversalJoint extends PinJoint
    private static final long serialVersionUID = 3428274232426974681L;
    private PinJoint joint2;
 
-   public UniversalJoint(String jname1, String jname2, Vector3D offset, Robot rob, Axis firstAxis, Axis secondAxis)
+   public UniversalJoint(String jname1, String jname2, Vector3DReadOnly offset, Robot rob, Axis firstAxis, Axis secondAxis)
    {
       super(jname1, offset, rob, firstAxis);
 
@@ -160,7 +162,7 @@ public class UniversalJoint extends PinJoint
    }
 
    @Override
-   public void getTranslationToWorld(Vector3D translation)
+   public void getTranslationToWorld(Vector3DBasics translation)
    {
       joint2.transformToNext.getTranslation(translation);
    }

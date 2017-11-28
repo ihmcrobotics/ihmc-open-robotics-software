@@ -1,5 +1,6 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -17,7 +18,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -98,9 +98,9 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final Vector3D correctedPelvisTranslation = new Vector3D();
    private final Vector3D errorBetweenCorrectedAndLocalizationTransform_Translation = new Vector3D();
    
-   private final FrameOrientation localizationOrientation = new FrameOrientation(worldFrame);
-   private final FrameOrientation correctedPelvisOrientation = new FrameOrientation(worldFrame);
-   private final FrameOrientation errorBetweenCorrectedAndLocalizationTransform_Rotation = new FrameOrientation(worldFrame);
+   private final FrameQuaternion localizationOrientation = new FrameQuaternion(worldFrame);
+   private final FrameQuaternion correctedPelvisOrientation = new FrameQuaternion(worldFrame);
+   private final FrameQuaternion errorBetweenCorrectedAndLocalizationTransform_Rotation = new FrameQuaternion(worldFrame);
    private final Quaternion errorBetweenCorrectedAndLocalizationQuaternion_Rotation = new Quaternion();
    
    private final YoBoolean isErrorTooBig;
@@ -219,10 +219,10 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       iterativeClosestPointInWorldFramePose.getPosition(localizationTranslation);
       
       iterativeClosestPointInWorldFramePose.getOrientationIncludingFrame(localizationOrientation);
-      correctedPelvisOrientation.setIncludingFrame(worldFrame, correctedPelvisTransformInWorldFrame);
+      correctedPelvisOrientation.setIncludingFrame(worldFrame, correctedPelvisTransformInWorldFrame.getRotationMatrix());
       
-      errorBetweenCorrectedAndLocalizationTransform_Rotation.setOrientationFromOneToTwo(localizationOrientation, correctedPelvisOrientation);
-      errorBetweenCorrectedAndLocalizationTransform_Rotation.getQuaternion(errorBetweenCorrectedAndLocalizationQuaternion_Rotation);
+      errorBetweenCorrectedAndLocalizationTransform_Rotation.difference(correctedPelvisOrientation, localizationOrientation);
+      errorBetweenCorrectedAndLocalizationQuaternion_Rotation.set(errorBetweenCorrectedAndLocalizationTransform_Rotation);
 
       errorBetweenCorrectedAndLocalizationTransform_Translation.sub(localizationTranslation, correctedPelvisTranslation);
       
