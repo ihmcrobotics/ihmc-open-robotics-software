@@ -233,14 +233,12 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
       currentUpdateNode++;
 
+      updateTimer(motionGenerationComputationTime, motionGenerationStartTime);
       /*
        * terminate generateMotion.
        */
       if (currentUpdateNode == path.size())
       {
-         long endTime = System.nanoTime();
-         motionGenerationComputationTime.set(Conversions.nanosecondsToSeconds(endTime - motionGenerationStartTime));
-
          // TODO : pack out output.
          setOutputStatus(toolboxSolution, 4);
          setOutputStatus(toolboxSolution, path);
@@ -338,14 +336,10 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       for (int i = 0; i < path.size(); i++)
          nodePlotter.update(path.get(i), 3);
 
-      long endTime = System.nanoTime();
-
-      shortcutPathComputationTime.set(Conversions.nanosecondsToSeconds(endTime - shortcutStartTime));
-      motionGenerationStartTime = endTime;
+      motionGenerationStartTime = updateTimer(shortcutPathComputationTime, shortcutStartTime);
 
       if (VERBOSE)
       {
-         PrintTools.info("Shortcut computation time = " + shortcutPathComputationTime.getDoubleValue());
          PrintTools.info("the size of the path is " + path.size() + " before dismissing " + revertedPathSize);
       }
 
@@ -414,11 +408,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          else
          {
             state.set(CWBToolboxState.SHORTCUT_PATH);
-            long endTime = System.nanoTime();
-            treeExpansionComputationTime.set(Conversions.nanosecondsToSeconds(endTime - treeExpansionStartTime));
-            shortcutStartTime = endTime;
          }
       }
+      shortcutStartTime = updateTimer(treeExpansionComputationTime, treeExpansionStartTime);
    }
 
    /**
@@ -476,12 +468,16 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
             state.set(CWBToolboxState.EXPAND_TREE);
 
             tree = new SpatialNodeTree(rootNode);
-
-            long endTime = System.nanoTime();
-            initialGuessComputationTime.set(Conversions.nanosecondsToSeconds(endTime - initialGuessStartTime));
-            treeExpansionStartTime = endTime;
          }
       }
+      treeExpansionStartTime = updateTimer(initialGuessComputationTime, initialGuessStartTime);
+   }
+
+   private long updateTimer(YoDouble currentTimer, long currentTimerStartTime)
+   {
+      long endTime = System.nanoTime();
+      currentTimer.set(Conversions.nanosecondsToSeconds(endTime - currentTimerStartTime));
+      return endTime;
    }
 
    private WholeBodyTrajectoryToolboxData toolboxData;

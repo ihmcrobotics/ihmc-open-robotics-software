@@ -14,7 +14,8 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
-public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTrajectoryCommand, WaypointBasedTrajectoryMessage>, WholeBodyTrajectoryToolboxAPI<WaypointBasedTrajectoryMessage>
+public class WaypointBasedTrajectoryCommand
+      implements Command<WaypointBasedTrajectoryCommand, WaypointBasedTrajectoryMessage>, WholeBodyTrajectoryToolboxAPI<WaypointBasedTrajectoryMessage>
 {
    /** This is the unique hash code of the end-effector to be solved for. */
    private long endEffectorNameBasedHashCode;
@@ -26,7 +27,7 @@ public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTraj
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final FramePose controlFramePose = new FramePose();
-   
+
    @Override
    public void clear()
    {
@@ -94,7 +95,7 @@ public class WaypointBasedTrajectoryCommand implements Command<WaypointBasedTraj
    {
       return waypointTimes.get(i);
    }
-   
+
    public double getLastWaypointTime()
    {
       return waypointTimes.get(getNumberOfWaypoints() - 1);

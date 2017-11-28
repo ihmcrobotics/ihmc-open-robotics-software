@@ -61,6 +61,8 @@ public class SpatialNodePlotter
    {
       double normalizedTime = node.getTime() / trajectoryTime;
       Color color;
+      double diameter = 0.005;
+      
       for (int nodeIndex = 0; nodeIndex < dimensionOfConfigurations; nodeIndex++)
       {
          String prefix;
@@ -75,6 +77,7 @@ public class SpatialNodePlotter
             else
             {
                prefix = "" + cnt + "_invalid_" + nodeIndex;
+               diameter = 0.005;
                color = Color.red;                              
             }
             break;
@@ -107,7 +110,7 @@ public class SpatialNodePlotter
             plotters.get(nodeIndex).addArtifact(lineArtifact);
          }
 
-         double diameter = 0.02;
+         
 
          CircleArtifact nodeArtifact = new CircleArtifact(prefix + "_node", normalizedTime, configurationData, diameter, true);
          nodeArtifact.setColor(color);
