@@ -550,13 +550,6 @@ public class EscherWalkingControllerParameters extends WalkingControllerParamete
    }
 
    @Override
-   public boolean doPrepareManipulationForLocomotion()
-   {
-      //this allows me to walk with hand poses locked in a reference frame
-      return false;
-   }
-
-   @Override
    public double getDefaultTransferTime()
    {
       return (target == RobotTarget.REAL_ROBOT) ? 0.8 : 0.25;

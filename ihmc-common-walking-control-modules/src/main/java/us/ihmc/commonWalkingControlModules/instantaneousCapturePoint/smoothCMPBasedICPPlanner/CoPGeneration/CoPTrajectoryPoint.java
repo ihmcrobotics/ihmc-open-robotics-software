@@ -4,7 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameTuple3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -17,7 +17,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
 {
    protected final YoVariableRegistry registry;
-   FramePoint3D localPosition = new FramePoint3D(); // dummy variable to hand out data with    
    private YoFramePoint yoFramePointInWorld;
 
    public CoPTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame[] referenceFrames)

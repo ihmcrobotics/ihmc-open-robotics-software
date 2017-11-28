@@ -5,25 +5,26 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.footstepPlanning.DefaultFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.FootstepPlanner;
+import us.ihmc.footstepPlanning.flatGroundPlanning.FootstepPlannerOnFlatGroundTest;
+import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlanarRegionBipedalFootstepPlannerVisualizer;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.AlwaysValidNodeChecker;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
-import us.ihmc.footstepPlanning.flatGroundPlanning.FootstepPlannerOnFlatGroundTest;
-import us.ihmc.footstepPlanning.graphSearch.*;
 import us.ihmc.footstepPlanning.graphSearch.planners.DepthFirstFootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.ConstantFootstepCost;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGroundTest
 {
    private YoVariableRegistry registry;
-   private BipedalFootstepPlannerParameters parameters;
+   private YoFootstepPlannerParameters parameters;
    private DepthFirstFootstepPlanner planner;
 
    private static final boolean visualize = false; // !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
@@ -87,39 +88,22 @@ public class DepthFirstFootstepPlannerOnFlatTest extends FootstepPlannerOnFlatGr
    public void setupPlanner()
    {
       registry = new YoVariableRegistry("test");
-      parameters = new BipedalFootstepPlannerParameters(registry);
-      setDefaultParameters();
+      parameters = new YoFootstepPlannerParameters(registry, new DefaultFootstepPlanningParameters());
       SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame = PlanningTestTools.createDefaultFootPolygons();
+      FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
 
       PlanarRegionBipedalFootstepPlannerVisualizer visualizer = null;
       if (showPlannerVisualizer)
       {
-          visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame, registry);
-         planner.setBipedalFootstepPlannerListener(visualizer);
+         visualizer = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(1.0, footPolygonsInSoleFrame, registry);
       }
 
-      FlatGroundFootstepNodeSnapper snapper = new FlatGroundFootstepNodeSnapper();
       AlwaysValidNodeChecker nodeChecker = new AlwaysValidNodeChecker();
       ConstantFootstepCost footstepCost = new ConstantFootstepCost(1.0);
       planner = new DepthFirstFootstepPlanner(parameters, snapper, nodeChecker, footstepCost, registry);
       planner.setFeetPolygons(footPolygonsInSoleFrame);
       planner.setMaximumNumberOfNodesToExpand(1000);
-   }
-
-   private void setDefaultParameters()
-   {
-      parameters.setMaximumStepReach(0.4);
-      parameters.setMaximumStepZ(0.25);
-      parameters.setMaximumStepXWhenForwardAndDown(0.25);
-      parameters.setMaximumStepZWhenForwardAndDown(0.25);
-      parameters.setMaximumStepYaw(0.15);
-      parameters.setMaximumStepWidth(0.4);
-      parameters.setMinimumStepWidth(0.15);
-      parameters.setMinimumFootholdPercent(0.8);
-
-      double idealFootstepLength = 0.3;
-      double idealFootstepWidth = 0.2;
-      parameters.setIdealFootstep(idealFootstepLength, idealFootstepWidth);
+      planner.setBipedalFootstepPlannerListener(visualizer);
    }
 
    @Override

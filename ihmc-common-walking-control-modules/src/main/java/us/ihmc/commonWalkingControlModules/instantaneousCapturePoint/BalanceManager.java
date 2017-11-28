@@ -14,8 +14,8 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPla
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.CenterOfMassTrajectoryHandler;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
+import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
@@ -38,7 +38,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBased
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -56,7 +56,6 @@ public class BalanceManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean ENABLE_DYN_REACHABILITY = true;
-   private static final boolean UPDATE_UPCOMING_CoPs_IN_FEET_WHEN_WALKING = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -189,7 +188,7 @@ public class BalanceManager
       else
       {
          SmoothCMPBasedICPPlanner smoothCMPPlanner = new SmoothCMPBasedICPPlanner(fullRobotModel, bipedSupportPolygons, contactableFeet, icpPlannerParameters.getNumberOfFootstepsToConsider(),
-                                                   icpPlannerParameters.getNumberOfCoPWayPointsPerFoot(), registry, yoGraphicsListRegistry, controllerToolbox.getGravityZ());
+                                                                                  registry, yoGraphicsListRegistry, controllerToolbox.getGravityZ());
          smoothCMPPlanner.setDefaultPhaseTimes(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
          icpPlanner = smoothCMPPlanner;
       }
@@ -342,6 +341,11 @@ public class BalanceManager
    public double getNextTransferDurationAdjustedForReachability()
    {
       return icpPlanner.getTransferDuration(1);
+   }
+   
+   public double getCurrentTouchdownDuration()
+   {
+      return icpPlanner.getTouchdownDuration(0);
    }
 
 
@@ -649,6 +653,11 @@ public class BalanceManager
       icpErrorToPack.setIncludingFrame(desiredCapturePoint2d);
       icpErrorToPack.sub(capturePoint2d);
    }
+   
+   public boolean isPrecomputedICPPlannerActive()
+   {
+      return precomputedICPPlanner.isWithinInterval(yoTime.getDoubleValue());
+   }
 
    public boolean isICPPlanDone()
    {
@@ -775,7 +784,7 @@ public class BalanceManager
 
    public void updateCurrentICPPlan()
    {
-      icpPlanner.updateCurrentPlan(UPDATE_UPCOMING_CoPs_IN_FEET_WHEN_WALKING);
+      icpPlanner.updateCurrentPlan();
    }
 
    public void updateSwingTimeRemaining(double timeRemainingInSwing)

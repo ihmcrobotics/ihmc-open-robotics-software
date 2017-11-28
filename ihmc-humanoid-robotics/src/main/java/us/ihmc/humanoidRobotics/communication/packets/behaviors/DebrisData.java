@@ -17,7 +17,7 @@ public class DebrisData extends Packet<DebrisData>
 	
 	public DebrisData(Random random)
 	{
-	   debrisTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+	   debrisTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 	   graspVector = RandomGeometry.nextVector3D(random);
 	   double max = Double.MAX_VALUE / 2;
       graspVectorPosition = RandomGeometry.nextPoint3D(random, max, max, max);

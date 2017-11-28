@@ -12,14 +12,15 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoFrameQuaternionTest
 {
@@ -52,9 +53,9 @@ public class YoFrameQuaternionTest
       matrix3dExpected.setIdentity();
       assertTrue(matrix3dActual.epsilonEquals(matrix3dExpected, EPS));
 
-      FrameOrientation frameOrientationActual = new FrameOrientation(worldFrame);
+      FrameQuaternion frameOrientationActual = new FrameQuaternion(worldFrame);
       yoFrameQuaternion.getFrameOrientationIncludingFrame(frameOrientationActual);
-      FrameOrientation frameOrientationExpected = new FrameOrientation(worldFrame);
+      FrameQuaternion frameOrientationExpected = new FrameQuaternion(worldFrame);
       assertTrue(frameOrientationActual.epsilonEquals(frameOrientationExpected, EPS));
 
       double[] yawPitchRollActual = new double[3];
@@ -92,10 +93,10 @@ public class YoFrameQuaternionTest
       yoFrameQuaternion.get(matrix3dActual);
       assertTrue(matrix3dActual.epsilonEquals(matrix3dExpected, EPS));
 
-      FrameOrientation frameOrientationExpected = new FrameOrientation(worldFrame);
+      FrameQuaternion frameOrientationExpected = new FrameQuaternion(worldFrame);
       frameOrientationExpected.set(RandomGeometry.nextQuaternion(random));
       yoFrameQuaternion.set(frameOrientationExpected);
-      FrameOrientation frameOrientationActual = new FrameOrientation(worldFrame);
+      FrameQuaternion frameOrientationActual = new FrameQuaternion(worldFrame);
       yoFrameQuaternion.getFrameOrientationIncludingFrame(frameOrientationActual);
       assertTrue(frameOrientationActual.epsilonEquals(frameOrientationExpected, EPS));
 
@@ -115,12 +116,12 @@ public class YoFrameQuaternionTest
    public void testReferenceFramesMismatching()
    {
       Random random = new Random(1984L);
-      ReferenceFrame testFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("chou", worldFrame, EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      ReferenceFrame testFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("chou", worldFrame, EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
       YoFrameQuaternion yoFrameQuaternion = new YoFrameQuaternion("test", worldFrame, registry);
 
-      FrameOrientation frameOrientation = new FrameOrientation(testFrame);
+      FrameQuaternion frameOrientation = new FrameQuaternion(testFrame);
       boolean hasReferenceFrameMismatchExceptionBeenThrown = false;
       try
       {
@@ -132,7 +133,7 @@ public class YoFrameQuaternionTest
       }
       assertTrue(hasReferenceFrameMismatchExceptionBeenThrown);
 
-      frameOrientation = new FrameOrientation(worldFrame);
+      frameOrientation = new FrameQuaternion(worldFrame);
       hasReferenceFrameMismatchExceptionBeenThrown = false;
       try
       {
@@ -157,7 +158,7 @@ public class YoFrameQuaternionTest
       Quaternion quat4dActual = new Quaternion(), quat4dExpected = new Quaternion();
       Quaternion quat4dA, quat4dB;
 
-      FrameOrientation frameOrientation = new FrameOrientation(worldFrame);
+      FrameQuaternion frameOrientation = new FrameQuaternion(worldFrame);
 
       for (int i = 0; i < 1000; i++)
       {
@@ -187,9 +188,9 @@ public class YoFrameQuaternionTest
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
 
-      FrameOrientation initialFrameOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-      FrameOrientation finalFrameOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-      FrameOrientation interpolatedFrameOrientation = new FrameOrientation(worldFrame);
+      FrameQuaternion initialFrameOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
+      FrameQuaternion finalFrameOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
+      FrameQuaternion interpolatedFrameOrientation = new FrameQuaternion(worldFrame);
 
       YoFrameQuaternion initialYoFrameQuaternion = new YoFrameQuaternion("init", worldFrame, registry);
       initialYoFrameQuaternion.set(initialFrameOrientation);
@@ -197,7 +198,7 @@ public class YoFrameQuaternionTest
       finalYoFrameQuaternion.set(finalFrameOrientation);
       YoFrameQuaternion interpolatedYoFrameQuaternion = new YoFrameQuaternion("interpolated", worldFrame, registry);
 
-      FrameOrientation temp = new FrameOrientation();
+      FrameQuaternion temp = new FrameQuaternion();
       for (double alpha = -0.1; alpha <= 1.1; alpha += 0.05)
       {
          interpolatedFrameOrientation.interpolate(initialFrameOrientation, finalFrameOrientation, alpha);

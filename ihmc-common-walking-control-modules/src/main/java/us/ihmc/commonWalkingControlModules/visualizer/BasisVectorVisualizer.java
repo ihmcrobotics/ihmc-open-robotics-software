@@ -12,9 +12,9 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class BasisVectorVisualizer
 {
@@ -25,14 +25,9 @@ public class BasisVectorVisualizer
    private final Map<Integer, YoFramePoint> pointOfBases = new LinkedHashMap<>();
    private final Map<Integer, YoGraphicVector> basisVisualizers = new LinkedHashMap<>();
 
-   private final FrameVector3D tempVector = new FrameVector3D();
-   private final FramePoint3D tempPoint = new FramePoint3D();
-   private final FrameVector3D tempBasisVector = new FrameVector3D();
-
    private final int rhoSize;
 
-   public BasisVectorVisualizer(String name, int rhoSize, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoVariableRegistry parentRegistry)
+   public BasisVectorVisualizer(String name, int rhoSize, double vizScaling, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       AppearanceDefinition basisAppearance = YoAppearance.Aqua();
 
@@ -50,10 +45,10 @@ public class BasisVectorVisualizer
          YoFramePoint pointOfBasis = new YoFramePoint(prefix + "PointOfBasis", ReferenceFrame.getWorldFrame(), registry);
          pointOfBases.put(i, pointOfBasis);
 
-         YoGraphicVector basisVisualizer = new YoGraphicVector(prefix + "BasisViz", pointOfBasis , basisVector, BASIS_VECTOR_SCALE  * vizScaling,
-               basisAppearance, true);
+         YoGraphicVector basisVisualizer = new YoGraphicVector(prefix + "BasisViz", pointOfBasis, basisVector, vizScaling, basisAppearance, true);
          basisVisualizers.put(i, basisVisualizer);
 
+         yoGraphicsListRegistry.registerArtifact(name, basisVisualizer.createArtifact());
          yoGraphicsList.add(basisVisualizer);
       }
 
@@ -66,23 +61,12 @@ public class BasisVectorVisualizer
    {
       for (int i = 0; i < rhoSize; i++)
       {
-         FrameVector3D basisVector = basisVectors.get(i);
-         tempBasisVector.changeFrame(basisVector.getReferenceFrame());
-         tempBasisVector.set(basisVector);
-         tempBasisVector.changeFrame(ReferenceFrame.getWorldFrame());
-
          YoFrameVector yoBasisVector = yoBasisVectors.get(i);
-         tempVector.setToZero(basisVector.getReferenceFrame());
-         tempVector.set(tempBasisVector.getVector());
-         tempVector.changeFrame(ReferenceFrame.getWorldFrame());
-         yoBasisVector.set(tempVector);
+         yoBasisVector.setAndMatchFrame(basisVectors.get(i));
+         yoBasisVector.scale(BASIS_VECTOR_SCALE);
 
-         FramePoint3D contactPoint = contactPoints.get(i);
          YoFramePoint pointOfBasis = pointOfBases.get(i);
-         tempPoint.setToZero(contactPoint.getReferenceFrame());
-         tempPoint.set(contactPoint);
-         tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
-         pointOfBasis.set(tempPoint);
+         pointOfBasis.setAndMatchFrame(contactPoints.get(i));
       }
    }
 }

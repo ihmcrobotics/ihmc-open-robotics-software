@@ -6,7 +6,7 @@ import java.net.PasswordAuthentication;
 import java.net.URL;
 
 import sun.audio.AudioPlayer;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class DrillDetectionThread extends Thread
 {

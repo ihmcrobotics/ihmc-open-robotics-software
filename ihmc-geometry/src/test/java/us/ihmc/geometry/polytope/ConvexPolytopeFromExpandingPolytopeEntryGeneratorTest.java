@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 public class ConvexPolytopeFromExpandingPolytopeEntryGeneratorTest
 {
 
-   @Test
+   @Test(timeout = 30000)
    public void testGeneratorUsingIcoSpheres()
    {
       IcoSphereCreator creator = new IcoSphereCreator();

@@ -95,8 +95,6 @@ public class NewPelvisPoseHistoryCorrectionTest
 
       pelvisReferenceFrame = new ReferenceFrame("pelvis", ReferenceFrame.getWorldFrame(), true, false)
       {
-         private static final long serialVersionUID = -6427490298776551499L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {

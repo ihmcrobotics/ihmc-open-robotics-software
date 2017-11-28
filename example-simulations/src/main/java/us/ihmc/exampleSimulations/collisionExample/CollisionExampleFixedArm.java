@@ -1,10 +1,9 @@
 package us.ihmc.exampleSimulations.collisionExample;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.Axis;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 import us.ihmc.simulationconstructionset.Joint;
@@ -22,6 +21,7 @@ import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandl
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.simple.DoNothingCollisionArbiter;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CollisionExampleFixedArm
 {

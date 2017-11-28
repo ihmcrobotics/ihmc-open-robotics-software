@@ -22,6 +22,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -39,7 +40,7 @@ public class FootControlModule
 
    public enum ConstraintType
    {
-      FULL, TOES, SWING, MOVE_VIA_WAYPOINTS
+      FULL, TOES, SWING, MOVE_VIA_WAYPOINTS, TOUCHDOWN
    }
 
    private static final double coefficientOfFriction = 0.8;
@@ -55,6 +56,7 @@ public class FootControlModule
 
    private final SwingState swingState;
    private final MoveViaWaypointsState moveViaWaypointsState;
+   private final TouchDownState touchdownState;
    private final OnToesState onToesState;
    private final SupportState supportState;
 
@@ -64,6 +66,10 @@ public class FootControlModule
 
    private final YoBoolean requestExploration;
    private final YoBoolean resetFootPolygon;
+   
+   private final FramePose desiredPose = new FramePose();
+   private final FrameVector3D desiredLinearVelocity = new FrameVector3D();
+   private final FrameVector3D desiredAngularVelocity = new FrameVector3D();
 
    public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
          YoPIDSE3Gains swingFootControlGains, YoPIDSE3Gains holdPositionFootControlGains, YoPIDSE3Gains toeOffFootControlGains,
@@ -85,7 +91,7 @@ public class FootControlModule
 
       footLoadThresholdToHoldPosition = new YoDouble("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
-
+      
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
       // set up states and state machine
@@ -117,6 +123,9 @@ public class FootControlModule
 
       swingState = new SwingState(footControlHelper, yoTouchdownVelocity, yoTouchdownAcceleration, swingFootControlGains, registry);
       states.add(swingState);
+      
+      touchdownState = new TouchDownState(footControlHelper, swingFootControlGains, registry);
+      states.add(touchdownState);
 
       moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
       states.add(moveViaWaypointsState);
@@ -138,6 +147,7 @@ public class FootControlModule
       contactStatesMap.put(ConstraintType.MOVE_VIA_WAYPOINTS, falses);
       contactStatesMap.put(ConstraintType.FULL, trues);
       contactStatesMap.put(ConstraintType.TOES, getOnEdgeContactPointStates(contactableFoot, ConstraintType.TOES));
+      contactStatesMap.put(ConstraintType.TOUCHDOWN, falses);
    }
 
    private void setupStateMachine(List<AbstractFootControlState> states)
@@ -150,7 +160,7 @@ public class FootControlModule
             StateMachineTools.addRequestedStateTransition(requestedState, false, fromState, toState);
          }
       }
-
+      
       for (AbstractFootControlState state : states)
       {
          stateMachine.addState(state);
@@ -162,6 +172,7 @@ public class FootControlModule
    {
       swingState.setWeight(defaultFootWeight);
       moveViaWaypointsState.setWeight(defaultFootWeight);
+      touchdownState.setWeight(defaultFootWeight);
       onToesState.setWeight(highFootWeight);
       supportState.setWeight(highFootWeight);
    }
@@ -170,6 +181,7 @@ public class FootControlModule
    {
       swingState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
       moveViaWaypointsState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
+      touchdownState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
       onToesState.setWeights(highAngularFootWeight, highLinearFootWeight);
       supportState.setWeights(highAngularFootWeight, highLinearFootWeight);
    }
@@ -183,6 +195,16 @@ public class FootControlModule
    {
       if (stateMachine.getCurrentState() == moveViaWaypointsState)
          moveViaWaypointsState.requestTouchdownForDisturbanceRecovery();
+   }
+   
+   public void requestTouchdown()
+   {
+    if(stateMachine.isCurrentState(ConstraintType.SWING))
+    {
+       setContactState(ConstraintType.TOUCHDOWN);
+       swingState.getDesireds(desiredPose, desiredLinearVelocity, desiredAngularVelocity);
+       touchdownState.initialize(desiredPose, desiredLinearVelocity, desiredAngularVelocity);
+    }
    }
 
    public void requestStopTrajectoryIfPossible()
@@ -239,11 +261,12 @@ public class FootControlModule
       {
          requestExploration();
       }
-
+      
       stateMachine.checkTransitionConditions();
 
       if (!isInFlatSupportState() && footControlHelper.getPartialFootholdControlModule() != null)
          footControlHelper.getPartialFootholdControlModule().reset();
+      
 
       stateMachine.doAction();
    }
@@ -253,7 +276,7 @@ public class FootControlModule
    {
       stateMachine.setCurrentState(getCurrentConstraintType());
    }
-
+   
    public boolean isInFlatSupportState()
    {
       ConstraintType currentConstraintType = getCurrentConstraintType();
@@ -324,9 +347,10 @@ public class FootControlModule
       }
    }
 
-   public void setFootstep(Footstep footstep, double swingTime)
+   public void setFootstep(Footstep footstep, double swingTime, double touchdownTime)
    {
       swingState.setFootstep(footstep, swingTime);
+      touchdownState.setTouchdownDuration(touchdownTime);
    }
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
@@ -373,6 +397,11 @@ public class FootControlModule
             ret.addCommand(state.getFeedbackControlCommand());
       }
       return ret;
+   }
+   
+   public boolean isInTouchdown()
+   {
+      return getCurrentConstraintType().equals(ConstraintType.TOUCHDOWN);
    }
 
    public void initializeFootExploration()

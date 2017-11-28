@@ -16,7 +16,7 @@ import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 
 public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode

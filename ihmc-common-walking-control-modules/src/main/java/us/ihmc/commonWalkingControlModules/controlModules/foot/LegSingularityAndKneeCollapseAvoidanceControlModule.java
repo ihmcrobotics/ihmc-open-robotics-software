@@ -21,7 +21,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -276,7 +276,6 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       final ReferenceFrame pelvisFrame = pelvis.getParentJoint().getFrameAfterJoint();
       virtualLegTangentialFrameHipCentered = new ReferenceFrame(namePrefix + "VirtualLegTangentialFrameHipCentered", pelvisFrame)
       {
-         private static final long serialVersionUID = 8992154939350877111L;
          private final AxisAngle hipPitchRotationToParentFrame = new AxisAngle();
          private final Vector3D hipPitchToParentFrame = new Vector3D();
          private final FramePoint3D tempPoint = new FramePoint3D();
@@ -302,7 +301,6 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
       virtualLegTangentialFrameAnkleCentered = new ReferenceFrame(namePrefix + "VirtualLegTangentialFrameAnkleCentered", pelvisFrame)
       {
-         private static final long serialVersionUID = 2338083143740929570L;
          private final AxisAngle anklePitchRotationToParentFrame = new AxisAngle();
          private final Vector3D anklePitchToParentFrame = new Vector3D();
          private final FramePoint3D tempPoint = new FramePoint3D();

@@ -1,12 +1,12 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
@@ -32,8 +32,8 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
 
    private final YoBoolean continuouslyUpdateFinalOrientation;
    
-   private final FrameOrientation tempInitialOrientation;
-   private final FrameOrientation tempFinalOrientation;
+   private final FrameQuaternion tempInitialOrientation;
+   private final FrameQuaternion tempFinalOrientation;
    
    private final OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();
 
@@ -58,8 +58,8 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
       this.initialOrientationProvider = initialOrientationProvider;
       this.finalOrientationProvider = finalOrientationProvider;
 
-      tempInitialOrientation = new FrameOrientation(referenceFrame);
-      tempFinalOrientation = new FrameOrientation(referenceFrame);
+      tempInitialOrientation = new FrameQuaternion(referenceFrame);
+      tempFinalOrientation = new FrameQuaternion(referenceFrame);
 
       parentRegistry.addChild(registry);
    }
@@ -123,7 +123,7 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
       return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
    }
 
-   public void getOrientation(FrameOrientation orientationToPack)
+   public void getOrientation(FrameQuaternion orientationToPack)
    {
       desiredOrientation.getFrameOrientationIncludingFrame(orientationToPack);
    }
@@ -138,7 +138,7 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
       desiredAngularAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
-   public void getAngularData(FrameOrientation orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
+   public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);

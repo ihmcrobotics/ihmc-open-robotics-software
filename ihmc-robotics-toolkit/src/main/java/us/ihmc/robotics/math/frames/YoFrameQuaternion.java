@@ -9,6 +9,7 @@ import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
@@ -17,8 +18,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -31,7 +31,7 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
    private final String nameSuffix;
 
    private final YoDouble qx, qy, qz, qs;
-   private final FrameOrientation frameOrientation = new FrameOrientation();
+   private final FrameQuaternion frameOrientation = new FrameQuaternion();
    /**
     * Never use this reference frame directly, use {@link #getReferenceFrame()} instead so the
     * multiple frames version of this {@link YoFrameQuaternion} will work properly.
@@ -69,7 +69,7 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
       this.referenceFrame = referenceFrame;
    }
 
-   public final FrameOrientation getFrameOrientation()
+   public final FrameQuaternion getFrameOrientation()
    {
       putYoValuesIntoFrameOrientation();
       return frameOrientation;
@@ -113,24 +113,24 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
       this.qs.set(qs);
    }
 
-   public void set(FrameOrientation frameOrientation)
+   public void set(FrameQuaternion frameOrientation)
    {
       set(frameOrientation, true);
    }
 
-   public void set(FrameOrientation frameOrientation, boolean notifyListeners)
+   public void set(FrameQuaternion frameOrientation, boolean notifyListeners)
    {
       checkReferenceFrameMatch(frameOrientation);
       this.frameOrientation.setIncludingFrame(frameOrientation);
       getYoValuesFromFrameOrientation(notifyListeners);
    }
 
-   public void setAndMatchFrame(FrameOrientation frameOrientation)
+   public void setAndMatchFrame(FrameQuaternion frameOrientation)
    {
       setAndMatchFrame(frameOrientation, true);
    }
 
-   public void setAndMatchFrame(FrameOrientation frameOrientation, boolean notifyListeners)
+   public void setAndMatchFrame(FrameQuaternion frameOrientation, boolean notifyListeners)
    {
       this.frameOrientation.setIncludingFrame(frameOrientation);
       this.frameOrientation.changeFrame(getReferenceFrame());
@@ -181,7 +181,7 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
    public void setRotationVector(Vector3DReadOnly rotationVector)
    {
       frameOrientation.setToZero(getReferenceFrame());
-      frameOrientation.setRotationVector(rotationVector);
+      frameOrientation.set(rotationVector);
       getYoValuesFromFrameOrientation();
    }
 
@@ -202,7 +202,7 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
    public void setRotationVector(FrameVector3D rotationVector)
    {
       frameOrientation.setToZero(getReferenceFrame());
-      frameOrientation.setRotationVector(rotationVector);
+      frameOrientation.set(rotationVector);
       getYoValuesFromFrameOrientation();
    }
 
@@ -223,26 +223,26 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
    public void setRotationVector(YoFrameVector rotationVector)
    {
       frameOrientation.setToZero(getReferenceFrame());
-      frameOrientation.setRotationVector(rotationVector.getFrameTuple());
+      frameOrientation.set(rotationVector.getFrameTuple());
       getYoValuesFromFrameOrientation();
    }
 
    public void get(QuaternionBasics quaternionToPack)
    {
       putYoValuesIntoFrameOrientation();
-      frameOrientation.getQuaternion(quaternionToPack);
+      quaternionToPack.set(frameOrientation);
    }
 
    public void get(RotationMatrix matrixToPack)
    {
       putYoValuesIntoFrameOrientation();
-      frameOrientation.getMatrix3d(matrixToPack);
+      matrixToPack.set(frameOrientation);
    }
 
    public void get(AxisAngleBasics axisAngleToPack)
    {
       putYoValuesIntoFrameOrientation();
-      frameOrientation.getAxisAngle(axisAngleToPack);
+      axisAngleToPack.set(frameOrientation);
    }
 
    public void getYawPitchRoll(double[] yawPitchRollToPack)
@@ -251,13 +251,13 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
       frameOrientation.getYawPitchRoll(yawPitchRollToPack);
    }
 
-   public void getFrameOrientation(FrameOrientation frameOrientationToPack)
+   public void getFrameOrientation(FrameQuaternion frameOrientationToPack)
    {
       putYoValuesIntoFrameOrientation();
       frameOrientationToPack.set(this.frameOrientation);
    }
 
-   public void getFrameOrientationIncludingFrame(FrameOrientation frameOrientationToPack)
+   public void getFrameOrientationIncludingFrame(FrameQuaternion frameOrientationToPack)
    {
       putYoValuesIntoFrameOrientation();
       frameOrientationToPack.setIncludingFrame(frameOrientation);
@@ -266,13 +266,13 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
    public Quaternion getQuaternionCopy()
    {
       putYoValuesIntoFrameOrientation();
-      return frameOrientation.getQuaternionCopy();
+      return new Quaternion(frameOrientation);
    }
 
-   public FrameOrientation getFrameOrientationCopy()
+   public FrameQuaternion getFrameOrientationCopy()
    {
       putYoValuesIntoFrameOrientation();
-      return new FrameOrientation(frameOrientation);
+      return new FrameQuaternion(frameOrientation);
    }
 
    /**
@@ -291,7 +291,8 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
     */
    public void getRotationVector(FrameVector3D frameRotationVectorToPack)
    {
-      getFrameOrientation().getRotationVector(frameRotationVectorToPack);
+      checkReferenceFrameMatch(frameRotationVectorToPack);
+      getFrameOrientation().get(frameRotationVectorToPack);
    }
 
    /**
@@ -308,7 +309,7 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
     */
    public void getRotationVectorIncludingFrame(FrameVector3D frameRotationVectorToPack)
    {
-      getFrameOrientation().getRotationVectorIncludingFrame(frameRotationVectorToPack);
+      getFrameOrientation().get(frameRotationVectorToPack);
    }
 
    /**
@@ -378,13 +379,13 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
       interpolate(yoFrameQuaternion1.frameOrientation, yoFrameQuaternion2.frameOrientation, alpha);
    }
 
-   public void interpolate(FrameOrientation frameOrientation1, FrameOrientation frameOrientation2, double alpha)
+   public void interpolate(FrameQuaternion frameOrientation1, FrameQuaternion frameOrientation2, double alpha)
    {
       checkReferenceFrameMatch(frameOrientation1);
       checkReferenceFrameMatch(frameOrientation2);
 
       frameOrientation.interpolate(frameOrientation1, frameOrientation2, alpha);
-      frameOrientation.checkQuaternionIsUnitMagnitude();
+      frameOrientation.checkIfUnitary();
       getYoValuesFromFrameOrientation();
    }
 
@@ -393,7 +394,7 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
       alpha = MathTools.clamp(alpha, 0.0, 1.0);
 
       frameOrientation.interpolate(quaternion1, quaternion2, alpha);
-      frameOrientation.checkQuaternionIsUnitMagnitude();
+      frameOrientation.checkIfUnitary();
       getYoValuesFromFrameOrientation();
    }
 
@@ -420,7 +421,7 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
     *
     * @param frameOrientation the frame orientation to multiply this. Not modified.
     */
-   public void multiply(FrameOrientation frameOrientation)
+   public void multiply(FrameQuaternion frameOrientation)
    {
       putYoValuesIntoFrameOrientation();
       this.frameOrientation.multiply(frameOrientation);
@@ -473,7 +474,7 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
    public void checkQuaternionIsUnitMagnitude()
    {
       putYoValuesIntoFrameOrientation();
-      frameOrientation.checkQuaternionIsUnitMagnitude();
+      frameOrientation.checkIfUnitary();
    }
 
    @Override
@@ -489,10 +490,10 @@ public class YoFrameQuaternion implements ReferenceFrameHolder, Clearable
 
    private void getYoValuesFromFrameOrientation(boolean notifyListeners)
    {
-      qx.set(frameOrientation.getQx(), notifyListeners);
-      qy.set(frameOrientation.getQy(), notifyListeners);
-      qz.set(frameOrientation.getQz(), notifyListeners);
-      qs.set(frameOrientation.getQs(), notifyListeners);
+      qx.set(frameOrientation.getX(), notifyListeners);
+      qy.set(frameOrientation.getY(), notifyListeners);
+      qz.set(frameOrientation.getZ(), notifyListeners);
+      qs.set(frameOrientation.getS(), notifyListeners);
    }
 
    @Override

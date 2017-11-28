@@ -4,11 +4,12 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.*;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
+import us.ihmc.footstepPlanning.graphSearch.YoFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionBaseOfCliffAvoider;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -27,7 +28,7 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
    private BipedalFootstepPlannerListener listener;
    private PlanarRegionsList planarRegionsList;
    private FootstepNodeSnapAndWiggler snapAndWiggler;
-   private BipedalFootstepPlannerParameters parameters;
+   private YoFootstepPlannerParameters parameters;
    private final PlanarRegionBaseOfCliffAvoider baseOfCliffAvoider;
    private SideDependentList<ConvexPolygon2D> controllerPolygonsInSoleFrame;
    private final ConvexPolygon2D footholdIntersection = new ConvexPolygon2D();
@@ -45,7 +46,7 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
 
    public SnapAndWiggleBasedNodeChecker(SideDependentList<ConvexPolygon2D> footPolygons,
                                         BipedalFootstepPlannerListener listener,
-                                        BipedalFootstepPlannerParameters parameters,
+                                        YoFootstepPlannerParameters parameters,
                                         YoGraphicsListRegistry graphicsListRegistry)
    {
       this.snapAndWiggler = new FootstepNodeSnapAndWiggler(footPolygons, parameters, listener);
@@ -53,6 +54,7 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
       this.baseOfCliffAvoider = new PlanarRegionBaseOfCliffAvoider(registry, graphicsListRegistry);
    }
 
+   @Override
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
@@ -71,9 +73,21 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
       if (snapTransform.containsNaN())
+      {
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand,
+                                                         BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
          return false;
+      }
 
-      RigidBodyTransform snappedSoleTransform = BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(nodeToExpand, snapTransform);
+      if (Math.abs(snapTransform.getM22()) < parameters.getMinimumSurfaceInclineRadians())
+      {
+         notifyListenerNodeUnderConsiderationWasRejected(nodeToExpand,
+                                                         BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
+         return false;
+      }
+
+      RigidBodyTransform snappedSoleTransform = new RigidBodyTransform();
+      FootstepNodeTools.getSnappedNodeTransform(nodeToExpand, snapTransform, snappedSoleTransform);
       baseOfCliffAvoider.shiftAwayFromCliffBottoms(parameters, planarRegionsList, snappedSoleTransform);
 
       boolean isEnoughArea = checkIfEnoughArea(nodeToExpand, footholdIntersection);
@@ -85,7 +99,9 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
 
       FootstepNodeSnapData previousNodeSnapData = snapAndWiggler.snapFootstepNode(previousNode);
       RigidBodyTransform previousSnapTransform = previousNodeSnapData.getSnapTransform();
-      RigidBodyTransform previousSnappedSoleTransform = BipedalFootstepPlannerNodeUtils.getSnappedSoleTransform(previousNode, previousSnapTransform);
+      RigidBodyTransform previousSnappedSoleTransform = new RigidBodyTransform();
+      FootstepNodeTools.getSnappedNodeTransform(previousNode, previousSnapTransform, previousSnappedSoleTransform);
+
       boolean goodFootstep = checkIfGoodFootstep(nodeToExpand, snappedSoleTransform, previousSnappedSoleTransform);
       if (!goodFootstep)
          return false;
@@ -192,5 +208,11 @@ public class SnapAndWiggleBasedNodeChecker implements FootstepNodeChecker
       {
          listener.nodeUnderConsiderationWasRejected(nodeToExpand, reason);
       }
+   }
+
+   @Override
+   public void addStartNode(FootstepNode startNode, RigidBodyTransform startNodeTransform)
+   {
+      snapAndWiggler.addSnapData(startNode, new FootstepNodeSnapData(startNodeTransform));
    }
 }

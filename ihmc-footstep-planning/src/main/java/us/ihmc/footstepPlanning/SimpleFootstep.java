@@ -17,6 +17,13 @@ public class SimpleFootstep
       foothold.clear();
    }
 
+   public void set(SimpleFootstep other)
+   {
+      this.robotSide = other.robotSide;
+      this.soleFramePose.setIncludingFrame(other.soleFramePose);
+      this.foothold.setAndUpdate(other.foothold);
+   }
+
    public RobotSide getRobotSide()
    {
       return robotSide;

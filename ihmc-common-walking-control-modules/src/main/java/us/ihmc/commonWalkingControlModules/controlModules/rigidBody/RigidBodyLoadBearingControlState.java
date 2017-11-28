@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,7 +22,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -56,6 +56,10 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final SpatialAccelerationVector bodyAcceleration;
 
    // TODO: allow multiple contact points
+   private final FramePoint3D previousContactPoint = new FramePoint3D();
+   private final FrameVector3D previousContactNormal = new FrameVector3D();
+   private double previousCoefficientOfFriction;
+
    private final YoFramePoint contactPoint;
    private final YoFramePoint contactPointInWorld;
 
@@ -72,9 +76,9 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final RigidBodyTransform contactToJointTransform = new RigidBodyTransform();
 
    private final FramePoint3D desiredContactPosition = new FramePoint3D(worldFrame);
-   private final FrameOrientation desiredContactOrientation = new FrameOrientation(worldFrame);
+   private final FrameQuaternion desiredContactOrientation = new FrameQuaternion(worldFrame);
    private final FramePoint3D currentContactPosition = new FramePoint3D(worldFrame);
-   private final FrameOrientation currentContactOrientation = new FrameOrientation(worldFrame);
+   private final FrameQuaternion currentContactOrientation = new FrameQuaternion(worldFrame);
 
    private final YoBoolean hybridModeActive;
    private final RigidBodyJointControlHelper jointControlHelper;
@@ -102,7 +106,6 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       desiredContactFrame = new PoseReferenceFrame(bodyName + "DesiredContactFrame", worldFrame);
 
       planeContactStateCommand.setContactingRigidBody(bodyToControl);
-      planeContactStateCommand.setId(NO_CONTACT_ID);
 
       this.jointControlHelper = jointControlHelper;
       String prefix = bodyName + "Loadbearing";
@@ -168,7 +171,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       planeContactStateCommand.setCoefficientOfFriction(coefficientOfFriction.getDoubleValue());
       planeContactStateCommand.setContactNormal(contactNormal.getFrameTuple());
       planeContactStateCommand.addPointInContact(contactPoint.getFrameTuple());
-      planeContactStateCommand.setId(IN_CONTACT_ID);
+      planeContactStateCommand.setHasContactStateChanged(hasContactStateNotChanged());
 
       // assemble zero acceleration command
       bodyAcceleration.setToZero(contactFrame, elevatorFrame, contactFrame);
@@ -189,6 +192,10 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
          double timeInTrajectory = getTimeInTrajectory();
          jointControlHelper.doAction(timeInTrajectory);
       }
+
+      contactNormal.getFrameTupleIncludingFrame(previousContactNormal);
+      contactPoint.getFrameTupleIncludingFrame(previousContactPoint);
+      previousCoefficientOfFriction = coefficientOfFriction.getDoubleValue();
 
       updateGraphics();
    }
@@ -270,6 +277,19 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
       desiredContactPosition.changeFrame(worldFrame);
       desiredContactOrientation.changeFrame(worldFrame);
+
+      previousContactPoint.setToZero(worldFrame);
+      previousContactNormal.setToZero(worldFrame);
+      previousCoefficientOfFriction = 0.0;
+   }
+
+   private boolean hasContactStateNotChanged()
+   {
+      boolean hasContactStateNotChanged = previousContactNormal.equals(contactNormal.getFrameTuple());
+      hasContactStateNotChanged &= previousContactPoint.equals(contactPoint.getFrameTuple());
+      hasContactStateNotChanged &= previousCoefficientOfFriction == coefficientOfFriction.getDoubleValue();
+
+      return hasContactStateNotChanged;
    }
 
    @Override
@@ -314,7 +334,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    public InverseDynamicsCommand<?> getTransitionOutOfStateCommand()
    {
       planeContactStateCommand.clearContactPoints();
-      planeContactStateCommand.setId(NO_CONTACT_ID);
+      planeContactStateCommand.setHasContactStateChanged(true);
       return planeContactStateCommand;
    }
 

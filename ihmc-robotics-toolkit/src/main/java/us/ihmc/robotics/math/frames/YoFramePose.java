@@ -2,12 +2,12 @@ package us.ihmc.robotics.math.frames;
 
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -19,7 +19,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
    private final YoFrameOrientation orientation;
 
    private final FramePoint3D tempFramePoint = new FramePoint3D();
-   private final FrameOrientation tempFrameOrientation = new FrameOrientation();
+   private final FrameQuaternion tempFrameOrientation = new FrameQuaternion();
 
    public YoFramePose(YoFramePoint position, YoFrameOrientation orientation)
    {
@@ -68,7 +68,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
    {
       position.getFrameTupleIncludingFrame(tempFramePoint);
       orientation.getFrameOrientationIncludingFrame(tempFrameOrientation);
-      tempFrameOrientation.getTransform3D(rigidBodyTransformToPack);
+      rigidBodyTransformToPack.setRotation(tempFrameOrientation);
       rigidBodyTransformToPack.setTranslation(tempFramePoint.getX(), tempFramePoint.getY(), tempFramePoint.getZ());
    }
 
@@ -124,7 +124,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
       this.position.set(position);
    }
 
-   public void setOrientation(FrameOrientation frameOrientation)
+   public void setOrientation(FrameQuaternion frameOrientation)
    {
       boolean notifyListeners = true;
       orientation.set(frameOrientation, notifyListeners);
@@ -135,7 +135,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
       orientation.set(quaternion);
    }
 
-   public void set(FramePoint3D framePoint, FrameOrientation frameOrientation)
+   public void set(FramePoint3D framePoint, FrameQuaternion frameOrientation)
    {
       boolean notifyListeners = true;
       position.set(framePoint, notifyListeners);
@@ -147,7 +147,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
       set(yoFramePose.getPosition().getFrameTuple(), yoFramePose.getOrientation().getFrameOrientation());
    }
 
-   public void setAndMatchFrame(FramePoint3D framePoint, FrameOrientation frameOrientation)
+   public void setAndMatchFrame(FramePoint3D framePoint, FrameQuaternion frameOrientation)
    {
       boolean notifyListeners = true;
       position.setAndMatchFrame(framePoint, notifyListeners);

@@ -1,6 +1,8 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
+import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolverWithInactiveVariables;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
 public class KinematicsToolboxOptimizationSettings implements ControllerCoreOptimizationSettings
@@ -9,14 +11,20 @@ public class KinematicsToolboxOptimizationSettings implements ControllerCoreOpti
    @Override
    public double getJointVelocityWeight()
    {
-      return 0.5;
+      return 0.00001;
    }
 
    /** @inheritDoc */
    @Override
    public double getJointAccelerationWeight()
    {
-      return 10.0;
+      return 0.0;
+   }
+
+   @Override
+   public boolean areJointVelocityLimitsConsidered()
+   {
+      return false;
    }
 
    /** @inheritDoc */
@@ -101,5 +109,16 @@ public class KinematicsToolboxOptimizationSettings implements ControllerCoreOpti
    public int getRhoSize()
    {
       return 0;
+   }
+
+   public boolean getDeactivateRhoWhenNotInContact()
+   {
+      return true;
+   }
+
+   @Override
+   public ActiveSetQPSolverWithInactiveVariablesInterface getActiveSetQPSolver()
+   {
+      return new JavaQuadProgSolverWithInactiveVariables();
    }
 }

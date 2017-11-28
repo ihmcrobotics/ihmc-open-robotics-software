@@ -3,9 +3,9 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
@@ -14,8 +14,6 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
-
-import java.util.Random;
 
 public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryControllerCommand<T, M>, M extends AbstractSE3TrajectoryMessage<M>>
       extends QueueableCommand<T, M> implements FrameBasedCommand<M>
@@ -178,7 +176,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
     * Convenience method for accessing {@link #trajectoryPointList}. To get the list use
     * {@link #getTrajectoryPointList()}.
     */
-   public void addTrajectoryPoint(double time, Point3D position, Quaternion orientation, Vector3D linearVelocity, Vector3D angularVelocity)
+   public void addTrajectoryPoint(double time, Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
       trajectoryPointList.addTrajectoryPoint(time, position, orientation, linearVelocity, angularVelocity);
    }

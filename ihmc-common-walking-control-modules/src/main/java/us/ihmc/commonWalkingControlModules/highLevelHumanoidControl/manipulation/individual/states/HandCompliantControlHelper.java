@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -11,7 +12,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplian
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.DeadzoneYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -136,7 +136,7 @@ public class HandCompliantControlHelper
       torqueDeadzoneSize.set(0.5);
    }
 
-   public void doCompliantControl(FramePoint3D desiredPosition, FrameOrientation desiredOrientation)
+   public void doCompliantControl(FramePoint3D desiredPosition, FrameQuaternion desiredOrientation)
    {
       updateWristMeasuredWrench(measuredForce, measuredTorque);
 
@@ -257,7 +257,7 @@ public class HandCompliantControlHelper
       yoCompliantControlAngularDisplacement.setToZero();
    }
 
-   public void progressivelyCancelOutCorrection(FramePoint3D desiredPosition, FrameOrientation desiredOrientation)
+   public void progressivelyCancelOutCorrection(FramePoint3D desiredPosition, FrameQuaternion desiredOrientation)
    {
       yoCompliantControlLinearDisplacement.scale(compliantControlResetLeakRatio.getDoubleValue());
       yoCompliantControlAngularDisplacement.scale(compliantControlResetLeakRatio.getDoubleValue());
@@ -271,7 +271,7 @@ public class HandCompliantControlHelper
       applyCorrection(desiredPosition, desiredOrientation);
    }
 
-   private void applyCorrection(FramePoint3D desiredPosition, FrameOrientation desiredOrientation)
+   private void applyCorrection(FramePoint3D desiredPosition, FrameQuaternion desiredOrientation)
    {
       ReferenceFrame originalFrame = desiredPosition.getReferenceFrame();
       desiredPosition.changeFrame(controlFrame);
@@ -282,7 +282,7 @@ public class HandCompliantControlHelper
       totalAngularCorrection.negate();
       angularDisplacementAsAxisAngle.set(totalAngularCorrection.getVector());
       angularDisplacementAsMatrix.set(angularDisplacementAsAxisAngle);
-      desiredOrientation.getMatrix3d(correctedRotationMatrix);
+      correctedRotationMatrix.set(desiredOrientation);
       correctedRotationMatrix.set(angularDisplacementAsMatrix);
       correctedRotationMatrix.multiply(correctedRotationMatrix);
       desiredOrientation.set(correctedRotationMatrix);

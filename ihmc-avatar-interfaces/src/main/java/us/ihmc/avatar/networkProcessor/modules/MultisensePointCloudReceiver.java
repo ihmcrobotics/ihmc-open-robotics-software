@@ -88,12 +88,6 @@ public class MultisensePointCloudReceiver extends RosPointCloudSubscriber
          {
             this.pointCloudReferenceFrame = new ReferenceFrame("leftCameraOpticalFrame", headRootReferenceFrame)
             {
-   
-               /**
-                * 
-                */
-               private static final long serialVersionUID = 2902570649318946274L;
-
                @Override
                protected void updateTransformToParent(RigidBodyTransform transformToParent)
                {

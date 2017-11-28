@@ -10,6 +10,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.LineSegment1D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -21,8 +22,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
@@ -130,9 +130,9 @@ public class DynamicReachabilityCalculator
    private final FramePoint3D adjustedCoMPosition = new FramePoint3D();
    private final FramePoint3D predictedCoMPosition = new FramePoint3D();
 
-   private final FrameOrientation predictedPelvisOrientation = new FrameOrientation();
-   private final FrameOrientation stanceFootOrientation = new FrameOrientation();
-   private final FrameOrientation footstepAnkleOrientation = new FrameOrientation();
+   private final FrameQuaternion predictedPelvisOrientation = new FrameQuaternion();
+   private final FrameQuaternion stanceFootOrientation = new FrameQuaternion();
+   private final FrameQuaternion footstepAnkleOrientation = new FrameQuaternion();
 
    private final FrameVector3D tempGradient = new FrameVector3D();
    private final FrameVector3D tempVector = new FrameVector3D();
@@ -1294,7 +1294,6 @@ public class DynamicReachabilityCalculator
 
    private static class Vector2dZUpFrame extends ReferenceFrame
    {
-      private static final long serialVersionUID = -1810366869361449743L;
       private final FrameVector2D xAxis;
       private final Vector3D x = new Vector3D();
       private final Vector3D y = new Vector3D();

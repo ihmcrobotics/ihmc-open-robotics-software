@@ -1,11 +1,11 @@
 package us.ihmc.atlas.initialSetup;
 
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -63,8 +63,27 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
          robot.getRootJointToWorldTransform(rootToWorld);
          rootToWorld.get(rotation, positionInWorld);
 
-         GroundContactPoint gc1 = robot.getFootGroundContactPoints(RobotSide.LEFT).get(0);
-         double pelvisToFoot = positionInWorld.getZ() - gc1.getPositionPoint().getZ();
+         GroundContactPoint lowestGroundContactPoint = null;
+         double minZ = Double.NaN;
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            for (GroundContactPoint groundContactPoint : robot.getFootGroundContactPoints(robotSide))
+            {
+               if(Double.isNaN(minZ) || Double.isInfinite(minZ))
+               {
+                  minZ = groundContactPoint.getPositionPoint().getZ();
+                  lowestGroundContactPoint = groundContactPoint;
+               }
+               else if(groundContactPoint.getPositionPoint().getZ() <= minZ)
+               {
+                  minZ = groundContactPoint.getPositionPoint().getZ();
+                  lowestGroundContactPoint = groundContactPoint;
+               }
+            }
+         }
+
+         double pelvisToFoot = positionInWorld.getZ() - lowestGroundContactPoint.getPositionPoint().getZ();
 
          // Hardcoded for gazebo integration
          //      double pelvisToFoot = 0.887;
@@ -74,12 +93,13 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
 
          robot.setPositionInWorld(positionInWorld);
 
-         FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), rotation);
-         double[] yawPitchRoll = frameOrientation.getYawPitchRoll();
+         FrameQuaternion frameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), rotation);
+         double[] yawPitchRoll = new double[3];
+         frameOrientation.getYawPitchRoll(yawPitchRoll);
          yawPitchRoll[0] = initialYaw;
          frameOrientation.setYawPitchRoll(yawPitchRoll);
 
-         robot.setOrientation(frameOrientation.getQuaternionCopy());
+         robot.setOrientation(frameOrientation);
          robot.update();
          robotInitialized = true;
       }

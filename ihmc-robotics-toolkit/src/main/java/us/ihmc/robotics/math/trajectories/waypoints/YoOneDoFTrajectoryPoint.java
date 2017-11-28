@@ -5,11 +5,11 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 
 public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface<YoOneDoFTrajectoryPoint>
 {
@@ -143,6 +143,16 @@ public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface<Y
       if (!MathTools.epsilonEquals(getTime(), other.getTime(), epsilon))
          return false;
       if (!waypoint1d.epsilonEquals(other.waypoint1d, epsilon))
+         return false;
+      return true;
+   }
+
+   @Override
+   public boolean geometricallyEquals(YoOneDoFTrajectoryPoint other, double epsilon)
+   {
+      if (!MathTools.epsilonEquals(getTime(), other.getTime(), epsilon))
+         return false;
+      if (!waypoint1d.geometricallyEquals(other.waypoint1d, epsilon))
          return false;
       return true;
    }

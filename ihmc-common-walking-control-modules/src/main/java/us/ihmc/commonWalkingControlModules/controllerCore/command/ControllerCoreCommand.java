@@ -23,6 +23,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    private final FeedbackControlCommandList feedbackControlCommandList;
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
    private WholeBodyControllerCoreMode controllerCoreMode;
+   private boolean reinitialize = false;
 
    /**
     * Class that contains the different lists that are submitted the whole body controller core. All
@@ -52,6 +53,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       feedbackControlCommandList.clear();
       inverseKinematicsCommandList.clear();
       lowLevelOneDoFJointDesiredDataHolder.clear();
+      reinitialize = false;
    }
 
    /**
@@ -111,6 +113,17 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    {
       if (lowLevelJointData != null)
          lowLevelOneDoFJointDesiredDataHolder.completeWith(lowLevelJointData);
+   }
+
+   /**
+    * Used to request a full reinitialization of the controller core.
+    * <p>
+    * Especially useful for resetting internal integrators.
+    * </p>
+    */
+   public void requestReinitialization()
+   {
+      reinitialize = true;
    }
 
    /**
@@ -192,6 +205,14 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       feedbackControlCommandList.set(other.feedbackControlCommandList);
       inverseKinematicsCommandList.set(other.inverseKinematicsCommandList);
       lowLevelOneDoFJointDesiredDataHolder.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
+   }
+
+   /**
+    * @return {@code true} if the controller core should be reinitialized, for instance clearing integrators.
+    */
+   public boolean isReinitializationRequested()
+   {
+      return reinitialize;
    }
 
    /**

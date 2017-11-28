@@ -9,11 +9,14 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.interfaces.Transformable;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
 @RosMessagePacket(documentation =
@@ -53,7 +56,7 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
          angularVelocity = new Vector3D(trajectoryPoint.angularVelocity);
    }
 
-   public SO3TrajectoryPointMessage(double time, Quaternion orientation, Vector3D angularVelocity)
+   public SO3TrajectoryPointMessage(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
    {
       this.time = time;
       this.orientation = new Quaternion(orientation);
@@ -83,22 +86,22 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       this.time = time;
    }
 
-   public void getOrientation(Quaternion orientationToPack)
+   public void getOrientation(QuaternionBasics orientationToPack)
    {
       orientationToPack.set(orientation);
    }
 
-   public void setOrientation(Quaternion orientation)
+   public void setOrientation(QuaternionReadOnly orientation)
    {
       this.orientation.set(orientation);
    }
 
-   public void getAngularVelocity(Vector3D angularVelocityToPack)
+   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
       angularVelocityToPack.set(angularVelocity);
    }
 
-   public void setAngularVelocity(Vector3D angularVelocity)
+   public void setAngularVelocity(Vector3DReadOnly angularVelocity)
    {
       this.angularVelocity.set(angularVelocity);
    }

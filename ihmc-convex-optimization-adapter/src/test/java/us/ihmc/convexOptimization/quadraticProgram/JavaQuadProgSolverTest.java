@@ -6,23 +6,18 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.testing.JUnitTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
-import java.util.Random;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
 {
    private static final double epsilon = 1e-4;
@@ -128,7 +123,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
       double[] simpleLagrangeEqualityMultipliers = new double[0];
       double[] simpleLagrangeInequalityMultipliers = new double[3];
 
-      for (int repeat = 0; repeat < 1000; repeat++)
+      for (int repeat = 0; repeat < 5000; repeat++)
       {
          quadProgTotalTimer.startMeasurement();
 
@@ -299,7 +294,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
    @Test(timeout = 30000)
    public void testSimpleCasesWithBoundsConstraints()
    {
-      testSimpleCasesWithBoundsConstraints(0, 1, 4, true);
+      testSimpleCasesWithBoundsConstraints(0, 1, 2, 6, true);
    }
 
    @Override /** have to override because quad prog uses different iterations */
@@ -307,14 +302,14 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
    @Test(timeout = 30000)
    public void testClear()
    {
-      testClear(4, 1, true);
+      testClear(6, 1, true);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMaxIterations()
    {
-      testMaxIterations(4);
+      testMaxIterations(6, false);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -332,6 +327,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
    {
       testChallengingCasesWithPolygonConstraints(1, 5);
    }
+
 
    @Override /** This IS a good solver **/
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

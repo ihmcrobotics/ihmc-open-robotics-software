@@ -9,18 +9,18 @@ import org.ejml.ops.NormOps;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.InverseJacobianSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -109,7 +109,7 @@ public class TaskspaceToJointspaceCalculator
    private final YoDouble kpTaskspaceLinearError;
 
    private final FramePoint3D baseParentJointFramePosition = new FramePoint3D();
-   private final FrameOrientation baseParentJointFrameOrientation = new FrameOrientation();
+   private final FrameQuaternion baseParentJointFrameOrientation = new FrameQuaternion();
 
    private final AxisAngle errorAxisAngle = new AxisAngle();
    private final Vector3D errorRotationVector = new Vector3D();
@@ -253,8 +253,6 @@ public class TaskspaceToJointspaceCalculator
    {
       ReferenceFrame localControlFrame = new ReferenceFrame("controlFrame", localEndEffectorFrame)
       {
-         private static final long serialVersionUID = -7254192469546194133L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
@@ -402,7 +400,7 @@ public class TaskspaceToJointspaceCalculator
       kpTaskspaceLinearError.set(kPLinearError);
    }
 
-   public void compute(FramePoint3D desiredPosition, FrameOrientation desiredOrientation, FrameVector3D desiredLinearVelocity, FrameVector3D desiredAngularVelocity)
+   public void compute(FramePoint3D desiredPosition, FrameQuaternion desiredOrientation, FrameVector3D desiredLinearVelocity, FrameVector3D desiredAngularVelocity)
    {
       desiredControlFramePose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
       desiredControlFrameTwist.set(originalEndEffectorFrame, originalBaseFrame, originalControlFrame, desiredLinearVelocity, desiredAngularVelocity);
@@ -433,7 +431,7 @@ public class TaskspaceToJointspaceCalculator
          
          desiredPose.getOrientationIncludingFrame(tempOrientation);
          tempOrientation.changeFrame(localControlFrame);
-         tempOrientation.getAxisAngle(tempAxisAngle);
+         tempAxisAngle.set(tempOrientation);
          double angle = Math.abs(AngleTools.trimAngleMinusPiToPi(tempAxisAngle.getAngle()));
          
          if(translationDistance < epsilon && angle < epsilon)
@@ -724,13 +722,13 @@ public class TaskspaceToJointspaceCalculator
       return NormOps.normP2(tempSubspaceError);
    }
 
-   private final FrameOrientation tempOrientation = new FrameOrientation();
+   private final FrameQuaternion tempOrientation = new FrameQuaternion();
 
-   public double getNormRotationError(FrameOrientation desiredOrientation)
+   public double getNormRotationError(FrameQuaternion desiredOrientation)
    {
       tempOrientation.setIncludingFrame(desiredOrientation);
       tempOrientation.changeFrame(localControlFrame);
-      tempOrientation.getAxisAngle(errorAxisAngle);
+      errorAxisAngle.set(tempOrientation);
       errorRotationVector.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
       errorRotationVector.scale(errorAxisAngle.getAngle());
 

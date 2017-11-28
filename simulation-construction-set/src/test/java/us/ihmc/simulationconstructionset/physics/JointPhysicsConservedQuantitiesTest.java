@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -30,7 +30,7 @@ import static junit.framework.TestCase.fail;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class JointPhysicsConservedQuantitiesTest
 {
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private BlockingSimulationRunner blockingSimulationRunner;
 
    @Before
@@ -65,7 +65,7 @@ public class JointPhysicsConservedQuantitiesTest
 
       for (int i = 0; i < numberOfAxes; i++)
       {
-         jointAxes[i] = EuclidCoreRandomTools.generateRandomVector3DWithFixedLength(random, 1.0);
+         jointAxes[i] = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
       }
 
       ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);

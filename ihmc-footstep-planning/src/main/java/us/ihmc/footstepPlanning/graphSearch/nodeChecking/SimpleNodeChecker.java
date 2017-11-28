@@ -2,9 +2,9 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import java.util.List;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -31,6 +31,11 @@ public class SimpleNodeChecker implements FootstepNodeChecker
    public void setPlanarRegions(PlanarRegionsList planarRegions)
    {
       this.planarRegions = planarRegions;
+   }
+
+   @Override
+   public void addStartNode(FootstepNode startNode, RigidBodyTransform startNodeTransform)
+   {
    }
 
 }

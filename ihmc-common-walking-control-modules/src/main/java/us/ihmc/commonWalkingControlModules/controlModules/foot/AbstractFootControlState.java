@@ -5,11 +5,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
@@ -29,7 +29,7 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
    protected final FramePoint3D desiredPosition = new FramePoint3D(worldFrame);
    protected final FrameVector3D desiredLinearVelocity = new FrameVector3D(worldFrame);
    protected final FrameVector3D desiredLinearAcceleration = new FrameVector3D(worldFrame);
-   protected final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
+   protected final FrameQuaternion desiredOrientation = new FrameQuaternion(worldFrame);
    protected final FrameVector3D desiredAngularVelocity = new FrameVector3D(worldFrame);
    protected final FrameVector3D desiredAngularAcceleration = new FrameVector3D(worldFrame);
    protected final SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();

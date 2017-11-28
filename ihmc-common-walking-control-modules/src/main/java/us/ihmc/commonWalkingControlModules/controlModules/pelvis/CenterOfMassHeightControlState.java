@@ -21,7 +21,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -304,6 +304,6 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    @Override
    public void getCurrentDesiredHeightOfDefaultControlFrame(FramePoint3D positionToPack)
    {
-      positionToPack.set(desiredCenterOfMassHeightPoint);
+      positionToPack.setIncludingFrame(desiredCenterOfMassHeightPoint);
    }
 }

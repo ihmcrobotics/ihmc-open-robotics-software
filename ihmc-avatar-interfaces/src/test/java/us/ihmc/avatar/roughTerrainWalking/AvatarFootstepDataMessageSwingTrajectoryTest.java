@@ -15,6 +15,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
@@ -30,7 +31,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
@@ -41,13 +41,13 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements MultiRobotTestInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    /**
@@ -88,7 +88,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       RobotSide robotSide = RobotSide.LEFT;
       ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
       FramePoint3D footPosition = new FramePoint3D(soleFrame);
-      FrameOrientation footOrientation = new FrameOrientation(soleFrame);
+      FrameQuaternion footOrientation = new FrameQuaternion(soleFrame);
 
       FootstepDataMessage footstep = new FootstepDataMessage();
       footstep.setRobotSide(robotSide);
@@ -124,7 +124,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
          }
          waypointLinearVelocity.changeFrame(worldFrame);
 
-         FrameOrientation waypointOrientation = new FrameOrientation(soleFrame);
+         FrameQuaternion waypointOrientation = new FrameQuaternion(soleFrame);
          if (i % 2 == 0)
          {
             waypointOrientation.setYawPitchRoll(0.0, pitch, 0.0);

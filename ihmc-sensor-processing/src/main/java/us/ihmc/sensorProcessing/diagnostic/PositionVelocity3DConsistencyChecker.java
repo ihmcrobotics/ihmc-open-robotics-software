@@ -4,9 +4,9 @@ import static us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVe
 
 import java.util.EnumMap;
 
-import us.ihmc.robotics.Axis;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.euclid.Axis;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;

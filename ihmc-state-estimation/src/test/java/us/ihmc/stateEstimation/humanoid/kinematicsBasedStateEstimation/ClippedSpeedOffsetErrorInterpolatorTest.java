@@ -14,6 +14,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -23,7 +24,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -373,21 +373,20 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          if (j>0 && (j%999) == 0)
          {
             FramePoint3D interpolatedPoseFramePointToPack = new FramePoint3D();
-            FrameOrientation interpolatedPoseOrientationToPack = new FrameOrientation();
+            FrameQuaternion interpolatedPoseOrientationToPack = new FrameQuaternion();
             interpolatedPose.getPoseIncludingFrame(interpolatedPoseFramePointToPack, interpolatedPoseOrientationToPack);
 
             FramePoint3D interpolatedPoseOneSecondEarlierFramePointToPack = new FramePoint3D();
-            FrameOrientation interpolatedPoseOneSecondEarlierOrientationToPack = new FrameOrientation();
+            FrameQuaternion interpolatedPoseOneSecondEarlierOrientationToPack = new FrameQuaternion();
             interpolatedPoseOneSecondEarlier.getPoseIncludingFrame(interpolatedPoseOneSecondEarlierFramePointToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
 
             Vector3D translationDisplacement = new Vector3D(interpolatedPoseOneSecondEarlierFramePointToPack.getX() - interpolatedPoseFramePointToPack.getX(),
                   interpolatedPoseOneSecondEarlierFramePointToPack.getY() - interpolatedPoseFramePointToPack.getY(),
                   interpolatedPoseOneSecondEarlierFramePointToPack.getZ() - interpolatedPoseFramePointToPack.getZ());
 
-           FrameOrientation rotationDisplacement = new FrameOrientation();
-            rotationDisplacement.setOrientationFromOneToTwo(interpolatedPoseOneSecondEarlierOrientationToPack, interpolatedPoseOrientationToPack);
-            AxisAngle rotationDisplacementAngle = new AxisAngle();
-            rotationDisplacement.getAxisAngle(rotationDisplacementAngle);
+           FrameQuaternion rotationDisplacement = new FrameQuaternion();
+            rotationDisplacement.difference(interpolatedPoseOrientationToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
+            AxisAngle rotationDisplacementAngle = new AxisAngle(rotationDisplacement);
 
             assertTrue(Math.abs(translationDisplacement.length()) <= 0.05);
             assertTrue(Math.abs(rotationDisplacementAngle.getAngle()) <= 0.05);
@@ -457,21 +456,20 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          if (j>0 && (j%999) == 0)
          {
             FramePoint3D interpolatedPoseFramePointToPack = new FramePoint3D();
-            FrameOrientation interpolatedPoseOrientationToPack = new FrameOrientation();
+            FrameQuaternion interpolatedPoseOrientationToPack = new FrameQuaternion();
             interpolatedPose.getPoseIncludingFrame(interpolatedPoseFramePointToPack, interpolatedPoseOrientationToPack);
 
             FramePoint3D interpolatedPoseOneSecondEarlierFramePointToPack = new FramePoint3D();
-            FrameOrientation interpolatedPoseOneSecondEarlierOrientationToPack = new FrameOrientation();
+            FrameQuaternion interpolatedPoseOneSecondEarlierOrientationToPack = new FrameQuaternion();
             interpolatedPoseOneSecondEarlier.getPoseIncludingFrame(interpolatedPoseOneSecondEarlierFramePointToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
 
             Vector3D translationDisplacement = new Vector3D(interpolatedPoseOneSecondEarlierFramePointToPack.getX() - interpolatedPoseFramePointToPack.getX(),
                   interpolatedPoseOneSecondEarlierFramePointToPack.getY() - interpolatedPoseFramePointToPack.getY(),
                   interpolatedPoseOneSecondEarlierFramePointToPack.getZ() - interpolatedPoseFramePointToPack.getZ());
 
-           FrameOrientation rotationDisplacement = new FrameOrientation();
-            rotationDisplacement.setOrientationFromOneToTwo(interpolatedPoseOneSecondEarlierOrientationToPack, interpolatedPoseOrientationToPack);
-            AxisAngle rotationDisplacementAngle = new AxisAngle();
-            rotationDisplacement.getAxisAngle(rotationDisplacementAngle);
+           FrameQuaternion rotationDisplacement = new FrameQuaternion();
+            rotationDisplacement.difference(interpolatedPoseOrientationToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
+            AxisAngle rotationDisplacementAngle = new AxisAngle(rotationDisplacement);
 
             assertTrue(Math.abs(translationDisplacement.length()) <= 0.05);
             assertTrue(Math.abs(rotationDisplacementAngle.getAngle()) <= 0.05);
@@ -542,21 +540,20 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          if (j>0 && (j%999) == 0)
          {
             FramePoint3D interpolatedPoseFramePointToPack = new FramePoint3D();
-            FrameOrientation interpolatedPoseOrientationToPack = new FrameOrientation();
+            FrameQuaternion interpolatedPoseOrientationToPack = new FrameQuaternion();
             interpolatedPose.getPoseIncludingFrame(interpolatedPoseFramePointToPack, interpolatedPoseOrientationToPack);
 
             FramePoint3D interpolatedPoseOneSecondEarlierFramePointToPack = new FramePoint3D();
-            FrameOrientation interpolatedPoseOneSecondEarlierOrientationToPack = new FrameOrientation();
+            FrameQuaternion interpolatedPoseOneSecondEarlierOrientationToPack = new FrameQuaternion();
             interpolatedPoseOneSecondEarlier.getPoseIncludingFrame(interpolatedPoseOneSecondEarlierFramePointToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
 
             Vector3D translationDisplacement = new Vector3D(interpolatedPoseOneSecondEarlierFramePointToPack.getX() - interpolatedPoseFramePointToPack.getX(),
                   interpolatedPoseOneSecondEarlierFramePointToPack.getY() - interpolatedPoseFramePointToPack.getY(),
                   interpolatedPoseOneSecondEarlierFramePointToPack.getZ() - interpolatedPoseFramePointToPack.getZ());
 
-           FrameOrientation rotationDisplacement = new FrameOrientation();
-            rotationDisplacement.setOrientationFromOneToTwo(interpolatedPoseOneSecondEarlierOrientationToPack, interpolatedPoseOrientationToPack);
-            AxisAngle rotationDisplacementAngle = new AxisAngle();
-            rotationDisplacement.getAxisAngle(rotationDisplacementAngle);
+           FrameQuaternion rotationDisplacement = new FrameQuaternion();
+            rotationDisplacement.difference(interpolatedPoseOrientationToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
+            AxisAngle rotationDisplacementAngle = new AxisAngle(rotationDisplacement);
 
             assertTrue(Math.abs(translationDisplacement.length()) <= 0.05);
             assertTrue(Math.abs(rotationDisplacementAngle.getAngle()) <= 0.05);
@@ -606,21 +603,20 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          if (j>0 && (j%999) == 0)
          {
             FramePoint3D interpolatedPoseFramePointToPack = new FramePoint3D();
-            FrameOrientation interpolatedPoseOrientationToPack = new FrameOrientation();
+            FrameQuaternion interpolatedPoseOrientationToPack = new FrameQuaternion();
             interpolatedPose.getPoseIncludingFrame(interpolatedPoseFramePointToPack, interpolatedPoseOrientationToPack);
 
             FramePoint3D interpolatedPoseOneSecondEarlierFramePointToPack = new FramePoint3D();
-            FrameOrientation interpolatedPoseOneSecondEarlierOrientationToPack = new FrameOrientation();
+            FrameQuaternion interpolatedPoseOneSecondEarlierOrientationToPack = new FrameQuaternion();
             interpolatedPoseOneSecondEarlier.getPoseIncludingFrame(interpolatedPoseOneSecondEarlierFramePointToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
 
             Vector3D translationDisplacement = new Vector3D(interpolatedPoseOneSecondEarlierFramePointToPack.getX() - interpolatedPoseFramePointToPack.getX(),
                   interpolatedPoseOneSecondEarlierFramePointToPack.getY() - interpolatedPoseFramePointToPack.getY(),
                   interpolatedPoseOneSecondEarlierFramePointToPack.getZ() - interpolatedPoseFramePointToPack.getZ());
 
-            FrameOrientation rotationDisplacement = new FrameOrientation();
-            rotationDisplacement.setOrientationFromOneToTwo(interpolatedPoseOneSecondEarlierOrientationToPack, interpolatedPoseOrientationToPack);
-            AxisAngle rotationDisplacementAngle = new AxisAngle();
-            rotationDisplacement.getAxisAngle(rotationDisplacementAngle);
+            FrameQuaternion rotationDisplacement = new FrameQuaternion();
+            rotationDisplacement.difference(interpolatedPoseOrientationToPack, interpolatedPoseOneSecondEarlierOrientationToPack);
+            AxisAngle rotationDisplacementAngle = new AxisAngle(rotationDisplacement);
 
             assertTrue(Math.abs(translationDisplacement.length()) <= 0.05);
             assertTrue(Math.abs(rotationDisplacementAngle.getAngle()) <= 0.05);
