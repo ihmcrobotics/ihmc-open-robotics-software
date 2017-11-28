@@ -2102,7 +2102,8 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    public void submitHumanoidArmPose(RobotSide robotSide, HumanoidArmPose armPose)
    {
-      FrameQuaternion desiredUpperArmOrientation = new FrameQuaternion(fullRobotModel.getChest().getBodyFixedFrame(),
+      FrameQuaternion desiredUpperArmOrientation = new FrameQuaternion();
+      desiredUpperArmOrientation.setYawPitchRollIncludingFrame(fullRobotModel.getChest().getBodyFixedFrame(),
             armPose.getDesiredUpperArmYawPitchRoll());
       double elbowAngle = robotSide.negateIfRightSide(armPose.getDesiredElbowAngle(robotSide));
       double[] handOrientation = new double[3];
@@ -2110,7 +2111,8 @@ public class DiagnosticBehavior extends AbstractBehavior
       {
          handOrientation = armPose.getDesiredHandYawPitchRoll();
       }
-      FrameQuaternion desiredHandOrientation = new FrameQuaternion(lowerArmsFrames.get(robotSide), handOrientation);
+      FrameQuaternion desiredHandOrientation = new FrameQuaternion();
+      desiredHandOrientation.setYawPitchRollIncludingFrame(lowerArmsFrames.get(robotSide), handOrientation);
       submitHandPose(robotSide, desiredUpperArmOrientation, elbowAngle, desiredHandOrientation, true);
    }
 
