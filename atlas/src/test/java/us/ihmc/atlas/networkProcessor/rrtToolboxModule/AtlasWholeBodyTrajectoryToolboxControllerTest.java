@@ -30,7 +30,7 @@ public class AtlasWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBo
    {
       return getRobotModel().getSimpleRobotName();
    }
-
+   
    @Override
    public void testHandCirclePositionAndYaw() throws Exception, UnreasonableAccelerationException
    {

@@ -17,6 +17,7 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Wayp
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialData;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialNode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**
@@ -46,10 +47,11 @@ public class WholeBodyTrajectoryToolboxData
    private final List<RigidBody> allRigidBodies = new ArrayList<>();
    private final Map<String, RigidBody> nameToRigidBodyMap = new HashMap<>();
    private final Map<RigidBody, ConstrainedRigidBodyTrajectory> rigidBodyDataMap = new HashMap<>();
-
+   FullHumanoidRobotModel fullRobotModel;
    public WholeBodyTrajectoryToolboxData(FullHumanoidRobotModel fullRobotModel, List<WaypointBasedTrajectoryCommand> endEffectorTrajectories,
                                          List<RigidBodyExplorationConfigurationCommand> explorationConfigurations)
    {
+      this.fullRobotModel = fullRobotModel;
       // trajectory time.
       this.trajectoryTime = 0.0;
       for (int i = 0; i < endEffectorTrajectories.size(); i++)
@@ -98,14 +100,20 @@ public class WholeBodyTrajectoryToolboxData
    }
 
    public SpatialData createRandomSpatialData()
-   {
+   {  
       SpatialData spatialData = new SpatialData();
 
       for (int i = 0; i < allRigidBodies.size(); i++)
       {
          RigidBody rigidBody = allRigidBodies.get(i);
-
+         
+         
          rigidBodyDataMap.get(rigidBody).appendRandomSpatial(spatialData);
+         
+         if(rigidBody == fullRobotModel.getHand(RobotSide.RIGHT))
+         {
+            
+         }
       }
 
       return spatialData;

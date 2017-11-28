@@ -11,13 +11,16 @@ public class SpatialNodeTree
 
    private List<SpatialNode> invalidNodes = new ArrayList<>();
 
-   private double timeWeight = 0.3;
+//   private double timeWeight = 0.1;
+//   private double positionWeight = 1.0;
+//   private double orientationWeight = 0.01;
+   private double timeWeight = 0.5;
    private double positionWeight = 1.0;
-   private double orientationWeight = 0.01;
+   private double orientationWeight = 0.5;
 
    public double dismissableTimeStep = 0.05;
    private double maxTimeInterval = 0.5;
-   private double maxPositionDistance = 0.1;
+   private double maxPositionDistance = 0.01;
    private double maxOrientationDistance = Math.toRadians(10);
 
    private SpatialNode currentCandidate = null;

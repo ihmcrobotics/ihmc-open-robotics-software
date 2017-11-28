@@ -38,6 +38,8 @@ public class ConstrainedRigidBodyTrajectory
    private final TDoubleArrayList explorationRangeLowerLimits = new TDoubleArrayList();
 
    private final Pose3D controlFramePose = new Pose3D();
+   
+   //private final Pose3D initialpose; 
 
    // For given trajectory and appending exploration transform.
    public ConstrainedRigidBodyTrajectory(WaypointBasedTrajectoryCommand trajectoryCommand, RigidBodyExplorationConfigurationCommand explorationCommand)

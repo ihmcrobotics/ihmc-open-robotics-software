@@ -13,7 +13,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class WholeBodyTrajectoryToolboxSettings
 {
-   public static double timeCoefficient = 3.0;
+   public static double timeCoefficient = 1.5;
    // TODO : will be get rid of. just for test.
    public static Random randomManager = new Random(1);
 
