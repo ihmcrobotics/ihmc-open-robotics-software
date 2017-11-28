@@ -148,7 +148,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          traj.compute(trajectoryTime - dt);
          traj.getAngularData(currentOrientation, currentAngularVelocity, currentAngularAcceleration);
 
-         boolean goodFinalOrientation = finalOrientation.epsilonEquals(currentOrientation.getGeometryObject(), orientationEpsilon);
+         boolean goodFinalOrientation = finalOrientation.geometricallyEquals(currentOrientation, orientationEpsilon);
          boolean goodFinalAngularVelocity = finalAngularVelocity.epsilonEquals(currentAngularVelocity, velocityEpsilon);
          boolean goodFinalAngularAcceleration = zeroAngularAcceleration.epsilonEquals(currentAngularAcceleration, accelerationEpsilon);
 
