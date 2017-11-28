@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -68,7 +68,7 @@ public class RigidBodyControlManager
    private final YoBoolean stateSwitched;
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
-         Pose3D homePose, List<String> positionControlledJointNames, Map<String, JointAccelerationIntegrationSettings> integrationSettings,
+         Pose3D homePose, List<String> positionControlledJointNames, Map<String, JointAccelerationIntegrationParametersReadOnly> integrationSettings,
          Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame, ContactablePlaneBody contactableBody,
          YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
