@@ -546,7 +546,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       positionControlledJoints = new ArrayList<String>();
 
-//      if (runningOnRealRobot)
+      if (runningOnRealRobot)
       {
          for (NeckJointName name : jointMap.getNeckJointNames())
             positionControlledJoints.add(jointMap.getNeckJointName(name));
@@ -567,6 +567,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       if (integrationSettings != null)
          return integrationSettings;
+
       integrationSettings = new ArrayList<ImmutableTriple<String, JointAccelerationIntegrationParametersReadOnly, List<String>>>();
 
       // Neck joints:
