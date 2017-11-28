@@ -211,7 +211,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       circleOrientation.appendYawRotation(Math.PI * 0.0);
       Quaternion handOrientation = new Quaternion(circleOrientation);
 
-      double trajectoryTime = 5.0;
+      double trajectoryTime = 10.0;
       FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
       configuration.setInitialConfigration(fullRobotModel);
@@ -431,7 +431,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private static Pose3D computeCircleTrajectory(double time, double trajectoryTime, double circleRadius, Point3DReadOnly circleCenter,
                                                  Quaternion circleRotation, QuaternionReadOnly constantOrientation, boolean ccw, double phase)
    {
-      double theta = (ccw ? -time : time) / trajectoryTime * 2.0 * Math.PI + phase;
+      double theta = (ccw ? -time : time) / trajectoryTime * 4.0 * Math.PI + phase;
       double z = circleRadius * Math.sin(theta);
       double y = circleRadius * Math.cos(theta);
       Point3D point = new Point3D(0.0, y, z);
