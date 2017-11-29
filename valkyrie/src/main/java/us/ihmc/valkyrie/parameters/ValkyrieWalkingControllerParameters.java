@@ -863,4 +863,10 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       return steppingParameters;
    }
+
+   @Override
+   public double getMinSwingTrajectoryClearanceFromStanceFoot()
+   {
+      return 0.18;
+   }
 }

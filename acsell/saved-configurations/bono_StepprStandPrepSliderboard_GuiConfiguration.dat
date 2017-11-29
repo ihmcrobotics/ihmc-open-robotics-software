@@ -246,7 +246,7 @@ ToeOff
 <Title>
 Tab6
 </Title>
-<Entry Boxes>torsoXActuatorMotorAngleOffset,torsoYActuatorMotorAngleOffset,walkingState,sow_walkingState,requestedHighLevelState,highLevelState,enableOutput,torsoZActuatorMotorAngleOffset</Entry Boxes>
+<Entry Boxes>torsoXActuatorMotorAngleOffset,torsoYActuatorMotorAngleOffset,walkingState,sow_walkingState,requestedHighLevelControllerName,highLevelControllerName,enableOutput,torsoZActuatorMotorAngleOffset</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>

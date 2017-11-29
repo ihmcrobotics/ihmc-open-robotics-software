@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remoteatlas.DRCControllerDispatcher.DRCMomentumBasedController.HighLevelHumanoidControllerManager.PolyvalentHighLevelHumanoidControllerFactory.requestedHighLevelState,root.remoteatlas.DRCControllerDispatcher.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.highLevelState</Variables>
+		<Variables>root.remoteatlas.DRCControllerDispatcher.DRCMomentumBasedController.HighLevelHumanoidControllerManager.PolyvalentHighLevelHumanoidControllerFactory.requestedHighLevelControllerName,root.remoteatlas.DRCControllerDispatcher.DRCMomentumBasedController.HighLevelHumanoidControllerManager.specific.highLevelControllerName</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -97,7 +97,7 @@
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-<Entry Boxes>requestedBehavior,hl_gainScaling,requestedHighLevelState,alphaQD,jointPositionAlpha,jointVelocityAlpha,captureKpParallel,captureKpOrthogonal,kp_comHeight,kd_comHeight,kpPelvisOrientation,zetaPelvisOrientation,walkingHeadOrientationKp,walkingHeadOrientationZeta,kpAllArmJointsL,kpAllArmJointsR,kdAllArmJointsL,kdAllArmJointsR,desiredICPX,desiredICPY,alphaDesiredVelocity,kVelActuatorValve,sliderBoardMode,doIHMCControlRatio,pelvisOrientationError,resendExtendedDataToRobot</Entry Boxes>
+<Entry Boxes>requestedBehavior,hl_gainScaling,requestedHighLevelControllerName,alphaQD,jointPositionAlpha,jointVelocityAlpha,captureKpParallel,captureKpOrthogonal,kp_comHeight,kd_comHeight,kpPelvisOrientation,zetaPelvisOrientation,walkingHeadOrientationKp,walkingHeadOrientationZeta,kpAllArmJointsL,kpAllArmJointsR,kdAllArmJointsL,kdAllArmJointsR,desiredICPX,desiredICPY,alphaDesiredVelocity,kVelActuatorValve,sliderBoardMode,doIHMCControlRatio,pelvisOrientationError,resendExtendedDataToRobot</Entry Boxes>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 

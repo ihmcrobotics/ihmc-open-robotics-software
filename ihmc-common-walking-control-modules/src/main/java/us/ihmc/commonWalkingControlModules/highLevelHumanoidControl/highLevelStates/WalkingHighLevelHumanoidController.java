@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -50,7 +49,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -71,7 +70,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 {
-   private final static HighLevelState controllerState = HighLevelState.WALKING;
+   private final static HighLevelControllerName controllerState = HighLevelControllerName.WALKING;
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -126,7 +125,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                             ICPTrajectoryPlannerParameters capturePointPlannerParameters, HighLevelHumanoidControllerToolbox controllerToolbox)
+                                             HighLevelHumanoidControllerToolbox controllerToolbox)
    {
       super(controllerState);
 
@@ -151,7 +150,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
-      
+
       ReferenceFrame chestBodyFrame = null;
       if(chest != null)
       {

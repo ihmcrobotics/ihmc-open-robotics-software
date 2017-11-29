@@ -7,6 +7,7 @@ import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
@@ -109,4 +110,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    {
       return null;
    }
+
+   public HighLevelControllerParameters getHighLevelControllerParameters();
 }
