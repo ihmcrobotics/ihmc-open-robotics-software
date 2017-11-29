@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics;
+package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
 public enum ConstraintType
 {
