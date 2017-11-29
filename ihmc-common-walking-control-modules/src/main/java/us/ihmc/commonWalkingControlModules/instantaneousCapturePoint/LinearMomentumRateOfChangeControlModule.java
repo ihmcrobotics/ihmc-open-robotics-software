@@ -339,9 +339,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
       this.controlHeightWithMomentum = controlHeightWithMomentum;
    }
 
-   public abstract ICPOptimizationController getICPOptimizationController();
-
-   public abstract double getOptimizedTimeRemaining();
 
    public abstract void setReferenceICPVelocity(FrameVector2D referenceICPVelocity);
 }
