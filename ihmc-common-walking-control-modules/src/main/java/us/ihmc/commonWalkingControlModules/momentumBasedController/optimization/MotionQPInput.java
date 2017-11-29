@@ -80,16 +80,6 @@ public class MotionQPInput
       return useWeightScalar;
    }
 
-   public boolean isMotionConstraint()
-   {
-      return constraintType.isHardConstraint();
-   }
-
-   public boolean isEqualityConstraint()
-   {
-      return constraintType.isEqualityConstraint();
-   }
-
    public void setConstraintType(ConstraintType constraintType)
    {
       this.constraintType = constraintType;
@@ -106,7 +96,7 @@ public class MotionQPInput
       String ret = getClass().getSimpleName();
       ret += "Jacobian:\n" + taskJacobian;
       ret += "Objective:\n" + taskObjective;
-      if (constraintType.isHardConstraint())
+      if (constraintType != ConstraintType.OBJECTIVE)
          ret += constraintType.toString();
       else if (useWeightScalar)
          ret += "Weight: " + taskWeightScalar;
