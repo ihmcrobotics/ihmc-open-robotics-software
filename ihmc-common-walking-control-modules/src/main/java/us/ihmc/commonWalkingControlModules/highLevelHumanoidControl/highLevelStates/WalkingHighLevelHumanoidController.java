@@ -121,8 +121,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
-   private final JointPositionControlHelper positionControlHelper;
-
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
                                              HighLevelHumanoidControllerToolbox controllerToolbox)
@@ -210,9 +208,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          }
          jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
       }
-
-      OneDoFJoint[] controlledOneDofJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
-      positionControlHelper = new JointPositionControlHelper(walkingControllerParameters, controlledOneDofJoints, registry);
    }
 
    private void setupStateMachine()
@@ -632,8 +627,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum();
       boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
       balanceManager.compute(currentState.getSupportSide(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon, controlHeightWithMomentum);
-
-      positionControlHelper.update();
    }
 
    private void submitControllerCoreCommands()
@@ -678,9 +671,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       controllerCoreCommand.addFeedbackControlCommand(comHeightManager.getFeedbackControlCommand());
 
       controllerCoreCommand.addInverseDynamicsCommand(balanceManager.getInverseDynamicsCommand());
-
-      controllerCoreCommand.addInverseDynamicsCommand(positionControlHelper.getJointAccelerationIntegrationCommand());
-      controllerCoreCommand.completeLowLevelJointData(positionControlHelper.getLowLevelOneDoFJointDesiredDataHolder());
 
       /*
        * FIXME: This is mainly used for resetting the integrators at touchdown.
