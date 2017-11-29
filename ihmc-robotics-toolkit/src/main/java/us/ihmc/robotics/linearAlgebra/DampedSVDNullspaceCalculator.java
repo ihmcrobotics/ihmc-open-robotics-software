@@ -111,28 +111,9 @@ public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator
          computeDampedSigmaOperator(sigmaDampedSigma, sigma, alpha);
          tempMatrix.reshape(v.getNumRows(), sigmaDampedSigma.getNumCols());
 
-         if (nullspace.getNumCols() > 0)
-         {
-            /*
-            DiagonalMatrixTools.postMult(nullspace, sigmaDampedSigma, tempMatrix);
-            CommonOps.multTransB(tempMatrix, nullspace, nullspaceProjectorToPack);
-            */
-
-            DiagonalMatrixTools.postMult(Q, sigmaDampedSigma, tempMatrix);
-            CommonOps.multTransB(tempMatrix, Q, nullspaceProjectorToPack);
-
-            CommonOps.scale(-1.0, nullspaceProjectorToPack);
-            MatrixTools.addDiagonal(nullspaceProjectorToPack, 1.0);
-         }
-         else
-         {
-            DiagonalMatrixTools.postMult(Q, sigmaDampedSigma, tempMatrix);
-            CommonOps.multTransB(tempMatrix, Q, nullspaceProjectorToPack);
-
-            CommonOps.scale(-1.0, nullspaceProjectorToPack);
-            MatrixTools.addDiagonal(nullspaceProjectorToPack, 1.0);
-         }
-
+         DiagonalMatrixTools.postMult(Q, sigmaDampedSigma, tempMatrix);
+         CommonOps.multTransB(-1.0, tempMatrix, Q, nullspaceProjectorToPack);
+         MatrixTools.addDiagonal(nullspaceProjectorToPack, 1.0);
       }
 
    }

@@ -79,9 +79,11 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
          tempMatrix1.reshape(A.getNumRows(), A.getNumRows());
          CommonOps.multOuter(A, tempMatrix1);
          MatrixTools.addDiagonal(tempMatrix1, alpha * alpha);
+
          linearSolver.setA(tempMatrix1);
          tempMatrix2.reshape(A.getNumCols(), b.getNumCols());
          linearSolver.solve(b, tempMatrix2);
+
          CommonOps.multTransA(A, tempMatrix2, x);
       }
    }
@@ -105,15 +107,13 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
       else
       {
          tempMatrix1.reshape(A.getNumRows(), A.getNumRows());
-         //MatrixTools.setDiagonal(tempMatrix1, alpha * alpha);
-         //CommonOps.multAddTransB(A, A, tempMatrix1);
-         //CommonOps.multTransB(A, A, tempMatrix1);
-         //SpecializedOps.addIdentity(tempMatrix1, tempMatrix1, alpha * alpha);
          CommonOps.multOuter(A, tempMatrix1);
          MatrixTools.addDiagonal(tempMatrix1, alpha * alpha);
+
          linearSolver.setA(tempMatrix1);
          tempMatrix2.reshape(tempMatrix1.getNumRows(), tempMatrix1.getNumCols());
          linearSolver.invert(tempMatrix2);
+
          CommonOps.multTransA(A, tempMatrix2, A_inv);
       }
    }

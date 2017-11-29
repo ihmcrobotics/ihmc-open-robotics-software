@@ -31,7 +31,7 @@ public class DampedQRNullspaceCalculator implements DampedNullspaceCalculator
       nullspaceProjector = new DenseMatrix64F(matrixSize, matrixSize);
       tempMatrixForProjectionInPlace = new DenseMatrix64F(matrixSize, matrixSize);
 
-      linearSolver = LinearSolverFactory.linear(matrixSize);
+      linearSolver = LinearSolverFactory.symmPosDef(matrixSize);
 
       decomposer = DecompositionFactory.qr(matrixSize, matrixSize);
       nullspace = new DenseMatrix64F(matrixSize, matrixSize);
