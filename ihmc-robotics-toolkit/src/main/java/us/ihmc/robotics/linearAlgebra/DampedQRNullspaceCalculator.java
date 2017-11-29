@@ -96,7 +96,7 @@ public class DampedQRNullspaceCalculator implements DampedNullspaceCalculator
    @Override
    public void computeNullspaceProjector(DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F nullspaceProjectorToPack)
    {
-      int nullity = matrixToComputeNullspaceOf.getNumCols() - matrixToComputeNullspaceOf.getNumRows();
+      int nullity = Math.max(matrixToComputeNullspaceOf.getNumCols() - matrixToComputeNullspaceOf.getNumRows(), 0);
       nullspaceProjectorToPack.reshape(matrixToComputeNullspaceOf.getNumCols(), matrixToComputeNullspaceOf.getNumCols());
 
       if (alpha == 0.0)
@@ -107,24 +107,30 @@ public class DampedQRNullspaceCalculator implements DampedNullspaceCalculator
       else
       {
          int size = matrixToComputeNullspaceOf.getNumCols();
-         int rank = matrixToComputeNullspaceOf.getNumRows();
-         transposed.reshape(size, rank);
+         int vars = matrixToComputeNullspaceOf.getNumRows();
+         int rank = Math.min(size, vars);
 
-         R1.reshape(rank, rank);
-         squared.reshape(rank, rank);
-         inverse.reshape(rank, rank);
+         transposed.reshape(size, vars);
+
+         R1.reshape(rank, vars);
+         squared.reshape(vars, vars);
+         inverse.reshape(vars, vars);
 
          CommonOps.transpose(matrixToComputeNullspaceOf, transposed);
          decomposer.decompose(transposed);
+
          decomposer.getR(R1, true);
 
-         inner_small_upper_diagonal(R1, squared);
+         if (R1.getNumCols() == R1.getNumRows())
+            inner_small_upper_diagonal(R1, squared);
+         else
+            CommonOps.multInner(R1, squared);
          MatrixTools.addDiagonal(squared, alpha * alpha);
 
          linearSolver.setA(squared);
          linearSolver.invert(inverse);
 
-         tempMatrix.reshape(size, rank);
+         tempMatrix.reshape(size, vars);
          CommonOps.multTransA(matrixToComputeNullspaceOf, inverse, tempMatrix);
          CommonOps.mult(-1.0, tempMatrix, matrixToComputeNullspaceOf, nullspaceProjectorToPack);
          MatrixTools.addDiagonal(nullspaceProjectorToPack, 1.0);

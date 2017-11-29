@@ -259,7 +259,7 @@ public abstract class DampedNullspaceCalculatorTest extends NullspaceCalculatorT
       nullspaceCalculator.setPseudoInverseAlpha(alpha);
       LinearSolver<DenseMatrix64F> linearSolver = LinearSolverFactory.pseudoInverse(true);
 
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < 1000; i++)
       {
          int JCols = RandomNumbers.nextInt(random, 1, 100);
          int JRows = RandomNumbers.nextInt(random, 1, 100);

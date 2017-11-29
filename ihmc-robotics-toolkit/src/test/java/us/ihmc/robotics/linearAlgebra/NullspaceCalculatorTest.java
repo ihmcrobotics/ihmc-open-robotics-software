@@ -11,7 +11,6 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public abstract class NullspaceCalculatorTest
 {
@@ -235,7 +234,6 @@ public abstract class NullspaceCalculatorTest
       {
          int JCols = RandomNumbers.nextInt(random, 1, 100);
          int JRows = RandomNumbers.nextInt(random, 1, 100);
-         //int JRows = RandomNumbers.nextInt(random, 1, JCols);
 
          int ARows = RandomNumbers.nextInt(random, 1, 100);
 
@@ -268,8 +266,6 @@ public abstract class NullspaceCalculatorTest
                assertEquals("Iteration " + i + " failed on index " + " (" + j + ", " + k + ").", projectorExpected.get(j, k), projector.get(j, k), 1e-7);
             }
          }
-
-
 
 
          // compute the projection
