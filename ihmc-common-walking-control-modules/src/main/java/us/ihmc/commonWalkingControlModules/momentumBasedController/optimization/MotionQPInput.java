@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 
 public class MotionQPInput
 {
