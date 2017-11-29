@@ -62,7 +62,7 @@ public class BalanceManager
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPPlannerWithAngularMomentumOffsetInterface icpPlanner;
    private final PrecomputedICPPlanner precomputedICPPlanner;
-   private final LinearMomentumRateOfChangeControlModule linearMomentumRateOfChangeControlModule;
+   private final BipedLinearMomentumRateOfChangeControlModule linearMomentumRateOfChangeControlModule;
    private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
