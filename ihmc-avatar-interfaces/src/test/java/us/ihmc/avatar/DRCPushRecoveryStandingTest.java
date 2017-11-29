@@ -224,7 +224,6 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
    public void testPushBackwardForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       setupTest(getRobotModel());
