@@ -71,25 +71,11 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, YoVariableRegistry parentRegistry,
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(namePrefix, null, null, minSwingHeight, maxSwingHeight, Double.NEGATIVE_INFINITY, parentRegistry, yoGraphicsListRegistry);
-   }
-
-   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double minDistanceToStance,
-                                    YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this(namePrefix, null, null, minSwingHeight, maxSwingHeight, minDistanceToStance, parentRegistry, yoGraphicsListRegistry);
+      this(namePrefix, null, null, minSwingHeight, maxSwingHeight, parentRegistry, yoGraphicsListRegistry);
    }
 
    public TwoWaypointSwingGenerator(String namePrefix, double[] waypointProportions, double[] obstacleClearanceProportions, double minSwingHeight,
                                     double maxSwingHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      this(namePrefix, waypointProportions, obstacleClearanceProportions, minSwingHeight, maxSwingHeight, Double.NEGATIVE_INFINITY, parentRegistry,
-           yoGraphicsListRegistry);
-   }
-
-   public TwoWaypointSwingGenerator(String namePrefix, double[] waypointProportions, double[] obstacleClearanceProportions, double minSwingHeight,
-                                    double maxSwingHeight, double minDistanceToStance, YoVariableRegistry parentRegistry,
-                                    YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
@@ -107,7 +93,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       this.minSwingHeight.set(minSwingHeight);
 
       this.minDistanceToStance = new YoDouble(namePrefix + "MinDistanceToStance", registry);
-      this.minDistanceToStance.set(minDistanceToStance);
+      this.minDistanceToStance.set(Double.NEGATIVE_INFINITY);
 
       if (waypointProportions == null)
          waypointProportions = defaultWaypointProportions;
@@ -346,10 +332,20 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       return true;
    }
 
-   public void setSwingSide(RobotSide swingSide, ReferenceFrame stanceZUpFrame)
+   /**
+    * Calling this method will enable a simple collision avoidance heuristic in the swing generator: if a straight line in the xy plane
+    * from the start to the end of the swing is too close to the stance position the trajectory waypoints will be adjusted. To activate
+    * this, additional information has to be provided as arguments to this method.
+    *
+    * @param swingSide the side of the robot that this swing trajectory will be executed on
+    * @param stanceZUpFrame the zup frame located at the stance foot sole
+    * @param minDistanceToStance the minimum clearance that the swing should have from the stance foot sole point in the xy plane
+    */
+   public void enableStanceCollisionAvoidance(RobotSide swingSide, ReferenceFrame stanceZUpFrame, double minDistanceToStance)
    {
       this.swingSide = swingSide;
       this.stanceZUpFrame = stanceZUpFrame;
+      this.minDistanceToStance.set(minDistanceToStance);
    }
 
    private void visualize()

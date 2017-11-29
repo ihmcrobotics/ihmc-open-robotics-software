@@ -18,6 +18,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -30,7 +31,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -330,7 +330,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       FramePoint3D initialStance = new FramePoint3D(stanceFrame);
       initialStance.changeFrame(ReferenceFrame.getWorldFrame());
       initialStance.get(lastPosition);
-      FrameOrientation stepOrientation = new FrameOrientation(stanceFrame);
+      FrameQuaternion stepOrientation = new FrameQuaternion(stanceFrame);
       stepOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepDataListMessage message = new FootstepDataListMessage();
