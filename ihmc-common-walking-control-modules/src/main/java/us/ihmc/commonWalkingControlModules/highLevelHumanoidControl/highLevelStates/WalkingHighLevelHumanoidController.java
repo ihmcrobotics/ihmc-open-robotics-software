@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
@@ -16,13 +14,11 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.DoubSuppToSingSuppCond4DistRecov;
@@ -47,7 +43,6 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -61,7 +56,6 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -128,25 +122,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
-   /**
-    * This command is used only when
-    * {@link WalkingControllerParameters#enableJointAccelerationIntegrationForAllJoints()} returns
-    * {@code true}. It works along with {@link #jointAccelerationIntegrationParameters}.
-    * <p>
-    * It is set to {@code null} when {@link WalkingControllerParameters#enableJointAccelerationIntegrationForAllJoints()} returns
-    * {@code false}.
-    * </p>
-    */
-   private final JointAccelerationIntegrationCommand accelerationIntegrationCommand;
-   /**
-    * Sets of joints for which specific parameters are to be used during the acceleration
-    * integration calculation.
-    * <p>
-    * It is set to {@code null} when {@link WalkingControllerParameters#enableJointAccelerationIntegrationForAllJoints()} returns
-    * {@code false}.
-    * </p>
-    */
-   private final Map<OneDoFJoint, JointAccelerationIntegrationParametersReadOnly> jointAccelerationIntegrationParameters;
+   private final JointPositionControlHelper positionControlHelper;
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
@@ -236,36 +212,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
       }
 
-      if (walkingControllerParameters.enableJointAccelerationIntegrationForAllJoints())
-      {
-         accelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
-         jointAccelerationIntegrationParameters = new HashMap<>();
-         Map<String, JointAccelerationIntegrationParametersReadOnly> parameters = managerFactory.getAccelerationIntegrationParameters();
-
-         for (InverseDynamicsJoint joint : controllerToolbox.getControlledJoints())
-         {
-            if (joint instanceof OneDoFJoint)
-            {
-               OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
-               accelerationIntegrationCommand.addJointToComputeDesiredPositionFor(oneDoFJoint);
-
-               if (parameters != null && parameters.containsKey(oneDoFJoint.getName()))
-               {
-                  jointAccelerationIntegrationParameters.put(oneDoFJoint, parameters.get(oneDoFJoint.getName()));
-               }
-               else
-               {
-                  PrintTools.warn("Integrating the desired acceleration for " + oneDoFJoint.getName() + " but no integration"
-                        + " parameters are defined - using defaults.");
-               }
-            }
-         }
-      }
-      else
-      {
-         accelerationIntegrationCommand = null;
-         jointAccelerationIntegrationParameters = null;
-      }
+      OneDoFJoint[] controlledOneDofJoints = ScrewTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class);
+      positionControlHelper = new JointPositionControlHelper(walkingControllerParameters, controlledOneDofJoints, registry);
    }
 
    private void setupStateMachine()
@@ -685,6 +633,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum();
       boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
       balanceManager.compute(currentState.getSupportSide(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon, controlHeightWithMomentum);
+
+      positionControlHelper.update();
    }
 
    private void submitControllerCoreCommands()
@@ -722,7 +672,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          {
             controllerCoreCommand.addFeedbackControlCommand(bodyManager.getFeedbackControlCommand());
             controllerCoreCommand.addInverseDynamicsCommand(bodyManager.getInverseDynamicsCommand());
-            controllerCoreCommand.completeLowLevelJointData(bodyManager.getLowLevelJointDesiredData());
          }
       }
 
@@ -731,21 +680,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       controllerCoreCommand.addInverseDynamicsCommand(balanceManager.getInverseDynamicsCommand());
 
-      if (accelerationIntegrationCommand != null)
-      {
-         if (!jointAccelerationIntegrationParameters.isEmpty())
-         {
-            int numberOfJointsToComputeDesiredPositionFor = accelerationIntegrationCommand.getNumberOfJointsToComputeDesiredPositionFor();
-            for (int jointIndex = 0; jointIndex < numberOfJointsToComputeDesiredPositionFor; jointIndex++)
-            {
-               OneDoFJoint joint = accelerationIntegrationCommand.getJointToComputeDesiredPositionFor(jointIndex);
-               JointAccelerationIntegrationParametersReadOnly parameters = jointAccelerationIntegrationParameters.get(joint);
-               if (parameters != null)
-                  accelerationIntegrationCommand.setJointParameters(jointIndex, parameters);
-            }
-         }
-         controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationCommand);
-      }
+      controllerCoreCommand.addInverseDynamicsCommand(positionControlHelper.getJointAccelerationIntegrationCommand());
+      controllerCoreCommand.completeLowLevelJointData(positionControlHelper.getLowLevelOneDoFJointDesiredDataHolder());
 
       /*
        * FIXME: This is mainly used for resetting the integrators at touchdown.
