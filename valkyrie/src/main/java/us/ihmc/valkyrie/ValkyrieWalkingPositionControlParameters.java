@@ -23,26 +23,34 @@ public class ValkyrieWalkingPositionControlParameters implements PositionControl
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         setGains(robotSide, LegJointName.HIP_YAW, 30.0, 3.0);
-         setGains(robotSide, LegJointName.HIP_ROLL, 30.0, 3.0);
-         setGains(robotSide, LegJointName.HIP_PITCH, 30.0, 3.0);
-         setGains(robotSide, LegJointName.KNEE_PITCH, 30.0, 4.0);
-         setGains(robotSide, LegJointName.ANKLE_PITCH, 60.0, 6.0);
-         setGains(robotSide, LegJointName.ANKLE_ROLL, 60.0, 6.0);
+         // Can go up to kp = 30.0, kd = 3.0
+         setGains(robotSide, LegJointName.HIP_YAW, 15.0, 1.5);
+         setGains(robotSide, LegJointName.HIP_ROLL, 15.0, 1.5);
+         setGains(robotSide, LegJointName.HIP_PITCH, 15.0, 1.5);
+         // Can go up to kp = 30.0, kd = 4.0
+         setGains(robotSide, LegJointName.KNEE_PITCH, 15.0, 2.0);
+         // Can go up to kp = 60.0, kd = 6.0
+         setGains(robotSide, LegJointName.ANKLE_PITCH, 30.0, 3.0);
+         setGains(robotSide, LegJointName.ANKLE_ROLL, 30.0, 3.0);
 
-         setGains(robotSide, ArmJointName.SHOULDER_PITCH, 30.0, 2.0);
-         setGains(robotSide, ArmJointName.SHOULDER_ROLL, 30.0, 2.0);
-         setGains(robotSide, ArmJointName.SHOULDER_YAW, 30.0, 2.0);
-         setGains(robotSide, ArmJointName.ELBOW_PITCH, 30.0, 2.0);
+         // Can go up to kp = 30.0, kd = 2.0
+         setGains(robotSide, ArmJointName.SHOULDER_PITCH, 15.0, 1.0);
+         setGains(robotSide, ArmJointName.SHOULDER_ROLL, 15.0, 1.0);
+         setGains(robotSide, ArmJointName.SHOULDER_YAW, 15.0, 1.0);
+         // Can go up to kp = 30.0, kd = 2.0
+         setGains(robotSide, ArmJointName.ELBOW_PITCH, 15.0, 1.0);
+
          setGains(robotSide, ArmJointName.ELBOW_ROLL, 7.0, 0.0);
          setGains(robotSide, ArmJointName.WRIST_ROLL, 20.0, 0.5);
          setGains(robotSide, ArmJointName.FIRST_WRIST_PITCH, 20.0, 0.5);
       }
-      setGains(SpineJointName.SPINE_YAW, 50.0, 1.0);
-      setGains(SpineJointName.SPINE_PITCH, 50.0, 1.0);
-      setGains(SpineJointName.SPINE_ROLL, 50.0, 1.0);
+
+      // Can go up to kp = 50.0, kd = 1.0
+      setGains(SpineJointName.SPINE_YAW, 30.0, 1.0);
+      setGains(SpineJointName.SPINE_PITCH, 30.0, 1.0);
+      setGains(SpineJointName.SPINE_ROLL, 30.0, 1.0);
    }
-   
+
    private void setGains(SpineJointName spineJointName, double kp, double kd)
    {
       String jointName = jointMap.getSpineJointName(spineJointName);
