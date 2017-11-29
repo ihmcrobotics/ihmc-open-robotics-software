@@ -4,7 +4,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
-import org.ejml.ops.SingularOps;
 import us.ihmc.commons.MathTools;
 
 public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator
@@ -19,7 +18,6 @@ public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator
 
    private final DenseMatrix64F nullspaceProjector;
    private final DenseMatrix64F tempMatrixForProjectionInPlace;
-
 
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
 
