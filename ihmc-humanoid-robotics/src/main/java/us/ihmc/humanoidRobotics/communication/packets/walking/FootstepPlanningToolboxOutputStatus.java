@@ -166,6 +166,7 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
       navigableExtrusions = other.navigableExtrusions;
       bodyPath = other.bodyPath;
       lowLevelPlannerGoal = other.lowLevelPlannerGoal;
+      planId = other.planId;
    }
 
 }
