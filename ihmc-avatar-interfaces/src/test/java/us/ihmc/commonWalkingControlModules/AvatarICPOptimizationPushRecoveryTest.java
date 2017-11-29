@@ -13,6 +13,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -21,7 +22,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
@@ -549,7 +549,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
       FramePoint3D step5Location = new FramePoint3D(referenceFrame, 2.5, -0.125, 0.0);
       FramePoint3D step6Location = new FramePoint3D(referenceFrame, 3.0,  0.125, 0.0);
 
-      FrameOrientation orientation = new FrameOrientation(referenceFrame);
+      FrameQuaternion orientation = new FrameQuaternion(referenceFrame);
 
       step1Location.scale(scale);
       step2Location.scale(scale);
@@ -581,10 +581,10 @@ public abstract class AvatarICPOptimizationPushRecoveryTest
 
    private FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, FramePoint3D placeToStep)
    {
-      return createFootstepDataMessage(robotSide, placeToStep, new FrameOrientation());
+      return createFootstepDataMessage(robotSide, placeToStep, new FrameQuaternion());
    }
 
-   private FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, FramePoint3D placeToStep, FrameOrientation orientation)
+   private FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, FramePoint3D placeToStep, FrameQuaternion orientation)
    {
       FootstepDataMessage footstepData = new FootstepDataMessage();
 

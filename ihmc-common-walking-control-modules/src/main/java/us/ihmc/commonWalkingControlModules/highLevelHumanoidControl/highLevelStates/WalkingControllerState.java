@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
-import java.util.ArrayList;
-
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -12,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -192,31 +189,6 @@ public class WalkingControllerState extends HighLevelControllerState
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
-   }
-
-   public void warmup(int iterations)
-   {
-      PrintTools.info(this, "Starting JIT walking warmup routine");
-      ArrayList<WalkingStateEnum> states = new ArrayList<>();
-      controllerCore.initialize();
-      walkingController.doTransitionIntoAction();
-
-      walkingController.getOrderedWalkingStatesForWarmup(states);
-      for (WalkingStateEnum state : states)
-      {
-         PrintTools.info(this, "Warming up " + state);
-         for (int i = 0; i < iterations; i++)
-         {
-            walkingController.warmupStateIteration(state);
-            ControllerCoreCommand controllerCoreCommandList = walkingController.getControllerCoreCommand();
-            controllerCore.submitControllerCoreCommand(controllerCoreCommandList);
-            controllerCore.compute();
-         }
-      }
-
-      walkingController.doTransitionOutOfAction();
-      walkingController.getControllerCoreCommand().clear();
-      PrintTools.info(this, "Finished JIT walking warmup routine");
    }
 
    /**

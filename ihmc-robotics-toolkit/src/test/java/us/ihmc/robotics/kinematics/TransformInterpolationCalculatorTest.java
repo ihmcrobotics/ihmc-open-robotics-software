@@ -408,8 +408,8 @@ public class TransformInterpolationCalculatorTest
       
       for (int i = 0; i < 1000; i++)
       {
-         transform1.set(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
-         transform2.set(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+         transform1.set(EuclidCoreRandomTools.nextRigidBodyTransform(random));
+         transform2.set(EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
          framePose1.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), transform1);
          framePose2.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), transform2);
@@ -486,8 +486,8 @@ public class TransformInterpolationCalculatorTest
 
       for (int i = 0; i < 100; i++)
       {
-         firstTimeStampedTransform.setTransform3D(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
-         secondTimeStampedTransform.setTransform3D(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+         firstTimeStampedTransform.setTransform3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
+         secondTimeStampedTransform.setTransform3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
          long timestamp1 = RandomNumbers.nextInt(random, 123, Integer.MAX_VALUE / 4);
          long timestamp2 = timestamp1 + RandomNumbers.nextInt(random, 1, 200);

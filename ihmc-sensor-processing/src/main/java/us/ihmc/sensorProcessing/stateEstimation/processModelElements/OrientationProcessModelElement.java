@@ -7,12 +7,12 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
 
@@ -20,7 +20,7 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
 {
    static final int SIZE = 3;
    private final ControlFlowOutputPort<FrameVector3D> angularVelocityPort;
-   private final ControlFlowOutputPort<FrameOrientation> orientationPort;
+   private final ControlFlowOutputPort<FrameQuaternion> orientationPort;
 
    private final Vector3D angularVelocity = new Vector3D();
    private final Vector3D tempRotationVector = new Vector3D();
@@ -29,9 +29,9 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
 
    private final Quaternion quaternionDelta = new Quaternion();
    private final Quaternion quaternion = new Quaternion();
-   private final FrameOrientation orientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
+   private final FrameQuaternion orientation = new FrameQuaternion(ReferenceFrame.getWorldFrame());
 
-   public OrientationProcessModelElement(ControlFlowOutputPort<FrameVector3D> angularVelocityPort, ControlFlowOutputPort<FrameOrientation> orientationPort,
+   public OrientationProcessModelElement(ControlFlowOutputPort<FrameVector3D> angularVelocityPort, ControlFlowOutputPort<FrameQuaternion> orientationPort,
            String name, YoVariableRegistry registry)
    {
       super(orientationPort, TimeDomain.CONTINUOUS, true, SIZE, name, registry);
@@ -65,7 +65,7 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
    public void propagateState(double dt)
    {
       angularVelocityPort.getData().get(angularVelocity);
-      orientationPort.getData().getQuaternion(quaternion);
+      quaternion.set(orientationPort.getData());
 
       tempRotationVector.set(angularVelocity);
       tempRotationVector.scale(dt);
@@ -81,7 +81,7 @@ public class OrientationProcessModelElement extends AbstractProcessModelElement
 
    public void correctState(DenseMatrix64F correction)
    {
-      orientationPort.getData().getQuaternion(quaternion);
+      quaternion.set(orientationPort.getData());
       MatrixTools.extractTuple3dFromEJMLVector(tempRotationVector, correction, 0);
       tempAxisAngle.set(tempRotationVector);
       quaternionDelta.set(tempAxisAngle);

@@ -83,6 +83,9 @@ public class InverseKinematicsQPSolver
       solverInput_Aeq.reshape(0, numberOfDoFs);
       solverInput_beq.reshape(0, 1);
 
+      solverInput_Ain.reshape(0, numberOfDoFs);
+      solverInput_bin.reshape(0, 1);
+
       if (!firstCall.getBooleanValue())
          addJointAccelerationRegularization();
    }
@@ -102,12 +105,23 @@ public class InverseKinematicsQPSolver
 
    public void addMotionInput(MotionQPInput input)
    {
-      if (input.isMotionConstraint())
-         addMotionConstraint(input.taskJacobian, input.taskObjective);
-      else if (input.useWeightScalar())
-         addMotionTask(input.taskJacobian, input.taskObjective, input.getWeightScalar());
-      else
-         addMotionTask(input.taskJacobian, input.taskObjective, input.taskWeightMatrix);
+      switch (input.getConstraintType())
+      {
+      case OBJECTIVE:
+         if (input.useWeightScalar())
+            addMotionTask(input.taskJacobian, input.taskObjective, input.getWeightScalar());
+         else
+            addMotionTask(input.taskJacobian, input.taskObjective, input.taskWeightMatrix);
+         break;
+      case EQUALITY: 
+         addMotionEqualityConstraint(input.taskJacobian, input.taskObjective);
+         break;
+      case INEQUALITY:
+         addMotionInequalityConstraint(input.taskJacobian, input.taskObjective);
+         break;
+      default:
+         break;
+      }
    }
 
    public void addMotionTask(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective, double taskWeight)
@@ -145,7 +159,7 @@ public class InverseKinematicsQPSolver
       CommonOps.subtractEquals(solverInput_f, tempTask_f);
    }
 
-   public void addMotionConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   public void addMotionEqualityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
       int taskSize = taskJacobian.getNumRows();
       int previousSize = solverInput_beq.getNumRows();
@@ -156,6 +170,18 @@ public class InverseKinematicsQPSolver
 
       CommonOps.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
       CommonOps.insert(taskObjective, solverInput_beq, previousSize, 0);
+   }
+   
+   public void addMotionInequalityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   {
+      int taskSize = taskJacobian.getNumRows();
+      int previousSize = solverInput_bin.getNumRows();
+
+      solverInput_Ain.reshape(previousSize + taskSize, numberOfDoFs, true);
+      solverInput_bin.reshape(previousSize + taskSize, 1, true);
+
+      CommonOps.insert(taskJacobian, solverInput_Ain, previousSize, 0);
+      CommonOps.insert(taskObjective, solverInput_bin, previousSize, 0);
    }
 
    public void solve() throws NoConvergenceException

@@ -144,11 +144,6 @@ public class StandPrepControllerState extends HighLevelControllerState
       return lowLevelOneDoFJointDesiredDataHolder;
    }
 
-   @Override
-   public void warmup(int iterations)
-   {
-   }
-
    private class TrajectoryData
    {
       private final YoDouble finalJointConfiguration;

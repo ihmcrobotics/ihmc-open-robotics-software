@@ -144,7 +144,7 @@ public class PoseReferenceFrameTest
    
    private void doRandomPoseChangeAndUpdate(PoseReferenceFrame poseReferenceFrame, Random random)
    {
-      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       FramePose framePose = new FramePose(poseReferenceFrame.getParent(), transform);
       poseReferenceFrame.setPoseAndUpdate(framePose);
    }

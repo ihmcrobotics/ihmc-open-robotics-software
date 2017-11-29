@@ -263,8 +263,6 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       floatingJoint = (FloatingJoint) robot.getRootJoints().get(0);
       refFrame = new ReferenceFrame("pelvis", ReferenceFrame.getWorldFrame(), true, false)
       {
-         private static final long serialVersionUID = -6427490298776551499L;
-
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
@@ -328,7 +326,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       RigidBodyTransform[] targets = new RigidBodyTransform[numOfTargets];
       for (int i = 0; i < 10; i++)
       {
-         targets[i] = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         targets[i] = EuclidCoreRandomTools.nextRigidBodyTransform(random);
       }
       return targets;
    }

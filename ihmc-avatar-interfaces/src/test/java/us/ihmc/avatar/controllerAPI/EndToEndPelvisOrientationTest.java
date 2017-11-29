@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientati
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -30,7 +31,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.Body
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -64,7 +64,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       ReferenceFrame midFootZUpGroundFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
 
       humanoidReferenceFrames.updateFrames();
-      FrameOrientation pelvisOrientation = new FrameOrientation(midFootZUpGroundFrame, orientation);
+      FrameQuaternion pelvisOrientation = new FrameQuaternion(midFootZUpGroundFrame, orientation);
       pelvisOrientation.changeFrame(worldFrame);
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation.getQuaternion());
       drcSimulationTestHelper.send(message);
@@ -78,7 +78,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.25));
 
       humanoidReferenceFrames.updateFrames();
-      FrameOrientation homeOrientation = new FrameOrientation(midFootZUpGroundFrame, new Quaternion());
+      FrameQuaternion homeOrientation = new FrameQuaternion(midFootZUpGroundFrame, new Quaternion());
       homeOrientation.changeFrame(worldFrame);
       SO3TrajectoryPointMessage home = new SO3TrajectoryPointMessage(trajectoryTime, homeOrientation.getQuaternion(), zeroVector);
       EndToEndTestTools.assertCurrentDesiredsMatchWaypoint(pelvisName, home, scs, epsilon);
@@ -98,7 +98,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       orientation.appendRollRotation(roll);
 
       ReferenceFrame midFootZUpGroundFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
-      FrameOrientation pelvisOrientation = new FrameOrientation(midFootZUpGroundFrame, orientation);
+      FrameQuaternion pelvisOrientation = new FrameQuaternion(midFootZUpGroundFrame, orientation);
       pelvisOrientation.changeFrame(worldFrame);
 
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(trajectoryTime, pelvisOrientation.getQuaternion());
@@ -130,7 +130,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       assertEquals("Control Mode", PelvisOrientationControlMode.WALKING_CONTROLLER, findCurrentControlMode());
       humanoidReferenceFrames.updateFrames();
       ReferenceFrame midFeetZUpFrame = humanoidReferenceFrames.getMidFootZUpGroundFrame();
-      FrameOrientation midFeetOrientation = new FrameOrientation(midFeetZUpFrame);
+      FrameQuaternion midFeetOrientation = new FrameQuaternion(midFeetZUpFrame);
       midFeetOrientation.changeFrame(worldFrame);
       String pelvisName = fullRobotModel.getPelvis().getName();
       EndToEndTestTools.assertCurrentDesiredsMatch(pelvisName, midFeetOrientation.getQuaternion(), zeroVector, scs, epsilon);
@@ -157,7 +157,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       String pelvisName = fullRobotModel.getPelvis().getName();
       Quaternion currentDesired = EndToEndTestTools.findControllerDesiredOrientation(pelvisName, scs);
-      FrameOrientation desiredAfterTrajectory = new FrameOrientation(worldFrame, currentDesired);
+      FrameQuaternion desiredAfterTrajectory = new FrameQuaternion(worldFrame, currentDesired);
       desiredAfterTrajectory.changeFrame(midFeetZUpGroundFrame);
 
       int steps = 2;
@@ -186,7 +186,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
 
       humanoidReferenceFrames.updateFrames();
       ReferenceFrame pelvisFrame = humanoidReferenceFrames.getPelvisFrame();
-      FrameOrientation initialOrientation = new FrameOrientation(pelvisFrame);
+      FrameQuaternion initialOrientation = new FrameQuaternion(pelvisFrame);
       initialOrientation.changeFrame(worldFrame);
 
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage(numberOfPoints);
@@ -205,7 +205,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
          orientation.appendYawRotation(yaw);
          orientation.appendPitchRotation(pitch);
          orientation.appendRollRotation(roll);
-         FrameOrientation frameOrientation = new FrameOrientation(pelvisFrame, orientation);
+         FrameQuaternion frameOrientation = new FrameQuaternion(pelvisFrame, orientation);
          frameOrientation.changeFrame(worldFrame);
          frameOrientation.get(orientation);
 
@@ -275,7 +275,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       ReferenceFrame chestFrame = humanoidReferenceFrames.getChestFrame();
 
       // first hold the chest in world to avoid feedback effects
-      FrameOrientation chestOrientation = new FrameOrientation(chestFrame);
+      FrameQuaternion chestOrientation = new FrameQuaternion(chestFrame);
       chestOrientation.changeFrame(worldFrame);
       ChestTrajectoryMessage holdChestInWorldMessage = new ChestTrajectoryMessage(0.0, chestOrientation.getQuaternion(), worldFrame, worldFrame);
       drcSimulationTestHelper.send(holdChestInWorldMessage);
@@ -290,7 +290,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
       humanoidReferenceFrames.updateFrames();
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendPitchRotation(pitch);
-      FrameOrientation frameChestOrientation = new FrameOrientation(chestFrame, desiredChestOrientation);
+      FrameQuaternion frameChestOrientation = new FrameQuaternion(chestFrame, desiredChestOrientation);
       frameChestOrientation.changeFrame(worldFrame);
       frameChestOrientation.get(desiredChestOrientation);
       ChestTrajectoryMessage chestMessage = new ChestTrajectoryMessage(chestTrajectoryTime, desiredChestOrientation, worldFrame, worldFrame);
@@ -333,7 +333,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
             location.setX(stepLength * (step + 1));
          location.setY(robotSide.negateIfRightSide(stepWidth / 2.0));
          location.changeFrame(worldFrame);
-         FrameOrientation orientation = new FrameOrientation(midFootZUpGroundFrame);
+         FrameQuaternion orientation = new FrameQuaternion(midFootZUpGroundFrame);
          orientation.changeFrame(worldFrame);
          FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location.getPoint(), orientation.getQuaternion());
          messageToPack.add(footstep);

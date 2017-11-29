@@ -22,8 +22,6 @@ public abstract class HighLevelControllerState extends FinishableState<HighLevel
    @Override
    public abstract void doTransitionOutOfAction();
 
-   public abstract void warmup(int iterations);
-
    public abstract YoVariableRegistry getYoVariableRegistry();
 
    public abstract LowLevelOneDoFJointDesiredDataHolderReadOnly getOutputForLowLevelController();

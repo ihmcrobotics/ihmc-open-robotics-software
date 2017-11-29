@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingControllerState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -169,25 +168,6 @@ public class HumanoidHighLevelControllerManager implements RobotController
    public String getDescription()
    {
       return getName();
-   }
-
-   /**
-    * Warmup the walking behavior by running all states for a number of iterations.
-    *
-    * Also warms up the controller core
-    *
-    * @param iterations number of times to run a single state
-    */
-   public void warmup(int iterations)
-   {
-      PrintTools.info(this, "Starting JIT warmup routine");
-      for (HighLevelControllerState highLevelControllerState : highLevelControllerStates.values())
-      {
-         highLevelControllerState.doTransitionIntoAction();
-         highLevelControllerState.warmup(iterations);
-         highLevelControllerState.doTransitionOutOfAction();
-      }
-      PrintTools.info(this, "Finished JIT warmup routine");
    }
 
    private GenericStateMachine<HighLevelControllerName, HighLevelControllerState> setUpStateMachine(EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerStateFactories,

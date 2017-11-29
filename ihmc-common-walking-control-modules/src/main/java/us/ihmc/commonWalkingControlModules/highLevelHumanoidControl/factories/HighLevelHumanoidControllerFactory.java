@@ -527,8 +527,4 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          isListeningToHighLevelStatePackets = isListening;
    }
 
-   public void warmupHighLevelControllers(int iterations)
-   {
-      humanoidHighLevelControllerManager.warmup(iterations);
-   }
 }

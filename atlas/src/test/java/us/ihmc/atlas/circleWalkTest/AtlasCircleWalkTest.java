@@ -20,7 +20,7 @@ public class AtlasCircleWalkTest extends HumanoidCircleWalkTest{
    {
       super.testCircleWalk();
    }
-	
+
 	@Override
 	public DRCRobotModel getRobotModel()
 	{
@@ -56,13 +56,7 @@ public class AtlasCircleWalkTest extends HumanoidCircleWalkTest{
 	{
 		return jointMap.getArmJointNames().length;
 	}
-	
-	@Override
-	protected boolean keepSCSUp()
-	{
-	   return false;
-	}
-	
+
 	@Override
 	public ArmJointName[] getArmJointNames()
 	{

@@ -71,9 +71,4 @@ public class DoNothingControllerState extends HighLevelControllerState
    {
       return lowLevelOneDoFJointDesiredDataHolder;
    }
-
-   @Override
-   public void warmup(int iterations)
-   {
-   }
 }

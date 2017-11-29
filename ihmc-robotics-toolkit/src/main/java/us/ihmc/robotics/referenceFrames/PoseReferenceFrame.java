@@ -4,19 +4,18 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 
 public class PoseReferenceFrame extends ReferenceFrame
 {
-   private static final long serialVersionUID = 1559362743221742457L;
    private final FramePose originPose;
 
    public PoseReferenceFrame(String frameName, ReferenceFrame parentFrame)
@@ -64,7 +63,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       this.update();
    }
 
-   public void setPoseAndUpdate(FramePoint3D position, FrameOrientation orientation)
+   public void setPoseAndUpdate(FramePoint3D position, FrameQuaternion orientation)
    {
       originPose.setPose(position, orientation);
       this.update();
@@ -119,7 +118,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       update();
    }
 
-   public void setOrientationAndUpdate(FrameOrientation frameOrientation)
+   public void setOrientationAndUpdate(FrameQuaternion frameOrientation)
    {
       frameOrientation.checkReferenceFrameMatch(parentFrame);
       originPose.setOrientation(frameOrientation);
@@ -183,7 +182,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       getTransformToParent(transformToPack);
    }
 
-   public void getPoseIncludingFrame(FramePoint3D framePointToPack, FrameOrientation frameOrientationToPack)
+   public void getPoseIncludingFrame(FramePoint3D framePointToPack, FrameQuaternion frameOrientationToPack)
    {
       originPose.getPoseIncludingFrame(framePointToPack, frameOrientationToPack);
    }
@@ -223,7 +222,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       originPose.getOrientation(matrixToPack);
    }
 
-   public void getOrientationIncludingFrame(FrameOrientation frameOrientationToPack)
+   public void getOrientationIncludingFrame(FrameQuaternion frameOrientationToPack)
    {
       originPose.getOrientationIncludingFrame(frameOrientationToPack);
    }

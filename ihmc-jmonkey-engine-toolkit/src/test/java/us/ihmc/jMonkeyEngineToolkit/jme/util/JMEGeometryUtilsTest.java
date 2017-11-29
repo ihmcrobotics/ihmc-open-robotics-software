@@ -36,7 +36,7 @@ public class JMEGeometryUtilsTest
       Random random = new Random(100L);
       for (int i = 0; i < 100; i++)
       {
-         RigidBodyTransform transform3D = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         RigidBodyTransform transform3D = EuclidCoreRandomTools.nextRigidBodyTransform(random);
          
          Transform transform = JMEGeometryUtils.transformFromZupToJMECoordinates(transform3D);
          Transform transformInverse = JMEGeometryUtils.getInverse(transform);
@@ -93,7 +93,7 @@ public class JMEGeometryUtilsTest
       Random random = new Random(100L);
       for (int i = 0; i < 100; i++)
       {
-         RigidBodyTransform transform3Doriginal = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         RigidBodyTransform transform3Doriginal = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
          Transform transform3d = JMEGeometryUtils.transformFromZupToJMECoordinates(transform3Doriginal );
          RigidBodyTransform transform3backToOriginal = JMEGeometryUtils.transformFromJMECoordinatesToZup(transform3d);

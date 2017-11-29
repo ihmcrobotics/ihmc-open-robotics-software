@@ -9,7 +9,6 @@ import us.ihmc.robotics.geometry.FramePose2d;
 
 public class PlanarJointReferenceFrame extends ReferenceFrame
 {
-   private static final long serialVersionUID = 1179880149506811812L;
    private double rotation = 0.0;
    private final Vector3D translation = new Vector3D();
 

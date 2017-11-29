@@ -101,34 +101,34 @@ public class ValkyrieAccelerationIntegration
          String jointName = joint.getName();
 
          if (jointName.contains("Hip"))
-         {
+         { // Can go up to kp = 30.0, kd = 3.0
+            kPositionList.get(i).set(15.0);
+            kVelocityList.get(i).set(1.5);
+         }
+         else if (jointName.contains("Knee"))
+         { // Can go up to kp = 30.0, kd = 4.0
+            kPositionList.get(i).set(15.0);
+            kVelocityList.get(i).set(2.0);
+         }
+         else if (jointName.contains("Ankle"))
+         { // Can go up to kp = 60.0, kd = 6.0
             kPositionList.get(i).set(30.0);
             kVelocityList.get(i).set(3.0);
          }
-         else if (jointName.contains("Knee"))
-         {
-            kPositionList.get(i).set(30.0);
-            kVelocityList.get(i).set(4.0);
-         }
-         else if (jointName.contains("Ankle"))
-         {
-            kPositionList.get(i).set(60.0);
-            kVelocityList.get(i).set(6.0);
-         }
          else if (jointName.contains("torso"))
-         {
-            kPositionList.get(i).set(50.0);
+         { // Can go up to kp = 50.0, kd = 1.0
+            kPositionList.get(i).set(30.0);
             kVelocityList.get(i).set(1.0);
          }
          else if (jointName.contains("Shoulder"))
-         {
-            kPositionList.get(i).set(30.0);
-            kVelocityList.get(i).set(2.0);
+         { // Can go up to kp = 30.0, kd = 2.0
+            kPositionList.get(i).set(15.0);
+            kVelocityList.get(i).set(1.0);
          }
          else if (jointName.contains("Elbow"))
-         {
-            kPositionList.get(i).set(30.0);
-            kVelocityList.get(i).set(2.0);
+         { // Can go up to kp = 30.0, kd = 2.0
+            kPositionList.get(i).set(15.0);
+            kVelocityList.get(i).set(1.0);
          }
          else if (jointName.contains("ForearmYaw"))
          {

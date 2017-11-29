@@ -6,11 +6,11 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
 
 
@@ -33,8 +33,8 @@ public class MultipleWaypointsOrientationTrajectoryGeneratorTest
     
       SimpleOrientationTrajectoryGenerator simpleTraj = new SimpleOrientationTrajectoryGenerator("simpleTraj", true, worldFrame, registry);
       simpleTraj.setTrajectoryTime(trajectoryTime);
-      simpleTraj.setInitialOrientation(new FrameOrientation(worldFrame, 1.0, 0.2, -0.5));
-      simpleTraj.setFinalOrientation(new FrameOrientation(worldFrame, -0.3, 0.7, 1.0));
+      simpleTraj.setInitialOrientation(new FrameQuaternion(worldFrame, 1.0, 0.2, -0.5));
+      simpleTraj.setFinalOrientation(new FrameQuaternion(worldFrame, -0.3, 0.7, 1.0));
       simpleTraj.initialize();
 
       int numberOfWaypoints = 100;
@@ -43,7 +43,7 @@ public class MultipleWaypointsOrientationTrajectoryGeneratorTest
       
       
       
-      FrameOrientation waypointOrientation = new FrameOrientation();
+      FrameQuaternion waypointOrientation = new FrameQuaternion();
       FrameVector3D waypointAngularVelocity = new FrameVector3D();
       
       for (int i = 0; i < numberOfWaypoints; i++)
@@ -58,11 +58,11 @@ public class MultipleWaypointsOrientationTrajectoryGeneratorTest
       multipleWaypointTrajectory.initialize();
 
 
-      FrameOrientation orientationToPackMultiple = new FrameOrientation(worldFrame);
+      FrameQuaternion orientationToPackMultiple = new FrameQuaternion(worldFrame);
       FrameVector3D angularVelocityToPackMultiple = new FrameVector3D(worldFrame);
       FrameVector3D angularAccelerationToPackMultiple = new FrameVector3D(worldFrame);
 
-      FrameOrientation orientationToPackSimple = new FrameOrientation(worldFrame);
+      FrameQuaternion orientationToPackSimple = new FrameQuaternion(worldFrame);
       FrameVector3D angularVelocityToPackSimple = new FrameVector3D(worldFrame);
       FrameVector3D angularAccelerationToPackSimple = new FrameVector3D(worldFrame);
       

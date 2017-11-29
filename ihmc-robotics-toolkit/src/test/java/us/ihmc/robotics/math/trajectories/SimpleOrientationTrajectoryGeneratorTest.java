@@ -8,15 +8,16 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.OrientationProvider;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SimpleOrientationTrajectoryGeneratorTest
 {
@@ -24,7 +25,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformToParent("frameA", worldFrame,
-         EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+         EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
    private static final double EPSILON = 1.0e-10;
 
@@ -86,9 +87,9 @@ public class SimpleOrientationTrajectoryGeneratorTest
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
 
-      FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
+      FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
       OrientationProvider initialOrientationProvider = new ConstantOrientationProvider(initialOrientation);
-      FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
+      FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
       OrientationProvider finalOrientationProvider = new ConstantOrientationProvider(finalOrientation);
 
       OrientationInterpolationTrajectoryGenerator originalOrientation = new OrientationInterpolationTrajectoryGenerator("orientation", worldFrame,
@@ -102,11 +103,11 @@ public class SimpleOrientationTrajectoryGeneratorTest
       trajToTest.initialize();
 
       double dt = 1.0e-3;
-      FrameOrientation orientation1 = new FrameOrientation();
+      FrameQuaternion orientation1 = new FrameQuaternion();
       FrameVector3D angularVelocity1 = new FrameVector3D();
       FrameVector3D angularAcceleration1 = new FrameVector3D();
 
-      FrameOrientation orientation2 = new FrameOrientation();
+      FrameQuaternion orientation2 = new FrameQuaternion();
       FrameVector3D angularVelocity2 = new FrameVector3D();
       FrameVector3D angularAcceleration2 = new FrameVector3D();
 
@@ -134,8 +135,8 @@ public class SimpleOrientationTrajectoryGeneratorTest
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
 
-      FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-      FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
+      FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
+      FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
 
       trajToTest.setInitialOrientation(initialOrientation);
       trajToTest.setFinalOrientation(finalOrientation);
@@ -144,11 +145,11 @@ public class SimpleOrientationTrajectoryGeneratorTest
       trajToTest.initialize();
       trajToTest.compute(-5.0);
 
-      FrameOrientation orientation1 = new FrameOrientation(initialOrientation);
+      FrameQuaternion orientation1 = new FrameQuaternion(initialOrientation);
       FrameVector3D angularVelocity1 = new FrameVector3D(worldFrame);
       FrameVector3D angularAcceleration1 = new FrameVector3D(worldFrame);
 
-      FrameOrientation orientation2 = new FrameOrientation();
+      FrameQuaternion orientation2 = new FrameQuaternion();
       FrameVector3D angularVelocity2 = new FrameVector3D();
       FrameVector3D angularAcceleration2 = new FrameVector3D();
 
@@ -168,8 +169,8 @@ public class SimpleOrientationTrajectoryGeneratorTest
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
 
-      FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
-      FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
+      FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
+      FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
 
       trajToTest.setInitialOrientation(initialOrientation);
       trajToTest.setFinalOrientation(finalOrientation);
@@ -178,11 +179,11 @@ public class SimpleOrientationTrajectoryGeneratorTest
       trajToTest.initialize();
       trajToTest.compute(15.0);
 
-      FrameOrientation orientation1 = new FrameOrientation(finalOrientation);
+      FrameQuaternion orientation1 = new FrameQuaternion(finalOrientation);
       FrameVector3D angularVelocity1 = new FrameVector3D(worldFrame);
       FrameVector3D angularAcceleration1 = new FrameVector3D(worldFrame);
 
-      FrameOrientation orientation2 = new FrameOrientation();
+      FrameQuaternion orientation2 = new FrameQuaternion();
       FrameVector3D angularVelocity2 = new FrameVector3D();
       FrameVector3D angularAcceleration2 = new FrameVector3D();
 
@@ -202,9 +203,9 @@ public class SimpleOrientationTrajectoryGeneratorTest
 
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
 
-      FrameOrientation initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
+      FrameQuaternion initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
       OrientationProvider initialOrientationProvider = new ConstantOrientationProvider(initialOrientation);
-      FrameOrientation finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, worldFrame);
+      FrameQuaternion finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
       OrientationProvider finalOrientationProvider = new ConstantOrientationProvider(finalOrientation);
 
       OrientationInterpolationTrajectoryGenerator originalOrientation = new OrientationInterpolationTrajectoryGenerator("orientation1", worldFrame,
@@ -218,11 +219,11 @@ public class SimpleOrientationTrajectoryGeneratorTest
       trajToTest.initialize();
 
       double dt = 1.0e-3;
-      FrameOrientation orientation1 = new FrameOrientation();
+      FrameQuaternion orientation1 = new FrameQuaternion();
       FrameVector3D angularVelocity1 = new FrameVector3D();
       FrameVector3D angularAcceleration1 = new FrameVector3D();
 
-      FrameOrientation orientation2 = new FrameOrientation();
+      FrameQuaternion orientation2 = new FrameQuaternion();
       FrameVector3D angularVelocity2 = new FrameVector3D();
       FrameVector3D angularAcceleration2 = new FrameVector3D();
 
@@ -242,9 +243,9 @@ public class SimpleOrientationTrajectoryGeneratorTest
 
       // Do the same in another frame
 
-      initialOrientation = FrameOrientation.generateRandomFrameOrientation(random, frameA);
+      initialOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, frameA);
       initialOrientationProvider = new ConstantOrientationProvider(initialOrientation);
-      finalOrientation = FrameOrientation.generateRandomFrameOrientation(random, frameA);
+      finalOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, frameA);
       finalOrientationProvider = new ConstantOrientationProvider(finalOrientation);
 
       originalOrientation = new OrientationInterpolationTrajectoryGenerator("orientation2", frameA,

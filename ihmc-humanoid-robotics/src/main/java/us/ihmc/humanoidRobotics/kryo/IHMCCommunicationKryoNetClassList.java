@@ -9,6 +9,7 @@ import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.*;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -208,6 +209,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(byte[].class);
       registerPacketField(Point3D.class);
       registerPacketField(Quaternion.class);
+      registerPacketField(RotationMatrix.class);
       registerPacketField(TimeStampedTransform3D.class);
 
       registerPacketField(PacketDestination.class);

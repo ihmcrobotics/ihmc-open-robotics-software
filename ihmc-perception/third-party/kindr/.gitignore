@@ -1,7 +1,7 @@
 # Make
 CMakeCache.txt
 CMakeFiles
-Makefile
+#Makefile
 cmake_install.cmake
 install_manifest.txt
 
@@ -65,7 +65,7 @@ gtest-1.7.0.zip
 *.xdy
 *.tdo
 *-converted-to.pdf
-*~
+#*~
 
-cmake/FindKindr.cmake
+#cmake/FindKindr.cmake
 

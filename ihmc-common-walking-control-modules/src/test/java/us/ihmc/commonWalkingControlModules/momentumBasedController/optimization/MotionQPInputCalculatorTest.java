@@ -67,8 +67,8 @@ public class MotionQPInputCalculatorTest
          centerOfMassFrame.update();
 
          SpatialAccelerationVector desiredSpatialAcceleration = new SpatialAccelerationVector(endEffectorFrame, rootFrame, endEffectorFrame);
-         desiredSpatialAcceleration.setLinearPart(EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
-         desiredSpatialAcceleration.setAngularPart(EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
+         desiredSpatialAcceleration.setLinearPart(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+         desiredSpatialAcceleration.setAngularPart(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
          spatialAccelerationCommand.setSpatialAcceleration(endEffectorFrame, desiredSpatialAcceleration);
 
          motionQPInputCalculator.initialize();
@@ -94,12 +94,12 @@ public class MotionQPInputCalculatorTest
          centerOfMassFrame.update();
 
          RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
-         controlFrameTransform.setTranslation(EuclidCoreRandomTools.generateRandomPoint3D(random, 10.0));
+         controlFrameTransform.setTranslation(EuclidCoreRandomTools.nextPoint3D(random, 10.0));
          ReferenceFrame controlFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("controlFrame" + i, endEffectorFrame, controlFrameTransform);
 
          SpatialAccelerationVector desiredSpatialAcceleration = new SpatialAccelerationVector(endEffectorFrame, rootFrame, controlFrame);
-         desiredSpatialAcceleration.setLinearPart(EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
-         desiredSpatialAcceleration.setAngularPart(EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0));
+         desiredSpatialAcceleration.setLinearPart(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
+         desiredSpatialAcceleration.setAngularPart(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));
          spatialAccelerationCommand.setSpatialAcceleration(controlFrame, desiredSpatialAcceleration);
 
          motionQPInputCalculator.initialize();

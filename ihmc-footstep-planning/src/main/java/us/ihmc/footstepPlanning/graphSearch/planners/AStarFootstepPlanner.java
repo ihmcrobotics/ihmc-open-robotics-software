@@ -144,12 +144,19 @@ public class AStarFootstepPlanner implements FootstepPlanner
    @Override
    public FootstepPlanningResult plan()
    {
+      if(debug)
+         PrintTools.info("A* planner is starting");
+      
       initialize();
+      
+      if(debug)
+         PrintTools.info("A* planner has initialized");
+
       planInternal();
       FootstepPlanningResult result = checkResult();
       if (debug)
       {
-         PrintTools.info("Planning statistics for " + result);
+         PrintTools.info("A* Footstep planning statistics for " + result);
          System.out.println("   Finished planning after " + Precision.round(planningTime.getDoubleValue(), 2) + " seconds.");
          System.out.println("   Expanded each node to an average of " + numberOfExpandedNodes.getLongValue() + " children nodes.");
          System.out.println("   Planning took a total of "+ itarationCount.getLongValue() + " iterations.");
@@ -193,14 +200,14 @@ public class AStarFootstepPlanner implements FootstepPlanner
          throw new RuntimeException("Need to set initial conditions before planning.");
       if (goalNodes == null)
          throw new RuntimeException("Need to set goal before planning.");
-
+      
       graph.initialize(startNode);
       NodeComparator nodeComparator = new NodeComparator(graph, goalNodes, heuristics);
       stack = new PriorityQueue<>(nodeComparator);
 
-      boolean validStartNode = nodeChecker.isNodeValid(startNode, null);
-      if (!validStartNode)
-         throw new RuntimeException("Start node isn't valid");
+//      boolean validStartNode = nodeChecker.isNodeValid(startNode, null);
+//      if (!validStartNode)
+//         throw new RuntimeException("Start node isn't valid");
 
       validGoalNode.set(true);
       for (RobotSide robotSide : RobotSide.values)
@@ -228,7 +235,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
    private void planInternal()
    {
       long planningStartTime = System.nanoTime();
-
+      
       long rejectedNodesCount = 0;
       long expandedNodesCount = 0;
       long iterations = 0;
@@ -236,6 +243,12 @@ public class AStarFootstepPlanner implements FootstepPlanner
       while (!stack.isEmpty())
       {
          iterations++;
+
+         if(debug)
+         {
+            if(iterations % 150 == 0)
+               PrintTools.info("A* planner is on iteration " + iterations);            
+         }
 
          FootstepNode nodeToExpand = stack.poll();
          if (expandedNodes.contains(nodeToExpand))
