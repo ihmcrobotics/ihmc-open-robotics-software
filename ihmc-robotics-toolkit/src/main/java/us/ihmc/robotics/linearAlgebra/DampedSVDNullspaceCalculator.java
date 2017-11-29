@@ -98,7 +98,7 @@ public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator
    @Override
    public void computeNullspaceProjector(DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F nullspaceProjectorToPack)
    {
-      int nullity = matrixToComputeNullspaceOf.getNumCols() - matrixToComputeNullspaceOf.getNumRows();
+      int nullity = Math.max(matrixToComputeNullspaceOf.getNumCols() - matrixToComputeNullspaceOf.getNumRows(), 0);
 
       computeNullspace(nullspace, Q, matrixToComputeNullspaceOf, nullity);
 
@@ -158,10 +158,11 @@ public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator
 
    private void computeDampedSigmaOperator(DenseMatrix64F dampedSigmaToPack, DenseMatrix64F sigma, double alpha)
    {
-      dampedSigmaToPack.reshape(sigma.getNumRows(), sigma.getNumRows());
+      int minor = Math.min(sigma.getNumRows(), sigma.getNumCols());
+      dampedSigmaToPack.reshape(minor, minor);
       dampedSigmaToPack.zero();
 
-      for (int i = 0; i < sigma.getNumRows(); i++)
+      for (int i = 0; i < minor; i++)
       {
          double sigmaValue = sigma.get(i, i);
          double dampedSigma = sigmaValue * sigmaValue / (sigmaValue * sigmaValue + alpha * alpha);

@@ -19,32 +19,18 @@ public class DampedLeastSquaresNullspaceCalculator implements DampedNullspaceCal
    private final DenseMatrix64F nullspaceProjector;
    private final DenseMatrix64F tempMatrixForProjectionInPlace;
 
-   private final DenseMatrix64F inverseMatrix;
-   private final LinearSolver<DenseMatrix64F> linearSolver;
-
-   private final DenseMatrix64F dampedMatrix;
-
-   private double alpha = 0.0;
-
    public DampedLeastSquaresNullspaceCalculator(int matrixSize, double alpha)
    {
       pseudoInverseSolver = new DampedLeastSquaresSolver(matrixSize, alpha);
       pseudoInverseMatrix = new DenseMatrix64F(matrixSize, matrixSize);
       nullspaceProjector = new DenseMatrix64F(matrixSize, matrixSize);
       tempMatrixForProjectionInPlace = new DenseMatrix64F(matrixSize, matrixSize);
-
-      this.alpha = alpha;
-
-      dampedMatrix = new DenseMatrix64F(matrixSize, matrixSize);
-      inverseMatrix = new DenseMatrix64F(matrixSize, matrixSize);
-      this.linearSolver = LinearSolverFactory.linear(matrixSize);
    }
 
    @Override
    public void setPseudoInverseAlpha(double alpha)
    {
       pseudoInverseSolver.setAlpha(alpha);
-      this.alpha = alpha;
    }
 
    /**
