@@ -225,25 +225,15 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    /**
     * state == GENERATE_MOTION
     */
-   private int currentUpdateNode = 0;
-
    private void generateMotion()
    {
-      visualizedNode = path.get(currentUpdateNode);
-      updateValidity(path.get(currentUpdateNode));
-
-      if (VERBOSE)
-         PrintTools.info("final result " + currentUpdateNode + " " + path.get(currentUpdateNode).isValid());
-
-      currentUpdateNode++;
-
       updateTimer(motionGenerationComputationTime, motionGenerationStartTime);
+
       /*
        * terminate generateMotion.
        */
-      if (currentUpdateNode == path.size())
+      if (true)
       {
-         // TODO : pack out output.
          setOutputStatus(toolboxSolution, 4);
          setOutputStatus(toolboxSolution, path);
 
@@ -252,10 +242,12 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          reportMessage(toolboxSolution);
 
          terminateToolboxController();
+
+         if (VERBOSE)
+            PrintTools.info("Solution out ");
       }
    }
 
-   // TODO
    private void setOutputStatus(WholeBodyTrajectoryToolboxOutputStatus outputStatusToPack, int planningResult)
    {
       outputStatusToPack.setPlanningResult(planningResult);
@@ -267,6 +259,11 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       {
          outputStatusToPack.setRobotConfigurations(path.stream().map(SpatialNode::getConfiguration).toArray(size -> new KinematicsToolboxOutputStatus[size]));
          outputStatusToPack.setTrajectoryTimes(path.stream().mapToDouble(SpatialNode::getTime).toArray());
+
+         //if (VERBOSE)
+         //   for (int i = 0; i < path.size(); i++)
+         //      PrintTools.info("FINAL RESULT IS " + i + " " + path.get(i).isValid());
+
       }
       else
       {
@@ -300,7 +297,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       path.add(new SpatialNode(revertedPath.get(revertedPathSize - 1)));
 
       // filtering out too short time gap node.
-      // TODO : for changed parent after filtering, few nodes are changed into invalid nodes.
+      // test ahead adding and attach only valid filtering.
+      // TODO : but still has problem. To test ahead whole shortcut would be too heavy.      
       int currentIndex = 0;
       int latestAddedIndexOfRevertedPath = revertedPathSize - 1;
       for (int j = revertedPathSize - 2; j > 0; j--)
@@ -335,13 +333,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       for (int i = 0; i < path.size() - 1; i++)
          path.get(i + 1).setParent(path.get(i));
 
-      for (int i = 0; i < path.size(); i++)
-      {
-         updateValidity(path.get(i));
-         if (!path.get(i).isValid())
-            PrintTools.info("wrong " + " " + i);
-      }
-
       // plotting before smoothing.
       for (int i = 0; i < path.size(); i++)
          nodePlotter.update(path.get(i), 2);
@@ -349,7 +340,6 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       // smoothing over one mile stone node.
       for (int i = 0; i < numberOfIterationForShortcutOptimization.getIntegerValue(); i++)
       {
-         PrintTools.info("shortcut try" + i);
          if (updateShortcutPath(path) < 0.001)
          {
             if (VERBOSE)
@@ -674,7 +664,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
        */
       boolean success = humanoidKinematicsSolver.solve();
 
-      node.setConfiguration(humanoidKinematicsSolver.getSolution());
+      node.setConfiguration(new KinematicsToolboxOutputStatus(humanoidKinematicsSolver.getSolution()));
       node.setValidity(success);
 
       return success;

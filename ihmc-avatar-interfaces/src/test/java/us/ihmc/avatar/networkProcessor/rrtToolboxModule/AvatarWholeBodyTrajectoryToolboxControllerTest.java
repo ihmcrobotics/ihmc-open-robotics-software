@@ -27,6 +27,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematic
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -488,6 +489,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          t += timeResolution;
          KinematicsToolboxOutputStatus frame = findFrameFromTime(solution, t);
          frame.getDesiredJointState(rootJoint, joints);
+
          robotForViz.updateFrames();
          snapGhostToFullRobotModel(robotForViz);
          scs.simulateOneTimeStep();
