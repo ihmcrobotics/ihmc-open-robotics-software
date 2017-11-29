@@ -78,7 +78,8 @@ public class InverseDynamicsQPSolver
    private boolean useWarmStart = false;
    private int maxNumberOfIterations = 100;
 
-   public InverseDynamicsQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase, YoVariableRegistry parentRegistry)
+   public InverseDynamicsQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase,
+                                  YoVariableRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.numberOfDoFs = numberOfDoFs;
@@ -203,6 +204,9 @@ public class InverseDynamicsQPSolver
       solverInput_Aeq.reshape(0, problemSize);
       solverInput_beq.reshape(0, 1);
 
+      solverInput_Ain.reshape(0, problemSize);
+      solverInput_bin.reshape(0, 1);
+
       if (!firstCall.getBooleanValue())
          addJointJerkRegularization();
    }
@@ -223,12 +227,23 @@ public class InverseDynamicsQPSolver
 
    public void addMotionInput(MotionQPInput input)
    {
-      if (input.isMotionConstraint())
-         addMotionConstraint(input.taskJacobian, input.taskObjective);
-      else if (input.useWeightScalar())
-         addMotionTask(input.taskJacobian, input.taskObjective, input.getWeightScalar());
-      else
-         addMotionTask(input.taskJacobian, input.taskObjective, input.taskWeightMatrix);
+      switch (input.getConstraintType())
+      {
+      case OBJECTIVE:
+         if (input.useWeightScalar())
+            addMotionTask(input.taskJacobian, input.taskObjective, input.getWeightScalar());
+         else
+            addMotionTask(input.taskJacobian, input.taskObjective, input.taskWeightMatrix);
+         break;
+      case EQUALITY:
+         addMotionEqualityConstraint(input.taskJacobian, input.taskObjective);
+         break;
+      case INEQUALITY:
+         addMotionInequalityConstraint(input.taskJacobian, input.taskObjective);
+         break;
+      default:
+         throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
+      }
    }
 
    public void addMotionTask(DenseMatrix64F taskJ, DenseMatrix64F taskObjective, double taskWeight)
@@ -264,7 +279,7 @@ public class InverseDynamicsQPSolver
       MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempMotionTask_f, 0, 0, numberOfDoFs, 1, -1.0);
    }
 
-   public void addMotionConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   public void addMotionEqualityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
       int taskSize = taskJacobian.getNumRows();
       int previousSize = solverInput_beq.getNumRows();
@@ -275,6 +290,19 @@ public class InverseDynamicsQPSolver
 
       CommonOps.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
       CommonOps.insert(taskObjective, solverInput_beq, previousSize, 0);
+   }
+
+   public void addMotionInequalityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
+   {
+      int taskSize = taskJacobian.getNumRows();
+      int previousSize = solverInput_bin.getNumRows();
+
+      // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
+      solverInput_Ain.reshape(previousSize + taskSize, problemSize, true);
+      solverInput_bin.reshape(previousSize + taskSize, 1, true);
+
+      CommonOps.insert(taskJacobian, solverInput_Ain, previousSize, 0);
+      CommonOps.insert(taskObjective, solverInput_bin, previousSize, 0);
    }
 
    public void addTorqueMinimizationObjective(DenseMatrix64F torqueJacobian, DenseMatrix64F torqueObjective)
@@ -305,23 +333,29 @@ public class InverseDynamicsQPSolver
    }
 
    /**
-    * Need to be called before {@link #solve()}.
-    * It sets up the constraint that ensures that the solution is dynamically feasible:
+    * Need to be called before {@link #solve()}. It sets up the constraint that ensures that the
+    * solution is dynamically feasible:
     * <p>
-    * <li> hDot = &sum;W<sub>ext</sub>
-    * <li> A * qDDot + ADot * qDot = Q * &rho; + &sum;W<sub>user</sub> + W<sub>gravity</sub>
-    * <li> -A * qDDot - ADot * qDot = - Q * &rho; - &sum;W<sub>user</sub> - W<sub>gravity</sub>
-    * <li> -A * qDDot + Q * &rho; = ADot * qDot - &sum;W<sub>user</sub> - W<sub>gravity</sub>
-    * <li> [-A Q] * [qDDot<sup>T</sup> &rho;<sup>T</sup>]<sup>T</sup> = ADot * qDot - &sum;W<sub>user</sub> - W<sub>gravity</sub>
+    * <li>hDot = &sum;W<sub>ext</sub>
+    * <li>A * qDDot + ADot * qDot = Q * &rho; + &sum;W<sub>user</sub> + W<sub>gravity</sub>
+    * <li>-A * qDDot - ADot * qDot = - Q * &rho; - &sum;W<sub>user</sub> - W<sub>gravity</sub>
+    * <li>-A * qDDot + Q * &rho; = ADot * qDot - &sum;W<sub>user</sub> - W<sub>gravity</sub>
+    * <li>[-A Q] * [qDDot<sup>T</sup> &rho;<sup>T</sup>]<sup>T</sup> = ADot * qDot -
+    * &sum;W<sub>user</sub> - W<sub>gravity</sub>
     * </p>
+    * 
     * @param centroidalMomentumMatrix refers to A in the equation.
-    * @param rhoJacobian refers to Q in the equation. Q&rho; represents external wrench to be optimized for.
+    * @param rhoJacobian refers to Q in the equation. Q&rho; represents external wrench to be
+    *           optimized for.
     * @param convectiveTerm refers to ADot * qDot in the equation.
-    * @param additionalExternalWrench refers to &sum;W<sub>user</sub> in the equation. These are constant wrenches usually used for compensating for the weight of an object that the robot is holding.
-    * @param gravityWrench refers to W<sub>gravity</sub> in the equation. It the wrench induced by the wieght of the robot.
+    * @param additionalExternalWrench refers to &sum;W<sub>user</sub> in the equation. These are
+    *           constant wrenches usually used for compensating for the weight of an object that the
+    *           robot is holding.
+    * @param gravityWrench refers to W<sub>gravity</sub> in the equation. It the wrench induced by
+    *           the wieght of the robot.
     */
    public void setupWrenchesEquilibriumConstraint(DenseMatrix64F centroidalMomentumMatrix, DenseMatrix64F rhoJacobian, DenseMatrix64F convectiveTerm,
-         DenseMatrix64F additionalExternalWrench, DenseMatrix64F gravityWrench)
+                                                  DenseMatrix64F additionalExternalWrench, DenseMatrix64F gravityWrench)
    {
       if (!hasFloatingBase)
       {
@@ -432,7 +466,6 @@ public class InverseDynamicsQPSolver
 
       qpSolverTimer.stopMeasurement();
 
-      
       hasWrenchesEquilibriumConstraintBeenSetup = false;
 
       if (MatrixTools.containsNaN(solverOutput))
