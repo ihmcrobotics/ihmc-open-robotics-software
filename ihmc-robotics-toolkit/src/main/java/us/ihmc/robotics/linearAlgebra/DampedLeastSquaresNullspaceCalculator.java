@@ -54,8 +54,8 @@ public class DampedLeastSquaresNullspaceCalculator implements DampedNullspaceCal
 
       // I - J^* J
       nullspaceProjectorToPack.reshape(nullspaceMatrixSize, nullspaceMatrixSize);
-      CommonOps.setIdentity(nullspaceProjectorToPack);
-      CommonOps.multAdd(-1.0, pseudoInverseMatrix, matrixToComputeNullspaceOf, nullspaceProjectorToPack);
+      CommonOps.mult(-1.0, pseudoInverseMatrix, matrixToComputeNullspaceOf, nullspaceProjectorToPack);
+      MatrixTools.addDiagonal(nullspaceProjectorToPack, 1.0);
    }
 
    /**
