@@ -4,7 +4,6 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.io.File;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -30,7 +29,7 @@ public class ParameterFileChooser
    private File parameterFile;
 
    private NameSpace defaultRoot = null;
-   private URL parameterFilePath = null;
+   private File parameterFilePath = null;
 
    public ParameterFileChooser()
    {
@@ -51,21 +50,12 @@ public class ParameterFileChooser
       fileChooser.setAccessory(extraPanel);
    }
 
-   public boolean showDialog(Component parent, YoVariableRegistry registry, NameSpace newDefaultRoot, URL defaultParameterFile, boolean save)
+   public boolean showDialog(Component parent, YoVariableRegistry registry, NameSpace newDefaultRoot, File file, boolean save)
    {
-      if (defaultParameterFile != null && defaultParameterFile != parameterFilePath) // Default path changed. Browse to this file
+      if (file != null && file != parameterFilePath) // Default path changed. Browse to this file
       {
-         parameterFilePath = defaultParameterFile;
-
-         try
-         {
-            Path path = Paths.get(parameterFilePath.toURI());
-            fileChooser.setSelectedFile(path.toFile());
-         }
-         catch (URISyntaxException e)
-         {
-            // Ignoring the path. It is not a file, so cannot browse there
-         }
+         parameterFilePath = file;
+         fileChooser.setSelectedFile(parameterFilePath);
       }
 
       if (newDefaultRoot != defaultRoot)
