@@ -36,7 +36,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanner;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlan;
+import us.ihmc.pathPlanning.visibilityGraphs.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
+import us.ihmc.pathPlanning.visibilityGraphs.YoVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.FramePose;
@@ -63,6 +65,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
    private final YoDouble timeSpentBeforeFootstepPlanner = new  YoDouble("timeSpentBeforeFootstepPlanner", registry);
    private final YoDouble timeSpentInFootstepPlanner = new  YoDouble("timeSpentInFootstepPlanner", registry);
    private final YoEnum<FootstepPlanningResult> yoResult = new YoEnum<>("planningResult", registry, FootstepPlanningResult.class);
+   private final NavigableRegionsManager navigableRegionsManager;
 
    private final FootstepPlannerParameters parameters;
    private final WaypointDefinedBodyPathPlan bodyPath;
@@ -94,6 +97,8 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 
       heuristics.setWeight(defaultHeuristicWeight);
       footstepPlanner = new AStarFootstepPlanner(parameters, nodeChecker, heuristics, expansion, stepCostCalculator, postProcessingSnapper, registry);
+
+      this.navigableRegionsManager = new NavigableRegionsManager(new YoVisibilityGraphParameters(new DefaultVisibilityGraphParameters(), registry));
 
       timeout.set(defaultTimeout);
       visualizing = graphicsListRegistry != null;
@@ -160,9 +165,9 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       }
       else
       {
-         NavigableRegionsManager navigableRegionsManager = new NavigableRegionsManager(planarRegionsList.getPlanarRegionsAsList());
          Point3D startPos = PlanarRegionTools.projectPointToPlanesVertically(bodyStartPose.getPosition(), planarRegionsList);
          Point3D goalPos = PlanarRegionTools.projectPointToPlanesVertically(bodyGoalPose.getPosition(), planarRegionsList);
+         navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
          if(startPos == null)
          {
@@ -192,7 +197,7 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
          {
             List<Point3D> path = navigableRegionsManager.calculateBodyPath(startPos, goalPos);
 
-            if (path.size() < 2)
+            if (path == null || path.size() < 2)
             {
                double seconds = (System.currentTimeMillis() - startTime) / 1000.0;
                timeSpentBeforeFootstepPlanner.set(seconds);
@@ -248,6 +253,11 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
       yoResult.set(footstepPlanner.plan());
       seconds = (System.currentTimeMillis() - startTime) / 1000.0;
       timeSpentInFootstepPlanner.set(seconds);
+      
+      if(DEBUG)
+      {
+         PrintTools.info("Visibility graph with A* planner finished. Result: " + yoResult.getEnumValue());
+      }
 
       return yoResult.getEnumValue();
    }
