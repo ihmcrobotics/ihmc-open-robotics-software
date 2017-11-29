@@ -297,7 +297,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    private final YoGraphicMenuManager yoGraphicMenuManager;
 
    private NameSpace parameterRootPath = null;
-   private URL defaultParameterFile = null;
+   private File defaultParameterFile = null;
    
    public static SimulationConstructionSet generateSimulationFromDataFile(File chosenFile)
    {
@@ -4603,12 +4603,12 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     *  
     * @param parameterFile URL. Ignored if not a local file
     */
-   public void setDefaultParameterFile(URL parameterFile)
+   public void setDefaultParameterFile(File parameterFile)
    {
       this.defaultParameterFile = parameterFile;
    }
    
-   public URL getDefaultParameterFile()
+   public File getDefaultParameterFile()
    {
       return this.defaultParameterFile;
    }
