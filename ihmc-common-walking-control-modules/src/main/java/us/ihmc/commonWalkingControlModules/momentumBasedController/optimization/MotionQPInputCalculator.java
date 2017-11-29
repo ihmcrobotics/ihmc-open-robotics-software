@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConf
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.linearAlgebra.DampedLeastSquaresNullspaceCalculator;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -65,8 +64,6 @@ public class MotionQPInputCalculator
 
    private final DenseMatrix64F allTaskJacobian;
    private final DampedLeastSquaresNullspaceCalculator nullspaceCalculator;
-
-   private final ExecutionTimer nullspaceProjection = new ExecutionTimer("nullspaceProjection", registry);
 
    private final int numberOfDoFs;
 
@@ -155,11 +152,7 @@ public class MotionQPInputCalculator
          if (success)
          {
             motionQPInputToPack.reshape(robotTaskSize);
-
-            nullspaceProjection.startMeasurement();
             nullspaceCalculator.projectOntoNullspace(tempTaskJacobian, allTaskJacobian);
-            nullspaceProjection.stopMeasurement();
-
             CommonOps.insert(tempTaskJacobian, motionQPInputToPack.taskJacobian, taskSize, 0);
             CommonOps.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), motionQPInputToPack.taskObjective, taskSize, 0);
             CommonOps.insert(privilegedConfigurationHandler.getWeights(), motionQPInputToPack.taskWeightMatrix, taskSize, taskSize);
