@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -499,7 +498,6 @@ public class RigidBodyControlManagerTest
 
       // no position controlled joints
       List<String> positionControlledJointNames = new ArrayList<>();
-      Map<String, JointAccelerationIntegrationParametersReadOnly> integrationSettings = new HashMap<>();
 
       // add some possible trajectory frames
       Collection<ReferenceFrame> trajectoryFrames = new ArrayList<>();
@@ -515,8 +513,8 @@ public class RigidBodyControlManagerTest
       ReferenceFrame controlFrame = bodyToControl.getBodyFixedFrame();
       ReferenceFrame baseFrame = baseBody.getBodyFixedFrame();
 
-      return new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, null, positionControlledJointNames, integrationSettings,
-            trajectoryFrames, controlFrame, baseFrame, contactableBody, yoTime, null, testRegistry);
+      return new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, null, positionControlledJointNames, trajectoryFrames,
+                                         controlFrame, baseFrame, contactableBody, yoTime, null, testRegistry);
    }
 
    private void setGainsAndWeights(RigidBodyControlManager manager)

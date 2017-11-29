@@ -26,6 +26,7 @@ import us.ihmc.robotics.controllers.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 public abstract class WalkingControllerParameters
@@ -68,6 +69,10 @@ public abstract class WalkingControllerParameters
     * of the joints are defined in the robots joint map. Note, that this list will only affect
     * joint chains that are controlled using a {@link RigidBodyControlManager}. This means only
     * upper body joints can be specified here.
+    * <p>
+    * This setting will enable acceleration integration for these joint and also set the joint control
+    * mode to be {@link JointDesiredControlMode#POSITION}.
+    * </p>
     *
     * @return list of position controlled joint names
     */
