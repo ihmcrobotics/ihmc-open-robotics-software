@@ -521,7 +521,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
 
    /**
     * Sets all the weights to {@link SolverWeightLevels#HARD_CONSTRAINT} such that this command will
-    * be treated as a hard inequality constraint
+    * be treated as a hard inequality constraint.
     */
    public void setAsHardInequalityConstraint()
    {
@@ -925,15 +925,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.TASKSPACE;
-   }
-
-   /**
-    * Set the type of spatial velocity constraint that should be imposed
-    * @param constraintType set up the constraint type
-    */
-   public void setConstraintType(ConstraintType constraintType)
-   {
-      this.constraintType = constraintType;
    }
 
    /**
