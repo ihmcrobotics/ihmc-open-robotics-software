@@ -26,42 +26,23 @@ public class NullspaceCalculatorTimingTest
       ExecutionTimer svdTimer = new ExecutionTimer("svdTimer", registry);
       ExecutionTimer leastSquaresTimer = new ExecutionTimer("leastSquarestTimer", registry);
       ExecutionTimer qrTimer = new ExecutionTimer("qrTimer", registry);
-      ExecutionTimer svdDecomposerTimer = new ExecutionTimer("svdDecomposerTimer", registry);
-      ExecutionTimer qrDecomposerTimer = new ExecutionTimer("qrDecomposerTimer", registry);
-      ExecutionTimer qrpDecomposerTimer = new ExecutionTimer("qrpDecomposerTimer", registry);
-
 
       NullspaceCalculator svdCalculator = new SVDNullspaceCalculator(100, true);
       NullspaceCalculator qrCalculator = new QRNullspaceCalculator(100);
       NullspaceCalculator leastSquaresCalculator = new DampedLeastSquaresNullspaceCalculator(100, 0.0, registry);
 
-      SingularValueDecomposition<DenseMatrix64F> svdDecomposer = DecompositionFactory.svd(10, 10, false, true, false);
-      QRDecomposition<DenseMatrix64F> qrDecomposer = DecompositionFactory.qr(10, 10);
-      QRPDecomposition<DenseMatrix64F> qrpDecomposer = DecompositionFactory.qrp(10, 10);
+      Random random = new Random(10L);
+      double[] Jvalues = RandomNumbers.nextDoubleArray(random, 200, 10.0);
+      double[] Avalues = RandomNumbers.nextDoubleArray(random, 100, 10.0);
 
       for (int i = 0; i < 10000; i++)
       {
-         Random random = new Random(10L);
-         double[] Jvalues = RandomNumbers.nextDoubleArray(random, 200, 10.0);
-         double[] Avalues = RandomNumbers.nextDoubleArray(random, 100, 10.0);
          DenseMatrix64F J = new DenseMatrix64F(10, 20, false, Jvalues);
          DenseMatrix64F A = new DenseMatrix64F(5, 20, false, Avalues);
 
          DenseMatrix64F A_projected1 = new DenseMatrix64F(5, 20, false, Avalues);
          DenseMatrix64F A_projected2 = new DenseMatrix64F(5, 20, false, Avalues);
          DenseMatrix64F A_projected3 = new DenseMatrix64F(5, 20, false, Avalues);
-
-         svdDecomposerTimer.startMeasurement();
-         svdDecomposer.decompose(J);
-         svdDecomposerTimer.stopMeasurement();
-
-         qrDecomposerTimer.startMeasurement();
-         qrDecomposer.decompose(J);
-         qrDecomposerTimer.stopMeasurement();
-
-         qrpDecomposerTimer.startMeasurement();
-         qrpDecomposer.decompose(J);
-         qrpDecomposerTimer.stopMeasurement();
 
          svdTimer.startMeasurement();
          svdCalculator.projectOntoNullspace(A, J, A_projected1);
@@ -87,8 +68,5 @@ public class NullspaceCalculatorTimingTest
       PrintTools.info("SVD average time : " + svdTimer.getAverageTime());
       PrintTools.info("Least Squares average time : " + leastSquaresTimer.getAverageTime());
       PrintTools.info("QR average time : " + qrTimer.getAverageTime());
-      PrintTools.info("SVD decompose average time : " + svdDecomposerTimer.getAverageTime());
-      PrintTools.info("QR decompose average time : " + qrDecomposerTimer.getAverageTime());
-      PrintTools.info("QRP decompose average time : " + qrpDecomposerTimer.getAverageTime());
    }
 }

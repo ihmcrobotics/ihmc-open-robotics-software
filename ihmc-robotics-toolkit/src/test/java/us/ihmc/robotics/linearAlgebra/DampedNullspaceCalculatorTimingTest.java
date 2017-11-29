@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 public class DampedNullspaceCalculatorTimingTest
 {
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 100000000)
    public void testRemoveNullspaceComponent()
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -44,55 +44,71 @@ public class DampedNullspaceCalculatorTimingTest
       leastSquaresCalculator.setPseudoInverseAlpha(0.1);
 
       Random random = new Random(10L);
-      double[] Jvalues = RandomNumbers.nextDoubleArray(random, 200, 10.0);
-      double[] Avalues = RandomNumbers.nextDoubleArray(random, 100, 10.0);
-
-      for (int i = 0; i < 10000; i++)
+      // test a bunch of sizes
+      for (int j = 0; j < 100; j++)
       {
-         DenseMatrix64F J = new DenseMatrix64F(10, 20, false, Jvalues);
-         DenseMatrix64F A = new DenseMatrix64F(5, 20, false, Avalues);
 
-         DenseMatrix64F A_projected1 = new DenseMatrix64F(5, 20, false, Avalues);
-         DenseMatrix64F A_projected2 = new DenseMatrix64F(5, 20, false, Avalues);
-         DenseMatrix64F A_projected3 = new DenseMatrix64F(5, 20, false, Avalues);
+         int Jcolumns = RandomNumbers.nextInt(random, 5, 100);
+         int Jrows = RandomNumbers.nextInt(random, 1, Jcolumns);
 
-         svdDecomposerTimer.startMeasurement();
-         svdDecomposer.decompose(J);
-         svdDecomposerTimer.stopMeasurement();
+         int ARows = RandomNumbers.nextInt(random, 1, Jcolumns);
 
-         qrDecomposerTimer.startMeasurement();
-         qrDecomposer.decompose(J);
-         qrDecomposerTimer.stopMeasurement();
+         double[] Jvalues = RandomNumbers.nextDoubleArray(random, Jrows * Jcolumns, 10.0);
+         double[] Avalues = RandomNumbers.nextDoubleArray(random, ARows * Jcolumns, 10.0);
 
-         qrpDecomposerTimer.startMeasurement();
-         qrpDecomposer.decompose(J);
-         qrpDecomposerTimer.stopMeasurement();
-
-         svdTimer.startMeasurement();
-         svdCalculator.projectOntoNullspace(A, J, A_projected1);
-         svdTimer.stopMeasurement();
-
-         leastSquaresTimer.startMeasurement();
-         leastSquaresCalculator.projectOntoNullspace(A, J, A_projected2);
-         leastSquaresTimer.stopMeasurement();
-
-         qrTimer.startMeasurement();
-         qrCalculator.projectOntoNullspace(A, J, A_projected3);
-         qrTimer.stopMeasurement();
-
-         // check the solutions are equal
-         for (int j = 0; j < A_projected1.getNumElements(); j++)
+         for (int i = 0; i < 100; i++)
          {
-            assertEquals(A_projected1.get(j), A_projected2.get(j), 1e-5);
-            assertEquals(A_projected1.get(j), A_projected3.get(j), 1e-5);
+            DenseMatrix64F J = new DenseMatrix64F(Jrows, Jcolumns, false, Jvalues);
+            DenseMatrix64F A = new DenseMatrix64F(ARows, Jcolumns, false, Avalues);
+
+            DenseMatrix64F A_projected1 = new DenseMatrix64F(ARows, Jcolumns, false, Avalues);
+            DenseMatrix64F A_projected2 = new DenseMatrix64F(ARows, Jcolumns, false, Avalues);
+            DenseMatrix64F A_projected3 = new DenseMatrix64F(ARows, Jcolumns, false, Avalues);
+
+            /*
+            svdDecomposerTimer.startMeasurement();
+            svdDecomposer.decompose(J);
+            svdDecomposerTimer.stopMeasurement();
+
+            qrDecomposerTimer.startMeasurement();
+            qrDecomposer.decompose(J);
+            qrDecomposerTimer.stopMeasurement();
+
+            qrpDecomposerTimer.startMeasurement();
+            qrpDecomposer.decompose(J);
+            qrpDecomposerTimer.stopMeasurement();
+            */
+
+            svdTimer.startMeasurement();
+            svdCalculator.projectOntoNullspace(A, J, A_projected1);
+            svdTimer.stopMeasurement();
+
+            leastSquaresTimer.startMeasurement();
+            leastSquaresCalculator.projectOntoNullspace(A, J, A_projected2);
+            leastSquaresTimer.stopMeasurement();
+
+            qrTimer.startMeasurement();
+            qrCalculator.projectOntoNullspace(A, J, A_projected3);
+            qrTimer.stopMeasurement();
+
+            /*
+            // check the solutions are equal
+            for (int k = 0; k < A_projected1.getNumElements(); k++)
+            {
+               assertEquals(A_projected1.get(k), A_projected2.get(k), 1e-5);
+               assertEquals(A_projected1.get(k), A_projected3.get(k), 1e-5);
+            }
+            */
          }
       }
 
       PrintTools.info("SVD average time : " + svdTimer.getAverageTime());
       PrintTools.info("Least Squares average time : " + leastSquaresTimer.getAverageTime());
       PrintTools.info("QR average time : " + qrTimer.getAverageTime());
+      /*
       PrintTools.info("SVD decompose average time : " + svdDecomposerTimer.getAverageTime());
       PrintTools.info("QR decompose average time : " + qrDecomposerTimer.getAverageTime());
       PrintTools.info("QRP decompose average time : " + qrpDecomposerTimer.getAverageTime());
+      */
    }
 }
